@@ -18,8 +18,8 @@ import logging
 import random
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-import testcontainers.redis as redis_container
-import testcontainers.postgres as postgres_container
+from testcontainers.redis import RedisContainer
+from testcontainers.postgres import PostgresContainer
 
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.base import BaseSubAgent
@@ -487,12 +487,12 @@ async def testcontainer_infrastructure():
     helper = TestcontainerHelper()
     
     # Start Redis container
-    redis_container_instance = redis_container.RedisContainer("redis:7-alpine")
+    redis_container_instance = RedisContainer("redis:7-alpine")
     redis_container_instance.start()
     redis_url = f"redis://localhost:{redis_container_instance.get_exposed_port(6379)}"
     
     # Start Postgres container
-    postgres_container_instance = postgres_container.PostgresContainer("postgres:15-alpine")
+    postgres_container_instance = PostgresContainer("postgres:15-alpine")
     postgres_container_instance.start()
     postgres_url = postgres_container_instance.get_connection_url()
     

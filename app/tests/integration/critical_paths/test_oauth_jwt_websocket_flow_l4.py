@@ -356,13 +356,20 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
     
     async def cleanup_test_specific_resources(self) -> None:
         """Clean up OAuth JWT WebSocket test resources."""
+        await self._cleanup_sessions()
+        await self._cleanup_services()
+    
+    async def _cleanup_sessions(self) -> None:
+        """Clean up all active sessions."""
         for session_id in list(self.active_sessions.keys()):
             try:
                 session_key = f"session:{session_id}"
                 await self.redis_session.delete(session_key)
             except Exception:
                 pass
-        
+    
+    async def _cleanup_services(self) -> None:
+        """Clean up authentication services."""
         if self.oauth_service:
             await self.oauth_service.shutdown()
         if self.jwt_service:

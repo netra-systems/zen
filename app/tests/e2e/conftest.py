@@ -646,6 +646,251 @@ def error_simulation():
 
 
 # =============================================================================
+# MISSING E2E FIXTURES - Common fixtures requested by tests
+# =============================================================================
+
+@pytest.fixture(scope="function")
+async def conversion_environment():
+    """Create comprehensive conversion test environment."""
+    from datetime import datetime, timezone
+    from unittest.mock import AsyncMock
+    import uuid
+    
+    # Create metrics tracker
+    class MetricsTracker:
+        def __init__(self):
+            self.signup_time = datetime.now(timezone.utc)
+            self.first_value_time = None
+            self.first_optimization_time = None
+            self.upgrade_prompt_time = None
+            self.conversion_time = None
+            self.abandonment_time = None
+    
+    # Create mock auth client
+    auth_client = AsyncMock()
+    auth_client.signup = AsyncMock(return_value={"user_id": str(uuid.uuid4()), "email": "newuser@test.com"})
+    auth_client.validate_token = AsyncMock(return_value={"valid": True, "user_id": "test-user"})
+    
+    # Create mock demo service
+    demo_service = AsyncMock()
+    demo_service.calculate_roi = AsyncMock(return_value={"roi": 340, "savings": 2400})
+    demo_service.get_optimization_preview = AsyncMock()
+    demo_service.run_scenario = AsyncMock()
+    
+    # Create mock websocket manager
+    ws_manager = AsyncMock()
+    ws_manager.send_optimization_result = AsyncMock()
+    ws_manager.send_upgrade_prompt = AsyncMock()
+    ws_manager.send_message = AsyncMock()
+    
+    return {
+        "auth_client": auth_client,
+        "demo_service": demo_service,
+        "websocket_manager": ws_manager,
+        "metrics_tracker": MetricsTracker()
+    }
+
+
+@pytest.fixture(scope="function")
+def cost_savings_calculator():
+    """Setup cost savings calculator for value demonstration."""
+    from unittest.mock import Mock
+    
+    calculator = Mock()
+    calculator.calculate_immediate_savings = Mock(return_value={
+        "monthly_savings": 2400, 
+        "roi_percentage": 340,
+        "current_cost": 1200,
+        "optimized_cost": 800
+    })
+    calculator.preview_optimization_value = Mock(return_value={
+        "potential_savings": 1600,
+        "confidence_score": 0.85
+    })
+    calculator.analyze_cost_structure = Mock(return_value={
+        "model_costs": 800,
+        "compute_costs": 200,
+        "optimization_opportunities": 3
+    })
+    return calculator
+
+
+@pytest.fixture(scope="function")
+def ai_provider_simulator():
+    """Setup AI provider connection simulator."""
+    from unittest.mock import AsyncMock
+    
+    simulator = AsyncMock()
+    simulator.connect_openai = AsyncMock(return_value={
+        "connected": True, 
+        "current_cost": 1200,
+        "usage_pattern": "moderate"
+    })
+    simulator.connect_anthropic = AsyncMock(return_value={
+        "connected": True,
+        "current_cost": 800,
+        "usage_pattern": "efficient"
+    })
+    simulator.analyze_current_usage = AsyncMock(return_value={
+        "monthly_tokens": 2500000,
+        "cost_per_token": 0.0008,
+        "optimization_score": 6.5
+    })
+    return simulator
+
+
+@pytest.fixture(scope="function")
+def permission_system():
+    """Setup permission system for tier testing."""
+    from unittest.mock import Mock
+    
+    permissions = Mock()
+    permissions.check_tier_limits = Mock(return_value={
+        "requests_remaining": 2,
+        "tokens_remaining": 2500,
+        "tier": "free",
+        "upgrade_required": False
+    })
+    permissions.enforce_rate_limit = Mock(return_value=True)
+    permissions.get_upgrade_options = Mock(return_value=[
+        {"tier": "starter", "price": 29, "features": ["unlimited_requests", "priority_support"]},
+        {"tier": "pro", "price": 99, "features": ["unlimited_requests", "priority_support", "advanced_analytics"]}
+    ])
+    return permissions
+
+
+@pytest.fixture(scope="function")
+def optimization_service():
+    """Setup optimization service for testing."""
+    from unittest.mock import AsyncMock
+    
+    service = AsyncMock()
+    service.analyze_workload = AsyncMock(return_value={
+        "workload_type": "content_generation",
+        "efficiency_score": 7.2,
+        "recommendations": ["switch_to_gpt35", "implement_caching", "batch_requests"]
+    })
+    service.apply_optimization = AsyncMock(return_value={
+        "success": True,
+        "estimated_savings": 35,
+        "implementation_time": "2 minutes"
+    })
+    return service
+
+
+@pytest.fixture(scope="function")
+def test_database_session():
+    """Create isolated database session for testing."""
+    from unittest.mock import AsyncMock
+    from sqlalchemy.ext.asyncio import AsyncSession
+    
+    session = AsyncMock(spec=AsyncSession)
+    session.begin = AsyncMock()
+    session.commit = AsyncMock()
+    session.rollback = AsyncMock()
+    session.flush = AsyncMock()
+    session.refresh = AsyncMock()
+    session.close = AsyncMock()
+    session.execute = AsyncMock()
+    session.scalar = AsyncMock()
+    session.add = AsyncMock()
+    session.delete = AsyncMock()
+    return session
+
+
+@pytest.fixture(scope="function")
+def mock_redis_client():
+    """Create mock Redis client for caching tests."""
+    from unittest.mock import AsyncMock
+    
+    redis = AsyncMock()
+    redis.get = AsyncMock(return_value=None)
+    redis.set = AsyncMock(return_value=True)
+    redis.delete = AsyncMock(return_value=1)
+    redis.exists = AsyncMock(return_value=False)
+    redis.expire = AsyncMock(return_value=True)
+    redis.flushdb = AsyncMock(return_value=True)
+    return redis
+
+
+@pytest.fixture(scope="function")
+def mock_clickhouse_client():
+    """Create mock ClickHouse client for analytics tests."""
+    from unittest.mock import AsyncMock
+    
+    clickhouse = AsyncMock()
+    clickhouse.query = AsyncMock(return_value=[])
+    clickhouse.insert = AsyncMock(return_value=True)
+    clickhouse.execute = AsyncMock(return_value=None)
+    return clickhouse
+
+
+@pytest.fixture(scope="function")
+def thread_management_service():
+    """Setup thread management service for testing."""
+    from unittest.mock import AsyncMock
+    import uuid
+    
+    service = AsyncMock()
+    service.create_thread = AsyncMock(return_value={
+        "id": str(uuid.uuid4()),
+        "title": "Test Thread",
+        "created_at": "2025-01-20T10:00:00Z",
+        "status": "active"
+    })
+    service.send_message = AsyncMock(return_value={
+        "id": str(uuid.uuid4()),
+        "content": "Test message",
+        "timestamp": "2025-01-20T10:01:00Z"
+    })
+    service.get_thread_history = AsyncMock(return_value=[])
+    return service
+
+
+@pytest.fixture(scope="function")
+def agent_orchestration_service():
+    """Setup agent orchestration service for testing."""
+    from unittest.mock import AsyncMock
+    
+    service = AsyncMock()
+    service.route_request = AsyncMock(return_value={
+        "agent_type": "triage",
+        "confidence": 0.9,
+        "routing_reason": "user_query_classification"
+    })
+    service.execute_agent_workflow = AsyncMock(return_value={
+        "status": "completed",
+        "result": "Analysis complete",
+        "execution_time": 2.5
+    })
+    return service
+
+
+@pytest.fixture(scope="function")
+def billing_service():
+    """Setup billing service for payment testing."""
+    from unittest.mock import AsyncMock
+    
+    service = AsyncMock()
+    service.create_subscription = AsyncMock(return_value={
+        "subscription_id": "sub_test123",
+        "status": "active",
+        "plan": "starter"
+    })
+    service.process_payment = AsyncMock(return_value={
+        "payment_id": "pi_test123",
+        "status": "succeeded",
+        "amount": 2900
+    })
+    service.get_usage_metrics = AsyncMock(return_value={
+        "requests_this_month": 1250,
+        "tokens_this_month": 875000,
+        "cost_this_month": 45.20
+    })
+    return service
+
+
+# =============================================================================
 # CLEANUP UTILITIES
 # =============================================================================
 

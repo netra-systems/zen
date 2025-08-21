@@ -95,54 +95,163 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
             "callback", "oauth", "auth", "login", "authentication",
             "client_id", "client_secret", "token_endpoint", "auth_endpoint"
         ]
+    
+    async def setup_test_specific_environment(self) -> None:
+        """Setup test-specific environment configuration."""
+        # Validate that we can access the actual files to scan
+        if not self.project_root.exists():
+            raise RuntimeError(f"Project root not found: {self.project_root}")
         
-    async def initialize_l4_environment(self) -> None:
-        """Initialize L4 staging environment for URL consistency testing."""
-        self.staging_suite = await get_staging_suite()
-        await self.staging_suite.setup()
+        # Verify staging endpoints are accessible for L4 realism
+        await self._verify_staging_endpoints()
+    
+    async def execute_critical_path_test(self) -> Dict[str, Any]:
+        """Execute the OAuth URL consistency audit as critical path test."""
+        return await self.execute_oauth_url_audit()
+    
+    async def validate_critical_path_results(self, results: Dict[str, Any]) -> bool:
+        """Validate OAuth URL audit results meet business requirements."""
+        audit_result = results.get("audit_result")
+        if not audit_result:
+            return False
         
-    async def execute_oauth_url_audit(self) -> OAuthAuditResult:
-        """Execute OAuth URL consistency audit across all services."""
+        # Critical requirement: No critical inconsistencies
+        critical_count = audit_result.get("critical_inconsistencies", 0)
+        if critical_count > 0:
+            self.test_metrics.errors.append(
+                f"Found {critical_count} critical OAuth URL inconsistencies"
+            )
+            return False
+        
+        # Performance requirement: Audit should complete quickly
+        duration = audit_result.get("audit_duration_seconds", 0)
+        if duration > 60.0:
+            self.test_metrics.errors.append(f"Audit took too long: {duration}s")
+            return False
+        
+        # Coverage requirement: Should scan meaningful number of files
+        files_scanned = audit_result.get("total_files_scanned", 0)
+        if files_scanned < 10:
+            self.test_metrics.errors.append(f"Too few files scanned: {files_scanned}")
+            return False
+        
+        return True
+    
+    async def cleanup_test_specific_resources(self) -> None:
+        """Clean up OAuth test specific resources."""
+        # No specific cleanup needed for URL scanning
+        pass
+    
+    async def _verify_staging_endpoints(self) -> None:
+        """Verify staging endpoints are accessible for L4 testing."""
+        for service_name, expected_url in self.expected_staging_urls.items():
+            if service_name == "websocket":
+                continue  # Skip WebSocket endpoint for HTTP check
+            
+            try:
+                health_url = f"{expected_url}/health"
+                response = await self.test_client.get(health_url, timeout=10.0)
+                # Accept 200, 404, or 405 as "accessible" - we just need DNS/routing to work
+                if response.status_code in [200, 404, 405]:
+                    self.test_metrics.details[f"{service_name}_endpoint_accessible"] = True
+                else:
+                    self.test_metrics.details[f"{service_name}_endpoint_accessible"] = False
+            except Exception as e:
+                self.test_metrics.details[f"{service_name}_endpoint_error"] = str(e)
+        
+    async def execute_oauth_url_audit(self) -> Dict[str, Any]:
+        """Execute comprehensive OAuth URL consistency audit across all services."""
         start_time = datetime.now()
         inconsistencies = []
         total_scanned = 0
         urls_found = 0
+        patterns_detected = {}
+        file_types_scanned = {}
+        staging_endpoints_verified = []
         
-        # Scan critical files mentioned in BVJ
+        # Phase 1: Scan critical files mentioned in BVJ
         critical_files = [
             "app/clients/auth_client_config.py",
-            "auth_service/main.py",
-            "frontend/lib/auth-service-config.ts"
+            "auth_service/main.py", 
+            "frontend/lib/auth-service-config.ts",
+            "frontend/src/config/auth.ts",
+            "docker-compose.staging.yml",
+            ".env.staging",
+            "deployment/staging/values.yaml"
         ]
         
         for file_rel_path in critical_files:
             file_path = self.project_root / file_rel_path
             if file_path.exists():
                 total_scanned += 1
-                file_inconsistencies = await self._scan_file(file_path, file_rel_path)
+                file_type = self._get_file_type(file_path)
+                file_types_scanned[file_type] = file_types_scanned.get(file_type, 0) + 1
+                
+                file_inconsistencies = await self._scan_file_comprehensive(file_path, file_rel_path)
                 inconsistencies.extend(file_inconsistencies)
-                urls_found += len(file_inconsistencies)
+                urls_found += len([i for i in file_inconsistencies if self._is_oauth_related(i.line_content)])
         
-        # Scan additional source files
-        python_files = list(self.project_root.rglob("*.py"))[:50]  # Limit for performance
-        for file_path in python_files:
-            if self._should_scan_file(file_path):
+        # Phase 2: Scan all configuration files
+        config_files = []
+        for pattern_type, patterns in self.file_patterns.items():
+            for pattern in patterns:
+                config_files.extend(self.project_root.rglob(pattern))
+        
+        # Limit to 100 files for performance, prioritize config files
+        prioritized_files = sorted(config_files, key=lambda p: (
+            0 if any(keyword in str(p).lower() for keyword in ['config', 'env', 'docker', 'deploy']) else 1,
+            str(p)
+        ))[:100]
+        
+        for file_path in prioritized_files:
+            if self._should_scan_file(file_path) and file_path not in [self.project_root / cf for cf in critical_files]:
                 total_scanned += 1
-                file_inconsistencies = await self._scan_file(file_path, str(file_path.relative_to(self.project_root)))
-                inconsistencies.extend(file_inconsistencies)
-                urls_found += len([i for i in file_inconsistencies if self._contains_oauth_url(str(file_path))])
+                file_type = self._get_file_type(file_path)
+                file_types_scanned[file_type] = file_types_scanned.get(file_type, 0) + 1
+                
+                try:
+                    file_inconsistencies = await self._scan_file_comprehensive(
+                        file_path, 
+                        str(file_path.relative_to(self.project_root))
+                    )
+                    inconsistencies.extend(file_inconsistencies)
+                    urls_found += len([i for i in file_inconsistencies if self._is_oauth_related(i.line_content)])
+                except Exception:
+                    continue  # Skip files that can't be processed
+        
+        # Phase 3: Verify staging endpoints are actually correct
+        for service_name, expected_url in self.expected_staging_urls.items():
+            if service_name != "websocket":  # Skip WebSocket for HTTP verification
+                try:
+                    health_url = f"{expected_url}/health"
+                    response = await self.test_client.get(health_url, timeout=5.0)
+                    if response.status_code in [200, 404, 405]:
+                        staging_endpoints_verified.append(expected_url)
+                        self.test_metrics.service_calls += 1
+                except Exception:
+                    pass  # Endpoint verification is supplementary
+        
+        # Phase 4: Count pattern occurrences
+        for inconsistency in inconsistencies:
+            pattern = inconsistency.incorrect_url
+            patterns_detected[pattern] = patterns_detected.get(pattern, 0) + 1
         
         duration = (datetime.now() - start_time).total_seconds()
         critical_count = len([i for i in inconsistencies if i.severity == "critical"])
         
-        return OAuthAuditResult(
+        audit_result = OAuthAuditResult(
             total_files_scanned=total_scanned,
             oauth_urls_found=urls_found,
             inconsistencies_detected=len(inconsistencies),
             critical_inconsistencies=critical_count,
             audit_duration_seconds=duration,
-            inconsistencies=inconsistencies
+            inconsistencies=inconsistencies,
+            patterns_detected=patterns_detected,
+            file_types_scanned=file_types_scanned,
+            staging_endpoints_verified=staging_endpoints_verified
         )
+        
+        return {"audit_result": audit_result}
     
     def _should_scan_file(self, file_path: Path) -> bool:
         """Check if file should be scanned for OAuth URLs."""

@@ -21,8 +21,8 @@ import os
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
-import testcontainers.postgres as postgres_container
-import testcontainers.redis as redis_container
+from testcontainers.postgres import PostgresContainer
+from testcontainers.redis import RedisContainer
 import httpx
 
 from test_framework.docker_testing.compose_manager import DockerComposeManager
@@ -88,8 +88,8 @@ class L3MultiServiceStartupManager:
     
     def __init__(self):
         self.compose_manager: Optional[DockerComposeManager] = None
-        self.postgres_container: Optional[postgres_container.PostgresContainer] = None
-        self.redis_container: Optional[redis_container.RedisContainer] = None
+        self.postgres_container: Optional[PostgresContainer] = None
+        self.redis_container: Optional[RedisContainer] = None
         self.http_client: Optional[httpx.AsyncClient] = None
         self.health_checker: Optional[HealthChecker] = None
         self.metrics = StartupSequenceMetrics(test_start_time=time.time())
