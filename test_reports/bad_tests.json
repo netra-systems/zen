@@ -2209,14 +2209,6 @@
   },
   "runs": [
     {
-      "run_id": "run_20250820_160311_91293",
-      "timestamp": "2025-08-20T16:03:11.509646",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
       "run_id": "run_20250820_160321_1381",
       "timestamp": "2025-08-20T16:03:27.377823",
       "total_tests": 1,
@@ -3007,10 +2999,18 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172733_53379",
+      "timestamp": "2025-08-20T17:27:33.423276",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 276,
-    "last_updated": "2025-08-20T17:26:42.678721"
+    "total_runs": 277,
+    "last_updated": "2025-08-20T17:27:33.423276"
   }
 }

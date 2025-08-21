@@ -13,7 +13,7 @@ Coverage: Health check orchestration, dependency mapping, cascading health statu
 import pytest
 import asyncio
 import time
-import logging
+import logging\nimport json
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
