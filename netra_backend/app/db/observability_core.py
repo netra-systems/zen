@@ -8,14 +8,14 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.observability_metrics import (
+from netra_backend.app.db.observability_metrics import (
     DatabaseMetrics, AlertThresholds, MetricsStorage, 
     MetricsSummaryBuilder
 )
-from netra_backend.app.observability_collectors import (
+from netra_backend.app.db.observability_collectors import (
     MetricsCollectionOrchestrator, MonitoringCycleManager
 )
-from netra_backend.app.observability_alerts import AlertOrchestrator
+from netra_backend.app.db.observability_alerts import AlertOrchestrator
 
 logger = central_logger.get_logger(__name__)
 

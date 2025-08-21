@@ -8,7 +8,7 @@ from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db.postgres import async_engine
-from netra_backend.app.observability_metrics import DatabaseMetrics, AlertThresholds
+from netra_backend.app.db.observability_metrics import DatabaseMetrics, AlertThresholds
 
 logger = central_logger.get_logger(__name__)
 

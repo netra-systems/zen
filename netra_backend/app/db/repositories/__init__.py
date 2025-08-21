@@ -3,9 +3,9 @@
 Repository pattern implementation for clean data access layer.
 """
 
-from netra_backend.app.base_repository import BaseRepository
-from netra_backend.app.user_repository import UserRepository, SecretRepository, ToolUsageRepository
-from netra_backend.app.agent_repository import AgentRepository, AgentStateRepository
+from netra_backend.app.db.repositories.base_repository import BaseRepository
+from netra_backend.app.db.repositories.user_repository import UserRepository, SecretRepository, ToolUsageRepository
+from netra_backend.app.db.repositories.agent_repository import AgentRepository, AgentStateRepository
 
 __all__ = [
     "BaseRepository",

@@ -165,7 +165,7 @@
             <files_affected>
                 <file>netra_backend/app/netra_backend/tests/agents/test_agent_e2e_critical_setup.py</file>
                 <file>netra_backend/app/netra_backend/tests/agents/test_agent_e2e_critical_*.py</file>
-                <file>pytest.ini - configured with testpaths including netra_backend/app/tests</file>
+                <file>pytest.ini - configured with testpaths including netra_backend/tests</file>
             </files_affected>
             <verification>Tests run successfully with relative imports from project root</verification>
         </learning>
@@ -391,7 +391,7 @@
             <solution>
                 Added explicit configuration file path to pytest arguments
                 Use -c flag to specify pytest.ini location
-                Prefer netra_backend/app/pytest.ini for netra_backend/app/tests, root pytest.ini as fallback
+                Prefer netra_backend/pytest.ini for netra_backend/tests, root pytest.ini as fallback
                 Added _add_config_file_args() function to build_pytest_args()
             </solution>
             <files_affected>
