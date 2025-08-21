@@ -60,6 +60,7 @@ class BinaryMessageProcessor:
         
         # Filename validation
         if not filename or len(filename) > 255:
+            validation_result["valid"] = False
             validation_result["errors"].append("Invalid filename")
         
         # File signature validation

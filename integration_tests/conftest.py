@@ -27,9 +27,14 @@ from app.config import settings
 async def test_engine():
     """Create test database engine and create all tables."""
     engine = create_async_engine(settings.database_url, echo=False)
+    # Drop existing tables first to ensure clean state
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    # Create fresh tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
+    # Clean up after test
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()

@@ -147,7 +147,6 @@ else:
             "https://app.staging.netrasystems.ai",
             "https://auth.staging.netrasystems.ai",
             "https://api.staging.netrasystems.ai",
-            "https://backend.staging.netrasystems.ai",
             "http://localhost:3000",
             "http://localhost:8000",
             "http://localhost:8080"

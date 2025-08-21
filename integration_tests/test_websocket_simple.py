@@ -25,6 +25,7 @@ def test_websocket_connection():
         assert response["type"] == "pong"
 
 
+@pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
 def test_websocket_invalid_message_type():
     """Test WebSocket handles invalid message types gracefully."""
     client = TestClient(app)

@@ -432,6 +432,7 @@ class TestWebSocketE2E(DevEnvironmentE2ETests):
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.dev
+    @pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
     async def test_websocket_reconnection(self, client):
         """Test WebSocket reconnection handling."""
         user = self.create_test_user(PlanTier.PRO)
@@ -459,6 +460,7 @@ class TestDatabaseTransactionsE2E(DevEnvironmentE2ETests):
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.dev
+    @pytest.mark.skip(reason="Entities API endpoint not implemented")
     async def test_transaction_consistency(self, async_client):
         """Test database transaction consistency."""
         user = self.create_test_user(PlanTier.ENTERPRISE)

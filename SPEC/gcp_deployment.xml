@@ -370,7 +370,10 @@
     </environments>
     
     <services>
-      <service name="netra-backend">
+      <!-- CRITICAL: Use EXACT service names for domain mapping -->
+      <!-- Staging: netra-backend-staging, netra-frontend-staging, netra-auth-service -->
+      <!-- Production: netra-backend-prod, netra-frontend-prod, netra-auth-service -->
+      <service name="netra-backend-staging">
         <dockerfile>Dockerfile</dockerfile>
         <port>8000</port>
         <memory>1Gi</memory>
@@ -382,7 +385,7 @@
         </environment_variables>
       </service>
       
-      <service name="netra-auth">
+      <service name="netra-auth-service">
         <dockerfile>Dockerfile.auth</dockerfile>
         <port>8001</port>
         <memory>512Mi</memory>
@@ -390,7 +393,7 @@
         <health_endpoint>/health</health_endpoint>
       </service>
       
-      <service name="netra-frontend">
+      <service name="netra-frontend-staging">
         <dockerfile>Dockerfile.frontend</dockerfile>
         <port>3000</port>
         <memory>512Mi</memory>

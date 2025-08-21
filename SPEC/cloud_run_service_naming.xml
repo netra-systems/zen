@@ -27,7 +27,7 @@
       
       <service name="frontend">
         <exact_name>netra-frontend-staging</exact_name>
-        <domain>staging.netrasystems.ai</domain>
+        <domain>app.staging.netrasystems.ai</domain>
         <description>Frontend web application for staging</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
@@ -50,7 +50,7 @@
       
       <service name="frontend">
         <exact_name>netra-frontend-prod</exact_name>
-        <domain>netrasystems.ai</domain>
+        <domain>app.netrasystems.ai</domain>
         <description>Frontend web application for production</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
@@ -88,6 +88,8 @@
       <example>
         NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai
         (Routes to netra-backend-staging service)
+        NEXT_PUBLIC_APP_URL=https://app.staging.netrasystems.ai
+        (Routes to netra-frontend-staging service)
       </example>
     </rule>
   </enforcement_rules>
@@ -102,7 +104,7 @@
     <mistake>
       <wrong>netra-frontend</wrong>
       <correct>netra-frontend-staging</correct>
-      <impact>Domain staging.netrasystems.ai will not route correctly</impact>
+      <impact>Domain app.staging.netrasystems.ai will not route correctly</impact>
     </mistake>
     
     <mistake>

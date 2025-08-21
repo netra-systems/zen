@@ -23,9 +23,12 @@ REGISTRY_PATH = f"{REGISTRY}/{PROJECT_ID}/netra-containers"
 BUILD_CONTEXT = "."  # Assuming the script is run from the project root
 
 # Service names (MUST match Cloud Run service names exactly)
-BACKEND_SERVICE = "netra-backend-staging"
-FRONTEND_SERVICE = "netra-frontend-staging"
-AUTH_SERVICE = "netra-auth-service"
+# CRITICAL: These are the EXACT service names required for domain mapping
+# DO NOT use "netra-backend" or "netra-frontend" without the -staging suffix
+# The auth service keeps the same name across all environments
+BACKEND_SERVICE = "netra-backend-staging"  # Maps to api.staging.netrasystems.ai
+FRONTEND_SERVICE = "netra-frontend-staging"  # Maps to app.staging.netrasystems.ai  
+AUTH_SERVICE = "netra-auth-service"  # Maps to auth.staging.netrasystems.ai
 
 # URLs for frontend build
 STAGING_API_URL = "https://api.staging.netrasystems.ai"
@@ -50,11 +53,14 @@ def print_colored(message: str, color: str = Colors.ENDC):
 def run_command(cmd: List[str], check: bool = True, capture_output: bool = False) -> subprocess.CompletedProcess:
     """Run a shell command and return the result."""
     try:
+        # On Windows, use shell=True for gcloud commands
+        use_shell = sys.platform == "win32" and cmd[0] in ["gcloud", "docker"]
         result = subprocess.run(
             cmd,
             check=check,
             capture_output=capture_output,
-            text=True
+            text=True,
+            shell=use_shell
         )
         return result
     except subprocess.CalledProcessError as e:
@@ -338,6 +344,27 @@ def run_migrations(skip_migrations: bool = False):
 def deploy_services(auth_service_exists: bool):
     """Deploy all services to Cloud Run."""
     print_colored("[4/5] Deploying services to Cloud Run...", Colors.GREEN)
+    
+    # List existing services first to verify correct names
+    print_colored("  Listing existing Cloud Run services...", Colors.CYAN)
+    try:
+        result = run_command([
+            "gcloud", "run", "services", "list",
+            "--platform", "managed",
+            "--region", REGION,
+            "--project", PROJECT_ID,
+            "--format", "table(SERVICE:label=SERVICE_NAME)"
+        ], capture_output=True, check=False)
+        
+        if result.returncode == 0 and result.stdout:
+            print_colored("  Existing services:", Colors.GRAY)
+            for line in result.stdout.strip().split('\n'):
+                if line and not line.startswith('SERVICE'):
+                    print_colored(f"    - {line}", Colors.GRAY)
+        else:
+            print_colored("  No existing services found or unable to list", Colors.YELLOW)
+    except Exception as e:
+        print_colored(f"  Warning: Could not list services: {e}", Colors.YELLOW)
     
     # Deploy Backend
     print_colored("  Deploying backend...", Colors.CYAN)
@@ -680,6 +707,7 @@ def main():
     print_colored("Custom domains (if configured):", Colors.CYAN)
     print_colored("  Frontend:  https://app.staging.netrasystems.ai", Colors.BLUE)
     print_colored("  Backend:   https://api.staging.netrasystems.ai", Colors.BLUE)
+    print_colored("  Auth:      https://auth.staging.netrasystems.ai", Colors.BLUE)
     print("")
     
     # Save deployment info
