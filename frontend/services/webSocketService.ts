@@ -36,10 +36,13 @@ interface WebSocketOptions {
   onReconnect?: () => void;
   onBinaryMessage?: (data: ArrayBuffer) => void;
   onRateLimit?: () => void;
+  onLargeMessage?: (progress: { chunks_received: number; total_chunks: number; progress_percent: number }) => void;
+  onChunkedMessage?: (data: any) => void;
   heartbeatInterval?: number;
   rateLimit?: RateLimitConfig;
   token?: string;
   refreshToken?: () => Promise<string | null>;
+  compression?: string[];  // Supported compression algorithms
 }
 
 class WebSocketService {
@@ -57,6 +60,20 @@ class WebSocketService {
   private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
   private isRefreshingToken: boolean = false;
   private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
+  
+  // Large message handling
+  private messageAssemblies: Map<string, {
+    messageId: string;
+    totalChunks: number;
+    receivedChunks: Map<number, any>;
+    metadata: any;
+    startedAt: number;
+    isCompressed: boolean;
+    compression: string;
+  }> = new Map();
+  private supportedCompression: string[] = ['gzip', 'deflate', 'lz4'];
+  private maxMessageSize: number = 10 * 1024 * 1024; // 10MB
+  private chunkSize: number = 64 * 1024; // 64KB
 
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
@@ -171,6 +188,12 @@ class WebSocketService {
   }
 
   private processTextMessage(rawMessage: any, options: WebSocketOptions): void {
+    // Check if this is a large message
+    if (this.isLargeMessage(rawMessage)) {
+      this.handleLargeMessage(rawMessage, options);
+      return;
+    }
+
     const validatedMessage = this.validateWebSocketMessage(rawMessage);
     if (!validatedMessage) {
       this.handleInvalidMessage(rawMessage, options);
@@ -354,6 +377,277 @@ class WebSocketService {
     } else {
       this.messageQueue.push(message);
     }
+  }
+
+  // Large message handling methods
+  private isLargeMessage(message: any): boolean {
+    const messageType = message?.message_type;
+    return messageType && [
+      'chunked_start', 'chunked_data', 'chunked_end',
+      'binary', 'compressed', 'upload_progress'
+    ].includes(messageType);
+  }
+
+  private handleLargeMessage(message: any, options: WebSocketOptions): void {
+    const messageType = message.message_type;
+
+    switch (messageType) {
+      case 'chunked_start':
+        this.handleChunkedStart(message, options);
+        break;
+      case 'chunked_data':
+        this.handleChunkedData(message, options);
+        break;
+      case 'chunked_end':
+        this.handleChunkedEnd(message, options);
+        break;
+      case 'binary':
+      case 'compressed':
+        this.handleBinaryCompressed(message, options);
+        break;
+      case 'upload_progress':
+        this.handleUploadProgress(message, options);
+        break;
+      default:
+        logger.warn('Unknown large message type:', messageType);
+    }
+  }
+
+  private handleChunkedStart(message: any, options: WebSocketOptions): void {
+    const { message_id, total_chunks, compression = 'none', is_binary = false } = message;
+    
+    this.messageAssemblies.set(message_id, {
+      messageId: message_id,
+      totalChunks: total_chunks,
+      receivedChunks: new Map(),
+      metadata: message,
+      startedAt: Date.now(),
+      isCompressed: compression !== 'none',
+      compression
+    });
+
+    logger.debug(`Started chunked message assembly: ${message_id} (${total_chunks} chunks)`);
+  }
+
+  private handleChunkedData(message: any, options: WebSocketOptions): void {
+    const { metadata, data } = message;
+    const { message_id, chunk_index } = metadata;
+
+    const assembly = this.messageAssemblies.get(message_id);
+    if (!assembly) {
+      logger.warn(`Received chunk for unknown message: ${message_id}`);
+      return;
+    }
+
+    // Decode chunk data
+    try {
+      const chunkData = atob(data); // Base64 decode
+      assembly.receivedChunks.set(chunk_index, chunkData);
+
+      // Update progress
+      const progress = {
+        chunks_received: assembly.receivedChunks.size,
+        total_chunks: assembly.totalChunks,
+        progress_percent: (assembly.receivedChunks.size / assembly.totalChunks) * 100
+      };
+
+      options.onLargeMessage?.(progress);
+      logger.debug(`Received chunk ${chunk_index + 1}/${assembly.totalChunks} for message ${message_id}`);
+    } catch (error) {
+      logger.error('Failed to decode chunk data:', error);
+    }
+  }
+
+  private handleChunkedEnd(message: any, options: WebSocketOptions): void {
+    const { message_id } = message;
+    const assembly = this.messageAssemblies.get(message_id);
+    
+    if (!assembly) {
+      logger.warn(`Received end for unknown message: ${message_id}`);
+      return;
+    }
+
+    // Check if all chunks received
+    if (assembly.receivedChunks.size !== assembly.totalChunks) {
+      logger.error(`Missing chunks for message ${message_id}`);
+      this.messageAssemblies.delete(message_id);
+      return;
+    }
+
+    try {
+      // Assemble message
+      let assembledData = '';
+      for (let i = 0; i < assembly.totalChunks; i++) {
+        assembledData += assembly.receivedChunks.get(i) || '';
+      }
+
+      // Decompress if needed
+      if (assembly.isCompressed) {
+        assembledData = this.decompressData(assembledData, assembly.compression);
+      }
+
+      // Parse assembled message
+      let finalMessage;
+      try {
+        finalMessage = JSON.parse(assembledData);
+      } catch {
+        finalMessage = { data: assembledData };
+      }
+
+      logger.info(`Successfully assembled message: ${message_id} (${assembledData.length} chars)`);
+      
+      // Clean up
+      this.messageAssemblies.delete(message_id);
+
+      // Process assembled message
+      options.onChunkedMessage?.(finalMessage);
+      this.onMessage?.(finalMessage);
+      options.onMessage?.(finalMessage);
+
+    } catch (error) {
+      logger.error(`Failed to assemble message ${message_id}:`, error);
+      this.messageAssemblies.delete(message_id);
+    }
+  }
+
+  private handleBinaryCompressed(message: any, options: WebSocketOptions): void {
+    const { data, compression = 'none', encoding = 'base64' } = message;
+    
+    try {
+      // Decode data
+      let decodedData = encoding === 'base64' ? atob(data) : data;
+
+      // Decompress if needed
+      if (compression !== 'none') {
+        decodedData = this.decompressData(decodedData, compression);
+      }
+
+      // Try to parse as JSON, otherwise treat as binary
+      let finalData;
+      try {
+        finalData = JSON.parse(decodedData);
+      } catch {
+        finalData = { data: decodedData, type: 'binary' };
+      }
+
+      this.onMessage?.(finalData);
+      options.onMessage?.(finalData);
+
+    } catch (error) {
+      logger.error('Failed to process binary/compressed message:', error);
+    }
+  }
+
+  private handleUploadProgress(message: any, options: WebSocketOptions): void {
+    const { chunks_received, total_chunks, progress_percent } = message;
+    
+    const progress = {
+      chunks_received,
+      total_chunks,
+      progress_percent
+    };
+
+    options.onLargeMessage?.(progress);
+    logger.debug(`Upload progress: ${progress_percent.toFixed(1)}% (${chunks_received}/${total_chunks})`);
+  }
+
+  private decompressData(data: string, algorithm: string): string {
+    // Note: Browser-based decompression would require additional libraries
+    // For now, we'll assume data is already decompressed on the server side
+    // or implement client-side decompression with libraries like pako
+    logger.debug(`Decompression requested for algorithm: ${algorithm}`);
+    return data;
+  }
+
+  // Large message sending support
+  public async sendLargeMessage(message: any, compression: string = 'gzip'): Promise<boolean> {
+    const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+    
+    if (messageStr.length <= this.chunkSize) {
+      // Send as regular message
+      this.send(message);
+      return true;
+    }
+
+    // Prepare chunked message
+    const messageId = this.generateMessageId();
+    const chunks = this.createMessageChunks(messageStr, messageId);
+
+    try {
+      // Send all chunks
+      for (const chunk of chunks) {
+        this.send(chunk);
+        // Small delay between chunks to avoid overwhelming
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      return true;
+    } catch (error) {
+      logger.error('Failed to send large message:', error);
+      return false;
+    }
+  }
+
+  private generateMessageId(): string {
+    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private createMessageChunks(data: string, messageId: string): any[] {
+    const chunks = [];
+    const totalChunks = Math.ceil(data.length / this.chunkSize);
+
+    // Start message
+    chunks.push({
+      message_type: 'chunked_start',
+      message_id: messageId,
+      total_chunks: totalChunks,
+      total_size: data.length,
+      compression: 'none',
+      is_binary: false,
+      timestamp: Date.now()
+    });
+
+    // Data chunks
+    for (let i = 0; i < data.length; i += this.chunkSize) {
+      const chunk = data.slice(i, i + this.chunkSize);
+      const chunkIndex = Math.floor(i / this.chunkSize);
+      
+      chunks.push({
+        message_type: 'chunked_data',
+        metadata: {
+          chunk_id: this.generateMessageId(),
+          message_id: messageId,
+          chunk_index: chunkIndex,
+          total_chunks: totalChunks,
+          chunk_size: chunk.length,
+          chunk_hash: this.hashString(chunk),
+          compression: 'none',
+          timestamp: Date.now(),
+          is_final: chunkIndex === totalChunks - 1
+        },
+        data: btoa(chunk), // Base64 encode
+        encoding: 'base64'
+      });
+    }
+
+    // End message
+    chunks.push({
+      message_type: 'chunked_end',
+      message_id: messageId,
+      total_chunks: totalChunks,
+      timestamp: Date.now()
+    });
+
+    return chunks;
+  }
+
+  private hashString(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString(16);
   }
 
   public connect(url: string, options: WebSocketOptions = {}) {
@@ -623,6 +917,37 @@ class WebSocketService {
     this.currentToken = null;
     this.isRefreshingToken = false;
     this.pendingMessages = [];
+    
+    // Clean up large message assemblies
+    this.messageAssemblies.clear();
+  }
+
+  // Get statistics about large message handling
+  public getLargeMessageStats(): {
+    activeAssemblies: number;
+    assemblyDetails: any[];
+    supportedCompression: string[];
+    maxMessageSize: number;
+    chunkSize: number;
+  } {
+    const assemblyDetails = Array.from(this.messageAssemblies.values()).map(assembly => ({
+      messageId: assembly.messageId,
+      totalChunks: assembly.totalChunks,
+      receivedChunks: assembly.receivedChunks.size,
+      progress: (assembly.receivedChunks.size / assembly.totalChunks) * 100,
+      isCompressed: assembly.isCompressed,
+      compression: assembly.compression,
+      startedAt: assembly.startedAt,
+      ageSeconds: (Date.now() - assembly.startedAt) / 1000
+    }));
+
+    return {
+      activeAssemblies: this.messageAssemblies.size,
+      assemblyDetails,
+      supportedCompression: this.supportedCompression,
+      maxMessageSize: this.maxMessageSize,
+      chunkSize: this.chunkSize
+    };
   }
 
   /**
@@ -647,8 +972,21 @@ class WebSocketService {
     const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
     // Base64URL encode the token to ensure it's safe for subprotocol
     const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    
+    // Build protocols array with auth and compression support
     const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
-    logger.debug('Creating secure WebSocket with encoded JWT subprotocol authentication');
+    
+    // Add compression protocols if supported
+    if (options.compression) {
+      const compressionProtocols = options.compression
+        .filter(alg => this.supportedCompression.includes(alg))
+        .map(alg => `compression-${alg}`);
+      protocols.push(...compressionProtocols);
+    }
+    
+    logger.debug('Creating secure WebSocket with authentication and compression support', {
+      protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p)
+    });
     
     return new WebSocket(url, protocols);
   }

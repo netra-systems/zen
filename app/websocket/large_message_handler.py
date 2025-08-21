@@ -120,12 +120,24 @@ class LargeMessageHandler:
         
         # Cleanup task for expired assemblies
         self._cleanup_task: Optional[asyncio.Task] = None
-        self._start_cleanup_task()
+        self._cleanup_started = False
     
     def _start_cleanup_task(self) -> None:
         """Start periodic cleanup of expired message assemblies."""
-        if self._cleanup_task is None:
+        if self._cleanup_task is None and not self._cleanup_started:
+            try:
+                loop = asyncio.get_running_loop()
+                self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
+                self._cleanup_started = True
+            except RuntimeError:
+                # No event loop running yet, will be started later
+                pass
+    
+    async def initialize(self) -> None:
+        """Initialize async components when event loop is available."""
+        if not self._cleanup_started:
             self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
+            self._cleanup_started = True
     
     async def _periodic_cleanup(self) -> None:
         """Periodically clean up expired message assemblies."""

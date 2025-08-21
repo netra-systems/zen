@@ -74,13 +74,37 @@ class UnifiedMessagingManager:
 
     async def send_to_user(self, user_id: str, 
                           message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
-                          retry: bool = True) -> bool:
-        """Send message to user with zero-loss guarantee."""
+                          retry: bool = True,
+                          compression: CompressionAlgorithm = CompressionAlgorithm.NONE) -> bool:
+        """Send message to user with zero-loss guarantee and optional compression."""
         self._ensure_queue_processor_started()
         validated_message = self.message_handler.prepare_and_validate_message(message)
         if not validated_message:
             return False
-        return await self._send_with_queue_fallback(user_id, validated_message, retry)
+        return await self._send_with_large_message_support(user_id, validated_message, retry, compression)
+
+    async def _send_with_large_message_support(self, user_id: str, message: Dict[str, Any], 
+                                             retry: bool, compression: CompressionAlgorithm) -> bool:
+        """Send message with large message and compression support."""
+        try:
+            # Prepare message for transmission (handles chunking and compression)
+            prepared_messages = await self.large_message_handler.prepare_message(
+                message, compression=compression
+            )
+            
+            # Send all prepared messages
+            all_sent = True
+            for prepared_msg in prepared_messages:
+                sent = await self._send_with_queue_fallback(user_id, prepared_msg, retry)
+                if not sent:
+                    all_sent = False
+            
+            return all_sent
+            
+        except Exception as e:
+            logger.error(f"Error in large message handling: {e}")
+            # Fall back to standard send
+            return await self._send_with_queue_fallback(user_id, message, retry)
 
     async def _send_with_queue_fallback(self, user_id: str, message: Dict[str, Any], retry: bool) -> bool:
         """Send message with queue fallback for zero-loss delivery."""
@@ -116,19 +140,36 @@ class UnifiedMessagingManager:
 
     async def handle_incoming_message(self, user_id: str, websocket: WebSocket, 
                                     message: Dict[str, Any]) -> bool:
-        """Handle incoming WebSocket message with rate limiting."""
+        """Handle incoming WebSocket message with large message support and rate limiting."""
         conn_info = await self.manager.connection_manager.find_connection(user_id, websocket)
         if not conn_info:
             logger.warning(f"Connection not found for user {user_id}")
             return False
         
-        # Handle state synchronization messages first
-        message_type = message.get("type", "")
+        # Check if this is a large message
+        message_type = message.get("message_type")
+        if message_type:
+            # Process large message
+            processed_message = await self.large_message_handler.process_incoming_message(message)
+            if processed_message is None:
+                # Message incomplete (chunking in progress)
+                return True
+            
+            # Send progress updates for chunked messages
+            if isinstance(processed_message, dict) and processed_message.get("message_type") == "upload_progress":
+                await self.send_to_user(user_id, processed_message, retry=False)
+                return True
+            
+            # Continue processing the assembled message
+            message = processed_message if isinstance(processed_message, dict) else {"data": processed_message}
+        
+        # Handle state synchronization messages
+        msg_type = message.get("type", "")
         state_sync_types = {
             "get_current_state", "state_update", "partial_state_update", "client_state_update"
         }
         
-        if message_type in state_sync_types:
+        if msg_type in state_sync_types:
             connection_id = conn_info.connection_id
             return await self.message_handler.handle_state_sync_message(
                 user_id, connection_id, websocket, message
@@ -167,12 +208,33 @@ class UnifiedMessagingManager:
         update_msg = self.message_builder.create_sub_agent_update_message(sub_agent_name, state)
         await self.send_to_user(user_id, update_msg)
 
+    # Large message convenience methods
+    async def send_large_message(self, user_id: str, message: Union[Dict[str, Any], bytes],
+                                compression: CompressionAlgorithm = CompressionAlgorithm.GZIP) -> bool:
+        """Send large message with automatic compression."""
+        return await self.send_to_user(user_id, message, retry=True, compression=compression)
+    
+    async def send_binary_data(self, user_id: str, data: bytes, 
+                              compression: CompressionAlgorithm = CompressionAlgorithm.LZ4) -> bool:
+        """Send binary data with optimal compression."""
+        return await self.send_to_user(user_id, data, retry=True, compression=compression)
+    
+    def negotiate_compression(self, client_algorithms: List[str]) -> CompressionAlgorithm:
+        """Negotiate compression algorithm with client."""
+        return self.large_message_handler.negotiate_compression(client_algorithms)
+
     def get_messaging_stats(self) -> Dict[str, Any]:
         """Get comprehensive messaging statistics."""
         queue_stats = self._get_all_queue_stats()
+        compression_stats = self.large_message_handler.get_compression_stats()
+        assembly_stats = self.large_message_handler.get_assembly_stats()
+        
         return {
             "message_stats": self.message_processor.get_stats(),
-            "queue_stats": queue_stats, "active_users": len(self.user_queues)
+            "queue_stats": queue_stats,
+            "compression_stats": compression_stats,
+            "assembly_stats": assembly_stats,
+            "active_users": len(self.user_queues)
         }
 
     def _get_all_queue_stats(self) -> Dict[str, Any]:
