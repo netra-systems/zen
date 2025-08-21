@@ -255,16 +255,51 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
     
     def _should_scan_file(self, file_path: Path) -> bool:
         """Check if file should be scanned for OAuth URLs."""
-        exclude_patterns = ["__pycache__", ".pytest_cache", "test_", ".git", "node_modules"]
-        return not any(pattern in str(file_path) for pattern in exclude_patterns)
+        exclude_patterns = [
+            "__pycache__", ".pytest_cache", "test_", ".git", "node_modules",
+            ".mypy_cache", ".tox", "venv", ".venv", "dist", "build",
+            ".DS_Store", "*.pyc", "*.pyo", "*.log"
+        ]
+        file_str = str(file_path).lower()
+        
+        # Exclude certain patterns but include important config files
+        if any(pattern in file_str for pattern in exclude_patterns):
+            return False
+        
+        # Include if file size is reasonable (< 1MB)
+        try:
+            if file_path.stat().st_size > 1024 * 1024:
+                return False
+        except OSError:
+            return False
+        
+        return True
     
-    def _contains_oauth_url(self, content: str) -> bool:
+    def _get_file_type(self, file_path: Path) -> str:
+        """Get categorized file type for scanning."""
+        extension = file_path.suffix.lower()
+        name = file_path.name.lower()
+        
+        if extension in ['.py']:
+            return 'python'
+        elif extension in ['.ts', '.tsx']:
+            return 'typescript'
+        elif extension in ['.js', '.jsx']:
+            return 'javascript'
+        elif extension in ['.yaml', '.yml', '.json'] or name.startswith('.env'):
+            return 'config'
+        elif 'dockerfile' in name or 'docker-compose' in name:
+            return 'docker'
+        else:
+            return 'other'
+    
+    def _is_oauth_related(self, content: str) -> bool:
         """Check if content contains OAuth-related URLs."""
-        oauth_indicators = ["staging.netrasystems.ai", "oauth", "auth/callback", "redirect_uri"]
-        return any(indicator in content.lower() for indicator in oauth_indicators)
+        content_lower = content.lower()
+        return any(keyword in content_lower for keyword in self.oauth_keywords)
     
-    async def _scan_file(self, file_path: Path, relative_path: str) -> List[URLInconsistency]:
-        """Scan file for OAuth URL inconsistencies."""
+    async def _scan_file_comprehensive(self, file_path: Path, relative_path: str) -> List[URLInconsistency]:
+        """Comprehensively scan file for OAuth URL inconsistencies."""
         inconsistencies = []
         
         try:
@@ -272,8 +307,15 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
                 lines = f.readlines()
                 
             for line_num, line in enumerate(lines, 1):
-                if self._contains_oauth_url(line):
-                    inconsistency = self._detect_inconsistency(relative_path, line_num, line.strip())
+                line_content = line.strip()
+                if not line_content or line_content.startswith('#'):
+                    continue
+                
+                # Check for any staging URLs or OAuth patterns
+                if self._contains_staging_pattern(line_content):
+                    inconsistency = self._detect_comprehensive_inconsistency(
+                        relative_path, line_num, line_content
+                    )
                     if inconsistency:
                         inconsistencies.append(inconsistency)
                         
@@ -282,12 +324,31 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
             
         return inconsistencies
     
-    def _detect_inconsistency(self, file_path: str, line_num: int, line_content: str) -> Optional[URLInconsistency]:
-        """Detect OAuth URL inconsistency in a line."""
+    def _contains_staging_pattern(self, content: str) -> bool:
+        """Check if content contains any staging-related patterns."""
+        # Check for incorrect patterns
+        for pattern in self.incorrect_patterns:
+            if pattern in content:
+                return True
+        
+        # Check for OAuth-related content with staging URLs
+        if 'staging' in content.lower() and any(keyword in content.lower() for keyword in self.oauth_keywords):
+            return True
+        
+        return False
+    
+    def _detect_comprehensive_inconsistency(self, file_path: str, line_num: int, line_content: str) -> Optional[URLInconsistency]:
+        """Detect OAuth URL inconsistency with enhanced context detection."""
         for incorrect_pattern in self.incorrect_patterns:
             if incorrect_pattern in line_content:
-                expected_url = "https://auth.staging.netrasystems.ai"
-                severity = "critical" if "redirect" in line_content.lower() else "medium"
+                # Determine the correct replacement based on context
+                expected_url, url_type = self._determine_correct_url(line_content, incorrect_pattern)
+                
+                # Determine severity based on context
+                severity = self._determine_severity(line_content, url_type)
+                
+                # Get context about the usage
+                context = self._get_usage_context(line_content)
                 
                 return URLInconsistency(
                     file_path=file_path,
@@ -295,9 +356,78 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
                     line_content=line_content,
                     incorrect_url=incorrect_pattern,
                     expected_url=expected_url,
-                    severity=severity
+                    severity=severity,
+                    url_type=url_type,
+                    context=context
                 )
         return None
+    
+    def _determine_correct_url(self, line_content: str, incorrect_pattern: str) -> tuple[str, str]:
+        """Determine the correct URL and type based on line content context."""
+        line_lower = line_content.lower()
+        
+        # Check for redirect URIs (should point to auth service)
+        if any(keyword in line_lower for keyword in ['redirect_uri', 'callback', 'oauth_callback']):
+            return "https://auth.staging.netrasystems.ai/auth/callback", "redirect_uri"
+        
+        # Check for JavaScript origins (should point to frontend)
+        if any(keyword in line_lower for keyword in ['javascript_origin', 'origin', 'cors']):
+            return "https://app.staging.netrasystems.ai", "javascript_origin"
+        
+        # Check for API endpoints (should point to backend)
+        if any(keyword in line_lower for keyword in ['api', 'endpoint', 'backend']):
+            return "https://api.staging.netrasystems.ai", "api_endpoint"
+        
+        # Check for frontend/UI references
+        if any(keyword in line_lower for keyword in ['frontend', 'ui', 'app', 'client']):
+            return "https://app.staging.netrasystems.ai", "frontend"
+        
+        # Default to auth service for OAuth-related content
+        if any(keyword in line_lower for keyword in self.oauth_keywords):
+            return "https://auth.staging.netrasystems.ai", "auth_service"
+        
+        # Generic staging reference - suggest backend API
+        return "https://api.staging.netrasystems.ai", "config"
+    
+    def _determine_severity(self, line_content: str, url_type: str) -> str:
+        """Determine severity of the inconsistency."""
+        line_lower = line_content.lower()
+        
+        # Critical: OAuth redirect URIs and authentication endpoints
+        if url_type in ['redirect_uri', 'auth_service'] or any(
+            keyword in line_lower for keyword in ['redirect_uri', 'oauth', 'callback', 'authentication']
+        ):
+            return "critical"
+        
+        # High: JavaScript origins and CORS settings
+        if url_type == 'javascript_origin' or 'cors' in line_lower:
+            return "high"
+        
+        # Medium: API endpoints and configuration
+        if url_type in ['api_endpoint', 'config']:
+            return "medium"
+        
+        # Low: Frontend references and documentation
+        return "low"
+    
+    def _get_usage_context(self, line_content: str) -> str:
+        """Get context about how the URL is being used."""
+        line_lower = line_content.lower()
+        
+        if 'redirect_uri' in line_lower:
+            return "OAuth redirect URI configuration"
+        elif 'javascript_origin' in line_lower:
+            return "CORS JavaScript origins configuration"
+        elif 'callback' in line_lower:
+            return "OAuth callback URL"
+        elif any(keyword in line_lower for keyword in ['client_id', 'client_secret']):
+            return "OAuth client configuration"
+        elif 'endpoint' in line_lower or 'url' in line_lower:
+            return "Service endpoint configuration"
+        elif any(keyword in line_lower for keyword in ['env', 'config']):
+            return "Environment configuration"
+        else:
+            return "General staging URL reference"
     
     async def check_critical_file_line(self, file_path: str, line_number: int) -> Dict[str, Any]:
         """Check specific critical file line mentioned in BVJ."""

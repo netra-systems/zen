@@ -1411,9 +1411,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T15:33:52.290612",
       "last_failure": "2025-08-20T15:35:30.482336",
-      "last_pass": "2025-08-20T17:17:20.455020",
+      "last_pass": "2025-08-20T17:27:58.348999",
       "total_failures": 4,
-      "total_passes": 4,
+      "total_passes": 5,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -2205,17 +2205,28 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "tests/unified/e2e/test_cold_start_to_agent_response.py::TestColdStartToAgentResponse::test_cold_start_timeout_scenarios": {
+      "component": "backend",
+      "first_seen": "2025-08-20T17:27:59.006600",
+      "last_failure": "2025-08-20T17:27:59.006600",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_172753_73550",
+          "timestamp": "2025-08-20T17:27:59.006600",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Should handle connection timeout gracefully\nassert not True"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250820_160321_1381",
-      "timestamp": "2025-08-20T16:03:27.377823",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250820_160344_24812",
       "timestamp": "2025-08-20T16:04:59.722603",
@@ -3007,10 +3018,18 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172753_73550",
+      "timestamp": "2025-08-20T17:27:59.012510",
+      "total_tests": 3,
+      "passed": 2,
+      "failed": 1,
+      "bad_tests_count": 1
     }
   ],
   "stats": {
-    "total_runs": 277,
-    "last_updated": "2025-08-20T17:27:33.423276"
+    "total_runs": 278,
+    "last_updated": "2025-08-20T17:27:59.012510"
   }
 }
