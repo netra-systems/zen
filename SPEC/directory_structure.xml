@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.428935</last_edited>
+  </metadata>
   <meta>
     <title>Directory Structure Specification</title>
     <category>infrastructure</category>
@@ -9,24 +12,22 @@
       <ref>LLM_MASTER_INDEX.md</ref>
     </cross_references>
   </meta>
-
   <directory_structure>
     <overview>
       Complete project directory structure for Netra Apex AI Optimization Platform.
       This document serves as the authoritative reference for project organization.
     </overview>
-
     <structure>
-      <![CDATA[
+      
 root/
 ├── agent_to_agent/           # Agent communication reports
 ├── agent_to_agent_status_updates/ # Status update reports
 ├── app/                      # Main backend application
 │   ├── agents/              # AI agent implementations (consolidated modules)
 │   ├── agent_to_agent/      # Agent-to-agent communication reports
-│   ├── auth/                # Authentication & authorization
+│   ├── auth/                # Authentication &amp; authorization
 │   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
-│   ├── core/                # Core utilities & exceptions
+│   ├── core/                # Core utilities &amp; exceptions
 │   │   ├── exceptions_*.py         # Categorized exception handlers
 │   │   ├── interfaces_*.py         # Interface definitions
 │   │   └── system_health_monitor.py # System monitoring
@@ -41,7 +42,7 @@ root/
 │   │   ├── corpus.py              # Corpus management
 │   │   ├── synthetic_data.py      # Synthetic data endpoints
 │   │   └── websockets.py          # WebSocket endpoints
-│   ├── schemas/             # Pydantic models & types
+│   ├── schemas/             # Pydantic models &amp; types
 │   │   ├── llm_*.py               # LLM-related types
 │   │   ├── admin_*.py             # Admin schemas
 │   │   └── websocket_*.py         # WebSocket message types
@@ -74,7 +75,7 @@ root/
 │   ├── types/               # TypeScript type definitions
 │   └── utils/               # Frontend utilities
 │
-├── scripts/                  # Utility & automation scripts
+├── scripts/                  # Utility &amp; automation scripts
 │   ├── architecture_*.py    # Architecture compliance tools
 │   ├── test_runner.py       # Test execution script
 │   ├── dev_launcher.py      # Development server launcher
@@ -113,9 +114,8 @@ root/
 ├── config/                  # Configuration files
 ├── alembic/                 # Database migrations
 └── requirements.txt         # Python dependencies
-      ]]>
+      
     </structure>
-
     <key_purposes>
       <directory name="app/">Core backend application with FastAPI</directory>
       <directory name="frontend/">Next.js-based web interface</directory>

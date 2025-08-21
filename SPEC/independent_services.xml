@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>Microservice.IndependenceProtocol</name>
@@ -9,13 +9,12 @@
       Ensures zero coupling with the main application monolith.
       NOTE: This protocol applies to backend services only. Frontend is excluded from these isolation requirements.
     </description>
+    <last_edited>2025-08-21T08:47:28.493818</last_edited>
   </metadata>
-  
   <critical-principle id="MS-P1">
     <title>Absolute Independence (Backend Services Only)</title>
     <instruction>Ensure each backend microservice is 100% self-contained. ZERO direct code dependencies (imports) on the main application (`app/`) or other services. This principle applies to backend services only - frontend is excluded.</instruction>
   </critical-principle>
-  
   <scope-clarification id="MS-SCOPE-001">
     <title>Backend-Only Application</title>
     <instruction>This specification applies exclusively to backend microservices (e.g., auth_service). The frontend is NOT considered a microservice for the purposes of this protocol and is exempt from these isolation requirements.</instruction>
@@ -27,44 +26,49 @@
       <component>Frontend (/frontend)</component>
     </excluded>
   </scope-clarification>
-
   <section title="Architectural Constraints (Backend Services)">
     <constraint id="MS-ARC-001" priority="CRITICAL">
-      <title>Unique Module Namespace (NO 'app')</title>
-      <instruction>Backend services must not use 'app' as the root module name. Use `{service_name}_core/`. This constraint does not apply to the frontend.</instruction>
+      <title>Service-Based Namespace Pattern</title>
+      <instruction>Backend services must use the pattern `{top_level_service_name}.{app|tests}` for their namespace. Main backend uses `netra_backend.app` and `netra_backend.tests`. This constraint does not apply to the frontend.</instruction>
       <code-example language="directory-structure">
-        <before description="VIOLATION: Namespace collision">
+        <before description="VIOLATION: Old namespace pattern">
 auth_service/
 ├── app/
-└── main.py
+└── tests/
+# Imports: from app.core import ...
         </before>
-        <after description="CORRECT: Unique namespace">
+        <after description="CORRECT: Service-based namespace">
 auth_service/
-├── auth_core/
-└── main.py
+├── app/
+└── tests/
+# Imports: from auth_service.app.core import ...
+
+netra_backend/
+├── app/
+└── tests/
+# Imports: from netra_backend.app.core import ...
         </after>
       </code-example>
     </constraint>
-
     <constraint id="MS-ARC-002" priority="CRITICAL">
       <title>Forbidden Cross-Service Imports</title>
-      <instruction>Backend services must not import code from the main `app/` directory. Frontend is exempt from this restriction.</instruction>
-      <forbidden-import-pattern>from app\.</forbidden-import-pattern>
+      <instruction>Backend services must not import code directly from other services without the service namespace prefix. Frontend is exempt from this restriction.</instruction>
+      <forbidden-import-pattern>from app\. (without service prefix)</forbidden-import-pattern>
+      <correct-import-pattern>from {service_name}.app</correct-import-pattern>
       <exemption>Frontend may import from app/ as needed</exemption>
     </constraint>
   </section>
-
   <section title="Dockerfile Standardization">
     <guideline id="MS-DOCKER-001">
       <title>Optimized Multi-Stage Build Template</title>
       <instruction>Use the following multi-stage build pattern optimized for Cloud Run deployment.</instruction>
       <code-block language="dockerfile">
-<![CDATA[
+
 # Stage 1: Builder
 FROM python:3.11-slim AS builder
 WORKDIR /app
 # Install build dependencies (gcc, g++, etc.)
-RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -rf /var/lib/apt/lists/*
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends gcc g++ &amp;&amp; rm -rf /var/lib/apt/lists/*
 # Build wheels
 COPY service_name/requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
@@ -74,13 +78,13 @@ FROM python:3.11-slim
 WORKDIR /app
 # Install from wheels
 COPY --from=builder /app/wheels /wheels
-RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+RUN pip install --no-cache-dir /wheels/* &amp;&amp; rm -rf /wheels
 
 # Copy service code - CRITICAL STEP
 COPY service_name/ ./
 
 # Security: Non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+RUN useradd -m -u 1000 appuser &amp;&amp; chown -R appuser:appuser /app
 USER appuser
 
 # Cloud Run Optimization
@@ -88,17 +92,16 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PORT=8080 WORKERS=1
 
 # Execution Command
 CMD exec gunicorn main:app --bind 0.0.0.0:$PORT --workers $WORKERS --worker-class uvicorn.workers.UvicornWorker
-]]>
+
       </code-block>
     </guideline>
   </section>
-
   <section title="Validation and Regression Prevention">
     <protocol id="MS-VAL-001">
       <title>Automated Independence Validation (Backend Services Only)</title>
       <instruction>AI Agents must execute this validation protocol when creating or modifying a backend microservice before finalizing the task. Frontend is excluded from this validation.</instruction>
       <validation-steps language="bash">
-<![CDATA[
+
 SERVICE_DIR=$1
 cd $SERVICE_DIR
 
@@ -117,7 +120,7 @@ if grep -r "from app\." . --exclude-dir=venv; then echo "ERROR: Imports from mai
 
 # 3. Test isolation import
 python -c "from main import app" || (echo "ERROR: Isolated startup failed for backend service."; exit 1)
-]]>
+
       </validation-steps>
     </protocol>
   </section>

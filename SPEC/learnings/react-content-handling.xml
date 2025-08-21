@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="react-content-handling">
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.677976</last_edited>
+  </metadata>
   <learning id="react-child-object-error" date="2025-08-16" severity="high">
     <title>React Child Object Rendering Error Prevention</title>
-    
     <problem>
       <description>
         React throws "Objects are not valid as a React child" error when attempting to render
@@ -19,7 +21,6 @@
         - Any component rendering dynamic content that could be objects
       </affected_components>
     </problem>
-    
     <root_cause>
       Message content from the store/API can be in multiple formats:
       1. Plain string: "Hello world"
@@ -30,7 +31,6 @@
       Direct assignment of content without type checking causes React to attempt
       rendering objects as children, which is invalid.
     </root_cause>
-    
     <solution>
       <implementation>
         Always normalize content before rendering by checking its type:
@@ -47,14 +47,12 @@
         3. Other objects are stringified for display
         4. Null/undefined are handled gracefully
       </implementation>
-      
       <applied_fixes>
         1. MessageList.tsx line 59-61: Added content normalization in displayedMessages mapping
         2. MessageItem.tsx line 83-85: Added content type checking in renderRegularContent
         3. Created comprehensive test suite in message-content-handling.test.tsx
       </applied_fixes>
     </solution>
-    
     <prevention>
       <best_practices>
         1. Always validate and normalize dynamic content before rendering
@@ -63,11 +61,10 @@
         4. Add unit tests for all content format variations
         5. Consider using discriminated unions for content types
       </best_practices>
-      
       <code_pattern>
         ```typescript
         // Utility function for content normalization
-        const normalizeMessageContent = (content: any): string => {
+        const normalizeMessageContent = (content: any): string =&gt; {
           if (typeof content === 'string') return content;
           if (content?.text) return content.text;
           if (content === null || content === undefined) return '';
@@ -76,7 +73,6 @@
         ```
       </code_pattern>
     </prevention>
-    
     <testing>
       <test_cases>
         1. String content rendering
@@ -90,12 +86,10 @@
         9. Empty string content
         10. Special characters in content
       </test_cases>
-      
       <regression_prevention>
         Run test suite: npm test -- message-content-handling.test.tsx
       </regression_prevention>
     </testing>
-    
     <business_impact>
       <segment>All segments (Free, Early, Mid, Enterprise)</segment>
       <value_impact>
@@ -104,7 +98,6 @@
         Critical for maintaining platform reliability.
       </value_impact>
     </business_impact>
-    
     <related_issues>
       - Content serialization from WebSocket messages
       - Store message format consistency

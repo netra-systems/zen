@@ -1,54 +1,50 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>API Routes</name>
-        <type>api_routes</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-spec>
-        <description>API Routes Specification</description>
-        <goals>
-            <goal priority="high">API Routes working as a complete end to end system</goal>
-            <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
-        </goals>
-    </primary-spec>
-    
-    <sections>
-        <section id="structure" order="1">
-            <title>Structure</title>
-            <requirements>
-                <requirement>API routes are organized by resource</requirement>
-                <requirement>Routes are defined in app/routes</requirement>
-                <requirement>Routes are versioned</requirement>
-            </requirements>
-        </section>
-        
-        <section id="authentication" order="2">
-            <title>Authentication</title>
-            <requirements>
-                <requirement>Routes are protected by authentication</requirement>
-                <requirement>Different authentication schemes are supported</requirement>
-                <requirement>Authorization is handled at the route level</requirement>
-            </requirements>
-        </section>
-        
-        <section id="validation" order="3">
-            <title>Validation</title>
-            <requirements>
-                <requirement>Request and response bodies are validated</requirement>
-                <requirement>Pydantic models are used for validation</requirement>
-                <requirement>Validation errors are handled gracefully</requirement>
-            </requirements>
-        </section>
-        
-        <section id="documentation" order="4">
-            <title>Documentation</title>
-            <requirements>
-                <requirement>API documentation is automatically generated</requirement>
-                <requirement>The OpenAPI schema is available at /openapi.json</requirement>
-                <requirement>Interactive documentation is available at /docs</requirement>
-            </requirements>
-        </section>
-    </sections>
+  <metadata>
+    <name>API Routes</name>
+    <type>api_routes</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.359941</last_edited>
+  </metadata>
+  <primary-spec>
+    <description>API Routes Specification</description>
+    <goals>
+      <goal priority="high">API Routes working as a complete end to end system</goal>
+      <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
+    </goals>
+  </primary-spec>
+  <sections>
+    <section id="structure" order="1">
+      <title>Structure</title>
+      <requirements>
+        <requirement>API routes are organized by resource</requirement>
+        <requirement>Routes are defined in app/routes</requirement>
+        <requirement>Routes are versioned</requirement>
+      </requirements>
+    </section>
+    <section id="authentication" order="2">
+      <title>Authentication</title>
+      <requirements>
+        <requirement>Routes are protected by authentication</requirement>
+        <requirement>Different authentication schemes are supported</requirement>
+        <requirement>Authorization is handled at the route level</requirement>
+      </requirements>
+    </section>
+    <section id="validation" order="3">
+      <title>Validation</title>
+      <requirements>
+        <requirement>Request and response bodies are validated</requirement>
+        <requirement>Pydantic models are used for validation</requirement>
+        <requirement>Validation errors are handled gracefully</requirement>
+      </requirements>
+    </section>
+    <section id="documentation" order="4">
+      <title>Documentation</title>
+      <requirements>
+        <requirement>API documentation is automatically generated</requirement>
+        <requirement>The OpenAPI schema is available at /openapi.json</requirement>
+        <requirement>Interactive documentation is available at /docs</requirement>
+      </requirements>
+    </section>
+  </sections>
 </specification>

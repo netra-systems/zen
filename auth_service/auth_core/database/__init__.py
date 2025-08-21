@@ -2,9 +2,9 @@
 Auth Service Database Module
 Database connection, models, and repositories for auth service
 """
-from .connection import auth_db, get_db_session
-from .models import AuthUser, AuthSession, AuthAuditLog
-from .repository import (
+from auth_service.app.connection import auth_db, get_db_session
+from auth_service.app.models import AuthUser, AuthSession, AuthAuditLog
+from auth_service.app.repository import (
     AuthUserRepository,
     AuthSessionRepository,
     AuthAuditRepository

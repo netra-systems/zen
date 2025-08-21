@@ -1,54 +1,57 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <auth_microservice_migration_plan>
-    <metadata>
-        <created>2025-08-17</created>
-        <description>Complete plan for separating auth into dedicated microservice</description>
-        <business_value_justification>
-            <segment>Growth &amp; Enterprise</segment>
-            <business_goal>Security isolation, compliance, scalability</business_goal>
-            <value_impact>Reduces auth-related security risks by 80%, enables SOC2 compliance</value_impact>
-            <revenue_impact>Enables enterprise deals worth +$50K MRR through compliance requirements</revenue_impact>
-        </business_value_justification>
-    </metadata>
-
-    <current_state>
-        <analysis>
-            <auth_files_count>26</auth_files_count>
-            <dependent_files_count>51</dependent_files_count>
-            <existing_infrastructure>
+  <metadata>
+    <created>2025-08-17</created>
+    <description>Complete plan for separating auth into dedicated microservice</description>
+    <business_value_justification>
+      <segment>Growth &amp; Enterprise</segment>
+      <business_goal>Security isolation, compliance, scalability</business_goal>
+      <value_impact>Reduces auth-related security risks by 80%, enables SOC2 compliance</value_impact>
+      <revenue_impact>Enables enterprise deals worth +$50K MRR through compliance requirements</revenue_impact>
+    </business_value_justification>
+    <last_edited>2025-08-21T08:47:28.370254</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.370254">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <current_state>
+    <analysis>
+      <auth_files_count>26</auth_files_count>
+      <dependent_files_count>51</dependent_files_count>
+      <existing_infrastructure>
                 - Terraform auth-service.tf already exists (Cloud Run config)
                 - Dockerfile.auth already exists
                 - auth_service_main.py already exists
                 - Auth routes at app/routes/auth/
             </existing_infrastructure>
-            <key_dependencies>
+      <key_dependencies>
                 - PostgreSQL for user/session storage
                 - Redis for session caching
                 - Google Secret Manager for OAuth secrets
                 - JWT tokens for stateless auth
             </key_dependencies>
-        </analysis>
-    </current_state>
-
-    <architecture_design>
-        <principles>
-            <principle>Single Source of Truth (SSOT) for all auth operations</principle>
-            <principle>Stateless JWT tokens with Redis session cache</principle>
-            <principle>Service-to-service auth via internal tokens</principle>
-            <principle>Zero-trust security model</principle>
-            <principle>450-line module limit maintained</principle>
-        </principles>
-        
-        <service_boundaries>
-            <auth_service>
-                <responsibilities>
+    </analysis>
+  </current_state>
+  <architecture_design>
+    <principles>
+      <principle>Single Source of Truth (SSOT) for all auth operations</principle>
+      <principle>Stateless JWT tokens with Redis session cache</principle>
+      <principle>Service-to-service auth via internal tokens</principle>
+      <principle>Zero-trust security model</principle>
+      <principle>450-line module limit maintained</principle>
+    </principles>
+    <service_boundaries>
+      <auth_service>
+        <responsibilities>
                     - User authentication (OAuth, API keys)
                     - JWT token generation/validation
                     - Session management
                     - Permission verification
                     - Service-to-service auth
                 </responsibilities>
-                <endpoints>
+        <endpoints>
                     - POST /auth/login
                     - POST /auth/logout
                     - POST /auth/refresh
@@ -56,36 +59,33 @@
                     - GET /auth/session
                     - POST /auth/service-token (internal)
                 </endpoints>
-            </auth_service>
-            
-            <main_backend>
-                <changes>
+      </auth_service>
+      <main_backend>
+        <changes>
                     - Remove all auth logic
                     - Add auth service client
                     - Validate tokens via auth service
                     - Cache validation results (5 min TTL)
                 </changes>
-            </main_backend>
-        </service_boundaries>
-        
-        <communication_patterns>
-            <pattern name="User Authentication">
-                Frontend -> Auth Service -> Database
+      </main_backend>
+    </service_boundaries>
+    <communication_patterns>
+      <pattern name="User Authentication">
+                Frontend -&gt; Auth Service -&gt; Database
             </pattern>
-            <pattern name="Request Authorization">
-                Frontend -> Backend -> Auth Service (cached)
+      <pattern name="Request Authorization">
+                Frontend -&gt; Backend -&gt; Auth Service (cached)
             </pattern>
-            <pattern name="Service-to-Service">
-                Backend -> Auth Service (internal token)
+      <pattern name="Service-to-Service">
+                Backend -&gt; Auth Service (internal token)
             </pattern>
-        </communication_patterns>
-    </architecture_design>
-
-    <implementation_steps>
-        <phase number="1" name="Auth Service Core">
-            <step order="1">
-                <action>Create auth service directory structure</action>
-                <details>
+    </communication_patterns>
+  </architecture_design>
+  <implementation_steps>
+    <phase number="1" name="Auth Service Core">
+      <step order="1">
+        <action>Create auth service directory structure</action>
+        <details>
                     auth_service/
                     ├── app/
                     │   ├── core/           # Core utilities (≤300 lines each)
@@ -98,37 +98,34 @@
                     ├── requirements.txt
                     └── main.py
                 </details>
-            </step>
-            
-            <step order="2">
-                <action>Implement SSOT auth modules</action>
-                <modules>
+      </step>
+      <step order="2">
+        <action>Implement SSOT auth modules</action>
+        <modules>
                     - auth_service/app/core/jwt_handler.py (≤300 lines)
                     - auth_service/app/core/session_manager.py (≤300 lines)
                     - auth_service/app/core/oauth_handler.py (≤300 lines)
                     - auth_service/app/services/auth_service.py (≤300 lines)
                     - auth_service/app/services/permission_service.py (≤300 lines)
                 </modules>
-            </step>
-            
-            <step order="3">
-                <action>Create auth service client for backend</action>
-                <file>app/clients/auth_client.py</file>
-                <features>
+      </step>
+      <step order="3">
+        <action>Create auth service client for backend</action>
+        <file>app/clients/auth_client.py</file>
+        <features>
                     - Token validation with caching
                     - Service-to-service auth
                     - Circuit breaker pattern
                     - Retry logic
                 </features>
-            </step>
-        </phase>
-
-        <phase number="2" name="Dev Environment Updates">
-            <step order="1">
-                <action>Update dev_launcher for auth service</action>
-                <changes>
-                    <file>dev_launcher/service_config.py</file>
-                    <additions>
+      </step>
+    </phase>
+    <phase number="2" name="Dev Environment Updates">
+      <step order="1">
+        <action>Update dev_launcher for auth service</action>
+        <changes>
+          <file>dev_launcher/service_config.py</file>
+          <additions>
                         AUTH_SERVICE_CONFIG = {
                             'name': 'auth-service',
                             'command': 'uvicorn auth_service.main:app',
@@ -141,148 +138,134 @@
                             }
                         }
                     </additions>
-                </changes>
-            </step>
-            
-            <step order="2">
-                <action>Update process manager</action>
-                <file>dev_launcher/process_manager.py</file>
-                <changes>Add auth service to startup sequence before backend</changes>
-            </step>
-            
-            <step order="3">
-                <action>Add auth service health checks</action>
-                <file>dev_launcher/health_monitor.py</file>
-            </step>
-        </phase>
-
-        <phase number="3" name="Deployment Configuration">
-            <step order="1">
-                <action>Update Terraform configurations</action>
-                <files>
-                    <file>terraform-gcp/auth-service.tf</file>
-                    <updates>
+        </changes>
+      </step>
+      <step order="2">
+        <action>Update process manager</action>
+        <file>dev_launcher/process_manager.py</file>
+        <changes>Add auth service to startup sequence before backend</changes>
+      </step>
+      <step order="3">
+        <action>Add auth service health checks</action>
+        <file>dev_launcher/health_monitor.py</file>
+      </step>
+    </phase>
+    <phase number="3" name="Deployment Configuration">
+      <step order="1">
+        <action>Update Terraform configurations</action>
+        <files>
+          <file>terraform-gcp/auth-service.tf</file>
+          <updates>
                         - Enable auth service deployment (count = 1)
                         - Configure service account permissions
                         - Set up load balancer rules
                     </updates>
-                </files>
-            </step>
-            
-            <step order="2">
-                <action>Update Docker configurations</action>
-                <files>
-                    <file>Dockerfile.auth</file>
-                    <updates>
+        </files>
+      </step>
+      <step order="2">
+        <action>Update Docker configurations</action>
+        <files>
+          <file>Dockerfile.auth</file>
+          <updates>
                         - Optimize for production
                         - Multi-stage build
                         - Security hardening
                     </updates>
-                </files>
-            </step>
-            
-            <step order="3">
-                <action>Configure CI/CD pipelines</action>
-                <files>
-                    <file>.github/workflows/auth-service.yml</file>
-                    <content>
+        </files>
+      </step>
+      <step order="3">
+        <action>Configure CI/CD pipelines</action>
+        <files>
+          <file>.github/workflows/auth-service.yml</file>
+          <content>
                         - Build auth service image
                         - Run auth service tests
                         - Deploy to staging/production
                     </content>
-                </files>
-            </step>
-        </phase>
-
-        <phase number="4" name="Migration and Routing">
-            <step order="1">
-                <action>Migrate auth routes</action>
-                <from>app/routes/auth/</from>
-                <to>auth_service/app/routes/</to>
-                <strategy>
+        </files>
+      </step>
+    </phase>
+    <phase number="4" name="Migration and Routing">
+      <step order="1">
+        <action>Migrate auth routes</action>
+        <from>app/routes/auth/</from>
+        <to>auth_service/app/routes/</to>
+        <strategy>
                     1. Copy routes to auth service
                     2. Update imports and dependencies
                     3. Test in isolation
                     4. Update backend to proxy auth requests
                 </strategy>
-            </step>
-            
-            <step order="2">
-                <action>Update backend auth dependencies</action>
-                <changes>
+      </step>
+      <step order="2">
+        <action>Update backend auth dependencies</action>
+        <changes>
                     - Replace direct auth imports with auth_client
                     - Update middleware to use auth service
                     - Add request caching for performance
                 </changes>
-            </step>
-            
-            <step order="3">
-                <action>Update frontend auth flow</action>
-                <changes>
+      </step>
+      <step order="3">
+        <action>Update frontend auth flow</action>
+        <changes>
                     - Point auth requests to auth service URL
                     - Update token storage logic
                     - Add auth service health monitoring
                 </changes>
-            </step>
-        </phase>
-
-        <phase number="5" name="Testing Updates">
-            <step order="1">
-                <action>Create auth service tests</action>
-                <test_suites>
+      </step>
+    </phase>
+    <phase number="5" name="Testing Updates">
+      <step order="1">
+        <action>Create auth service tests</action>
+        <test_suites>
                     - auth_service/tests/unit/ (JWT, sessions, OAuth)
                     - auth_service/tests/integration/ (API endpoints)
                     - auth_service/tests/e2e/ (Full auth flows)
                 </test_suites>
-            </step>
-            
-            <step order="2">
-                <action>Update existing tests</action>
-                <changes>
+      </step>
+      <step order="2">
+        <action>Update existing tests</action>
+        <changes>
                     - Mock auth service calls in backend tests
                     - Update integration tests for new architecture
                     - Add service-to-service auth tests
                 </changes>
-            </step>
-            
-            <step order="3">
-                <action>Add performance tests</action>
-                <metrics>
+      </step>
+      <step order="3">
+        <action>Add performance tests</action>
+        <metrics>
                     - Token validation latency (&lt;10ms with cache)
                     - Auth service response time (&lt;50ms)
                     - Concurrent user handling (1000+ users)
                 </metrics>
-            </step>
-        </phase>
-
-        <phase number="6" name="Inter-Service Authentication">
-            <step order="1">
-                <action>Implement service tokens</action>
-                <features>
+      </step>
+    </phase>
+    <phase number="6" name="Inter-Service Authentication">
+      <step order="1">
+        <action>Implement service tokens</action>
+        <features>
                     - Service account registration
                     - Short-lived service tokens (5 min)
                     - Automatic token refresh
                     - Service identity verification
                 </features>
-            </step>
-            
-            <step order="2">
-                <action>Add service mesh configuration</action>
-                <optional>For future Istio/Linkerd integration</optional>
-            </step>
-        </phase>
-    </implementation_steps>
-
-    <common_patterns_and_problems>
-        <pattern name="Token Validation Caching">
-            <problem>High latency from repeated token validations</problem>
-            <solution>
-                <code>
+      </step>
+      <step order="2">
+        <action>Add service mesh configuration</action>
+        <optional>For future Istio/Linkerd integration</optional>
+      </step>
+    </phase>
+  </implementation_steps>
+  <common_patterns_and_problems>
+    <pattern name="Token Validation Caching">
+      <problem>High latency from repeated token validations</problem>
+      <solution>
+        <code>
                 class AuthClient:
                     def __init__(self):
                         self.cache = TTLCache(maxsize=1000, ttl=300)
                     
-                    async def validate_token_jwt(self, token: str) -> bool:
+                    async def validate_token_jwt(self, token: str) -&gt; bool:
                         if token in self.cache:
                             return self.cache[token]
                         
@@ -290,13 +273,12 @@
                         self.cache[token] = result
                         return result
                 </code>
-            </solution>
-        </pattern>
-
-        <pattern name="Circuit Breaker for Auth Service">
-            <problem>Auth service downtime affects entire system</problem>
-            <solution>
-                <code>
+      </solution>
+    </pattern>
+    <pattern name="Circuit Breaker for Auth Service">
+      <problem>Auth service downtime affects entire system</problem>
+      <solution>
+        <code>
                 class AuthCircuitBreaker:
                     def __init__(self):
                         self.failures = 0
@@ -316,13 +298,12 @@
                             self.on_failure()
                             raise
                 </code>
-            </solution>
-        </pattern>
-
-        <pattern name="Service-to-Service Auth">
-            <problem>Backend needs to call other services securely</problem>
-            <solution>
-                <code>
+      </solution>
+    </pattern>
+    <pattern name="Service-to-Service Auth">
+      <problem>Backend needs to call other services securely</problem>
+      <solution>
+        <code>
                 class ServiceAuthManager:
                     async def get_service_token(self):
                         # Use service account credentials
@@ -337,92 +318,84 @@
                         headers = {'Authorization': f'Bearer {token}'}
                         return await http_client.post(url, json=data, headers=headers)
                 </code>
-            </solution>
-        </pattern>
-
-        <problem name="Session Synchronization">
-            <description>Sessions need to be consistent across services</description>
-            <solution>
+      </solution>
+    </pattern>
+    <problem name="Session Synchronization">
+      <description>Sessions need to be consistent across services</description>
+      <solution>
                 - Use Redis as centralized session store
                 - Implement session versioning
                 - Add session invalidation broadcast
             </solution>
-        </problem>
-
-        <problem name="Token Rotation">
-            <description>Tokens need to be refreshed without user disruption</description>
-            <solution>
+    </problem>
+    <problem name="Token Rotation">
+      <description>Tokens need to be refreshed without user disruption</description>
+      <solution>
                 - Implement refresh token mechanism
                 - Auto-refresh before expiration
                 - Grace period for old tokens
             </solution>
-        </problem>
-
-        <problem name="Rate Limiting">
-            <description>Auth endpoints are vulnerable to brute force</description>
-            <solution>
+    </problem>
+    <problem name="Rate Limiting">
+      <description>Auth endpoints are vulnerable to brute force</description>
+      <solution>
                 - Implement per-IP rate limiting
                 - Add CAPTCHA for repeated failures
                 - Use exponential backoff
             </solution>
-        </problem>
-    </common_patterns_and_problems>
-
-    <rollback_plan>
-        <step>1. Keep existing auth code in backend (feature flag)</step>
-        <step>2. Add AUTH_SERVICE_ENABLED environment variable</step>
-        <step>3. Route auth based on feature flag</step>
-        <step>4. Monitor metrics during gradual rollout</step>
-        <step>5. Quick revert: Set AUTH_SERVICE_ENABLED=false</step>
-    </rollback_plan>
-
-    <monitoring_and_alerts>
-        <metrics>
-            <metric>Auth service response time (p50, p95, p99)</metric>
-            <metric>Token validation cache hit rate</metric>
-            <metric>Failed authentication attempts</metric>
-            <metric>Service-to-service auth failures</metric>
-            <metric>Session creation/destruction rate</metric>
-        </metrics>
-        
-        <alerts>
-            <alert threshold="&gt;100ms" metric="auth_response_time_p95">Auth service slow</alert>
-            <alert threshold="&gt;10/min" metric="auth_failures">High auth failure rate</alert>
-            <alert threshold="&lt;80%" metric="cache_hit_rate">Low cache effectiveness</alert>
-        </alerts>
-    </monitoring_and_alerts>
-
-    <security_considerations>
-        <item>All auth service endpoints use HTTPS only</item>
-        <item>Service-to-service communication uses mTLS</item>
-        <item>Secrets rotation every 30 days</item>
-        <item>Audit logging for all auth operations</item>
-        <item>Rate limiting on all public endpoints</item>
-        <item>Input validation and sanitization</item>
-        <item>SQL injection prevention</item>
-        <item>XSS protection headers</item>
-    </security_considerations>
-
-    <timeline>
-        <milestone week="1">
+    </problem>
+  </common_patterns_and_problems>
+  <rollback_plan>
+    <step>1. Keep existing auth code in backend (feature flag)</step>
+    <step>2. Add AUTH_SERVICE_ENABLED environment variable</step>
+    <step>3. Route auth based on feature flag</step>
+    <step>4. Monitor metrics during gradual rollout</step>
+    <step>5. Quick revert: Set AUTH_SERVICE_ENABLED=false</step>
+  </rollback_plan>
+  <monitoring_and_alerts>
+    <metrics>
+      <metric>Auth service response time (p50, p95, p99)</metric>
+      <metric>Token validation cache hit rate</metric>
+      <metric>Failed authentication attempts</metric>
+      <metric>Service-to-service auth failures</metric>
+      <metric>Session creation/destruction rate</metric>
+    </metrics>
+    <alerts>
+      <alert threshold="&gt;100ms" metric="auth_response_time_p95">Auth service slow</alert>
+      <alert threshold="&gt;10/min" metric="auth_failures">High auth failure rate</alert>
+      <alert threshold="&lt;80%" metric="cache_hit_rate">Low cache effectiveness</alert>
+    </alerts>
+  </monitoring_and_alerts>
+  <security_considerations>
+    <item>All auth service endpoints use HTTPS only</item>
+    <item>Service-to-service communication uses mTLS</item>
+    <item>Secrets rotation every 30 days</item>
+    <item>Audit logging for all auth operations</item>
+    <item>Rate limiting on all public endpoints</item>
+    <item>Input validation and sanitization</item>
+    <item>SQL injection prevention</item>
+    <item>XSS protection headers</item>
+  </security_considerations>
+  <timeline>
+    <milestone week="1">
             - Auth service core implementation
             - Dev launcher updates
             - Basic testing
         </milestone>
-        <milestone week="2">
+    <milestone week="2">
             - Route migration
             - Backend integration
             - Integration testing
         </milestone>
-        <milestone week="3">
+    <milestone week="3">
             - Deployment configuration
             - Staging deployment
             - Performance testing
         </milestone>
-        <milestone week="4">
+    <milestone week="4">
             - Production rollout (gradual)
             - Monitoring setup
             - Documentation
         </milestone>
-    </timeline>
+  </timeline>
 </auth_microservice_migration_plan>

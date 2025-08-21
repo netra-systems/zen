@@ -181,71 +181,69 @@ else:
             "http://127.0.0.1:8082"
         ]
 
-# When using wildcard with credentials, we need custom handling
-if cors_origins == ["*"]:
-    # In development with wildcard, we can't use credentials with "*"
-    # So we'll handle CORS dynamically
-    from starlette.middleware.base import BaseHTTPMiddleware
-    from starlette.responses import Response
-    
-    class DynamicCORSMiddleware(BaseHTTPMiddleware):
-        def is_allowed_origin(self, origin: str) -> bool:
-            """Check if origin is allowed - supports dynamic ports for localhost."""
-            if not origin:
-                return False
-            
-            # In development, accept any localhost/127.0.0.1 origin with any port
-            import re
-            localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
-            if re.match(localhost_pattern, origin):
-                return True
-            
-            # Also accept standard ports without explicit port numbers
-            standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
-            if re.match(standard_localhost, origin):
-                return True
-            
-            # In non-development, could add additional checks here
-            return True  # For wildcard mode, accept all origins
+# Always use DynamicCORSMiddleware to properly handle OPTIONS requests
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+class DynamicCORSMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, allowed_origins=None):
+        super().__init__(app)
+        self.allowed_origins = allowed_origins or []
         
-        async def dispatch(self, request, call_next):
-            origin = request.headers.get("origin")
+    def is_allowed_origin(self, origin: str) -> bool:
+        """Check if origin is allowed - supports dynamic ports for localhost."""
+        if not origin:
+            return False
+        
+        # Check if it matches explicit allowed origins
+        if self.allowed_origins and origin in self.allowed_origins:
+            return True
             
-            # Handle preflight
-            if request.method == "OPTIONS":
-                response = Response(status_code=200)
-                if origin and self.is_allowed_origin(origin):
-                    response.headers["Access-Control-Allow-Origin"] = origin
-                    response.headers["Access-Control-Allow-Credentials"] = "true"
-                    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-                    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-                    response.headers["Access-Control-Max-Age"] = "3600"
-                return response
+        # If wildcard mode
+        if self.allowed_origins == ["*"]:
+            return True
             
-            # Process request
-            response = await call_next(request)
-            
-            # Add CORS headers to response
+        # In development, accept any localhost/127.0.0.1 origin with any port
+        import re
+        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
+        if re.match(localhost_pattern, origin):
+            return True
+        
+        # Also accept standard ports without explicit port numbers
+        standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
+        if re.match(standard_localhost, origin):
+            return True
+        
+        return False
+    
+    async def dispatch(self, request, call_next):
+        origin = request.headers.get("origin")
+        
+        # Handle preflight
+        if request.method == "OPTIONS":
+            response = Response(status_code=200)
             if origin and self.is_allowed_origin(origin):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
                 response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-                response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
-            
+                response.headers["Access-Control-Max-Age"] = "3600"
             return response
-    
-    app.add_middleware(DynamicCORSMiddleware)
-else:
-    # Use standard CORS middleware for specific origins
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"]
-    )
+        
+        # Process request
+        response = await call_next(request)
+        
+        # Add CORS headers to response
+        if origin and self.is_allowed_origin(origin):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+            response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
+        
+        return response
+
+app.add_middleware(DynamicCORSMiddleware, allowed_origins=cors_origins)
 
 # Security middleware for production
 if os.getenv("ENVIRONMENT") in ["staging", "production"]:

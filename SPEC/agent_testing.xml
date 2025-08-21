@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Agent Testing Specification</title>
@@ -6,8 +6,8 @@
     <created>2025-08-14</created>
     <description>Comprehensive testing requirements for multi-agent system</description>
     <priority>CRITICAL</priority>
+    <last_edited>2025-08-21T08:47:28.344450</last_edited>
   </metadata>
-
   <requirements>
     <requirement id="AGT-001" priority="CRITICAL">
       <title>Test Suite Coverage</title>
@@ -19,7 +19,6 @@
       </implementation>
       <validation>Run pytest with --cov flag to verify coverage</validation>
     </requirement>
-
     <requirement id="AGT-002" priority="CRITICAL">
       <title>Module Architecture Compliance</title>
       <description>All test files MUST adhere to 450-line limit and 25-line function limit</description>
@@ -30,7 +29,6 @@
       </implementation>
       <validation>Automated line count verification in CI/CD</validation>
     </requirement>
-
     <requirement id="AGT-003" priority="HIGH">
       <title>Mock Strategy</title>
       <description>All external dependencies MUST be mocked for unit testing</description>
@@ -41,7 +39,6 @@
       </implementation>
       <validation>Tests must run without external services</validation>
     </requirement>
-
     <requirement id="AGT-004" priority="HIGH">
       <title>State Management Testing</title>
       <description>Use real DeepAgentState objects instead of mocks for state testing</description>
@@ -52,7 +49,6 @@
       </implementation>
       <validation>No MagicMock objects for state parameters</validation>
     </requirement>
-
     <requirement id="AGT-005" priority="HIGH">
       <title>Entry Conditions Validation</title>
       <description>Each agent MUST validate entry conditions before execution</description>
@@ -63,7 +59,6 @@
       </implementation>
       <validation>All entry condition paths covered</validation>
     </requirement>
-
     <requirement id="AGT-006" priority="MEDIUM">
       <title>Error Handling Coverage</title>
       <description>Test suites MUST cover all error scenarios and fallback mechanisms</description>
@@ -75,7 +70,6 @@
       </implementation>
       <validation>Error paths have explicit test cases</validation>
     </requirement>
-
     <requirement id="AGT-007" priority="MEDIUM">
       <title>WebSocket Testing</title>
       <description>Test WebSocket updates and streaming functionality</description>
@@ -87,7 +81,6 @@
       </implementation>
       <validation>WebSocket interactions properly mocked and tested</validation>
     </requirement>
-
     <requirement id="AGT-008" priority="HIGH">
       <title>Cache Testing</title>
       <description>Test caching mechanisms with proper time handling</description>
@@ -99,7 +92,6 @@
       </implementation>
       <validation>Cache behavior correctly validated with time</validation>
     </requirement>
-
     <requirement id="AGT-009" priority="MEDIUM">
       <title>Health Monitoring</title>
       <description>Test health status and circuit breaker monitoring</description>
@@ -110,7 +102,6 @@
       </implementation>
       <validation>Health endpoints return expected data</validation>
     </requirement>
-
     <requirement id="AGT-010" priority="HIGH">
       <title>Test Execution Performance</title>
       <description>Test suites MUST execute efficiently</description>
@@ -122,7 +113,6 @@
       <validation>Timed test execution in CI/CD</validation>
     </requirement>
   </requirements>
-
   <test_suites>
     <suite name="TriageSubAgent" file="tests/test_triage_sub_agent.py">
       <coverage>26 tests</coverage>
@@ -135,7 +125,6 @@
         - Fallback mechanisms
       </key_scenarios>
     </suite>
-
     <suite name="DataSubAgent" file="tests/test_data_sub_agent.py">
       <coverage>25 tests</coverage>
       <key_scenarios>
@@ -147,7 +136,6 @@
         - Cache management
       </key_scenarios>
     </suite>
-
     <suite name="ActionsToMeetGoalsSubAgent" file="tests/test_actions_sub_agent.py">
       <coverage>25 tests</coverage>
       <key_scenarios>
@@ -159,7 +147,6 @@
         - Large prompt handling
       </key_scenarios>
     </suite>
-
     <suite name="ReportingSubAgent" file="tests/test_reporting_sub_agent.py">
       <coverage>21 tests</coverage>
       <key_scenarios>
@@ -171,7 +158,6 @@
       </key_scenarios>
     </suite>
   </test_suites>
-
   <integration>
     <test_runner>
       <description>Integration with test_runner.py for automated execution</description>
@@ -189,7 +175,6 @@
         - comprehensive: Full workflow validation
       </execution_levels>
     </test_runner>
-
     <ci_cd>
       <description>GitHub Actions integration for continuous testing</description>
       <workflow>
@@ -200,73 +185,60 @@
       </workflow>
     </ci_cd>
   </integration>
-
   <best_practices>
     <practice id="BP-001">
       <title>Consistent Fixture Usage</title>
       <description>Use shared fixtures from conftest.py for common mocks</description>
     </practice>
-
     <practice id="BP-002">
       <title>Deterministic Tests</title>
       <description>All tests must be deterministic and not rely on external state</description>
     </practice>
-
     <practice id="BP-003">
       <title>Clear Test Names</title>
       <description>Test names should clearly describe what is being tested</description>
     </practice>
-
     <practice id="BP-004">
       <title>Single Responsibility</title>
       <description>Each test should validate exactly one behavior</description>
     </practice>
-
     <practice id="BP-005">
       <title>Fast Feedback</title>
       <description>Tests should provide immediate, clear feedback on failures</description>
     </practice>
   </best_practices>
-
   <troubleshooting>
     <issue id="TS-001">
       <problem>Import errors when running tests</problem>
       <solution>Ensure PYTHONPATH includes project root</solution>
     </issue>
-
     <issue id="TS-002">
       <problem>Async test warnings</problem>
       <solution>Use pytest-asyncio fixtures properly</solution>
     </issue>
-
     <issue id="TS-003">
       <problem>State validation failures</problem>
       <solution>Use real DeepAgentState objects, not MagicMock</solution>
     </issue>
-
     <issue id="TS-004">
       <problem>Cache timestamp errors</problem>
       <solution>Import time module and initialize _schema_cache_timestamps</solution>
     </issue>
   </troubleshooting>
-
   <learnings>
     <learning date="2025-08-14">
       <issue>DataSubAgent cache tests failing due to missing time import</issue>
       <solution>Added import time to test file and initialized _schema_cache_timestamps</solution>
     </learning>
-
     <learning date="2025-08-14">
       <issue>ActionsSubAgent tests failing due to state validation</issue>
       <solution>Use real DeepAgentState objects instead of MagicMock for state</solution>
     </learning>
-
     <learning date="2025-08-14">
       <issue>Test files exceeding 450-line limit</issue>
       <solution>Split tests into focused groups, extract common setup to fixtures</solution>
     </learning>
   </learnings>
-
   <metrics>
     <metric name="Total Tests">97</metric>
     <metric name="Coverage Target">80%</metric>

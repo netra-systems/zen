@@ -1,13 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.483639</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.483639">
+      <reasons>
+        <reason>Content contains: DEPRECATED</reason>
+        <reason>Content contains: deprecated</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <name>GitHub Code Analysis Agent</name>
   <version>1.0.0</version>
   <description>
     Agent for analyzing GitHub repositories to map AI/LLM operations, configurations, and usage patterns.
     Creates comprehensive maps of AI infrastructure within codebases.
   </description>
-
-  <!-- INTEGRATION WITH EXISTING SYSTEM -->
   <system_integration>
     <supervisor_integration>
       <description>Operates under supervisor agent control</description>
@@ -15,13 +22,11 @@
       <error_handling>Integrates with triage_sub_agent for error recovery</error_handling>
       <compensation>Uses existing compensation_engine for rollback operations</compensation>
     </supervisor_integration>
-    
     <data_flow>
       <input>Repository URL or local path from corpus_service</input>
       <processing>Leverages data_sub_agent patterns for data processing</processing>
       <output>Structured AI operations map to database via existing models</output>
     </data_flow>
-    
     <shared_components>
       <llm_integration>Uses app.llm.fallback_handler for resilient LLM calls</llm_integration>
       <database>Uses existing session_manager and query patterns</database>
@@ -29,8 +34,6 @@
       <websocket>Reports progress via existing WebSocket infrastructure</websocket>
     </shared_components>
   </system_integration>
-
-  <!-- AGENT ARCHITECTURE -->
   <architecture>
     <module_structure>
       <base_path>app/agents/github_analyzer/</base_path>
@@ -45,14 +48,11 @@
         <module name="github_client.py" max_lines="300">GitHub API integration</module>
       </modules>
     </module_structure>
-    
     <function_constraints>
       <max_lines_per_function>8</max_lines_per_function>
       <composition>Small functions composed into larger operations</composition>
     </function_constraints>
   </architecture>
-
-  <!-- AI OPERATION DETECTION PATTERNS -->
   <detection_patterns>
     <llm_providers>
       <openai>
@@ -64,7 +64,6 @@
         </patterns>
         <config_keys>temperature, max_tokens, top_p, frequency_penalty</config_keys>
       </openai>
-      
       <anthropic>
         <patterns>
           <pattern>anthropic\.Client</pattern>
@@ -73,7 +72,6 @@
         </patterns>
         <config_keys>max_tokens_to_sample, temperature, top_k, top_p</config_keys>
       </anthropic>
-      
       <langchain>
         <patterns>
           <pattern>from langchain</pattern>
@@ -83,7 +81,6 @@
         <config_keys>memory, callbacks, verbose</config_keys>
       </langchain>
     </llm_providers>
-    
     <agent_frameworks>
       <autogen>
         <patterns>
@@ -91,14 +88,12 @@
           <pattern>ConversableAgent</pattern>
         </patterns>
       </autogen>
-      
       <crewai>
         <patterns>
           <pattern>from crewai</pattern>
           <pattern>Agent\(|Task\(|Crew\(</pattern>
         </patterns>
       </crewai>
-      
       <custom_agents>
         <patterns>
           <pattern>class \w+Agent</pattern>
@@ -106,7 +101,6 @@
         </patterns>
       </custom_agents>
     </agent_frameworks>
-    
     <tool_usage>
       <function_calling>
         <patterns>
@@ -114,7 +108,6 @@
           <pattern>function_call|tool_calls</pattern>
         </patterns>
       </function_calling>
-      
       <retrieval>
         <patterns>
           <pattern>VectorStore|Embeddings</pattern>
@@ -123,8 +116,6 @@
       </retrieval>
     </tool_usage>
   </detection_patterns>
-
-  <!-- OUTPUT SCHEMA -->
   <output_schema>
     <ai_operations_map>
       <repository_info>
@@ -133,7 +124,6 @@
         <commit_hash>string</commit_hash>
         <analyzed_at>datetime</analyzed_at>
       </repository_info>
-      
       <ai_infrastructure>
         <llm_endpoints>
           <endpoint>
@@ -144,7 +134,6 @@
             <configuration>dict</configuration>
           </endpoint>
         </llm_endpoints>
-        
         <agents>
           <agent>
             <name>string</name>
@@ -154,7 +143,6 @@
             <dependencies>list[string]</dependencies>
           </agent>
         </agents>
-        
         <prompts>
           <prompt>
             <file_path>string</file_path>
@@ -163,7 +151,6 @@
             <content_preview>string</content_preview>
           </prompt>
         </prompts>
-        
         <configurations>
           <config>
             <file_path>string</file_path>
@@ -172,7 +159,6 @@
           </config>
         </configurations>
       </ai_infrastructure>
-      
       <metrics>
         <total_llm_calls>int</total_llm_calls>
         <unique_models>list[string]</unique_models>
@@ -182,44 +168,36 @@
       </metrics>
     </ai_operations_map>
   </output_schema>
-
-  <!-- AGENT CAPABILITIES -->
   <capabilities>
     <file_operations>
       <search>Recursive file search with pattern matching</search>
       <parse>Multi-language parsing (Python, JS, TS, Go, Java)</parse>
       <cache>Intelligent caching of analyzed results</cache>
     </file_operations>
-    
     <analysis_features>
       <dependency_tracking>Track AI library dependencies</dependency_tracking>
       <cost_estimation>Estimate token usage and costs</cost_estimation>
       <security_scanning>Identify exposed API keys</security_scanning>
       <best_practices>Check against AI coding standards</best_practices>
     </analysis_features>
-    
     <reporting>
       <formats>JSON, Markdown, HTML</formats>
       <visualizations>Dependency graphs, usage heatmaps</visualizations>
       <alerts>Security issues, deprecated patterns</alerts>
     </reporting>
   </capabilities>
-
-  <!-- PERFORMANCE REQUIREMENTS -->
   <performance>
     <repository_size_limits>
       <small>Up to 100 files - complete scan</small>
       <medium>100-1000 files - targeted scan</medium>
       <large>1000+ files - sampling strategy</large>
     </repository_size_limits>
-    
     <scanning_strategy>
       <prioritization>
         <high>Known AI directories (agents/, llm/, ai/)</high>
         <medium>Configuration files</medium>
         <low>Test files, documentation</low>
       </prioritization>
-      
       <optimization>
         <parallel_processing>Use asyncio for concurrent file analysis</parallel_processing>
         <early_termination>Stop on resource limits</early_termination>
@@ -227,64 +205,51 @@
       </optimization>
     </scanning_strategy>
   </performance>
-
-  <!-- ERROR HANDLING -->
   <error_handling>
     <integration>
       <triage_agent>Delegate complex errors to triage_sub_agent</triage_agent>
       <recovery>Use agent_recovery_strategies for resilience</recovery>
       <compensation>Rollback partial analyses on failure</compensation>
     </integration>
-    
     <specific_errors>
       <rate_limits>Implement exponential backoff</rate_limits>
       <parse_errors>Log and continue with next file</parse_errors>
       <access_denied>Report in output, continue scan</access_denied>
     </specific_errors>
   </error_handling>
-
-  <!-- TESTING REQUIREMENTS -->
   <testing>
     <unit_tests>
       <coverage>Minimum 80% for all modules</coverage>
       <mock_repositories>Test against synthetic codebases</mock_repositories>
       <pattern_validation>Test all detection patterns</pattern_validation>
     </unit_tests>
-    
     <integration_tests>
       <supervisor_communication>Test state updates</supervisor_communication>
       <database_operations>Test map storage and retrieval</database_operations>
       <websocket_updates>Test progress reporting</websocket_updates>
     </integration_tests>
-    
     <e2e_tests>
       <real_repositories>Test against known AI projects</real_repositories>
       <performance_benchmarks>Measure scan times</performance_benchmarks>
       <accuracy_validation>Verify detection accuracy</accuracy_validation>
     </e2e_tests>
   </testing>
-
-  <!-- DEPLOYMENT -->
   <deployment>
     <routes>
       <analyze>/api/github/analyze</analyze>
       <status>/api/github/analysis/{id}/status</status>
       <results>/api/github/analysis/{id}/results</results>
     </routes>
-    
     <permissions>
       <required>corpus_admin role for analysis initiation</required>
       <public>Read-only access to completed analyses</public>
     </permissions>
-    
     <monitoring>
       <metrics>Scan duration, files processed, patterns detected</metrics>
       <alerts>Failed scans, security issues found</alerts>
       <dashboards>Analysis trends, popular patterns</dashboards>
     </monitoring>
   </deployment>
-
-  <!-- FUTURE ENHANCEMENTS -->
   <future_enhancements>
     <ml_classification>Use ML to classify AI usage patterns</ml_classification>
     <recommendation_engine>Suggest AI improvements</recommendation_engine>

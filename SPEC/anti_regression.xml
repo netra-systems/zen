@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>Development.AntiRegressionProtocol</name>
     <type>InstructionSet</type>
     <version>2.0.0</version>
     <description>Critical instructions for AI agents to prevent the reintroduction of known bugs.</description>
+    <last_edited>2025-08-21T08:47:28.359941</last_edited>
   </metadata>
-
   <core-directives>
     <directive id="AR-D1">
       <title>Prioritize Clarity Over Assumption</title>
@@ -17,7 +17,6 @@
       <instruction>Do not modify existing, functional code unless explicitly requested or required for compliance (e.g., 300/8 rule). Unsolicited refactoring is forbidden.</instruction>
     </directive>
   </core-directives>
-
   <known-regression-patterns>
     <pattern id="KRP-001" context="Frontend/Zustand">
       <name>Zustand Selector Infinite Loop</name>
@@ -26,7 +25,6 @@
         <step>NEVER return a newly created object from a selector.</step>
       </prevention-protocol>
     </pattern>
-
     <pattern id="KRP-002" context="Project Structure">
       <name>Unnecessary File Proliferation</name>
       <prevention-protocol>
@@ -34,7 +32,6 @@
         <step>Do not create new documentation (.md) or example files unless explicitly requested.</step>
       </prevention-protocol>
     </pattern>
-
     <pattern id="KRP-004" context="Testing">
       <name>Test Suite Corruption</name>
       <prevention-protocol>
@@ -42,7 +39,6 @@
         <step>Fix the System Under Test (SUT), not the test.</step>
       </prevention-protocol>
     </pattern>
-
     <pattern id="KRP-005" context="Backend/ClickHouse">
       <name>ClickHouse Array Syntax Error</name>
       <prevention-protocol>
@@ -51,8 +47,7 @@
         <step>MANDATORY: Preserve exact casing of ClickHouse functions. Do not lowercase queries.</step>
       </prevention-protocol>
     </pattern>
-
-     <pattern id="KRP-006" context="Frontend/React">
+    <pattern id="KRP-006" context="Frontend/React">
       <name>React Key Instability</name>
       <prevention-protocol>
         <step>Use stable, unique identifiers or `generateUniqueId()` from `@/lib/utils`.</step>
@@ -60,7 +55,6 @@
       </prevention-protocol>
     </pattern>
   </known-regression-patterns>
-
   <ambiguity-resolution-protocol>
     <title>Handling Ambiguous Prompts</title>
     <scenario keyword="refactor, improve, optimize">

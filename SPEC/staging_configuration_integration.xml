@@ -1,279 +1,249 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Staging Configuration Integration Requirements</name>
-        <type>integration_testing</type>
-        <version>1.0</version>
-        <last_updated>2025-08-20</last_updated>
-        <purpose>Document staging environment configuration flow and required integration tests</purpose>
-        <bvj>
-            <segment>Platform/Internal</segment>
-            <business_goal>Deployment Reliability</business_goal>
-            <value_impact>Reduce staging deployment failures by 90%</value_impact>
-            <strategic_impact>Enable confident production deployments</strategic_impact>
-        </bvj>
-    </metadata>
-    
-    <configuration_flow>
-        <description>
+  <metadata>
+    <name>Staging Configuration Integration Requirements</name>
+    <type>integration_testing</type>
+    <version>1.0</version>
+    <last_updated>2025-08-20</last_updated>
+    <purpose>Document staging environment configuration flow and required integration tests</purpose>
+    <bvj>
+      <segment>Platform/Internal</segment>
+      <business_goal>Deployment Reliability</business_goal>
+      <value_impact>Reduce staging deployment failures by 90%</value_impact>
+      <strategic_impact>Enable confident production deployments</strategic_impact>
+    </bvj>
+    <last_edited>2025-08-21T08:47:28.573624</last_edited>
+  </metadata>
+  <configuration_flow>
+    <description>
             End-to-end flow of configuration from Terraform to runtime in staging environment.
             Critical path that must be validated through integration testing.
         </description>
-        
-        <phase name="terraform_provisioning">
-            <step order="1">Terraform creates GCP infrastructure (Cloud SQL, Cloud Run, etc.)</step>
-            <step order="2">Terraform creates secrets in GCP Secret Manager with specific names</step>
-            <step order="3">Terraform grants IAM permissions to service accounts</step>
-            <outputs>
-                <output>Secret names: jwt-secret, database-url-staging, etc.</output>
-                <output>Service account emails with secretAccessor role</output>
-                <output>Cloud SQL instance connection name</output>
-            </outputs>
-        </phase>
-        
-        <phase name="deployment_configuration">
-            <step order="1">deploy_staging.py builds Docker images</step>
-            <step order="2">Images pushed to Artifact Registry</step>
-            <step order="3">Cloud Run deployment with --set-secrets flags</step>
-            <critical_mapping>
+    <phase name="terraform_provisioning">
+      <step order="1">Terraform creates GCP infrastructure (Cloud SQL, Cloud Run, etc.)</step>
+      <step order="2">Terraform creates secrets in GCP Secret Manager with specific names</step>
+      <step order="3">Terraform grants IAM permissions to service accounts</step>
+      <outputs>
+        <output>Secret names: jwt-secret, database-url-staging, etc.</output>
+        <output>Service account emails with secretAccessor role</output>
+        <output>Cloud SQL instance connection name</output>
+      </outputs>
+    </phase>
+    <phase name="deployment_configuration">
+      <step order="1">deploy_staging.py builds Docker images</step>
+      <step order="2">Images pushed to Artifact Registry</step>
+      <step order="3">Cloud Run deployment with --set-secrets flags</step>
+      <critical_mapping>
                 Secret references must match Terraform-created names exactly
             </critical_mapping>
-        </phase>
-        
-        <phase name="runtime_initialization">
-            <step order="1">Cloud Run starts container with injected secrets</step>
-            <step order="2">Application startup checks detect ENVIRONMENT=staging</step>
-            <step order="3">Secrets loaded from environment variables</step>
-            <step order="4">Database connection established via Cloud SQL proxy</step>
-        </phase>
-    </configuration_flow>
-    
-    <identified_conflicts>
-        <conflict id="C001" severity="CRITICAL">
-            <name>Secret Name Mismatch</name>
-            <description>
+    </phase>
+    <phase name="runtime_initialization">
+      <step order="1">Cloud Run starts container with injected secrets</step>
+      <step order="2">Application startup checks detect ENVIRONMENT=staging</step>
+      <step order="3">Secrets loaded from environment variables</step>
+      <step order="4">Database connection established via Cloud SQL proxy</step>
+    </phase>
+  </configuration_flow>
+  <identified_conflicts>
+    <conflict id="C001" severity="CRITICAL">
+      <name>Secret Name Mismatch</name>
+      <description>
                 Terraform creates secrets with one naming convention while deployment 
                 scripts expect different names
             </description>
-            <examples>
-                <terraform_creates>jwt-secret</terraform_creates>
-                <deployment_expects>jwt-secret-staging</deployment_expects>
-            </examples>
-            <resolution>Standardize secret naming across Terraform and deployment scripts</resolution>
-        </conflict>
-        
-        <conflict id="C002" severity="HIGH">
-            <name>Database URL Format Inconsistency</name>
-            <description>
+      <examples>
+        <terraform_creates>jwt-secret</terraform_creates>
+        <deployment_expects>jwt-secret-staging</deployment_expects>
+      </examples>
+      <resolution>Standardize secret naming across Terraform and deployment scripts</resolution>
+    </conflict>
+    <conflict id="C002" severity="HIGH">
+      <name>Database URL Format Inconsistency</name>
+      <description>
                 Multiple formats for DATABASE_URL across different contexts
             </description>
-            <formats>
-                <terraform>postgresql://user:pass@host:5432/db</terraform>
-                <cloud_sql>postgresql://user:pass@/db?host=/cloudsql/instance</cloud_sql>
-                <local>postgresql://user:pass@localhost:5432/db</local>
-            </formats>
-            <resolution>Use environment-aware connection string builder</resolution>
-        </conflict>
-        
-        <conflict id="C003" severity="HIGH">
-            <name>Service Account Permission Gaps</name>
-            <description>
+      <formats>
+        <terraform>postgresql://user:pass@host:5432/db</terraform>
+        <cloud_sql>postgresql://user:pass@/db?host=/cloudsql/instance</cloud_sql>
+        <local>postgresql://user:pass@localhost:5432/db</local>
+      </formats>
+      <resolution>Use environment-aware connection string builder</resolution>
+    </conflict>
+    <conflict id="C003" severity="HIGH">
+      <name>Service Account Permission Gaps</name>
+      <description>
                 Service accounts may lack necessary permissions for secret access
             </description>
-            <required_roles>
-                <role>roles/secretmanager.secretAccessor</role>
-                <role>roles/cloudsql.client</role>
-            </required_roles>
-            <resolution>Verify IAM bindings in Terraform match deployment requirements</resolution>
-        </conflict>
-        
-        <conflict id="C004" severity="MEDIUM">
-            <name>Environment Detection Ambiguity</name>
-            <description>
+      <required_roles>
+        <role>roles/secretmanager.secretAccessor</role>
+        <role>roles/cloudsql.client</role>
+      </required_roles>
+      <resolution>Verify IAM bindings in Terraform match deployment requirements</resolution>
+    </conflict>
+    <conflict id="C004" severity="MEDIUM">
+      <name>Environment Detection Ambiguity</name>
+      <description>
                 Multiple ways to detect staging environment causing inconsistency
             </description>
-            <detection_methods>
-                <method>ENVIRONMENT=staging</method>
-                <method>K_SERVICE (Cloud Run indicator)</method>
-                <method>GCP_PROJECT_ID=netra-staging</method>
-            </detection_methods>
-            <resolution>Implement canonical environment detection function</resolution>
-        </conflict>
-    </identified_conflicts>
-    
-    <required_integration_tests>
-        <test_category name="secret_management" realism="L3-L4">
-            <test name="test_staging_secret_manager_integration" priority="1">
-                <description>Verify all required secrets exist and are accessible</description>
-                <validates>Secret creation, naming, and permissions</validates>
-                <coverage_gap>Currently no tests verify secret manager integration</coverage_gap>
-            </test>
-            
-            <test name="test_terraform_to_deployment_consistency" priority="2">
-                <description>Ensure Terraform outputs match deployment expectations</description>
-                <validates>Configuration consistency across tools</validates>
-                <coverage_gap>No validation of Terraform/deployment alignment</coverage_gap>
-            </test>
-            
-            <test name="test_environment_variable_precedence" priority="5">
-                <description>Test configuration source precedence and fallbacks</description>
-                <validates>Config resolution order</validates>
-                <coverage_gap>Precedence rules not tested</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="database_connectivity" realism="L4">
-            <test name="test_cloud_sql_proxy_initialization" priority="3">
-                <description>Test Cloud SQL connection via proxy sidecar</description>
-                <validates>Database connectivity in Cloud Run</validates>
-                <coverage_gap>No Cloud SQL proxy tests exist</coverage_gap>
-            </test>
-            
-            <test name="test_database_migration_in_staging" priority="8">
-                <description>Test Alembic migrations against Cloud SQL</description>
-                <validates>Schema management in staging</validates>
-                <coverage_gap>Migration testing only covers local databases</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="service_startup" realism="L4">
-            <test name="test_staging_startup_with_real_secrets" priority="4">
-                <description>Full startup sequence with GCP secrets</description>
-                <validates>Complete initialization flow</validates>
-                <coverage_gap>Startup tests use mocked secrets</coverage_gap>
-            </test>
-            
-            <test name="test_staging_health_check_endpoints" priority="9">
-                <description>Health checks with all dependencies</description>
-                <validates>Service readiness detection</validates>
-                <coverage_gap>Health checks not tested in staging config</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="multi_service_coordination" realism="L4">
-            <test name="test_multi_service_secret_sharing" priority="6">
-                <description>Cross-service authentication with shared secrets</description>
-                <validates>Service-to-service auth</validates>
-                <coverage_gap>No multi-service secret tests</coverage_gap>
-            </test>
-            
-            <test name="test_staging_cors_configuration" priority="11">
-                <description>CORS with staging URLs</description>
-                <validates>Cross-origin request handling</validates>
-                <coverage_gap>CORS only tested with localhost</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="external_dependencies" realism="L4">
-            <test name="test_staging_redis_connection_lifecycle" priority="7">
-                <description>Redis connectivity and session management</description>
-                <validates>Cache layer integration</validates>
-                <coverage_gap>Redis tests use local instance only</coverage_gap>
-            </test>
-            
-            <test name="test_staging_llm_api_integration" priority="12">
-                <description>Gemini API with staging credentials</description>
-                <validates>LLM service integration</validates>
-                <coverage_gap>LLM tests use mocks exclusively</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="deployment_operations" realism="L4">
-            <test name="test_staging_deployment_rollback" priority="13">
-                <description>Blue-green deployment and rollback</description>
-                <validates>Deployment safety</validates>
-                <coverage_gap>No deployment operation tests</coverage_gap>
-            </test>
-            
-            <test name="test_staging_resource_limits_enforcement" priority="15">
-                <description>CPU/memory limits and scaling</description>
-                <validates>Resource management</validates>
-                <coverage_gap>Resource limits not tested</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="networking" realism="L4">
-            <test name="test_staging_websocket_with_load_balancer" priority="10">
-                <description>WebSocket through Cloud Run ingress</description>
-                <validates>Real-time communication</validates>
-                <coverage_gap>WebSocket tests assume direct connection</coverage_gap>
-            </test>
-        </test_category>
-        
-        <test_category name="observability" realism="L4">
-            <test name="test_staging_observability_pipeline" priority="14">
-                <description>Logging, metrics, and tracing integration</description>
-                <validates>Monitoring capabilities</validates>
-                <coverage_gap>No observability integration tests</coverage_gap>
-            </test>
-        </test_category>
-    </required_integration_tests>
-    
-    <test_implementation_strategy>
-        <approach>
-            <principle>Test the actual staging configuration, not mocks</principle>
-            <principle>Use L3/L4 realism levels per testing.xml</principle>
-            <principle>Validate end-to-end flows, not just components</principle>
-        </approach>
-        
-        <test_environment_setup>
-            <requirement>Access to netra-staging GCP project</requirement>
-            <requirement>Service account with appropriate permissions</requirement>
-            <requirement>Isolated test namespace/database</requirement>
-        </test_environment_setup>
-        
-        <execution_strategy>
-            <phase name="pre_deployment">
+      <detection_methods>
+        <method>ENVIRONMENT=staging</method>
+        <method>K_SERVICE (Cloud Run indicator)</method>
+        <method>GCP_PROJECT_ID=netra-staging</method>
+      </detection_methods>
+      <resolution>Implement canonical environment detection function</resolution>
+    </conflict>
+  </identified_conflicts>
+  <required_integration_tests>
+    <test_category name="secret_management" realism="L3-L4">
+      <test name="test_staging_secret_manager_integration" priority="1">
+        <description>Verify all required secrets exist and are accessible</description>
+        <validates>Secret creation, naming, and permissions</validates>
+        <coverage_gap>Currently no tests verify secret manager integration</coverage_gap>
+      </test>
+      <test name="test_terraform_to_deployment_consistency" priority="2">
+        <description>Ensure Terraform outputs match deployment expectations</description>
+        <validates>Configuration consistency across tools</validates>
+        <coverage_gap>No validation of Terraform/deployment alignment</coverage_gap>
+      </test>
+      <test name="test_environment_variable_precedence" priority="5">
+        <description>Test configuration source precedence and fallbacks</description>
+        <validates>Config resolution order</validates>
+        <coverage_gap>Precedence rules not tested</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="database_connectivity" realism="L4">
+      <test name="test_cloud_sql_proxy_initialization" priority="3">
+        <description>Test Cloud SQL connection via proxy sidecar</description>
+        <validates>Database connectivity in Cloud Run</validates>
+        <coverage_gap>No Cloud SQL proxy tests exist</coverage_gap>
+      </test>
+      <test name="test_database_migration_in_staging" priority="8">
+        <description>Test Alembic migrations against Cloud SQL</description>
+        <validates>Schema management in staging</validates>
+        <coverage_gap>Migration testing only covers local databases</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="service_startup" realism="L4">
+      <test name="test_staging_startup_with_real_secrets" priority="4">
+        <description>Full startup sequence with GCP secrets</description>
+        <validates>Complete initialization flow</validates>
+        <coverage_gap>Startup tests use mocked secrets</coverage_gap>
+      </test>
+      <test name="test_staging_health_check_endpoints" priority="9">
+        <description>Health checks with all dependencies</description>
+        <validates>Service readiness detection</validates>
+        <coverage_gap>Health checks not tested in staging config</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="multi_service_coordination" realism="L4">
+      <test name="test_multi_service_secret_sharing" priority="6">
+        <description>Cross-service authentication with shared secrets</description>
+        <validates>Service-to-service auth</validates>
+        <coverage_gap>No multi-service secret tests</coverage_gap>
+      </test>
+      <test name="test_staging_cors_configuration" priority="11">
+        <description>CORS with staging URLs</description>
+        <validates>Cross-origin request handling</validates>
+        <coverage_gap>CORS only tested with localhost</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="external_dependencies" realism="L4">
+      <test name="test_staging_redis_connection_lifecycle" priority="7">
+        <description>Redis connectivity and session management</description>
+        <validates>Cache layer integration</validates>
+        <coverage_gap>Redis tests use local instance only</coverage_gap>
+      </test>
+      <test name="test_staging_llm_api_integration" priority="12">
+        <description>Gemini API with staging credentials</description>
+        <validates>LLM service integration</validates>
+        <coverage_gap>LLM tests use mocks exclusively</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="deployment_operations" realism="L4">
+      <test name="test_staging_deployment_rollback" priority="13">
+        <description>Blue-green deployment and rollback</description>
+        <validates>Deployment safety</validates>
+        <coverage_gap>No deployment operation tests</coverage_gap>
+      </test>
+      <test name="test_staging_resource_limits_enforcement" priority="15">
+        <description>CPU/memory limits and scaling</description>
+        <validates>Resource management</validates>
+        <coverage_gap>Resource limits not tested</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="networking" realism="L4">
+      <test name="test_staging_websocket_with_load_balancer" priority="10">
+        <description>WebSocket through Cloud Run ingress</description>
+        <validates>Real-time communication</validates>
+        <coverage_gap>WebSocket tests assume direct connection</coverage_gap>
+      </test>
+    </test_category>
+    <test_category name="observability" realism="L4">
+      <test name="test_staging_observability_pipeline" priority="14">
+        <description>Logging, metrics, and tracing integration</description>
+        <validates>Monitoring capabilities</validates>
+        <coverage_gap>No observability integration tests</coverage_gap>
+      </test>
+    </test_category>
+  </required_integration_tests>
+  <test_implementation_strategy>
+    <approach>
+      <principle>Test the actual staging configuration, not mocks</principle>
+      <principle>Use L3/L4 realism levels per testing.xml</principle>
+      <principle>Validate end-to-end flows, not just components</principle>
+    </approach>
+    <test_environment_setup>
+      <requirement>Access to netra-staging GCP project</requirement>
+      <requirement>Service account with appropriate permissions</requirement>
+      <requirement>Isolated test namespace/database</requirement>
+    </test_environment_setup>
+    <execution_strategy>
+      <phase name="pre_deployment">
                 Run tests 1-5 before deployment to validate configuration
             </phase>
-            <phase name="post_deployment">
+      <phase name="post_deployment">
                 Run tests 6-15 after deployment to validate runtime behavior
             </phase>
-            <phase name="continuous">
+      <phase name="continuous">
                 Run all tests in CI/CD pipeline for staging deployments
             </phase>
-        </execution_strategy>
-    </test_implementation_strategy>
-    
-    <resolution_actions>
-        <action priority="1">
-            <description>Create configuration validation script</description>
-            <details>
+    </execution_strategy>
+  </test_implementation_strategy>
+  <resolution_actions>
+    <action priority="1">
+      <description>Create configuration validation script</description>
+      <details>
                 Script to compare Terraform outputs with deployment script expectations
                 and identify mismatches before deployment
             </details>
-        </action>
-        
-        <action priority="2">
-            <description>Implement integration test suite</description>
-            <details>
+    </action>
+    <action priority="2">
+      <description>Implement integration test suite</description>
+      <details>
                 Create the 15 identified tests using real staging environment
                 with proper L3/L4 realism levels
             </details>
-        </action>
-        
-        <action priority="3">
-            <description>Standardize secret naming convention</description>
-            <details>
+    </action>
+    <action priority="3">
+      <description>Standardize secret naming convention</description>
+      <details>
                 Update either Terraform or deployment scripts to use
                 consistent secret names
             </details>
-        </action>
-        
-        <action priority="4">
-            <description>Document configuration flow</description>
-            <details>
+    </action>
+    <action priority="4">
+      <description>Document configuration flow</description>
+      <details>
                 Create comprehensive documentation of the configuration
                 pipeline from Terraform to runtime
             </details>
-        </action>
-    </resolution_actions>
-    
-    <references>
-        <reference>SPEC/testing.xml - Mock-Real Spectrum definitions</reference>
-        <reference>SPEC/coverage_requirements.xml - Integration test requirements</reference>
-        <reference>SPEC/staging_environment.xml - Staging architecture</reference>
-        <reference>terraform-gcp/main.tf - Infrastructure definitions</reference>
-        <reference>organized_root/deployment_configs/deploy_staging.py - Deployment script</reference>
-    </references>
+    </action>
+  </resolution_actions>
+  <references>
+    <reference>SPEC/testing.xml - Mock-Real Spectrum definitions</reference>
+    <reference>SPEC/coverage_requirements.xml - Integration test requirements</reference>
+    <reference>SPEC/staging_environment.xml - Staging architecture</reference>
+    <reference>terraform-gcp/main.tf - Infrastructure definitions</reference>
+    <reference>organized_root/deployment_configs/deploy_staging.py - Deployment script</reference>
+  </references>
 </specification>

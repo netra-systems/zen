@@ -1,59 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Services</name>
-        <type>services</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-spec>
-        <description>Services Specification</description>
-        <goals>
-            <goal priority="high">Services working as a complete end to end system</goal>
-            <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
-        </goals>
-    </primary-spec>
-    
-    <sections>
-        <section id="structure" order="1">
-            <title>Structure</title>
-            <requirements>
-                <requirement>Services contain the business logic of the application</requirement>
-                <requirement>Services are organized by domain</requirement>
-                <requirement>Services are defined in app/services</requirement>
-            </requirements>
-        </section>
-        
-        <section id="dependencies" order="2">
-            <title>Dependencies</title>
-            <requirements>
-                <requirement>Services declare their dependencies</requirement>
-                <requirement>Dependencies are injected using a dependency injection framework</requirement>
-                <requirement>Services are easily testable</requirement>
-                <requirement priority="critical">LLMManager MUST be injected using Depends(get_llm_manager) from app.dependencies, NOT Depends(LLMManager)</requirement>
-                <requirement priority="critical">All singleton services (LLMManager, SecurityService, etc.) MUST be retrieved from app.state via dependency functions, not instantiated directly</requirement>
-                <requirement>Dependency providers should be defined in app/dependencies.py for reusability</requirement>
-            </requirements>
-            <common-issues>
-                <issue>
-                    <problem>Using Depends(LLMManager) instead of Depends(get_llm_manager)</problem>
-                    <symptom>API keys missing, "API key for provider 'google' is missing" error</symptom>
-                    <solution>Always use dependency provider functions that retrieve from app.state</solution>
-                    <example>
-                        <incorrect>llm_manager: LLMManager = Depends(LLMManager)</incorrect>
-                        <correct>llm_manager: LLMManager = Depends(get_llm_manager)</correct>
-                    </example>
-                </issue>
-            </common-issues>
-        </section>
-        
-        <section id="error-handling" order="3">
-            <title>Error Handling</title>
-            <requirements>
-                <requirement>Services handle errors gracefully</requirement>
-                <requirement>Custom exceptions are used to indicate specific errors</requirement>
-                <requirement>Errors are logged and monitored</requirement>
-            </requirements>
-        </section>
-    </sections>
+  <metadata>
+    <name>Services</name>
+    <type>services</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.569626</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.569626">
+      <reasons>
+        <reason>Likely outdated spec: services.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary-spec>
+    <description>Services Specification</description>
+    <goals>
+      <goal priority="high">Services working as a complete end to end system</goal>
+      <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
+    </goals>
+  </primary-spec>
+  <sections>
+    <section id="structure" order="1">
+      <title>Structure</title>
+      <requirements>
+        <requirement>Services contain the business logic of the application</requirement>
+        <requirement>Services are organized by domain</requirement>
+        <requirement>Services are defined in app/services</requirement>
+      </requirements>
+    </section>
+    <section id="dependencies" order="2">
+      <title>Dependencies</title>
+      <requirements>
+        <requirement>Services declare their dependencies</requirement>
+        <requirement>Dependencies are injected using a dependency injection framework</requirement>
+        <requirement>Services are easily testable</requirement>
+        <requirement priority="critical">LLMManager MUST be injected using Depends(get_llm_manager) from app.dependencies, NOT Depends(LLMManager)</requirement>
+        <requirement priority="critical">All singleton services (LLMManager, SecurityService, etc.) MUST be retrieved from app.state via dependency functions, not instantiated directly</requirement>
+        <requirement>Dependency providers should be defined in app/dependencies.py for reusability</requirement>
+      </requirements>
+      <common-issues>
+        <issue>
+          <problem>Using Depends(LLMManager) instead of Depends(get_llm_manager)</problem>
+          <symptom>API keys missing, "API key for provider 'google' is missing" error</symptom>
+          <solution>Always use dependency provider functions that retrieve from app.state</solution>
+          <example>
+            <incorrect>llm_manager: LLMManager = Depends(LLMManager)</incorrect>
+            <correct>llm_manager: LLMManager = Depends(get_llm_manager)</correct>
+          </example>
+        </issue>
+      </common-issues>
+    </section>
+    <section id="error-handling" order="3">
+      <title>Error Handling</title>
+      <requirements>
+        <requirement>Services handle errors gracefully</requirement>
+        <requirement>Custom exceptions are used to indicate specific errors</requirement>
+        <requirement>Errors are logged and monitored</requirement>
+      </requirements>
+    </section>
+  </sections>
 </specification>

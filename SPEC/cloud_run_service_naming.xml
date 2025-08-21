@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.391463</last_edited>
+  </metadata>
   <title>Cloud Run Service Naming Convention - CRITICAL</title>
   <version>1.0.0</version>
   <created>2025-08-18</created>
   <priority>CRITICAL</priority>
-  
   <overview>
     <description>
       MANDATORY naming convention for Cloud Run services to ensure proper domain mapping.
@@ -15,7 +17,6 @@
       Using incorrect names will break staging/production domain routing.
     </importance>
   </overview>
-
   <service_names>
     <staging>
       <service name="backend">
@@ -24,14 +25,12 @@
         <description>Backend API service for staging environment</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
-      
       <service name="frontend">
         <exact_name>netra-frontend-staging</exact_name>
         <domain>app.staging.netrasystems.ai</domain>
         <description>Frontend web application for staging</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
-      
       <service name="auth">
         <exact_name>netra-auth-service</exact_name>
         <domain>auth.staging.netrasystems.ai</domain>
@@ -39,7 +38,6 @@
         <critical>YES - Must match exactly for auth subdomain</critical>
       </service>
     </staging>
-    
     <production>
       <service name="backend">
         <exact_name>netra-backend-prod</exact_name>
@@ -47,14 +45,12 @@
         <description>Backend API service for production</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
-      
       <service name="frontend">
         <exact_name>netra-frontend-prod</exact_name>
         <domain>app.netrasystems.ai</domain>
         <description>Frontend web application for production</description>
         <critical>YES - Must match exactly for domain mapping</critical>
       </service>
-      
       <service name="auth">
         <exact_name>netra-auth-service</exact_name>
         <domain>auth.netrasystems.ai</domain>
@@ -63,7 +59,6 @@
       </service>
     </production>
   </service_names>
-
   <enforcement_rules>
     <rule id="1">
       <description>ALL deployment scripts MUST use these exact names</description>
@@ -74,15 +69,13 @@
         - config/cloudbuild*.yaml
       </files>
     </rule>
-    
     <rule id="2">
       <description>Docker image tags should match service names</description>
       <example>
         us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:staging
-        -> Deploys to service: netra-backend-staging
+        -&gt; Deploys to service: netra-backend-staging
       </example>
     </rule>
-    
     <rule id="3">
       <description>Environment variables must reference correct service URLs</description>
       <example>
@@ -93,27 +86,23 @@
       </example>
     </rule>
   </enforcement_rules>
-
   <common_mistakes>
     <mistake>
       <wrong>netra-backend</wrong>
       <correct>netra-backend-staging</correct>
       <impact>Domain api.staging.netrasystems.ai will not route correctly</impact>
     </mistake>
-    
     <mistake>
       <wrong>netra-frontend</wrong>
       <correct>netra-frontend-staging</correct>
       <impact>Domain app.staging.netrasystems.ai will not route correctly</impact>
     </mistake>
-    
     <mistake>
       <wrong>netra-auth-staging</wrong>
       <correct>netra-auth-service</correct>
       <impact>Auth service name is consistent across environments</impact>
     </mistake>
   </common_mistakes>
-
   <deployment_commands>
     <staging>
       <backend>
@@ -123,7 +112,6 @@
           --region us-central1 \
           --project netra-staging
       </backend>
-      
       <frontend>
         gcloud run deploy netra-frontend-staging \
           --image us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:staging \
@@ -131,7 +119,6 @@
           --region us-central1 \
           --project netra-staging
       </frontend>
-      
       <auth>
         gcloud run deploy netra-auth-service \
           --image us-central1-docker.pkg.dev/netra-staging/netra-containers/auth:staging \
@@ -141,7 +128,6 @@
       </auth>
     </staging>
   </deployment_commands>
-
   <verification>
     <command>
       gcloud run services list --platform managed --region us-central1 --project netra-staging

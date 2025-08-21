@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.048095</last_edited>
+  </metadata>
   <title>Database URL Consistency Between Services</title>
   <date>2025-08-20</date>
   <severity>CRITICAL</severity>
@@ -8,7 +11,6 @@
     When using Cloud SQL proxy, the URL must use Unix socket format, not direct IP.
     Invalid IP addresses in secrets cause connection timeouts.
   </summary>
-  
   <issue_discovery>
     <symptom>Auth service fails with database connection timeout</symptom>
     <initial_assumption>Auth service was getting different DATABASE_URL than backend</initial_assumption>
@@ -20,14 +22,12 @@
       <step>Listed Cloud SQL instances - IP doesn't match any instance</step>
     </discovery_method>
   </issue_discovery>
-  
   <root_cause_analysis>
     <database_secret_issue>
       <secret_name>database-url-staging</secret_name>
       <incorrect_value>postgresql://netra:test-password@34.68.229.240:5432/netra_staging?sslmode=require</incorrect_value>
       <problem>IP address 34.68.229.240 doesn't belong to any Cloud SQL instance</problem>
     </database_secret_issue>
-    
     <actual_instances>
       <instance>
         <name>netra-postgres-2db4ccab</name>
@@ -40,14 +40,12 @@
         <connection_name>netra-staging:us-central1:staging-shared-postgres</connection_name>
       </instance>
     </actual_instances>
-    
     <cloud_sql_proxy_configuration>
       <service>netra-auth-service</service>
       <cloudsql_instances>netra-staging:us-central1:staging-shared-postgres</cloudsql_instances>
       <required_url_format>Unix socket format for Cloud SQL proxy</required_url_format>
     </cloud_sql_proxy_configuration>
   </root_cause_analysis>
-  
   <correct_configuration>
     <unix_socket_format>
       <description>When using Cloud SQL proxy, use Unix socket format</description>
@@ -59,7 +57,6 @@
         - Automatic authentication via service account
       </benefits>
     </unix_socket_format>
-    
     <direct_ip_format>
       <description>For direct connections without Cloud SQL proxy</description>
       <format>postgresql://user:password@ip:port/database?sslmode=require</format>
@@ -71,7 +68,6 @@
       </requirements>
     </direct_ip_format>
   </correct_configuration>
-  
   <service_configuration_consistency>
     <principle>All services must use the same database configuration approach</principle>
     <backend_service>
@@ -84,7 +80,6 @@
       <must_use>Unix socket format</must_use>
     </auth_service>
   </service_configuration_consistency>
-  
   <best_practices>
     <practice priority="1">
       <title>Use Cloud SQL proxy for all services</title>
@@ -93,7 +88,6 @@
         Use Unix socket format in DATABASE_URL for consistency.
       </description>
     </practice>
-    
     <practice priority="2">
       <title>Validate database URLs before deployment</title>
       <description>
@@ -101,7 +95,6 @@
         Verify Unix socket paths match configured Cloud SQL instances.
       </description>
     </practice>
-    
     <practice priority="3">
       <title>Single source of truth for database configuration</title>
       <description>
@@ -109,7 +102,6 @@
         Update all services when changing database configuration.
       </description>
     </practice>
-    
     <practice priority="4">
       <title>Document database instances</title>
       <description>
@@ -118,7 +110,6 @@
       </description>
     </practice>
   </best_practices>
-  
   <troubleshooting_guide>
     <issue type="timeout">
       <symptom>Database connection timeout</symptom>
@@ -126,14 +117,12 @@
       <check>Confirm Cloud SQL proxy is running if using Unix socket</check>
       <check>Check network connectivity and firewall rules</check>
     </issue>
-    
     <issue type="authentication">
       <symptom>Authentication failed</symptom>
       <check>Verify username and password are correct</check>
       <check>Check user exists in Cloud SQL instance</check>
       <check>Confirm database name is correct</check>
     </issue>
-    
     <issue type="ssl">
       <symptom>SSL/TLS errors</symptom>
       <check>For asyncpg, use ssl= instead of sslmode=</check>
@@ -141,33 +130,26 @@
       <check>Direct IP connections require sslmode=require</check>
     </issue>
   </troubleshooting_guide>
-  
   <commands>
     <command purpose="List Cloud SQL instances">
       gcloud sql instances list --project=netra-staging
     </command>
-    
     <command purpose="Get instance details">
       gcloud sql instances describe INSTANCE_NAME --project=netra-staging
     </command>
-    
     <command purpose="Check secret value">
       gcloud secrets versions access latest --secret=database-url-staging --project=netra-staging
     </command>
-    
     <command purpose="Update secret">
       echo -n "NEW_URL" | gcloud secrets versions add database-url-staging --data-file=- --project=netra-staging
     </command>
-    
     <command purpose="Check service configuration">
       gcloud run services describe SERVICE_NAME --region=us-central1 --project=netra-staging --format=yaml
     </command>
-    
     <command purpose="Force service restart">
       gcloud run services update SERVICE_NAME --region=us-central1 --project=netra-staging --no-traffic
     </command>
   </commands>
-  
   <action_items>
     <action priority="COMPLETED">
       Updated database-url-staging secret to use Unix socket format

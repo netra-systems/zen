@@ -1,177 +1,161 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
-    <metadata>
-        <name>Real Service Testing Architecture</name>
-        <version>1.0.0</version>
-        <created>2025-01-19</created>
-        <priority>CRITICAL</priority>
-        <business_value>
-            <segment>Platform/Internal</segment>
-            <goal>Development Velocity, System Stability</goal>
-            <impact>Ensures production-quality testing with real services to prevent revenue-impacting bugs</impact>
-        </business_value>
-    </metadata>
-
-    <principles>
-        <principle id="real-first">
-            <name>Real Services Over Mocks</name>
-            <description>Tests should use real services by default for integration and E2E testing</description>
-            <rationale>Mocks can hide integration issues that only appear in production</rationale>
-        </principle>
-        
-        <principle id="dev-launcher-reuse">
-            <name>Dev Launcher Reuse</name>
-            <description>Tests MUST reuse the dev launcher for starting real services</description>
-            <rationale>Single source of truth for service orchestration reduces maintenance</rationale>
-        </principle>
-        
-        <principle id="dynamic-ports">
-            <name>Dynamic Port Allocation</name>
-            <description>Use dynamic ports for parallel test execution</description>
-            <rationale>Enables concurrent test runs without port conflicts</rationale>
-        </principle>
-        
-        <principle id="isolated-environments">
-            <name>Environment Isolation</name>
-            <description>Each test suite gets isolated database and service instances</description>
-            <rationale>Prevents test pollution and ensures reproducibility</rationale>
-        </principle>
-    </principles>
-
-    <architecture>
-        <layer name="Test Runner">
-            <component>test_runner.py</component>
-            <responsibilities>
-                <item>Orchestrate test execution levels</item>
-                <item>Configure real vs mock service modes</item>
-                <item>Handle environment setup/teardown</item>
-            </responsibilities>
-        </layer>
-        
-        <layer name="Service Orchestration">
-            <component>dev_launcher/launcher.py</component>
-            <responsibilities>
-                <item>Start/stop all microservices</item>
-                <item>Health check validation</item>
-                <item>Dynamic port allocation</item>
-                <item>Process lifecycle management</item>
-            </responsibilities>
-        </layer>
-        
-        <layer name="Test Fixtures">
-            <component>tests/unified/real_services_manager.py</component>
-            <responsibilities>
-                <item>Provide pytest fixtures for real services</item>
-                <item>Manage service lifecycle per test session</item>
-                <item>Handle cleanup on failure</item>
-            </responsibilities>
-        </layer>
-        
-        <layer name="Service Clients">
-            <component>tests/unified/real_client_factory.py</component>
-            <responsibilities>
-                <item>Create typed clients for each service</item>
-                <item>Handle authentication flow</item>
-                <item>Provide async/sync interfaces</item>
-            </responsibilities>
-        </layer>
-    </architecture>
-
-    <service_startup_sequence>
-        <step order="1">
-            <name>Environment Preparation</name>
-            <actions>
-                <action>Set TEST_ISOLATION=1</action>
-                <action>Configure test database URLs</action>
-                <action>Set service discovery directory</action>
-            </actions>
-        </step>
-        
-        <step order="2">
-            <name>Database Initialization</name>
-            <actions>
-                <action>Create test database (netra_test)</action>
-                <action>Run migrations</action>
-                <action>Seed test data if needed</action>
-            </actions>
-        </step>
-        
-        <step order="3">
-            <name>Service Launch via Dev Launcher</name>
-            <config>
-                <param name="dynamic_ports">true</param>
-                <param name="test_mode">true</param>
-                <param name="startup_timeout">30</param>
-            </config>
-            <services>
-                <service name="auth" port="dynamic" health_url="/health"/>
-                <service name="backend" port="dynamic" health_url="/health"/>
-                <service name="frontend" port="dynamic" health_url="/" optional="true"/>
-            </services>
-        </step>
-        
-        <step order="4">
-            <name>Service Discovery</name>
-            <actions>
-                <action>Read .service_discovery/*.json files</action>
-                <action>Extract dynamic ports</action>
-                <action>Configure test clients with discovered endpoints</action>
-            </actions>
-        </step>
-        
-        <step order="5">
-            <name>Health Validation</name>
-            <actions>
-                <action>Poll health endpoints until ready</action>
-                <action>Verify WebSocket connectivity</action>
-                <action>Validate database connections</action>
-            </actions>
-        </step>
-    </service_startup_sequence>
-
-    <test_levels>
-        <level name="unit">
-            <real_services>false</real_services>
-            <description>Fast, isolated function tests with mocks</description>
-            <use_cases>
-                <case>Algorithm validation</case>
-                <case>Business logic testing</case>
-                <case>Error handling verification</case>
-            </use_cases>
-        </level>
-        
-        <level name="integration">
-            <real_services>true</real_services>
-            <description>Real service integration without external APIs</description>
-            <use_cases>
-                <case>Service communication testing</case>
-                <case>Database integration</case>
-                <case>WebSocket message flow</case>
-            </use_cases>
-            <configuration>
-                <env>ENABLE_REAL_LLM_TESTING=false</env>
-                <env>USE_REAL_SERVICES=true</env>
-            </configuration>
-        </level>
-        
-        <level name="e2e">
-            <real_services>true</real_services>
-            <description>Full system testing with all real components</description>
-            <use_cases>
-                <case>User journey validation</case>
-                <case>Cross-service workflows</case>
-                <case>Performance testing</case>
-            </use_cases>
-            <configuration>
-                <env>ENABLE_REAL_LLM_TESTING=true</env>
-                <env>USE_REAL_SERVICES=true</env>
-            </configuration>
-        </level>
-    </test_levels>
-
-    <patterns>
-        <pattern name="Real Service Fixture">
-            <code><![CDATA[
+  <metadata>
+    <name>Real Service Testing Architecture</name>
+    <version>1.0.0</version>
+    <created>2025-01-19</created>
+    <priority>CRITICAL</priority>
+    <business_value>
+      <segment>Platform/Internal</segment>
+      <goal>Development Velocity, System Stability</goal>
+      <impact>Ensures production-quality testing with real services to prevent revenue-impacting bugs</impact>
+    </business_value>
+    <last_edited>2025-08-21T08:47:28.566121</last_edited>
+  </metadata>
+  <principles>
+    <principle id="real-first">
+      <name>Real Services Over Mocks</name>
+      <description>Tests should use real services by default for integration and E2E testing</description>
+      <rationale>Mocks can hide integration issues that only appear in production</rationale>
+    </principle>
+    <principle id="dev-launcher-reuse">
+      <name>Dev Launcher Reuse</name>
+      <description>Tests MUST reuse the dev launcher for starting real services</description>
+      <rationale>Single source of truth for service orchestration reduces maintenance</rationale>
+    </principle>
+    <principle id="dynamic-ports">
+      <name>Dynamic Port Allocation</name>
+      <description>Use dynamic ports for parallel test execution</description>
+      <rationale>Enables concurrent test runs without port conflicts</rationale>
+    </principle>
+    <principle id="isolated-environments">
+      <name>Environment Isolation</name>
+      <description>Each test suite gets isolated database and service instances</description>
+      <rationale>Prevents test pollution and ensures reproducibility</rationale>
+    </principle>
+  </principles>
+  <architecture>
+    <layer name="Test Runner">
+      <component>test_runner.py</component>
+      <responsibilities>
+        <item>Orchestrate test execution levels</item>
+        <item>Configure real vs mock service modes</item>
+        <item>Handle environment setup/teardown</item>
+      </responsibilities>
+    </layer>
+    <layer name="Service Orchestration">
+      <component>dev_launcher/launcher.py</component>
+      <responsibilities>
+        <item>Start/stop all microservices</item>
+        <item>Health check validation</item>
+        <item>Dynamic port allocation</item>
+        <item>Process lifecycle management</item>
+      </responsibilities>
+    </layer>
+    <layer name="Test Fixtures">
+      <component>tests/unified/real_services_manager.py</component>
+      <responsibilities>
+        <item>Provide pytest fixtures for real services</item>
+        <item>Manage service lifecycle per test session</item>
+        <item>Handle cleanup on failure</item>
+      </responsibilities>
+    </layer>
+    <layer name="Service Clients">
+      <component>tests/unified/real_client_factory.py</component>
+      <responsibilities>
+        <item>Create typed clients for each service</item>
+        <item>Handle authentication flow</item>
+        <item>Provide async/sync interfaces</item>
+      </responsibilities>
+    </layer>
+  </architecture>
+  <service_startup_sequence>
+    <step order="1">
+      <name>Environment Preparation</name>
+      <actions>
+        <action>Set TEST_ISOLATION=1</action>
+        <action>Configure test database URLs</action>
+        <action>Set service discovery directory</action>
+      </actions>
+    </step>
+    <step order="2">
+      <name>Database Initialization</name>
+      <actions>
+        <action>Create test database (netra_test)</action>
+        <action>Run migrations</action>
+        <action>Seed test data if needed</action>
+      </actions>
+    </step>
+    <step order="3">
+      <name>Service Launch via Dev Launcher</name>
+      <config>
+        <param name="dynamic_ports">true</param>
+        <param name="test_mode">true</param>
+        <param name="startup_timeout">30</param>
+      </config>
+      <services>
+        <service name="auth" port="dynamic" health_url="/health" />
+        <service name="backend" port="dynamic" health_url="/health" />
+        <service name="frontend" port="dynamic" health_url="/" optional="true" />
+      </services>
+    </step>
+    <step order="4">
+      <name>Service Discovery</name>
+      <actions>
+        <action>Read .service_discovery/*.json files</action>
+        <action>Extract dynamic ports</action>
+        <action>Configure test clients with discovered endpoints</action>
+      </actions>
+    </step>
+    <step order="5">
+      <name>Health Validation</name>
+      <actions>
+        <action>Poll health endpoints until ready</action>
+        <action>Verify WebSocket connectivity</action>
+        <action>Validate database connections</action>
+      </actions>
+    </step>
+  </service_startup_sequence>
+  <test_levels>
+    <level name="unit">
+      <real_services>false</real_services>
+      <description>Fast, isolated function tests with mocks</description>
+      <use_cases>
+        <case>Algorithm validation</case>
+        <case>Business logic testing</case>
+        <case>Error handling verification</case>
+      </use_cases>
+    </level>
+    <level name="integration">
+      <real_services>true</real_services>
+      <description>Real service integration without external APIs</description>
+      <use_cases>
+        <case>Service communication testing</case>
+        <case>Database integration</case>
+        <case>WebSocket message flow</case>
+      </use_cases>
+      <configuration>
+        <env>ENABLE_REAL_LLM_TESTING=false</env>
+        <env>USE_REAL_SERVICES=true</env>
+      </configuration>
+    </level>
+    <level name="e2e">
+      <real_services>true</real_services>
+      <description>Full system testing with all real components</description>
+      <use_cases>
+        <case>User journey validation</case>
+        <case>Cross-service workflows</case>
+        <case>Performance testing</case>
+      </use_cases>
+      <configuration>
+        <env>ENABLE_REAL_LLM_TESTING=true</env>
+        <env>USE_REAL_SERVICES=true</env>
+      </configuration>
+    </level>
+  </test_levels>
+  <patterns>
+    <pattern name="Real Service Fixture">
+      <code>
 @pytest.fixture(scope="session")
 async def real_services():
     """Provides real services via dev launcher for testing."""
@@ -196,11 +180,10 @@ async def real_services():
     finally:
         # Cleanup
         await launcher.shutdown()
-            ]]></code>
-        </pattern>
-        
-        <pattern name="WebSocket Test Client">
-            <code><![CDATA[
+            </code>
+    </pattern>
+    <pattern name="WebSocket Test Client">
+      <code>
 async def test_websocket_flow(real_services):
     """Test real WebSocket communication."""
     # Get auth token
@@ -219,11 +202,10 @@ async def test_websocket_flow(real_services):
     await ws_client.send({"type": "ping"})
     response = await ws_client.receive(timeout=5.0)
     assert response["type"] == "pong"
-            ]]></code>
-        </pattern>
-        
-        <pattern name="Database Isolation">
-            <code><![CDATA[
+            </code>
+    </pattern>
+    <pattern name="Database Isolation">
+      <code>
 @pytest.fixture(scope="function")
 async def isolated_db(real_services):
     """Provides isolated database for each test."""
@@ -236,158 +218,137 @@ async def isolated_db(real_services):
         
         # Rollback to savepoint
         await trans.rollback()
-            ]]></code>
-        </pattern>
-    </patterns>
-
-    <environment_variables>
-        <variable name="USE_REAL_SERVICES" default="false">
-            <description>Master switch for real service testing</description>
-        </variable>
-        
-        <variable name="TEST_ISOLATION" default="1">
-            <description>Enable test environment isolation</description>
-        </variable>
-        
-        <variable name="DYNAMIC_PORTS" default="true">
-            <description>Use dynamic port allocation</description>
-        </variable>
-        
-        <variable name="SERVICE_DISCOVERY_DIR" default=".service_discovery">
-            <description>Directory for service endpoint discovery</description>
-        </variable>
-        
-        <variable name="ENABLE_REAL_LLM_TESTING" default="false">
-            <description>Use real LLM APIs (costs money)</description>
-        </variable>
-        
-        <variable name="TEST_DATABASE_URL" default="postgresql://test:test@localhost:5432/netra_test">
-            <description>Test database connection string</description>
-        </variable>
-    </environment_variables>
-
-    <implementation_checklist>
-        <task status="required">
-            <name>Unify Dev Launcher Usage</name>
-            <description>All test files must use dev_launcher for service startup</description>
-            <files>
-                <file>tests/conftest.py - Add dev_launcher fixture</file>
-                <file>tests/unified/real_services_manager.py - Refactor to use dev_launcher</file>
-            </files>
-        </task>
-        
-        <task status="required">
-            <name>Implement Service Discovery</name>
-            <description>Standardize dynamic port discovery mechanism</description>
-            <files>
-                <file>dev_launcher/discovery.py - Create discovery module</file>
-                <file>tests/unified/service_discovery.py - Test discovery client</file>
-            </files>
-        </task>
-        
-        <task status="required">
-            <name>Create Test Client Factory</name>
-            <description>Typed clients for all services with auth handling</description>
-            <files>
-                <file>tests/unified/clients/__init__.py - Client factory</file>
-                <file>tests/unified/clients/auth_client.py</file>
-                <file>tests/unified/clients/backend_client.py</file>
-                <file>tests/unified/clients/websocket_client.py</file>
-            </files>
-        </task>
-        
-        <task status="required">
-            <name>Standardize Cleanup</name>
-            <description>Ensure all resources are cleaned up properly</description>
-            <approach>Use pytest fixtures with proper teardown and signal handling</approach>
-        </task>
-        
-        <task status="optional">
-            <name>Performance Monitoring</name>
-            <description>Track test performance with real services</description>
-            <approach>Add timing metrics and identify slow tests</approach>
-        </task>
-    </implementation_checklist>
-
-    <migration_strategy>
-        <phase number="1">
-            <name>Audit Existing Tests</name>
-            <actions>
-                <action>Identify all tests using mocked services</action>
-                <action>Categorize by test level (unit/integration/e2e)</action>
-                <action>Prioritize high-value tests for migration</action>
-            </actions>
-        </phase>
-        
-        <phase number="2">
-            <name>Create Core Infrastructure</name>
-            <actions>
-                <action>Implement dev_launcher pytest fixture</action>
-                <action>Create service discovery module</action>
-                <action>Build test client factory</action>
-            </actions>
-        </phase>
-        
-        <phase number="3">
-            <name>Migrate Integration Tests</name>
-            <actions>
-                <action>Update WebSocket tests to use real connections</action>
-                <action>Convert auth flow tests to real service</action>
-                <action>Migrate database tests to use real PostgreSQL</action>
-            </actions>
-        </phase>
-        
-        <phase number="4">
-            <name>Validate and Optimize</name>
-            <actions>
-                <action>Run full test suite with real services</action>
-                <action>Identify and fix flaky tests</action>
-                <action>Optimize startup/teardown times</action>
-            </actions>
-        </phase>
-    </migration_strategy>
-
-    <best_practices>
-        <practice>Always use dev_launcher for service orchestration</practice>
-        <practice>Implement proper timeout handling for service startup</practice>
-        <practice>Use dynamic ports to enable parallel test execution</practice>
-        <practice>Isolate database state between test runs</practice>
-        <practice>Clean up all processes even on test failure</practice>
-        <practice>Log service output for debugging failed tests</practice>
-        <practice>Use health checks to ensure services are ready</practice>
-        <practice>Provide clear error messages when services fail to start</practice>
-    </best_practices>
-
-    <anti_patterns>
-        <anti_pattern>
-            <name>Hardcoded Ports</name>
-            <problem>Prevents parallel test execution</problem>
-            <solution>Always use dynamic port allocation</solution>
-        </anti_pattern>
-        
-        <anti_pattern>
-            <name>Manual Service Startup</name>
-            <problem>Inconsistent and error-prone</problem>
-            <solution>Use dev_launcher for all service management</solution>
-        </anti_pattern>
-        
-        <anti_pattern>
-            <name>Shared Test Database</name>
-            <problem>Test pollution and race conditions</problem>
-            <solution>Use transactions or separate databases</solution>
-        </anti_pattern>
-        
-        <anti_pattern>
-            <name>No Cleanup on Failure</name>
-            <problem>Orphaned processes consuming resources</problem>
-            <solution>Use try/finally or pytest fixtures</solution>
-        </anti_pattern>
-    </anti_patterns>
-
-    <related_specs>
-        <spec>testing.xml - General testing guidelines</spec>
-        <spec>independent_services.xml - Microservice independence requirements</spec>
-        <spec>websockets.xml - WebSocket testing patterns</spec>
-        <spec>dev_launcher.xml - Dev launcher configuration</spec>
-    </related_specs>
+            </code>
+    </pattern>
+  </patterns>
+  <environment_variables>
+    <variable name="USE_REAL_SERVICES" default="false">
+      <description>Master switch for real service testing</description>
+    </variable>
+    <variable name="TEST_ISOLATION" default="1">
+      <description>Enable test environment isolation</description>
+    </variable>
+    <variable name="DYNAMIC_PORTS" default="true">
+      <description>Use dynamic port allocation</description>
+    </variable>
+    <variable name="SERVICE_DISCOVERY_DIR" default=".service_discovery">
+      <description>Directory for service endpoint discovery</description>
+    </variable>
+    <variable name="ENABLE_REAL_LLM_TESTING" default="false">
+      <description>Use real LLM APIs (costs money)</description>
+    </variable>
+    <variable name="TEST_DATABASE_URL" default="postgresql://test:test@localhost:5432/netra_test">
+      <description>Test database connection string</description>
+    </variable>
+  </environment_variables>
+  <implementation_checklist>
+    <task status="required">
+      <name>Unify Dev Launcher Usage</name>
+      <description>All test files must use dev_launcher for service startup</description>
+      <files>
+        <file>tests/conftest.py - Add dev_launcher fixture</file>
+        <file>tests/unified/real_services_manager.py - Refactor to use dev_launcher</file>
+      </files>
+    </task>
+    <task status="required">
+      <name>Implement Service Discovery</name>
+      <description>Standardize dynamic port discovery mechanism</description>
+      <files>
+        <file>dev_launcher/discovery.py - Create discovery module</file>
+        <file>tests/unified/service_discovery.py - Test discovery client</file>
+      </files>
+    </task>
+    <task status="required">
+      <name>Create Test Client Factory</name>
+      <description>Typed clients for all services with auth handling</description>
+      <files>
+        <file>tests/unified/clients/__init__.py - Client factory</file>
+        <file>tests/unified/clients/auth_client.py</file>
+        <file>tests/unified/clients/backend_client.py</file>
+        <file>tests/unified/clients/websocket_client.py</file>
+      </files>
+    </task>
+    <task status="required">
+      <name>Standardize Cleanup</name>
+      <description>Ensure all resources are cleaned up properly</description>
+      <approach>Use pytest fixtures with proper teardown and signal handling</approach>
+    </task>
+    <task status="optional">
+      <name>Performance Monitoring</name>
+      <description>Track test performance with real services</description>
+      <approach>Add timing metrics and identify slow tests</approach>
+    </task>
+  </implementation_checklist>
+  <migration_strategy>
+    <phase number="1">
+      <name>Audit Existing Tests</name>
+      <actions>
+        <action>Identify all tests using mocked services</action>
+        <action>Categorize by test level (unit/integration/e2e)</action>
+        <action>Prioritize high-value tests for migration</action>
+      </actions>
+    </phase>
+    <phase number="2">
+      <name>Create Core Infrastructure</name>
+      <actions>
+        <action>Implement dev_launcher pytest fixture</action>
+        <action>Create service discovery module</action>
+        <action>Build test client factory</action>
+      </actions>
+    </phase>
+    <phase number="3">
+      <name>Migrate Integration Tests</name>
+      <actions>
+        <action>Update WebSocket tests to use real connections</action>
+        <action>Convert auth flow tests to real service</action>
+        <action>Migrate database tests to use real PostgreSQL</action>
+      </actions>
+    </phase>
+    <phase number="4">
+      <name>Validate and Optimize</name>
+      <actions>
+        <action>Run full test suite with real services</action>
+        <action>Identify and fix flaky tests</action>
+        <action>Optimize startup/teardown times</action>
+      </actions>
+    </phase>
+  </migration_strategy>
+  <best_practices>
+    <practice>Always use dev_launcher for service orchestration</practice>
+    <practice>Implement proper timeout handling for service startup</practice>
+    <practice>Use dynamic ports to enable parallel test execution</practice>
+    <practice>Isolate database state between test runs</practice>
+    <practice>Clean up all processes even on test failure</practice>
+    <practice>Log service output for debugging failed tests</practice>
+    <practice>Use health checks to ensure services are ready</practice>
+    <practice>Provide clear error messages when services fail to start</practice>
+  </best_practices>
+  <anti_patterns>
+    <anti_pattern>
+      <name>Hardcoded Ports</name>
+      <problem>Prevents parallel test execution</problem>
+      <solution>Always use dynamic port allocation</solution>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Manual Service Startup</name>
+      <problem>Inconsistent and error-prone</problem>
+      <solution>Use dev_launcher for all service management</solution>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Shared Test Database</name>
+      <problem>Test pollution and race conditions</problem>
+      <solution>Use transactions or separate databases</solution>
+    </anti_pattern>
+    <anti_pattern>
+      <name>No Cleanup on Failure</name>
+      <problem>Orphaned processes consuming resources</problem>
+      <solution>Use try/finally or pytest fixtures</solution>
+    </anti_pattern>
+  </anti_patterns>
+  <related_specs>
+    <spec>testing.xml - General testing guidelines</spec>
+    <spec>independent_services.xml - Microservice independence requirements</spec>
+    <spec>websockets.xml - WebSocket testing patterns</spec>
+    <spec>dev_launcher.xml - Dev launcher configuration</spec>
+  </related_specs>
 </spec>

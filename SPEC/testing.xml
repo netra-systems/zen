@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="testing_specification_v4.0.xsd">
-    <metadata>
-        <name>Netra AI Optimization Platform - Comprehensive Testing Strategy</name>
-        <type>Quality Engineering and Testing Specification</type>
-        <version>4.0</version>
-        <last_updated>2025-08-20</last_updated>
-        <owner>QA Architecture Team</owner>
-        <status>Active</status>
-        <changes>
-            <change version="3.0" date="2025-08-11">Coverage standardization and report restructuring.</change>
-            <change version="3.1" date="2025-08-11">Introduction of real LLM testing capabilities.</change>
-            <change version="3.2" date="2025-08-16">Implementation of frontend parallel testing architecture.</change>
-            <change version="4.0" date="2025-08-20">
+  <metadata>
+    <name>Netra AI Optimization Platform - Comprehensive Testing Strategy</name>
+    <type>Quality Engineering and Testing Specification</type>
+    <version>4.0</version>
+    <last_updated>2025-08-20</last_updated>
+    <owner>QA Architecture Team</owner>
+    <status>Active</status>
+    <changes>
+      <change version="3.0" date="2025-08-11">Coverage standardization and report restructuring.</change>
+      <change version="3.1" date="2025-08-11">Introduction of real LLM testing capabilities.</change>
+      <change version="3.2" date="2025-08-16">Implementation of frontend parallel testing architecture.</change>
+      <change version="4.0" date="2025-08-20">
                 - MAJOR REVISION (10x Improvement).
                 - Introduced the Mock-Real Spectrum (L0-L5) with detailed examples and guidelines.
                 - Formalized 'Testing Philosophy' and Principles emphasizing realism.
@@ -21,522 +21,431 @@
                 - Enhanced 'Bad Test Detection' to 'Flaky Test Management' with Quarantine process.
                 - Introduced Metrics and KPIs (Flakiness Rate, MTTD, MTTR).
             </change>
-        </changes>
-    </metadata>
-    
-    <overview>
-        <description>
+    </changes>
+    <last_edited>2025-08-21T08:47:28.636943</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.636943">
+      <reasons>
+        <reason>Content contains: OBSOLETE</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <overview>
+    <description>
             A rigorous, multi-layered testing strategy for the Netra AI Optimization Platform. 
             This specification defines the principles, methodologies, and quality gates required to ensure platform reliability, performance, and correctness. 
             It emphasizes a shift towards real-world validation over excessive mocking, and incorporates advanced techniques like real LLM validation and proactive test health management.
         </description>
-        <goals>
-            <goal id="G1" priority="1">Achieve and maintain 97% meaningful test coverage.</goal>
-            <goal id="G2" priority="1">Prioritize realism: Maximize testing at higher levels of the Mock-Real Spectrum (L3+).</goal>
-            <goal id="G3" priority="1">Ensure test integrity: Fix the System Under Test (SUT) first; modify tests only if requirements genuinely changed.</goal>
-            <goal id="G4" priority="2">Execute comprehensive E2E tests (L4) with real LLM calls for critical path validation before every release.</goal>
-            <goal id="G5" priority="2">Maintain fast feedback loops: Smoke tests &lt; 30s, Unit tests &lt; 2m.</goal>
-            <goal id="G6" priority="3">Maintain test health: Automatically detect, quarantine, and remediate flaky tests (Flakiness Rate &lt; 1%).</goal>
-        </goals>
-        <testing_philosophy>
-            <principle name="Realism First">
+    <goals>
+      <goal id="G1" priority="1">Achieve and maintain 97% meaningful test coverage.</goal>
+      <goal id="G2" priority="1">Prioritize realism: Maximize testing at higher levels of the Mock-Real Spectrum (L3+).</goal>
+      <goal id="G3" priority="1">Ensure test integrity: Fix the System Under Test (SUT) first; modify tests only if requirements genuinely changed.</goal>
+      <goal id="G4" priority="2">Execute comprehensive E2E tests (L4) with real LLM calls for critical path validation before every release.</goal>
+      <goal id="G5" priority="2">Maintain fast feedback loops: Smoke tests &lt; 30s, Unit tests &lt; 2m.</goal>
+      <goal id="G6" priority="3">Maintain test health: Automatically detect, quarantine, and remediate flaky tests (Flakiness Rate &lt; 1%).</goal>
+    </goals>
+    <testing_philosophy>
+      <principle name="Realism First">
                 Mocks hide integration bugs. Confidence is built by testing real interactions. If a dependency can be run (imported or containerized), it MUST be used instead of a mock.
             </principle>
-            <principle name="Test Code is Production Code">
+      <principle name="Test Code is Production Code">
                 Test code must adhere to the same quality standards, reviews, and architectural rigor as production code (e.g., 450-line file limit, 25-line function limit).
             </principle>
-            <principle name="Shift Left, Shift Right">
+      <principle name="Shift Left, Shift Right">
                 Integrate quality early (Shift Left: Unit, Integration, CI) and validate behavior in production (Shift Right: Monitoring, Canary, TiP).
             </principle>
-            <principle name="Zero Tolerance for Flakiness">
+      <principle name="Zero Tolerance for Flakiness">
                 Flaky tests destroy trust in the CI pipeline. They must be aggressively detected, quarantined, and fixed.
             </principle>
-        </testing_philosophy>
-    </overview>
-
-    <!-- ################################################## -->
-    <!-- ########## MOCK-REAL SPECTRUM DEFINITION ########## -->
-    <!-- ################################################## -->
-    <mock_real_spectrum>
-        <description>
+    </testing_philosophy>
+  </overview>
+  <mock_real_spectrum>
+    <description>
             Defines the spectrum of realism in testing. This spectrum guides the appropriate level of mocking and emphasizes the requirement for testing real functionality.
         </description>
-
-        <spectrum_levels>
-            <level id="L0" name="Fully Mocked / Simulated" confidence="Lowest">
-                <description>
+    <spectrum_levels>
+      <level id="L0" name="Fully Mocked / Simulated" confidence="Lowest">
+        <description>
                     The SUT and all its dependencies are mocked or simulated. No real interactions occur.
                 </description>
-                <characteristics>Fast execution, high determinism, lowest confidence. High risk of "testing the mock".</characteristics>
-                <examples>
-                    <example>A unit test where the database repository, service layer, and even the SUT itself are heavily mocked using `unittest.mock.Mock` or `jest.fn()`.</example>
-                </examples>
-                <appropriate_for>Rarely acceptable. Only for highly isolated, complex algorithmic logic where setup is impossible.</appropriate_for>
-            </level>
-
-            <level id="L1" name="Real SUT with Mocked Dependencies" confidence="Low">
-                <description>
+        <characteristics>Fast execution, high determinism, lowest confidence. High risk of "testing the mock".</characteristics>
+        <examples>
+          <example>A unit test where the database repository, service layer, and even the SUT itself are heavily mocked using `unittest.mock.Mock` or `jest.fn()`.</example>
+        </examples>
+        <appropriate_for>Rarely acceptable. Only for highly isolated, complex algorithmic logic where setup is impossible.</appropriate_for>
+      </level>
+      <level id="L1" name="Real SUT with Mocked Dependencies" confidence="Low">
+        <description>
                     The SUT is the real code implementation, but all immediate dependencies (APIs, databases, other services) are mocked or stubbed.
                 </description>
-                <characteristics>Tests the internal logic of the SUT. Still fast and deterministic. Does not validate integration points.</characteristics>
-                <examples>
-                    <example>Testing a `UserService` by importing the real Python object, but mocking the `UserRepository` it calls internally.</example>
-                    <example>Rendering a React component, but mocking `axios` or `fetch` calls.</example>
-                </examples>
-                <appropriate_for>Standard Unit Tests, Component Tests (isolated).</appropriate_for>
-            </level>
-
-            <level id="L2" name="Real SUT with Real Internal Dependencies (In-Process)" confidence="Medium">
-                <description>
+        <characteristics>Tests the internal logic of the SUT. Still fast and deterministic. Does not validate integration points.</characteristics>
+        <examples>
+          <example>Testing a `UserService` by importing the real Python object, but mocking the `UserRepository` it calls internally.</example>
+          <example>Rendering a React component, but mocking `axios` or `fetch` calls.</example>
+        </examples>
+        <appropriate_for>Standard Unit Tests, Component Tests (isolated).</appropriate_for>
+      </level>
+      <level id="L2" name="Real SUT with Real Internal Dependencies (In-Process)" confidence="Medium">
+        <description>
                     The SUT and its internal dependencies within the same process boundary are real. Only out-of-process or external dependencies are mocked. This is "more real" than L1.
                 </description>
-                <characteristics>Validates interaction between internal components. Moderate execution speed. Increased confidence.</characteristics>
-                <examples>
-                    <example>Integration test where the Controller, Service, and Repository layers are all real imported Python objects interacting in memory.</example>
-                    <example>Frontend test rendering a real parent component with all its real child components and the real Redux store, but mocking the backend API (e.g., using MSW).</example>
-                    <example>Using lightweight doubles like an in-memory database (SQLite) instead of the production database (PostgreSQL).</example>
-                </examples>
-                <appropriate_for>Component Integration Tests, Internal Contract Tests.</appropriate_for>
-            </level>
-
-            <level id="L3" name="Real SUT with Real Local Services (Out-of-Process)" confidence="High">
-                <description>
+        <characteristics>Validates interaction between internal components. Moderate execution speed. Increased confidence.</characteristics>
+        <examples>
+          <example>Integration test where the Controller, Service, and Repository layers are all real imported Python objects interacting in memory.</example>
+          <example>Frontend test rendering a real parent component with all its real child components and the real Redux store, but mocking the backend API (e.g., using MSW).</example>
+          <example>Using lightweight doubles like an in-memory database (SQLite) instead of the production database (PostgreSQL).</example>
+        </examples>
+        <appropriate_for>Component Integration Tests, Internal Contract Tests.</appropriate_for>
+      </level>
+      <level id="L3" name="Real SUT with Real Local Services (Out-of-Process)" confidence="High">
+        <description>
                     The SUT interacts with real, locally running instances of dependent services using the production technology stack. This is "more real" than L2.
                 </description>
-                <characteristics>Validates out-of-process communication, serialization, and database schemas. Slower execution due to container management. High confidence.</characteristics>
-                <examples>
-                    <example>Using `Testcontainers` or Docker Compose to spin up a real PostgreSQL, ClickHouse, and Redis instance. The SUT connects using real database drivers.</example>
-                    <example>Running the backend service locally and testing its REST API endpoints with a real HTTP client.</example>
-                </examples>
-                <appropriate_for>Database Integration Tests, Service-to-Service Integration Tests.</appropriate_for>
-            </level>
-
-            <level id="L4" name="Real SUT with Real Shared Environment (Staging/Pre-Prod)" confidence="Very High">
-                <description>
+        <characteristics>Validates out-of-process communication, serialization, and database schemas. Slower execution due to container management. High confidence.</characteristics>
+        <examples>
+          <example>Using `Testcontainers` or Docker Compose to spin up a real PostgreSQL, ClickHouse, and Redis instance. The SUT connects using real database drivers.</example>
+          <example>Running the backend service locally and testing its REST API endpoints with a real HTTP client.</example>
+        </examples>
+        <appropriate_for>Database Integration Tests, Service-to-Service Integration Tests.</appropriate_for>
+      </level>
+      <level id="L4" name="Real SUT with Real Shared Environment (Staging/Pre-Prod)" confidence="Very High">
+        <description>
                     The SUT is deployed in a production-like shared environment (Staging/QA) and interacts with real instances of all dependencies.
                 </description>
-                <characteristics>Highest pre-production confidence. Validates infrastructure and configuration. Slowest execution, requires robust data management.</characteristics>
-                <examples>
-                    <example>Running Playwright/Cypress E2E tests against the Staging URL.</example>
-                    <example>Real LLM testing using dedicated test API keys against the staging deployment.</example>
-                    <example>Performance testing in the Staging environment.</example>
-                </examples>
-                <appropriate_for>End-to-End Tests, Performance Testing, Pre-Release Validation.</appropriate_for>
-            </level>
-
-            <level id="L5" name="Real Production (Monitoring &amp; Testing in Prod)" confidence="Ultimate">
-                <description>
+        <characteristics>Highest pre-production confidence. Validates infrastructure and configuration. Slowest execution, requires robust data management.</characteristics>
+        <examples>
+          <example>Running Playwright/Cypress E2E tests against the Staging URL.</example>
+          <example>Real LLM testing using dedicated test API keys against the staging deployment.</example>
+          <example>Performance testing in the Staging environment.</example>
+        </examples>
+        <appropriate_for>End-to-End Tests, Performance Testing, Pre-Release Validation.</appropriate_for>
+      </level>
+      <level id="L5" name="Real Production (Monitoring &amp; Testing in Prod)" confidence="Ultimate">
+        <description>
                     Testing and monitoring activities performed directly in the production environment.
                 </description>
-                <characteristics>Ultimate validation of real user experience. Requires extreme caution, feature flags, and robust rollback mechanisms.</characteristics>
-                <examples>
-                    <example>Synthetic monitoring running periodically against production endpoints using dedicated test accounts.</example>
-                    <example>Canary deployments validating new features on a small percentage of real traffic.</example>
-                </examples>
-                <appropriate_for>Synthetic Monitoring, Canary Releases, A/B Testing.</appropriate_for>
-            </level>
-        </spectrum_levels>
-
-        <guidelines>
-            <guideline>Aim for the highest level of realism feasible. If L3 is possible, L1/L2 is forbidden for integration validation.</guideline>
-            <guideline>Integration tests MUST target L2 or higher, with L3 strongly preferred.</guideline>
-            <guideline>E2E tests MUST target L4.</guideline>
-        </guidelines>
-    </mock_real_spectrum>
-
-    <!-- ################################################## -->
-    <!-- ############## REAL TEST REQUIREMENTS ############## -->
-    <!-- ################################################## -->
-    
-    <real_test_requirements>
-        <description>
+        <characteristics>Ultimate validation of real user experience. Requires extreme caution, feature flags, and robust rollback mechanisms.</characteristics>
+        <examples>
+          <example>Synthetic monitoring running periodically against production endpoints using dedicated test accounts.</example>
+          <example>Canary deployments validating new features on a small percentage of real traffic.</example>
+        </examples>
+        <appropriate_for>Synthetic Monitoring, Canary Releases, A/B Testing.</appropriate_for>
+      </level>
+    </spectrum_levels>
+    <guidelines>
+      <guideline>Aim for the highest level of realism feasible. If L3 is possible, L1/L2 is forbidden for integration validation.</guideline>
+      <guideline>Integration tests MUST target L2 or higher, with L3 strongly preferred.</guideline>
+      <guideline>E2E tests MUST target L4.</guideline>
+    </guidelines>
+  </mock_real_spectrum>
+  <real_test_requirements>
+    <description>
             Mandatory rules enforcing the "Realism First" philosophy. Based on frontend test paradox analysis (2025-08-19).
         </description>
-        
-        <mandatory_rules>
-            <rule id="no-mock-sut" severity="CRITICAL">
+    <mandatory_rules>
+      <rule id="no-mock-sut" severity="CRITICAL">
                 Tests MUST NOT mock the System Under Test (SUT) itself. Test the real component/class. L0 tests are banned without explicit approval.
             </rule>
-
-            <rule id="real-internal-dependencies" severity="HIGH">
+      <rule id="real-internal-dependencies" severity="HIGH">
                 Integration tests (L2+) MUST use real internal dependencies (e.g., real child components, real service classes). Mocking all internal dependencies reduces the test to L1 and is forbidden for integration validation.
             </rule>
-            
-            <rule id="test-code-quality-standards" severity="MEDIUM">
+      <rule id="test-code-quality-standards" severity="MEDIUM">
                 Test code adheres to production standards.
                 <requirement>Test files limited to 300 lines.</requirement>
-                <requirement>Test functions limited to 8 lines (excluding declarative setup/assertions).</requirement>
-            </rule>
-            
-            <rule id="mock-justification-required" severity="CRITICAL">
+        <requirement>Test functions limited to 8 lines (excluding declarative setup/assertions).</requirement>
+      </rule>
+      <rule id="mock-justification-required" severity="CRITICAL">
                 ALL mocks (used in L1-L3) MUST be justified with explicit documentation. A mock without justification is a violation.
                 <requirement>Use the @mock_justified decorator (Python) or inline comment (Frontend) stating the reason and the target spectrum level.</requirement>
-                <example_valid>@mock_justified("L1 Unit Test: Mocking DatabaseRepository to isolate UserService logic. DB interactions tested in L3.")</example_valid>
-                <example_invalid>@mock_justified("Mocking because it's faster.") (Violation: Speed is not a valid justification for reducing realism in integration tests).</example_invalid>
-            </rule>
-            
-            <rule id="fix-sut-not-tests" severity="HIGH">
+        <example_valid>@mock_justified("L1 Unit Test: Mocking DatabaseRepository to isolate UserService logic. DB interactions tested in L3.")</example_valid>
+        <example_invalid>@mock_justified("Mocking because it's faster.") (Violation: Speed is not a valid justification for reducing realism in integration tests).</example_invalid>
+      </rule>
+      <rule id="fix-sut-not-tests" severity="HIGH">
                 When tests fail, the default assumption is a bug in the SUT. Fix the SUT first.
             </rule>
-        </mandatory_rules>
-        
-        <test_pyramid_distribution>
-            <description>Redefinition of the test pyramid (Testing Trophy Model) focusing on high-value integration.</description>
-            <level name="Static Analysis" percentage="Foundation">Linting, Type Checking, SAST.</level>
-            <level name="Unit" percentage="20%" realism="L1">Isolated logic validation.</level>
-            <level name="Integration" percentage="60%" realism="L2-L3">The core of the strategy. Real component interactions (L2) and containerized services (L3).</level>
-            <level name="E2E" percentage="15%" realism="L4">Complete user flows in staging.</level>
-            <level name="Production" percentage="5%" realism="L5">Synthetic monitoring and TiP.</level>
-        </test_pyramid_distribution>
-        
-        <anti_patterns>
-            <anti_pattern>"Mocking Hell": Mocking every dependency in an integration test (L2+).</anti_pattern>
-            <anti_pattern>Creating mock components/services inside test files instead of using real ones.</anti_pattern>
-            <anti_pattern>Using `jest.fn()` or `Mock()` for internal services without justification.</anti_pattern>
-            <anti_pattern>Modifying tests to pass instead of fixing the underlying bug in the SUT.</anti_pattern>
-            <anti_pattern>Tests exceeding size limits (300 lines/file, 8 lines/function).</anti_pattern>
-            <anti_pattern>Using `@patch` or `Mock()` without the `@mock_justified` decorator.</anti_pattern>
-        </anti_patterns>
-    </real_test_requirements>
-
-    <!-- ################################################## -->
-    <!-- ############# ENVIRONMENT & DATA STRATEGY ########## -->
-    <!-- ################################################## -->
-
-    <test_environments_strategy>
-        <description>Defines the architecture and usage policies for different testing environments.</description>
-        <environments>
-            <environment name="Local Development" realism="L1-L3">
-                <purpose>Rapid development, debugging, unit/integration testing.</purpose>
-                <architecture>Developer workstations. Local processes and Docker containers (Testcontainers).</architecture>
-            </environment>
-            <environment name="CI (Ephemeral)" realism="L1-L3">
-                <purpose>Automated validation on every commit/PR.</purpose>
-                <architecture>Ephemeral, isolated environments (e.g., GitHub Actions runners). Optimized for parallelism. Real services spun up on demand.</architecture>
-            </environment>
-            <environment name="Staging (Static)" realism="L4">
-                <purpose>Full system validation, E2E, Performance, Security testing.</purpose>
-                <architecture>Persistent, production-like infrastructure. Identical stack (Kubernetes, DB versions).</architecture>
-            </environment>
-            <environment name="Production" realism="L5">
-                <purpose>Live environment. Used for L5 synthetic monitoring and controlled rollouts.</purpose>
-                <architecture>Production infrastructure.</architecture>
-            </environment>
-        </environments>
-        <parity_requirement>
+    </mandatory_rules>
+    <test_pyramid_distribution>
+      <description>Redefinition of the test pyramid (Testing Trophy Model) focusing on high-value integration.</description>
+      <level name="Static Analysis" percentage="Foundation">Linting, Type Checking, SAST.</level>
+      <level name="Unit" percentage="20%" realism="L1">Isolated logic validation.</level>
+      <level name="Integration" percentage="60%" realism="L2-L3">The core of the strategy. Real component interactions (L2) and containerized services (L3).</level>
+      <level name="E2E" percentage="15%" realism="L4">Complete user flows in staging.</level>
+      <level name="Production" percentage="5%" realism="L5">Synthetic monitoring and TiP.</level>
+    </test_pyramid_distribution>
+    <anti_patterns>
+      <anti_pattern>"Mocking Hell": Mocking every dependency in an integration test (L2+).</anti_pattern>
+      <anti_pattern>Creating mock components/services inside test files instead of using real ones.</anti_pattern>
+      <anti_pattern>Using `jest.fn()` or `Mock()` for internal services without justification.</anti_pattern>
+      <anti_pattern>Modifying tests to pass instead of fixing the underlying bug in the SUT.</anti_pattern>
+      <anti_pattern>Tests exceeding size limits (300 lines/file, 8 lines/function).</anti_pattern>
+      <anti_pattern>Using `@patch` or `Mock()` without the `@mock_justified` decorator.</anti_pattern>
+    </anti_patterns>
+  </real_test_requirements>
+  <test_environments_strategy>
+    <description>Defines the architecture and usage policies for different testing environments.</description>
+    <environments>
+      <environment name="Local Development" realism="L1-L3">
+        <purpose>Rapid development, debugging, unit/integration testing.</purpose>
+        <architecture>Developer workstations. Local processes and Docker containers (Testcontainers).</architecture>
+      </environment>
+      <environment name="CI (Ephemeral)" realism="L1-L3">
+        <purpose>Automated validation on every commit/PR.</purpose>
+        <architecture>Ephemeral, isolated environments (e.g., GitHub Actions runners). Optimized for parallelism. Real services spun up on demand.</architecture>
+      </environment>
+      <environment name="Staging (Static)" realism="L4">
+        <purpose>Full system validation, E2E, Performance, Security testing.</purpose>
+        <architecture>Persistent, production-like infrastructure. Identical stack (Kubernetes, DB versions).</architecture>
+      </environment>
+      <environment name="Production" realism="L5">
+        <purpose>Live environment. Used for L5 synthetic monitoring and controlled rollouts.</purpose>
+        <architecture>Production infrastructure.</architecture>
+      </environment>
+    </environments>
+    <parity_requirement>
             The technology stack MUST be identical across CI, Staging, and Production to ensure consistency.
         </parity_requirement>
-    </test_environments_strategy>
-
-    <test_data_management_strategy>
-        <description>Strategy for creating, managing, and utilizing test data.</description>
-        <data_types>
-            <type name="Synthetic Data (Generated)">
-                <description>Dynamically generated data using factories (e.g., Faker). Used primarily for L1-L3 tests.</description>
-                <advantages>Fast, isolated, customizable for edge cases.</advantages>
-            </type>
-            <type name="Sanitized Production Data">
-                <description>Anonymized and scrubbed snapshot of production data.</description>
-                <use_case>Used for L4 E2E and Performance testing where realism is critical.</use_case>
-                <process>Automated weekly refresh and scrubbing pipeline.</process>
-            </type>
-        </data_types>
-        <data_isolation>
-            <strategy level="L1-L2">Stateless execution; data exists only in memory.</strategy>
-            <strategy level="L3">
+  </test_environments_strategy>
+  <test_data_management_strategy>
+    <description>Strategy for creating, managing, and utilizing test data.</description>
+    <data_types>
+      <type name="Synthetic Data (Generated)">
+        <description>Dynamically generated data using factories (e.g., Faker). Used primarily for L1-L3 tests.</description>
+        <advantages>Fast, isolated, customizable for edge cases.</advantages>
+      </type>
+      <type name="Sanitized Production Data">
+        <description>Anonymized and scrubbed snapshot of production data.</description>
+        <use_case>Used for L4 E2E and Performance testing where realism is critical.</use_case>
+        <process>Automated weekly refresh and scrubbing pipeline.</process>
+      </type>
+    </data_types>
+    <data_isolation>
+      <strategy level="L1-L2">Stateless execution; data exists only in memory.</strategy>
+      <strategy level="L3">
                 1. Transaction Rollback (Preferred): Execute tests within a DB transaction and roll back.
                 2. Database Cleaning: Truncate tables before/after each suite.
                 3. Ephemeral Databases: Unique database instance per parallel worker.
             </strategy>
-            <strategy level="L4">Use dedicated test accounts/organizations; automated cleanup scripts.</strategy>
-        </data_isolation>
-    </test_data_management_strategy>
-
-    <!-- ################################################## -->
-    <!-- ############### TEST CATEGORIZATION ############### -->
-    <!-- ################################################## -->
-    
-    <test_categories>
-        <category name="unit" realism="L1">
-            <description>Fast, isolated tests for individual functions or classes.</description>
-            <coverage_target>98%</coverage_target>
-        </category>
-        
-        <category name="integration" realism="L2-L3">
-            <description>Tests interactions between components, services, and databases. Must use real internal dependencies (L2) and containerized services (L3).</description>
-            <coverage_target>95%</coverage_target>
-        </category>
-
-        <category name="contract" realism="L2">
-            <description>Validates the contracts between services (APIs, message queues).</description>
-            <tool>Pact (CDC Testing)</tool>
-            <coverage_target>100% of inter-service APIs</coverage_target>
-        </category>
-        
-        <category name="e2e" realism="L4">
-            <description>End-to-end tests simulating user flows in a deployed environment (Staging).</description>
-            <coverage_target>90% of user journeys</coverage_target>
-        </category>
-        
-        <category name="performance" realism="L4">
-            <description>Load, stress, and endurance testing.</description>
-            <tool>k6, Locust</tool>
-            <sla_target>p99 &lt; 500ms for API responses (excluding LLM calls).</sla_target>
-        </category>
-
-        <category name="security" realism="L1-L4">
-            <description>Static (SAST) and Dynamic (DAST) security testing.</description>
-            <tool>Bandit, Snyk, OWASP ZAP</tool>
-            <requirements>No critical/high vulnerabilities.</requirements>
-        </category>
-
-        <category name="critical" realism="L4">
-            <description>Business-critical path tests.</description>
-            <coverage_target>100%</coverage_target>
-        </category>
-
-        <category name="tdd_feature_flagged">
-            <description>Tests controlled by feature flags, enabling TDD workflow while maintaining 100% CI pass rate.</description>
-            <location>Tests marked with @feature_flag or @tdd_test decorators.</location>
-        </category>
-    </test_categories>
-
-    <!-- ################################################## -->
-    <!-- ############ UNIFIED TEST RUNNER & CI/CD ########### -->
-    <!-- ################################################## -->
-    
-    <unified_test_runner>
-        <description>Single entry point (test_runner.py) for all testing activities, managing environments, parallelism, reporting, and CI/CD integration.</description>
-        
-        <ci_cd_pipeline_integration>
-            <description>Integration of the test runner into the GitHub Actions CI/CD pipeline stages.</description>
-            
-            <pipeline_stages>
-                <stage name="1. Build &amp; Static Analysis">
-                    <trigger>On pull_request, push to main.</trigger>
-                    <steps>Dependency installation, Linting, Formatting, SAST (Security).</steps>
-                    <quality_gate>Zero policy violations.</quality_gate>
-                </stage>
-                <stage name="2. Parallel Testing (L1-L3)">
-                    <trigger>On pull_request, push to main.</trigger>
-                    <environment>Ephemeral CI (L3).</environment>
-                    <steps>Unit Tests (L1/L2), Integration Tests (L3), Contract Tests (L2).</steps>
-                    <command>python test_runner.py --level integration --ci</command>
-                    <quality_gate>100% pass rate, Coverage >= 97%.</quality_gate>
-                </stage>
-                <stage name="3. Deployment to Staging">
-                    <trigger>On push to main (after Stage 2).</trigger>
-                    <steps>Build artifacts, Deploy to Static Staging (L4).</steps>
-                </stage>
-                <stage name="4. Staging Validation (L4)">
-                    <trigger>After deployment to Staging.</trigger>
-                    <environment>Static Staging (L4).</environment>
-                    <steps>E2E Tests (L4), Real LLM Critical Tests (L4), Performance Baseline, DAST (Security).</steps>
-                    <command>python test_runner.py --level e2e --real-llm --env staging</command>
-                    <quality_gate>100% pass rate on critical E2E, Performance SLAs met, No critical security findings.</quality_gate>
-                </stage>
-            </pipeline_stages>
-
-            <exit_code_handling>
-                <rule severity="CRITICAL">Test runner MUST return distinct non-zero exit codes (e.g., 1=Test Failure, 2=Infra Error).</rule>
-                <rule severity="CRITICAL">Workflows MUST use `set -e` or `|| exit $?` to propagate failures immediately. `continue-on-error` is forbidden for test steps.</rule>
-            </exit_code_handling>
-        </ci_cd_pipeline_integration>
-        
-        <test_levels>
-            <!-- Simplified representation; detailed definitions from original XML are retained -->
-             <level name="smoke" duration="30s" realism="L1-L2">Quick health checks (Pre-commit).</level>
-             <level name="unit" duration="1-2m" realism="L1" coverage="true">Isolated component testing.</level>
-             <level name="integration" duration="5-10m" realism="L2-L3" coverage="true">Component interaction and API testing.</level>
-             <level name="e2e" duration="15-30m" realism="L4" coverage="true">End-to-end user flows (Staging).</level>
-             <level name="comprehensive" duration="45-60m" realism="L1-L4" coverage="true">Full suite validation (Nightly).</level>
-             <!-- Modular comprehensive levels (backend, frontend, agents, etc.) are retained from original XML -->
-        </test_levels>
-        
-        <report_generation>
-            <description>Unified test reporting, history tracking, and KPI dashboard generation.</description>
-            
-            <latest_report>
-                <location>test_reports/latest_report.html</location>
-                <format>HTML (primary), Markdown (summary)</format>
-                <structure>
-                    <section order="1">Executive Summary (Status, Duration, Key Metrics, Trends)</section>
-                    <section order="2">Detailed Results by Category (Total, Passed, Failed, Skipped, Flaky)</section>
-                    <section order="3">Flaky/Bad Test Report</section>
-                    <section order="4">Coverage Details (Line, Branch)</section>
-                    <section order="5">Error Details, Logs, and Artifacts</section>
-                </structure>
-            </latest_report>
-
-            <metrics_and_kpis>
-                <kpi name="Test Coverage" target="97%">Percentage of code executed.</kpi>
-                <kpi name="Test Pass Rate" target="100%">Percentage of tests passing.</kpi>
-                <kpi name="Flakiness Rate" target="&lt; 1%">Percentage of tests exhibiting intermittent failures.</kpi>
-                <kpi name="Mean Time to Detect (MTTD)" target="&lt; 10m">Time from commit to failure detection.</kpi>
-                <kpi name="Mean Time to Resolve (MTTR)" target="&lt; 24h">Time from detection to resolution.</kpi>
-            </metrics_and_kpis>
-        </report_generation>
-    </unified_test_runner>
-
-    <!-- ################################################## -->
-    <!-- ########## TEST HEALTH AND MAINTENANCE ############ -->
-    <!-- ################################################## -->
-
-    <flaky_test_management>
-        <description>
+      <strategy level="L4">Use dedicated test accounts/organizations; automated cleanup scripts.</strategy>
+    </data_isolation>
+  </test_data_management_strategy>
+  <test_categories>
+    <category name="unit" realism="L1">
+      <description>Fast, isolated tests for individual functions or classes.</description>
+      <coverage_target>98%</coverage_target>
+    </category>
+    <category name="integration" realism="L2-L3">
+      <description>Tests interactions between components, services, and databases. Must use real internal dependencies (L2) and containerized services (L3).</description>
+      <coverage_target>95%</coverage_target>
+    </category>
+    <category name="contract" realism="L2">
+      <description>Validates the contracts between services (APIs, message queues).</description>
+      <tool>Pact (CDC Testing)</tool>
+      <coverage_target>100% of inter-service APIs</coverage_target>
+    </category>
+    <category name="e2e" realism="L4">
+      <description>End-to-end tests simulating user flows in a deployed environment (Staging).</description>
+      <coverage_target>90% of user journeys</coverage_target>
+    </category>
+    <category name="performance" realism="L4">
+      <description>Load, stress, and endurance testing.</description>
+      <tool>k6, Locust</tool>
+      <sla_target>p99 &lt; 500ms for API responses (excluding LLM calls).</sla_target>
+    </category>
+    <category name="security" realism="L1-L4">
+      <description>Static (SAST) and Dynamic (DAST) security testing.</description>
+      <tool>Bandit, Snyk, OWASP ZAP</tool>
+      <requirements>No critical/high vulnerabilities.</requirements>
+    </category>
+    <category name="critical" realism="L4">
+      <description>Business-critical path tests.</description>
+      <coverage_target>100%</coverage_target>
+    </category>
+    <category name="tdd_feature_flagged">
+      <description>Tests controlled by feature flags, enabling TDD workflow while maintaining 100% CI pass rate.</description>
+      <location>Tests marked with @feature_flag or @tdd_test decorators.</location>
+    </category>
+  </test_categories>
+  <unified_test_runner>
+    <description>Single entry point (test_runner.py) for all testing activities, managing environments, parallelism, reporting, and CI/CD integration.</description>
+    <ci_cd_pipeline_integration>
+      <description>Integration of the test runner into the GitHub Actions CI/CD pipeline stages.</description>
+      <pipeline_stages>
+        <stage name="1. Build &amp; Static Analysis">
+          <trigger>On pull_request, push to main.</trigger>
+          <steps>Dependency installation, Linting, Formatting, SAST (Security).</steps>
+          <quality_gate>Zero policy violations.</quality_gate>
+        </stage>
+        <stage name="2. Parallel Testing (L1-L3)">
+          <trigger>On pull_request, push to main.</trigger>
+          <environment>Ephemeral CI (L3).</environment>
+          <steps>Unit Tests (L1/L2), Integration Tests (L3), Contract Tests (L2).</steps>
+          <command>python test_runner.py --level integration --ci</command>
+          <quality_gate>100% pass rate, Coverage &gt;= 97%.</quality_gate>
+        </stage>
+        <stage name="3. Deployment to Staging">
+          <trigger>On push to main (after Stage 2).</trigger>
+          <steps>Build artifacts, Deploy to Static Staging (L4).</steps>
+        </stage>
+        <stage name="4. Staging Validation (L4)">
+          <trigger>After deployment to Staging.</trigger>
+          <environment>Static Staging (L4).</environment>
+          <steps>E2E Tests (L4), Real LLM Critical Tests (L4), Performance Baseline, DAST (Security).</steps>
+          <command>python test_runner.py --level e2e --real-llm --env staging</command>
+          <quality_gate>100% pass rate on critical E2E, Performance SLAs met, No critical security findings.</quality_gate>
+        </stage>
+      </pipeline_stages>
+      <exit_code_handling>
+        <rule severity="CRITICAL">Test runner MUST return distinct non-zero exit codes (e.g., 1=Test Failure, 2=Infra Error).</rule>
+        <rule severity="CRITICAL">Workflows MUST use `set -e` or `|| exit $?` to propagate failures immediately. `continue-on-error` is forbidden for test steps.</rule>
+      </exit_code_handling>
+    </ci_cd_pipeline_integration>
+    <test_levels>
+      <level name="smoke" duration="30s" realism="L1-L2">Quick health checks (Pre-commit).</level>
+      <level name="unit" duration="1-2m" realism="L1" coverage="true">Isolated component testing.</level>
+      <level name="integration" duration="5-10m" realism="L2-L3" coverage="true">Component interaction and API testing.</level>
+      <level name="e2e" duration="15-30m" realism="L4" coverage="true">End-to-end user flows (Staging).</level>
+      <level name="comprehensive" duration="45-60m" realism="L1-L4" coverage="true">Full suite validation (Nightly).</level>
+    </test_levels>
+    <report_generation>
+      <description>Unified test reporting, history tracking, and KPI dashboard generation.</description>
+      <latest_report>
+        <location>test_reports/latest_report.html</location>
+        <format>HTML (primary), Markdown (summary)</format>
+        <structure>
+          <section order="1">Executive Summary (Status, Duration, Key Metrics, Trends)</section>
+          <section order="2">Detailed Results by Category (Total, Passed, Failed, Skipped, Flaky)</section>
+          <section order="3">Flaky/Bad Test Report</section>
+          <section order="4">Coverage Details (Line, Branch)</section>
+          <section order="5">Error Details, Logs, and Artifacts</section>
+        </structure>
+      </latest_report>
+      <metrics_and_kpis>
+        <kpi name="Test Coverage" target="97%">Percentage of code executed.</kpi>
+        <kpi name="Test Pass Rate" target="100%">Percentage of tests passing.</kpi>
+        <kpi name="Flakiness Rate" target="&lt; 1%">Percentage of tests exhibiting intermittent failures.</kpi>
+        <kpi name="Mean Time to Detect (MTTD)" target="&lt; 10m">Time from commit to failure detection.</kpi>
+        <kpi name="Mean Time to Resolve (MTTR)" target="&lt; 24h">Time from detection to resolution.</kpi>
+      </metrics_and_kpis>
+    </report_generation>
+  </unified_test_runner>
+  <flaky_test_management>
+    <description>
             Proactive strategy for detecting, managing, and remediating flaky (intermittently failing) or consistently failing tests. Formerly 'Bad Test Detection'.
         </description>
-        <storage>test_reports/test_health.json</storage>
-
-        <detection_strategy>
-            <method name="automatic_retry">Tests are retried up to 2 times in CI. If it passes on retry, it's flagged as flaky.</method>
-            <method name="historical_analysis">Tracking test outcomes across runs.</method>
-        </detection_strategy>
-
-        <criteria>
-            <criterion name="flaky">Passes on retry OR failure rate between 1% and 30% over the last 50 runs.</criterion>
-            <criterion name="consistently_failing">Failure rate > 70% over the last 50 runs OR 5+ consecutive failures. Indicates a likely bug or obsolete test.</criterion>
-        </criteria>
-        
-        <management_process>
-            <step order="1">Detection: Test is automatically detected.</step>
-            <step order="2">Alerting: Notification sent to owning team and QE channel.</step>
-            <step order="3">Quarantine (Automatic): The test is automatically marked with `@quarantined` decorator. Quarantined tests do not block the main CI pipeline.</step>
-            <step order="4">Investigation &amp; Remediation: Owning team investigates and fixes the test.</step>
-            <step order="5">Reintegration: Test is validated for stability (e.g., 20 consecutive passes) and reintegrated.</step>
-        </management_process>
-
-        <sla>
-            <sla_definition>Flaky tests MUST be investigated within 48 hours. Remediation or deletion must occur within 1 week.</sla_definition>
-            <enforcement>If a test remains in quarantine for more than 1 week, it is automatically deleted.</enforcement>
-        </sla>
-    </flaky_test_management>
-
-    <fake_test_detection>
-        <description>
+    <storage>test_reports/test_health.json</storage>
+    <detection_strategy>
+      <method name="automatic_retry">Tests are retried up to 2 times in CI. If it passes on retry, it's flagged as flaky.</method>
+      <method name="historical_analysis">Tracking test outcomes across runs.</method>
+    </detection_strategy>
+    <criteria>
+      <criterion name="flaky">Passes on retry OR failure rate between 1% and 30% over the last 50 runs.</criterion>
+      <criterion name="consistently_failing">Failure rate &gt; 70% over the last 50 runs OR 5+ consecutive failures. Indicates a likely bug or obsolete test.</criterion>
+    </criteria>
+    <management_process>
+      <step order="1">Detection: Test is automatically detected.</step>
+      <step order="2">Alerting: Notification sent to owning team and QE channel.</step>
+      <step order="3">Quarantine (Automatic): The test is automatically marked with `@quarantined` decorator. Quarantined tests do not block the main CI pipeline.</step>
+      <step order="4">Investigation &amp; Remediation: Owning team investigates and fixes the test.</step>
+      <step order="5">Reintegration: Test is validated for stability (e.g., 20 consecutive passes) and reintegrated.</step>
+    </management_process>
+    <sla>
+      <sla_definition>Flaky tests MUST be investigated within 48 hours. Remediation or deletion must occur within 1 week.</sla_definition>
+      <enforcement>If a test remains in quarantine for more than 1 week, it is automatically deleted.</enforcement>
+    </sla>
+  </flaky_test_management>
+  <fake_test_detection>
+    <description>
             Criteria and automated scanning for identifying "fake tests" that inflate coverage without validating functionality.
         </description>
-        
-        <fake_test_types>
-            <type name="auto_pass_flags">Tests designed to always pass (e.g., `assert True`, silent try/except).</type>
-            <type name="trivial_assertions">Testing constants or language features.</type>
-            <type name="mock_only_tests (L0)">Tests that only verify interactions between mocks, not the SUT behavior.</type>
-            <type name="empty_tests">Tests with no assertions or meaningful verification.</type>
-        </fake_test_types>
-        
-        <detection_strategy>
-            <step>Static analysis (custom lint rules) to detect assertion-less tests or tautological assertions.</step>
-            <step>Code review process emphasizing assertion quality.</step>
-        </detection_strategy>
-    </fake_test_detection>
-
-    <!-- ################################################## -->
-    <!-- ############## LLM SPECIFIC TESTING ################ -->
-    <!-- ################################################## -->
-    
-    <e2e_real_llm_tests>
-        <description>
+    <fake_test_types>
+      <type name="auto_pass_flags">Tests designed to always pass (e.g., `assert True`, silent try/except).</type>
+      <type name="trivial_assertions">Testing constants or language features.</type>
+      <type name="mock_only_tests (L0)">Tests that only verify interactions between mocks, not the SUT behavior.</type>
+      <type name="empty_tests">Tests with no assertions or meaningful verification.</type>
+    </fake_test_types>
+    <detection_strategy>
+      <step>Static analysis (custom lint rules) to detect assertion-less tests or tautological assertions.</step>
+      <step>Code review process emphasizing assertion quality.</step>
+    </detection_strategy>
+  </fake_test_detection>
+  <e2e_real_llm_tests>
+    <description>
             Comprehensive E2E tests (L4 Realism) making real LLM calls for the 9 critical example prompts, with 10 variations each (90 tests total). Executed in Staging.
         </description>
-        
-        <test_file>app/tests/agents/test_example_prompts_e2e_real.py</test_file>
-        
-        <features>
-            <feature>Real LLM calls through the complete agent workflow (Supervisor and Sub-agents).</feature>
-            <feature>Utilization of Sanitized Production Data (L4) or large-scale Synthetic Data.</feature>
-            <feature>Automated Quality Gate validation for all AI-generated responses.</feature>
-            <feature>Performance metrics collection (Time to first token, total response time, token usage).</feature>
-        </features>
-        
-        <example_prompts_tested>
-            <!-- Prompt list retained from original XML -->
-            <prompt id="1" category="cost_optimization">Cost reduction with quality preservation</prompt>
-            <prompt id="2" category="latency_optimization">3x latency improvement without cost increase</prompt>
-            <prompt id="3" category="capacity_planning">50% usage increase impact analysis</prompt>
-            <prompt id="4" category="function_optimization">Advanced function optimization methods</prompt>
-            <prompt id="5" category="model_selection">New model effectiveness evaluation</prompt>
-            <prompt id="6" category="audit">KV cache audit for optimizations</prompt>
-            <prompt id="7" category="multi_objective">20% cost reduction + 2x latency improvement</prompt>
-            <prompt id="8" category="tool_migration">GPT-5 migration recommendations</prompt>
-            <prompt id="9" category="rollback_analysis">Upgrade worth analysis and rollback</prompt>
-        </example_prompts_tested>
-        
-        <quality_validation>
-            <description>All responses validated through the automated QualityGateService.</description>
-            <validation_criteria>
-                <criterion>Specificity score >= 0.6</criterion>
-                <criterion>Actionability score >= 0.6</criterion>
-                <criterion>Factual Correctness (No hallucinations in metrics).</criterion>
-                <criterion>No circular reasoning and minimal generic phrases.</criterion>
-            </validation_criteria>
-        </quality_validation>
-    </e2e_real_llm_tests>
-    
-    <real_llm_testing_configuration>
-        <description>
+    <test_file>app/tests/agents/test_example_prompts_e2e_real.py</test_file>
+    <features>
+      <feature>Real LLM calls through the complete agent workflow (Supervisor and Sub-agents).</feature>
+      <feature>Utilization of Sanitized Production Data (L4) or large-scale Synthetic Data.</feature>
+      <feature>Automated Quality Gate validation for all AI-generated responses.</feature>
+      <feature>Performance metrics collection (Time to first token, total response time, token usage).</feature>
+    </features>
+    <example_prompts_tested>
+      <prompt id="1" category="cost_optimization">Cost reduction with quality preservation</prompt>
+      <prompt id="2" category="latency_optimization">3x latency improvement without cost increase</prompt>
+      <prompt id="3" category="capacity_planning">50% usage increase impact analysis</prompt>
+      <prompt id="4" category="function_optimization">Advanced function optimization methods</prompt>
+      <prompt id="5" category="model_selection">New model effectiveness evaluation</prompt>
+      <prompt id="6" category="audit">KV cache audit for optimizations</prompt>
+      <prompt id="7" category="multi_objective">20% cost reduction + 2x latency improvement</prompt>
+      <prompt id="8" category="tool_migration">GPT-5 migration recommendations</prompt>
+      <prompt id="9" category="rollback_analysis">Upgrade worth analysis and rollback</prompt>
+    </example_prompts_tested>
+    <quality_validation>
+      <description>All responses validated through the automated QualityGateService.</description>
+      <validation_criteria>
+        <criterion>Specificity score &gt;= 0.6</criterion>
+        <criterion>Actionability score &gt;= 0.6</criterion>
+        <criterion>Factual Correctness (No hallucinations in metrics).</criterion>
+        <criterion>No circular reasoning and minimal generic phrases.</criterion>
+      </validation_criteria>
+    </quality_validation>
+  </e2e_real_llm_tests>
+  <real_llm_testing_configuration>
+    <description>
             Configuration, execution patterns, and best practices for tests utilizing actual LLM API calls (L3/L4).
         </description>
-        
-        <configuration_options>
-            <option name="--real-llm">Enables real LLM calls.</option>
-            <option name="--llm-model">
-                <default>gemini-1.5-flash (Cost-effective)</default>
-                <alternatives>gpt-4, claude-3 (For high-fidelity validation)</alternatives>
-            </option>
-            <option name="--llm-temperature">
-                <default>0.0</default>
-                <description>MUST be 0.0 for deterministic testing.</description>
-            </option>
-        </configuration_options>
-        
-        <best_practices>
-            <practice>Use dedicated TEST_* API keys with separate rate limits from production.</practice>
-            <practice>Run L4 Real LLM tests selectively (nightly or pre-release) to manage costs.</practice>
-            <practice>Implement exponential backoff and jitter for rate limit handling.</practice>
-            <practice>Ensure robust seed data management for reproducibility.</practice>
-        </best_practices>
-    </real_llm_testing_configuration>
-
-    <!-- ################################################## -->
-    <!-- ############ ADVANCED TECHNIQUES RETAINED ########## -->
-    <!-- ################################################## -->
-
-    <frontend_parallel_testing>
-        <description>
+    <configuration_options>
+      <option name="--real-llm">Enables real LLM calls.</option>
+      <option name="--llm-model">
+        <default>gemini-1.5-flash (Cost-effective)</default>
+        <alternatives>gpt-4, claude-3 (For high-fidelity validation)</alternatives>
+      </option>
+      <option name="--llm-temperature">
+        <default>0.0</default>
+        <description>MUST be 0.0 for deterministic testing.</description>
+      </option>
+    </configuration_options>
+    <best_practices>
+      <practice>Use dedicated TEST_* API keys with separate rate limits from production.</practice>
+      <practice>Run L4 Real LLM tests selectively (nightly or pre-release) to manage costs.</practice>
+      <practice>Implement exponential backoff and jitter for rate limit handling.</practice>
+      <practice>Ensure robust seed data management for reproducibility.</practice>
+    </best_practices>
+  </real_llm_testing_configuration>
+  <frontend_parallel_testing>
+    <description>
             Optimized frontend test execution using intelligent parallelization based on test suite priorities and resource weights.
             (Details regarding jest.config.suites.cjs, test-suite-runner.js, suite definitions, and execution strategy are retained from v3.2 as they are already robust).
         </description>
-        <!-- Detailed content from v3.2 retained here -->
-    </frontend_parallel_testing>
-
-    <feature_flag_testing>
-        <description>
+  </frontend_parallel_testing>
+  <feature_flag_testing>
+    <description>
             Comprehensive feature flag system enabling TDD workflow and controlled rollouts while maintaining 100% CI/CD pass rate.
             (Details regarding status types, configuration, decorators, and utilities are retained from v3.2 as they are already robust).
         </description>
-         <!-- Detailed content from v3.2 retained here -->
-    </feature_flag_testing>
-
-    <!-- ################################################## -->
-    <!-- ######### OPERATIONAL COMMANDS & PRACTICES ######### -->
-    <!-- ################################################## -->
-
-    <unified_commands>
-        <command name="pre_commit">python test_runner.py --level smoke</command>
-        <command name="development_unit">python test_runner.py --level unit</command>
-        <command name="feature_validation (L3)">python test_runner.py --level integration</command>
-        <command name="pre_release (L4)">python test_runner.py --level e2e --env staging</command>
-        <command name="real_llm_critical">python test_runner.py --level critical --real-llm --parallel 1</command>
-        <!-- Other commands retained from v3.2 -->
-    </unified_commands>
-
-    <best_practices>
-        <practice>Adhere strictly to the Mock-Real Spectrum guidelines; prioritize L2/L3 over L1 wherever feasible.</practice>
-        <practice>Maintain test isolation; utilize fixtures and transaction rollbacks to prevent shared state.</practice>
-        <practice>Validate both success paths (happy path) and failure paths (error handling, edge cases).</practice>
-        <practice>Ensure all tests contain meaningful assertions; actively remove fake tests.</practice>
-        <practice>Treat test code with the same quality standards as production code (See Real Test Requirements).</practice>
-        <practice>Actively address quarantined tests according to the Flaky Test Management SLAs.</practice>
-    </best_practices>
-
+  </feature_flag_testing>
+  <unified_commands>
+    <command name="pre_commit">python test_runner.py --level smoke</command>
+    <command name="development_unit">python test_runner.py --level unit</command>
+    <command name="feature_validation (L3)">python test_runner.py --level integration</command>
+    <command name="pre_release (L4)">python test_runner.py --level e2e --env staging</command>
+    <command name="real_llm_critical">python test_runner.py --level critical --real-llm --parallel 1</command>
+  </unified_commands>
+  <best_practices>
+    <practice>Adhere strictly to the Mock-Real Spectrum guidelines; prioritize L2/L3 over L1 wherever feasible.</practice>
+    <practice>Maintain test isolation; utilize fixtures and transaction rollbacks to prevent shared state.</practice>
+    <practice>Validate both success paths (happy path) and failure paths (error handling, edge cases).</practice>
+    <practice>Ensure all tests contain meaningful assertions; actively remove fake tests.</practice>
+    <practice>Treat test code with the same quality standards as production code (See Real Test Requirements).</practice>
+    <practice>Actively address quarantined tests according to the Flaky Test Management SLAs.</practice>
+  </best_practices>
 </specification>

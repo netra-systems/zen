@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning category="configuration_secrets" date="2025-08-18" priority="CRITICAL">
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.393427</last_edited>
+  </metadata>
   <title>GEMINI API Key Loading Paradox - RESOLVED</title>
-  
   <problem>
     <symptom>Dev launcher shows loading GEMINI_API_KEY successfully but backend reports "Required secrets missing: ['gemini-api-key']"</symptom>
     <symptom>Logging shows app.core.unified_logging instead of actual module locations</symptom>
     <impact>Backend fails to start due to missing secrets that are actually present</impact>
   </problem>
-  
   <root_cause>
     <issue type="timing">
       Configuration loading happens at module import time, not runtime.
@@ -19,7 +20,6 @@
       All logs appear to come from unified_logging module instead of actual callers.
     </issue>
   </root_cause>
-  
   <solution>
     <fix file="app/config.py">
       Changed from eager loading (settings = get_config()) to lazy loading.
@@ -36,21 +36,18 @@
       Changed from {name}:{function}:{line} to {extra[caller_module]}:{extra[caller_function]}:{extra[caller_line]}.
     </fix>
   </solution>
-  
   <lessons>
     <lesson>NEVER load configuration at module import time - always use lazy loading</lesson>
     <lesson>Module-level code executes immediately on import, before subprocess env is ready</lesson>
     <lesson>When wrapping loggers, preserve caller frame information for debugging</lesson>
     <lesson>Environment variables in subprocesses may not be immediately available at import time</lesson>
   </lessons>
-  
   <prevention>
     <guideline>Always use lazy initialization for configuration that depends on environment</guideline>
     <guideline>Never execute configuration loading at module level</guideline>
     <guideline>Use __getattr__ or property decorators for lazy attribute access</guideline>
     <guideline>Test subprocess environment inheritance with timing scenarios</guideline>
   </prevention>
-  
   <verification>
     <test>Run dev_launcher.py and verify no "Required secrets missing" error</test>
     <test>Check logs show actual module names like app.core.configuration.secrets:113</test>

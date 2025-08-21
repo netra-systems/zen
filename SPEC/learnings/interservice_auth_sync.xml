@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
   <metadata>
     <title>Interservice Auth Sync Learnings</title>
     <category>Authentication</category>
     <priority>CRITICAL</priority>
     <last_updated>2025-08-19</last_updated>
+    <last_edited>2025-08-21T08:47:29.492365</last_edited>
   </metadata>
-
   <problem>
     <description>
       Auth service and backend service user IDs were out of sync, causing WebSocket authentication failures
@@ -20,7 +20,6 @@
       Auth service was creating users with hardcoded IDs without checking if user already exists in main database with different ID
     </root_cause>
   </problem>
-
   <solution>
     <approach>Check for existing users by email first, use their ID if found</approach>
     <implementation>
@@ -30,17 +29,15 @@
       <step>4. Update auth service to sync first, then use returned ID</step>
     </implementation>
   </solution>
-
   <key_principles>
     <principle>Email is the unique identifier across services</principle>
     <principle>Main database is source of truth for user IDs</principle>
     <principle>Auth service must sync with main DB before creating JWTs</principle>
     <principle>Always check for existing users by email to avoid duplicates</principle>
   </key_principles>
-
   <code_pattern>
     <description>Proper user sync pattern</description>
-    <pattern><![CDATA[
+    <pattern>
 # 1. Check for existing user by email
 existing_user = await session.execute(
     select(User).filter(User.email == auth_user.email)
@@ -52,20 +49,17 @@ if existing_user:
 new_user = User(id=generate_unique_id(), email=email, ...)
 session.add(new_user)
 return new_user.id
-]]></pattern>
+</pattern>
   </code_pattern>
-
   <files_modified>
     <file>auth_service/auth_core/database/main_db_sync.py</file>
     <file>auth_service/auth_core/routes/auth_routes.py</file>
   </files_modified>
-
   <testing>
     <test_case>Dev login with no existing user - should create new user</test_case>
     <test_case>Dev login with existing user - should use existing ID</test_case>
     <test_case>WebSocket auth after dev login - should succeed</test_case>
   </testing>
-
   <future_considerations>
     <consideration>Consider using UUIDs for all user IDs to avoid conflicts</consideration>
     <consideration>Implement proper user merge logic for OAuth providers</consideration>

@@ -1,297 +1,275 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Test Coverage Requirements for New Features</name>
-        <type>testing_coverage</type>
-        <version>1.0</version>
-        <last_updated>2025-08-11</last_updated>
-        <purpose>Define mandatory test coverage requirements for all new features</purpose>
-    </metadata>
-    
-    <overview>
-        <description>
+  <metadata>
+    <name>Test Coverage Requirements for New Features</name>
+    <type>testing_coverage</type>
+    <version>1.0</version>
+    <last_updated>2025-08-11</last_updated>
+    <purpose>Define mandatory test coverage requirements for all new features</purpose>
+    <last_edited>2025-08-21T08:47:28.412185</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.412185">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <overview>
+    <description>
             Comprehensive test coverage requirements that must be met for all new feature development.
             Based on analysis of current gaps and industry best practices for enterprise AI platforms.
         </description>
-        <current_state>
-            <overall_coverage>51.4%</overall_coverage>
-            <target_coverage>97%</target_coverage>
-            <critical_gaps>
-                <gap>Frontend Auth System: 17-29% coverage</gap>
-                <gap>Chat Components: 4-13% coverage</gap>
-                <gap>WebSocket Management: Minimal coverage</gap>
-                <gap>Agent Orchestration: Limited integration tests</gap>
-            </critical_gaps>
-        </current_state>
-    </overview>
-
-    <mandatory_requirements>
-        <requirement id="CR001" priority="CRITICAL">
-            <name>Minimum Coverage Threshold</name>
-            <description>All new features MUST achieve minimum 90% code coverage before merge</description>
-            <enforcement>Automated CI/CD gate</enforcement>
-            <exceptions>Third-party integrations may have 80% minimum with justification</exceptions>
-        </requirement>
-
-        <requirement id="CR002" priority="CRITICAL">
-            <name>Test Types Required</name>
-            <description>Each new feature MUST include all test types</description>
-            <test_types>
-                <type name="unit" minimum_coverage="95%">Isolated component tests</type>
-                <type name="integration" minimum_coverage="85%">Component interaction tests</type>
-                <type name="e2e" minimum_coverage="70%">Full workflow tests</type>
-                <type name="edge_cases" minimum_coverage="80%">Error and boundary conditions</type>
-            </test_types>
-        </requirement>
-
-        <requirement id="CR003" priority="HIGH">
-            <name>Performance Benchmarks</name>
-            <description>Features impacting performance must include benchmarks</description>
-            <benchmarks>
-                <benchmark>Response time under load (P95 &lt; 200ms)</benchmark>
-                <benchmark>Memory usage patterns</benchmark>
-                <benchmark>Concurrent user handling</benchmark>
-            </benchmarks>
-        </requirement>
-
-        <requirement id="CR004" priority="HIGH">
-            <name>Security Testing</name>
-            <description>Security-sensitive features require additional tests</description>
-            <security_tests>
-                <test>Input validation and sanitization</test>
-                <test>Authentication and authorization flows</test>
-                <test>Rate limiting and abuse prevention</test>
-                <test>Data encryption and privacy</test>
-            </security_tests>
-        </requirement>
-    </mandatory_requirements>
-
-    <feature_specific_requirements>
-        <category name="frontend_components">
-            <requirement>
-                <component>React Components</component>
-                <tests_required>
-                    <test>Render tests with React Testing Library</test>
-                    <test>User interaction simulation</test>
-                    <test>State management validation</test>
-                    <test>Accessibility (ARIA) compliance</test>
-                    <test>Responsive design breakpoints</test>
-                </tests_required>
-                <coverage_target>95%</coverage_target>
-            </requirement>
-            
-            <requirement>
-                <component>WebSocket Hooks</component>
-                <tests_required>
-                    <test>Connection lifecycle management</test>
-                    <test>Message handling and parsing</test>
-                    <test>Reconnection logic</test>
-                    <test>Error recovery scenarios</test>
-                    <test>Provider context wrapping</test>
-                </tests_required>
-                <coverage_target>90%</coverage_target>
-            </requirement>
-        </category>
-
-        <category name="backend_services">
-            <requirement>
-                <component>API Endpoints</component>
-                <tests_required>
-                    <test>Valid request handling</test>
-                    <test>Invalid input rejection</test>
-                    <test>Authentication enforcement</test>
-                    <test>Rate limiting behavior</test>
-                    <test>Database transaction integrity</test>
-                </tests_required>
-                <coverage_target>95%</coverage_target>
-            </requirement>
-
-            <requirement>
-                <component>Agent Tools</component>
-                <tests_required>
-                    <test>Tool initialization and configuration</test>
-                    <test>Input validation and transformation</test>
-                    <test>LLM interaction mocking</test>
-                    <test>Error handling and retries</test>
-                    <test>Performance under load</test>
-                </tests_required>
-                <coverage_target>90%</coverage_target>
-            </requirement>
-        </category>
-
-        <category name="data_layer">
-            <requirement>
-                <component>Database Operations</component>
-                <tests_required>
-                    <test>CRUD operations validation</test>
-                    <test>Transaction rollback scenarios</test>
-                    <test>Connection pool management</test>
-                    <test>Query optimization verification</test>
-                    <test>Migration testing</test>
-                </tests_required>
-                <coverage_target>95%</coverage_target>
-            </requirement>
-
-            <requirement>
-                <component>Cache Layer</component>
-                <tests_required>
-                    <test>Cache hit/miss scenarios</test>
-                    <test>Invalidation logic</test>
-                    <test>TTL expiration</test>
-                    <test>Concurrent access patterns</test>
-                </tests_required>
-                <coverage_target>90%</coverage_target>
-            </requirement>
-        </category>
-    </feature_specific_requirements>
-
-    <test_implementation_checklist>
-        <before_development>
-            <step>Review existing test patterns in similar features</step>
-            <step>Identify all test categories needed</step>
-            <step>Create test plan with coverage targets</step>
-            <step>Set up test data generators</step>
-        </before_development>
-
-        <during_development>
-            <step>Write tests alongside implementation (TDD preferred)</step>
-            <step>Run smoke tests frequently (python test_runner.py --level smoke)</step>
-            <step>Validate coverage incrementally</step>
-            <step>Document test purposes and edge cases</step>
-        </during_development>
-
-        <before_merge>
-            <step>Run comprehensive test suite (python test_runner.py --level comprehensive)</step>
-            <step>Verify coverage meets all thresholds</step>
-            <step>Review test quality and assertions</step>
-            <step>Ensure CI/CD gates pass</step>
-            <step>Update test documentation</step>
-        </before_merge>
-    </test_implementation_checklist>
-
-    <coverage_gaps_to_prioritize>
-        <priority level="1" deadline="Week 1">
-            <area>Authentication System</area>
-            <current>17-29%</current>
-            <target>95%</target>
-            <tests_needed>
-                <test>Context provider initialization</test>
-                <test>Login/logout flows</test>
-                <test>Token refresh mechanism</test>
-                <test>Permission checking</test>
-                <test>Protected route authorization</test>
-            </tests_needed>
-        </priority>
-
-        <priority level="2" deadline="Week 2">
-            <area>Chat Components</area>
-            <current>4-13%</current>
-            <target>90%</target>
-            <tests_needed>
-                <test>Message input validation</test>
-                <test>File upload handling</test>
-                <test>WebSocket message flow</test>
-                <test>Agent status updates</test>
-                <test>History management</test>
-            </tests_needed>
-        </priority>
-
-        <priority level="3" deadline="Week 3">
-            <area>WebSocket Management</area>
-            <current>Minimal</current>
-            <target>85%</target>
-            <tests_needed>
-                <test>Connection pooling</test>
-                <test>Message broadcasting</test>
-                <test>Heartbeat mechanism</test>
-                <test>Reconnection logic</test>
-                <test>Error recovery</test>
-            </tests_needed>
-        </priority>
-    </coverage_gaps_to_prioritize>
-
-    <automated_enforcement>
-        <ci_cd_gates>
-            <gate name="pre_commit">
-                <command>python test_runner.py --level smoke</command>
-                <failure_action>Block commit</failure_action>
-            </gate>
-            
-            <gate name="pull_request">
-                <command>python test_runner.py --level unit</command>
-                <coverage_check>true</coverage_check>
-                <minimum_coverage>90%</minimum_coverage>
-                <failure_action>Request changes</failure_action>
-            </gate>
-
-            <gate name="pre_merge">
-                <command>python test_runner.py --level comprehensive</command>
-                <coverage_check>true</coverage_check>
-                <minimum_coverage>95%</minimum_coverage>
-                <failure_action>Block merge</failure_action>
-            </gate>
-        </ci_cd_gates>
-
-        <coverage_reporting>
-            <tool>pytest-cov</tool>
-            <format>html,json,terminal</format>
-            <fail_under>90</fail_under>
-            <report_location>test_reports/coverage/</report_location>
-        </coverage_reporting>
-    </automated_enforcement>
-
-    <test_data_strategy>
-        <synthetic_data>
-            <purpose>Consistent, reproducible test scenarios</purpose>
-            <generators>
-                <generator>User profiles with varying permissions</generator>
-                <generator>Chat conversation histories</generator>
-                <generator>Agent execution traces</generator>
-                <generator>Performance metrics timeseries</generator>
-            </generators>
-        </synthetic_data>
-
-        <fixtures>
-            <fixture>Authenticated user sessions</fixture>
-            <fixture>WebSocket connections</fixture>
-            <fixture>Database seed data</fixture>
-            <fixture>Mock LLM responses</fixture>
-        </fixtures>
-    </test_data_strategy>
-
-    <quality_metrics>
-        <metric name="coverage_percentage">
-            <description>Percentage of code covered by tests</description>
-            <target>97%</target>
-            <measurement>pytest-cov reports</measurement>
-        </metric>
-
-        <metric name="test_execution_time">
-            <description>Time to run test suites</description>
-            <targets>
-                <target level="smoke">30 seconds</target>
-                <target level="unit">2 minutes</target>
-                <target level="comprehensive">15 minutes</target>
-            </targets>
-        </metric>
-
-        <metric name="test_flakiness">
-            <description>Percentage of non-deterministic test failures</description>
-            <target>&lt; 1%</target>
-            <measurement>CI/CD failure analysis</measurement>
-        </metric>
-
-        <metric name="defect_escape_rate">
-            <description>Bugs found in production vs testing</description>
-            <target>&lt; 5%</target>
-            <measurement>Bug tracking system</measurement>
-        </metric>
-    </quality_metrics>
-
-    <references>
-        <reference>SPEC/testing.xml - Overall testing strategy</reference>
-        <reference>SPEC/code_changes.xml - Code change checklist</reference>
-        <reference>test_reports/top_100_missing_tests.md - Gap analysis</reference>
-        <reference>test_runner.py - Unified test execution</reference>
-    </references>
+    <current_state>
+      <overall_coverage>51.4%</overall_coverage>
+      <target_coverage>97%</target_coverage>
+      <critical_gaps>
+        <gap>Frontend Auth System: 17-29% coverage</gap>
+        <gap>Chat Components: 4-13% coverage</gap>
+        <gap>WebSocket Management: Minimal coverage</gap>
+        <gap>Agent Orchestration: Limited integration tests</gap>
+      </critical_gaps>
+    </current_state>
+  </overview>
+  <mandatory_requirements>
+    <requirement id="CR001" priority="CRITICAL">
+      <name>Minimum Coverage Threshold</name>
+      <description>All new features MUST achieve minimum 90% code coverage before merge</description>
+      <enforcement>Automated CI/CD gate</enforcement>
+      <exceptions>Third-party integrations may have 80% minimum with justification</exceptions>
+    </requirement>
+    <requirement id="CR002" priority="CRITICAL">
+      <name>Test Types Required</name>
+      <description>Each new feature MUST include all test types</description>
+      <test_types>
+        <type name="unit" minimum_coverage="95%">Isolated component tests</type>
+        <type name="integration" minimum_coverage="85%">Component interaction tests</type>
+        <type name="e2e" minimum_coverage="70%">Full workflow tests</type>
+        <type name="edge_cases" minimum_coverage="80%">Error and boundary conditions</type>
+      </test_types>
+    </requirement>
+    <requirement id="CR003" priority="HIGH">
+      <name>Performance Benchmarks</name>
+      <description>Features impacting performance must include benchmarks</description>
+      <benchmarks>
+        <benchmark>Response time under load (P95 &lt; 200ms)</benchmark>
+        <benchmark>Memory usage patterns</benchmark>
+        <benchmark>Concurrent user handling</benchmark>
+      </benchmarks>
+    </requirement>
+    <requirement id="CR004" priority="HIGH">
+      <name>Security Testing</name>
+      <description>Security-sensitive features require additional tests</description>
+      <security_tests>
+        <test>Input validation and sanitization</test>
+        <test>Authentication and authorization flows</test>
+        <test>Rate limiting and abuse prevention</test>
+        <test>Data encryption and privacy</test>
+      </security_tests>
+    </requirement>
+  </mandatory_requirements>
+  <feature_specific_requirements>
+    <category name="frontend_components">
+      <requirement>
+        <component>React Components</component>
+        <tests_required>
+          <test>Render tests with React Testing Library</test>
+          <test>User interaction simulation</test>
+          <test>State management validation</test>
+          <test>Accessibility (ARIA) compliance</test>
+          <test>Responsive design breakpoints</test>
+        </tests_required>
+        <coverage_target>95%</coverage_target>
+      </requirement>
+      <requirement>
+        <component>WebSocket Hooks</component>
+        <tests_required>
+          <test>Connection lifecycle management</test>
+          <test>Message handling and parsing</test>
+          <test>Reconnection logic</test>
+          <test>Error recovery scenarios</test>
+          <test>Provider context wrapping</test>
+        </tests_required>
+        <coverage_target>90%</coverage_target>
+      </requirement>
+    </category>
+    <category name="backend_services">
+      <requirement>
+        <component>API Endpoints</component>
+        <tests_required>
+          <test>Valid request handling</test>
+          <test>Invalid input rejection</test>
+          <test>Authentication enforcement</test>
+          <test>Rate limiting behavior</test>
+          <test>Database transaction integrity</test>
+        </tests_required>
+        <coverage_target>95%</coverage_target>
+      </requirement>
+      <requirement>
+        <component>Agent Tools</component>
+        <tests_required>
+          <test>Tool initialization and configuration</test>
+          <test>Input validation and transformation</test>
+          <test>LLM interaction mocking</test>
+          <test>Error handling and retries</test>
+          <test>Performance under load</test>
+        </tests_required>
+        <coverage_target>90%</coverage_target>
+      </requirement>
+    </category>
+    <category name="data_layer">
+      <requirement>
+        <component>Database Operations</component>
+        <tests_required>
+          <test>CRUD operations validation</test>
+          <test>Transaction rollback scenarios</test>
+          <test>Connection pool management</test>
+          <test>Query optimization verification</test>
+          <test>Migration testing</test>
+        </tests_required>
+        <coverage_target>95%</coverage_target>
+      </requirement>
+      <requirement>
+        <component>Cache Layer</component>
+        <tests_required>
+          <test>Cache hit/miss scenarios</test>
+          <test>Invalidation logic</test>
+          <test>TTL expiration</test>
+          <test>Concurrent access patterns</test>
+        </tests_required>
+        <coverage_target>90%</coverage_target>
+      </requirement>
+    </category>
+  </feature_specific_requirements>
+  <test_implementation_checklist>
+    <before_development>
+      <step>Review existing test patterns in similar features</step>
+      <step>Identify all test categories needed</step>
+      <step>Create test plan with coverage targets</step>
+      <step>Set up test data generators</step>
+    </before_development>
+    <during_development>
+      <step>Write tests alongside implementation (TDD preferred)</step>
+      <step>Run smoke tests frequently (python test_runner.py --level smoke)</step>
+      <step>Validate coverage incrementally</step>
+      <step>Document test purposes and edge cases</step>
+    </during_development>
+    <before_merge>
+      <step>Run comprehensive test suite (python test_runner.py --level comprehensive)</step>
+      <step>Verify coverage meets all thresholds</step>
+      <step>Review test quality and assertions</step>
+      <step>Ensure CI/CD gates pass</step>
+      <step>Update test documentation</step>
+    </before_merge>
+  </test_implementation_checklist>
+  <coverage_gaps_to_prioritize>
+    <priority level="1" deadline="Week 1">
+      <area>Authentication System</area>
+      <current>17-29%</current>
+      <target>95%</target>
+      <tests_needed>
+        <test>Context provider initialization</test>
+        <test>Login/logout flows</test>
+        <test>Token refresh mechanism</test>
+        <test>Permission checking</test>
+        <test>Protected route authorization</test>
+      </tests_needed>
+    </priority>
+    <priority level="2" deadline="Week 2">
+      <area>Chat Components</area>
+      <current>4-13%</current>
+      <target>90%</target>
+      <tests_needed>
+        <test>Message input validation</test>
+        <test>File upload handling</test>
+        <test>WebSocket message flow</test>
+        <test>Agent status updates</test>
+        <test>History management</test>
+      </tests_needed>
+    </priority>
+    <priority level="3" deadline="Week 3">
+      <area>WebSocket Management</area>
+      <current>Minimal</current>
+      <target>85%</target>
+      <tests_needed>
+        <test>Connection pooling</test>
+        <test>Message broadcasting</test>
+        <test>Heartbeat mechanism</test>
+        <test>Reconnection logic</test>
+        <test>Error recovery</test>
+      </tests_needed>
+    </priority>
+  </coverage_gaps_to_prioritize>
+  <automated_enforcement>
+    <ci_cd_gates>
+      <gate name="pre_commit">
+        <command>python test_runner.py --level smoke</command>
+        <failure_action>Block commit</failure_action>
+      </gate>
+      <gate name="pull_request">
+        <command>python test_runner.py --level unit</command>
+        <coverage_check>true</coverage_check>
+        <minimum_coverage>90%</minimum_coverage>
+        <failure_action>Request changes</failure_action>
+      </gate>
+      <gate name="pre_merge">
+        <command>python test_runner.py --level comprehensive</command>
+        <coverage_check>true</coverage_check>
+        <minimum_coverage>95%</minimum_coverage>
+        <failure_action>Block merge</failure_action>
+      </gate>
+    </ci_cd_gates>
+    <coverage_reporting>
+      <tool>pytest-cov</tool>
+      <format>html,json,terminal</format>
+      <fail_under>90</fail_under>
+      <report_location>test_reports/coverage/</report_location>
+    </coverage_reporting>
+  </automated_enforcement>
+  <test_data_strategy>
+    <synthetic_data>
+      <purpose>Consistent, reproducible test scenarios</purpose>
+      <generators>
+        <generator>User profiles with varying permissions</generator>
+        <generator>Chat conversation histories</generator>
+        <generator>Agent execution traces</generator>
+        <generator>Performance metrics timeseries</generator>
+      </generators>
+    </synthetic_data>
+    <fixtures>
+      <fixture>Authenticated user sessions</fixture>
+      <fixture>WebSocket connections</fixture>
+      <fixture>Database seed data</fixture>
+      <fixture>Mock LLM responses</fixture>
+    </fixtures>
+  </test_data_strategy>
+  <quality_metrics>
+    <metric name="coverage_percentage">
+      <description>Percentage of code covered by tests</description>
+      <target>97%</target>
+      <measurement>pytest-cov reports</measurement>
+    </metric>
+    <metric name="test_execution_time">
+      <description>Time to run test suites</description>
+      <targets>
+        <target level="smoke">30 seconds</target>
+        <target level="unit">2 minutes</target>
+        <target level="comprehensive">15 minutes</target>
+      </targets>
+    </metric>
+    <metric name="test_flakiness">
+      <description>Percentage of non-deterministic test failures</description>
+      <target>&lt; 1%</target>
+      <measurement>CI/CD failure analysis</measurement>
+    </metric>
+    <metric name="defect_escape_rate">
+      <description>Bugs found in production vs testing</description>
+      <target>&lt; 5%</target>
+      <measurement>Bug tracking system</measurement>
+    </metric>
+  </quality_metrics>
+  <references>
+    <reference>SPEC/testing.xml - Overall testing strategy</reference>
+    <reference>SPEC/code_changes.xml - Code change checklist</reference>
+    <reference>test_reports/top_100_missing_tests.md - Gap analysis</reference>
+    <reference>test_runner.py - Unified test execution</reference>
+  </references>
 </specification>

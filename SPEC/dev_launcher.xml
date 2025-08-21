@@ -1,16 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <name>Dev Launcher</name>
-    <version>2.0.0</version>
-    <description>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.424916</last_edited>
+  </metadata>
+  <name>Dev Launcher</name>
+  <version>2.0.0</version>
+  <description>
         High-performance development environment launcher with intelligent caching,
         optimized startup sequences, real-time logging, health monitoring,
         and multi-service orchestration. Target: Sub-10 second cached startup.
     </description>
-    
-    <performance_optimization_reference>
-        <spec>SPEC/dev_launcher_performance.xml</spec>
-        <description>
+  <performance_optimization_reference>
+    <spec>SPEC/dev_launcher_performance.xml</spec>
+    <description>
             See dev_launcher_performance.xml for aggressive performance optimizations including:
             - Sub-10 second startup requirements
             - Silent logging implementation
@@ -18,50 +20,47 @@
             - Aggressive caching strategies
             - Multiprocessing requirements
         </description>
-    </performance_optimization_reference>
-    
-    <architecture>
-        <components>
-            <component name="DevLauncher" file="dev_launcher/launcher.py">
-                <responsibility>Main orchestrator for development services</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-            <component name="LogStreamer" file="dev_launcher/log_streamer.py">
-                <responsibility>Real-time log streaming with color coding</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-            <component name="HealthMonitor" file="dev_launcher/health_monitor.py">
-                <responsibility>Service health monitoring and recovery</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-            <component name="ProcessManager" file="dev_launcher/process_manager.py">
-                <responsibility>Subprocess lifecycle management</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-            <component name="CacheManager" file="dev_launcher/cache_manager.py">
-                <responsibility>Startup state and file hash caching</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-            <component name="StartupOptimizer" file="dev_launcher/startup_optimizer.py">
-                <responsibility>Optimize startup sequence and skip unnecessary steps</responsibility>
-                <max_lines>300</max_lines>
-            </component>
-        </components>
-    </architecture>
-    
-    <logging_requirements>
-        <requirement id="LOG-001" priority="CRITICAL">
-            <description>Service name appears in its designated color</description>
-            <implementation>
+  </performance_optimization_reference>
+  <architecture>
+    <components>
+      <component name="DevLauncher" file="dev_launcher/launcher.py">
+        <responsibility>Main orchestrator for development services</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="LogStreamer" file="dev_launcher/log_streamer.py">
+        <responsibility>Real-time log streaming with color coding</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="HealthMonitor" file="dev_launcher/health_monitor.py">
+        <responsibility>Service health monitoring and recovery</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="ProcessManager" file="dev_launcher/process_manager.py">
+        <responsibility>Subprocess lifecycle management</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="CacheManager" file="dev_launcher/cache_manager.py">
+        <responsibility>Startup state and file hash caching</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="StartupOptimizer" file="dev_launcher/startup_optimizer.py">
+        <responsibility>Optimize startup sequence and skip unnecessary steps</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+    </components>
+  </architecture>
+  <logging_requirements>
+    <requirement id="LOG-001" priority="CRITICAL">
+      <description>Service name appears in its designated color</description>
+      <implementation>
                 - Backend service name: Bright Cyan (only the service name)
                 - Frontend service name: Bright Magenta (only the service name)
                 - Other services: Use designated colors from Colors class
             </implementation>
-        </requirement>
-        
-        <requirement id="LOG-002" priority="CRITICAL">
-            <description>Log content uses standard color scheme</description>
-            <implementation>
+    </requirement>
+    <requirement id="LOG-002" priority="CRITICAL">
+      <description>Log content uses standard color scheme</description>
+      <implementation>
                 - After the service name, ALL log content uses standard terminal colors
                 - Errors: Red
                 - Warnings: Yellow
@@ -71,57 +70,52 @@
                 - NO syntax highlighting for regular log output
                 - Path highlighting only for actual file paths
             </implementation>
-        </requirement>
-        
-        <requirement id="LOG-003">
-            <description>Log format structure</description>
-            <format>[SERVICE_NAME] log_content_here</format>
-            <example>
+    </requirement>
+    <requirement id="LOG-003">
+      <description>Log format structure</description>
+      <format>[SERVICE_NAME] log_content_here</format>
+      <example>
                 - Colored: [BACKEND] (in cyan)
                 - Standard: "Server started on port 8000" (in default colors)
             </example>
-        </requirement>
-    </logging_requirements>
-    
-    <startup_visibility>
-        <requirement id="VIS-001" priority="CRITICAL">
-            <description>Background task logging control</description>
-            <implementation>
+    </requirement>
+  </logging_requirements>
+  <startup_visibility>
+    <requirement id="VIS-001" priority="CRITICAL">
+      <description>Background task logging control</description>
+      <implementation>
                 - Background tasks like index optimization should NOT show logs by default
                 - Only show critical errors from background tasks
                 - Provide --verbose-background flag to enable background task logging
                 - Example: _run_index_optimization_background should log at DEBUG level
                 - Keep startup output focused on main service initialization
             </implementation>
-        </requirement>
-        
-        <requirement id="VIS-002" priority="HIGH">
-            <description>Table check lazy loading</description>
-            <implementation>
+    </requirement>
+    <requirement id="VIS-002" priority="HIGH">
+      <description>Table check lazy loading</description>
+      <implementation>
                 - Database table checks should run silently in background
                 - Only log table issues if problems detected or schema changes needed
                 - Skip logging successful table checks
                 - Provide --verbose-tables flag to show all table check details
                 - Cache table check results to avoid repeated checks
             </implementation>
-        </requirement>
-    </startup_visibility>
-    
-    <performance_optimizations>
-        <requirement id="PERF-001" priority="CRITICAL">
-            <description>No-reload mode for all services</description>
-            <implementation>
+    </requirement>
+  </startup_visibility>
+  <performance_optimizations>
+    <requirement id="PERF-001" priority="CRITICAL">
+      <description>No-reload mode for all services</description>
+      <implementation>
                 - Backend service: Use --reload=false or equivalent to disable auto-reload
                 - Auth service: Disable auto-reload mechanism
                 - Frontend: Configure Next.js for optimized dev mode without unnecessary rebuilds
                 - Provide flag --no-reload to disable all auto-reload features across services
                 - Manual restart required for code changes when no-reload is active
             </implementation>
-        </requirement>
-        
-        <requirement id="PERF-002" priority="CRITICAL">
-            <description>Smart caching for database initialization</description>
-            <implementation>
+    </requirement>
+    <requirement id="PERF-002" priority="CRITICAL">
+      <description>Smart caching for database initialization</description>
+      <implementation>
                 - Cache database migration state using file checksums
                 - Skip migrations if no changes detected in:
                   - Migration files (alembic/versions/*)
@@ -131,11 +125,10 @@
                 - Cache key: hash of all relevant DB files
                 - Provide --force-migrations flag to bypass cache
             </implementation>
-        </requirement>
-        
-        <requirement id="PERF-003" priority="HIGH">
-            <description>Incremental startup optimization</description>
-            <implementation>
+    </requirement>
+    <requirement id="PERF-003" priority="HIGH">
+      <description>Incremental startup optimization</description>
+      <implementation>
                 - Track startup time for each service
                 - Parallelize non-dependent service startups
                 - Skip unnecessary initialization steps when possible:
@@ -147,94 +140,86 @@
                 - Startup MUST complete even if exceeding time goal
                 - Time limits are for monitoring/reporting, not enforcement
             </implementation>
-        </requirement>
-        
-        <requirement id="PERF-004">
-            <description>Service dependency optimization</description>
-            <implementation>
+    </requirement>
+    <requirement id="PERF-004">
+      <description>Service dependency optimization</description>
+      <implementation>
                 - Lazy load optional dependencies
                 - Start services in optimal order based on dependencies
                 - Allow partial startup (e.g., backend without auth for testing)
                 - Cache service readiness state to optimize subsequent checks
             </implementation>
-        </requirement>
-    </performance_optimizations>
-    
-    <health_monitoring>
-        <requirement id="HEALTH-001" priority="CRITICAL">
-            <description>Health checks wait for startup completion</description>
-            <implementation>
+    </requirement>
+  </performance_optimizations>
+  <health_monitoring>
+    <requirement id="HEALTH-001" priority="CRITICAL">
+      <description>Health checks wait for startup completion</description>
+      <implementation>
                 - Health monitoring MUST NOT start immediately after service launch
                 - MUST wait for startup checks to pass before beginning health monitoring
                 - Backend: Wait for /health/ready endpoint to respond successfully
                 - Frontend: Wait for initial compilation and readiness check
                 - Only AFTER startup verification should health monitoring begin
             </implementation>
-        </requirement>
-        
-        <requirement id="HEALTH-002">
-            <description>Startup grace period</description>
-            <implementation>
+    </requirement>
+    <requirement id="HEALTH-002">
+      <description>Startup grace period</description>
+      <implementation>
                 - Backend: 30 second grace period for initial startup
                 - Frontend: 90 second grace period for Next.js compilation
                 - Health checks begin AFTER grace period AND readiness confirmation
             </implementation>
-        </requirement>
-        
-        <requirement id="HEALTH-003">
-            <description>Health check intervals</description>
-            <implementation>
+    </requirement>
+    <requirement id="HEALTH-003">
+      <description>Health check intervals</description>
+      <implementation>
                 - Default check interval: 30 seconds
                 - Only check health AFTER service is confirmed ready
                 - Track consecutive failures before triggering recovery
                 - Max failures before recovery: 5
             </implementation>
-        </requirement>
-    </health_monitoring>
-    
-    <service_startup_sequence>
-        <step order="1">Check cache for previous startup state</step>
-        <step order="2">Environment check (skip if cached and unchanged)</step>
-        <step order="3">Load secrets if configured</step>
-        <step order="4">Check if migrations needed (use file hash cache)</step>
-        <step order="5">Run migrations only if needed</step>
-        <step order="6">Start backend process (with --no-reload if flag set)</step>
-        <step order="7">Start auth service (with --no-reload if flag set)</step>
-        <step order="8">Wait for backend readiness (/health/ready)</step>
-        <step order="9">Verify auth system (/api/auth/config)</step>
-        <step order="10">Start frontend process (optimized mode)</step>
-        <step order="11">Wait for frontend readiness</step>
-        <step order="12">Cache successful startup state</step>
-        <step order="13">ONLY NOW start health monitoring</step>
-    </service_startup_sequence>
-    
-    <port_management>
-        <requirement id="PORT-001" priority="CRITICAL">
-            <description>Dynamic port allocation for auth service</description>
-            <implementation>
+    </requirement>
+  </health_monitoring>
+  <service_startup_sequence>
+    <step order="1">Check cache for previous startup state</step>
+    <step order="2">Environment check (skip if cached and unchanged)</step>
+    <step order="3">Load secrets if configured</step>
+    <step order="4">Check if migrations needed (use file hash cache)</step>
+    <step order="5">Run migrations only if needed</step>
+    <step order="6">Start backend process (with --no-reload if flag set)</step>
+    <step order="7">Start auth service (with --no-reload if flag set)</step>
+    <step order="8">Wait for backend readiness (/health/ready)</step>
+    <step order="9">Verify auth system (/api/auth/config)</step>
+    <step order="10">Start frontend process (optimized mode)</step>
+    <step order="11">Wait for frontend readiness</step>
+    <step order="12">Cache successful startup state</step>
+    <step order="13">ONLY NOW start health monitoring</step>
+  </service_startup_sequence>
+  <port_management>
+    <requirement id="PORT-001" priority="CRITICAL">
+      <description>Dynamic port allocation for auth service</description>
+      <implementation>
                 - Check if port 8081 is available before starting auth service
                 - If port 8081 is in use, dynamically allocate next available port (8082, 8083, etc)
                 - Update backend configuration to use the dynamically allocated auth port
                 - Log the actual port being used for auth service
                 - Store allocated port in startup state cache for consistency
             </implementation>
-        </requirement>
-        
-        <requirement id="PORT-002" priority="HIGH">
-            <description>Port availability checking</description>
-            <implementation>
+    </requirement>
+    <requirement id="PORT-002" priority="HIGH">
+      <description>Port availability checking</description>
+      <implementation>
                 - Use socket library to check port availability before service startup
                 - Implement retry logic with configurable port range (default: 8081-8090)
                 - Provide --auth-port flag to override default port
                 - Display clear message when using non-default port
             </implementation>
-        </requirement>
-    </port_management>
-    
-    <error_messaging>
-        <requirement id="ERROR-001" priority="CRITICAL">
-            <description>Clear and actionable error messages</description>
-            <implementation>
+    </requirement>
+  </port_management>
+  <error_messaging>
+    <requirement id="ERROR-001" priority="CRITICAL">
+      <description>Clear and actionable error messages</description>
+      <implementation>
                 - Phase timeout errors should show what was expected vs what happened
                 - Instead of generic "Phase timeout", show:
                   - Which service failed to start
@@ -243,11 +228,10 @@
                   - Suggested actions to resolve the issue
                 - Example: "Backend failed to start: /health/ready returned 500 after 21.4s (expected 200 within 5s). Check backend logs for startup errors."
             </implementation>
-        </requirement>
-        
-        <requirement id="ERROR-004" priority="CRITICAL">
-            <description>Critical error handling</description>
-            <implementation>
+    </requirement>
+    <requirement id="ERROR-004" priority="CRITICAL">
+      <description>Critical error handling</description>
+      <implementation>
                 - STOP entire process on critical errors (database connection, auth failure, etc)
                 - Display clear critical error message with specific failure reason
                 - Exit with appropriate error code (1 for general, specific codes for types)
@@ -258,44 +242,40 @@
                   - Port binding failures
                 - Non-critical errors should log warnings but continue
             </implementation>
-        </requirement>
-        
-        <requirement id="ERROR-002" priority="HIGH">
-            <description>Progress indicators with meaningful context</description>
-            <implementation>
+    </requirement>
+    <requirement id="ERROR-002" priority="HIGH">
+      <description>Progress indicators with meaningful context</description>
+      <implementation>
                 - Show what phase is currently executing
                 - Display what specific check is being performed
                 - Include service-specific details in progress messages
                 - Example: "Starting backend service on port 8000..." instead of generic "INIT: Loading"
                 - Show actual progress percentage based on completed vs total steps
             </implementation>
-        </requirement>
-        
-        <requirement id="ERROR-003" priority="HIGH">
-            <description>Startup phase descriptions</description>
-            <implementation>
+    </requirement>
+    <requirement id="ERROR-003" priority="HIGH">
+      <description>Startup phase descriptions</description>
+      <implementation>
                 - INIT phase: "Checking environment and dependencies"
                 - LAUNCH phase: "Starting {service_name} service"
                 - READY phase: "Waiting for {service_name} to become ready"
                 - SUCCESS phase: "All services started successfully"
                 - Include service name and port in phase messages
             </implementation>
-        </requirement>
-    </error_messaging>
-    
-    <graceful_shutdown>
-        <requirement id="SHUTDOWN-001" priority="CRITICAL">
-            <description>Proper signal handling for graceful shutdown</description>
-            <implementation>
+    </requirement>
+  </error_messaging>
+  <graceful_shutdown>
+    <requirement id="SHUTDOWN-001" priority="CRITICAL">
+      <description>Proper signal handling for graceful shutdown</description>
+      <implementation>
                 - Install signal handlers for SIGINT (Ctrl+C) and SIGTERM
                 - On Windows, handle keyboard interrupt and console close events
                 - Ensure all cleanup functions are called on any exit path
             </implementation>
-        </requirement>
-        
-        <requirement id="SHUTDOWN-002" priority="CRITICAL">
-            <description>Port cleanup on shutdown</description>
-            <implementation>
+    </requirement>
+    <requirement id="SHUTDOWN-002" priority="CRITICAL">
+      <description>Port cleanup on shutdown</description>
+      <implementation>
                 - Auth service port (dynamic or 8081) MUST be freed on shutdown
                 - Backend service ports MUST be freed on shutdown
                 - Frontend service ports MUST be freed on shutdown
@@ -303,11 +283,10 @@
                 - Verify ports are free after shutdown
                 - Clean up dynamically allocated ports from cache
             </implementation>
-        </requirement>
-        
-        <requirement id="SHUTDOWN-003" priority="HIGH">
-            <description>Service termination order</description>
-            <implementation>
+    </requirement>
+    <requirement id="SHUTDOWN-003" priority="HIGH">
+      <description>Service termination order</description>
+      <implementation>
                 - Stop health monitoring first
                 - Terminate frontend process
                 - Terminate backend process
@@ -315,37 +294,34 @@
                 - Stop all log streamers
                 - Cleanup cache and temporary files
             </implementation>
-        </requirement>
-        
-        <requirement id="SHUTDOWN-004" priority="HIGH">
-            <description>Timeout handling for shutdown</description>
-            <implementation>
+    </requirement>
+    <requirement id="SHUTDOWN-004" priority="HIGH">
+      <description>Timeout handling for shutdown</description>
+      <implementation>
                 - Give each service 5 seconds to gracefully terminate
                 - Force kill if graceful termination fails
                 - Log any services that required force termination
                 - Total shutdown should complete within 15 seconds
             </implementation>
-        </requirement>
-    </graceful_shutdown>
-    
-    <color_codes>
-        <service name="BACKEND" color="\033[96m" description="Bright Cyan"/>
-        <service name="FRONTEND" color="\033[95m" description="Bright Magenta"/>
-        <standard name="ERROR" color="\033[31m" description="Red"/>
-        <standard name="WARNING" color="\033[33m" description="Yellow"/>
-        <standard name="SUCCESS" color="\033[32m" description="Green"/>
-        <standard name="INFO" color="\033[37m" description="White"/>
-        <standard name="DEBUG" color="\033[90m" description="Gray"/>
-        <standard name="RESET" color="\033[0m" description="Reset to default"/>
-    </color_codes>
-    
-    <testing>
-        <test_file>dev_launcher/tests/test_launcher.py</test_file>
-        <test_file>dev_launcher/tests/test_launcher_health.py</test_file>
-        <test_scenarios>
-            <scenario>Verify service name color isolation</scenario>
-            <scenario>Verify health check startup delay</scenario>
-            <scenario>Verify startup sequence order</scenario>
-        </test_scenarios>
-    </testing>
+    </requirement>
+  </graceful_shutdown>
+  <color_codes>
+    <service name="BACKEND" color="\033[96m" description="Bright Cyan" />
+    <service name="FRONTEND" color="\033[95m" description="Bright Magenta" />
+    <standard name="ERROR" color="\033[31m" description="Red" />
+    <standard name="WARNING" color="\033[33m" description="Yellow" />
+    <standard name="SUCCESS" color="\033[32m" description="Green" />
+    <standard name="INFO" color="\033[37m" description="White" />
+    <standard name="DEBUG" color="\033[90m" description="Gray" />
+    <standard name="RESET" color="\033[0m" description="Reset to default" />
+  </color_codes>
+  <testing>
+    <test_file>dev_launcher/tests/test_launcher.py</test_file>
+    <test_file>dev_launcher/tests/test_launcher_health.py</test_file>
+    <test_scenarios>
+      <scenario>Verify service name color isolation</scenario>
+      <scenario>Verify health check startup delay</scenario>
+      <scenario>Verify startup sequence order</scenario>
+    </test_scenarios>
+  </testing>
 </specification>

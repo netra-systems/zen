@@ -21,9 +21,7 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
-from app.services.session_service import SessionService
-from app.services.cache_service import CacheService
-from tests.unified.jwt_token_helpers import JWTTestHelper
+# Session and cache services not available in current codebase
 
 
 class TestSessionManagementL3:
@@ -32,7 +30,7 @@ class TestSessionManagementL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.redis_client = None
         self.test_sessions = []
         

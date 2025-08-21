@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>Supply Researcher Agent Specification</name>
@@ -8,15 +8,21 @@
     <status>Active</status>
     <category>Agent</category>
     <priority>High</priority>
+    <last_edited>2025-08-21T08:47:28.599490</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.599490">
+      <reasons>
+        <reason>Content contains: DEPRECATED</reason>
+        <reason>Content contains: old</reason>
+        <reason>Content contains: deprecated</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     <summary>
       The SupplyResearcherAgent is an intelligent autonomous agent that researches and updates AI supply information,
       including LLM pricing, model capabilities, API availability, and performance metrics. It leverages Google Deep
       Research API for comprehensive information gathering and maintains the platform's supply data in real-time.
     </summary>
-    
     <objectives>
       <objective>Automate AI supply information updates through scheduled research cycles</objective>
       <objective>Respond to on-demand research requests from administrators</objective>
@@ -26,7 +32,6 @@
       <objective>Validate and cross-reference pricing information from multiple sources</objective>
     </objectives>
   </overview>
-
   <architecture>
     <components>
       <component name="SupplyResearcherAgent" type="Agent">
@@ -39,7 +44,6 @@
           <responsibility>Generate audit trails for all updates</responsibility>
         </responsibilities>
       </component>
-      
       <component name="SupplyResearchService" type="Service">
         <description>Service layer for supply research operations</description>
         <responsibilities>
@@ -49,7 +53,6 @@
           <responsibility>Coordinate database updates</responsibility>
         </responsibilities>
       </component>
-      
       <component name="ResearchScheduler" type="Scheduler">
         <description>Background task scheduler for periodic updates</description>
         <responsibilities>
@@ -59,7 +62,6 @@
           <responsibility>Maintain research history and logs</responsibility>
         </responsibilities>
       </component>
-      
       <component name="SupplyDataValidator" type="Validator">
         <description>Validates and normalizes supply data before storage</description>
         <responsibilities>
@@ -70,63 +72,59 @@
         </responsibilities>
       </component>
     </components>
-    
     <data_models>
       <model name="AISupplyItem">
         <fields>
-          <field name="id" type="UUID" required="true"/>
-          <field name="provider" type="String" required="true"/>
-          <field name="model_name" type="String" required="true"/>
-          <field name="model_version" type="String"/>
-          <field name="pricing_input" type="Decimal" description="Cost per 1M input tokens"/>
-          <field name="pricing_output" type="Decimal" description="Cost per 1M output tokens"/>
-          <field name="pricing_currency" type="String" default="USD"/>
-          <field name="context_window" type="Integer"/>
-          <field name="max_output_tokens" type="Integer"/>
-          <field name="capabilities" type="JSON" description="Array of model capabilities"/>
-          <field name="availability_status" type="Enum" values="available,deprecated,preview,waitlist"/>
-          <field name="api_endpoints" type="JSON"/>
-          <field name="performance_metrics" type="JSON"/>
-          <field name="last_updated" type="DateTime"/>
-          <field name="research_source" type="String"/>
-          <field name="confidence_score" type="Float" min="0" max="1"/>
+          <field name="id" type="UUID" required="true" />
+          <field name="provider" type="String" required="true" />
+          <field name="model_name" type="String" required="true" />
+          <field name="model_version" type="String" />
+          <field name="pricing_input" type="Decimal" description="Cost per 1M input tokens" />
+          <field name="pricing_output" type="Decimal" description="Cost per 1M output tokens" />
+          <field name="pricing_currency" type="String" default="USD" />
+          <field name="context_window" type="Integer" />
+          <field name="max_output_tokens" type="Integer" />
+          <field name="capabilities" type="JSON" description="Array of model capabilities" />
+          <field name="availability_status" type="Enum" values="available,deprecated,preview,waitlist" />
+          <field name="api_endpoints" type="JSON" />
+          <field name="performance_metrics" type="JSON" />
+          <field name="last_updated" type="DateTime" />
+          <field name="research_source" type="String" />
+          <field name="confidence_score" type="Float" min="0" max="1" />
         </fields>
       </model>
-      
       <model name="ResearchSession">
         <fields>
-          <field name="id" type="UUID" required="true"/>
-          <field name="query" type="String" required="true"/>
-          <field name="session_id" type="String" description="Google Deep Research session"/>
-          <field name="status" type="Enum" values="pending,researching,processing,completed,failed"/>
-          <field name="research_plan" type="JSON"/>
-          <field name="questions_answered" type="JSON"/>
-          <field name="raw_results" type="JSON"/>
-          <field name="processed_data" type="JSON"/>
-          <field name="citations" type="JSON"/>
-          <field name="initiated_by" type="String" description="user_id or scheduler"/>
-          <field name="created_at" type="DateTime"/>
-          <field name="completed_at" type="DateTime"/>
-          <field name="error_message" type="String"/>
+          <field name="id" type="UUID" required="true" />
+          <field name="query" type="String" required="true" />
+          <field name="session_id" type="String" description="Google Deep Research session" />
+          <field name="status" type="Enum" values="pending,researching,processing,completed,failed" />
+          <field name="research_plan" type="JSON" />
+          <field name="questions_answered" type="JSON" />
+          <field name="raw_results" type="JSON" />
+          <field name="processed_data" type="JSON" />
+          <field name="citations" type="JSON" />
+          <field name="initiated_by" type="String" description="user_id or scheduler" />
+          <field name="created_at" type="DateTime" />
+          <field name="completed_at" type="DateTime" />
+          <field name="error_message" type="String" />
         </fields>
       </model>
-      
       <model name="SupplyUpdateLog">
         <fields>
-          <field name="id" type="UUID" required="true"/>
-          <field name="supply_item_id" type="UUID" required="true"/>
-          <field name="field_updated" type="String"/>
-          <field name="old_value" type="JSON"/>
-          <field name="new_value" type="JSON"/>
-          <field name="research_session_id" type="UUID"/>
-          <field name="update_reason" type="String"/>
-          <field name="updated_by" type="String"/>
-          <field name="updated_at" type="DateTime"/>
+          <field name="id" type="UUID" required="true" />
+          <field name="supply_item_id" type="UUID" required="true" />
+          <field name="field_updated" type="String" />
+          <field name="old_value" type="JSON" />
+          <field name="new_value" type="JSON" />
+          <field name="research_session_id" type="UUID" />
+          <field name="update_reason" type="String" />
+          <field name="updated_by" type="String" />
+          <field name="updated_at" type="DateTime" />
         </fields>
       </model>
     </data_models>
   </architecture>
-
   <workflows>
     <workflow name="OnDemandResearch">
       <steps>
@@ -193,15 +191,14 @@
         </step>
       </steps>
     </workflow>
-    
     <workflow name="ScheduledResearch">
       <steps>
         <step order="1">
           <action>Trigger based on schedule</action>
           <schedules>
-            <schedule frequency="daily" time="02:00" query="Latest AI model pricing updates"/>
-            <schedule frequency="weekly" time="Monday 09:00" query="New AI model releases and deprecations"/>
-            <schedule frequency="monthly" time="1st 00:00" query="Comprehensive AI market pricing report"/>
+            <schedule frequency="daily" time="02:00" query="Latest AI model pricing updates" />
+            <schedule frequency="weekly" time="Monday 09:00" query="New AI model releases and deprecations" />
+            <schedule frequency="monthly" time="1st 00:00" query="Comprehensive AI market pricing report" />
           </schedules>
         </step>
         <step order="2">
@@ -237,7 +234,7 @@
         <step order="7">
           <action>Send notifications if significant changes detected</action>
           <notification_triggers>
-            <trigger>Price change > 10%</trigger>
+            <trigger>Price change &gt; 10%</trigger>
             <trigger>New flagship model released</trigger>
             <trigger>Model deprecation announced</trigger>
           </notification_triggers>
@@ -245,7 +242,6 @@
       </steps>
     </workflow>
   </workflows>
-
   <integration_points>
     <integration name="Google Deep Research API">
       <endpoint>https://discoveryengine.googleapis.com/v1/projects/{project_id}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist</endpoint>
@@ -259,7 +255,6 @@
         <fallback>Queue for later processing</fallback>
       </error_handling>
     </integration>
-    
     <integration name="Admin Chat Interface">
       <trigger_phrases>
         <phrase>Update pricing for {model}</phrase>
@@ -273,7 +268,6 @@
         <required_permission>supply_management</required_permission>
       </permissions>
     </integration>
-    
     <integration name="Supply Database">
       <tables>
         <table>ai_supply_items</table>
@@ -287,7 +281,6 @@
       </indices>
     </integration>
   </integration_points>
-
   <research_prompts>
     <category name="Pricing Research">
       <prompt_template>
@@ -300,7 +293,6 @@
         Please provide official sources and documentation links.
       </prompt_template>
     </category>
-    
     <category name="Capability Research">
       <prompt_template>
         What are the technical capabilities of {provider} {model}:
@@ -312,7 +304,6 @@
         Include comparisons with previous versions if relevant.
       </prompt_template>
     </category>
-    
     <category name="Availability Research">
       <prompt_template>
         What is the current availability status of {provider} {model}:
@@ -323,7 +314,6 @@
         - Migration paths from older models
       </prompt_template>
     </category>
-    
     <category name="Market Overview">
       <prompt_template>
         Provide a comprehensive overview of the current AI model market:
@@ -335,31 +325,27 @@
       </prompt_template>
     </category>
   </research_prompts>
-
   <configuration>
     <settings>
-      <setting name="research_timeout" value="300" unit="seconds"/>
-      <setting name="max_concurrent_research" value="3"/>
-      <setting name="cache_duration" value="3600" unit="seconds"/>
-      <setting name="confidence_threshold" value="0.7" description="Minimum confidence for auto-update"/>
-      <setting name="price_change_alert_threshold" value="0.1" description="10% change triggers alert"/>
-      <setting name="enable_scheduled_research" value="true"/>
-      <setting name="enable_on_demand_research" value="true"/>
+      <setting name="research_timeout" value="300" unit="seconds" />
+      <setting name="max_concurrent_research" value="3" />
+      <setting name="cache_duration" value="3600" unit="seconds" />
+      <setting name="confidence_threshold" value="0.7" description="Minimum confidence for auto-update" />
+      <setting name="price_change_alert_threshold" value="0.1" description="10% change triggers alert" />
+      <setting name="enable_scheduled_research" value="true" />
+      <setting name="enable_on_demand_research" value="true" />
     </settings>
-    
     <schedules>
       <schedule name="daily_pricing_check" enabled="true">
         <cron>0 2 * * *</cron>
         <description>Daily check for pricing updates</description>
         <providers>all</providers>
       </schedule>
-      
       <schedule name="weekly_capability_scan" enabled="true">
         <cron>0 9 * * 1</cron>
         <description>Weekly scan for new models and capabilities</description>
         <providers>all</providers>
       </schedule>
-      
       <schedule name="monthly_market_report" enabled="true">
         <cron>0 0 1 * *</cron>
         <description>Monthly comprehensive market report</description>
@@ -367,7 +353,6 @@
       </schedule>
     </schedules>
   </configuration>
-
   <testing_requirements>
     <test_categories>
       <category name="Unit Tests">
@@ -377,7 +362,6 @@
         <test>Cache management</test>
         <test>Error handling and retries</test>
       </category>
-      
       <category name="Integration Tests">
         <test>Google Deep Research API integration</test>
         <test>Database transaction handling</test>
@@ -385,7 +369,6 @@
         <test>Admin permission validation</test>
         <test>Scheduler trigger execution</test>
       </category>
-      
       <category name="E2E Tests">
         <test>Admin chat request to database update flow</test>
         <test>Scheduled research execution</test>
@@ -393,7 +376,6 @@
         <test>Change detection and notification</test>
         <test>Audit trail generation</test>
       </category>
-      
       <category name="Performance Tests">
         <test>Concurrent research session handling</test>
         <test>Large result set processing</test>
@@ -401,7 +383,6 @@
         <test>Cache hit rate validation</test>
       </category>
     </test_categories>
-    
     <coverage_requirements>
       <requirement>Minimum 97% code coverage</requirement>
       <requirement>All error paths tested</requirement>
@@ -409,7 +390,6 @@
       <requirement>Edge cases and boundary conditions covered</requirement>
     </coverage_requirements>
   </testing_requirements>
-
   <security_considerations>
     <consideration>
       <risk>API key exposure</risk>
@@ -428,26 +408,23 @@
       <mitigation>Cross-reference multiple sources, confidence scoring</mitigation>
     </consideration>
   </security_considerations>
-
   <monitoring>
     <metrics>
-      <metric name="research_sessions_total" type="counter"/>
-      <metric name="research_session_duration" type="histogram" unit="seconds"/>
-      <metric name="supply_updates_total" type="counter" labels="provider,model"/>
-      <metric name="research_errors_total" type="counter" labels="error_type"/>
-      <metric name="cache_hit_rate" type="gauge"/>
-      <metric name="confidence_scores" type="histogram"/>
-      <metric name="price_changes_detected" type="counter" labels="provider,direction"/>
+      <metric name="research_sessions_total" type="counter" />
+      <metric name="research_session_duration" type="histogram" unit="seconds" />
+      <metric name="supply_updates_total" type="counter" labels="provider,model" />
+      <metric name="research_errors_total" type="counter" labels="error_type" />
+      <metric name="cache_hit_rate" type="gauge" />
+      <metric name="confidence_scores" type="histogram" />
+      <metric name="price_changes_detected" type="counter" labels="provider,direction" />
     </metrics>
-    
     <alerts>
-      <alert name="research_failure_rate_high" threshold="0.1" window="5m"/>
-      <alert name="api_rate_limit_approaching" threshold="0.8" window="1m"/>
-      <alert name="significant_price_change" threshold="0.2" immediate="true"/>
-      <alert name="scheduled_research_missed" window="1h"/>
+      <alert name="research_failure_rate_high" threshold="0.1" window="5m" />
+      <alert name="api_rate_limit_approaching" threshold="0.8" window="1m" />
+      <alert name="significant_price_change" threshold="0.2" immediate="true" />
+      <alert name="scheduled_research_missed" window="1h" />
     </alerts>
   </monitoring>
-
   <examples>
     <example name="Add New Model Pricing">
       <request>Add GPT-5 pricing information to the supply database</request>
@@ -461,7 +438,6 @@
         7. Respond: "Added GPT-5 pricing: $40/1M input, $120/1M output (confidence: 0.92)"
       </agent_actions>
     </example>
-    
     <example name="Scheduled Price Check">
       <trigger>Daily schedule at 02:00 UTC</trigger>
       <agent_actions>
@@ -475,7 +451,6 @@
         8. Send notification to admin channel
       </agent_actions>
     </example>
-    
     <example name="Market Comparison Request">
       <request>Compare current pricing for all enterprise LLMs</request>
       <agent_actions>
@@ -490,7 +465,6 @@
       </agent_actions>
     </example>
   </examples>
-
   <future_enhancements>
     <enhancement priority="high">
       <title>Multi-source verification</title>

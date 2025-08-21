@@ -1,143 +1,156 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>NetraPlatform.CodingConventions</name>
-        <type>InstructionSet</type>
-        <version>3.0</version>
-        <last_updated>2025-08-19</last_updated>
-        <description>
+  <metadata>
+    <name>NetraPlatform.CodingConventions</name>
+    <type>InstructionSet</type>
+    <version>3.0</version>
+    <last_updated>2025-08-19</last_updated>
+    <description>
             MANDATORY instruction set for all AI agents contributing code to the Netra AI platform.
         </description>
-    </metadata>
-    
-    <section title="Architectural Constraints (The 300/8 Rule)">
-        <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>
+    <last_edited>2025-08-21T08:47:28.401907</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.401907">
+      <reasons>
+        <reason>Content contains: DO NOT USE</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <section title="Architectural Constraints (The 300/8 Rule)">
+    <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>
+    <constraint id="ARC-001" priority="CRITICAL">
+      <title>File Line Limit (300 Lines)</title>
+      <instruction>Ensure every source file is 300 lines or less (LOC).</instruction>
+      <action-on-violation>Execute 'Extract Module Protocol'. Split the file based on functional boundaries.</action-on-violation>
+    </constraint>
+    <constraint id="ARC-002" priority="CRITICAL">
+      <title>Function/Method Line Limit (8 Lines)</title>
+      <instruction>Ensure every function or method body is 8 lines or less (LOC).</instruction>
+      <action-on-violation>Execute 'Extract Function Protocol'. Decompose logic into smaller, named helper functions.</action-on-violation>
+    </constraint>
+    <constraint id="ARC-003" priority="CRITICAL">
+      <title>Prohibition of Duplication</title>
+      <instruction>Do not create duplicate functionality or types. Extend existing implementations.</instruction>
+      <ai-directive>Before generating new code or types, search the codebase for existing implementations. If found, IMPORT and USE it. Do not redefine.</ai-directive>
+    </constraint>
+    <constraint id="ARC-004" priority="CRITICAL">
+      <title>Test Code Segregation</title>
+      <instruction>Do not introduce test stubs or mocks into production service code.</instruction>
+      <reference>SPEC/no_test_stubs.xml</reference>
+    </constraint>
+  </section>
+  <section title="Frontend Specific Conventions">
+    <guideline id="FE-001" context="State Management (Zustand)" priority="CRITICAL">
+      <title>Zustand Individual Selector Pattern</title>
+      <instruction>Always use individual selectors for accessing Zustand store state. Object-returning selectors are FORBIDDEN as they cause infinite loops.</instruction>
+      <code-example language="typescript">
+        <before description="VIOLATION: Creates unstable references">
 
-        <constraint id="ARC-001" priority="CRITICAL">
-            <title>File Line Limit (300 Lines)</title>
-            <instruction>Ensure every source file is 300 lines or less (LOC).</instruction>
-            <action-on-violation>Execute 'Extract Module Protocol'. Split the file based on functional boundaries.</action-on-violation>
-        </constraint>
-        
-        <constraint id="ARC-002" priority="CRITICAL">
-            <title>Function/Method Line Limit (8 Lines)</title>
-            <instruction>Ensure every function or method body is 8 lines or less (LOC).</instruction>
-            <action-on-violation>Execute 'Extract Function Protocol'. Decompose logic into smaller, named helper functions.</action-on-violation>
-        </constraint>
-        
-        <constraint id="ARC-003" priority="CRITICAL">
-            <title>Prohibition of Duplication</title>
-            <instruction>Do not create duplicate functionality or types. Extend existing implementations.</instruction>
-            <ai-directive>Before generating new code or types, search the codebase for existing implementations. If found, IMPORT and USE it. Do not redefine.</ai-directive>
-        </constraint>
-        
-        <constraint id="ARC-004" priority="CRITICAL">
-            <title>Test Code Segregation</title>
-            <instruction>Do not introduce test stubs or mocks into production service code.</instruction>
-            <reference>SPEC/no_test_stubs.xml</reference>
-        </constraint>
-    </section>
-
-    <section title="Frontend Specific Conventions">
-        <guideline id="FE-001" context="State Management (Zustand)" priority="CRITICAL">
-            <title>Zustand Individual Selector Pattern</title>
-            <instruction>Always use individual selectors for accessing Zustand store state. Object-returning selectors are FORBIDDEN as they cause infinite loops.</instruction>
-            <code-example language="typescript">
-                <before description="VIOLATION: Creates unstable references">
-<![CDATA[
-const selector = (state) => ({ a: state.a, b: state.b });
+const selector = (state) =&gt; ({ a: state.a, b: state.b });
 const data = useStore(selector, shallow);
-]]>
+
                 </before>
-                <after description="CORRECT: Ensures stable references">
-<![CDATA[
-const a = useStore(state => state.a);
-const b = useStore(state => state.b);
-]]>
+        <after description="CORRECT: Ensures stable references">
+
+const a = useStore(state =&gt; state.a);
+const b = useStore(state =&gt; state.b);
+
                 </after>
-            </code-example>
-        </guideline>
+      </code-example>
+    </guideline>
+    <guideline id="FE-003" context="React Keys">
+      <instruction>Ensure unique and stable keys for all list renderings.</instruction>
+      <pattern>Use `generateUniqueId()` from `@/lib/utils` if no stable ID exists.</pattern>
+      <forbidden-pattern>Do NOT use `Date.now()` or array indices as keys.</forbidden-pattern>
+    </guideline>
+  </section>
+  <section title="Backend Specific Conventions">
+    <guideline id="BE-001" context="Namespace Convention" priority="CRITICAL">
+      <title>Service-Based Namespace Pattern - Absolute Imports Only</title>
+      <instruction>All backend imports must follow the service-based namespace pattern: {top_level_service_name}.{app|tests}. NO relative imports are allowed - use absolute imports exclusively.</instruction>
+      <code-example language="python">
+        <before description="VIOLATION: Old import pattern or relative imports">
 
-        <guideline id="FE-003" context="React Keys">
-            <instruction>Ensure unique and stable keys for all list renderings.</instruction>
-            <pattern>Use `generateUniqueId()` from `@/lib/utils` if no stable ID exists.</pattern>
-            <forbidden-pattern>Do NOT use `Date.now()` or array indices as keys.</forbidden-pattern>
-        </guideline>
-    </section>
+from app.core.config import Settings
+from tests.conftest import TestClient
+from .config import Settings  # FORBIDDEN: relative import
+from ..core.config import Settings  # FORBIDDEN: relative import
 
-    <section title="Backend Specific Conventions">
-        <guideline id="BE-002" context="Dependency Injection (FastAPI)" priority="CRITICAL">
-            <title>Explicit Typing for DB Sessions</title>
-            <instruction>Explicitly type hint database session dependencies to prevent runtime auth failures.</instruction>
-            <code-example language="python">
-                <before description="VIOLATION: Missing type hint causes errors">
-<![CDATA[
+                </before>
+        <after description="CORRECT: Service-based absolute namespace">
+
+from netra_backend.app.core.config import Settings
+from netra_backend.tests.conftest import TestClient
+# Always use absolute imports with full service namespace
+
+                </after>
+      </code-example>
+      <pattern>For microservices: {service_name}.{app|tests} (e.g., auth_service.app, auth_service.tests)</pattern>
+      <forbidden-pattern>Relative imports using . or .. are strictly forbidden</forbidden-pattern>
+    </guideline>
+    <guideline id="BE-002" context="Dependency Injection (FastAPI)" priority="CRITICAL">
+      <title>Explicit Typing for DB Sessions</title>
+      <instruction>Explicitly type hint database session dependencies to prevent runtime auth failures.</instruction>
+      <code-example language="python">
+        <before description="VIOLATION: Missing type hint causes errors">
+
 db_session = Depends(get_db_session)
-]]>
+
                 </before>
-                <after description="CORRECT: Explicit type hint">
-<![CDATA[
+        <after description="CORRECT: Explicit type hint">
+
 db_session: AsyncSession = Depends(get_db_session)
-]]>
-                </after>
-            </code-example>
-        </guideline>
 
-        <guideline id="BE-003" context="Dependency Injection (Singletons)" priority="CRITICAL">
-            <title>Singleton Injection via Provider Functions</title>
-            <instruction>Inject singleton services using provider functions, not the class directly, to ensure configuration (e.g., secrets) is applied.</instruction>
-            <code-example language="python">
-                <before description="VIOLATION: Bypasses configuration">
-<![CDATA[
+                </after>
+      </code-example>
+    </guideline>
+    <guideline id="BE-003" context="Dependency Injection (Singletons)" priority="CRITICAL">
+      <title>Singleton Injection via Provider Functions</title>
+      <instruction>Inject singleton services using provider functions, not the class directly, to ensure configuration (e.g., secrets) is applied.</instruction>
+      <code-example language="python">
+        <before description="VIOLATION: Bypasses configuration">
+
 Depends(LLMManager)
-]]>
+
                 </before>
-                <after description="CORRECT: Uses provider function">
-<![CDATA[
+        <after description="CORRECT: Uses provider function">
+
 Depends(get_llm_manager)
-]]>
+
                 </after>
-            </code-example>
-        </guideline>
-    </section>
-
-    <section title="Agent Architecture Naming Conventions" priority="CRITICAL">
-        <instruction>Apply the correct suffix based on the component's role.</instruction>
-        
-        <classification suffix="SubAgent" or="Agent">
-            <role>LLM-powered components extending `BaseSubAgent`.</role>
-            <requirement>Must utilize LLM capabilities.</requirement>
-        </classification>
-        
-        <classification suffix="Executor" or="Manager">
-            <role>Infrastructure orchestration and system coordination (Non-LLM).</role>
-        </classification>
-        
-        <classification suffix="Service">
-            <role>Domain-specific business logic processing units.</role>
-        </classification>
-        
-        <forbidden>Do NOT use the "Agent" suffix for utility or infrastructure modules.</forbidden>
-    </section>
-
-    <section title="Testing Protocol">
-        <guideline id="TEST-003" context="TDD Workflow (Feature Flags)" priority="HIGH">
-            <title>Feature Flag Driven TDD</title>
-            <instruction>Utilize the feature flag system for TDD to maintain a 100% CI/CD pass rate during development.</instruction>
-            <workflow>
-                <step>1. Define feature in `test_feature_flags.json` with status "in_development".</step>
-                <step>2. Write test using `@tdd_test("feature_name")` decorator. (Test will be skipped in CI).</step>
-                <step>3. Implement functionality.</step>
-                <step>4. Update status to "enabled" when implementation is complete and tests pass.</step>
-            </workflow>
-        </guideline>
-    </section>
-
-    <section title="Compliance and Enforcement">
-        <tool id="COMP-001">
-            <name>Architecture Compliance Check</name>
-            <command>python scripts/check_architecture_compliance.py</command>
-            <ai-directive>AI Agent MUST execute this tool before finalizing any code contribution. If violations are detected, initiate the appropriate refactoring protocol (ARC-001 or ARC-002).</ai-directive>
-        </tool>
-    </section>
+      </code-example>
+    </guideline>
+  </section>
+  <section title="Agent Architecture Naming Conventions" priority="CRITICAL">
+    <instruction>Apply the correct suffix based on the component's role.</instruction>
+    <classification suffix="SubAgent" or="Agent">
+      <role>LLM-powered components extending `BaseSubAgent`.</role>
+      <requirement>Must utilize LLM capabilities.</requirement>
+    </classification>
+    <classification suffix="Executor" or="Manager">
+      <role>Infrastructure orchestration and system coordination (Non-LLM).</role>
+    </classification>
+    <classification suffix="Service">
+      <role>Domain-specific business logic processing units.</role>
+    </classification>
+    <forbidden>Do NOT use the "Agent" suffix for utility or infrastructure modules.</forbidden>
+  </section>
+  <section title="Testing Protocol">
+    <guideline id="TEST-003" context="TDD Workflow (Feature Flags)" priority="HIGH">
+      <title>Feature Flag Driven TDD</title>
+      <instruction>Utilize the feature flag system for TDD to maintain a 100% CI/CD pass rate during development.</instruction>
+      <workflow>
+        <step>1. Define feature in `test_feature_flags.json` with status "in_development".</step>
+        <step>2. Write test using `@tdd_test("feature_name")` decorator. (Test will be skipped in CI).</step>
+        <step>3. Implement functionality.</step>
+        <step>4. Update status to "enabled" when implementation is complete and tests pass.</step>
+      </workflow>
+    </guideline>
+  </section>
+  <section title="Compliance and Enforcement">
+    <tool id="COMP-001">
+      <name>Architecture Compliance Check</name>
+      <command>python scripts/check_architecture_compliance.py</command>
+      <ai-directive>AI Agent MUST execute this tool before finalizing any code contribution. If violations are detected, initiate the appropriate refactoring protocol (ARC-001 or ARC-002).</ai-directive>
+    </tool>
+  </section>
 </specification>

@@ -1,0 +1,40 @@
+"""
+Tool Permission Service - Modular Facade
+
+This module provides backward compatibility while using the new modular architecture.
+All functionality has been split into focused modules ≤300 lines with functions ≤8 lines.
+"""
+
+# Import all modular components for backward compatibility
+from typing import Dict, List, Optional, Any
+import redis
+from netra_backend.app.tool_permissions.tool_permission_service_main import ToolPermissionService
+from netra_backend.app.tool_permissions.permission_definitions import PermissionDefinitions
+from netra_backend.app.tool_permissions.permission_checker import PermissionChecker
+from netra_backend.app.tool_permissions.rate_limiter import RateLimiter
+from netra_backend.app.tool_permissions.tool_availability_processor import ToolAvailabilityProcessor
+from app.schemas.ToolPermission import (
+    ToolPermission, ToolExecutionContext, PermissionCheckResult, 
+    ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
+)
+from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+
+
+# Re-export classes and functions for backward compatibility
+__all__ = [
+    "ToolPermissionService",
+    "PermissionDefinitions",
+    "PermissionChecker",
+    "RateLimiter",
+    "ToolAvailabilityProcessor",
+    "ToolPermission",
+    "ToolExecutionContext",
+    "PermissionCheckResult",
+    "ToolAvailability",
+    "PermissionLevel",
+    "BusinessRequirement",
+    "RateLimit",
+    "UserPlan",
+    "PlanTier",
+    "PLAN_DEFINITIONS"
+]

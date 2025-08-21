@@ -1,22 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.346450</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.346450">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>Agent Code Modification Tracking Specification</title>
   <version>1.0.0</version>
   <purpose>
     Define standards for tracking and documenting all code modifications made by AI coding agents
     to ensure traceability, accountability, and reversibility of automated changes.
   </purpose>
-
   <metadata_header>
     <description>
       All files modified by AI agents must include a metadata header at the top of the file
       containing tracking information. This header provides a safety net for understanding
       the history and context of automated changes.
     </description>
-    
     <format>
       <language name="Python">
-        <template><![CDATA[
+        <template>
 # Agent Modification Tracking
 # ===========================
 # Last Modified: {timestamp}
@@ -27,11 +33,10 @@
 # Prompt Summary: {prompt_summary}
 # Changes: {change_description}
 # ===========================
-]]></template>
+</template>
       </language>
-      
       <language name="JavaScript/TypeScript">
-        <template><![CDATA[
+        <template>
 /**
  * Agent Modification Tracking
  * ===========================
@@ -44,11 +49,10 @@
  * Changes: {change_description}
  * ===========================
  */
-]]></template>
+</template>
       </language>
-      
       <language name="HTML/JSX/TSX">
-        <template><![CDATA[
+        <template>
 {/* 
   Agent Modification Tracking
   ===========================
@@ -61,18 +65,16 @@
   Changes: {change_description}
   ===========================
 */}
-]]></template>
+</template>
       </language>
     </format>
   </metadata_header>
-
   <required_fields>
     <field name="timestamp">
       <description>ISO 8601 formatted timestamp with timezone</description>
       <format>YYYY-MM-DDTHH:MM:SS±HH:MM</format>
       <example>2025-01-10T15:30:45-08:00</example>
     </field>
-    
     <field name="agent_name">
       <description>Identifier of the AI agent making the modification</description>
       <examples>
@@ -81,7 +83,6 @@
         <example>Cursor AI</example>
       </examples>
     </field>
-    
     <field name="model_version">
       <description>Specific model version used by the agent</description>
       <examples>
@@ -89,41 +90,33 @@
         <example>gpt-4-turbo-2024-04-09</example>
       </examples>
     </field>
-    
     <field name="task_id">
       <description>Unique identifier for the task or conversation</description>
       <format>UUID or conversation ID</format>
     </field>
-    
     <field name="git_branch">
       <description>Current git branch name</description>
     </field>
-    
     <field name="git_commit_hash">
       <description>Latest commit hash before modification</description>
       <format>7-character short hash or full hash</format>
     </field>
-    
     <field name="prompt_summary">
       <description>Brief summary of the user's request or task</description>
       <max_length>200 characters</max_length>
     </field>
-    
     <field name="change_description">
       <description>Brief description of changes made</description>
       <max_length>200 characters</max_length>
     </field>
   </required_fields>
-
   <optional_fields>
     <field name="conversation_context">
       <description>Link to full conversation or task context</description>
     </field>
-    
     <field name="parent_task">
       <description>Reference to parent task if part of larger workflow</description>
     </field>
-    
     <field name="review_status">
       <description>Human review status of the changes</description>
       <values>
@@ -133,7 +126,6 @@
         <value>modified</value>
       </values>
     </field>
-    
     <field name="test_status">
       <description>Automated test results after modification</description>
       <values>
@@ -143,29 +135,25 @@
       </values>
     </field>
   </optional_fields>
-
   <history_tracking>
     <description>
       For files with multiple agent modifications, maintain a history section
       that preserves previous modification records.
     </description>
-    
-    <format><![CDATA[
+    <format>
 # Agent Modification History
 # ===========================
 # Entry 1: {timestamp} - {agent_name} - {change_summary}
 # Entry 2: {timestamp} - {agent_name} - {change_summary}
 # ... (keep last 5 entries)
 # ===========================
-]]></format>
-    
+</format>
     <rules>
       <rule>Keep maximum of 5 historical entries</rule>
       <rule>Oldest entries removed when limit exceeded</rule>
       <rule>Each entry includes timestamp, agent, and brief change summary</rule>
     </rules>
   </history_tracking>
-
   <implementation_guidelines>
     <guideline>
       <title>Automatic Header Injection</title>
@@ -174,7 +162,6 @@
         If header exists, update it; if not, add it at the top of the file.
       </description>
     </guideline>
-    
     <guideline>
       <title>Preserve Existing Headers</title>
       <description>
@@ -182,7 +169,6 @@
         Place agent tracking header after existing file headers.
       </description>
     </guideline>
-    
     <guideline>
       <title>Git Integration</title>
       <description>
@@ -190,7 +176,6 @@
         Use 'git rev-parse --abbrev-ref HEAD' for branch and 'git rev-parse HEAD' for commit.
       </description>
     </guideline>
-    
     <guideline>
       <title>Minimal Disruption</title>
       <description>
@@ -199,7 +184,6 @@
       </description>
     </guideline>
   </implementation_guidelines>
-
   <exclusions>
     <description>Files that should NOT have agent tracking headers</description>
     <exclude>Configuration files (package.json, requirements.txt, etc.)</exclude>
@@ -210,16 +194,14 @@
     <exclude>Lock files (package-lock.json, poetry.lock, etc.)</exclude>
     <exclude>Git-ignored files</exclude>
   </exclusions>
-
   <audit_trail>
     <description>
       Complementary logging mechanism for comprehensive tracking
     </description>
-    
     <log_file>
       <location>.agent_modifications.log</location>
       <format>JSONL (JSON Lines)</format>
-      <schema><![CDATA[
+      <schema>
 {
   "timestamp": "ISO 8601",
   "agent": "string",
@@ -235,48 +217,41 @@
     "functions_modified": ["string"]
   }
 }
-]]></schema>
+</schema>
     </log_file>
-    
     <retention>
       <duration>30 days</duration>
       <rotation>Daily</rotation>
     </retention>
   </audit_trail>
-
   <rollback_support>
     <description>
       Enable easy rollback of agent-made changes
     </description>
-    
     <mechanism>
       <step>Create git stash or temporary branch before modifications</step>
       <step>Tag commits made by agents with standardized message format</step>
       <step>Maintain rollback script in project tools directory</step>
     </mechanism>
-    
     <commit_message_format>
       <template>[AGENT: {agent_name}] {change_description} | Task: {task_id}</template>
     </commit_message_format>
   </rollback_support>
-
   <compliance>
     <requirement>
       All AI coding assistants must implement this tracking specification
       when modifying source code files in the repository.
     </requirement>
-    
     <verification>
       <check>Pre-commit hooks validate presence of headers in modified files</check>
       <check>CI/CD pipeline checks for proper header format</check>
       <check>Weekly audit reports on agent modification patterns</check>
     </verification>
   </compliance>
-
   <examples>
     <example language="Python">
       <description>Python file with agent tracking header</description>
-      <code><![CDATA[
+      <code>
 # Agent Modification Tracking
 # ===========================
 # Last Modified: 2025-01-10T15:30:45-08:00
@@ -299,12 +274,11 @@ from typing import List, Optional
 
 class UserService:
     # ... rest of the code
-]]></code>
+</code>
     </example>
-    
     <example language="TypeScript">
       <description>TypeScript React component with agent tracking</description>
-      <code><![CDATA[
+      <code>
 /**
  * Agent Modification Tracking
  * ===========================
@@ -321,10 +295,10 @@ class UserService:
 import React, { useState, useEffect } from 'react';
 import { UserData } from '@/types';
 
-export const UserDashboard: React.FC = () => {
+export const UserDashboard: React.FC = () =&gt; {
   // Component implementation
 };
-]]></code>
+</code>
     </example>
   </examples>
 </specification>

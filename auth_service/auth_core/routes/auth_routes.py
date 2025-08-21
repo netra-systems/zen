@@ -8,9 +8,9 @@ from typing import Optional
 import logging
 import os
 
-from ..config import AuthConfig
-from ..services.auth_service import AuthService
-from ..models.auth_models import (
+from auth_service.app..config import AuthConfig
+from auth_service.app..services.auth_service import AuthService
+from auth_service.app..models.auth_models import (
     LoginRequest, LoginResponse,
     TokenRequest, TokenResponse,
     RefreshRequest, ServiceTokenRequest,
@@ -478,9 +478,9 @@ async def oauth_callback(
         logger.info(f"OAuth login successful for {user_info['email']} with user ID {user_id}")
         logger.info(f"Generated JWT access token: {access_token[:20]}...")
         
-        # Redirect to frontend with tokens
+        # Redirect to frontend callback page with tokens
         frontend_url = _determine_urls()[1]
-        redirect_url = return_url or f"{frontend_url}/chat"
+        redirect_url = f"{frontend_url}/auth/callback"
         redirect_url += f"?token={access_token}&refresh={refresh_token}"
         
         logger.info(f"Redirecting to: {redirect_url[:50]}...")

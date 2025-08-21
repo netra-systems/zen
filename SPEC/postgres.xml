@@ -1,22 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Postgres</name>
-        <type>postgres</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-spec>
-        <description>Postgres Database Specification</description>
-    </primary-spec>
-    
-    <requirements>
-        <requirement id="1">Postgres is the primary DB for transactional data</requirement>
-        <requirement id="2">All Schemas that should be persisted must be</requirement>
-        <requirement id="3">Postgres data models are built on top of Schema models</requirement>
-        <requirement id="4">Any changes must have migration files. Check prior migrations</requirement>
-        <requirement id="5">All calls to Postgres are done from central classes</requirement>
-        <requirement id="6">Always use the "with" block for automatic rollback etc.</requirement>
-        <requirement id="7">Validate all Schemas have Postgres context as needed</requirement>
-    </requirements>
+  <metadata>
+    <name>Postgres</name>
+    <type>postgres</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.553372</last_edited>
+  </metadata>
+  <primary-spec>
+    <description>Postgres Database Specification</description>
+  </primary-spec>
+  <requirements>
+    <requirement id="1">Postgres is the primary DB for transactional data</requirement>
+    <requirement id="2">All Schemas that should be persisted must be</requirement>
+    <requirement id="3">Postgres data models are built on top of Schema models</requirement>
+    <requirement id="4">Any changes must have migration files. Check prior migrations</requirement>
+    <requirement id="5">All calls to Postgres are done from central classes</requirement>
+    <requirement id="6">Always use the "with" block for automatic rollback etc.</requirement>
+    <requirement id="7">Validate all Schemas have Postgres context as needed</requirement>
+  </requirements>
 </specification>

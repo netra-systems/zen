@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.366736</last_edited>
+  </metadata>
   <title>OAuth Environment Isolation and Management</title>
   <version>1.0.0</version>
   <created>2025-08-12</created>
@@ -7,7 +10,6 @@
     Complete OAuth authentication isolation across development, testing, staging, and production environments,
     with special handling for dynamic PR staging environments and Google OAuth's exact URL requirements.
   </purpose>
-
   <problem_statement>
     Google OAuth requires exact, full URLs for redirect URIs and doesn't support wildcards.
     This creates challenges for:
@@ -15,7 +17,6 @@
     - Environment isolation during development and testing
     - Managing different OAuth clients and secrets per environment
   </problem_statement>
-
   <solution_architecture>
     <approach>OAuth Proxy Service with Environment-Specific Clients</approach>
     <rationale>
@@ -25,7 +26,6 @@
       - Clear separation between environments
     </rationale>
   </solution_architecture>
-
   <environment_configuration>
     <environment name="development">
       <domain>localhost:3000</domain>
@@ -47,7 +47,6 @@
         <mock_auth>true</mock_auth>
       </features>
     </environment>
-
     <environment name="testing">
       <domain>test.local</domain>
       <api_domain>api.test.local</api_domain>
@@ -67,7 +66,6 @@
         <mock_auth>true</mock_auth>
       </features>
     </environment>
-
     <environment name="staging">
       <domain>*.staging.netrasystems.ai</domain>
       <api_domain>*.staging.netrasystems.ai</api_domain>
@@ -76,7 +74,6 @@
         <client_id_env>GOOGLE_OAUTH_CLIENT_ID_STAGING</client_id_env>
         <client_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_STAGING</client_secret_env>
         <redirect_uris>
-          <!-- Single proxy endpoint for all PR environments -->
           <uri>https://auth.staging.netrasystems.ai/callback</uri>
         </redirect_uris>
         <javascript_origins>
@@ -89,7 +86,6 @@
         <pr_environments>true</pr_environments>
       </features>
     </environment>
-
     <environment name="production">
       <domain>netrasystems.ai</domain>
       <api_domain>api.netrasystems.ai</api_domain>
@@ -111,12 +107,10 @@
       </features>
     </environment>
   </environment_configuration>
-
   <oauth_proxy_implementation>
     <description>
       OAuth proxy service for staging environment to handle dynamic PR URLs
     </description>
-    
     <flow>
       1. PR environment initiates OAuth flow
       2. State parameter encodes PR number and return URL
@@ -126,7 +120,6 @@
       6. Store token in Redis with PR-specific key
       7. Redirect to PR environment with secure token transfer
     </flow>
-
     <state_encoding>
       <format>base64(json)</format>
       <fields>
@@ -136,7 +129,6 @@
         <field name="timestamp">Request timestamp for expiry</field>
       </fields>
     </state_encoding>
-
     <token_transfer>
       <method>Secure cookie with subdomain access</method>
       <cookie_settings>
@@ -144,11 +136,10 @@
         <httponly>true</httponly>
         <samesite>none</samesite>
         <domain>.staging.netrasystems.ai</domain>
-        <max_age>300</max_age> <!-- 5 minutes -->
+        <max_age>300</max_age>
       </cookie_settings>
     </token_transfer>
   </oauth_proxy_implementation>
-
   <implementation_files>
     <file path="app/auth/oauth_proxy.py">
       OAuth proxy service for staging environments
@@ -175,7 +166,6 @@
       Production environment OAuth credentials
     </file>
   </implementation_files>
-
   <security_considerations>
     <consideration>
       <title>Token Security</title>
@@ -204,7 +194,6 @@
       </description>
     </consideration>
   </security_considerations>
-
   <deployment_workflow>
     <step number="1">
       <action>PR Created</action>
@@ -242,7 +231,6 @@
       </details>
     </step>
   </deployment_workflow>
-
   <testing_strategy>
     <test type="unit">
       Test OAuth proxy state encoding/decoding
@@ -260,7 +248,6 @@
       Test complete OAuth flow in staging
     </test>
   </testing_strategy>
-
   <migration_plan>
     <phase number="1">
       <title>Create OAuth Clients</title>
@@ -303,7 +290,6 @@
       </tasks>
     </phase>
   </migration_plan>
-
   <alternative_solutions>
     <solution name="Programmatic OAuth Management">
       <description>
@@ -335,7 +321,6 @@
       </cons>
     </solution>
   </alternative_solutions>
-
   <monitoring>
     <metric name="oauth_flow_success_rate">
       Success rate of OAuth authentication flows per environment
@@ -350,7 +335,6 @@
       Authentication attempts per PR environment
     </metric>
   </monitoring>
-
   <documentation>
     <doc type="developer">
       How to configure OAuth for new environments

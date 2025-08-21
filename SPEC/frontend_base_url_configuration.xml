@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Frontend Base URL Configuration Specification</title>
@@ -16,8 +16,8 @@
       <ref>SPEC/learnings/frontend.xml</ref>
       <ref>SPEC/learnings/environment_detection.xml</ref>
     </cross-references>
+    <last_edited>2025-08-21T08:47:28.459933</last_edited>
   </metadata>
-
   <problem-statement>
     <issue>
       Frontend applications encounter "Failed to construct 'URL': Invalid base URL" errors
@@ -35,7 +35,6 @@
       - Overall application functionality is severely degraded
     </impact>
   </problem-statement>
-
   <requirements>
     <requirement id="REQ-001">
       <description>Base URL must always be a valid URL string in all contexts</description>
@@ -62,13 +61,11 @@
       <priority>MEDIUM</priority>
     </requirement>
   </requirements>
-
   <solution-architecture>
     <principle>
       Use window.location.origin as the base URL in browser contexts to ensure
       valid URL construction while maintaining relative path behavior.
     </principle>
-    
     <base-url-resolution>
       <browser-context>
         <description>
@@ -82,7 +79,6 @@
             : secureApiConfig.apiUrl;
         </implementation>
       </browser-context>
-      
       <server-context>
         <description>
           In server-side contexts (SSR), use the full backend URL from configuration.
@@ -92,7 +88,6 @@
         </implementation>
       </server-context>
     </base-url-resolution>
-
     <url-construction>
       <pattern>
         Always use the URL constructor with proper base URL:
@@ -104,7 +99,6 @@
         - Validate constructed URL before making requests
       </validation>
     </url-construction>
-
     <environment-specific-configuration>
       <development>
         <base-url>http://localhost:3000</base-url>
@@ -123,7 +117,6 @@
       </production>
     </environment-specific-configuration>
   </solution-architecture>
-
   <implementation-checklist>
     <item priority="1">
       <file>frontend/services/apiClientWrapper.ts</file>
@@ -139,7 +132,6 @@
         }
       </code>
     </item>
-    
     <item priority="2">
       <file>frontend/services/apiClientWrapper.ts</file>
       <change>
@@ -152,14 +144,13 @@
         }
       </code>
     </item>
-    
     <item priority="3">
       <file>frontend/lib/secure-api-config.ts</file>
       <change>
         Export helper function for getting base URL
       </change>
       <code>
-        export const getBaseUrl = (): string => {
+        export const getBaseUrl = (): string =&gt; {
           if (typeof window !== 'undefined') {
             return window.location.origin;
           }
@@ -173,14 +164,13 @@
         };
       </code>
     </item>
-    
     <item priority="4">
       <file>frontend/services/url-sync/utils.ts</file>
       <change>
         Update URL construction to use window.location.origin
       </change>
       <code>
-        export const createUrlWithThread = (threadId: string | null, config: UrlSyncConfig): string => {
+        export const createUrlWithThread = (threadId: string | null, config: UrlSyncConfig): string =&gt; {
           const url = new URL(config.basePath, window.location.origin);
           if (threadId) {
             url.searchParams.set(config.paramName, threadId);
@@ -189,7 +179,6 @@
         };
       </code>
     </item>
-    
     <item priority="5">
       <file>frontend/.env.example</file>
       <change>
@@ -201,7 +190,6 @@
       </code>
     </item>
   </implementation-checklist>
-
   <testing-requirements>
     <test-scenario id="TEST-001">
       <name>Browser Context URL Construction</name>
@@ -213,7 +201,6 @@
       </steps>
       <expected>API calls succeed with proper URL construction</expected>
     </test-scenario>
-    
     <test-scenario id="TEST-002">
       <name>SSR Context URL Construction</name>
       <steps>
@@ -224,7 +211,6 @@
       </steps>
       <expected>SSR API calls use full backend URL</expected>
     </test-scenario>
-    
     <test-scenario id="TEST-003">
       <name>Environment-Specific URLs</name>
       <steps>
@@ -235,33 +221,28 @@
       <expected>Each environment uses correct base URLs and proxies</expected>
     </test-scenario>
   </testing-requirements>
-
   <edge-cases>
     <case id="EDGE-001">
       <description>URL with double slashes</description>
       <input>/api//threads</input>
       <expected-output>http://localhost:3000/api/threads</expected-output>
     </case>
-    
     <case id="EDGE-002">
       <description>Absolute URL passed to API client</description>
       <input>https://external-api.com/endpoint</input>
       <expected-output>https://external-api.com/endpoint</expected-output>
     </case>
-    
     <case id="EDGE-003">
       <description>URL without leading slash</description>
       <input>api/threads</input>
       <expected-output>http://localhost:3000/api/threads</expected-output>
     </case>
-    
     <case id="EDGE-004">
       <description>WebSocket URL construction</description>
       <input>ws://localhost:8000/ws</input>
       <expected-output>ws://localhost:8000/ws (unchanged for WebSocket)</expected-output>
     </case>
   </edge-cases>
-
   <monitoring-and-debugging>
     <logging>
       <item>Log base URL on initialization</item>
@@ -273,13 +254,11 @@
       <item>Provide clear error messages for URL construction failures</item>
     </debugging>
   </monitoring-and-debugging>
-
   <rollback-plan>
     <step>1. If issues arise, temporarily hardcode base URLs per environment</step>
     <step>2. Use environment variables as immediate fallback</step>
     <step>3. Maintain backward compatibility with existing proxy patterns</step>
   </rollback-plan>
-
   <future-considerations>
     <consideration>
       Consider implementing a URL builder service that centralizes all URL construction logic

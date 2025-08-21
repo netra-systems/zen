@@ -21,8 +21,9 @@ from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.services.agent_service import AgentService
-from app.schemas import AgentType, AgentStatus, ToolExecutionRequest
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from app.schemas.core_enums import AgentStatus
+from app.core.agent_recovery_types import AgentType
+from app.routes.unified_tools.schemas import ToolExecutionRequest
 
 
 class TestAgentOrchestrationL3:
@@ -31,7 +32,7 @@ class TestAgentOrchestrationL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.test_agents = []
         self.test_executions = []
         yield

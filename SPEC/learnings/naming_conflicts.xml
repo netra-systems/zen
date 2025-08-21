@@ -1,16 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.548580</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.548580">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>Naming Conflicts and Context Binding</title>
   <category>frontend</category>
   <tags>typescript, javascript, naming-conflicts, context-binding, this-binding</tags>
   <date>2025-08-18</date>
-  
   <summary>
     Learnings from fixing "TypeError: this.cleanup is not a function" error in production.
     Property-method naming conflicts can cause runtime errors when properties shadow methods
     in callback contexts.
   </summary>
-
   <issue>
     <description>
       Production error on staging: "TypeError: this.cleanup is not a function"
@@ -21,7 +27,7 @@
       1. A property: private cleanup: CleanupManager
       2. A method: public cleanup(): void
       
-      In the callback () => this.cleanup(), the property (CleanupManager instance) 
+      In the callback () =&gt; this.cleanup(), the property (CleanupManager instance) 
       shadowed the method, causing the error.
     </root_cause>
     <impact>
@@ -30,17 +36,16 @@
       - WebSocket connection instability
     </impact>
   </issue>
-
   <solution>
     <approach>
       Created a separate performCleanup() method to avoid naming conflict:
-      - Changed: this.cleanup.startAutoCleanup(() => this.cleanup())
-      - To: this.cleanup.startAutoCleanup(() => this.performCleanup())
+      - Changed: this.cleanup.startAutoCleanup(() =&gt; this.cleanup())
+      - To: this.cleanup.startAutoCleanup(() =&gt; this.performCleanup())
     </approach>
     <implementation>
       ```typescript
       private startAutoCleanup(): void {
-        this.cleanup.startAutoCleanup(() => this.performCleanup());
+        this.cleanup.startAutoCleanup(() =&gt; this.performCleanup());
       }
       
       private performCleanup(): void {
@@ -51,7 +56,6 @@
       ```
     </implementation>
   </solution>
-
   <prevention>
     <rule id="1">
       <title>Avoid Property-Method Name Conflicts</title>
@@ -77,7 +81,6 @@
         ```
       </example>
     </rule>
-
     <rule id="2">
       <title>Use Descriptive Property Names for Class Instances</title>
       <description>
@@ -91,7 +94,6 @@
         ```
       </example>
     </rule>
-
     <rule id="3">
       <title>Be Careful with Arrow Functions in Callbacks</title>
       <description>
@@ -101,14 +103,13 @@
       <example>
         ```typescript
         // If this.cleanup is a property, not a method:
-        setTimeout(() => this.cleanup(), 1000);  // ERROR!
+        setTimeout(() =&gt; this.cleanup(), 1000);  // ERROR!
         
         // Clear and explicit:
-        setTimeout(() => this.performCleanup(), 1000);  // Good
+        setTimeout(() =&gt; this.performCleanup(), 1000);  // Good
         ```
       </example>
     </rule>
-
     <rule id="4">
       <title>Use Method Binding for Clarity</title>
       <description>
@@ -118,7 +119,7 @@
       <example>
         ```typescript
         // Explicit callback method
-        private handleCleanupInterval = (): void => {
+        private handleCleanupInterval = (): void =&gt; {
           this.performCleanup();
         }
         
@@ -128,37 +129,33 @@
       </example>
     </rule>
   </prevention>
-
   <detection>
     <pattern id="1">
       <description>Search for property-method naming conflicts</description>
       <regex>private\s+(\w+):[^;]+;[\s\S]*?public\s+\1\(</regex>
       <command>grep -r "private\s\+\(\w\+\):" --include="*.ts" | cut -d: -f2 | sed 's/.*private\s\+\(\w\+\):.*/\1/' | sort | uniq -d</command>
     </pattern>
-    
     <pattern id="2">
       <description>Find callbacks using this.property()</description>
-      <regex>\(\)\s*=>\s*this\.(\w+)\(\)</regex>
+      <regex>\(\)\s*=&gt;\s*this\.(\w+)\(\)</regex>
       <note>Review each match to ensure the reference is to a method, not a property</note>
     </pattern>
   </detection>
-
   <testing>
     <test_case>
       <description>Test cleanup function binding</description>
       <code>
         ```typescript
-        it('should maintain proper context binding in cleanup callback', () => {
+        it('should maintain proper context binding in cleanup callback', () =&gt; {
           const performCleanupSpy = jest.spyOn(service as any, 'performCleanup');
           jest.advanceTimersByTime(1000);
           expect(performCleanupSpy).toHaveBeenCalled();
-          expect(() => jest.advanceTimersByTime(1000)).not.toThrow();
+          expect(() =&gt; jest.advanceTimersByTime(1000)).not.toThrow();
         });
         ```
       </code>
     </test_case>
   </testing>
-
   <related_issues>
     <issue>
       <file>frontend/lib/operation-cleanup.ts</file>
@@ -171,7 +168,6 @@
       <finding>No naming conflicts found - good separation of concerns</finding>
     </issue>
   </related_issues>
-
   <best_practices>
     <practice>Use TypeScript strict mode to catch more potential issues at compile time</practice>
     <practice>Run integration tests that exercise timer-based functionality</practice>
@@ -179,7 +175,6 @@
     <practice>Document callback expectations in method signatures</practice>
     <practice>Consider using dependency injection to reduce naming complexity</practice>
   </best_practices>
-
   <business_impact>
     <metric>Prevented production crashes affecting all user tiers</metric>
     <metric>Avoided memory leaks that could increase infrastructure costs</metric>

@@ -143,6 +143,33 @@
             </business_value>
         </learning>
         
+        <learning id="test-import-resolution-microservice-structure">
+            <title>Test Import Resolution in Microservice Architecture</title>
+            <problem>
+                Tests in app/tests/agents/ using "from app.agents.state import" failed with ModuleNotFoundError
+                Python path resolution issue when tests run from within app/tests/ directory
+                Confusion about whether tests should be moved to top-level directory
+            </problem>
+            <solution>
+                Keep tests in app/tests/ - this follows microservice isolation principles
+                Use relative imports within app package: "from agents.state import" not "from app.agents.state"
+                Run tests from project root: python -m pytest app/tests/
+                Each microservice (app, auth_service, frontend) maintains its own test directory
+            </solution>
+            <rationale>
+                Project has independent microservices per SPEC/independent_services.xml
+                Top-level tests/ and integration_tests/ exist for cross-service testing
+                app/tests/ contains app-specific tests maintaining proper boundaries
+                Moving tests to top-level would violate microservice isolation
+            </rationale>
+            <files_affected>
+                <file>app/tests/agents/test_agent_e2e_critical_setup.py</file>
+                <file>app/tests/agents/test_agent_e2e_critical_*.py</file>
+                <file>pytest.ini - configured with testpaths including app/tests</file>
+            </files_affected>
+            <verification>Tests run successfully with relative imports from project root</verification>
+        </learning>
+        
         <learning id="integration-test-architecture-compliance">
             <title>Integration Test File Modularization Required</title>
             <problem>

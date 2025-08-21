@@ -1,0 +1,107 @@
+"""PostgreSQL database integration module.
+
+Main module that imports and exposes functionality from focused sub-modules.
+Maintains backward compatibility while adhering to modular architecture.
+Now enhanced with resilience patterns for pragmatic rigor and degraded operation.
+"""
+
+# Import configuration
+from netra_backend.app.postgres_config import DatabaseConfig
+
+# Import core functionality
+from netra_backend.app.postgres_core import (
+    Database,
+    async_engine,
+    async_session_factory,
+    initialize_postgres
+)
+
+# Import session management
+from netra_backend.app.postgres_session import (
+    validate_session,
+    get_session_validation_error,
+    get_async_db,
+    get_postgres_session
+)
+
+# Import pool monitoring
+from netra_backend.app.postgres_pool import (
+    get_pool_status,
+    close_async_db
+)
+
+# Import resilience features
+try:
+    from .postgres_resilience import (
+        postgres_resilience,
+        with_postgres_resilience,
+        resilient_postgres_session,
+        PostgresResilienceError,
+        ReadOnlyModeError
+    )
+    _RESILIENCE_AVAILABLE = True
+except ImportError:
+    _RESILIENCE_AVAILABLE = False
+    postgres_resilience = None
+    with_postgres_resilience = None
+    resilient_postgres_session = None
+    PostgresResilienceError = None
+    ReadOnlyModeError = None
+
+# Backward compatibility alias with resilience awareness
+async def get_postgres_db():
+    """Alias for get_async_db for backward compatibility.
+    
+    Uses resilient session if available, otherwise falls back to standard session.
+    """
+    async for session in get_resilient_postgres_session():
+        yield session
+
+async def get_resilient_postgres_session():
+    """Get PostgreSQL session with resilience patterns if available."""
+    if _RESILIENCE_AVAILABLE and resilient_postgres_session:
+        async with resilient_postgres_session() as session:
+            yield session
+    else:
+        # Fallback to standard session
+        async with get_async_db() as session:
+            yield session
+
+def get_postgres_resilience_status():
+    """Get PostgreSQL resilience status and configuration."""
+    if _RESILIENCE_AVAILABLE and postgres_resilience:
+        return postgres_resilience.get_status()
+    return {
+        "resilience_available": False,
+        "message": "PostgreSQL resilience module not available"
+    }
+
+# Re-export all functionality for backward compatibility
+__all__ = [
+    # Core functionality
+    'Database',
+    'DatabaseConfig', 
+    'async_engine',
+    'async_session_factory',
+    'initialize_postgres',
+    
+    # Session management
+    'validate_session',
+    'get_session_validation_error',
+    'get_async_db',
+    'get_postgres_db',
+    'get_postgres_session',
+    
+    # Pool monitoring
+    'get_pool_status',
+    'close_async_db',
+    
+    # Resilience features (if available)
+    'get_resilient_postgres_session',
+    'get_postgres_resilience_status',
+    'postgres_resilience',
+    'with_postgres_resilience',
+    'resilient_postgres_session',
+    'PostgresResilienceError',
+    'ReadOnlyModeError'
+]

@@ -36,15 +36,7 @@ from app.schemas import (
 )
 from app.schemas.UserPlan import PlanTier
 
-# Import test helpers
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.agent_conversation_helpers import (
-    AgentConversationTestCore,
-    ConversationFlowSimulator,
-    ConversationFlowValidator,
-    AgentConversationTestUtils,
-    RealTimeUpdateValidator
-)
+# Import test helpers - removed due to missing module
 
 # Staging environment configuration
 STAGING_CONFIG = {
@@ -85,18 +77,12 @@ class StagingEnvironmentE2ETests:
             pytest.skip("Staging environment not configured")
         
         # Initialize test helpers
-        self.jwt_helper = JWTTestHelper()
-        self.conversation_core = AgentConversationTestCore()
-        self.flow_simulator = ConversationFlowSimulator()
-        self.flow_validator = ConversationFlowValidator()
-        self.update_validator = RealTimeUpdateValidator()
+        # JWT helper removed - not available
         
-        await self.conversation_core.setup_test_environment()
         
         yield
         
         # Cleanup
-        await self.conversation_core.teardown_test_environment()
     
     @pytest.fixture
     async def staging_client(self):

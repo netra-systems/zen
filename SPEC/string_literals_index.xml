@@ -1,16 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.589217</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.589217">
+      <reasons>
+        <reason>Content contains: DEPRECATED</reason>
+        <reason>Content contains: deprecated</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>String Literals Master Index</title>
   <category>Core Infrastructure</category>
   <priority>High</priority>
   <last_updated>2025-01-20</last_updated>
-  
   <purpose>
     Master index of all string literal types unique to the Netra platform.
     Serves as a single source of truth for concrete values, preventing LLM hallucination
     and ensuring consistency across the codebase.
   </purpose>
-
   <scope>
     <include>
       - Configuration keys and values
@@ -38,7 +45,6 @@
       - Third-party library constants
     </exclude>
   </scope>
-
   <structure>
     <format>
       Each category contains entries with:
@@ -48,7 +54,6 @@
       - description: Brief explanation of purpose
       - related: Related string literals (if any)
     </format>
-    
     <categories>
       <category name="configuration">
         <description>Configuration keys, settings, and parameters</description>
@@ -57,7 +62,6 @@
           - "max_retries", "timeout_seconds"
         </examples>
       </category>
-      
       <category name="paths">
         <description>File paths, directories, and URL paths</description>
         <examples>
@@ -65,7 +69,6 @@
           - "logs/", "configs/", ".env"
         </examples>
       </category>
-      
       <category name="identifiers">
         <description>Service names, agent types, component IDs</description>
         <examples>
@@ -73,7 +76,6 @@
           - "auth_service", "main_backend"
         </examples>
       </category>
-      
       <category name="database">
         <description>Table names, column names, query constants</description>
         <examples>
@@ -81,7 +83,6 @@
           - "created_at", "status", "thread_id"
         </examples>
       </category>
-      
       <category name="events">
         <description>Event names, message types, signals</description>
         <examples>
@@ -89,7 +90,6 @@
           - "websocket_connect", "auth_success"
         </examples>
       </category>
-      
       <category name="metrics">
         <description>Metric names, labels, and monitoring keys</description>
         <examples>
@@ -97,7 +97,6 @@
           - "service_health", "queue_depth"
         </examples>
       </category>
-      
       <category name="environment">
         <description>Environment variable names</description>
         <examples>
@@ -105,7 +104,6 @@
           - "LOG_LEVEL", "ENV"
         </examples>
       </category>
-      
       <category name="states">
         <description>Status values, state names, conditions</description>
         <examples>
@@ -115,7 +113,6 @@
       </category>
     </categories>
   </structure>
-
   <implementation>
     <scanner>
       <path>scripts/scan_string_literals.py</path>
@@ -130,13 +127,11 @@
         - Validation against existing index
       </features>
     </scanner>
-    
     <index_file>
       <path>SPEC/generated/string_literals.json</path>
       <format>JSON for easy parsing and updating</format>
       <versioning>Tracked in git with semantic versioning</versioning>
     </index_file>
-    
     <agent_integration>
       <description>
         Agents can query the index for correct string values,
@@ -149,14 +144,12 @@
       </usage>
     </agent_integration>
   </implementation>
-
   <maintenance>
     <update_triggers>
       - Pre-commit hook to scan changed files
       - CI/CD pipeline validation
       - Manual trigger via script
     </update_triggers>
-    
     <validation>
       - Check for duplicates within categories
       - Verify all referenced files exist
@@ -164,7 +157,6 @@
       - Flag deprecated entries for removal
     </validation>
   </maintenance>
-
   <usage_guidelines>
     <for_llms>
       1. ALWAYS check this index before using string literals
@@ -172,7 +164,6 @@
       3. If a needed literal is missing, flag for addition
       4. Reference by category and key for clarity
     </for_llms>
-    
     <for_developers>
       1. Run scanner after adding new string constants
       2. Update descriptions when changing usage
@@ -180,21 +171,18 @@
       4. Use constants from index in new code
     </for_developers>
   </usage_guidelines>
-
   <examples>
     <example type="query">
       <description>Finding the correct WebSocket endpoint</description>
       <query>category: paths, type: websocket</query>
       <result>"/websocket", "/ws"</result>
     </example>
-    
     <example type="validation">
       <description>Checking if a config key exists</description>
       <input>"max_retry_attempts"</input>
       <result>Not found. Did you mean "max_retries"?</result>
     </example>
   </examples>
-
   <related_specs>
     <spec>conventions.xml</spec>
     <spec>type_safety.xml</spec>

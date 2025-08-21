@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
 import logging
 
-from ..config import AuthConfig
+from auth_service.app..config import AuthConfig
 
 logger = logging.getLogger(__name__)
 

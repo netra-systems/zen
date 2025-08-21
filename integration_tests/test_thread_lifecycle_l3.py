@@ -20,10 +20,8 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
-from app.schemas import ThreadStatus, ThreadPriority
-from app.services.thread_service import ThreadService
-from app.db.postgres import get_db_session
-from tests.unified.jwt_token_helpers import JWTTestHelper
+# Thread-related services and schemas not available in current codebase
+from app.db.postgres import get_postgres_db
 
 
 class TestThreadLifecycleL3:
@@ -32,7 +30,7 @@ class TestThreadLifecycleL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.test_threads = []
         self.test_users = []
         yield

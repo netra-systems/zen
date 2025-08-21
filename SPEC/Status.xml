@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>System Component Status Report</name>
@@ -10,8 +10,18 @@
     </description>
     <created>2025-08-10</created>
     <auto_update>weekly</auto_update>
+    <last_edited>2025-08-21T08:47:28.589217</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.589217">
+      <reasons>
+        <reason>Content contains: DEPRECATED</reason>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: old</reason>
+        <reason>Content contains: legacy</reason>
+        <reason>Content contains: deprecated</reason>
+        <reason>Likely outdated spec: Status.xml</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <analysis_categories>
     <category id="component_health">
       <name>Component Health Status</name>
@@ -43,7 +53,6 @@
         </check>
       </checks>
     </category>
-
     <category id="integration_status">
       <name>Integration Points Status</name>
       <description>Status of integrations between frontend and backend</description>
@@ -82,7 +91,6 @@
         </check>
       </checks>
     </category>
-
     <category id="feature_flags">
       <name>Feature Flags and Toggles</name>
       <description>Features controlled by flags or environment variables</description>
@@ -106,7 +114,6 @@
         </check>
       </checks>
     </category>
-
     <category id="work_in_progress">
       <name>Work In Progress Items</name>
       <description>Features and components currently under development</description>
@@ -129,7 +136,6 @@
         </check>
       </checks>
     </category>
-
     <category id="agent_system">
       <name>Agent System Status</name>
       <description>Multi-agent system operational status</description>
@@ -161,7 +167,6 @@
         </check>
       </checks>
     </category>
-
     <category id="database_status">
       <name>Database and Migration Status</name>
       <description>Database connectivity and migration state</description>
@@ -196,7 +201,6 @@
         </check>
       </checks>
     </category>
-
     <category id="test_coverage">
       <name>Test Coverage Status</name>
       <description>Current test coverage and test health</description>
@@ -225,7 +229,6 @@
         </check>
       </checks>
     </category>
-
     <category id="security_status">
       <name>Security and Authentication Status</name>
       <description>Security configurations and authentication health</description>
@@ -253,7 +256,6 @@
         </check>
       </checks>
     </category>
-
     <category id="performance_bottlenecks">
       <name>Performance and Optimization Status</name>
       <description>Known performance issues and optimization opportunities</description>
@@ -276,7 +278,6 @@
         </check>
       </checks>
     </category>
-
     <category id="known_issues">
       <name>Known Issues and Bugs</name>
       <description>Documented issues and workarounds in the codebase</description>
@@ -299,7 +300,6 @@
       </checks>
     </category>
   </analysis_categories>
-
   <report_format>
     <section id="executive_summary">
       <title>Executive Summary</title>
@@ -310,7 +310,6 @@
         - Integration points status
       </content>
     </section>
-
     <section id="component_details">
       <title>Component Status Details</title>
       <subsections>
@@ -320,7 +319,6 @@
         <subsection>Database Layer</subsection>
       </subsections>
     </section>
-
     <section id="integration_health">
       <title>Integration Health</title>
       <content>
@@ -329,7 +327,6 @@
         - Authentication flow status
       </content>
     </section>
-
     <section id="work_items">
       <title>Work In Progress</title>
       <content>
@@ -338,7 +335,6 @@
         - Incomplete implementations
       </content>
     </section>
-
     <section id="issues_risks">
       <title>Known Issues and Risks</title>
       <content>
@@ -348,7 +344,6 @@
         - Technical debt items
       </content>
     </section>
-
     <section id="recommendations">
       <title>Recommendations</title>
       <content>
@@ -358,7 +353,6 @@
       </content>
     </section>
   </report_format>
-
   <execution>
     <schedule>
       <frequency>weekly</frequency>

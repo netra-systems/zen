@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
-    <metadata>
-        <category>WebSockets</category>
-        <last_updated>2025-01-21</last_updated>
-    </metadata>
-    
-    <learning id="websocket-jwt-subprotocol-encoding">
-        <title>JWT Token Encoding for WebSocket Subprotocols</title>
-        <description>
+  <metadata>
+    <category>WebSockets</category>
+    <last_updated>2025-01-21</last_updated>
+    <last_edited>2025-08-21T08:47:29.890818</last_edited>
+  </metadata>
+  <learning id="websocket-jwt-subprotocol-encoding">
+    <title>JWT Token Encoding for WebSocket Subprotocols</title>
+    <description>
             WebSocket subprotocol names have strict character restrictions per RFC 6455.
             JWT tokens contain characters (spaces, dots, special chars) that are invalid for subprotocols.
         </description>
-        <problem>
+    <problem>
             Browser error: "SyntaxError: Failed to construct 'WebSocket': The subprotocol 'jwt.Bearer eyJhbG...' is invalid"
             JWT tokens with Bearer prefix and base64 encoding contain invalid characters for subprotocol names.
         </problem>
-        <solution>
+    <solution>
             1. Frontend: Base64URL encode the JWT token before using as subprotocol
             2. Backend: Decode the base64URL-encoded token when receiving
             3. Use standard subprotocol name 'jwt-auth' alongside encoded token
         </solution>
-        <implementation>
+    <implementation>
             Frontend (webSocketService.ts):
             - Remove Bearer prefix from token
             - Base64URL encode: btoa(token).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
@@ -31,50 +31,48 @@
             - Decode base64URL back to original JWT
             - Validate decoded token with auth service
         </implementation>
-        <files_changed>
-            <file>frontend/services/webSocketService.ts:557-570</file>
-            <file>app/routes/websocket_secure.py:123-151</file>
-            <file>app/routes/websocket_secure.py:587-600</file>
-        </files_changed>
-        <testing>
+    <files_changed>
+      <file>frontend/services/webSocketService.ts:557-570</file>
+      <file>app/routes/websocket_secure.py:123-151</file>
+      <file>app/routes/websocket_secure.py:587-600</file>
+    </files_changed>
+    <testing>
             Integration tests required for:
             - Valid JWT encoding/decoding
             - Invalid token rejection
             - Malformed encoding handling
             - Subprotocol negotiation
         </testing>
-    </learning>
-    
-    <learning id="websocket-subprotocol-restrictions">
-        <title>WebSocket Subprotocol Character Restrictions</title>
-        <description>
+  </learning>
+  <learning id="websocket-subprotocol-restrictions">
+    <title>WebSocket Subprotocol Character Restrictions</title>
+    <description>
             RFC 6455 restricts subprotocol names to ASCII printable characters excluding specific chars.
             Cannot use raw JWT tokens or any strings with spaces/special characters.
         </description>
-        <allowed_characters>
+    <allowed_characters>
             Letters (a-z, A-Z), digits (0-9), and limited punctuation: !#$%&amp;'*+-.^_`|~
         </allowed_characters>
-        <forbidden_characters>
+    <forbidden_characters>
             Spaces, commas, semicolons, equals signs, forward slashes, backslashes, quotes
         </forbidden_characters>
-        <best_practice>
+    <best_practice>
             Always encode complex data (JWTs, URLs, etc.) using base64URL before using as subprotocol
         </best_practice>
-    </learning>
-    
-    <learning id="websocket-auth-methods">
-        <title>WebSocket Authentication Methods Priority</title>
-        <description>
+  </learning>
+  <learning id="websocket-auth-methods">
+    <title>WebSocket Authentication Methods Priority</title>
+    <description>
             Multiple authentication methods for WebSocket connections with fallback strategy
         </description>
-        <priority_order>
+    <priority_order>
             1. Authorization header (preferred but not always available in browsers)
             2. Subprotocol with encoded JWT (browser-compatible)
             3. Never use query parameters (security risk)
         </priority_order>
-        <browser_limitations>
+    <browser_limitations>
             Browser WebSocket API doesn't support custom headers directly.
             Must use subprotocol or cookies for authentication.
         </browser_limitations>
-    </learning>
+  </learning>
 </learnings>

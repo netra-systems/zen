@@ -1,0 +1,31 @@
+"""
+Performance Tests - Index
+Central index for all performance optimization tests split across modules.
+Compliance: <300 lines, 25-line max functions, modular design.
+"""
+
+# Import all performance test modules
+from tests.performance.test_performance_cache import (
+    TestMemoryCache,
+    TestQueryOptimizer
+)
+from tests.performance.test_performance_batching import (
+    TestBatchProcessor,
+    TestMessageBatcher
+)
+from tests.performance.test_performance_monitoring import (
+    TestPerformanceMonitoring,
+    TestDatabaseIndexOptimization,
+    TestPerformanceOptimizationIntegration
+)
+
+# Re-export all test classes for pytest discovery
+__all__ = [
+    "TestMemoryCache",
+    "TestQueryOptimizer",
+    "TestBatchProcessor", 
+    "TestMessageBatcher",
+    "TestPerformanceMonitoring",
+    "TestDatabaseIndexOptimization",
+    "TestPerformanceOptimizationIntegration"
+]

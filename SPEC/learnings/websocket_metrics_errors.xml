@@ -1,115 +1,107 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>WebSocket Metrics Collection Error Learnings</name>
-        <type>learnings</type>
-        <version>1.0</version>
-        <last_updated>2025-08-18</last_updated>
-    </metadata>
-    
-    <learnings>
-        <learning>
-            <id>websocket-metrics-connection-stats-keyerror</id>
-            <date>2025-08-18</date>
-            <category>WebSocket/Metrics</category>
-            <severity>high</severity>
-            <title>WebSocket Metrics Collection KeyError: 'connection_stats'</title>
-            
-            <problem>
-                <description>Metrics collection fails when trying to extract connection_stats from orchestrator result</description>
-                <error_message>Failed to gather WebSocket metrics: 'connection_stats'</error_message>
-                <location>app.monitoring.metrics_collector:_gather_websocket_metrics:306</location>
-                <symptoms>
-                    <symptom>Metrics collection logs WARNING with KeyError</symptom>
-                    <symptom>Occurs when orchestrator returns success but result lacks expected key</symptom>
-                    <symptom>Can happen when result is None or missing connection_stats</symptom>
-                </symptoms>
-                <root_cause>_extract_modern_stats method assumes result.result always contains 'connection_stats' key when success is True</root_cause>
-                <impact>Metrics collection fails silently, degrading monitoring capabilities</impact>
-            </problem>
-            
-            <solution>
-                <description>Add defensive checks in _extract_modern_stats to handle missing keys</description>
-                <implementation>
-                    <step>Check result.success AND result.result is not None</step>
-                    <step>Verify 'connection_stats' key exists before accessing</step>
-                    <step>Return empty dict for any failure case</step>
-                </implementation>
-                <code_changes>
-                    <file>app/websocket/connection_manager.py</file>
-                    <change>Modified _extract_modern_stats to check: result.success and result.result and "connection_stats" in result.result</change>
-                </code_changes>
-                <fix_pattern><![CDATA[
-def _extract_modern_stats(self, result) -> Dict[str, any]:
+  <metadata>
+    <name>WebSocket Metrics Collection Error Learnings</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <last_updated>2025-08-18</last_updated>
+    <last_edited>2025-08-21T08:47:30.019201</last_edited>
+  </metadata>
+  <learnings>
+    <learning>
+      <id>websocket-metrics-connection-stats-keyerror</id>
+      <date>2025-08-18</date>
+      <category>WebSocket/Metrics</category>
+      <severity>high</severity>
+      <title>WebSocket Metrics Collection KeyError: 'connection_stats'</title>
+      <problem>
+        <description>Metrics collection fails when trying to extract connection_stats from orchestrator result</description>
+        <error_message>Failed to gather WebSocket metrics: 'connection_stats'</error_message>
+        <location>app.monitoring.metrics_collector:_gather_websocket_metrics:306</location>
+        <symptoms>
+          <symptom>Metrics collection logs WARNING with KeyError</symptom>
+          <symptom>Occurs when orchestrator returns success but result lacks expected key</symptom>
+          <symptom>Can happen when result is None or missing connection_stats</symptom>
+        </symptoms>
+        <root_cause>_extract_modern_stats method assumes result.result always contains 'connection_stats' key when success is True</root_cause>
+        <impact>Metrics collection fails silently, degrading monitoring capabilities</impact>
+      </problem>
+      <solution>
+        <description>Add defensive checks in _extract_modern_stats to handle missing keys</description>
+        <implementation>
+          <step>Check result.success AND result.result is not None</step>
+          <step>Verify 'connection_stats' key exists before accessing</step>
+          <step>Return empty dict for any failure case</step>
+        </implementation>
+        <code_changes>
+          <file>app/websocket/connection_manager.py</file>
+          <change>Modified _extract_modern_stats to check: result.success and result.result and "connection_stats" in result.result</change>
+        </code_changes>
+        <fix_pattern>
+def _extract_modern_stats(self, result) -&gt; Dict[str, any]:
     """Extract modern stats from orchestrator result."""
     if result.success and result.result and "connection_stats" in result.result:
         return result.result["connection_stats"]
     else:
         return {}
-                ]]></fix_pattern>
-            </solution>
-            
-            <prevention>
-                <recommendation>Always validate dictionary keys before access in result processing</recommendation>
-                <recommendation>Use defensive programming when handling external API results</recommendation>
-                <recommendation>Return safe defaults when expected data is missing</recommendation>
-                <pattern>
-                    <name>Safe Dictionary Access Pattern</name>
-                    <description>Check for None and key existence before accessing nested dictionaries</description>
-                    <code><![CDATA[
+                </fix_pattern>
+      </solution>
+      <prevention>
+        <recommendation>Always validate dictionary keys before access in result processing</recommendation>
+        <recommendation>Use defensive programming when handling external API results</recommendation>
+        <recommendation>Return safe defaults when expected data is missing</recommendation>
+        <pattern>
+          <name>Safe Dictionary Access Pattern</name>
+          <description>Check for None and key existence before accessing nested dictionaries</description>
+          <code>
 if obj and hasattr(obj, 'result') and obj.result and key in obj.result:
     return obj.result[key]
 else:
     return default_value
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>app/tests/critical/test_websocket_metrics_regression.py</test_file>
-                <test_cases>
-                    <test>test_metrics_collection_handles_missing_connection_stats - Tests missing key scenario</test>
-                    <test>test_metrics_collection_handles_none_result - Tests None result handling</test>
-                    <test>test_metrics_collection_handles_failed_orchestrator_result - Tests failure status</test>
-                    <test>test_metrics_collection_with_valid_connection_stats - Positive test case</test>
-                    <test>test_connection_manager_extract_modern_stats_safety - Direct method testing</test>
-                </test_cases>
-                <coverage>
-                    <scenario>Orchestrator returns success with None result</scenario>
-                    <scenario>Orchestrator returns success with empty dict</scenario>
-                    <scenario>Orchestrator returns success with dict missing connection_stats</scenario>
-                    <scenario>Orchestrator returns failure status</scenario>
-                    <scenario>Normal operation with valid connection_stats</scenario>
-                </coverage>
-            </testing>
-            
-            <affected_files>
-                <file>app/websocket/connection_manager.py</file>
-                <file>app/monitoring/metrics_collector.py</file>
-            </affected_files>
-            
-            <related_patterns>
-                <pattern>Defensive programming for external API results</pattern>
-                <pattern>Safe dictionary access patterns</pattern>
-                <pattern>Graceful degradation in monitoring systems</pattern>
-            </related_patterns>
-            
-            <business_impact>
-                <impact>Improves monitoring reliability by preventing metrics collection failures</impact>
-                <impact>Ensures continuous visibility into WebSocket performance</impact>
-                <impact>Reduces noise in error logs for better operational clarity</impact>
-            </business_impact>
-            
-            <similar_issues>
-                <issue>
-                    <reference>websocket-connection-state-error</reference>
-                    <similarity>Both involve defensive checking of object state before operations</similarity>
-                </issue>
-                <issue>
-                    <pattern>Missing key errors in async result processing</pattern>
-                    <solution>Always validate presence of expected keys in results</solution>
-                </issue>
-            </similar_issues>
-        </learning>
-    </learnings>
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>app/tests/critical/test_websocket_metrics_regression.py</test_file>
+        <test_cases>
+          <test>test_metrics_collection_handles_missing_connection_stats - Tests missing key scenario</test>
+          <test>test_metrics_collection_handles_none_result - Tests None result handling</test>
+          <test>test_metrics_collection_handles_failed_orchestrator_result - Tests failure status</test>
+          <test>test_metrics_collection_with_valid_connection_stats - Positive test case</test>
+          <test>test_connection_manager_extract_modern_stats_safety - Direct method testing</test>
+        </test_cases>
+        <coverage>
+          <scenario>Orchestrator returns success with None result</scenario>
+          <scenario>Orchestrator returns success with empty dict</scenario>
+          <scenario>Orchestrator returns success with dict missing connection_stats</scenario>
+          <scenario>Orchestrator returns failure status</scenario>
+          <scenario>Normal operation with valid connection_stats</scenario>
+        </coverage>
+      </testing>
+      <affected_files>
+        <file>app/websocket/connection_manager.py</file>
+        <file>app/monitoring/metrics_collector.py</file>
+      </affected_files>
+      <related_patterns>
+        <pattern>Defensive programming for external API results</pattern>
+        <pattern>Safe dictionary access patterns</pattern>
+        <pattern>Graceful degradation in monitoring systems</pattern>
+      </related_patterns>
+      <business_impact>
+        <impact>Improves monitoring reliability by preventing metrics collection failures</impact>
+        <impact>Ensures continuous visibility into WebSocket performance</impact>
+        <impact>Reduces noise in error logs for better operational clarity</impact>
+      </business_impact>
+      <similar_issues>
+        <issue>
+          <reference>websocket-connection-state-error</reference>
+          <similarity>Both involve defensive checking of object state before operations</similarity>
+        </issue>
+        <issue>
+          <pattern>Missing key errors in async result processing</pattern>
+          <solution>Always validate presence of expected keys in results</solution>
+        </issue>
+      </similar_issues>
+    </learning>
+  </learnings>
 </specification>

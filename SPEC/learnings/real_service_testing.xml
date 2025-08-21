@@ -1,53 +1,53 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
-    <metadata>
-        <name>Real Service Testing Learnings</name>
-        <created>2025-01-19</created>
-        <category>Testing Infrastructure</category>
-        <priority>HIGH</priority>
-    </metadata>
-
-    <insights>
-        <insight id="dev-launcher-integration">
-            <title>Dev Launcher is the Single Source of Truth</title>
-            <finding>All test infrastructure should use dev_launcher for service management instead of manual subprocess handling</finding>
-            <benefit>Eliminates duplication, ensures consistency, and provides centralized service orchestration</benefit>
-            <implementation>Created dev_launcher pytest fixtures in tests/conftest.py</implementation>
-        </insight>
-        
-        <insight id="dynamic-ports-critical">
-            <title>Dynamic Port Allocation Enables Parallel Testing</title>
-            <finding>Fixed ports cause conflicts when running tests in parallel or when services are already running</finding>
-            <solution>Implemented ServiceDiscovery module that reads port information from .service_discovery/*.json files</solution>
-            <benefit>Multiple test sessions can run concurrently without conflicts</benefit>
-        </insight>
-        
-        <insight id="typed-clients">
-            <title>Typed Test Clients Improve Developer Experience</title>
-            <finding>Generic HTTP clients require developers to remember API endpoints and request formats</finding>
-            <solution>Created typed client classes (AuthTestClient, BackendTestClient, WebSocketTestClient) with specific methods</solution>
-            <benefit>IDE autocomplete, type safety, and self-documenting test code</benefit>
-        </insight>
-        
-        <insight id="fixture-scoping">
-            <title>Session-Scoped Fixtures for Service Startup</title>
-            <finding>Starting services for each test is slow and resource-intensive</finding>
-            <solution>Use session-scoped fixtures for dev_launcher and service_discovery</solution>
-            <benefit>Services start once per test session, reducing test execution time from minutes to seconds</benefit>
-        </insight>
-        
-        <insight id="cleanup-critical">
-            <title>Proper Cleanup Prevents Resource Leaks</title>
-            <finding>Orphaned processes and open connections cause test failures and system resource exhaustion</finding>
-            <solution>Implement try/finally blocks and async context managers for guaranteed cleanup</solution>
-            <pattern>Always use await launcher.shutdown() in finally blocks</pattern>
-        </insight>
-    </insights>
-
-    <patterns>
-        <pattern id="real-service-fixture">
-            <name>Real Service Fixture Pattern</name>
-            <code><![CDATA[
+  <metadata>
+    <name>Real Service Testing Learnings</name>
+    <created>2025-01-19</created>
+    <category>Testing Infrastructure</category>
+    <priority>HIGH</priority>
+    <last_edited>2025-08-21T08:47:29.696356</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.696356">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <insights>
+    <insight id="dev-launcher-integration">
+      <title>Dev Launcher is the Single Source of Truth</title>
+      <finding>All test infrastructure should use dev_launcher for service management instead of manual subprocess handling</finding>
+      <benefit>Eliminates duplication, ensures consistency, and provides centralized service orchestration</benefit>
+      <implementation>Created dev_launcher pytest fixtures in tests/conftest.py</implementation>
+    </insight>
+    <insight id="dynamic-ports-critical">
+      <title>Dynamic Port Allocation Enables Parallel Testing</title>
+      <finding>Fixed ports cause conflicts when running tests in parallel or when services are already running</finding>
+      <solution>Implemented ServiceDiscovery module that reads port information from .service_discovery/*.json files</solution>
+      <benefit>Multiple test sessions can run concurrently without conflicts</benefit>
+    </insight>
+    <insight id="typed-clients">
+      <title>Typed Test Clients Improve Developer Experience</title>
+      <finding>Generic HTTP clients require developers to remember API endpoints and request formats</finding>
+      <solution>Created typed client classes (AuthTestClient, BackendTestClient, WebSocketTestClient) with specific methods</solution>
+      <benefit>IDE autocomplete, type safety, and self-documenting test code</benefit>
+    </insight>
+    <insight id="fixture-scoping">
+      <title>Session-Scoped Fixtures for Service Startup</title>
+      <finding>Starting services for each test is slow and resource-intensive</finding>
+      <solution>Use session-scoped fixtures for dev_launcher and service_discovery</solution>
+      <benefit>Services start once per test session, reducing test execution time from minutes to seconds</benefit>
+    </insight>
+    <insight id="cleanup-critical">
+      <title>Proper Cleanup Prevents Resource Leaks</title>
+      <finding>Orphaned processes and open connections cause test failures and system resource exhaustion</finding>
+      <solution>Implement try/finally blocks and async context managers for guaranteed cleanup</solution>
+      <pattern>Always use await launcher.shutdown() in finally blocks</pattern>
+    </insight>
+  </insights>
+  <patterns>
+    <pattern id="real-service-fixture">
+      <name>Real Service Fixture Pattern</name>
+      <code>
 @pytest.fixture(scope="session")
 async def real_services(dev_launcher, service_discovery):
     factory = TestClientFactory(service_discovery)
@@ -61,12 +61,11 @@ async def real_services(dev_launcher, service_discovery):
     )
     
     await factory.cleanup()
-            ]]></code>
-        </pattern>
-        
-        <pattern id="service-discovery">
-            <name>Service Discovery Pattern</name>
-            <code><![CDATA[
+            </code>
+    </pattern>
+    <pattern id="service-discovery">
+      <name>Service Discovery Pattern</name>
+      <code>
 discovery = ServiceDiscovery()
 auth_info = await discovery.wait_for_service("auth", timeout=30.0)
 backend_info = await discovery.wait_for_service("backend", timeout=30.0)
@@ -74,12 +73,11 @@ backend_info = await discovery.wait_for_service("backend", timeout=30.0)
 # Use discovered ports for connections
 auth_url = auth_info.base_url  # http://localhost:{dynamic_port}
 ws_url = backend_info.websocket_url  # ws://localhost:{dynamic_port}/ws
-            ]]></code>
-        </pattern>
-        
-        <pattern id="websocket-testing">
-            <name>WebSocket Testing Pattern</name>
-            <code><![CDATA[
+            </code>
+    </pattern>
+    <pattern id="websocket-testing">
+      <name>WebSocket Testing Pattern</name>
+      <code>
 ws_client = await real_services.create_websocket_client()
 try:
     await ws_client.connect()
@@ -88,119 +86,105 @@ try:
     assert response["type"] == "chat_response"
 finally:
     await ws_client.disconnect()
-            ]]></code>
-        </pattern>
-    </patterns>
-
-    <gotchas>
-        <gotcha id="env-variable-required">
-            <problem>Tests skip silently when USE_REAL_SERVICES is not set</problem>
-            <solution>Set USE_REAL_SERVICES=true in environment or pytest.ini</solution>
-        </gotcha>
-        
-        <gotcha id="port-conflicts">
-            <problem>Services fail to start due to port conflicts</problem>
-            <solution>Always use dynamic_ports=True in LauncherConfig</solution>
-        </gotcha>
-        
-        <gotcha id="timeout-tuning">
-            <problem>Tests fail intermittently due to service startup timeouts</problem>
-            <solution>Increase startup_timeout in LauncherConfig for slower systems</solution>
-        </gotcha>
-        
-        <gotcha id="cleanup-order">
-            <problem>Cleanup errors when closing clients before services</problem>
-            <solution>Always cleanup clients before shutting down services</solution>
-        </gotcha>
-    </gotchas>
-
-    <migration_guide>
-        <step number="1">
-            <action>Update test file to use real_services fixture</action>
-            <before><![CDATA[
+            </code>
+    </pattern>
+  </patterns>
+  <gotchas>
+    <gotcha id="env-variable-required">
+      <problem>Tests skip silently when USE_REAL_SERVICES is not set</problem>
+      <solution>Set USE_REAL_SERVICES=true in environment or pytest.ini</solution>
+    </gotcha>
+    <gotcha id="port-conflicts">
+      <problem>Services fail to start due to port conflicts</problem>
+      <solution>Always use dynamic_ports=True in LauncherConfig</solution>
+    </gotcha>
+    <gotcha id="timeout-tuning">
+      <problem>Tests fail intermittently due to service startup timeouts</problem>
+      <solution>Increase startup_timeout in LauncherConfig for slower systems</solution>
+    </gotcha>
+    <gotcha id="cleanup-order">
+      <problem>Cleanup errors when closing clients before services</problem>
+      <solution>Always cleanup clients before shutting down services</solution>
+    </gotcha>
+  </gotchas>
+  <migration_guide>
+    <step number="1">
+      <action>Update test file to use real_services fixture</action>
+      <before>
 # Old approach with manual service management
 manager = RealServicesManager()
 await manager.start_all_services()
-            ]]></before>
-            <after><![CDATA[
+            </before>
+      <after>
 # New approach with dev_launcher fixtures
 async def test_something(real_services):
     # Services already started and clients ready
     await real_services.auth_client.login(...)
-            ]]></after>
-        </step>
-        
-        <step number="2">
-            <action>Replace hardcoded ports with discovery</action>
-            <before><![CDATA[
+            </after>
+    </step>
+    <step number="2">
+      <action>Replace hardcoded ports with discovery</action>
+      <before>
 # Hardcoded port
 client = httpx.AsyncClient(base_url="http://localhost:8081")
-            ]]></before>
-            <after><![CDATA[
+            </before>
+      <after>
 # Dynamic port discovery
 auth_info = await service_discovery.get_service_info("auth")
 client = httpx.AsyncClient(base_url=auth_info.base_url)
-            ]]></after>
-        </step>
-        
-        <step number="3">
-            <action>Use typed clients instead of raw HTTP</action>
-            <before><![CDATA[
+            </after>
+    </step>
+    <step number="3">
+      <action>Use typed clients instead of raw HTTP</action>
+      <before>
 # Raw HTTP request
 response = await client.post("/auth/login", json={"email": "...", "password": "..."})
 token = response.json()["access_token"]
-            ]]></before>
-            <after><![CDATA[
+            </before>
+      <after>
 # Typed client method
 token = await real_services.auth_client.login(email="...", password="...")
-            ]]></after>
-        </step>
-    </migration_guide>
-
-    <performance_considerations>
-        <consideration>
-            <aspect>Service Startup Time</aspect>
-            <impact>Initial test run takes 10-30 seconds for service startup</impact>
-            <mitigation>Use session-scoped fixtures to start services once</mitigation>
-        </consideration>
-        
-        <consideration>
-            <aspect>Resource Usage</aspect>
-            <impact>Each service consumes memory and CPU</impact>
-            <mitigation>Skip frontend service for backend-only tests</mitigation>
-        </consideration>
-        
-        <consideration>
-            <aspect>Parallel Execution</aspect>
-            <impact>Multiple test sessions can run concurrently</impact>
-            <requirement>Ensure dynamic_ports=True for all sessions</requirement>
-        </consideration>
-    </performance_considerations>
-
-    <future_improvements>
-        <improvement>
-            <title>Service Caching Between Sessions</title>
-            <description>Keep services running between test sessions for faster iteration</description>
-            <benefit>Reduce startup time to near zero for subsequent runs</benefit>
-        </improvement>
-        
-        <improvement>
-            <title>Test Recording and Playback</title>
-            <description>Record real service interactions for offline testing</description>
-            <benefit>Enable testing without service dependencies</benefit>
-        </improvement>
-        
-        <improvement>
-            <title>Automated Performance Profiling</title>
-            <description>Profile service performance during tests</description>
-            <benefit>Identify performance regressions early</benefit>
-        </improvement>
-    </future_improvements>
-
-    <related_specs>
-        <spec>real_service_testing.xml - Main specification</spec>
-        <spec>testing.xml - General testing guidelines</spec>
-        <spec>websockets.xml - WebSocket testing patterns</spec>
-        <spec>independent_services.xml - Service independence requirements</spec>
-    </related_specs>
+            </after>
+    </step>
+  </migration_guide>
+  <performance_considerations>
+    <consideration>
+      <aspect>Service Startup Time</aspect>
+      <impact>Initial test run takes 10-30 seconds for service startup</impact>
+      <mitigation>Use session-scoped fixtures to start services once</mitigation>
+    </consideration>
+    <consideration>
+      <aspect>Resource Usage</aspect>
+      <impact>Each service consumes memory and CPU</impact>
+      <mitigation>Skip frontend service for backend-only tests</mitigation>
+    </consideration>
+    <consideration>
+      <aspect>Parallel Execution</aspect>
+      <impact>Multiple test sessions can run concurrently</impact>
+      <requirement>Ensure dynamic_ports=True for all sessions</requirement>
+    </consideration>
+  </performance_considerations>
+  <future_improvements>
+    <improvement>
+      <title>Service Caching Between Sessions</title>
+      <description>Keep services running between test sessions for faster iteration</description>
+      <benefit>Reduce startup time to near zero for subsequent runs</benefit>
+    </improvement>
+    <improvement>
+      <title>Test Recording and Playback</title>
+      <description>Record real service interactions for offline testing</description>
+      <benefit>Enable testing without service dependencies</benefit>
+    </improvement>
+    <improvement>
+      <title>Automated Performance Profiling</title>
+      <description>Profile service performance during tests</description>
+      <benefit>Identify performance regressions early</benefit>
+    </improvement>
+  </future_improvements>
+  <related_specs>
+    <spec>real_service_testing.xml - Main specification</spec>
+    <spec>testing.xml - General testing guidelines</spec>
+    <spec>websockets.xml - WebSocket testing patterns</spec>
+    <spec>independent_services.xml - Service independence requirements</spec>
+  </related_specs>
 </learnings>

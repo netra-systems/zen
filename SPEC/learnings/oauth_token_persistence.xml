@@ -1,116 +1,108 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning_document>
-    <metadata>
-        <title>OAuth Token Persistence Issue</title>
-        <date>2025-08-21</date>
-        <category>Authentication</category>
-        <tags>oauth, token_storage, frontend, auth_flow</tags>
-    </metadata>
-
-    <problem_statement>
+  <metadata>
+    <title>OAuth Token Persistence Issue</title>
+    <date>2025-08-21</date>
+    <category>Authentication</category>
+    <tags>oauth, token_storage, frontend, auth_flow</tags>
+    <last_edited>2025-08-21T08:47:29.604244</last_edited>
+  </metadata>
+  <problem_statement>
         Google OAuth returns successfully but tokens get "lost" - user remains 
         unauthenticated despite successful OAuth flow completion.
     </problem_statement>
-
-    <root_cause>
+  <root_cause>
         Multiple issues in the token handoff from auth service to frontend:
         1. Auth service redirects to /chat with tokens as query parameters
         2. Frontend /chat page was not handling tokens from URL
         3. Frontend /auth/callback page was being bypassed entirely
         4. Token parameter mismatch (frontend expected 'token', auth sent 'token' and 'refresh')
     </root_cause>
-
-    <authentication_flow>
-        <step number="1">User initiates OAuth login from frontend</step>
-        <step number="2">Frontend redirects to auth service /auth/login</step>
-        <step number="3">Auth service redirects to Google OAuth</step>
-        <step number="4">Google redirects back to auth service /auth/callback with code</step>
-        <step number="5">Auth service exchanges code for Google tokens</step>
-        <step number="6">Auth service creates JWT tokens for user</step>
-        <step number="7">Auth service redirects to frontend /chat with JWT tokens as URL params</step>
-        <step number="8">Frontend /chat page must extract and store tokens</step>
-        <step number="9">Auth context validates stored tokens on mount</step>
-    </authentication_flow>
-
-    <solution>
-        <frontend_changes>
-            <change file="frontend/app/chat/page.tsx">
+  <authentication_flow>
+    <step number="1">User initiates OAuth login from frontend</step>
+    <step number="2">Frontend redirects to auth service /auth/login</step>
+    <step number="3">Auth service redirects to Google OAuth</step>
+    <step number="4">Google redirects back to auth service /auth/callback with code</step>
+    <step number="5">Auth service exchanges code for Google tokens</step>
+    <step number="6">Auth service creates JWT tokens for user</step>
+    <step number="7">Auth service redirects to frontend /chat with JWT tokens as URL params</step>
+    <step number="8">Frontend /chat page must extract and store tokens</step>
+    <step number="9">Auth context validates stored tokens on mount</step>
+  </authentication_flow>
+  <solution>
+    <frontend_changes>
+      <change file="frontend/app/chat/page.tsx">
                 Added handleOAuthTokens function to extract tokens from URL parameters
                 and store them in localStorage when the chat page loads
             </change>
-            <change file="frontend/app/auth/callback/client.tsx">
+      <change file="frontend/app/auth/callback/client.tsx">
                 Updated to handle both 'token' and 'refresh' parameters and store
                 both tokens properly in localStorage
             </change>
-        </frontend_changes>
-        
-        <auth_service_changes>
-            <change file="auth_service/auth_core/routes/auth_routes.py">
+    </frontend_changes>
+    <auth_service_changes>
+      <change file="auth_service/auth_core/routes/auth_routes.py">
                 Added comprehensive logging to track OAuth flow and identify
                 where tokens might be getting lost
             </change>
-        </auth_service_changes>
-        
-        <testing_additions>
-            <test file="tests/integration/test_oauth_token_flow.py">
+    </auth_service_changes>
+    <testing_additions>
+      <test file="tests/integration/test_oauth_token_flow.py">
                 Integration tests for complete OAuth token flow
             </test>
-            <test file="tests/deployment/test_oauth_staging_flow.py">
+      <test file="tests/deployment/test_oauth_staging_flow.py">
                 Deployment tests to verify OAuth works in staging
             </test>
-            <test file="scripts/test_oauth_deployment.py">
+      <test file="scripts/test_oauth_deployment.py">
                 Script to run OAuth tests after deployment
             </test>
-        </testing_additions>
-    </solution>
-
-    <key_learnings>
-        <learning>
+    </testing_additions>
+  </solution>
+  <key_learnings>
+    <learning>
             Auth service redirects directly to /chat, not /auth/callback.
             Frontend pages that might receive tokens must handle them.
         </learning>
-        <learning>
+    <learning>
             URL parameter names must match exactly between auth service redirect
             and frontend token extraction code.
         </learning>
-        <learning>
+    <learning>
             Both access token and refresh token should be stored - not just
             the access token.
         </learning>
-        <learning>
+    <learning>
             Always add logging at critical handoff points in OAuth flow to
             aid debugging in production.
         </learning>
-        <learning>
+    <learning>
             Frontend auth context properly checks localStorage on mount,
             so tokens just need to be stored there correctly.
         </learning>
-    </key_learnings>
-
-    <deployment_checklist>
-        <item>Deploy auth service with logging additions</item>
-        <item>Deploy frontend with token handling in /chat page</item>
-        <item>Run OAuth deployment tests to verify flow</item>
-        <item>Test manual OAuth login in staging</item>
-        <item>Monitor logs for any token exchange failures</item>
-    </deployment_checklist>
-
-    <debugging_commands>
-        <command>
+  </key_learnings>
+  <deployment_checklist>
+    <item>Deploy auth service with logging additions</item>
+    <item>Deploy frontend with token handling in /chat page</item>
+    <item>Run OAuth deployment tests to verify flow</item>
+    <item>Test manual OAuth login in staging</item>
+    <item>Monitor logs for any token exchange failures</item>
+  </deployment_checklist>
+  <debugging_commands>
+    <command>
             Check auth service logs:
             gcloud run logs read auth-service --project=netra-staging
         </command>
-        <command>
+    <command>
             Test auth config:
             curl https://auth.staging.netrasystems.ai/auth/config
         </command>
-        <command>
+    <command>
             Test OAuth initiation:
             curl -I https://auth.staging.netrasystems.ai/auth/login?provider=google
         </command>
-        <command>
+    <command>
             Browser console to check localStorage:
             localStorage.getItem('jwt_token')
         </command>
-    </debugging_commands>
+  </debugging_commands>
 </learning_document>

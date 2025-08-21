@@ -1,41 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Netra Frontend Layout</name>
-        <type>netra_frontend_layout</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-goal priority="critical">
-        <description>Core background shell for frontend layout has react and next js required elements and concepts</description>
-        <components>
-            <component>Sidebar</component>
-            <component>Header</component>
-            <component>Main panel background</component>
-        </components>
-        <directive>Keep and use existing items</directive>
-    </primary-goal>
-    
-    <requirements>
-        <requirement id="1" priority="high">Core frontend layout is always visible and is persistent</requirement>
-        <requirement id="2">Sidebar maintains its collapsible function</requirement>
-        <requirement id="3">Prevent regression, including tests that test the existence of items of these existing components</requirement>
-        <requirement id="4">Core is persistent for authenticated users AND unauthenticated users on the homepage</requirement>
-        <requirement id="5">Core (sidebar and header) should indeed be visible at all times, with the content inside them adapting to the user's authentication status (e.g., showing a "Login" button when logged out)</requirement>
-        <requirement id="6">The homepage loads and is visible by default</requirement>
-        <requirement id="7">Sidebar links are different for authenticated and unauthenticated users</requirement>
-        <requirement id="8">
-            <description>The project uses next.js. When needed use the next.js required "app" folder structure. In every other case use the top level folders.</description>
-            <example>
-                <note>e.g. "app" should only look like this at most:</note>
-                <code language="javascript">
+  <metadata>
+    <name>Netra Frontend Layout</name>
+    <type>netra_frontend_layout</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.460934</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.460934">
+      <reasons>
+        <reason>Old UI/frontend pattern: frontend_layout</reason>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary-goal priority="critical">
+    <description>Core background shell for frontend layout has react and next js required elements and concepts</description>
+    <components>
+      <component>Sidebar</component>
+      <component>Header</component>
+      <component>Main panel background</component>
+    </components>
+    <directive>Keep and use existing items</directive>
+  </primary-goal>
+  <requirements>
+    <requirement id="1" priority="high">Core frontend layout is always visible and is persistent</requirement>
+    <requirement id="2">Sidebar maintains its collapsible function</requirement>
+    <requirement id="3">Prevent regression, including tests that test the existence of items of these existing components</requirement>
+    <requirement id="4">Core is persistent for authenticated users AND unauthenticated users on the homepage</requirement>
+    <requirement id="5">Core (sidebar and header) should indeed be visible at all times, with the content inside them adapting to the user's authentication status (e.g., showing a "Login" button when logged out)</requirement>
+    <requirement id="6">The homepage loads and is visible by default</requirement>
+    <requirement id="7">Sidebar links are different for authenticated and unauthenticated users</requirement>
+    <requirement id="8">
+      <description>The project uses next.js. When needed use the next.js required "app" folder structure. In every other case use the top level folders.</description>
+      <example>
+        <note>e.g. "app" should only look like this at most:</note>
+        <code language="javascript">
 'use client'; 
 import { Generation } from '@/components/Generation';
 export default function GenerationPage() {
   return &lt;Generation /&gt;;
 }
                 </code>
-            </example>
-        </requirement>
-    </requirements>
+      </example>
+    </requirement>
+  </requirements>
 </specification>

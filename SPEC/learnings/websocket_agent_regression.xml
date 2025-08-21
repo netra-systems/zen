@@ -1,22 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning_document>
-    <metadata>
-        <title>WebSocket Agent Registration Regression</title>
-        <category>WebSocket</category>
-        <tags>websocket, agents, regression, circular-import</tags>
-        <created>2025-01-19</created>
-        <priority>CRITICAL</priority>
-    </metadata>
-
-    <problem_statement>
+  <metadata>
+    <title>WebSocket Agent Registration Regression</title>
+    <category>WebSocket</category>
+    <tags>websocket, agents, regression, circular-import</tags>
+    <created>2025-01-19</created>
+    <priority>CRITICAL</priority>
+    <last_edited>2025-08-21T08:47:29.912215</last_edited>
+  </metadata>
+  <problem_statement>
         WebSocket messages are sent but agents don't execute. User messages reach the backend 
         but supervisor.run() fails silently because agents can't be imported due to circular dependency.
         This breaks the entire chat functionality.
     </problem_statement>
-
-    <root_cause>
-        <issue>Circular import between agent executor and WebSocket connection modules</issue>
-        <import_chain>
+  <root_cause>
+    <issue>Circular import between agent executor and WebSocket connection modules</issue>
+    <import_chain>
             app.agents.base.executor.BaseExecutionEngine
             → app.agents.base.reliability.ReliabilityManager  
             → app.agents.base.rate_limiter (imports websocket.rate_limiter)
@@ -26,68 +25,61 @@
             → app.websocket.connection_executor.ConnectionExecutor
             → attempts to import app.agents.base.executor.BaseExecutionEngine (CIRCULAR!)
         </import_chain>
-        <symptoms>
+    <symptoms>
             - ImportError on startup
             - Agents not registered in registry
             - supervisor.run() returns error silently
             - WebSocket messages sent but no responses
         </symptoms>
-    </root_cause>
-
-    <correct_architecture>
-        <principle>WebSocket modules MUST NOT import agent execution modules</principle>
-        <principle>Agent modules MAY import WebSocket modules (one-way dependency)</principle>
-        <principle>Shared functionality should be in core modules, not cross-imported</principle>
-        
-        <dependency_rules>
-            <rule>websocket/* → NEVER imports agents/*</rule>
-            <rule>agents/* → MAY import websocket/* for broadcasting</rule>
-            <rule>Shared interfaces → app.core.interfaces_*</rule>
-            <rule>Execution engines → Should not be cross-referenced</rule>
-        </dependency_rules>
-    </correct_architecture>
-
-    <fix_strategy>
-        <step priority="1">
-            <action>Remove BaseExecutionEngine import from connection_executor.py</action>
-            <location>app/websocket/connection_executor.py:45</location>
-            <replacement>Use local execution pattern or interface</replacement>
-        </step>
-        
-        <step priority="2">
-            <action>Break rate_limiter dependency</action>
-            <location>app/agents/base/rate_limiter.py:17</location>
-            <change>Don't import from websocket, use interface or duplicate</change>
-        </step>
-        
-        <step priority="3">
-            <action>Add import validation test</action>
-            <purpose>Prevent future circular imports</purpose>
-        </step>
-    </fix_strategy>
-
-    <testing_requirements>
-        <test name="test_agent_registration">
+  </root_cause>
+  <correct_architecture>
+    <principle>WebSocket modules MUST NOT import agent execution modules</principle>
+    <principle>Agent modules MAY import WebSocket modules (one-way dependency)</principle>
+    <principle>Shared functionality should be in core modules, not cross-imported</principle>
+    <dependency_rules>
+      <rule>websocket/* → NEVER imports agents/*</rule>
+      <rule>agents/* → MAY import websocket/* for broadcasting</rule>
+      <rule>Shared interfaces → app.core.interfaces_*</rule>
+      <rule>Execution engines → Should not be cross-referenced</rule>
+    </dependency_rules>
+  </correct_architecture>
+  <fix_strategy>
+    <step priority="1">
+      <action>Remove BaseExecutionEngine import from connection_executor.py</action>
+      <location>app/websocket/connection_executor.py:45</location>
+      <replacement>Use local execution pattern or interface</replacement>
+    </step>
+    <step priority="2">
+      <action>Break rate_limiter dependency</action>
+      <location>app/agents/base/rate_limiter.py:17</location>
+      <change>Don't import from websocket, use interface or duplicate</change>
+    </step>
+    <step priority="3">
+      <action>Add import validation test</action>
+      <purpose>Prevent future circular imports</purpose>
+    </step>
+  </fix_strategy>
+  <testing_requirements>
+    <test name="test_agent_registration">
             Verify all agents register on startup
         </test>
-        <test name="test_websocket_message_flow">
+    <test name="test_websocket_message_flow">
             End-to-end test: message → agent → response
         </test>
-        <test name="test_no_circular_imports">
+    <test name="test_no_circular_imports">
             Import all modules independently
         </test>
-        <test name="test_supervisor_execution">
+    <test name="test_supervisor_execution">
             Direct supervisor.run() execution
         </test>
-        <test name="test_websocket_broadcast">
+    <test name="test_websocket_broadcast">
             Agent can broadcast via WebSocket
         </test>
-    </testing_requirements>
-
-    <prevention>
-        <rule>Run import tests in CI/CD</rule>
-        <rule>Document dependency direction in each module</rule>
-        <rule>Use interfaces for cross-domain communication</rule>
-        <rule>Regular dependency graph analysis</rule>
-    </prevention>
+  </testing_requirements>
+  <prevention>
+    <rule>Run import tests in CI/CD</rule>
+    <rule>Document dependency direction in each module</rule>
+    <rule>Use interfaces for cross-domain communication</rule>
+    <rule>Regular dependency graph analysis</rule>
+  </prevention>
 </learning_document>

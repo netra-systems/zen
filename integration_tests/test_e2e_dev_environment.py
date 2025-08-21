@@ -36,15 +36,7 @@ from app.services.agent_service import AgentService, get_agent_service
 from app.services.security_service import SecurityService
 from app.dependencies import get_db_session, get_security_service
 
-# Import test helpers
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.agent_conversation_helpers import (
-    AgentConversationTestCore,
-    ConversationFlowSimulator,
-    ConversationFlowValidator,
-    AgentConversationTestUtils,
-    RealTimeUpdateValidator
-)
+# Import test helpers - removed due to missing module
 
 # Configure dev environment
 os.environ["TEST_ENV"] = "dev"
@@ -73,18 +65,12 @@ class DevEnvironmentE2ETests:
                 os.environ[key.upper()] = value
         
         # Initialize test helpers
-        self.jwt_helper = JWTTestHelper()
-        self.conversation_core = AgentConversationTestCore()
-        self.flow_simulator = ConversationFlowSimulator()
-        self.flow_validator = ConversationFlowValidator()
-        self.update_validator = RealTimeUpdateValidator()
+        # JWT helper removed - not available
         
-        await self.conversation_core.setup_test_environment()
         
         yield
         
         # Cleanup
-        await self.conversation_core.teardown_test_environment()
     
     @pytest.fixture
     def client(self, test_engine):

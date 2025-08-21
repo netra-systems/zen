@@ -1,379 +1,345 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Startup Learnings</name>
-        <type>learnings</type>
-        <version>1.0</version>
-        <last_updated>2025-08-18</last_updated>
-        <description>Learnings from startup errors and configuration issues</description>
-    </metadata>
-    
-    <learnings>
-        <learning>
-            <id>startup-clickhouse-port-configuration</id>
-            <category>startup</category>
-            <date>2025-08-18</date>
-            <severity>critical</severity>
-            <title>ClickHouse Port Configuration Mismatch</title>
-            
-            <problem>
-                <description>ClickHouse connection failing due to incorrect port configuration</description>
-                <symptoms>
-                    <symptom>Connection error: HTTPSConnectionPool port 8443 instead of 8123</symptom>
-                    <symptom>Host showing as "clickhouse_host_url_placeholder"</symptom>
-                    <symptom>Cannot connect to ClickHouse during startup</symptom>
-                </symptoms>
-                <root_cause>Using CLICKHOUSE_PORT instead of CLICKHOUSE_HTTP_PORT environment variable</root_cause>
-            </problem>
-            
-            <solution>
-                <description>Use correct port environment variables for different connection types</description>
-                <implementation>
-                    <file>app/core/configuration/database.py</file>
-                    <changes>
-                        <change line="134">Use CLICKHOUSE_HTTP_PORT for HTTP connections (8123)</change>
-                        <change line="149">Use CLICKHOUSE_NATIVE_PORT for native connections (9000)</change>
-                    </changes>
-                </implementation>
-                <verification>
-                    <step>Run: python test_runner.py --level smoke --no-coverage --fast-fail</step>
-                    <step>Check startup logs for "ClickHouse connected with X tables"</step>
-                </verification>
-            </solution>
-            
-            <prevention>
-                <guideline>Always distinguish between HTTP (8123), Native (9000), and HTTPS (8443) ports</guideline>
-                <guideline>Use environment-specific configuration for connection modes</guideline>
-                <guideline>Implement proper local development fallbacks</guideline>
-            </prevention>
-        </learning>
-        
-        <learning>
-            <id>startup-secrets-env-var-mapping</id>
-            <category>startup</category>
-            <date>2025-08-18</date>
-            <severity>high</severity>
-            <title>Secrets Manager Environment Variable Mapping</title>
-            
-            <problem>
-                <description>Secrets not loading due to incorrect environment variable names</description>
-                <symptoms>
-                    <symptom>Missing secrets: CLICKHOUSE_DEFAULT_PASSWORD</symptom>
-                    <symptom>GEMINI_API_KEY not loading from .env.development.local</symptom>
-                    <symptom>Google Secret Manager fallback being triggered unnecessarily</symptom>
-                </symptoms>
-                <root_cause>Mismatch between expected and actual environment variable names</root_cause>
-            </problem>
-            
-            <solution>
-                <description>Fix environment variable name mappings in secrets configuration</description>
-                <implementation>
-                    <file>app/core/configuration/secrets.py</file>
-                    <changes>
-                        <change line="244">Map "clickhouse-default-password" to "CLICKHOUSE_PASSWORD"</change>
-                    </changes>
-                    <file>.env.development.local</file>
-                    <changes>
-                        <change line="95">Add GEMINI_API_KEY with correct value</change>
-                    </changes>
-                </implementation>
-                <verification>
-                    <step>Check startup logs for "Loaded gemini-api-key=REDACTED"</step>
-                    <step>Verify no unnecessary Google Secret Manager calls</step>
-                </verification>
-            </solution>
-            
-            <prevention>
-                <guideline>Maintain consistent environment variable naming across all files</guideline>
-                <guideline>Document all required environment variables in a single place</guideline>
-                <guideline>Use .env.development.local for local development overrides</guideline>
-            </prevention>
-        </learning>
-        
-        <learning>
-            <id>startup-redis-local-fallback</id>
-            <category>startup</category>
-            <date>2025-08-18</date>
-            <severity>high</severity>
-            <title>Redis Connection Local Development Fallback</title>
-            
-            <problem>
-                <description>Redis connection failing in local development due to remote endpoint</description>
-                <symptoms>
-                    <symptom>Redis read/write test failed</symptom>
-                    <symptom>Cannot reach redis-17593.c305.ap-south-1-1.ec2.redns.redis-cloud.com</symptom>
-                    <symptom>Network connectivity issues blocking local development</symptom>
-                </symptoms>
-                <root_cause>Attempting to connect to remote Redis instance instead of local</root_cause>
-            </problem>
-            
-            <solution>
-                <description>Configure proper local Redis fallback for development</description>
-                <implementation>
-                    <guideline>Set REDIS_MODE=local in .env</guideline>
-                    <guideline>Configure REDIS_HOST=localhost and REDIS_PORT=6379</guideline>
-                    <guideline>Ensure local Redis instance is running</guideline>
-                </implementation>
-                <verification>
-                    <step>Check connection to localhost:6379</step>
-                    <step>Verify Redis operations (set/get) work locally</step>
-                </verification>
-            </solution>
-            
-            <prevention>
-                <guideline>Always provide local development alternatives for external services</guideline>
-                <guideline>Use environment-based service selection (local/staging/production)</guideline>
-                <guideline>Document local service requirements in README</guideline>
-            </prevention>
-        </learning>
-        
-        <learning>
-            <id>startup-app-state-initialization</id>
-            <category>startup</category>
-            <date>2025-08-18</date>
-            <severity>medium</severity>
-            <title>App State Initialization During Startup Checks</title>
-            
-            <problem>
-                <description>App state attributes not initialized when running startup checks directly</description>
-                <symptoms>
-                    <symptom>AttributeError: 'State' object has no attribute 'db'</symptom>
-                    <symptom>Missing app.state attributes during direct Python execution</symptom>
-                    <symptom>Startup checks failing when run outside lifespan context</symptom>
-                </symptoms>
-                <root_cause>Startup checks running before lifespan manager initializes app state</root_cause>
-            </problem>
-            
-            <solution>
-                <description>Ensure startup checks run within proper initialization context</description>
-                <implementation>
-                    <guideline>Run startup checks through FastAPI lifespan manager</guideline>
-                    <guideline>Use proper app startup sequence via uvicorn</guideline>
-                    <guideline>Don't run startup checks as standalone scripts</guideline>
-                </implementation>
-                <verification>
-                    <step>Start app with: python scripts/dev_launcher.py</step>
-                    <step>Verify all app.state attributes are initialized</step>
-                </verification>
-            </solution>
-            
-            <prevention>
-                <guideline>Always use proper startup sequence through dev launcher</guideline>
-                <guideline>Document correct startup procedures</guideline>
-                <guideline>Implement defensive checks for app state attributes</guideline>
-            </prevention>
-        </learning>
-        
-        <learning>
-            <id>startup-comprehensive-fix-process</id>
-            <category>startup</category>
-            <date>2025-08-18</date>
-            <severity>info</severity>
-            <title>Systematic Startup Error Resolution Process</title>
-            
-            <problem>
-                <description>Multiple interconnected startup failures requiring systematic approach</description>
-                <symptoms>
-                    <symptom>5+ critical startup failures</symptom>
-                    <symptom>Cascading failures from configuration issues</symptom>
-                    <symptom>100% startup failure rate</symptom>
-                </symptoms>
-                <root_cause>Configuration drift and inconsistent environment setup</root_cause>
-            </problem>
-            
-            <solution>
-                <description>Systematic approach to fixing all startup errors</description>
-                <implementation>
-                    <step>Run dev launcher and capture all errors</step>
-                    <step>Categorize errors by severity and dependency</step>
-                    <step>Fix configuration issues first (ports, hostnames)</step>
-                    <step>Fix authentication/secrets issues second</step>
-                    <step>Fix service connection issues third</step>
-                    <step>Validate with smoke tests after each fix</step>
-                </implementation>
-                <verification>
-                    <step>All smoke tests passing</step>
-                    <step>All services connected</step>
-                    <step>Startup time under 10 seconds</step>
-                </verification>
-            </solution>
-            
-            <prevention>
-                <guideline>Maintain comprehensive startup health checks</guideline>
-                <guideline>Run smoke tests in CI/CD pipeline</guideline>
-                <guideline>Document all required environment variables</guideline>
-                <guideline>Keep development environment configuration in sync</guideline>
-            </prevention>
-            
-            <metrics>
-                <before>
-                    <metric name="startup_success_rate">0%</metric>
-                    <metric name="critical_errors">5</metric>
-                    <metric name="connection_failures">5</metric>
-                </before>
-                <after>
-                    <metric name="startup_success_rate">100%</metric>
-                    <metric name="critical_errors">0</metric>
-                    <metric name="connection_failures">0</metric>
-                    <metric name="startup_time">7 seconds</metric>
-                </after>
-            </metrics>
-        </learning>
-    </learnings>
-    
-    <references>
-        <reference>app/core/configuration/database.py</reference>
-        <reference>app/core/configuration/secrets.py</reference>
-        <reference>app/db/clickhouse.py</reference>
-        <reference>.env.development.local</reference>
-        <reference>scripts/dev_launcher.py</reference>
-        <reference>SPEC/dev_launcher_performance.xml</reference>
-        <reference>SPEC/dev_launcher.xml</reference>
-    </references>
-    
-    <performance_improvements>
-        <improvement date="2025-08-19">
-            <description>Created dedicated performance optimization spec</description>
-            <reference>SPEC/dev_launcher_performance.xml</reference>
-            <goals>
-                <goal>Sub-10 second startup for cached runs</goal>
-                <goal>Silent repetitive logs</goal>
-                <goal>Local-first secrets (no GSM by default)</goal>
-                <goal>Aggressive caching of one-time operations</goal>
-                <goal>Multiprocessing for parallel operations</goal>
-            </goals>
-        </improvement>
-    </performance_improvements>
-    
-    <startup_logs>
-        <learning>
-            <id>startup-logs-noise-clarification</id>
-            <category>startup</category>
-            <date>2025-08-19</date>
-            <severity>info</severity>
-            <title>Dev Launcher Startup Logs Are Informational Noise</title>
-            
-            <description>
+  <metadata>
+    <name>Startup Learnings</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <last_updated>2025-08-18</last_updated>
+    <description>Learnings from startup errors and configuration issues</description>
+    <last_edited>2025-08-21T08:47:29.756495</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.756495">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <learnings>
+    <learning>
+      <id>startup-clickhouse-port-configuration</id>
+      <category>startup</category>
+      <date>2025-08-18</date>
+      <severity>critical</severity>
+      <title>ClickHouse Port Configuration Mismatch</title>
+      <problem>
+        <description>ClickHouse connection failing due to incorrect port configuration</description>
+        <symptoms>
+          <symptom>Connection error: HTTPSConnectionPool port 8443 instead of 8123</symptom>
+          <symptom>Host showing as "clickhouse_host_url_placeholder"</symptom>
+          <symptom>Cannot connect to ClickHouse during startup</symptom>
+        </symptoms>
+        <root_cause>Using CLICKHOUSE_PORT instead of CLICKHOUSE_HTTP_PORT environment variable</root_cause>
+      </problem>
+      <solution>
+        <description>Use correct port environment variables for different connection types</description>
+        <implementation>
+          <file>app/core/configuration/database.py</file>
+          <changes>
+            <change line="134">Use CLICKHOUSE_HTTP_PORT for HTTP connections (8123)</change>
+            <change line="149">Use CLICKHOUSE_NATIVE_PORT for native connections (9000)</change>
+          </changes>
+        </implementation>
+        <verification>
+          <step>Run: python test_runner.py --level smoke --no-coverage --fast-fail</step>
+          <step>Check startup logs for "ClickHouse connected with X tables"</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always distinguish between HTTP (8123), Native (9000), and HTTPS (8443) ports</guideline>
+        <guideline>Use environment-specific configuration for connection modes</guideline>
+        <guideline>Implement proper local development fallbacks</guideline>
+      </prevention>
+    </learning>
+    <learning>
+      <id>startup-secrets-env-var-mapping</id>
+      <category>startup</category>
+      <date>2025-08-18</date>
+      <severity>high</severity>
+      <title>Secrets Manager Environment Variable Mapping</title>
+      <problem>
+        <description>Secrets not loading due to incorrect environment variable names</description>
+        <symptoms>
+          <symptom>Missing secrets: CLICKHOUSE_DEFAULT_PASSWORD</symptom>
+          <symptom>GEMINI_API_KEY not loading from .env.development.local</symptom>
+          <symptom>Google Secret Manager fallback being triggered unnecessarily</symptom>
+        </symptoms>
+        <root_cause>Mismatch between expected and actual environment variable names</root_cause>
+      </problem>
+      <solution>
+        <description>Fix environment variable name mappings in secrets configuration</description>
+        <implementation>
+          <file>app/core/configuration/secrets.py</file>
+          <changes>
+            <change line="244">Map "clickhouse-default-password" to "CLICKHOUSE_PASSWORD"</change>
+          </changes>
+          <file>.env.development.local</file>
+          <changes>
+            <change line="95">Add GEMINI_API_KEY with correct value</change>
+          </changes>
+        </implementation>
+        <verification>
+          <step>Check startup logs for "Loaded gemini-api-key=REDACTED"</step>
+          <step>Verify no unnecessary Google Secret Manager calls</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Maintain consistent environment variable naming across all files</guideline>
+        <guideline>Document all required environment variables in a single place</guideline>
+        <guideline>Use .env.development.local for local development overrides</guideline>
+      </prevention>
+    </learning>
+    <learning>
+      <id>startup-redis-local-fallback</id>
+      <category>startup</category>
+      <date>2025-08-18</date>
+      <severity>high</severity>
+      <title>Redis Connection Local Development Fallback</title>
+      <problem>
+        <description>Redis connection failing in local development due to remote endpoint</description>
+        <symptoms>
+          <symptom>Redis read/write test failed</symptom>
+          <symptom>Cannot reach redis-17593.c305.ap-south-1-1.ec2.redns.redis-cloud.com</symptom>
+          <symptom>Network connectivity issues blocking local development</symptom>
+        </symptoms>
+        <root_cause>Attempting to connect to remote Redis instance instead of local</root_cause>
+      </problem>
+      <solution>
+        <description>Configure proper local Redis fallback for development</description>
+        <implementation>
+          <guideline>Set REDIS_MODE=local in .env</guideline>
+          <guideline>Configure REDIS_HOST=localhost and REDIS_PORT=6379</guideline>
+          <guideline>Ensure local Redis instance is running</guideline>
+        </implementation>
+        <verification>
+          <step>Check connection to localhost:6379</step>
+          <step>Verify Redis operations (set/get) work locally</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always provide local development alternatives for external services</guideline>
+        <guideline>Use environment-based service selection (local/staging/production)</guideline>
+        <guideline>Document local service requirements in README</guideline>
+      </prevention>
+    </learning>
+    <learning>
+      <id>startup-app-state-initialization</id>
+      <category>startup</category>
+      <date>2025-08-18</date>
+      <severity>medium</severity>
+      <title>App State Initialization During Startup Checks</title>
+      <problem>
+        <description>App state attributes not initialized when running startup checks directly</description>
+        <symptoms>
+          <symptom>AttributeError: 'State' object has no attribute 'db'</symptom>
+          <symptom>Missing app.state attributes during direct Python execution</symptom>
+          <symptom>Startup checks failing when run outside lifespan context</symptom>
+        </symptoms>
+        <root_cause>Startup checks running before lifespan manager initializes app state</root_cause>
+      </problem>
+      <solution>
+        <description>Ensure startup checks run within proper initialization context</description>
+        <implementation>
+          <guideline>Run startup checks through FastAPI lifespan manager</guideline>
+          <guideline>Use proper app startup sequence via uvicorn</guideline>
+          <guideline>Don't run startup checks as standalone scripts</guideline>
+        </implementation>
+        <verification>
+          <step>Start app with: python scripts/dev_launcher.py</step>
+          <step>Verify all app.state attributes are initialized</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always use proper startup sequence through dev launcher</guideline>
+        <guideline>Document correct startup procedures</guideline>
+        <guideline>Implement defensive checks for app state attributes</guideline>
+      </prevention>
+    </learning>
+    <learning>
+      <id>startup-comprehensive-fix-process</id>
+      <category>startup</category>
+      <date>2025-08-18</date>
+      <severity>info</severity>
+      <title>Systematic Startup Error Resolution Process</title>
+      <problem>
+        <description>Multiple interconnected startup failures requiring systematic approach</description>
+        <symptoms>
+          <symptom>5+ critical startup failures</symptom>
+          <symptom>Cascading failures from configuration issues</symptom>
+          <symptom>100% startup failure rate</symptom>
+        </symptoms>
+        <root_cause>Configuration drift and inconsistent environment setup</root_cause>
+      </problem>
+      <solution>
+        <description>Systematic approach to fixing all startup errors</description>
+        <implementation>
+          <step>Run dev launcher and capture all errors</step>
+          <step>Categorize errors by severity and dependency</step>
+          <step>Fix configuration issues first (ports, hostnames)</step>
+          <step>Fix authentication/secrets issues second</step>
+          <step>Fix service connection issues third</step>
+          <step>Validate with smoke tests after each fix</step>
+        </implementation>
+        <verification>
+          <step>All smoke tests passing</step>
+          <step>All services connected</step>
+          <step>Startup time under 10 seconds</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Maintain comprehensive startup health checks</guideline>
+        <guideline>Run smoke tests in CI/CD pipeline</guideline>
+        <guideline>Document all required environment variables</guideline>
+        <guideline>Keep development environment configuration in sync</guideline>
+      </prevention>
+      <metrics>
+        <before>
+          <metric name="startup_success_rate">0%</metric>
+          <metric name="critical_errors">5</metric>
+          <metric name="connection_failures">5</metric>
+        </before>
+        <after>
+          <metric name="startup_success_rate">100%</metric>
+          <metric name="critical_errors">0</metric>
+          <metric name="connection_failures">0</metric>
+          <metric name="startup_time">7 seconds</metric>
+        </after>
+      </metrics>
+    </learning>
+  </learnings>
+  <references>
+    <reference>app/core/configuration/database.py</reference>
+    <reference>app/core/configuration/secrets.py</reference>
+    <reference>app/db/clickhouse.py</reference>
+    <reference>.env.development.local</reference>
+    <reference>scripts/dev_launcher.py</reference>
+    <reference>SPEC/dev_launcher_performance.xml</reference>
+    <reference>SPEC/dev_launcher.xml</reference>
+  </references>
+  <performance_improvements>
+    <improvement date="2025-08-19">
+      <description>Created dedicated performance optimization spec</description>
+      <reference>SPEC/dev_launcher_performance.xml</reference>
+      <goals>
+        <goal>Sub-10 second startup for cached runs</goal>
+        <goal>Silent repetitive logs</goal>
+        <goal>Local-first secrets (no GSM by default)</goal>
+        <goal>Aggressive caching of one-time operations</goal>
+        <goal>Multiprocessing for parallel operations</goal>
+      </goals>
+    </improvement>
+  </performance_improvements>
+  <startup_logs>
+    <learning>
+      <id>startup-logs-noise-clarification</id>
+      <category>startup</category>
+      <date>2025-08-19</date>
+      <severity>info</severity>
+      <title>Dev Launcher Startup Logs Are Informational Noise</title>
+      <description>
                 The extensive startup logs from dev_launcher.py are normal informational output
                 and do not indicate issues requiring attention. These logs show successful
                 initialization of all services.
             </description>
-            
-            <normal_log_patterns>
-                <pattern type="auth_service">
-                    <example>[AUTH] ✅ Auth database initialized successfully</example>
-                    <example>[AUTH] ✅ Main database sync initialized successfully</example>
-                    <example>[AUTH] INFO: Uvicorn running on http://0.0.0.0:8081</example>
-                    <meaning>Auth service started successfully</meaning>
-                </pattern>
-                
-                <pattern type="backend_configuration">
-                    <example>[BACKEND] INFO | Created development configuration</example>
-                    <example>[BACKEND] INFO | Configuration validation passed</example>
-                    <example>[BACKEND] INFO | Populated configuration from all sources</example>
-                    <meaning>Configuration loaded correctly</meaning>
-                </pattern>
-                
-                <pattern type="service_initialization">
-                    <example>[BACKEND] ✅ SyntheticDataService initialized successfully</example>
-                    <example>[BACKEND] INFO | UnifiedToolRegistry initialized</example>
-                    <example>[BACKEND] INFO | Quality Gate Service initialized</example>
-                    <meaning>Core services initialized properly</meaning>
-                </pattern>
-                
-                <pattern type="database_setup">
-                    <example>[BACKEND] INFO | Database is up to date</example>
-                    <example>[BACKEND] ✅ Database session factory successfully set</example>
-                    <example>[BACKEND] INFO | ClickHouse tables initialization complete</example>
-                    <meaning>Database connections established</meaning>
-                </pattern>
-                
-                <pattern type="health_checks">
-                    <example>[BACKEND] ✅ Running startup check: check_environment_variables</example>
-                    <example>[BACKEND] ✅ Running startup check: check_database_connection</example>
-                    <example>[BACKEND] ✅ Redis connected successfully</example>
-                    <meaning>All health checks passing</meaning>
-                </pattern>
-            </normal_log_patterns>
-            
-            <guidance>
-                <guideline>These logs are expected output during normal startup</guideline>
-                <guideline>The ✅ symbols indicate successful initialization steps</guideline>
-                <guideline>INFO level logs are informational and do not require action</guideline>
-                <guideline>Only ERROR or CRITICAL logs require investigation</guideline>
-                <guideline>The verbosity helps with debugging but is not indicative of problems</guideline>
-            </guidance>
-            
-            <when_to_investigate>
-                <scenario>ERROR or CRITICAL log levels appear</scenario>
-                <scenario>Services fail to start (missing ✅ confirmations)</scenario>
-                <scenario>Connection timeouts or authentication failures</scenario>
-                <scenario>Startup process hangs or crashes</scenario>
-            </when_to_investigate>
-        </learning>
-    </startup_logs>
-    
-    <staging_startup_checks>
-        <learning>
-            <id>staging-startup-crash-on-failure</id>
-            <category>startup</category>
-            <date>2025-08-19</date>
-            <severity>critical</severity>
-            <title>Staging Environment Crashes on Any Startup Check Failure</title>
-            
-            <description>
+      <normal_log_patterns>
+        <pattern type="auth_service">
+          <example>[AUTH] ✅ Auth database initialized successfully</example>
+          <example>[AUTH] ✅ Main database sync initialized successfully</example>
+          <example>[AUTH] INFO: Uvicorn running on http://0.0.0.0:8081</example>
+          <meaning>Auth service started successfully</meaning>
+        </pattern>
+        <pattern type="backend_configuration">
+          <example>[BACKEND] INFO | Created development configuration</example>
+          <example>[BACKEND] INFO | Configuration validation passed</example>
+          <example>[BACKEND] INFO | Populated configuration from all sources</example>
+          <meaning>Configuration loaded correctly</meaning>
+        </pattern>
+        <pattern type="service_initialization">
+          <example>[BACKEND] ✅ SyntheticDataService initialized successfully</example>
+          <example>[BACKEND] INFO | UnifiedToolRegistry initialized</example>
+          <example>[BACKEND] INFO | Quality Gate Service initialized</example>
+          <meaning>Core services initialized properly</meaning>
+        </pattern>
+        <pattern type="database_setup">
+          <example>[BACKEND] INFO | Database is up to date</example>
+          <example>[BACKEND] ✅ Database session factory successfully set</example>
+          <example>[BACKEND] INFO | ClickHouse tables initialization complete</example>
+          <meaning>Database connections established</meaning>
+        </pattern>
+        <pattern type="health_checks">
+          <example>[BACKEND] ✅ Running startup check: check_environment_variables</example>
+          <example>[BACKEND] ✅ Running startup check: check_database_connection</example>
+          <example>[BACKEND] ✅ Redis connected successfully</example>
+          <meaning>All health checks passing</meaning>
+        </pattern>
+      </normal_log_patterns>
+      <guidance>
+        <guideline>These logs are expected output during normal startup</guideline>
+        <guideline>The ✅ symbols indicate successful initialization steps</guideline>
+        <guideline>INFO level logs are informational and do not require action</guideline>
+        <guideline>Only ERROR or CRITICAL logs require investigation</guideline>
+        <guideline>The verbosity helps with debugging but is not indicative of problems</guideline>
+      </guidance>
+      <when_to_investigate>
+        <scenario>ERROR or CRITICAL log levels appear</scenario>
+        <scenario>Services fail to start (missing ✅ confirmations)</scenario>
+        <scenario>Connection timeouts or authentication failures</scenario>
+        <scenario>Startup process hangs or crashes</scenario>
+      </when_to_investigate>
+    </learning>
+  </startup_logs>
+  <staging_startup_checks>
+    <learning>
+      <id>staging-startup-crash-on-failure</id>
+      <category>startup</category>
+      <date>2025-08-19</date>
+      <severity>critical</severity>
+      <title>Staging Environment Crashes on Any Startup Check Failure</title>
+      <description>
                 In staging environments, the system now crashes immediately on any startup
                 check failure to ensure observability and prevent deployment of broken services.
                 Each error is raised as a fresh individual error for better tracking.
             </description>
-            
-            <implementation>
-                <file>app/startup_checks/checker.py</file>
-                <changes>
-                    <change line="102-115">Modified _execute_check to raise RuntimeError immediately in staging on any failure</change>
-                    <change line="149-162">Modified _record_check_failure to treat all failures as critical in staging</change>
-                </changes>
-                
-                <file>app/startup_checks/utils.py</file>
-                <changes>
-                    <change line="72-79">Modified _handle_startup_results to treat non-critical failures as critical in staging</change>
-                    <change line="81-92">Enhanced _handle_critical_failures to provide detailed error messages with all failure information</change>
-                    <change line="94-97">Added _is_staging_environment helper function</change>
-                </changes>
-            </implementation>
-            
-            <behavior>
-                <environment name="development">
-                    <description>Allows non-critical failures to proceed</description>
-                    <critical_failures>Crash with RuntimeError</critical_failures>
-                    <non_critical_failures>Log as warnings and continue</non_critical_failures>
-                </environment>
-                
-                <environment name="staging">
-                    <description>Treats ALL failures as critical</description>
-                    <critical_failures>Crash immediately with detailed RuntimeError</critical_failures>
-                    <non_critical_failures>Treated as critical, crash immediately</non_critical_failures>
-                    <detection>
-                        <method>ENVIRONMENT=staging</method>
-                        <method>K_SERVICE environment variable present (Cloud Run)</method>
-                    </detection>
-                </environment>
-            </behavior>
-            
-            <benefits>
-                <benefit>Immediate failure visibility in staging deployments</benefit>
-                <benefit>Prevents broken services from being deployed</benefit>
-                <benefit>Individual error reporting for better observability</benefit>
-                <benefit>Detailed error messages with all failure information</benefit>
-            </benefits>
-            
-            <testing>
-                <test>Verify staging detection via ENVIRONMENT variable</test>
-                <test>Verify staging detection via K_SERVICE (Cloud Run)</test>
-                <test>Verify all failures are critical in staging</test>
-                <test>Verify immediate crash on first failure in staging</test>
-                <test>Verify detailed error messages include all failure info</test>
-            </testing>
-        </learning>
-    </staging_startup_checks>
+      <implementation>
+        <file>app/startup_checks/checker.py</file>
+        <changes>
+          <change line="102-115">Modified _execute_check to raise RuntimeError immediately in staging on any failure</change>
+          <change line="149-162">Modified _record_check_failure to treat all failures as critical in staging</change>
+        </changes>
+        <file>app/startup_checks/utils.py</file>
+        <changes>
+          <change line="72-79">Modified _handle_startup_results to treat non-critical failures as critical in staging</change>
+          <change line="81-92">Enhanced _handle_critical_failures to provide detailed error messages with all failure information</change>
+          <change line="94-97">Added _is_staging_environment helper function</change>
+        </changes>
+      </implementation>
+      <behavior>
+        <environment name="development">
+          <description>Allows non-critical failures to proceed</description>
+          <critical_failures>Crash with RuntimeError</critical_failures>
+          <non_critical_failures>Log as warnings and continue</non_critical_failures>
+        </environment>
+        <environment name="staging">
+          <description>Treats ALL failures as critical</description>
+          <critical_failures>Crash immediately with detailed RuntimeError</critical_failures>
+          <non_critical_failures>Treated as critical, crash immediately</non_critical_failures>
+          <detection>
+            <method>ENVIRONMENT=staging</method>
+            <method>K_SERVICE environment variable present (Cloud Run)</method>
+          </detection>
+        </environment>
+      </behavior>
+      <benefits>
+        <benefit>Immediate failure visibility in staging deployments</benefit>
+        <benefit>Prevents broken services from being deployed</benefit>
+        <benefit>Individual error reporting for better observability</benefit>
+        <benefit>Detailed error messages with all failure information</benefit>
+      </benefits>
+      <testing>
+        <test>Verify staging detection via ENVIRONMENT variable</test>
+        <test>Verify staging detection via K_SERVICE (Cloud Run)</test>
+        <test>Verify all failures are critical in staging</test>
+        <test>Verify immediate crash on first failure in staging</test>
+        <test>Verify detailed error messages include all failure info</test>
+      </testing>
+    </learning>
+  </staging_startup_checks>
 </specification>

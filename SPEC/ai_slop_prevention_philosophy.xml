@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <ai_slop_prevention_philosophy>
   <metadata>
     <name>Netra AI Slop Prevention, Detection, and Reporting Philosophy</name>
@@ -6,8 +6,13 @@
     <created>2025-08-10</created>
     <author>Netra AI Quality Assurance Team</author>
     <scope>Netra AI Optimization Platform - All Agents and Services</scope>
+    <last_edited>2025-08-21T08:47:28.350960</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.350960">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <definition>
     <concept>
       AI slop refers to low-quality, generic, repetitive, or meaningless AI-generated content that:
@@ -49,7 +54,6 @@
       </type>
     </netra_specific_slop>
   </definition>
-
   <prevention_strategies>
     <strategy id="input_validation">
       <name>Comprehensive Input Validation</name>
@@ -63,7 +67,6 @@
         <point>app/services/websocket/message_handler.py - Input sanitization</point>
       </code_points>
     </strategy>
-
     <strategy id="prompt_engineering">
       <name>Anti-Slop Prompt Engineering</name>
       <implementation>
@@ -77,7 +80,6 @@
         <rule>Output format must be defined with examples</rule>
       </rules>
     </strategy>
-
     <strategy id="context_management">
       <name>Intelligent Context Management</name>
       <implementation>
@@ -90,7 +92,6 @@
         <relevance_score_minimum>0.7</relevance_score_minimum>
       </threshold>
     </strategy>
-
     <strategy id="output_constraints">
       <name>Strict Output Constraints</name>
       <implementation>
@@ -104,7 +105,6 @@
         <agent_communication_max_tokens>300</agent_communication_max_tokens>
       </limits>
     </strategy>
-
     <strategy id="quality_gates">
       <name>Multi-Stage Quality Gates</name>
       <implementation>
@@ -119,7 +119,6 @@
       </gates>
     </strategy>
   </prevention_strategies>
-
   <detection_mechanisms>
     <detector id="pattern_matching">
       <name>Slop Pattern Detector</name>
@@ -130,7 +129,7 @@
         </pattern>
         <pattern type="circular_reasoning">
           <description>Detects when conclusion restates premise</description>
-          <implementation>Semantic similarity > 0.9 between premise and conclusion</implementation>
+          <implementation>Semantic similarity &gt; 0.9 between premise and conclusion</implementation>
         </pattern>
         <pattern type="empty_recommendations">
           <keywords>optimize, improve, enhance, better, efficient</keywords>
@@ -138,7 +137,6 @@
         </pattern>
       </patterns>
     </detector>
-
     <detector id="metric_absence">
       <name>Quantification Validator</name>
       <checks>
@@ -149,7 +147,6 @@
       </checks>
       <minimum_metrics_per_recommendation>2</minimum_metrics_per_recommendation>
     </detector>
-
     <detector id="redundancy_analyzer">
       <name>Cross-Agent Redundancy Detector</name>
       <implementation>
@@ -162,7 +159,6 @@
         <repetition_limit>2</repetition_limit>
       </thresholds>
     </detector>
-
     <detector id="hallucination_checker">
       <name>Factual Accuracy Validator</name>
       <checks>
@@ -172,7 +168,6 @@
         <check>Cross-reference with actual system capabilities</check>
       </checks>
     </detector>
-
     <detector id="value_scorer">
       <name>Output Value Scorer</name>
       <scoring_criteria>
@@ -184,7 +179,6 @@
       <minimum_acceptable_score>0.7</minimum_acceptable_score>
     </detector>
   </detection_mechanisms>
-
   <reporting_protocols>
     <protocol id="real_time_monitoring">
       <name>Real-Time Slop Detection Dashboard</name>
@@ -202,7 +196,6 @@
         </websocket_events>
       </implementation>
     </protocol>
-
     <protocol id="periodic_reporting">
       <name>Weekly Slop Analysis Report</name>
       <sections>
@@ -214,7 +207,6 @@
       </sections>
       <storage>reports/slop_analysis/</storage>
     </protocol>
-
     <protocol id="incident_reporting">
       <name>Critical Slop Incident Reports</name>
       <triggers>
@@ -229,7 +221,6 @@
         <action>Model parameter adjustment</action>
       </response>
     </protocol>
-
     <protocol id="user_feedback_integration">
       <name>User Feedback Loop</name>
       <implementation>
@@ -240,17 +231,15 @@
       </implementation>
     </protocol>
   </reporting_protocols>
-
   <mitigation_actions>
     <action id="immediate_rewrite">
-      <trigger>Slop score > 0.6</trigger>
+      <trigger>Slop score &gt; 0.6</trigger>
       <response>
         <step>Automatically request regeneration with stricter constraints</step>
         <step>Apply additional context filtering</step>
         <step>Increase specificity requirements</step>
       </response>
     </action>
-
     <action id="agent_retraining">
       <trigger>Consistent slop detection over 5 runs</trigger>
       <response>
@@ -259,7 +248,6 @@
         <step>Implement additional output validation</step>
       </response>
     </action>
-
     <action id="fallback_to_template">
       <trigger>Critical slop detection in production</trigger>
       <response>
@@ -268,7 +256,6 @@
         <step>Engage human review for complex cases</step>
       </response>
     </action>
-
     <action id="context_pruning">
       <trigger>Context window exceeding optimal size</trigger>
       <response>
@@ -278,66 +265,55 @@
       </response>
     </action>
   </mitigation_actions>
-
   <agent_specific_rules>
     <agent name="TriageSubAgent">
       <rule>Must categorize request with specific optimization domain</rule>
       <rule>Cannot use generic problem descriptions</rule>
       <rule>Must identify measurable success criteria</rule>
     </agent>
-
     <agent name="DataSubAgent">
       <rule>Must provide specific data points, not summaries</rule>
       <rule>Cannot make assumptions without data</rule>
       <rule>Must include data source and timestamp</rule>
     </agent>
-
     <agent name="OptimizationsCoreSubAgent">
       <rule>Every recommendation must include expected improvement percentage</rule>
       <rule>Must provide specific parameter values</rule>
       <rule>Cannot suggest optimization without baseline metrics</rule>
     </agent>
-
     <agent name="ActionsToMeetGoalsSubAgent">
       <rule>Must provide step-by-step implementation guide</rule>
       <rule>Each action must be independently verifiable</rule>
       <rule>Must include rollback procedures</rule>
     </agent>
-
     <agent name="ReportingSubAgent">
       <rule>Cannot exceed 30% boilerplate content</rule>
       <rule>Must include visual data representation</rule>
       <rule>Executive summary limited to 3 bullet points</rule>
     </agent>
   </agent_specific_rules>
-
   <quality_metrics>
     <metric id="information_density">
       <formula>unique_insights / total_words</formula>
       <minimum_threshold>0.15</minimum_threshold>
     </metric>
-
     <metric id="actionability_score">
       <formula>(specific_actions + measurable_outcomes) / total_recommendations</formula>
       <minimum_threshold>0.8</minimum_threshold>
     </metric>
-
     <metric id="redundancy_ratio">
       <formula>repeated_content / total_content</formula>
       <maximum_threshold>0.1</maximum_threshold>
     </metric>
-
     <metric id="specificity_index">
       <formula>specific_values_mentioned / total_claims</formula>
       <minimum_threshold>0.7</minimum_threshold>
     </metric>
-
     <metric id="user_value_score">
       <formula>(user_rating * actionability * (1 - redundancy)) / response_time</formula>
       <minimum_threshold>0.6</minimum_threshold>
     </metric>
   </quality_metrics>
-
   <implementation_checklist>
     <item priority="critical">Integrate slop detection into WebSocket message handler</item>
     <item priority="critical">Add quality gates to agent supervisor</item>
@@ -348,7 +324,6 @@
     <item priority="low">Create slop pattern library for training</item>
     <item priority="low">Build user feedback integration</item>
   </implementation_checklist>
-
   <continuous_improvement>
     <process>
       <step>Weekly review of slop detection accuracy</step>

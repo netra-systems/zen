@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Netra Apex Marketing Page Specification</title>
@@ -6,8 +6,13 @@
     <created>2025-01-10</created>
     <description>Complete specification for the single-page marketing website</description>
     <file>netra-marketing.html</file>
+    <last_edited>2025-08-21T08:47:28.525295</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.525295">
+      <reasons>
+        <reason>Old UI/frontend pattern: marketing-page</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     <purpose>
       A comprehensive single-page marketing website that showcases Netra Apex as the world's leading
@@ -27,7 +32,6 @@
       - 5-minute setup with existing infrastructure
     </key-messages>
   </overview>
-
   <structure>
     <section id="header">
       <description>Sticky navigation header with logo and primary navigation</description>
@@ -49,7 +53,6 @@
         - Responsive collapse to mobile menu at 768px
       </styling>
     </section>
-
     <section id="hero">
       <description>Primary value proposition and call-to-action</description>
       <content>
@@ -70,7 +73,6 @@
         - Fade-in animation on load
       </animations>
     </section>
-
     <section id="stats">
       <description>Key performance metrics in card format</description>
       <metrics>
@@ -97,7 +99,6 @@
         - Gradient text for numbers
       </styling>
     </section>
-
     <section id="features">
       <description>Core platform features in grid layout</description>
       <features>
@@ -133,7 +134,6 @@
         </feature>
       </features>
     </section>
-
     <section id="agents">
       <description>AI Agent system showcase with gradient background</description>
       <agents>
@@ -168,7 +168,6 @@
         - White text
       </styling>
     </section>
-
     <section id="pricing">
       <description>Pricing tiers with feature comparison</description>
       <tiers>
@@ -222,7 +221,6 @@
         </tier>
       </tiers>
     </section>
-
     <section id="demo">
       <description>Interactive demo cards with modal popups</description>
       <demos>
@@ -258,7 +256,6 @@
         </demo>
       </demos>
     </section>
-
     <section id="cta">
       <description>Final call-to-action with dark gradient background</description>
       <content>
@@ -268,7 +265,6 @@
         <cta-secondary>Schedule Demo</cta-secondary>
       </content>
     </section>
-
     <section id="footer">
       <description>Footer with company information and links</description>
       <columns>
@@ -292,7 +288,6 @@
       <copyright>© 2025 Netra Inc. All rights reserved.</copyright>
     </section>
   </structure>
-
   <design-system>
     <colors>
       <primary>#4f46e5</primary>
@@ -338,7 +333,6 @@
       </hover-effects>
     </effects>
   </design-system>
-
   <javascript-functionality>
     <mobile-menu>
       <description>Toggle mobile navigation menu</description>
@@ -365,7 +359,6 @@
       <description>Animated typing for hero headline</description>
     </typing-effect>
   </javascript-functionality>
-
   <update-guidelines>
     <content-updates>
       <pricing>
@@ -389,7 +382,6 @@
         Keep metrics current
       </testimonials>
     </content-updates>
-    
     <styling-updates>
       <colors>
         Modify CSS variables in :root
@@ -402,7 +394,6 @@
         Check modal display on mobile
       </responsive>
     </styling-updates>
-    
     <performance>
       <optimization>
         Keep all assets inline for single-file deployment
@@ -415,7 +406,6 @@
         Add loading states for interactive elements
       </loading>
     </performance>
-    
     <seo>
       <meta-tags>
         Update title and description tags
@@ -429,7 +419,6 @@
       </content>
     </seo>
   </update-guidelines>
-
   <deployment>
     <hosting>
       Can be hosted on any static web server
@@ -449,7 +438,6 @@
       Monitor conversion rates
     </analytics>
   </deployment>
-
   <future-enhancements>
     <potential-features>
       - Live chat integration

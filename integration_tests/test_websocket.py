@@ -12,7 +12,6 @@ from app.services.demo_service import DemoService, get_demo_service
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 import asyncio
-from tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Skip startup checks for integration tests
 os.environ["SKIP_STARTUP_CHECKS"] = "true"

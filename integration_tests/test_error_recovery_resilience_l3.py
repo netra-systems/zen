@@ -22,9 +22,7 @@ from httpx import AsyncClient, ASGITransport
 import aiohttp
 
 from app.main import app
-from app.services.circuit_breaker import CircuitBreaker
-from app.services.retry_service import RetryService
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from app.core.circuit_breaker_core import CircuitBreaker
 
 
 class TestErrorRecoveryResilienceL3:
@@ -33,7 +31,7 @@ class TestErrorRecoveryResilienceL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.test_services = []
         self.chaos_configs = []
         yield

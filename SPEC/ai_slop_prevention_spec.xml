@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>AI Slop Prevention and Quality Assurance Specification</title>
@@ -9,8 +9,13 @@
     <authors>
       <author role="lead">Netra AI Quality Team</author>
     </authors>
+    <last_edited>2025-08-21T08:47:28.350960</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.350960">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <executive_summary>
     <purpose>
       Eliminate AI-generated slop from the Netra AI Optimization Platform by implementing
@@ -20,17 +25,13 @@
       All agent outputs, LLM responses, and user-facing content generation within the Netra platform.
     </scope>
     <success_criteria>
-      <criterion priority="1">Quality score >0.8 for all outputs</criterion>
+      <criterion priority="1">Quality score &gt;0.8 for all outputs</criterion>
       <criterion priority="1">Zero generic fallback responses</criterion>
       <criterion priority="2">100% of outputs contain actionable metrics</criterion>
-      <criterion priority="2">User satisfaction rating >4.5/5</criterion>
+      <criterion priority="2">User satisfaction rating &gt;4.5/5</criterion>
     </success_criteria>
   </executive_summary>
-
   <requirements>
-    
-    <!-- CRITICAL PRIORITY ITEMS -->
-    
     <requirement id="REQ-001" priority="CRITICAL" category="quality_validation">
       <title>Output Quality Validation System</title>
       <description>
@@ -38,8 +39,8 @@
         delivery to users. System must validate content quality, not just format.
       </description>
       <acceptance_criteria>
-        <criterion>Minimum content length validation (>100 chars for reports)</criterion>
-        <criterion>Specificity score calculation (>0.7 required)</criterion>
+        <criterion>Minimum content length validation (&gt;100 chars for reports)</criterion>
+        <criterion>Specificity score calculation (&gt;0.7 required)</criterion>
         <criterion>Actionability assessment (must contain concrete steps)</criterion>
         <criterion>Metric presence validation (quantifiable measurements required)</criterion>
         <criterion>Domain relevance check (optimization-specific terminology)</criterion>
@@ -62,7 +63,6 @@
         <test type="performance">Validation latency under load</test>
       </testing_requirements>
     </requirement>
-
     <requirement id="REQ-002" priority="CRITICAL" category="fallback_behavior">
       <title>Context-Aware Fallback System</title>
       <description>
@@ -97,7 +97,6 @@
         </fallback_templates>
       </implementation_details>
     </requirement>
-
     <requirement id="REQ-003" priority="CRITICAL" category="prompt_enhancement">
       <title>Anti-Slop Prompt Engineering</title>
       <description>
@@ -133,9 +132,6 @@
         </prompt_structure>
       </implementation_details>
     </requirement>
-
-    <!-- HIGH PRIORITY ITEMS -->
-    
     <requirement id="REQ-004" priority="HIGH" category="monitoring">
       <title>Real-time Quality Monitoring Dashboard</title>
       <description>
@@ -150,26 +146,25 @@
       <implementation_details>
         <component>QualityMonitoringService</component>
         <metrics>
-          <metric name="quality_score" type="float" range="0-1"/>
-          <metric name="specificity_score" type="float" range="0-1"/>
-          <metric name="actionability_score" type="float" range="0-1"/>
-          <metric name="slop_detection_count" type="integer"/>
-          <metric name="user_satisfaction" type="float" range="1-5"/>
+          <metric name="quality_score" type="float" range="0-1" />
+          <metric name="specificity_score" type="float" range="0-1" />
+          <metric name="actionability_score" type="float" range="0-1" />
+          <metric name="slop_detection_count" type="integer" />
+          <metric name="user_satisfaction" type="float" range="1-5" />
         </metrics>
         <alerts>
-          <alert trigger="quality_score &lt; 0.6" severity="HIGH"/>
-          <alert trigger="slop_detection_count > 5/hour" severity="CRITICAL"/>
+          <alert trigger="quality_score &lt; 0.6" severity="HIGH" />
+          <alert trigger="slop_detection_count &gt; 5/hour" severity="CRITICAL" />
         </alerts>
       </implementation_details>
     </requirement>
-
     <requirement id="REQ-005" priority="HIGH" category="caching">
       <title>Cache Quality Management</title>
       <description>
         Prevent low-quality responses from being cached and polluting future responses.
       </description>
       <acceptance_criteria>
-        <criterion>Quality threshold for cache eligibility (>0.75)</criterion>
+        <criterion>Quality threshold for cache eligibility (&gt;0.75)</criterion>
         <criterion>Automatic cache invalidation for low-quality entries</criterion>
         <criterion>Cache quality metrics tracking</criterion>
       </acceptance_criteria>
@@ -177,13 +172,12 @@
         <component>QualityCacheManager</component>
         <location>app/services/cache/quality_cache.py</location>
         <cache_policy>
-          <rule>Only cache responses with quality_score > 0.75</rule>
+          <rule>Only cache responses with quality_score &gt; 0.75</rule>
           <rule>Invalidate cached entries if quality_score drops</rule>
           <rule>TTL based on quality score (higher quality = longer TTL)</rule>
         </cache_policy>
       </implementation_details>
     </requirement>
-
     <requirement id="REQ-006" priority="HIGH" category="testing">
       <title>Automated Slop Detection Tests</title>
       <description>
@@ -197,16 +191,13 @@
       </acceptance_criteria>
       <implementation_details>
         <test_suite location="app/tests/quality/">
-          <test_file name="test_slop_detection.py"/>
-          <test_file name="test_quality_validation.py"/>
-          <test_file name="test_fallback_quality.py"/>
-          <test_file name="test_prompt_effectiveness.py"/>
+          <test_file name="test_slop_detection.py" />
+          <test_file name="test_quality_validation.py" />
+          <test_file name="test_fallback_quality.py" />
+          <test_file name="test_prompt_effectiveness.py" />
         </test_suite>
       </implementation_details>
     </requirement>
-
-    <!-- MEDIUM PRIORITY ITEMS -->
-    
     <requirement id="REQ-007" priority="MEDIUM" category="user_feedback">
       <title>User Quality Feedback System</title>
       <description>
@@ -218,7 +209,6 @@
         <criterion>Feedback-driven prompt improvements</criterion>
       </acceptance_criteria>
     </requirement>
-
     <requirement id="REQ-008" priority="MEDIUM" category="llm_config">
       <title>LLM Configuration Optimization</title>
       <description>
@@ -230,39 +220,32 @@
         <criterion>Retry logic for low-quality responses</criterion>
       </acceptance_criteria>
       <llm_settings>
-        <setting name="temperature" value="0.3" rationale="Lower temperature for consistency"/>
-        <setting name="top_p" value="0.9" rationale="Focused but not overly restrictive"/>
-        <setting name="max_retries" value="3" rationale="Retry on quality failure"/>
-        <setting name="presence_penalty" value="0.3" rationale="Reduce repetition"/>
+        <setting name="temperature" value="0.3" rationale="Lower temperature for consistency" />
+        <setting name="top_p" value="0.9" rationale="Focused but not overly restrictive" />
+        <setting name="max_retries" value="3" rationale="Retry on quality failure" />
+        <setting name="presence_penalty" value="0.3" rationale="Reduce repetition" />
       </llm_settings>
     </requirement>
-
   </requirements>
-
   <implementation_phases>
-    
     <phase number="1" name="Emergency Response" duration="1 week">
       <deliverable>Quality validation system (REQ-001)</deliverable>
       <deliverable>Context-aware fallbacks (REQ-002)</deliverable>
       <deliverable>Enhanced prompts (REQ-003)</deliverable>
       <success_metric>50% reduction in generic responses</success_metric>
     </phase>
-    
     <phase number="2" name="Foundation" duration="2 weeks">
       <deliverable>Quality monitoring dashboard (REQ-004)</deliverable>
       <deliverable>Cache quality management (REQ-005)</deliverable>
       <deliverable>Automated tests (REQ-006)</deliverable>
-      <success_metric>Quality score >0.7 for 80% of outputs</success_metric>
+      <success_metric>Quality score &gt;0.7 for 80% of outputs</success_metric>
     </phase>
-    
     <phase number="3" name="Optimization" duration="2 weeks">
       <deliverable>User feedback system (REQ-007)</deliverable>
       <deliverable>LLM configuration tuning (REQ-008)</deliverable>
-      <success_metric>Quality score >0.8 for 90% of outputs</success_metric>
+      <success_metric>Quality score &gt;0.8 for 90% of outputs</success_metric>
     </phase>
-    
   </implementation_phases>
-
   <validation>
     <test_scenarios>
       <scenario name="Generic Input Handling">
@@ -272,13 +255,11 @@
         <must_include>Quantifiable improvements</must_include>
         <must_avoid>Generic advice</must_avoid>
       </scenario>
-      
       <scenario name="Error Recovery">
         <input>Analyze non-existent dataset XYZ</input>
         <expected_behavior>Context-aware error with alternatives</expected_behavior>
         <must_avoid>Generic "No data" response</must_avoid>
       </scenario>
-      
       <scenario name="Complex Optimization">
         <input>Optimize transformer model latency for edge deployment</input>
         <must_include>Specific quantization parameters</must_include>
@@ -287,7 +268,6 @@
       </scenario>
     </test_scenarios>
   </validation>
-
   <risks>
     <risk level="HIGH">
       <description>Increased latency from quality validation</description>
@@ -302,7 +282,6 @@
       <mitigation>Configurable verbosity levels</mitigation>
     </risk>
   </risks>
-
   <success_metrics>
     <metric category="quality">
       <name>Average Quality Score</name>
@@ -325,5 +304,4 @@
       <measurement_method>Quality monitoring system</measurement_method>
     </metric>
   </success_metrics>
-
 </specification>

@@ -4,7 +4,7 @@ Handles environment variable loading with staging/production awareness
 """
 import os
 import logging
-from .secret_loader import AuthSecretLoader
+from auth_service.app.secret_loader import AuthSecretLoader
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_core.database.models import AuthUser, AuthSession
-from ..factories import TokenFactory
+from auth_service.tests..factories import TokenFactory
 
 
 class AssertionHelpers:

@@ -1,5 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.190480</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.190480">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>E2E Agent Runtime Fixes and Improvements</title>
   <description>
     Comprehensive documentation of runtime failures discovered and fixed during
@@ -7,7 +15,6 @@
     reliability and type safety.
   </description>
   <date>2025-08-16</date>
-  
   <critical_findings>
     <finding severity="CRITICAL">
       <title>Systematic Import Failures Blocking Tests</title>
@@ -21,7 +28,6 @@
         and preventing detection of runtime issues in production code.
       </impact>
     </finding>
-    
     <finding severity="HIGH">
       <title>Runtime Validation Failures</title>
       <statistics>
@@ -35,7 +41,6 @@
       </impact>
     </finding>
   </critical_findings>
-
   <issue_category name="Import_Resolution">
     <problem>
       Multiple import errors preventing test execution:
@@ -74,7 +79,6 @@
       Run test discovery before committing changes.
     </prevention>
   </issue_category>
-
   <issue_category name="FallbackConfig_Parameter_Mismatch">
     <problem>
       FallbackConfig.__init__() got unexpected keyword argument 'retry_delay'.
@@ -96,7 +100,6 @@
       Create factory methods for complex configuration objects.
     </prevention>
   </issue_category>
-
   <issue_category name="Required_Fields_Validation">
     <problem>
       Multiple validation errors for missing required fields:
@@ -124,7 +127,6 @@
       Add validation tests for all edge cases and error paths.
     </prevention>
   </issue_category>
-
   <issue_category name="JSON_Parsing_Robustness">
     <problem>
       JSON parsing failing on descriptive strings like:
@@ -149,30 +151,25 @@
       Provide graceful fallbacks for all parsing operations.
     </prevention>
   </issue_category>
-
   <architectural_improvements>
     <improvement name="Type_Safety_Enhancement">
       Strengthened type safety by ensuring all Pydantic models
       are properly initialized with required fields. Added factory
       methods for consistent object creation.
     </improvement>
-    
     <improvement name="Backward_Compatibility_Layer">
       Established pattern of providing aliases for renamed classes
       to maintain backward compatibility during refactoring.
     </improvement>
-    
     <improvement name="Error_Recovery_Robustness">
       Improved error recovery paths to always produce valid
       typed results, preventing cascading validation failures.
     </improvement>
-    
     <improvement name="Schema_Completeness">
       Added missing schemas (DocumentCreate, DocumentUpdate, Document)
       to provide complete CRUD operation support for corpus management.
     </improvement>
   </architectural_improvements>
-
   <patterns_established>
     <pattern name="Alias_Pattern">
       <description>
@@ -183,7 +180,6 @@
         StateManager = AgentStateManager  # Backward compatibility
       </example>
     </pattern>
-    
     <pattern name="Complete_Initialization">
       <description>
         Always initialize Pydantic models with all required fields,
@@ -198,7 +194,6 @@
         )
       </example>
     </pattern>
-    
     <pattern name="Graceful_Parsing">
       <description>
         Detect content type before parsing and provide fallbacks
@@ -210,14 +205,12 @@
       </example>
     </pattern>
   </patterns_established>
-
   <test_results>
     <before>
       - 0 tests could run due to import errors
       - Complete test suite blocked
       - Unable to detect runtime issues
     </before>
-    
     <after>
       - All 286 E2E tests can now be imported and executed
       - 2 tests passing completely
@@ -225,34 +218,29 @@
       - Runtime validation errors eliminated
       - JSON parsing errors resolved
     </after>
-    
     <remaining_issues>
       Some tests still fail on business logic assertions,
       but all runtime errors and validation issues are resolved.
       Tests can now properly evaluate agent behavior.
     </remaining_issues>
   </test_results>
-
   <metrics>
     <reliability>
       Import success rate: 0% → 100%
       Runtime error rate: 100% → 0%
       Validation failure rate: 71% → 0%
     </reliability>
-    
     <type_safety>
       Required fields properly initialized: 100%
       Backward compatibility maintained: 100%
       Schema completeness: 100%
     </type_safety>
-    
     <robustness>
       JSON parsing error rate: High → 0%
       Fallback path success: 100%
       Error recovery success: 100%
     </robustness>
   </metrics>
-
   <best_practices>
     <practice>Always run test discovery before committing changes</practice>
     <practice>Provide backward compatibility aliases when renaming</practice>
@@ -263,20 +251,17 @@
     <practice>Document breaking changes in migration guides</practice>
     <practice>Use semantic versioning for API changes</practice>
   </best_practices>
-
   <implementation_priority>
     <priority level="COMPLETED">
       Fixed all import errors blocking test execution
       Resolved all runtime validation failures
       Enhanced JSON parsing robustness
     </priority>
-    
     <priority level="HIGH" timeline="Next Sprint">
       Fix remaining business logic test failures
       Add comprehensive validation tests for edge cases
       Create automated compatibility checks
     </priority>
-    
     <priority level="MEDIUM" timeline="Future">
       Implement automated API change detection
       Create migration tooling for breaking changes

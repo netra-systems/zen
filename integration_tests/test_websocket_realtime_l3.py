@@ -22,8 +22,8 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
-from app.schemas import WebSocketMessage, WebSocketMessageType
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from app.schemas.websocket_models import WebSocketMessage
+from app.schemas.websocket_message_types import WebSocketMessageType
 
 
 class TestWebSocketRealTimeL3:
@@ -32,7 +32,7 @@ class TestWebSocketRealTimeL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.active_connections = []
         self.test_threads = []
         yield

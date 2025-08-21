@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import aioredis
 
 from auth_core.database.models import AuthUser, AuthSession
-from ..factories import AuthUserFactory, AuthSessionFactory, AuditLogFactory
+from auth_service.tests..factories import AuthUserFactory, AuthSessionFactory, AuditLogFactory
 
 
 class DatabaseTestMixin:

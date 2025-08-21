@@ -1,104 +1,103 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning_document>
-    <metadata>
-        <title>OAuth Redirect URI Configuration</title>
-        <date>2025-08-20</date>
-        <category>Authentication</category>
-        <tags>oauth, redirect_uri, auth_service, configuration</tags>
-    </metadata>
-
-    <problem_statement>
+  <metadata>
+    <title>OAuth Redirect URI Configuration</title>
+    <date>2025-08-20</date>
+    <category>Authentication</category>
+    <tags>oauth, redirect_uri, auth_service, configuration</tags>
+    <last_edited>2025-08-21T08:47:29.590110</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.590110">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <problem_statement>
         OAuth was redirecting to incorrect URL (https://app.staging.netrasystems.ai/auth/callback) 
         instead of the dedicated auth service URL.
     </problem_statement>
-
-    <architecture_context>
-        <service_domains>
-            <service name="frontend" url="app.staging.netrasystems.ai">
+  <architecture_context>
+    <service_domains>
+      <service name="frontend" url="app.staging.netrasystems.ai">
                 Frontend React application - user interface
             </service>
-            <service name="backend_api" url="api.staging.netrasystems.ai">
+      <service name="backend_api" url="api.staging.netrasystems.ai">
                 Main backend API - business logic and data processing
             </service>
-            <service name="auth_service" url="auth.staging.netrasystems.ai">
+      <service name="auth_service" url="auth.staging.netrasystems.ai">
                 Dedicated authentication service - handles OAuth flows
             </service>
-        </service_domains>
-        
-        <oauth_flow>
+    </service_domains>
+    <oauth_flow>
             The auth service at auth.staging.netrasystems.ai is the dedicated service
             that handles OAuth authentication flows. It has the /auth/callback endpoint
             that receives OAuth provider callbacks.
         </oauth_flow>
-    </architecture_context>
-
-    <root_cause>
+  </architecture_context>
+  <root_cause>
         The OAuth configuration in app/clients/auth_client_config.py had multiple
         redirect URIs listed, with incorrect URLs as the primary entries:
         - staging.netrasystems.ai (legacy domain, no longer used)
         - api.staging.netrasystems.ai/api/auth/callback (backend API, not auth handler)
         - app.staging.netrasystems.ai/auth/callback (frontend, not auth handler)
     </root_cause>
-
-    <solution>
-        <step number="1">
+  <solution>
+    <step number="1">
             Identified that auth_service at auth.staging.netrasystems.ai is the 
             dedicated OAuth handler with /auth/callback endpoint.
         </step>
-        <step number="2">
+    <step number="2">
             Updated redirect URIs to use auth.staging.netrasystems.ai/auth/callback
             as the primary (and only) redirect URI.
         </step>
-        <step number="3">
+    <step number="3">
             Removed legacy and incorrect redirect URIs to prevent confusion.
         </step>
-        <step number="4">
+    <step number="4">
             Cleaned up JavaScript origins to only include active service domains
             (app.staging and auth.staging).
         </step>
-    </solution>
-
-    <key_learnings>
-        <learning>
+  </solution>
+  <key_learnings>
+    <learning>
             OAuth redirect URIs should point to the dedicated auth service,
             not to frontend or backend API endpoints.
         </learning>
-        <learning>
+    <learning>
             Multiple redirect URIs can cause confusion - keep only the active,
             correct URI to ensure proper OAuth flow.
         </learning>
-        <learning>
+    <learning>
             The auth service uses the same database as the main application,
             so no separate user sync is needed after authentication.
         </learning>
-        <learning>
+    <learning>
             JavaScript origins should only include domains that will initiate
             OAuth flows (frontend and auth service).
         </learning>
-    </key_learnings>
-
-    <configuration_reference>
-        <file>app/clients/auth_client_config.py</file>
-        <functions>
-            <function>_get_staging_redirect_uris</function>
-            <function>_get_prod_redirect_uris</function>
-            <function>_get_staging_js_origins</function>
-            <function>_get_prod_js_origins</function>
-        </functions>
-    </configuration_reference>
-
-    <best_practices>
-        <practice>
+  </key_learnings>
+  <configuration_reference>
+    <file>app/clients/auth_client_config.py</file>
+    <functions>
+      <function>_get_staging_redirect_uris</function>
+      <function>_get_prod_redirect_uris</function>
+      <function>_get_staging_js_origins</function>
+      <function>_get_prod_js_origins</function>
+    </functions>
+  </configuration_reference>
+  <best_practices>
+    <practice>
             Keep OAuth configuration centralized in auth_client_config.py
         </practice>
-        <practice>
+    <practice>
             Use environment-specific configuration methods for different deployments
         </practice>
-        <practice>
+    <practice>
             Ensure redirect URIs match exactly what's configured in OAuth provider
         </practice>
-        <practice>
+    <practice>
             Remove legacy domains and URLs to prevent confusion and misconfiguration
         </practice>
-    </best_practices>
+  </best_practices>
 </learning_document>

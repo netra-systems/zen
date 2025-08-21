@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>Workflow.AIFactoryProcess</name>
     <type>WorkflowDefinition</type>
     <version>2.0</version>
     <description>Defines the standard operating procedures for the AI Factory (LLM-based development agents).</description>
+    <last_edited>2025-08-21T08:47:28.349955</last_edited>
   </metadata>
-
   <section title="Core Principles of AI Factory Operation">
     <principle id="AI-P2" priority="CRITICAL">
       <title>Atomicity of Work</title>
@@ -17,56 +17,51 @@
       <instruction>Each agent execution (Task) MUST operate within a fresh, isolated context window to maintain process integrity and prevent context poisoning.</instruction>
     </principle>
   </section>
-
   <section title="The Standard Complex Coding Workflow">
     <workflow id="AI-WORKFLOW-001" mandatory="true">
       <description>The mandatory multi-agent process (Write-Review-Refine-Test).</description>
-
       <task id="T1" name="Implementation">
         <agent-persona>AI_Code_Contributor (Engineer Persona)</agent-persona>
         <input-artifacts>
-            <artifact>Task Requirements</artifact>
-            <artifact>Relevant SPEC/ files</artifact>
+          <artifact>Task Requirements</artifact>
+          <artifact>Relevant SPEC/ files</artifact>
         </input-artifacts>
         <objective>Generate the initial code implementation.</objective>
         <output-schema>
-            <field name="code_implementation" type="CodeBlock"/>
+          <field name="code_implementation" type="CodeBlock" />
         </output-schema>
       </task>
-
       <task id="T2" name="Code Review">
         <agent-persona>AI_Code_Reviewer (Critic Persona)</agent-persona>
         <input-artifacts>
-            <artifact>Output of T1</artifact>
-            <artifact>Core Specifications (conventions.xml, system_boundaries.xml)</artifact>
+          <artifact>Output of T1</artifact>
+          <artifact>Core Specifications (conventions.xml, system_boundaries.xml)</artifact>
         </input-artifacts>
         <objective>Critically review the code for violations (esp. 300/8 rule) and flaws.</objective>
         <output-schema>
-            <field name="review_comments" type="List[String]" constraint="MUST contain only critique. MUST NOT contain code."/>
+          <field name="review_comments" type="List[String]" constraint="MUST contain only critique. MUST NOT contain code." />
         </output-schema>
       </task>
-
       <task id="T3" name="Refinement">
         <agent-persona>AI_Code_Contributor (Engineer Persona - Fresh Context)</agent-persona>
         <input-artifacts>
-            <artifact>Original Requirements</artifact>
-            <artifact>Output of T1 (Initial Code)</artifact>
-            <artifact>Output of T2 (Review Comments)</artifact>
+          <artifact>Original Requirements</artifact>
+          <artifact>Output of T1 (Initial Code)</artifact>
+          <artifact>Output of T2 (Review Comments)</artifact>
         </input-artifacts>
         <objective>Address all critique points and generate refined code.</objective>
-         <output-schema>
-            <field name="refined_code_implementation" type="CodeBlock"/>
+        <output-schema>
+          <field name="refined_code_implementation" type="CodeBlock" />
         </output-schema>
       </task>
-
       <task id="T4" name="Verification">
         <agent-persona>AI_Tester</agent-persona>
         <input-artifacts>
-            <artifact>Output of T3 (Refined Code)</artifact>
+          <artifact>Output of T3 (Refined Code)</artifact>
         </input-artifacts>
         <objective>Execute relevant test suites and compliance checks.</objective>
         <output-schema>
-            <field name="status" type="Enum[PASS, FAIL]"/>
+          <field name="status" type="Enum[PASS, FAIL]" />
         </output-schema>
       </task>
     </workflow>

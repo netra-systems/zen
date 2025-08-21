@@ -24,11 +24,10 @@ import hashlib
 import hmac
 
 from app.main import app
-from app.schemas.auth_types import AuthProvider, TokenType
+from app.schemas.auth_types import AuthProvider, TokenType  
 from app.services.security_service import SecurityService
-from app.services.auth_service import AuthService
-from app.db.postgres import get_db_session
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from app.auth_integration.auth import get_current_user
+from app.db.postgres import get_postgres_db
 
 
 class TestAuthFlowComprehensiveL3:
@@ -37,7 +36,7 @@ class TestAuthFlowComprehensiveL3:
     @pytest.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
-        self.jwt_helper = JWTTestHelper()
+        # JWT helper removed - not available
         self.test_users = []
         self.cleanup_tokens = []
         yield
