@@ -64,7 +64,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         threads: []
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       expectElementByText(/Failed to load threads/i).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         loadThreads: jest.fn()
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       expectElementByRole('button', { name: /retry/i }).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         error: { code: 'RATE_LIMIT', message: 'Too many requests' }
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       expectElementByText(/Too many requests/i).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         sendMessage: mockSendMessage
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       // Try to send empty message
@@ -123,7 +123,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         messages: [createTestMessage({ id: '1', content: 'New message', role: 'user' })]
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       rerender(<MessageList />);
       
       expectElementByText('New message').toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         currentThread: mockThread
       });
       
-      (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
       render(<ChatHeader />);
       
       expectElementByText('Selected Thread').toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         messages: []
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);
@@ -173,8 +173,8 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         setCurrentThreadId: jest.fn()
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       // Switch thread
@@ -209,7 +209,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         sendMessage: mockSendMessage
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);
@@ -245,7 +245,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
         loadThreads: mockRetry
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const retryButton = expectElementByRole('button', { name: /retry/i });
@@ -260,7 +260,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       };
       
       const mockThreadStore = createThreadStoreMock(sharedState);
-      (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
       
       render(<ChatHeader />);
       expectElementByText('Shared Thread').toBeInTheDocument();

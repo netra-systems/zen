@@ -54,6 +54,11 @@ class TestScanners:
         if netra_backend_tests.exists():
             test_dirs.append(netra_backend_tests)
         
+        # Dev launcher tests location
+        dev_launcher_tests = path / "dev_launcher" / "tests"
+        if dev_launcher_tests.exists():
+            test_dirs.append(dev_launcher_tests)
+        
         # Legacy location: app/tests (kept for backward compatibility)
         app_tests = path / "app" / "tests"
         if app_tests.exists():

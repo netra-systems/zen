@@ -43,22 +43,22 @@ export const mockToken = 'mock-jwt-token-123';
 // Setup functions (≤8 lines each)
 export const setupBasicMocks = () => {
   jest.clearAllMocks();
-  (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
-  (authService.getToken as jest.Mock).mockReturnValue(null);
-  (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(false);
+  jest.mocked(authService.getAuthConfig).mockResolvedValue(mockAuthConfig);
+  jest.mocked(authService.getToken).mockReturnValue(null);
+  jest.mocked(authService.getDevLogoutFlag).mockReturnValue(false);
   setupAuthServiceMethods();
   setupAuthServiceClientMocks();
   (jwtDecode as jest.Mock).mockReturnValue(mockUser);
 };
 
 export const setupAuthServiceMethods = () => {
-  (authService.handleLogin as jest.Mock).mockImplementation(() => {});
-  (authService.handleLogout as jest.Mock).mockImplementation(() => Promise.resolve());
-  (authService.setDevLogoutFlag as jest.Mock).mockImplementation(() => {});
-  (authService.clearDevLogoutFlag as jest.Mock).mockImplementation(() => {});
-  (authService.removeToken as jest.Mock).mockImplementation(() => {});
-  (authService.handleDevLogin as jest.Mock).mockResolvedValue(mockAuthServiceResponses.devLogin);
-  (authService.getAuthHeaders as jest.Mock).mockReturnValue({});
+  jest.mocked(authService.handleLogin).mockImplementation(() => {});
+  jest.mocked(authService.handleLogout).mockImplementation(() => Promise.resolve());
+  jest.mocked(authService.setDevLogoutFlag).mockImplementation(() => {});
+  jest.mocked(authService.clearDevLogoutFlag).mockImplementation(() => {});
+  jest.mocked(authService.removeToken).mockImplementation(() => {});
+  jest.mocked(authService.handleDevLogin).mockResolvedValue(mockAuthServiceResponses.devLogin);
+  jest.mocked(authService.getAuthHeaders).mockReturnValue({});
 };
 
 export const setupAuthServiceClientMocks = () => {
@@ -79,23 +79,23 @@ export const setupAuthStore = () => {
     token: null,
     isAuthenticated: false
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
   return mockAuthStore;
 };
 
 export const setupTokenMocks = (token: string = mockToken) => {
-  (authService.getToken as jest.Mock).mockReturnValue(token);
+  jest.mocked(authService.getToken).mockReturnValue(token);
   (jwtDecode as jest.Mock).mockReturnValue(mockUser);
 };
 
 export const setupDevModeMocks = (isDevMode: boolean = true) => {
   const devConfig = { ...mockAuthConfig, development_mode: isDevMode };
-  (authService.getAuthConfig as jest.Mock).mockResolvedValue(devConfig);
+  jest.mocked(authService.getAuthConfig).mockResolvedValue(devConfig);
   return devConfig;
 };
 
 export const setupAuthConfigError = () => {
-  (authService.getAuthConfig as jest.Mock).mockRejectedValue(new Error('Network error'));
+  jest.mocked(authService.getAuthConfig).mockRejectedValue(new Error('Network error'));
 };
 
 // Wrapper components (≤8 lines each)

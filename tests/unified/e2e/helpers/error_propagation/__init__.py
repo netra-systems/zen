@@ -16,7 +16,8 @@ Re-exports all public interfaces for backward compatibility.
 # Import all public classes and functions from the refactored modules
 
 # Error Generation and Testing Infrastructure
-from tests.unified.e2e.helpers.error_generators import ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation
+from tests.unified.e2e.helpers.error_generators import (
+    ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation,
     ErrorCorrelationContext,
     ErrorPropagationMetrics,
     RealErrorPropagationTester,
@@ -26,25 +27,29 @@ from tests.unified.e2e.helpers.error_generators import ErrorCorrelationContext, 
 )
 
 # Error Validation Components  
-from tests.unified.e2e.helpers.error_validators import AuthServiceFailurePropagationValidator, AuthTokenValidator
+from tests.unified.e2e.helpers.error_validators import (
+    AuthServiceFailurePropagationValidator, AuthTokenValidator,
     AuthServiceFailurePropagationValidator,
     AuthTokenValidator
 )
 
 # Database Error Handling
-from tests.unified.e2e.helpers.database_error_helpers import DatabaseErrorHandlingValidator, DatabaseConnectionTester
+from tests.unified.e2e.helpers.database_error_helpers import (
+    DatabaseErrorHandlingValidator, DatabaseConnectionTester,
     DatabaseErrorHandlingValidator,
     DatabaseConnectionTester
 )
 
 # Recovery and Retry Testing
-from tests.unified.e2e.helpers.error_recovery_helpers import NetworkFailureSimulationValidator, NetworkLatencyTester
+from tests.unified.e2e.helpers.error_recovery_helpers import (
+    NetworkFailureSimulationValidator, NetworkLatencyTester,
     NetworkFailureSimulationValidator,
     NetworkLatencyTester
 )
 
 # Network Retry and Pattern Testing
-from tests.unified.e2e.helpers.network_retry_helpers import RetryPatternTester, RecoveryScenarioTester, NetworkResilienceTester, TimeoutPatternAnalyzer
+from tests.unified.e2e.helpers.network_retry_helpers import (
+    RetryPatternTester, RecoveryScenarioTester, NetworkResilienceTester, TimeoutPatternAnalyzer,
     RetryPatternTester,
     RecoveryScenarioTester,
     NetworkResilienceTester,
@@ -52,13 +57,15 @@ from tests.unified.e2e.helpers.network_retry_helpers import RetryPatternTester, 
 )
 
 # Correlation Testing
-from tests.unified.e2e.helpers.error_correlation_helpers import ErrorCorrelationValidator, CorrelationTestHelper
+from tests.unified.e2e.helpers.error_correlation_helpers import (
+    ErrorCorrelationValidator, CorrelationTestHelper,
     ErrorCorrelationValidator,
     CorrelationTestHelper
 )
 
 # User Message and Cross-Service Testing
-from tests.unified.e2e.helpers.user_message_helpers import UserFriendlyMessageValidator, CrossServiceTrackingValidator, MessageQualityAnalyzer
+from tests.unified.e2e.helpers.user_message_helpers import (
+    UserFriendlyMessageValidator, CrossServiceTrackingValidator, MessageQualityAnalyzer,
     UserFriendlyMessageValidator,
     CrossServiceTrackingValidator,
     MessageQualityAnalyzer

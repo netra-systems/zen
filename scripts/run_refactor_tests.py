@@ -29,7 +29,7 @@ def run_tests():
         "-v",  # Verbose output
         "--tb=short",  # Short traceback format
         "--strict-markers",  # Strict marker validation
-        "--cov=app/core",  # Coverage for core modules
+        "--cov=netra_backend.app.core",  # Coverage for core modules
         "--cov-report=term-missing",  # Show missing lines
         "--cov-report=html:htmlcov/refactor",  # HTML coverage report
         "--cov-fail-under=80",  # Require 80% coverage
@@ -73,7 +73,7 @@ def run_specific_test_category(category: str):
     pytest_args = [
         "-v",
         "--tb=short",
-        f"--cov=app/core",
+        f"--cov=netra_backend.app.core",
         "--cov-report=term",
         test_file
     ]

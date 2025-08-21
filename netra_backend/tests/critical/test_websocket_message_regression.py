@@ -553,7 +553,7 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_websocket_error_handler_with_coroutine_error(self):
         """Test error handler properly logs coroutine-related errors."""
-        from netra_backend.app.routes.websockets import _handle_general_exception
+        from netra_backend.app.routes.websocket_secure import _handle_general_exception
         
         mock_websocket = Mock()
         error = RuntimeError("'coroutine' object has no attribute 'get'")

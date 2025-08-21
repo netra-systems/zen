@@ -83,9 +83,11 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
-        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest">
+        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
+            <critical-takeaway>All test directories MUST be added to test_scanners.py for discovery (test-discovery-all-directories).</critical-takeaway>
+            <critical-takeaway>Test runner requires PROJECT_ROOT in sys.path for imports (test-import-project-root).</critical-takeaway>
         </category>
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">

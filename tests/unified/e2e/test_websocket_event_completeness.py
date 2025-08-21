@@ -15,8 +15,9 @@ import pytest
 import pytest_asyncio
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.helpers.websocket_test_helpers import WebSocketTestManager, create_agent_request, extract_events_by_type, validate_event_payload
-    WebSocketTestManager, 
+from tests.unified.e2e.helpers.websocket_test_helpers import (
+    WebSocketTestManager, create_agent_request, extract_events_by_type, validate_event_payload,
+    WebSocketTestManager,
     create_agent_request,
     extract_events_by_type,
     validate_event_payload

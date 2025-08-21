@@ -30,7 +30,7 @@ from schemas import SubAgentState
 from sqlalchemy.ext.asyncio import AsyncSession
 from ws_manager import WebSocketManager
 
-from config import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path

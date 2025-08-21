@@ -24,7 +24,7 @@ import pytest
 import pytest_asyncio
 from logging_config import central_logger as logger
 
-from config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (

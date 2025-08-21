@@ -43,7 +43,7 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
       sendMessage: mockSendMessage,
     });
     
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       setProcessing: mockChatStore.setProcessing,
       isProcessing: false,
       addMessage: mockChatStore.addMessage,
@@ -53,13 +53,13 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
       updateOptimisticMessage: jest.fn(),
     });
     
-    (useThreadStore as jest.Mock).mockReturnValue({
+    jest.mocked(useThreadStore).mockReturnValue({
       currentThreadId: 'thread-1',
       setCurrentThread: mockThreadStore.setCurrentThread,
       addThread: mockThreadStore.addThread,
     });
     
-    (useAuthStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
     });
     
@@ -75,7 +75,7 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
     });
 
     it('should disable voice input when processing', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      jest.mocked(useUnifiedChatStore).mockReturnValue({
         setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
         addMessage: mockChatStore.addMessage,
@@ -110,7 +110,7 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
     });
 
     it('should disable voice input when not authenticated', () => {
-      (useAuthStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAuthStore).mockReturnValue({
         isAuthenticated: false,
       });
       

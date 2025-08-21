@@ -50,8 +50,8 @@ describe('AuthContext - Development Mode', () => {
   };
 
   const setupAutoLogin = (devConfig: any) => {
-    (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(false);
-    (authService.handleDevLogin as jest.Mock).mockResolvedValue({
+    jest.mocked(authService.getDevLogoutFlag).mockReturnValue(false);
+    jest.mocked(authService.handleDevLogin).mockResolvedValue({
       access_token: mockToken,
       token_type: 'Bearer'
     });
@@ -81,7 +81,7 @@ describe('AuthContext - Development Mode', () => {
 
   const setupSkipAutoLogin = () => {
     const devConfig = setupDevModeMocks(true);
-    (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(true);
+    jest.mocked(authService.getDevLogoutFlag).mockReturnValue(true);
     return devConfig;
   };
 
@@ -106,7 +106,7 @@ describe('AuthContext - Development Mode', () => {
 
   const setupDevLoginFailure = () => {
     const devConfig = setupDevModeMocks(true);
-    (authService.handleDevLogin as jest.Mock).mockResolvedValue(null);
+    jest.mocked(authService.handleDevLogin).mockResolvedValue(null);
     return devConfig;
   };
 

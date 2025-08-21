@@ -7,19 +7,19 @@ import asyncio
 import time
 from typing import Any, Dict, List, Optional, Union
 
-from netra_backend.app.batch_load_monitor import LoadMonitor
-from netra_backend.app.batch_message_operations import (
+from netra_backend.app.websocket.batch_load_monitor import LoadMonitor
+from netra_backend.app.websocket.batch_message_operations import (
     BatchTimerManager,
     create_batched_message,
     send_batch_to_connection,
 )
-from netra_backend.app.batch_message_strategies import BatchingStrategyManager
-from netra_backend.app.batch_message_transactional import (
+from netra_backend.app.websocket.batch_message_strategies import BatchingStrategyManager
+from netra_backend.app.websocket.batch_message_transactional import (
     MessageStateManager,
     RetryManager,
     TransactionalBatchProcessor,
 )
-from netra_backend.app.batch_message_types import (
+from netra_backend.app.websocket.batch_message_types import (
     BatchConfig,
     BatchMetrics,
     MessageState,

@@ -52,22 +52,24 @@ class TestProcessManagerWindows:
     def test_windows_process_tree_termination(self, process_manager, mock_process):
         """Test Windows process tree termination with taskkill /F /T."""
         with patch('subprocess.run') as mock_run:
-            # Mock successful taskkill response
+            # Mock successful taskkill response for tree kill, then verification shows terminated
             mock_run.return_value.returncode = 0
-            mock_run.return_value.stdout = ""
+            mock_run.return_value.stdout = "No tasks are running which match the specified criteria."
             mock_run.return_value.stderr = ""
             
             process_manager.add_process("test_service", mock_process)
             result = process_manager.terminate_process("test_service")
             
             assert result is True
-            # Verify taskkill was called with correct flags
-            mock_run.assert_called_with(
-                ["taskkill", "/F", "/T", "/PID", "12345"],
-                capture_output=True,
-                text=True,
-                timeout=10
+            # Verify taskkill was called with tree termination flag
+            # The call could be for tree kill or verification - check any call had the right params
+            calls = mock_run.call_args_list
+            tree_kill_found = any(
+                call[0][0] == ["taskkill", "/F", "/T", "/PID", "12345"] and
+                call[1].get('timeout') == 10
+                for call in calls
             )
+            assert tree_kill_found, f"Expected tree kill command not found in calls: {calls}"
     
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_process_verification_with_tasklist(self, process_manager, mock_process):
@@ -306,11 +308,15 @@ class TestStartupSequenceIntegration:
     @pytest.fixture
     def launcher_config(self):
         """Create a test launcher configuration."""
+        from pathlib import Path
+        # Get the actual project root - go up 2 directories from the test file
+        project_root = Path(__file__).parent.parent.parent
         return LauncherConfig(
             backend_port=8000,
             frontend_port=3000,
             dynamic_ports=True,
-            verbose=True
+            verbose=True,
+            project_root=project_root
         )
     
     def test_13_step_startup_sequence(self, launcher_config):

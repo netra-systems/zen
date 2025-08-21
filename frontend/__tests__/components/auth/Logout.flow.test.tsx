@@ -81,12 +81,12 @@ describe('Logout Flow and Cleanup Tests', () => {
     mockSessionStorage.removeItem.mockClear();
     mockSessionStorage.clear.mockClear();
     mockCookies.clear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Basic Logout Flow', () => {
     it('should trigger logout when button clicked', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -104,7 +104,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should transition to logged out state', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -120,7 +120,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       expect(mockLogout).toHaveBeenCalled();
       
       // Simulate logout completion
-      (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
       
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
@@ -128,7 +128,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should show loading state during logout', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -143,7 +143,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Simulate logout loading state
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -153,7 +153,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should handle logout completion successfully', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -168,7 +168,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Complete logout flow
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: false,
         user: null,
@@ -182,7 +182,7 @@ describe('Logout Flow and Cleanup Tests', () => {
 
   describe('Development Mode Logout', () => {
     it('should handle dev mode logout with flag setting', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -204,7 +204,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should show dev mode UI after logout', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -223,7 +223,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Simulate dev mode logout completion
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -236,7 +236,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should handle OAuth logout in dev mode', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -261,7 +261,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should persist dev logout flag', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -287,7 +287,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     it('should handle logout service errors gracefully', async () => {
       mockLogout.mockRejectedValueOnce(new Error('Logout service error'));
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -307,7 +307,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     it('should handle network errors during logout', async () => {
       mockLogout.mockRejectedValueOnce(new Error('Network error'));
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -327,7 +327,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     it('should handle server unavailable during logout', async () => {
       mockLogout.mockRejectedValueOnce(new Error('Server unavailable'));
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -347,7 +347,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     it('should continue logout process despite errors', async () => {
       mockLogout.mockRejectedValueOnce(new Error('Partial logout error'));
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -362,7 +362,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Even with errors, should attempt local cleanup
-      (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
       
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
@@ -371,7 +371,7 @@ describe('Logout Flow and Cleanup Tests', () => {
 
   describe('Session Data Cleanup', () => {
     it('should clear user data on logout', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -386,7 +386,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Simulate cleanup completion
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: null
@@ -397,7 +397,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should clear authentication tokens', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -413,7 +413,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Tokens should be cleared
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: null
@@ -424,7 +424,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should handle incomplete cleanup gracefully', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -440,7 +440,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Partial cleanup - user cleared but token remains
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: 'orphaned-token'
@@ -451,7 +451,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should clear session storage on logout', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -471,7 +471,7 @@ describe('Logout Flow and Cleanup Tests', () => {
 
   describe('Multiple Session Logout', () => {
     it('should handle rapid logout attempts', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -493,7 +493,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should prevent double logout processing', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -508,7 +508,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Simulate loading state to prevent double processing
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -519,7 +519,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should handle concurrent logout attempts', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -544,7 +544,7 @@ describe('Logout Flow and Cleanup Tests', () => {
     });
 
     it('should complete cleanup for all sessions', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -559,7 +559,7 @@ describe('Logout Flow and Cleanup Tests', () => {
       await userEvent.click(logoutButton);
       
       // Complete cleanup
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: null,

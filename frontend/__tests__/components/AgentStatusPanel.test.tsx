@@ -32,7 +32,7 @@ describe('AgentStatusPanel Component', () => {
 
     jest.clearAllMocks();
     jest.useFakeTimers();
-    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+    jest.mocked(useUnifiedChatStore).mockReturnValue(mockUnifiedChatStore);
   });
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Test Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -70,7 +70,7 @@ describe('AgentStatusPanel Component', () => {
         isProcessing: false
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(inactiveStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(inactiveStore);
       
       const { container } = renderWithProvider(<AgentStatusPanel />);
       
@@ -85,7 +85,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Supervisor Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -103,7 +103,7 @@ describe('AgentStatusPanel Component', () => {
         slowLayerData: { phase: 'analysis' }
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -119,7 +119,7 @@ describe('AgentStatusPanel Component', () => {
         fastLayerData: { activeTools: ['search', 'analyze'] }
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -134,7 +134,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: null
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -151,7 +151,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Test Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -176,7 +176,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Test Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -199,7 +199,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Test Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       const { unmount } = renderWithProvider(<AgentStatusPanel />);
       
@@ -214,7 +214,7 @@ describe('AgentStatusPanel Component', () => {
         subAgentName: 'Test Agent'
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      jest.mocked(useUnifiedChatStore).mockReturnValue(activeStore);
       
       const { rerender } = renderWithProvider(<AgentStatusPanel />);
       

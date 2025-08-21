@@ -50,7 +50,7 @@ describe('Authentication UI Tests Index', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Test Suite Overview', () => {

@@ -44,7 +44,7 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.core.config import get_config
 
 # Add project root to path
-from netra_backend.app.routes.mcp.main import app
+from netra_backend.app.main import app
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.schemas.core_models import User
 

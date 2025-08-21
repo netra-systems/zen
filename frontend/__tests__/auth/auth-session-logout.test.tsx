@@ -48,7 +48,7 @@ describe('Auth Session Auto-Logout', () => {
     Date.now = jest.fn();
     
     const mockConfig = createMockAuthConfig();
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockConfig);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(mockConfig);
   });
 
   afterEach(() => {
@@ -65,7 +65,7 @@ describe('Auth Session Auto-Logout', () => {
       exp: Math.floor(expiryTimeMs / 1000)
     };
     
-    (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+    jest.mocked(authService.getToken).mockReturnValue(mockToken);
     (jwtDecode as jest.Mock).mockReturnValue(mockUser);
     return { mockToken, mockUser };
   };
@@ -285,7 +285,7 @@ describe('Auth Session Auto-Logout', () => {
       const newExpiry = Date.now() + SESSION_TIMEOUT_MS;
       
       await act(async () => {
-        (authService.getToken as jest.Mock).mockReturnValue(newToken);
+        jest.mocked(authService.getToken).mockReturnValue(newToken);
         const newUser = {
           id: 'test-user',
           email: 'test@example.com',

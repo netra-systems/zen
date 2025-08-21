@@ -49,7 +49,7 @@ jest.mock('@/components/LoginButton', () => ({
 describe('AppWithLayout', () => {
   beforeEach(() => {
     const { useAppStore } = require('@/store');
-    (useAppStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAppStore).mockReturnValue({
       isSidebarCollapsed: false,
       toggleSidebar: jest.fn(),
     });
@@ -68,7 +68,7 @@ describe('AppWithLayout', () => {
     // Arrange
     const { useAppStore } = require('@/store');
     const toggleSidebar = jest.fn();
-    (useAppStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAppStore).mockReturnValue({
       isSidebarCollapsed: true,
       toggleSidebar,
     });
@@ -85,7 +85,7 @@ describe('AppWithLayout', () => {
     // Arrange
     const { useAppStore } = require('@/store');
     const toggleSidebar = jest.fn();
-    (useAppStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAppStore).mockReturnValue({
       isSidebarCollapsed: false,
       toggleSidebar,
     });

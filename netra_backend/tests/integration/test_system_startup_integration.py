@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from startup_checks import StartupChecker, StartupCheckResult
 
-from config import get_config
+from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.core.app_factory import create_app

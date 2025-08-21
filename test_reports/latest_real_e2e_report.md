@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T14:03:52.301829  
+**Generated:** 2025-08-21T15:29:23.694135  
 **Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 5.93s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 17.40s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,8 +28,8 @@
 - **Purpose:** Complete user journey validation with actual services
 - **Timeout:** 1800s
 - **Coverage Enabled:** No
-- **Total Duration:** 5.93s
-- **Exit Code:** 4
+- **Total Duration:** 17.40s
+- **Exit Code:** 5
 
 ### Backend Configuration
 ```
@@ -59,53 +59,28 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -vv -n 2 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m real_e2e
 ================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+created: 2/2 workers
+2 workers [0 items]
+
+scheduling tests via LoadScheduling
+
+[33m============================ [33mno tests ran[0m[33m in 8.22s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.06s
+[FAIL] TESTS FAILED with exit code 5 after 16.23s
 ================================================================================
 
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
   warnings.warn(
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
-netra_backend\tests\conftest.py:65: in <module>
-    from netra_backend.app.main import app
-netra_backend\app\main.py:91: in <module>
-    from netra_backend.app.core.app_factory import create_app
-netra_backend\app\core\app_factory.py:9: in <module>
-    from netra_backend.app.core.lifespan_manager import lifespan
-netra_backend\app\core\lifespan_manager.py:9: in <module>
-    from netra_backend.app.shutdown import run_complete_shutdown
-netra_backend\app\shutdown.py:12: in <module>
-    from netra_backend.app.services.websocket.ws_manager import manager as websocket_manager
-netra_backend\app\services\websocket\ws_manager.py:47: in __getattr__
-    mgr, _, _, _ = _lazy_import()
-                   ^^^^^^^^^^^^^^
-netra_backend\app\services\websocket\ws_manager.py:29: in _lazy_import
-    from netra_backend.app.ws_manager import (
-netra_backend\app\ws_manager.py:245: in <module>
-    manager = get_manager()
-              ^^^^^^^^^^^^^
-netra_backend\app\ws_manager.py:241: in get_manager
-    _manager = WebSocketManager()
-               ^^^^^^^^^^^^^^^^^^
-netra_backend\app\ws_manager.py:38: in __new__
-    cls._instance._initialize_unified_delegation()
-netra_backend\app\ws_manager.py:45: in _initialize_unified_delegation
-    self._unified_manager = get_unified_manager()
-                            ^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\websocket\unified\manager.py:410: in get_unified_manager
-    _unified_manager = UnifiedWebSocketManager()
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\websocket\unified\manager.py:65: in __init__
-    self._initialize_core_components()
-netra_backend\app\websocket\unified\manager.py:73: in _initialize_core_components
-    self.connection_manager = ConnectionManager()
-                              ^^^^^^^^^^^^^^^^^^^
-netra_backend\app\websocket\connection.py:56: in __init__
-    self._modern_manager = Modernget_connection_manager()
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   NameError: name 'Modernget_connection_manager' is not defined
 
 ```
 

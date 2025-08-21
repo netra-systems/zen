@@ -18,7 +18,7 @@ Business Value Justification (BVJ):
 """
 
 # Re-export all suite components for backward compatibility
-from tests.e2e.resource_isolation.suite import ResourceIsolationTestSuite, TEST_CONFIG, TenantAgentManager, WorkloadGenerator, resource_isolation_suite, tenant_agents
+from tests.e2e.resource_isolation.suite import (
     ResourceIsolationTestSuite, TEST_CONFIG, TenantAgentManager,
     WorkloadGenerator, resource_isolation_suite, tenant_agents
 )

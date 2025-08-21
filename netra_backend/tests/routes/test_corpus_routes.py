@@ -46,7 +46,7 @@ class TestCorpusRoute:
         """Corpus-specific test client with required app state."""
         from fastapi.testclient import TestClient
 
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         
         # Mock the db_session_factory to prevent state errors
         @asynccontextmanager

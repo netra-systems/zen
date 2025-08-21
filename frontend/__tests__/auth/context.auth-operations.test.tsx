@@ -101,7 +101,7 @@ describe('AuthContext - Auth Operations', () => {
   it('should set dev logout flag in development mode', async () => {
     // Override the auth config to be in development mode
     const devConfig = { ...mockAuthConfig, development_mode: true };
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(devConfig);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(devConfig);
     
     const { result } = renderAuthHook();
     

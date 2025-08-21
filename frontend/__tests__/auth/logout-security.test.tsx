@@ -69,7 +69,7 @@ const setupAuthStore = () => {
     isAdminOrHigher: jest.fn(() => false),
     isDeveloperOrHigher: jest.fn(() => false)
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockStore);
   return mockStore;
 };
 

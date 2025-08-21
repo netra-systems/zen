@@ -32,7 +32,7 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
-from config import get_config, reload_config, validate_configuration
+from netra_backend.app.config import get_config, reload_config, validate_configuration
 
 # Add project root to path
 from netra_backend.app.core.configuration.base import config_manager, get_unified_config

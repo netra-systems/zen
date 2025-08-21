@@ -28,6 +28,30 @@ from netra_backend.app.core.network_constants import (
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
+    def setup_method(self):
+        """Set up test environment."""
+        self.temp_dir = tempfile.mkdtemp()
+        # Create required directory structure for LauncherConfig validation
+        backend_dir = Path(self.temp_dir) / "netra_backend" / "app"
+        backend_dir.mkdir(parents=True, exist_ok=True)
+        (backend_dir / "main.py").touch()  # Create main.py file
+        
+        frontend_dir = Path(self.temp_dir) / "frontend"
+        frontend_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.config = LauncherConfig(
+            backend_port=8000,
+            frontend_port=3000,
+            project_root=Path(self.temp_dir),
+            verbose=False
+        )
+    
+    def teardown_method(self):
+        """Clean up test environment."""
+        import shutil
+        if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
     def test_error_handling(self):
         """Test error handling in startup system."""
         with patch('signal.signal'):

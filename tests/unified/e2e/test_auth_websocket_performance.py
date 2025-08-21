@@ -28,7 +28,8 @@ import time
 import pytest
 from typing import List, Dict, Any
 
-from tests.unified.e2e.auth_test_fixtures import WebSocketAuthTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance
+from tests.unified.e2e.auth_test_fixtures import (
+    WebSocketAuthTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance,
     WebSocketAuthTester,
     AuthTestConfig,
     skip_if_services_unavailable,

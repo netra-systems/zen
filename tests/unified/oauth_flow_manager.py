@@ -16,7 +16,8 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Tuple, Optional
 
 from tests.unified.config import TEST_CONFIG, TestTokenManager
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory, get_enterprise_config
+from tests.unified.oauth_test_providers import (
+    GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory, get_enterprise_config,
     GoogleOAuthProvider,
     GitHubOAuthProvider,
     OAuthUserFactory,

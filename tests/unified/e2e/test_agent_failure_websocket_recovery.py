@@ -21,7 +21,8 @@ import pytest_asyncio
 
 from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
 from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.e2e.helpers.agent_failure_recovery_helpers import AgentFailureSimulator, WebSocketErrorEventValidator, CircuitBreakerTester, FailureType, RecoveryAction, create_error_test_scenarios, validate_recovery_timing, create_mock_websocket_error
+from tests.unified.e2e.helpers.agent_failure_recovery_helpers import (
+    AgentFailureSimulator, WebSocketErrorEventValidator, CircuitBreakerTester, FailureType, RecoveryAction, create_error_test_scenarios, validate_recovery_timing, create_mock_websocket_error,
     AgentFailureSimulator,
     WebSocketErrorEventValidator,
     CircuitBreakerTester,

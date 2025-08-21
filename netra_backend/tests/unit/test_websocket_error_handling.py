@@ -22,7 +22,7 @@ import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.routes.websockets import (
+from netra_backend.app.routes.websocket_secure import (
     _handle_general_exception,
     # Add project root to path
     _handle_websocket_error,

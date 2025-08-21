@@ -12,7 +12,7 @@ from typing import Dict, Any, List
 import pytest
 import httpx
 
-from tests.e2e.resource_isolation.test_infrastructure import ResourceMonitor, TenantAgent, ResourceLeakDetector, PerformanceIsolationValidator, QuotaEnforcer
+from tests.e2e.resource_isolation.test_infrastructure import (
     ResourceMonitor, TenantAgent, ResourceLeakDetector, 
     PerformanceIsolationValidator, QuotaEnforcer
 )

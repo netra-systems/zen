@@ -49,7 +49,7 @@ from netra_backend.app.core.websocket_cors import (
 from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-from netra_backend.app.routes.mcp.main import app
+from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_enhanced import (
     authenticate_websocket_with_database,
     connection_manager,

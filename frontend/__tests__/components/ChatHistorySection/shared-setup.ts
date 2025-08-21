@@ -132,11 +132,11 @@ export const initializeDefaultMocks = () => {
 
 // Initialize service mocks
 export const initializeServiceMocks = () => {
-  (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
-  (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
-  (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
-  (ThreadService.createThread as jest.Mock).mockResolvedValue(mockThreads[0]);
-  (ThreadService.updateThread as jest.Mock).mockResolvedValue(mockThreads[0]);
+  jest.mocked(ThreadService.listThreads).mockResolvedValue(mockThreads);
+  jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
+  jest.mocked(ThreadService.getThreadMessages).mockResolvedValue({ messages: [] });
+  jest.mocked(ThreadService.createThread).mockResolvedValue(mockThreads[0]);
+  jest.mocked(ThreadService.updateThread).mockResolvedValue(mockThreads[0]);
 };
 
 // Clear all mocks

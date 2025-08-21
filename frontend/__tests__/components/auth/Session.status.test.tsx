@@ -54,7 +54,7 @@ describe('Session Status Indicators Tests', () => {
     mockLocalStorage.setItem.mockClear();
     mockLocalStorage.removeItem.mockClear();
     mockLocalStorage.clear.mockClear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Login Status Indicators', () => {
@@ -67,7 +67,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should show logged in state with user info', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -84,7 +84,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should show loading status during auth operations', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -97,7 +97,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should show user email when name unavailable', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -114,7 +114,7 @@ describe('Session Status Indicators Tests', () => {
 
   describe('Development Mode Indicators', () => {
     it('should show dev mode badge when enabled', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -134,7 +134,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should show dev mode login options', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -154,7 +154,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should hide dev mode badge in production', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -174,7 +174,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should handle missing authConfig gracefully', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -199,7 +199,7 @@ describe('Session Status Indicators Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
       
       // Simulate login
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -215,7 +215,7 @@ describe('Session Status Indicators Tests', () => {
 
     it('should handle logout to login transition', async () => {
       // Start with logged in user
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -232,7 +232,7 @@ describe('Session Status Indicators Tests', () => {
       expect(mockLogout).toHaveBeenCalled();
       
       // Simulate logout completion
-      (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
       
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
@@ -250,7 +250,7 @@ describe('Session Status Indicators Tests', () => {
       ];
       
       states.forEach((state, index) => {
-        (authService.useAuth as jest.Mock).mockReturnValue({
+        jest.mocked(authService.useAuth).mockReturnValue({
           ...baseAuthContext,
           ...state
         });
@@ -268,7 +268,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should maintain state consistency during loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true,
         user: {
@@ -288,7 +288,7 @@ describe('Session Status Indicators Tests', () => {
 
   describe('Token Status Management', () => {
     it('should reflect token presence in UI state', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -305,7 +305,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should handle token without user data', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: 'orphaned-token'
@@ -318,7 +318,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should handle user data without token', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -335,7 +335,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should handle invalid token scenarios', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: null,
         token: 'invalid.jwt.token'
@@ -349,7 +349,7 @@ describe('Session Status Indicators Tests', () => {
 
   describe('Visual State Indicators', () => {
     it('should apply correct styling for logged in state', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -368,7 +368,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should apply loading button styling', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -381,7 +381,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should apply dev mode badge styling', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -402,7 +402,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should apply correct button layout for dev mode', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -425,7 +425,7 @@ describe('Session Status Indicators Tests', () => {
 
   describe('Accessibility for Status Indicators', () => {
     it('should provide accessible status information', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -441,7 +441,7 @@ describe('Session Status Indicators Tests', () => {
     });
 
     it('should announce loading state to screen readers', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -467,7 +467,7 @@ describe('Session Status Indicators Tests', () => {
       const loginButton = screen.getByText('Login with Google');
       loginButton.focus();
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',

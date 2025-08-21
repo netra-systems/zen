@@ -15,9 +15,10 @@ REQUIREMENTS:
 import time
 from typing import Dict, Any
 
-from tests.unified.e2e.user_onboarding_helpers import OnboardingFlowManager, UserRegistrationHelper, ProfileSetupHelper, OptimizationRequestHelper
+from tests.unified.e2e.user_onboarding_helpers import (
+    OnboardingFlowManager, UserRegistrationHelper, ProfileSetupHelper, OptimizationRequestHelper,
     OnboardingFlowManager,
-    UserRegistrationHelper, 
+    UserRegistrationHelper,
     ProfileSetupHelper,
     OptimizationRequestHelper
 )

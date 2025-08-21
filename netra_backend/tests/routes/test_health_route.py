@@ -50,7 +50,7 @@ def test_health_endpoint_direct():
     
     from fastapi.testclient import TestClient
 
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")
@@ -69,7 +69,7 @@ def test_live_endpoint():
     
     from fastapi.testclient import TestClient
 
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")

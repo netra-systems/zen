@@ -66,7 +66,7 @@ describe('MessageInput - ThreadService.getThread Fix', () => {
       sendMessage: mockSendMessage,
     });
     
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       setProcessing: jest.fn(),
       isProcessing: false,
       addMessage: jest.fn(),
@@ -76,13 +76,13 @@ describe('MessageInput - ThreadService.getThread Fix', () => {
       updateOptimisticMessage: jest.fn(),
     });
     
-    (useThreadStore as jest.Mock).mockReturnValue({
+    jest.mocked(useThreadStore).mockReturnValue({
       currentThreadId: 'thread-1',
       setCurrentThread: jest.fn(),
       addThread: jest.fn(),
     });
     
-    (useAuthStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
     });
     

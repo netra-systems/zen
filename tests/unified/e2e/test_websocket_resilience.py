@@ -23,7 +23,8 @@ from typing import Dict, Any
 import pytest
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore, WebSocketStateRecoveryManager, MessageContinuityValidator, AgentErrorSimulator
+from tests.unified.e2e.websocket_resilience_core import (
+    WebSocketResilienceTestCore, WebSocketStateRecoveryManager, MessageContinuityValidator, AgentErrorSimulator,
     WebSocketResilienceTestCore,
     WebSocketStateRecoveryManager,
     MessageContinuityValidator,

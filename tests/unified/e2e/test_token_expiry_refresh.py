@@ -20,8 +20,9 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
-from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, TokenValidationHelper, PerformanceBenchmark
-    TokenLifecycleManager, WebSocketSessionManager, 
+from tests.unified.e2e.token_lifecycle_helpers import (
+    TokenLifecycleManager, WebSocketSessionManager, TokenValidationHelper, PerformanceBenchmark,
+    TokenLifecycleManager, WebSocketSessionManager,
     TokenValidationHelper, PerformanceBenchmark
 )
 

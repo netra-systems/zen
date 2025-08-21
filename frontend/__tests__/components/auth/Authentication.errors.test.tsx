@@ -48,7 +48,7 @@ describe('Authentication Error Message Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Invalid Credentials Errors', () => {
@@ -194,7 +194,7 @@ describe('Authentication Error Message Tests', () => {
 
   describe('Configuration Error Handling', () => {
     it('should handle missing auth configuration', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: null
       });
@@ -206,7 +206,7 @@ describe('Authentication Error Message Tests', () => {
     });
 
     it('should handle invalid client ID configuration', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -221,7 +221,7 @@ describe('Authentication Error Message Tests', () => {
     });
 
     it('should handle malformed endpoint URLs', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -239,7 +239,7 @@ describe('Authentication Error Message Tests', () => {
     });
 
     it('should handle missing required configuration fields', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           development_mode: false,
@@ -257,7 +257,7 @@ describe('Authentication Error Message Tests', () => {
   describe('Token Management Errors', () => {
     it('should handle corrupted token storage', () => {
       // Mock corrupted token scenario
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'corrupted-token',
         user: null
@@ -270,7 +270,7 @@ describe('Authentication Error Message Tests', () => {
     });
 
     it('should handle token decode failures', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'invalid.jwt.token',
         user: null
@@ -294,7 +294,7 @@ describe('Authentication Error Message Tests', () => {
     });
 
     it('should handle token validation errors', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'expired.token.here',
         user: null
@@ -331,7 +331,7 @@ describe('Authentication Error Message Tests', () => {
       await userEvent.click(button);
       
       // Simulate successful login after error
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',

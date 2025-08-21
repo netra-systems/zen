@@ -206,7 +206,7 @@ class MockAppStateManager:
 @pytest.fixture
 def basic_test_client():
     """Basic FastAPI test client with minimal setup."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     MockAppStateManager.setup_app_state(app)
     return TestClient(app)
 
@@ -214,7 +214,7 @@ def basic_test_client():
 @pytest.fixture
 def authenticated_test_client(ensure_db_initialized):
     """FastAPI test client with authentication mocked."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_auth_dependencies(app)
@@ -229,7 +229,7 @@ def authenticated_test_client(ensure_db_initialized):
 @pytest.fixture  
 def configured_test_client():
     """Test client with core dependencies mocked."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockAppStateManager.setup_app_state(app)
@@ -243,7 +243,7 @@ def configured_test_client():
 @pytest.fixture
 def agent_test_client():
     """Test client configured for agent route testing."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_agent_dependencies(app)

@@ -13,19 +13,22 @@ Architecture:
 All modules follow 450-line limit and 25-line function requirements.
 """
 
-from tests.unified.e2e.test_file_upload_pipeline import test_complete_file_upload_pipeline, test_pipeline_performance_requirements, test_file_upload_error_handling, test_concurrent_file_uploads
+from tests.unified.e2e.test_file_upload_pipeline import (
+    test_complete_file_upload_pipeline, test_pipeline_performance_requirements, test_file_upload_error_handling, test_concurrent_file_uploads,
     test_complete_file_upload_pipeline,
     test_pipeline_performance_requirements,
     test_file_upload_error_handling,
     test_concurrent_file_uploads
 )
 
-from tests.unified.e2e.file_upload_test_context import FileUploadTestContext, create_file_upload_context
+from tests.unified.e2e.file_upload_test_context import (
+    FileUploadTestContext, create_file_upload_context,
     FileUploadTestContext,
     create_file_upload_context
 )
 
-from tests.unified.e2e.file_upload_pipeline_executor import FileUploadPipelineExecutor, create_pipeline_executor
+from tests.unified.e2e.file_upload_pipeline_executor import (
+    FileUploadPipelineExecutor, create_pipeline_executor,
     FileUploadPipelineExecutor,
     create_pipeline_executor
 )

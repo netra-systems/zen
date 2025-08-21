@@ -52,7 +52,7 @@ describe('Auth Session Detection', () => {
     Date.now = jest.fn();
     
     const mockConfig = createMockAuthConfig();
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockConfig);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(mockConfig);
   });
 
   afterEach(() => {
@@ -69,7 +69,7 @@ describe('Auth Session Detection', () => {
       exp: Math.floor(expiryTimeMs / 1000)
     };
     
-    (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+    jest.mocked(authService.getToken).mockReturnValue(mockToken);
     (jwtDecode as jest.Mock).mockReturnValue(mockUser);
     return { mockToken, mockUser };
   };
@@ -107,7 +107,7 @@ describe('Auth Session Detection', () => {
       const mockToken = createMockToken();
       const invalidUser = { id: 'test-user', exp: 'invalid' };
       
-      (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+      jest.mocked(authService.getToken).mockReturnValue(mockToken);
       (jwtDecode as jest.Mock).mockReturnValue(invalidUser);
 
       await act(async () => {
@@ -284,7 +284,7 @@ describe('Auth Session Detection', () => {
       const mockToken = createMockToken();
       const userWithoutExp = { id: 'test-user', email: 'test@example.com' };
       
-      (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+      jest.mocked(authService.getToken).mockReturnValue(mockToken);
       (jwtDecode as jest.Mock).mockReturnValue(userWithoutExp);
 
       await act(async () => {

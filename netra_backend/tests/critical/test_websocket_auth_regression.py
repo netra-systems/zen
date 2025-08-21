@@ -193,7 +193,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_handler_exceptions_logged_with_context(self):
         """Test that message handler exceptions include full context."""
-        from netra_backend.app.routes.websockets import _handle_validated_message
+        from netra_backend.app.routes.websocket_secure import _handle_validated_message
         
         websocket = Mock(spec=WebSocket)
         websocket.application_state = WebSocketState.CONNECTED

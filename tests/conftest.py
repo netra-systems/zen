@@ -186,7 +186,7 @@ def app(
 
     # Only include routes if they can be imported
     try:
-        from netra_backend.app.routes.websockets import router as websockets_router
+        from netra_backend.app.routes.websocket_secure import router as websockets_router
 
         app.include_router(websockets_router)
     except ImportError:

@@ -56,7 +56,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     mockMFA.generateQR.mockClear();
     mockMFA.validateCode.mockClear();
     mockMFA.getBackupCodes.mockClear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('MFA Feature Detection', () => {
@@ -69,7 +69,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should handle MFA-disabled configuration', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -85,7 +85,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should support future MFA integration', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -102,7 +102,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should handle missing MFA endpoints gracefully', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -159,7 +159,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
 
   describe('MFA Verification UI (Future Implementation)', () => {
     it('should show MFA verification prompt after login', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -276,7 +276,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should handle MFA-enabled user flow', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -292,7 +292,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should show MFA status in user profile', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -308,7 +308,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should handle development mode MFA testing', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -334,7 +334,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
 
   describe('MFA Security Features', () => {
     it('should enforce MFA for enterprise users', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'enterprise-123',
@@ -351,7 +351,7 @@ describe('Multi-Factor Authentication UI Tests', () => {
     });
 
     it('should handle MFA bypass for development', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,

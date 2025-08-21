@@ -92,7 +92,7 @@ describe('AuthContext - Token Management', () => {
   });
 
   const renderWithoutToken = () => {
-    (authService.getToken as jest.Mock).mockReturnValue(null);
+    jest.mocked(authService.getToken).mockReturnValue(null);
     return render(
       <AuthProvider>
         <div>Test Content</div>
@@ -102,8 +102,8 @@ describe('AuthContext - Token Management', () => {
 
   const setupTokenRefresh = () => {
     jest.clearAllMocks();
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthConfig);
-    (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(mockAuthConfig);
+    jest.mocked(authService.getToken).mockReturnValue(mockToken);
   };
 
   const performRerender = (rerender: any) => {

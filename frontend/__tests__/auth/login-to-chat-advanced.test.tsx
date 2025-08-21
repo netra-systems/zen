@@ -125,7 +125,7 @@ describe('Auth Login Advanced Features', () => {
 
   describe('MFA (Multi-Factor Authentication)', () => {
     it('prompts for MFA code when required', async () => {
-      (authService.handleLogin as jest.Mock).mockResolvedValue({
+      jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,
         mfa_required: true,
         session_id: 'mfa_session_123'
@@ -143,7 +143,7 @@ describe('Auth Login Advanced Features', () => {
     });
 
     it('validates MFA code and completes login', async () => {
-      (authService.handleLogin as jest.Mock).mockResolvedValue({
+      jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,
         mfa_required: true,
         session_id: 'mfa_session_123'
@@ -161,7 +161,7 @@ describe('Auth Login Advanced Features', () => {
     });
 
     it('handles invalid MFA code gracefully', async () => {
-      (authService.verifyMFA as jest.Mock).mockResolvedValue({
+      jest.mocked(authService.verifyMFA).mockResolvedValue({
         success: false,
         error: 'Invalid MFA code'
       });
@@ -180,13 +180,13 @@ describe('Auth Login Advanced Features', () => {
     });
 
     it('handles MFA verification failure', async () => {
-      (authService.handleLogin as jest.Mock).mockResolvedValue({
+      jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,
         mfa_required: true,
         session_id: 'mfa_session_456'
       });
       
-      (authService.verifyMFA as jest.Mock).mockRejectedValue(new Error('MFA service unavailable'));
+      jest.mocked(authService.verifyMFA).mockRejectedValue(new Error('MFA service unavailable'));
       
       renderLoginComponent();
       

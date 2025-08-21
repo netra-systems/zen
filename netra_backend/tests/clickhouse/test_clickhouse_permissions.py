@@ -19,7 +19,7 @@ import uuid
 
 import pytest
 
-from config import settings
+from netra_backend.app.config import settings
 
 # Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client

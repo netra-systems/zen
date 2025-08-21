@@ -43,7 +43,7 @@ export function renderRealLoginToChatFlow() {
     loading: false,
     error: null
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockStore);
   
   const TestApp = () => (
     <TestProviders>

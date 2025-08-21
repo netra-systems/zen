@@ -15,9 +15,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 // Mock only the store dependencies, not the hook being tested
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn()
-}));
+jest.mock('@/store/unified-chat');
 
 // Mock WebSocket provider for controlled testing
 jest.mock('@/providers/WebSocketProvider', () => ({

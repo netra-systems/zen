@@ -18,12 +18,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pydantic import ValidationError
 
-from config import get_config, reload_config
+from netra_backend.app.core.config import get_config, reload_config
 from netra_backend.app.core.config_validator import (
     ConfigurationValidationError,
     ConfigValidator,
 )
-from netra_backend.app.core.configuration.manager import ConfigManager
+# ConfigManager import removed - class doesn't exist in base module
+# from netra_backend.app.core.configuration.base import ConfigManager
 from netra_backend.app.core.exceptions_config import ConfigurationError
 
 # Add project root to path
@@ -342,7 +343,8 @@ class TestConfigurationIntegration:
         # Use clear=True to ensure only our test env vars are set
         with patch.dict(os.environ, test_env, clear=True):
             # Create a new config manager to avoid cached config
-            from netra_backend.app.core.configuration.manager import ConfigManager
+            # ConfigManager import removed - class doesn't exist in base module
+# from netra_backend.app.core.configuration.base import ConfigManager
             manager = ConfigManager()
             
             # Override the _load_secrets_into_config to apply our DATABASE_URL

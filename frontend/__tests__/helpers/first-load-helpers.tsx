@@ -28,7 +28,7 @@ const createFirstLoadState = (overrides: Partial<FirstLoadState> = {}): FirstLoa
 export const setupFirstLoadMocks = () => {
   resetAuthServiceMocks();
   jest.clearAllMocks();
-  (authService.useAuth as jest.Mock).mockReturnValue({
+  jest.mocked(authService.useAuth).mockReturnValue({
     loading: false,
     user: null,
     error: null,
@@ -40,14 +40,14 @@ export const setupFirstLoadMocks = () => {
 export const simulateLoadingSequence = (finalState: FirstLoadState) => {
   const { authLoading, authUser, authError, configLoaded } = finalState;
   
-  (authService.useAuth as jest.Mock)
+  jest.mocked(authService.useAuth)
     .mockReturnValueOnce({ loading: true, user: null, error: null })
     .mockReturnValue({ loading: authLoading, user: authUser, error: authError });
     
   if (configLoaded) {
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockAuthServiceResponses.config);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(mockAuthServiceResponses.config);
   } else {
-    (authService.getAuthConfig as jest.Mock).mockRejectedValue(new Error('Config load failed'));
+    jest.mocked(authService.getAuthConfig).mockRejectedValue(new Error('Config load failed'));
   }
 };
 

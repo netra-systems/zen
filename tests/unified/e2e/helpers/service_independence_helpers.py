@@ -30,7 +30,8 @@ sys.path.insert(0, str(project_root))
 
 # Import everything from the new modular structure
 from tests.unified.e2e.helpers.service_independence import *
-from tests.unified.e2e.helpers.service_independence.pytest_interface import test_service_independence, test_zero_import_violations, test_api_only_communication, test_independent_startup_capability, test_graceful_failure_handling, run_direct_tests
+from tests.unified.e2e.helpers.service_independence.pytest_interface import (
+    test_service_independence, test_zero_,
     test_service_independence,
     test_zero_import_violations,
     test_api_only_communication,

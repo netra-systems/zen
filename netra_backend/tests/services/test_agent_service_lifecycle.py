@@ -38,12 +38,12 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.test_agent_service_fixtures import (
+from netra_backend.tests.services.test_agent_service_fixtures import (
     # Add project root to path
     orchestrator,
     verify_orchestration_metrics,
 )
-from netra_backend.tests.test_agent_service_mock_classes import AgentState
+from netra_backend.tests.services.test_agent_service_mock_classes import AgentState
 
 
 class TestAgentLifecycleManagement:

@@ -128,7 +128,7 @@ describe('Auth Login Flow - Core', () => {
     });
 
     it('handles unauthorized response correctly', async () => {
-      (authService.handleLogin as jest.Mock).mockResolvedValue({
+      jest.mocked(authService.handleLogin).mockResolvedValue({
         success: false,
         error: 'Invalid email or password'
       });
@@ -158,7 +158,7 @@ describe('Auth Login Flow - Core', () => {
 
   describe('Network Error Recovery', () => {
     it('displays network error message on connection failure', async () => {
-      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      jest.mocked(authService.handleLogin).mockRejectedValue(new Error('Network error'));
       renderLoginComponent();
       
       await act(async () => {
@@ -171,7 +171,7 @@ describe('Auth Login Flow - Core', () => {
     });
 
     it('enables retry after network error', async () => {
-      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      jest.mocked(authService.handleLogin).mockRejectedValue(new Error('Network error'));
       renderLoginComponent();
       
       await act(async () => {
@@ -184,7 +184,7 @@ describe('Auth Login Flow - Core', () => {
     });
 
     it('clears error state on retry attempt', async () => {
-      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      jest.mocked(authService.handleLogin).mockRejectedValue(new Error('Network error'));
       renderLoginComponent();
       
       await act(async () => {
@@ -212,7 +212,7 @@ describe('Auth Login Flow - Core', () => {
 
     it('handles expired token during login', async () => {
       const expiredToken = 'expired.jwt.token';
-      (authService.validateToken as jest.Mock).mockResolvedValue(false);
+      jest.mocked(authService.validateToken).mockResolvedValue(false);
       
       renderLoginComponent();
       

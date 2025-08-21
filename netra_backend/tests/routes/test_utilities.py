@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from config import settings
+from netra_backend.app.config import settings
 
 # Add project root to path
 from netra_backend.app.services.security_service import KeyManager, SecurityService
@@ -33,14 +33,14 @@ from netra_backend.app.services.security_service import KeyManager, SecurityServ
 @pytest.fixture
 def base_client():
     """Base FastAPI test client with minimal setup."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     return TestClient(app)
 
 
 @pytest.fixture  
 def secured_client():
     """Test client with security service configured."""
-    from netra_backend.app.routes.mcp.main import app
+    from netra_backend.app.main import app
     
     # Mock db session factory
     @asynccontextmanager

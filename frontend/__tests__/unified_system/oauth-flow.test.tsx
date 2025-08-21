@@ -161,7 +161,7 @@ describe('OAuth Flow Integration Tests', () => {
       user: null,
       token: null,
     };
-    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
   });
 
   describe('OAuth Login Button Initiation', () => {

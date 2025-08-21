@@ -9,9 +9,7 @@ import { act } from '@testing-library/react';
 // Removed imports for non-existent components: ResponseCard, ThreadList, SettingsPanel, NotificationToast, LoadingSpinner
 
 // Mock the unified chat store
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn(),
-}))
+jest.mock('@/store/unified-chat')
 
 // Test 69: MessageList virtualization
 describe('test_MessageList_virtualization', () => {
@@ -25,7 +23,7 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       messages,
       isProcessing: false,
       isThreadLoading: false,
@@ -50,7 +48,7 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       messages,
       isProcessing: false,
       isThreadLoading: false,
@@ -75,7 +73,7 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       messages,
       isProcessing: false,
       isThreadLoading: false,
@@ -191,7 +189,7 @@ jest.mock('@/hooks/useProgressiveLoading', () => ({
 // Test 70: MessageInput validation
 describe('test_MessageInput_validation', () => {
   beforeEach(() => {
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       activeThreadId: 'thread-123',
       isProcessing: false,
       addMessage: jest.fn(),

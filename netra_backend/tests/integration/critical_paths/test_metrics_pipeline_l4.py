@@ -36,7 +36,7 @@ from unittest.mock import patch
 import httpx
 import pytest
 
-from config import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.services.observability.alert_manager import AlertManager
 
 # Add project root to path

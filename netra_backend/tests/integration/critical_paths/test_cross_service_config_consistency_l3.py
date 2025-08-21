@@ -35,7 +35,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from config import get_config
+from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.core.cache.redis_manager import RedisManager

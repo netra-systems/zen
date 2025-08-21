@@ -188,6 +188,14 @@ class TestSyntaxFix:
     def setup_method(self):
         """Set up test environment."""
         self.temp_dir = tempfile.mkdtemp()
+        # Create required directory structure for LauncherConfig validation
+        backend_dir = Path(self.temp_dir) / "netra_backend" / "app"
+        backend_dir.mkdir(parents=True, exist_ok=True)
+        (backend_dir / "main.py").touch()  # Create main.py file
+        
+        frontend_dir = Path(self.temp_dir) / "frontend"
+        frontend_dir.mkdir(parents=True, exist_ok=True)
+        
         self.config = LauncherConfig(
             backend_port=8000,
             frontend_port=3000,

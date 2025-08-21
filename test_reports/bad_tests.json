@@ -1173,78 +1173,6 @@
   },
   "runs": [
     {
-      "run_id": "run_20250821_113456_96900",
-      "timestamp": "2025-08-21T11:34:57.294403",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250821_113641_1382",
-      "timestamp": "2025-08-21T11:36:41.633647",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_113752_72921",
-      "timestamp": "2025-08-21T11:37:53.283573",
-      "total_tests": 6,
-      "passed": 5,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250821_113818_98981",
-      "timestamp": "2025-08-21T11:38:19.292098",
-      "total_tests": 6,
-      "passed": 6,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_114117_77490",
-      "timestamp": "2025-08-21T11:41:25.741977",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_114237_57502",
-      "timestamp": "2025-08-21T11:42:44.754871",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_114442_82267",
-      "timestamp": "2025-08-21T11:44:49.791549",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_114519_19093",
-      "timestamp": "2025-08-21T11:45:27.544254",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_114530_30208",
-      "timestamp": "2025-08-21T11:45:36.378614",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
       "run_id": "run_20250821_114645_5995",
       "timestamp": "2025-08-21T11:46:46.024156",
       "total_tests": 0,
@@ -1957,24 +1885,96 @@
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250821_152842_22810",
-      "timestamp": "2025-08-21T15:28:50.754417",
+      "run_id": "run_20250821_152844_24257",
+      "timestamp": "2025-08-21T15:28:57.597374",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_152906_46299",
+      "timestamp": "2025-08-21T15:29:23.686045",
       "total_tests": 0,
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250821_152852_32586",
-      "timestamp": "2025-08-21T15:29:10.758374",
+      "run_id": "run_20250821_153214_34652",
+      "timestamp": "2025-08-21T15:32:21.734710",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_153542_42065",
+      "timestamp": "2025-08-21T15:35:51.024764",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_153740_60752",
+      "timestamp": "2025-08-21T15:37:58.267698",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_153800_80736",
+      "timestamp": "2025-08-21T15:38:23.560696",
       "total_tests": 4,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_154525_25582",
+      "timestamp": "2025-08-21T15:45:33.465218",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_154601_61492",
+      "timestamp": "2025-08-21T15:46:09.154769",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_154640_602",
+      "timestamp": "2025-08-21T15:46:57.676381",
+      "total_tests": 4,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_155002_2211",
+      "timestamp": "2025-08-21T15:50:18.739355",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_160515_15328",
+      "timestamp": "2025-08-21T16:05:30.390459",
+      "total_tests": 1,
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 185,
-    "last_updated": "2025-08-21T15:29:10.758374"
+    "total_runs": 194,
+    "last_updated": "2025-08-21T16:05:30.390459"
   }
 }

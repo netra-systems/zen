@@ -17,7 +17,8 @@ import pytest
 from typing import Dict, Any
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.websocket_guarantees_helpers import MessageOrderingCore, AtLeastOnceDeliveryCore, DuplicateDetectionCore, ReconnectionRecoveryCore, ConcurrentMessageCore
+from tests.unified.e2e.websocket_guarantees_helpers import (
+    MessageOrderingCore, AtLeastOnceDeliveryCore, DuplicateDetectionCore, ReconnectionRecoveryCore, ConcurrentMessageCore,
     MessageOrderingCore,
     AtLeastOnceDeliveryCore,
     DuplicateDetectionCore,

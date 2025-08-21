@@ -43,24 +43,24 @@ export function setupMockAuthStore() {
     isAdminOrHigher: jest.fn(() => false),
     isDeveloperOrHigher: jest.fn(() => false)
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
   return mockAuthStore;
 }
 
 export function setupMockAuthService() {
-  (authService.handleLogin as jest.Mock) = jest.fn().mockResolvedValue({
+  jest.mocked(authService.handleLogin) = jest.fn().mockResolvedValue({
     success: true,
     user: mockUser,
     token: mockToken
   });
-  (authService.setToken as jest.Mock) = jest.fn();
-  (authService.getCurrentUser as jest.Mock) = jest.fn().mockResolvedValue(mockUser);
-  (authService.validateToken as jest.Mock) = jest.fn().mockResolvedValue(true);
-  (authService.refreshToken as jest.Mock) = jest.fn().mockResolvedValue(mockToken);
-  (authService.initiateGoogleLogin as jest.Mock) = jest.fn();
-  (authService.handleOAuthCallback as jest.Mock) = jest.fn();
-  (authService.verifyMFA as jest.Mock) = jest.fn().mockResolvedValue({ success: true });
-  (authService.setTokenExpiration as jest.Mock) = jest.fn();
+  jest.mocked(authService.setToken) = jest.fn();
+  jest.mocked(authService.getCurrentUser) = jest.fn().mockResolvedValue(mockUser);
+  jest.mocked(authService.validateToken) = jest.fn().mockResolvedValue(true);
+  jest.mocked(authService.refreshToken) = jest.fn().mockResolvedValue(mockToken);
+  jest.mocked(authService.initiateGoogleLogin) = jest.fn();
+  jest.mocked(authService.handleOAuthCallback) = jest.fn();
+  jest.mocked(authService.verifyMFA) = jest.fn().mockResolvedValue({ success: true });
+  jest.mocked(authService.setTokenExpiration) = jest.fn();
 }
 
 export function setupMockCookies() {

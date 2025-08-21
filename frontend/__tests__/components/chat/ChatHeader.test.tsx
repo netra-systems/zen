@@ -20,13 +20,13 @@ beforeAll(() => {
 beforeEach(() => {
   resetChatMocks();
   // Reset the mock implementations
-  (useUnifiedChatStore as jest.Mock).mockReturnValue(mockUnifiedChatStore);
+  jest.mocked(useUnifiedChatStore).mockReturnValue(mockUnifiedChatStore);
   (useMCPTools as jest.Mock).mockReturnValue(mockMCPTools);
 });
 
 describe('ChatHeader', () => {
   it('should render the sub-agent name and status', () => {
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       ...mockUnifiedChatStore,
       subAgentName: 'Test Agent',
       subAgentStatus: { lifecycle: 'running' },
@@ -39,7 +39,7 @@ describe('ChatHeader', () => {
   });
 
   it('should render default status when no status provided', () => {
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       ...mockUnifiedChatStore,
       subAgentName: 'Test Agent',
       subAgentStatus: { lifecycle: null },
@@ -52,7 +52,7 @@ describe('ChatHeader', () => {
   });
 
   it('should render default agent name when no name provided', () => {
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       ...mockUnifiedChatStore,
       subAgentName: null,
       subAgentStatus: null,
@@ -63,7 +63,7 @@ describe('ChatHeader', () => {
   });
 
   it('should render processing state', () => {
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       ...mockUnifiedChatStore,
       subAgentName: 'Test Agent',
       subAgentStatus: { lifecycle: 'active' },

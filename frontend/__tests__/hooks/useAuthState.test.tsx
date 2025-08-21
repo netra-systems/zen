@@ -16,9 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 import { User } from '@/types/registry';
 
 // Mock the auth store dependency
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
+jest.mock('@/store/authStore');
 
 // Mock localStorage for token management tests
 Object.defineProperty(window, 'localStorage', {

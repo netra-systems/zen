@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 from main import app
 from schemas import User
 
-from config import settings
+from netra_backend.app.config import settings
 
 
 @pytest.fixture(scope="function", autouse=True)

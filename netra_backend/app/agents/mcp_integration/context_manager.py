@@ -11,9 +11,9 @@ from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.agents.base import (
     BaseExecutionInterface,
-    ExecutionErrorHandler,
     ExecutionMonitor,
 )
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger

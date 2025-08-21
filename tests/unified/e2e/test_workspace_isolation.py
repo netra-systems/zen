@@ -29,9 +29,10 @@ import asyncio
 import time
 from typing import Dict, Any
 
-from tests.unified.e2e.workspace_isolation_helpers import WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator, RBACEnforcementTester, WorkspaceAuditTrailValidator, WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils
+from tests.unified.e2e.workspace_isolation_helpers import (
+    WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator, RBACEnforcementTester, WorkspaceAuditTrailValidator, WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils,
     WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator,
-    RBACEnforcementTester, WorkspaceAuditTrailValidator, 
+    RBACEnforcementTester, WorkspaceAuditTrailValidator,
     WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils
 )
 from netra_backend.app.schemas.UserPlan import PlanTier

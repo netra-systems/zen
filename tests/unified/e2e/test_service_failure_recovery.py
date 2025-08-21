@@ -27,7 +27,8 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.e2e.service_failure_recovery_helpers import AuthServiceFailureSimulator, GracefulDegradationTester, StatePreservationValidator, RecoveryTimeValidator, create_auth_failure_simulator, create_degradation_tester, create_state_preservation_validator, create_recovery_time_validator
+from tests.unified.e2e.service_failure_recovery_helpers import (
+    AuthServiceFailureSimulator, GracefulDegradationTester, StatePreservationValidator, RecoveryTimeValidator, create_auth_failure_simulator, create_degradation_tester, create_state_preservation_validator, create_recovery_time_validator,
     AuthServiceFailureSimulator,
     GracefulDegradationTester,
     StatePreservationValidator,

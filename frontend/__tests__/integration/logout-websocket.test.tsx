@@ -16,9 +16,7 @@ import { useAuthStore } from '@/store/authStore';
 
 // Mock dependencies
 jest.mock('@/services/webSocketService');
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
+jest.mock('@/store/authStore');
 jest.mock('@/lib/logger');
 
 // Test helpers following 25-line limit
@@ -39,13 +37,13 @@ const setupAuthStore = () => {
     setLoading: jest.fn(),
     setError: jest.fn(),
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockStore);
   return mockStore;
 };
 
 const setupWebSocketMocks = () => {
-  (webSocketService.disconnect as jest.Mock).mockImplementation(() => {});
-  (webSocketService.getState as jest.Mock).mockReturnValue('disconnected');
+  jest.mocked(webSocketService.disconnect).mockImplementation(() => {});
+  jest.mocked(webSocketService.getState).mockReturnValue('disconnected');
 };
 
 // Simple logout button component for testing
@@ -105,7 +103,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should handle WebSocket disconnection errors', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         throw new Error('WebSocket error');
       });
       await testWebSocketDisconnection();
@@ -173,7 +171,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should not block logout process if WebSocket fails', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         throw new Error('WebSocket disconnect failed');
       });
       const user = userEvent.setup();
@@ -186,7 +184,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should handle WebSocket timeout gracefully', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         return new Promise((resolve) => setTimeout(resolve, 100));
       });
       const user = userEvent.setup();
@@ -199,7 +197,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should complete logout even if WebSocket is slow', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         return new Promise((resolve) => setTimeout(resolve, 200));
       });
       const user = userEvent.setup();
@@ -224,7 +222,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     };
 
     it('should handle WebSocket disconnect errors gracefully', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         throw new Error('Connection error');
       });
       await testWebSocketErrorHandling('connection');
@@ -234,7 +232,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should handle WebSocket state check errors', async () => {
-      (webSocketService.getState as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.getState).mockImplementation(() => {
         throw new Error('State check error');
       });
       await testWebSocketErrorHandling('state');
@@ -244,7 +242,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should continue logout process despite WebSocket errors', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         throw new Error('WebSocket error');
       });
       await testWebSocketErrorHandling('general');
@@ -255,7 +253,7 @@ describe('Logout WebSocket Disconnection Tests', () => {
     });
 
     it('should log WebSocket errors without blocking logout', async () => {
-      (webSocketService.disconnect as jest.Mock).mockImplementation(() => {
+      jest.mocked(webSocketService.disconnect).mockImplementation(() => {
         throw new Error('Test WebSocket error');
       });
       await testWebSocketErrorHandling('logging');

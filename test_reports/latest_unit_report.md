@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T15:28:32.102763  
+**Generated:** 2025-08-21T16:05:30.693356  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 18.34s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.36s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 15.06s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.29s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 18.70s
+- **Total Duration:** 15.35s
 - **Exit Code:** 255
 
 ### Backend Configuration
@@ -57,20 +57,20 @@ Test Configuration:
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/services netra_backend/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\pytest.ini netra_backend/tests/services netra_backend/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
 cachedir: .pytest_cache
 metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function
 created: 4/4 workers
 
 =================================== ERRORS ====================================
-[31m[1m_ ERROR collecting netra_backend/tests/services/test_agent_service_error_recovery.py _[0m
+[31m[1m____ ERROR collecting tests/services/test_agent_service_error_recovery.py _____[0m
 ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_agent_service_error_recovery.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
@@ -91,16 +91,16 @@ Traceback:
     ???
 ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
     exec(co, module.__dict__)
-netra_backend\tests\services\test_agent_service_error_recovery.py:41: in <module>
-    from netra_backend.tests.test_agent_service_fixtures import resilient_orchestrator
-E   ModuleNotFoundError: No module named 'netra_backend.tests.test_agent_service_fixtures'
+netra_backend\tests\services\test_agent_service_error_recovery.py:42: in <module>
+    from netra_backend.tests.test_agent_service_mock_classes import AgentState
+E   ModuleNotFoundError: No module named 'netra_backend.tests.test_agent_service_mock_classes'
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m netra_backend/tests/services/test_agent_service_error_recovery.py
+[31mERROR[0m netra_backend\tests\services\test_agent_service_error_recovery.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 9.93s[0m[31m ===============================[0m
+[31m============================== [31m[1m1 error[0m[31m in 8.10s[0m[31m ===============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 17.15s
+[FAIL] TESTS FAILED with exit code 2 after 14.15s
 ================================================================================
 
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
@@ -137,9 +137,9 @@ operable program or batch file.
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m_ ERROR collecting netra_backend/tests/services/test_agent_service_error_recovery.py _[0m
-- [31mERROR[0m netra_backend/tests/services/test_agent_service_error_recovery.py
-- [FAIL] TESTS FAILED with exit code 2 after 17.15s
+- [31m[1m____ ERROR collecting tests/services/test_agent_service_error_recovery.py _____[0m
+- [31mERROR[0m netra_backend\tests\services\test_agent_service_error_recovery.py
+- [FAIL] TESTS FAILED with exit code 2 after 14.15s
 
 ---
 *Generated by Netra AI Unified Test Runner v3.0*  

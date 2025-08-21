@@ -17,7 +17,7 @@ import pytest
 from fastapi.testclient import TestClient
 from schemas import DataSource, RequestModel, TimeRange, Workload
 
-from config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.main import app
 

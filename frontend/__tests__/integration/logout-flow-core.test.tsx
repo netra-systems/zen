@@ -62,15 +62,15 @@ const setupAuthStore = () => {
     setLoading: jest.fn(),
     setError: jest.fn(),
   };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  jest.mocked(useAuthStore).mockReturnValue(mockStore);
   return mockStore;
 };
 
 const setupAuthServiceMocks = () => {
-  (authService.getAuthConfig as jest.Mock).mockResolvedValue(createMockAuthConfig());
-  (authService.handleLogout as jest.Mock).mockResolvedValue(undefined);
-  (authService.removeToken as jest.Mock).mockImplementation(() => {});
-  (authService.getToken as jest.Mock).mockReturnValue('test-token-123');
+  jest.mocked(authService.getAuthConfig).mockResolvedValue(createMockAuthConfig());
+  jest.mocked(authService.handleLogout).mockResolvedValue(undefined);
+  jest.mocked(authService.removeToken).mockImplementation(() => {});
+  jest.mocked(authService.getToken).mockReturnValue('test-token-123');
 };
 
 // Simple logout button component for testing
@@ -157,7 +157,7 @@ describe('Logout Flow Core Tests', () => {
     });
 
     it('should handle logout errors gracefully', async () => {
-      (authService.handleLogout as jest.Mock).mockRejectedValue(new Error('Network error'));
+      jest.mocked(authService.handleLogout).mockRejectedValue(new Error('Network error'));
       await performLogout();
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
@@ -168,8 +168,8 @@ describe('Logout Flow Core Tests', () => {
   describe('Development Mode Logout', () => {
     const setupDevMode = () => {
       const devConfig = { ...createMockAuthConfig(), development_mode: true };
-      (authService.getAuthConfig as jest.Mock).mockResolvedValue(devConfig);
-      (authService.setDevLogoutFlag as jest.Mock).mockImplementation(() => {});
+      jest.mocked(authService.getAuthConfig).mockResolvedValue(devConfig);
+      jest.mocked(authService.setDevLogoutFlag).mockImplementation(() => {});
     };
 
     const testDevModeLogout = async () => {
@@ -205,7 +205,7 @@ describe('Logout Flow Core Tests', () => {
     };
 
     it('should handle auth service errors during logout', async () => {
-      (authService.handleLogout as jest.Mock).mockRejectedValue(new Error('Auth error'));
+      jest.mocked(authService.handleLogout).mockRejectedValue(new Error('Auth error'));
       await testErrorHandling();
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe('Logout Flow Core Tests', () => {
     });
 
     it('should complete logout even with partial failures', async () => {
-      (authService.handleLogout as jest.Mock).mockRejectedValue(new Error('Partial failure'));
+      jest.mocked(authService.handleLogout).mockRejectedValue(new Error('Partial failure'));
       await testErrorHandling();
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();

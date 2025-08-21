@@ -55,7 +55,7 @@ describe('Auth Token Refresh Failure Handling', () => {
     mockAuthServiceClient.refreshToken = jest.fn();
     
     const mockConfig = createMockAuthConfig();
-    (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockConfig);
+    jest.mocked(authService.getAuthConfig).mockResolvedValue(mockConfig);
   });
 
   afterEach(() => {
@@ -73,7 +73,7 @@ describe('Auth Token Refresh Failure Handling', () => {
     };
     
     const mockToken = createMockToken();
-    (authService.getToken as jest.Mock).mockReturnValue(mockToken);
+    jest.mocked(authService.getToken).mockReturnValue(mockToken);
     (jwtDecode as jest.Mock).mockReturnValue(mockUser);
     
     return { mockToken, mockUser, expiryTime };

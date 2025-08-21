@@ -70,7 +70,7 @@ class BackendTestExecutor:
             "--tb=short", "--disable-warnings"
         ]
         if self.args.coverage:
-            cmd.extend(["--cov=app", "--cov-report=term-missing"])
+            cmd.extend(["--cov=netra_backend.app", "--cov-report=term-missing"])
         return cmd
     
     def _execute_command(self, cmd: List[str]) -> tuple:
@@ -226,7 +226,7 @@ class E2ETestExecutor:
     def _add_coverage_options(self, cmd: List[str]) -> List[str]:
         """Add coverage options if requested"""
         if self.args.coverage:
-            cmd.extend(["--cov=app", "--cov-report=term-missing"])
+            cmd.extend(["--cov=netra_backend.app", "--cov-report=term-missing"])
         return cmd
     
     def _add_mode_filters(self, cmd: List[str]) -> List[str]:

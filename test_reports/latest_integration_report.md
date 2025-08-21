@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T15:29:13.692454  
+**Generated:** 2025-08-21T15:47:00.431629  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 4 | 0 | 0 | 0 | 4 | 18.18s | [FAILED] |
-| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.91s | [FAILED] |
+| Backend   | 4 | 0 | 0 | 0 | 4 | 17.09s | [FAILED] |
+| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.73s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 21.09s
+- **Total Duration:** 19.82s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -57,55 +57,39 @@ Test Configuration:
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/integration netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\pytest.ini netra_backend/tests/integration netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
 cachedir: .pytest_cache
 metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'langsmith': '0.4.15', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function
 created: 4/4 workers
 
 =================================== ERRORS ====================================
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-'l4' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-'l4' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-'l4' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-'l4' not found in `markers` configuration option
+[31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+'l2_integration' not found in `markers` configuration option
+[31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+'l2_integration' not found in `markers` configuration option
+[31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+'l2_integration' not found in `markers` configuration option
+[31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+'l2_integration' not found in `markers` configuration option
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+[31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+[31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+[31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+[31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 4 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================= [31m[1m4 errors[0m[31m in 10.03s[0m[31m ==============================[0m
+[31m============================== [31m[1m4 errors[0m[31m in 9.58s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 16.97s
+[FAIL] TESTS FAILED with exit code 2 after 15.79s
 ================================================================================
 
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
-  class TestAgentCommunicationBasic(L3IntegrationTest):
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
-  class TestAgentCommunicationBasic(L3IntegrationTest):
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
-  class TestcontainerHelper:
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
-  class TestcontainerHelper:
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
-  class TestAgentCommunicationBasic(L3IntegrationTest):
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
-  class TestAgentCommunicationBasic(L3IntegrationTest):
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
-  class TestcontainerHelper:
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
-  class TestcontainerHelper:
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
@@ -306,15 +290,15 @@ FAIL __tests__/integration/logout-websocket.test.tsx
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
-- [FAIL] TESTS FAILED with exit code 2 after 16.97s
+- [31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+- [31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+- [31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+- [31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_audit_trail.py _[0m
+- [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+- [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+- [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+- [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_audit_trail.py - Failed: 'l2_integration' not found in `markers` configuration option
+- [FAIL] TESTS FAILED with exit code 2 after 15.79s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1

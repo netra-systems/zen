@@ -185,13 +185,13 @@ def build_pytest_args(args) -> List[str]:
 
 def _add_config_file_args(pytest_args):
     """Add pytest configuration file path"""
-    # Check if we're testing app/ directory tests
-    app_pytest_ini = PROJECT_ROOT / "app" / "pytest.ini"
+    # Use netra_backend pytest.ini for backend tests if it exists
+    netra_backend_pytest = PROJECT_ROOT / "netra_backend" / "pytest.ini"
     root_pytest_ini = PROJECT_ROOT / "pytest.ini"
     
-    # Use app/pytest.ini if it exists, otherwise use root pytest.ini
-    if app_pytest_ini.exists():
-        pytest_args.extend(["-c", str(app_pytest_ini)])
+    # Prefer netra_backend pytest.ini for proper path resolution
+    if netra_backend_pytest.exists():
+        pytest_args.extend(["-c", str(netra_backend_pytest)])
     elif root_pytest_ini.exists():
         pytest_args.extend(["-c", str(root_pytest_ini)])
 
@@ -260,7 +260,7 @@ def _add_coverage_args(args, pytest_args):
 def _get_coverage_options(args):
     """Get coverage configuration options"""
     return [
-        "--cov=app", "--cov-report=html:reports/coverage/html",
+        "--cov=netra_backend.app", "--cov-report=html:reports/coverage/html",
         "--cov-report=term-missing", "--cov-report=json:reports/coverage/coverage.json",
         f"--cov-fail-under={args.min_coverage}"
     ]

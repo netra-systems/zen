@@ -34,12 +34,12 @@ describe('Auth Components Features', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
   });
 
   describe('Edge Cases', () => {
     it('should handle user with no name or email', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -58,7 +58,7 @@ describe('Auth Components Features', () => {
     });
 
     it('should handle undefined auth config gracefully', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -79,7 +79,7 @@ describe('Auth Components Features', () => {
 
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -94,20 +94,20 @@ describe('Auth Components Features', () => {
       rerender(<LoginButton />);
       expect(screen.getByText('Test User')).toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         loading: true
       });
       rerender(<LoginButton />);
       expect(screen.getByText('Loading...')).toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
 
     it('should handle empty string user names', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -135,7 +135,7 @@ describe('Auth Components Features', () => {
     });
 
     it('should properly disable button when loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         loading: true
       });
@@ -155,7 +155,7 @@ describe('Auth Components Features', () => {
 
   describe('Layout and Styling', () => {
     it('should apply correct layout classes for logged in state', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -175,7 +175,7 @@ describe('Auth Components Features', () => {
     });
 
     it('should apply correct text styling for user name', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -195,7 +195,7 @@ describe('Auth Components Features', () => {
     });
 
     it('should apply correct layout for dev mode buttons', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -224,7 +224,7 @@ describe('Auth Components Features', () => {
       fireEvent.click(loginButton);
       expect(mockLogin).toHaveBeenCalled();
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -243,7 +243,7 @@ describe('Auth Components Features', () => {
     });
 
     it('should handle complete logout flow', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -262,7 +262,7 @@ describe('Auth Components Features', () => {
       fireEvent.click(logoutButton);
       expect(mockLogout).toHaveBeenCalled();
 
-      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
       rerender(<LoginButton />);
 
       expect(screen.getByText('Login with Google')).toBeInTheDocument();

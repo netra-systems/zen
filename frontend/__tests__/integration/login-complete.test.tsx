@@ -250,8 +250,8 @@ describe('Complete Login Flow Integration', () => {
   function setupMockStores() {
     mockAuthStore = createMockAuthStore();
     mockChatStore = createMockChatStore();
-    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
-    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
+    jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
+    jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
   }
 
   function createMockAuthStore() {

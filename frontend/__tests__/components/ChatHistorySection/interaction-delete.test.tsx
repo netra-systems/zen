@@ -75,7 +75,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
     it('should handle confirmation acceptance', async () => {
       const restoreConfirm = mockWindowConfirm(true);
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -110,7 +110,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
   describe('Delete operation execution', () => {
     it('should delete thread when confirmed', async () => {
       const restoreConfirm = mockWindowConfirm(true);
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -134,7 +134,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
     it('should update thread list after successful delete', async () => {
       const restoreConfirm = mockWindowConfirm(true);
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -145,7 +145,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
     it('should handle delete success response', async () => {
       const restoreConfirm = mockWindowConfirm(true);
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ 
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ 
         success: true, 
         message: 'Thread deleted successfully' 
       });
@@ -160,7 +160,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
   describe('Delete error handling', () => {
     it('should handle delete error gracefully', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Delete failed'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Delete failed'));
       const restoreConsole = mockConsoleError();
       
       render(<ChatHistorySection />);
@@ -171,7 +171,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should handle network errors during delete', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Network error'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Network error'));
       const restoreConsole = mockConsoleError();
       
       render(<ChatHistorySection />);
@@ -182,7 +182,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should handle server errors during delete', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Server error'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Server error'));
       const restoreConsole = mockConsoleError();
       
       render(<ChatHistorySection />);
@@ -193,7 +193,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should handle authorization errors during delete', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Unauthorized'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Unauthorized'));
       const restoreConsole = mockConsoleError();
       
       render(<ChatHistorySection />);
@@ -206,7 +206,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
   describe('Delete state management', () => {
     it('should disable delete during operation', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockImplementation(
+      jest.mocked(ThreadService.deleteThread).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
       );
       
@@ -216,7 +216,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should re-enable delete after operation completes', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -224,7 +224,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should handle multiple delete operations', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -233,7 +233,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should maintain component state during delete', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -255,7 +255,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should announce delete operations to screen readers', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -291,7 +291,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
 
   describe('Delete UI feedback', () => {
     it('should show loading state during delete operation', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockImplementation(
+      jest.mocked(ThreadService.deleteThread).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
       );
       
@@ -301,7 +301,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should show success feedback after delete', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -309,7 +309,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should show error feedback on delete failure', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Delete failed'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Delete failed'));
       const restoreConsole = mockConsoleError();
       
       render(<ChatHistorySection />);
@@ -320,7 +320,7 @@ describe('ChatHistorySection - Delete Interactions', () => {
     });
 
     it('should clear feedback after timeout', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       

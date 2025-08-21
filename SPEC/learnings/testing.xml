@@ -295,6 +295,64 @@
             <note>Test isolation critical for singleton patterns</note>
         </learning>
         
+        <learning id="test-discovery-all-directories">
+            <title>Test Discovery Must Include All Test Directories</title>
+            <problem>
+                dev_launcher/tests directory not being discovered by test runner
+                Tests existed but were not included in test discovery
+                Project had incomplete test coverage visibility
+                Some test directories were missing from scanner configuration
+            </problem>
+            <solution>
+                Added dev_launcher/tests to _get_backend_test_directories in test_scanners.py
+                Ensure all test directories are explicitly listed in scanner
+                Test directories to scan:
+                - netra_backend/tests (primary)
+                - dev_launcher/tests (launcher tests)
+                - app/tests (legacy)
+                - tests (root level)
+            </solution>
+            <files_affected>
+                <file>test_framework/test_scanners.py</file>
+                <file>test_framework/test_discovery.py</file>
+            </files_affected>
+            <verification>All test directories now discovered, 1500+ tests found</verification>
+            <prevention>
+                Always verify new test directories are added to scanner
+                Run python -m test_framework.test_runner --list to verify discovery
+                Check that all project test directories appear in output
+            </prevention>
+        </learning>
+        
+        <learning id="test-import-project-root">
+            <title>Test Imports Require Project Root in sys.path</title>
+            <problem>
+                Tests failing with ImportError for project modules
+                Module imports like 'dev_launcher.config' not found
+                Tests could not import from netra_backend or other packages
+                Project root not consistently in Python path
+            </problem>
+            <solution>
+                Test runner adds PROJECT_ROOT to sys.path at startup
+                PROJECT_ROOT = Path(__file__).parent.parent
+                sys.path.insert(0, str(PROJECT_ROOT))
+                All test files can now import project modules directly
+            </solution>
+            <files_affected>
+                <file>test_framework/test_runner.py</file>
+                <file>dev_launcher/tests/*.py</file>
+            </files_affected>
+            <verification>
+                All imports work: dev_launcher.*, netra_backend.*, test_framework.*
+                Tests run successfully with proper imports
+            </verification>
+            <best_practice>
+                Always ensure PROJECT_ROOT is in sys.path before imports
+                Use absolute imports from project root
+                Avoid relative imports in test files
+            </best_practice>
+        </learning>
+        
         <learning id="frontend-component-test-setup">
             <title>Frontend Component Test Configuration</title>
             <problem>

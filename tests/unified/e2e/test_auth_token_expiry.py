@@ -22,8 +22,9 @@ import time
 import pytest
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
-from tests.unified.e2e.auth_test_fixtures import WebSocketAuthTester, TokenExpiryTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance
-    WebSocketAuthTester, 
+from tests.unified.e2e.auth_test_fixtures import (
+    WebSocketAuthTester, TokenExpiryTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance,
+    WebSocketAuthTester,
     TokenExpiryTester,
     AuthTestConfig,
     skip_if_services_unavailable,
