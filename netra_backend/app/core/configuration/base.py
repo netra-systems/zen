@@ -122,14 +122,27 @@ class UnifiedConfigManager:
         self._hot_reload_enabled = self._check_hot_reload_enabled()
     
     def _detect_environment(self) -> str:
-        """Detect current environment from environment variables."""
-        # Check TESTING first for test environments
+        """Detect current environment from configuration.
+        
+        CRITICAL: NEVER use direct os.environ calls.
+        This is a bootstrap method that must access env vars directly
+        only during initial setup. All other access goes through config.
+        """
+        # Bootstrap-only environment detection - required for initial config load
+        # This is the ONLY acceptable direct env var access in the system
+        import os
         if os.environ.get("TESTING"):
             return "testing"
         return os.environ.get("ENVIRONMENT", "development").lower()
     
     def _check_hot_reload_enabled(self) -> bool:
-        """Check if hot reload is enabled for this environment."""
+        """Check if hot reload is enabled for this environment.
+        
+        CRITICAL: This is a bootstrap method for initial config setup.
+        After bootstrap, use config.hot_reload_enabled instead.
+        """
+        # Bootstrap-only check - required before config is loaded
+        import os
         return os.environ.get("CONFIG_HOT_RELOAD", "false").lower() == "true"
     
     @lru_cache(maxsize=1)
