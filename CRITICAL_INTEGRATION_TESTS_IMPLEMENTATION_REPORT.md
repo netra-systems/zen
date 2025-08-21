@@ -125,17 +125,17 @@ Each test includes:
 
 ```bash
 # Run all critical integration tests
-python -m test_framework.test_runner --level integration --real-llm
+python unified_test_runner.py --level integration --real-llm
 
 # Run specific phase tests
 python -m pytest app/tests/integration/critical_paths/test_subscription_tier_enforcement_l3.py -v
 python -m pytest app/tests/integration/critical_paths/test_agent_orchestration_revenue_path_l4.py -v
 
 # Run with coverage
-python -m test_framework.test_runner --level integration --coverage
+python unified_test_runner.py --level integration --coverage
 
 # Run in CI/CD pipeline
-python -m test_framework.test_runner --level integration --ci --fast-fail
+python unified_test_runner.py --level integration --ci --fast-fail
 ```
 
 ### Environment Requirements

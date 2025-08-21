@@ -141,7 +141,7 @@ def main():
     if fixed_count > 0:
         print(f"\nSuccessfully fixed {fixed_count} e2e test files!")
         print("Next steps:")
-        print("  1. Run tests to verify fixes: python -m test_framework.test_runner --level integration")
+        print("  1. Run tests to verify fixes: python unified_test_runner.py --level integration")
         print("  2. Check for any remaining import issues")
         print("  3. Review changes with git diff")
     else:

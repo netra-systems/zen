@@ -15,16 +15,19 @@
       </reasons>
     </legacy_status>
   </metadata>
-  <section title="Architectural Constraints (The 300/8 Rule)">
+  <section title="Architectural Constraints (The 450/25 Rule)">
     <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>
     <constraint id="ARC-001" priority="CRITICAL">
-      <title>File Line Limit (300 Lines)</title>
-      <instruction>Ensure every source file is 300 lines or less (LOC).</instruction>
+      <title>File Line Limit (450 Lines)</title>
+      <instruction>Ensure every source file is 450 lines or less (LOC). Exception: Test files may extend up to 1000 lines.</instruction>
       <action-on-violation>Execute 'Extract Module Protocol'. Split the file based on functional boundaries.</action-on-violation>
+      <exceptions>
+        <exception type="test_files">Test files (test_*.py, *.test.ts, *.test.tsx) may extend up to 1000 lines to accommodate comprehensive test suites</exception>
+      </exceptions>
     </constraint>
     <constraint id="ARC-002" priority="CRITICAL">
-      <title>Function/Method Line Limit (8 Lines)</title>
-      <instruction>Ensure every function or method body is 8 lines or less (LOC).</instruction>
+      <title>Function/Method Line Limit (25 Lines)</title>
+      <instruction>Ensure every function or method body is 25 lines or less (LOC).</instruction>
       <action-on-violation>Execute 'Extract Function Protocol'. Decompose logic into smaller, named helper functions.</action-on-violation>
     </constraint>
     <constraint id="ARC-003" priority="CRITICAL">

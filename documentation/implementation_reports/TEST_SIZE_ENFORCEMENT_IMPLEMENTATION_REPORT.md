@@ -219,13 +219,13 @@ python scripts/compliance/test_refactor_helper.py validate app/tests/test_large.
 ### Test Runner Integration
 ```bash
 # Normal run with size validation
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 
 # Skip oversized tests
-python -m test_framework.test_runner --level integration --strict-size
+python unified_test_runner.py --level integration --strict-size
 
 # Bypass validation
-python -m test_framework.test_runner --level integration --skip-size-validation
+python unified_test_runner.py --level integration --skip-size-validation
 ```
 
 ## Business Value

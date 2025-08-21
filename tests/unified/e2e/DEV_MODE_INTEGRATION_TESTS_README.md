@@ -66,10 +66,10 @@ python -m pytest tests/unified/e2e/ -k "service_integration" -v
 
 ```bash
 # Integration level testing
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # E2E testing with real services
-python -m test_framework.test_runner --level e2e --env development
+python unified_test_runner.py --level e2e --env development
 ```
 
 ## Test Structure
@@ -322,10 +322,10 @@ print(f"Average response time: {metrics.avg_response_time:.2f}s")
 
 ```bash
 # Fast development feedback
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Complete E2E validation
-python -m test_framework.test_runner --level e2e --real-llm --env staging
+python unified_test_runner.py --level e2e --real-llm --env staging
 ```
 
 ## Best Practices

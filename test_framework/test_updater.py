@@ -39,6 +39,8 @@ class TestUpdateMode(Enum):
 class TestUpdater:
     """Main test update automation system with modular architecture"""
     
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, spec_path: Optional[Path] = None):
         self.project_root = Path(__file__).parent.parent
         self.spec_path = spec_path or self.project_root / "SPEC" / "test_update_spec.xml"
@@ -276,6 +278,8 @@ def _execute_with_mode_handler(updater, mode_handler, args, ultra_think, with_me
 
 class TestUpdateModeHandler:
     """Handles execution of different test update modes"""
+    
+    __test__ = False  # Tell pytest this is not a test class
     
     def __init__(self, updater: TestUpdater):
         self.updater = updater

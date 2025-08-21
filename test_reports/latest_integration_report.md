@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T16:12:55.515091  
+**Generated:** 2025-08-21T16:16:39.763020  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 19.73s | [FAILED] |
-| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.59s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 24.22s | [FAILED] |
+| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.65s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 22.32s
-- **Exit Code:** 2
+- **Total Duration:** 26.87s
+- **Exit Code:** 15
 
 ### Backend Configuration
 ```
@@ -98,13 +98,15 @@ E   ModuleNotFoundError: No module named 'monitoring'
 [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_metrics_collection.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 10.84s[0m[31m ==============================[0m
+[31m============================== [31m[1m1 error[0m[31m in 14.33s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 18.61s
+[FAIL] TESTS FAILED with exit code 2 after 22.90s
 ================================================================================
 
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_communication_basic_l3.py)
   class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_communication_basic_l3.py)
+  class TestAgentCommunicationBasic(L3IntegrationTest):
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
   class TestcontainerHelper:
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_communication_basic_l3.py)
@@ -113,13 +115,11 @@ C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\tes
   class TestcontainerHelper:
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_communication_basic_l3.py)
   class TestAgentCommunicationBasic(L3IntegrationTest):
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_communication_basic_l3.py)
-  class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
+  class TestcontainerHelper:
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
   class TestcontainerHelper:
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_failure_recovery_cascade_l3.py)
-  class TestcontainerHelper:
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
   class TestcontainerHelper:
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
   class TestcontainerHelper:
@@ -140,21 +140,6 @@ C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 1
-================================================================================
-
-Cleaning up test processes...
 
 FAIL __tests__/integration/logout-websocket.test.tsx
   ● Logout WebSocket Disconnection Tests › WebSocket Disconnection › should disconnect WebSocket on logout
@@ -307,7 +292,22 @@ FAIL __tests__/integration/logout-websocket.test.tsx
       at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:45:22)
       at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:77:21)
 
-  ● Logout WebSocket Disconnection Tests › WebSocket Timing Requirements › should handle WebSoc...(truncated)
+  ● Logout WebSocket Disconnection Tests › WebSocket Timing Requirements › should handle WebSocket timeout gracefully
+
+    TypeError: mockedUseAuthStore.mockReturnValue is not a function
+
+    [0m [90m 43 |[39m   }[33m;[39m
+     [90m 44 |[39m   [36mconst[39m mockedUseAuthStore [33m=[39m useAuthStore [36mas[39m jest[33m.[39m[33mMockedFunction[39m[33m<[39m[36mtypeof[39m useAuthStore[33m>[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 45 |[39m   mockedUseAuthStore[33m.[39mmockReturnValue(mockStore)[33m;[39m
+     [90m    |[39m                      [31m[1m^[22m[39m
+     [90m 46 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 47 |[39m }[33m;[39m
+     [90m 48 |[39m[0m
+
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:45:22)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:77:21)
+
+  ● Logout WebSocke...(truncated)
 ```
 
 ## 5. Error Details
@@ -316,10 +316,9 @@ FAIL __tests__/integration/logout-websocket.test.tsx
 - =================================== ERRORS ====================================
 - [31m[1m_ ERROR collecting tests/integration/critical_paths/test_agent_metrics_collection.py _[0m
 - [31mERROR[0m netra_backend\tests\integration\critical_paths\test_agent_metrics_collection.py
-- [FAIL] TESTS FAILED with exit code 2 after 18.61s
+- [FAIL] TESTS FAILED with exit code 2 after 22.90s
 
 ### Frontend Errors
-- [FAIL] CHECKS FAILED with exit code 1
 - FAIL __tests__/integration/logout-websocket.test.tsx
 - FAIL __tests__/integration/logout-websocket.test.tsx
 

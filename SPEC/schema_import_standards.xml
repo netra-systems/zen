@@ -153,7 +153,7 @@
         
         <step number="4">
             <action>Run Tests</action>
-            <command>python -m test_framework.test_runner --level integration --no-coverage --fast-fail</command>
+            <command>python unified_test_runner.py --level integration --no-coverage --fast-fail</command>
             <description>Ensure all tests pass after schema reorganization</description>
         </step>
     </migration-process>

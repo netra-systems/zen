@@ -182,13 +182,13 @@ Missing components:
 
 ```bash
 # Quick L3 validation (after fixes)
-python -m test_framework.test_runner --level critical --no-coverage --fast-fail
+python unified_test_runner.py --level critical --no-coverage --fast-fail
 
 # Comprehensive L3 with coverage
-python -m test_framework.test_runner --level critical --coverage
+python unified_test_runner.py --level critical --coverage
 
 # L3 tests with real LLM (for agent tests)
-python -m test_framework.test_runner --level critical --real-llm
+python unified_test_runner.py --level critical --real-llm
 
 # Specific critical path testing
 pytest tests/integration/critical_paths/ -m l3 -v --tb=short

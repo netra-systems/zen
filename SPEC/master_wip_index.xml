@@ -145,7 +145,7 @@
       <step order="2">
         Run compliance checking tools:
         - python scripts/check_architecture_compliance.py
-        - python -m test_framework.test_runner --report-only
+        - python unified_test_runner.py --report-only
       </step>
       <step order="3">
         Analyze spec alignment using sub-agents for each category

@@ -16,6 +16,8 @@ from test_optimizer import LegacyTestUpdater, MetadataManager, TestPerformanceOp
 class TestModifier:
     """Main test modification orchestrator"""
     
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.generator = TestGenerator(project_root)

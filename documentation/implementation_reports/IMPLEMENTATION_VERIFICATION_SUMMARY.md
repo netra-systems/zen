@@ -101,7 +101,7 @@ python scripts/compliance/test_size_validator.py
 python scripts/compliance/test_refactor_helper.py analyze app/tests/examples/test_size_compliance_examples.py
 
 # Test runner integration (INTEGRATED)
-python -m test_framework.test_runner --strict-size
+python unified_test_runner.py --strict-size
 ```
 
 ## Business Value Delivered

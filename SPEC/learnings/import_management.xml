@@ -139,7 +139,7 @@
         <practice>
             <title>Import Testing</title>
             <description>Always run import tests before committing</description>
-            <command>python -m test_framework.test_runner --import-only</command>
+            <command>python unified_test_runner.py --import-only</command>
         </practice>
         
         <practice>

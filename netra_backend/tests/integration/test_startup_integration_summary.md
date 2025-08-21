@@ -33,13 +33,13 @@
 ### Quick Validation (CI/CD)
 ```bash
 # Run smoke tests only (<5 minutes)
-python -m test_framework.test_runner --level integration --component startup --smoke
+python unified_test_runner.py --level integration --component startup --smoke
 ```
 
 ### Full Validation (Pre-Release)
 ```bash
 # Run all startup tests with containers (~20 minutes)
-python -m test_framework.test_runner --level integration --component startup --real-containers
+python unified_test_runner.py --level integration --component startup --real-containers
 ```
 
 ### Parallel Execution Groups

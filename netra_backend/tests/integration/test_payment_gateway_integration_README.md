@@ -96,7 +96,7 @@ python -m pytest app/tests/integration/test_payment_gateway_integration.py -v
 python -m pytest app/tests/integration/test_payment_gateway_integration.py --cov
 
 # Run as part of integration suite
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 ### Expected Results

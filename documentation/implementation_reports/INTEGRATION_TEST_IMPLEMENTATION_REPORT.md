@@ -104,7 +104,7 @@ Total Remaining: **$27K MRR**
 python -m pytest tests/integration/test_*.py -v
 
 # Run with test framework
-python -m test_framework.test_runner --level integration --pattern "test_*"
+python unified_test_runner.py --level integration --pattern "test_*"
 
 # Run specific test
 python -m pytest tests/integration/test_cold_start_to_agent_response.py::TestColdStartToAgentResponse::test_cold_start_to_first_agent_response_e2e -v -s

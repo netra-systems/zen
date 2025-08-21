@@ -102,14 +102,14 @@
 ### Next Steps for Test Validation:
 1. Run test suite with test runner:
    ```bash
-   python -m test_framework.test_runner --level e2e --no-coverage
+   python unified_test_runner.py --level e2e --no-coverage
    ```
 
 2. Fix any import or dependency issues
 
 3. Validate against real services (not just mocks):
    ```bash
-   python -m test_framework.test_runner --level e2e --real-services
+   python unified_test_runner.py --level e2e --real-services
    ```
 
 4. Add to CI/CD pipeline configuration

@@ -22,7 +22,7 @@
                 - Introduced Metrics and KPIs (Flakiness Rate, MTTD, MTTR).
             </change>
     </changes>
-    <last_edited>2025-08-21T08:47:28.636943</last_edited>
+    <last_edited>2025-08-21T16:30:00.000000</last_edited>
     <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.636943">
       <reasons>
         <reason>Content contains: OBSOLETE</reason>
@@ -150,7 +150,7 @@
             </rule>
       <rule id="test-code-quality-standards" severity="MEDIUM">
                 Test code adheres to production standards.
-                <requirement>Test files limited to 300 lines.</requirement>
+                <requirement>Test files limited to 1000 lines.</requirement>
         <requirement>Test functions limited to 8 lines (excluding declarative setup/assertions).</requirement>
       </rule>
       <rule id="mock-justification-required" severity="CRITICAL">
@@ -176,7 +176,7 @@
       <anti_pattern>Creating mock components/services inside test files instead of using real ones.</anti_pattern>
       <anti_pattern>Using `jest.fn()` or `Mock()` for internal services without justification.</anti_pattern>
       <anti_pattern>Modifying tests to pass instead of fixing the underlying bug in the SUT.</anti_pattern>
-      <anti_pattern>Tests exceeding size limits (300 lines/file, 8 lines/function).</anti_pattern>
+      <anti_pattern>Tests exceeding size limits (1000 lines/file, 8 lines/function).</anti_pattern>
       <anti_pattern>Using `@patch` or `Mock()` without the `@mock_justified` decorator.</anti_pattern>
     </anti_patterns>
   </real_test_requirements>

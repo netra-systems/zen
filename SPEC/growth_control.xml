@@ -8,7 +8,7 @@
     <description>
             Defines patterns for healthy system growth that maintain architectural 
             integrity while supporting business requirements. Prevents uncontrolled 
-            expansion that violates 300/8 limits and system boundaries.
+            expansion that violates 450/25 limits and system boundaries.
         </description>
     <last_edited>2025-08-21T08:47:28.487151</last_edited>
     <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.487151">
@@ -23,14 +23,14 @@
       <title>Growth Within Constraints</title>
       <description>
                 System growth must occur within established boundaries. Never exceed 
-                300/8 limits - instead, grow by adding new constrained modules.
+                450/25 limits - instead, grow by adding new constrained modules.
             </description>
     </principle>
     <principle id="modular-expansion">
       <title>Modular Expansion</title>
       <description>
                 Add functionality through new modules, not by expanding existing ones.
-                Each new module must also respect the 300/8 constraints.
+                Each new module must also respect the 450/25 constraints.
             </description>
     </principle>
     <principle id="horizontal-scaling">
@@ -44,7 +44,7 @@
   <good-growth-patterns>
     <pattern id="module-subdivision">
       <title>Module Subdivision Pattern</title>
-      <description>When a module approaches 300 lines, subdivide it</description>
+      <description>When a module approaches 400 lines, subdivide it</description>
       <example>
         <before>
                     app/services/user_service.py (290 lines)
@@ -244,7 +244,7 @@
     <metrics>
       <metric id="file-size-distribution">
         <description>Track distribution of file sizes</description>
-        <target>95% of files under 200 lines, 0% over 300 lines</target>
+        <target>95% of files under 200 lines, 0% over 300 lines (except test files: 0% over 1000 lines)</target>
         <frequency>Weekly</frequency>
         <tool>scripts/check_architecture_compliance.py</tool>
       </metric>
@@ -295,14 +295,15 @@
     <before-adding-code>
       <checklist>
         <item>Does this belong in an existing module?</item>
-        <item>Will this cause any module to exceed 300 lines?</item>
+        <item>Will this cause any module to exceed 300 lines (1000 for test files)?</item>
         <item>Will any function exceed 8 lines?</item>
         <item>Am I duplicating existing functionality?</item>
         <item>Can I use composition instead of extension?</item>
       </checklist>
     </before-adding-code>
     <refactoring-triggers>
-      <trigger>File reaches 250 lines - plan subdivision</trigger>
+      <trigger>Production file reaches 250 lines - plan subdivision</trigger>
+      <trigger>Test file reaches 900 lines - plan subdivision</trigger>
       <trigger>Function reaches 6 lines - plan extraction</trigger>
       <trigger>Module has 3+ unrelated responsibilities</trigger>
       <trigger>Copy-paste detected - extract shared component</trigger>

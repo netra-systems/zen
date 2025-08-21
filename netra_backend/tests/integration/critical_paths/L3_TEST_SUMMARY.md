@@ -171,7 +171,7 @@ python -m pytest app/tests/integration/critical_paths/test_api_*_l3.py -v
 
 ### Run with Coverage
 ```bash
-python -m test_framework.test_runner --level integration --coverage
+python unified_test_runner.py --level integration --coverage
 ```
 
 ## Key Testing Areas Covered

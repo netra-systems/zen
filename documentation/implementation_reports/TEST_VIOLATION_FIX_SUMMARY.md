@@ -121,7 +121,7 @@ To validate the fixes worked correctly:
 
 1. **Run Test Suite:** Ensure all split tests still pass
 ```bash
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 2. **Check Import Resolution:** Verify no import errors in split files

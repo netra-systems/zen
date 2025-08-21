@@ -39,7 +39,7 @@ try:
 except ImportError as e:
     print(f"Failed to import optimization modules: {e}")
     print("Falling back to standard test runner...")
-    from scripts.test_backend import main as fallback_main
+    from unified_test_runner import main as fallback_main
     fallback_main()
     sys.exit(0)
 

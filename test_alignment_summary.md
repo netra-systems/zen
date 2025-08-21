@@ -50,16 +50,16 @@ The following test levels are now properly configured:
 
 ```bash
 # List all tests
-python -m test_framework.test_runner --list
+python unified_test_runner.py --list
 
 # Run smoke tests
-python -m test_framework.test_runner --level smoke --no-coverage --fast-fail
+python unified_test_runner.py --level smoke --no-coverage --fast-fail
 
 # Run integration tests
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Run with coverage
-python -m test_framework.test_runner --level unit
+python unified_test_runner.py --level unit
 ```
 
 ## Files Modified

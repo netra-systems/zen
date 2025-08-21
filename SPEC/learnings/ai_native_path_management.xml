@@ -43,7 +43,7 @@
                 --validate
             
             # Step 4: Verification
-            python -m test_framework.test_runner --level integration --fast-fail
+            python unified_test_runner.py --level integration --fast-fail
             ```
         </implementation>
         <ai_instructions>

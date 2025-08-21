@@ -31,13 +31,13 @@ python scripts/test_staging.py --full
 
 ```bash
 # Run staging tests with test runner
-python -m test_framework.test_runner --level staging --env staging
+python unified_test_runner.py --level staging --env staging
 
 # Run real staging environment tests
-python -m test_framework.test_runner --level staging-real --env staging
+python unified_test_runner.py --level staging-real --env staging
 
 # Quick staging validation
-python -m test_framework.test_runner --level staging-quick --env staging
+python unified_test_runner.py --level staging-quick --env staging
 ```
 
 ## Test Levels
@@ -184,7 +184,7 @@ Add to your workflow:
 ```yaml
 - name: Run Staging Tests
   run: |
-    python -m test_framework.test_runner --level staging-quick --env staging
+    python unified_test_runner.py --level staging-quick --env staging
   env:
     STAGING_URL: https://app.staging.netrasystems.ai
     STAGING_API_URL: https://api.staging.netrasystems.ai
@@ -223,7 +223,7 @@ Typical results for a healthy staging environment:
 
 Run with verbose output:
 ```bash
-python -m test_framework.test_runner --level staging --env staging -v
+python unified_test_runner.py --level staging --env staging -v
 ```
 
 ## Adding New Staging Tests
@@ -263,7 +263,7 @@ Staging tests are now included in the comprehensive test suite:
 
 ```bash
 # Runs all tests including staging
-python -m test_framework.test_runner --level comprehensive
+python unified_test_runner.py --level comprehensive
 ```
 
 This ensures staging environment validation is part of pre-release testing.

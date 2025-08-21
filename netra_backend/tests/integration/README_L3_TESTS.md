@@ -92,10 +92,10 @@ python -m pytest -m L3 -v
 ### Integration with Test Runner
 ```bash
 # Via unified test runner
-python -m test_framework.test_runner --level integration --real-redis
+python unified_test_runner.py --level integration --real-redis
 
 # Include L3 tests in integration suite
-python -m test_framework.test_runner --level integration --markers L3
+python unified_test_runner.py --level integration --markers L3
 ```
 
 ## Test Architecture

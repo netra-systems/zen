@@ -151,13 +151,13 @@ Feature flags integrate seamlessly with the unified test runner:
 
 ```bash
 # Normal test run - respects all feature flags
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 
 # Enable experimental tests for this run
-ENABLE_EXPERIMENTAL_TESTS=true python -m test_framework.test_runner
+ENABLE_EXPERIMENTAL_TESTS=true python unified_test_runner.py
 
 # Override specific feature status
-TEST_FEATURE_NEW_FEATURE=enabled python -m test_framework.test_runner
+TEST_FEATURE_NEW_FEATURE=enabled python unified_test_runner.py
 ```
 
 The test runner will display feature flag summaries showing which features are enabled, disabled, in development, or experimental.

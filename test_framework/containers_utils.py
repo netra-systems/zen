@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 class TestcontainerHelper:
     """Helper class for managing testcontainers in L3 integration tests."""
     
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self):
         self.active_containers: Dict[str, Any] = {}
         self.container_urls: Dict[str, str] = {}

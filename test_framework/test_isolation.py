@@ -15,6 +15,8 @@ from typing import Dict, Optional, Tuple
 class TestIsolationManager:
     """Manages isolated test environments for concurrent test execution."""
     
+    __test__ = False  # Tell pytest this is not a test class
+    
     _instances: Dict[str, 'TestIsolationManager'] = {}
     _lock = threading.Lock()
     

@@ -623,7 +623,7 @@
 
       <command>
         <name>Test backend with dynamic port</name>
-        <code>python scripts/test_backend.py --dynamic-port</code>
+        <code>python unified_test_runner.py --service backend --dynamic-port</code>
         <description>Run backend tests with automatic port allocation</description>
       </command>
     </commands>

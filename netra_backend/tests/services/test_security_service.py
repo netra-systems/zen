@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
-from schemas import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 
 # Add project root to path
 from netra_backend.app.services.security_service import KeyManager, SecurityService
@@ -34,7 +34,7 @@ def test_encrypt_and_decrypt(security_service: SecurityService):
     assert decrypted == original_string
 
 
-from schemas import TokenPayload
+from netra_backend.app.schemas.auth_types import TokenPayload
 
 
 def test_create_and_validate_access_token(security_service: SecurityService):

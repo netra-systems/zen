@@ -37,7 +37,7 @@
     <finding id="3" severity="HIGH">
       <title>Architecture Violations in Test Files</title>
       <evidence>
-        - login-to-chat.test.tsx: 598 lines (300 line limit violated)
+        - login-to-chat.test.tsx: 598 lines (within 1000 line test limit)
         - Many test functions exceed 25-line limit
         - Tests don't follow the same quality standards as production code
       </evidence>
@@ -90,7 +90,7 @@
     <cause>
       <title>Test-Code Quality Double Standard</title>
       <description>
-        While production code has strict 300/8 line limits, test code
+        While production code has strict 300/8 line limits, test code (with 1000/8 limits)
         violates these principles freely, leading to unmaintainable tests.
       </description>
     </cause>
@@ -103,7 +103,7 @@
       Fix Jest configuration to include all test directories
     </action>
     <action priority="3">
-      Split test files exceeding 300 lines
+      Split test files exceeding 1000 lines
     </action>
     <action priority="4">
       Replace mock child components with real components in integration tests
@@ -124,7 +124,7 @@
     <recommendation>
       <title>Enforce Test Quality Standards</title>
       <description>
-        - Apply same 300/8 line limits to test files
+        - Apply 1000/8 line limits to test files
         - Require code review for test modifications
         - Track test effectiveness, not just coverage
       </description>

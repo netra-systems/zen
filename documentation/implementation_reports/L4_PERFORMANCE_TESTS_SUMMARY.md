@@ -190,7 +190,7 @@ python -m pytest app/tests/integration/critical_paths/test_message_pipeline_l4.p
 python -m pytest app/tests/integration/critical_paths/ -v -m l4
 
 # With staging environment
-python -m test_framework.test_runner --level critical --env staging --real-llm
+python unified_test_runner.py --level critical --env staging --real-llm
 ```
 
 ### Performance Monitoring

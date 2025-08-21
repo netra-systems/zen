@@ -449,7 +449,7 @@
             <step number="6">
                 <title>Validate with Test Runner</title>
                 <action>Run comprehensive tests to ensure migrations work</action>
-                <command>python -m test_framework.test_runner --level integration</command>
+                <command>python unified_test_runner.py --level integration</command>
                 <expected_outcome>Tests still pass but now test real functionality</expected_outcome>
             </step>
         </step_by_step>

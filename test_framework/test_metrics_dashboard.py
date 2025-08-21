@@ -73,6 +73,8 @@ class PerformanceMetrics:
 class TestMetricsCollector:
     """Collect and store test metrics (≤300 lines total)."""
     
+    __test__ = False  # Tell pytest this is not a test class
+    
     def __init__(self, db_path: Optional[Path] = None):
         """Initialize metrics collector."""
         self.db_path = db_path or PROJECT_ROOT / "reports" / "test_metrics.db"

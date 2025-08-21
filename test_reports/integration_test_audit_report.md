@@ -101,16 +101,16 @@ The integration test suite audit revealed critical issues preventing successful 
 ### Working Commands
 ```bash
 # Quick integration test (without coverage to avoid ambiguity)
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Full integration test
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 ### Commands to Avoid
 ```bash
 # Ambiguous - causes error
-python -m test_framework.test_runner --level integration --coverage
+python unified_test_runner.py --level integration --coverage
 ```
 
 ## Next Steps

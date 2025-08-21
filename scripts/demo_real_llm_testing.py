@@ -212,13 +212,13 @@ def demo_cli_usage():
     print("=" * 60)
     
     print("\n1. Basic Real LLM Testing:")
-    print("   python -m test_framework.test_runner --level integration --real-llm")
-    print("   python -m test_framework.test_runner --level agents --real-llm")
+    print("   python unified_test_runner.py --level integration --real-llm")
+    print("   python unified_test_runner.py --level agents --real-llm")
     
     print("\n2. Advanced Real LLM Testing:")
-    print("   python -m test_framework.test_runner --level integration --real-llm --llm-model gpt-4")
-    print("   python -m test_framework.test_runner --level agents --real-llm --llm-timeout 60")
-    print("   python -m test_framework.test_runner --level comprehensive --real-llm --parallel 1")
+    print("   python unified_test_runner.py --level integration --real-llm --llm-model gpt-4")
+    print("   python unified_test_runner.py --level agents --real-llm --llm-timeout 60")
+    print("   python unified_test_runner.py --level comprehensive --real-llm --parallel 1")
     
     print("\n3. Environment Configuration:")
     print("   # Set test-specific API keys (recommended)")

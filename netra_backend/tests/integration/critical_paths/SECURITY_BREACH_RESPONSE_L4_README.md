@@ -139,7 +139,7 @@ pytest app/tests/integration/critical_paths/test_security_breach_response_l4.py 
 ### Test Framework Integration
 ```bash
 # Using unified test runner
-python -m test_framework.test_runner --level integration --pattern "*security_breach*" --env staging
+python unified_test_runner.py --level integration --pattern "*security_breach*" --env staging
 ```
 
 ## Configuration

@@ -9,12 +9,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Import modular components
-from test_executor import AutonomousReviewRunner, TestExecutionResult, TestExecutor
-from test_reporter import ReportGenerator, TestProgressMonitor
+from .test_executor import AutonomousReviewRunner, TestExecutionResult, TestExecutor
+from .test_reporter import ReportGenerator, TestProgressMonitor
 
 
 class TestValidator:
     """Main test validation orchestrator"""
+    
+    __test__ = False  # Tell pytest this is not a test class
     
     def __init__(self, project_root: Path):
         self.project_root = project_root

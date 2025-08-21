@@ -373,7 +373,7 @@
       <title>Test Execution</title>
       <description>Test runner integration requirements</description>
       <execution>
-        <command>python -m test_framework.test_runner --level agents</command>
+        <command>python unified_test_runner.py --level agents</command>
         <ci_cd>Automated in GitHub Actions on every PR</ci_cd>
         <performance>All tests complete in &lt;30 seconds</performance>
       </execution>

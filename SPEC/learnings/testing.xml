@@ -319,7 +319,7 @@
             <verification>All test directories now discovered, 1500+ tests found</verification>
             <prevention>
                 Always verify new test directories are added to scanner
-                Run python -m test_framework.test_runner --list to verify discovery
+                Run python unified_test_runner.py --list to verify discovery
                 Check that all project test directories appear in output
             </prevention>
         </learning>
@@ -442,7 +442,7 @@
             <title>Pytest Marker Configuration File Resolution</title>
             <problem>
                 Error: 'real_llm' not found in `markers` configuration option
-                Pytest.main() called from scripts/test_backend.py couldn't find pytest.ini
+                Pytest.main() called from unified_test_runner.py --service backend couldn't find pytest.ini
                 Tests in netra_backend/app/netra_backend/tests/ need netra_backend/app/pytest.ini configuration
                 Multiple pytest.ini files (root and netra_backend/app/) causing confusion
             </problem>
@@ -453,7 +453,7 @@
                 Added _add_config_file_args() function to build_pytest_args()
             </solution>
             <files_affected>
-                <file>scripts/test_backend.py</file>
+                <file>unified_test_runner.py --service backend</file>
             </files_affected>
             <technical_details>
                 Root cause: pytest.main() doesn't auto-discover config when run from scripts/
@@ -683,7 +683,7 @@
             <compliance_metrics_before>
                 Real System: 68.6% compliant (1230 violations in 656 files)
                 Test Files: 28.0% compliant (4500 violations in 846 files)
-                Files >300 lines: 181 files (worst: websocket-complete.test.tsx at 758 lines)
+                Test files >1000 lines: 18 files (worst: test_websocket_auth_cold_start_extended_l3.py at 3035 lines)
                 Functions >8 lines: 312 files (worst: 4425-line function)
                 Mock components: 7 files with excessive component mocking
             </compliance_metrics_before>

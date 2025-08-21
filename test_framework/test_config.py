@@ -276,8 +276,8 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
 # Test runner configurations - DEPRECATED (kept for backward compatibility)
 # Use test_runner.py as the single entry point
 RUNNERS = {
-    "backend": "scripts/test_backend.py", 
-    "frontend": "scripts/test_frontend.py"
+    "backend": "unified_test_runner.py --service backend", 
+    "frontend": "unified_test_runner.py --service frontend"
 }
 
 # Component mappings for focused testing

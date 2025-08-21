@@ -137,7 +137,7 @@ python -m pytest tests/unified/e2e/test_session_state_synchronization.py -v
 python -m pytest tests/unified/e2e/test_session_state_synchronization.py::test_session_cross_service_sync_only -v
 
 # Run as part of integration test suite
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 ## Business Impact Metrics

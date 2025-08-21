@@ -72,7 +72,7 @@ The logout-websocket.test.tsx needs mock refactoring for useAuthStore.
 ### Priority 3: Re-run Complete Suite
 After fixes, run full integration test suite with:
 ```bash
-python -m test_framework.test_runner --level integration --coverage
+python unified_test_runner.py --level integration --coverage
 ```
 
 ## Test Execution Summary

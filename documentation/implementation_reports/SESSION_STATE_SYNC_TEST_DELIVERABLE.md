@@ -114,7 +114,7 @@ python -m pytest tests/unified/e2e/test_session_state_synchronization.py -v
 python -m pytest tests/unified/e2e/test_session_sync_validation.py -v
 
 # Integration with test framework
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 ### CI/CD Pipeline Ready

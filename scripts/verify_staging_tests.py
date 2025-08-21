@@ -153,13 +153,13 @@ def print_usage_instructions():
     print("=" * 80)
     
     print("\n[1] Quick staging validation (2-3 minutes):")
-    print("  python -m test_framework.test_runner --level staging-quick")
+    print("  python unified_test_runner.py --level staging-quick")
     
     print("\n[2] Full staging configuration tests (10-15 minutes):")
-    print("  python -m test_framework.test_runner --level staging")
+    print("  python unified_test_runner.py --level staging")
     
     print("\n[3] Run with explicit GCP staging environment:")
-    print("  python -m test_framework.test_runner --level staging --env staging")
+    print("  python unified_test_runner.py --level staging --env staging")
     
     print("\n[PREREQUISITES]:")
     print("  1. Set GOOGLE_APPLICATION_CREDENTIALS environment variable")

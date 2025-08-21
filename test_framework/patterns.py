@@ -19,7 +19,8 @@ import pytest
 class BaseIntegrationTest:
     """Base class for integration tests with common utilities."""
     
-    def __init__(self):
+    def setup_method(self):
+        """Setup called before each test method."""
         self._setup_backend_url()
         self._test_users: List[Dict[str, Any]] = []
         self._test_threads: List[str] = []
@@ -47,6 +48,8 @@ class BaseIntegrationTest:
         }
         
         # Store for cleanup
+        if not hasattr(self, '_test_users'):
+            self._test_users = []
         self._test_users.append(user_data)
         
         # In real implementation, this would create user via API
@@ -90,6 +93,8 @@ class BaseIntegrationTest:
                 if resp.status == 201:
                     thread = await resp.json()
                     thread_id = thread["id"]
+                    if not hasattr(self, '_test_threads'):
+                        self._test_threads = []
                     self._test_threads.append(thread_id)
                     return thread_id
                 else:
@@ -99,8 +104,10 @@ class BaseIntegrationTest:
         """Cleanup test resources created during testing."""
         # In real implementation, this would clean up users, threads, etc.
         # For now, just clear the tracking lists
-        self._test_users.clear()
-        self._test_threads.clear()
+        if hasattr(self, '_test_users'):
+            self._test_users.clear()
+        if hasattr(self, '_test_threads'):
+            self._test_threads.clear()
 
 
 class L3IntegrationTest(BaseIntegrationTest):
@@ -115,15 +122,13 @@ class L3IntegrationTest(BaseIntegrationTest):
     - Error handling and recovery
     """
     
-    def __init__(self):
-        super().__init__()
-        self.test_level = "L3"
-        self.timeout = 300  # 5 minutes default timeout for L3 tests
+    test_level = "L3"
+    timeout = 300  # 5 minutes default timeout for L3 tests
     
-    async def setup_method(self):
+    def setup_method(self):
         """Setup method called before each test method."""
+        super().setup_method()
         # Override in subclasses for specific setup
-        pass
     
     async def teardown_method(self):
         """Teardown method called after each test method."""

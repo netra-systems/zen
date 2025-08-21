@@ -119,7 +119,7 @@ def demo_test_runner_integration():
     
     # Test the validation function
     try:
-        from test_framework.test_runner import validate_test_sizes
+        from unified_test_runner import validate_test_sizes
         
         print("Testing pre-run size validation...")
         args = MockArgs()
@@ -128,8 +128,8 @@ def demo_test_runner_integration():
         print("  ✓ Pre-run validation function is available")
         print("  ✓ Integration with test runner is complete")
         print("\n  Usage:")
-        print("    python -m test_framework.test_runner --strict-size")
-        print("    python -m test_framework.test_runner --skip-size-validation")
+        print("    python unified_test_runner.py --strict-size")
+        print("    python unified_test_runner.py --skip-size-validation")
         
     except ImportError as e:
         print(f"  Import error: {e}")
@@ -191,9 +191,9 @@ def demo_cli_usage():
     print()
     
     print("3. Test Runner Integration:")
-    print("   python -m test_framework.test_runner --level integration")
-    print("   python -m test_framework.test_runner --strict-size")
-    print("   python -m test_framework.test_runner --skip-size-validation")
+    print("   python unified_test_runner.py --level integration")
+    print("   python unified_test_runner.py --strict-size")
+    print("   python unified_test_runner.py --skip-size-validation")
     print()
     
     print("4. View Examples:")

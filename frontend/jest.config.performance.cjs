@@ -41,7 +41,7 @@ const config = {
   testTimeout: 10000, // 10 seconds instead of default 30
   
   // Setup optimizations
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.optimized.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
   // Module resolution optimizations
   moduleNameMapper: {

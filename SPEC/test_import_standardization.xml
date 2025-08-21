@@ -130,7 +130,7 @@ from ...app.agents import supervisor
     <phase id="3">
       <description>Verification</description>
       <action>Run test suite to ensure no breakage</action>
-      <command>python -m test_framework.test_runner --level integration</command>
+      <command>python unified_test_runner.py --level integration</command>
     </phase>
   </migration_strategy>
 

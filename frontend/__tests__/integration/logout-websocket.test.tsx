@@ -19,9 +19,7 @@ jest.mock('@/services/webSocketService');
 jest.mock('@/lib/logger');
 
 // Mock the auth store module
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
+jest.mock('@/store/authStore', () => require('../../__mocks__/store/authStore'));
 
 // Test helpers following 25-line limit
 const createMockUser = () => ({
@@ -32,6 +30,7 @@ const createMockUser = () => ({
 });
 
 const setupAuthStore = () => {
+  const { configureAuthStoreMock } = require('../../__mocks__/store/authStore');
   const mockStore = {
     isAuthenticated: true,
     user: createMockUser(),
@@ -41,8 +40,7 @@ const setupAuthStore = () => {
     setLoading: jest.fn(),
     setError: jest.fn(),
   };
-  const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
-  mockedUseAuthStore.mockReturnValue(mockStore);
+  configureAuthStoreMock(mockStore);
   return mockStore;
 };
 

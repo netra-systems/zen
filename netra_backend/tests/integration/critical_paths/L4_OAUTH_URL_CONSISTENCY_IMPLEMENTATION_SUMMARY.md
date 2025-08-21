@@ -157,7 +157,7 @@ python -m pytest app/tests/integration/critical_paths/test_oauth_staging_url_con
 
 ### Run with Staging Environment
 ```bash
-python -m test_framework.test_runner --level integration --env staging --pattern "*oauth_staging_url*"
+python unified_test_runner.py --level integration --env staging --pattern "*oauth_staging_url*"
 ```
 
 ## Next Steps

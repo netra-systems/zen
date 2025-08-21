@@ -38,6 +38,7 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 ## 🚀 Developer Guidelines
 
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
+🧪 **[TESTING.md](TESTING.md)** - Comprehensive testing guide and unified test runner
 🔧 **[TOOLING INDEX](TOOLING_INDEX.md)** - AI Native centric tools
 📚 **[LLM INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
@@ -146,35 +147,61 @@ powershell -ExecutionPolicy Bypass -File quick-start.ps1  # Windows
 # Dev launcher will auto-create SQLite database
 ```
 
-### 🧪 Unified Test Runner
+### 🧪 Testing
 
-The test runner provides a linear progression from fastest to slowest tests:
+**📖 See [TESTING.md](TESTING.md) for comprehensive testing documentation**
+
+#### Quick Start
 
 ```bash
-# DEFAULT: Integration tests with fast feedback (3-5min)
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+# Pre-commit smoke test (<30s)
+python unified_test_runner.py --level smoke
 
-# Test Levels (from fastest to slowest):
-python -m test_framework.test_runner --level smoke         # <30s: Pre-commit validation
-python -m test_framework.test_runner --level unit          # 1-2min: Component tests
-python -m test_framework.test_runner --level critical      # 1-2min: Business-critical paths
-python -m test_framework.test_runner --level agents        # 2-3min: Agent system tests
-python -m test_framework.test_runner --level integration   # 3-5min: Feature validation
-python -m test_framework.test_runner --level performance   # 3-5min: SLA compliance
-python -m test_framework.test_runner --level real_e2e      # 20-30min: Full E2E with real services
+# Default integration tests (3-5min)
+python unified_test_runner.py --level integration
 
-# Specialized Testing
-python -m test_framework.test_runner --level agents --real-llm    # Test with real LLM
-python -m test_framework.test_runner --level staging --env staging # Staging validation
-python -m test_framework.test_runner --parallel --workers 4       # Parallel execution
+# Service-specific tests
+python unified_test_runner.py --service backend
+python unified_test_runner.py --service frontend
+python unified_test_runner.py --service auth
+
+# With coverage
+python unified_test_runner.py --coverage
 ```
 
-**Advanced Features:**
-- 🎯 **Bad Test Detection:** Automatically tracks and reports flaky tests
-- ⚡ **Smart Sharding:** Optimal test distribution across workers
-- 📊 **Coverage Tracking:** Target 97% with detailed reports
-- 🔄 **Auto-Retry:** Configurable retry for transient failures
-- 📈 **Performance Baselines:** Track regression in response times
+#### Test Levels
+
+| Level | Duration | Purpose | Command |
+|-------|----------|---------|---------|
+| **smoke** | <30s | Pre-commit validation | `--level smoke` |
+| **unit** | 1-2min | Component testing | `--level unit` |
+| **integration** | 3-5min | Feature validation | `--level integration` |
+| **comprehensive** | 30-45min | Full coverage | `--level comprehensive` |
+| **critical** | 1-2min | Business-critical paths | `--level critical` |
+| **agents** | 2-3min | Agent testing with LLMs | `--level agents --real-llm` |
+
+#### Advanced Testing
+
+```bash
+# Real LLM testing
+python unified_test_runner.py --real-llm
+
+# Staging environment
+python unified_test_runner.py --env staging
+
+# Parallel execution
+python unified_test_runner.py --parallel --workers 8
+
+# Pattern matching
+python unified_test_runner.py --pattern "test_auth"
+```
+
+**Key Features:**
+- 🎯 **Unified Interface:** Single command for all services
+- ⚡ **Smart Parallelization:** Optimal test distribution
+- 📊 **Coverage Reports:** HTML and terminal reports
+- 🔄 **Test Isolation:** Prevent test pollution
+- 📈 **Performance Tracking:** Monitor test execution times
 - 🎭 **Mock/Real Toggle:** Switch between mocked and real services
 
 ### System Components
@@ -364,7 +391,7 @@ python -m test_framework.bad_test_reporter --reset
 
 ```bash
 # Pre-deployment validation
-python -m test_framework.test_runner --level staging --env staging
+python unified_test_runner.py --level staging --env staging
 
 # Deploy to staging
 python organized_root/deployment_configs/deploy_staging.py
