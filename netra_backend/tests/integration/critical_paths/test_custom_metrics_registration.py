@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 # Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter

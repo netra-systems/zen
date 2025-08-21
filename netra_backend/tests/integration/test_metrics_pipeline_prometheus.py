@@ -27,8 +27,8 @@ from typing import Any, Dict, List
 import aiohttp
 import docker
 import pytest
-from monitoring.metrics_collector import MetricsCollector
-from monitoring.prometheus_exporter import PrometheusExporter
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.prometheus_exporter import PrometheusExporter
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 

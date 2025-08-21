@@ -39,7 +39,7 @@ from urllib.parse import quote
 import httpx
 import pytest
 import websockets
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.services.redis_service import RedisService

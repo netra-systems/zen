@@ -27,8 +27,8 @@ from typing import Any, Dict, List, Optional
 import asyncpg
 import docker
 import pytest
-from database.row_level_security import RowLevelSecurityManager
-from database.tenant_manager import TenantManager
+from netra_backend.app.database.row_level_security import RowLevelSecurityManager
+from netra_backend.app.database.tenant_manager import TenantManager
 
 # Add project root to path
 from netra_backend.app.services.tenant_service import TenantService

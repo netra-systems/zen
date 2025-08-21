@@ -34,7 +34,7 @@ from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-# from monitoring.metrics_collector import MetricsCollector  # TODO: Fix import path
+# from netra_backend.app.monitoring.metrics_collector import MetricsCollector  # TODO: Fix import path
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker

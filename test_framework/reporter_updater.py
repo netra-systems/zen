@@ -113,6 +113,16 @@ class TestResultsUpdater:
                 comp_result["last_counts"] = data.get("test_counts", {})
                 comp_result["last_duration"] = data.get("duration", 0)
                 comp_result["last_run"] = datetime.now().isoformat()
+                
+                # Add frontend-specific metrics
+                if component == "frontend" and "test_metrics" in data:
+                    comp_result["metrics"] = data["test_metrics"]
+                    # Add additional frontend insights
+                    if "import_errors" in data["test_metrics"]:
+                        comp_result["import_error_count"] = len(data["test_metrics"]["import_errors"])
+                    if "test_categories" in data["test_metrics"]:
+                        comp_result["category_count"] = len(data["test_metrics"]["test_categories"])
+                        comp_result["test_file_count"] = data["test_metrics"]["total_test_files"]
     
     @staticmethod
     def update_failing_tests(test_results: Dict, results: Dict):

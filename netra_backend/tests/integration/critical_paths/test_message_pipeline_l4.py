@@ -35,7 +35,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-# from agents.supervisor_consolidated import SupervisorAgent
+# from app.agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 
 import aiohttp

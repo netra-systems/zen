@@ -1,4 +1,4 @@
-# Dockerfile.backend - Optimized multi-stage production backend
+# Dockerfile.backend.cloudrun - Optimized for Google Cloud Run
 # Build stage for dependencies
 FROM python:3.11-slim AS builder
 
@@ -43,9 +43,10 @@ RUN useradd -m -u 1000 appuser && \
 
 USER appuser
 
-# Environment variables
+# Environment variables for Cloud Run
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONIOENCODING=utf-8 \
     PORT=8080 \
     WORKERS=1 \
     TIMEOUT=120

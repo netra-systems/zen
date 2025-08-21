@@ -35,7 +35,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
-from routes.health import health_interface
+from app.routes.health import health_interface
 
 # Add project root to path
 from netra_backend.app.core.health_checkers import (

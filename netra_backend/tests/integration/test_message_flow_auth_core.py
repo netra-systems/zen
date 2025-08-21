@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import jwt
 import pytest
 from logging_config import central_logger
-from routes.utils.websocket_helpers import validate_websocket_token
+from app.routes.utils.websocket_helpers import validate_websocket_token
 
 from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket

@@ -36,7 +36,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.alert_manager import HealthAlertManager
 

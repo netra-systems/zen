@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import jwt
 import pytest
 from fastapi import WebSocket
-from routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
+from app.routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
 from starlette.websockets import WebSocketState
 
 # Add project root to path

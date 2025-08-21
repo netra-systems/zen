@@ -26,8 +26,8 @@ from typing import Any, Dict, List, Optional
 import asyncpg
 import docker
 import pytest
-from database.migration_manager import MigrationManager
-from database.postgres_connection import PostgresConnection
+from netra_backend.app.database.migration_manager import MigrationManager
+from netra_backend.app.database.postgres_connection import PostgresConnection
 
 
 @pytest.mark.L3

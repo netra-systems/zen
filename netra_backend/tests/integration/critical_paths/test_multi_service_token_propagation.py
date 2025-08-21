@@ -41,7 +41,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
-from auth_integration.auth import get_current_user
+from app.auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
 from sqlalchemy import select
 

@@ -44,7 +44,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 import pytest
-from auth_integration.auth import get_current_user
+from app.auth_integration.auth import get_current_user
 from clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials

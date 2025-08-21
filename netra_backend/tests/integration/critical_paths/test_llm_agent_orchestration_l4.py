@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-# # # from agents.supervisor_agent_modern import ModernSupervisorAgent
+# # # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
@@ -51,7 +51,7 @@ ModernSupervisorAgent = AsyncMock
 from unittest.mock import AsyncMock
 
 ModernSupervisorAgent = AsyncMock
-# # # from agents.base.interface import ExecutionContext, ExecutionResult
+# # # from app.agents.base.interface import ExecutionContext, ExecutionResult
 from unittest.mock import AsyncMock
 
 ExecutionContext = dict
@@ -62,7 +62,7 @@ ExecutionContext = dict  # Use dict as placeholder
 ExecutionResult = dict   # Use dict as placeholder
 # # from netra_backend.app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
-# # # from agents.tool_dispatcher import ToolDispatcher
+# # # from app.agents.tool_dispatcher import ToolDispatcher
 from unittest.mock import AsyncMock
 
 from netra_backend.app.core.configuration.base import get_unified_config

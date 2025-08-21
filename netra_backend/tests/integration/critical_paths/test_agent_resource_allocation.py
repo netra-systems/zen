@@ -32,7 +32,7 @@ from typing import Any, Dict, List, NamedTuple, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker

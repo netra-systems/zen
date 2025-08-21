@@ -35,7 +35,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager

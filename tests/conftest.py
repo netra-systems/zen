@@ -143,7 +143,8 @@ async def throughput_client(test_user_token, high_volume_server):
 
 
 @pytest.fixture
-def mock_redis_manager():
+def mock_redis_client():
+    """Mock Redis client for basic operations (renamed to avoid conflict)"""
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
     mock.disconnect = AsyncMock(return_value=None)
@@ -154,15 +155,7 @@ def mock_redis_manager():
     return mock
 
 
-@pytest.fixture
-def mock_clickhouse_client():
-    mock = MagicMock()
-    mock.ping = MagicMock(return_value=True)
-    mock.execute = AsyncMock(return_value=None)
-    mock.close = AsyncMock(return_value=None)
-    mock.__aenter__ = AsyncMock(return_value=mock)
-    mock.__aexit__ = AsyncMock(return_value=None)
-    return mock
+# mock_clickhouse_client removed - duplicate exists in netra_backend/tests/conftest.py with more methods
 
 
 @pytest.fixture

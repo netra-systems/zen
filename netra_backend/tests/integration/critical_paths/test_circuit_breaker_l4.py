@@ -39,7 +39,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 # Add project root to path
 from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import (

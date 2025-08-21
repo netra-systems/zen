@@ -42,7 +42,7 @@ from unittest.mock import patch
 
 import httpx
 import pytest
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.redis_service import RedisService

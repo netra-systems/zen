@@ -37,9 +37,9 @@ from typing import Any, Dict
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from netra_backend.tests.integration.helpers.critical_integration_helpers import (
-    # Add project root to path
+# Import helpers directly
+sys.path.append(str(PROJECT_ROOT / "tests"))
+from integration.helpers.user_flow_helpers import (
     setup_test_infrastructure,
     teardown_test_infrastructure,
 )
@@ -49,7 +49,7 @@ class TestCriticalIntegrationSuite:
     """Main critical integration test suite"""
     
     @pytest.mark.asyncio
-    async def test_end_to_end_system_integration(self, test_session: AsyncSession):
+    async def test_end_to_end_system_integration(self, db_session: AsyncSession):
         """Test end-to-end system integration across all components"""
         # Setup infrastructure
         infrastructure = await setup_test_infrastructure()
@@ -67,7 +67,7 @@ class TestCriticalIntegrationSuite:
             await teardown_test_infrastructure(infrastructure)
     
     @pytest.mark.asyncio
-    async def test_critical_failure_recovery(self, test_session: AsyncSession):
+    async def test_critical_failure_recovery(self, db_session: AsyncSession):
         """Test system recovery from critical failures"""
         # Simulate critical failure
         failure_result = await self._simulate_critical_failure()

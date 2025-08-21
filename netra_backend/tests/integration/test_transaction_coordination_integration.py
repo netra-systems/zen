@@ -42,7 +42,7 @@ import pytest
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.integration.helpers.critical_integration_helpers import (
+from tests.integration.helpers.user_flow_helpers import (
     # Add project root to path
     DatabaseTestHelpers,
     MiscTestHelpers,

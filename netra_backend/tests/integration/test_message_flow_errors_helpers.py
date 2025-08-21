@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from logging_config import central_logger
-from routes.utils.websocket_helpers import (
+from app.routes.utils.websocket_helpers import (
     accept_websocket_connection,
     receive_message_with_timeout,
 )

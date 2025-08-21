@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from logging_config import central_logger
-from routes.utils.websocket_helpers import decode_token_payload
+from app.routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

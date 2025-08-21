@@ -32,7 +32,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 # Add project root to path
-# # from agents.supervisor_agent_modern import ModernSupervisorAgent
+# # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
@@ -41,15 +41,15 @@ ModernSupervisorAgent = AsyncMock
 from unittest.mock import AsyncMock
 
 ModernSupervisorAgent = AsyncMock
-# from agents.sub_agents.optimization_agent import OptimizationAgent
+# from app.agents.sub_agents.optimization_agent import OptimizationAgent
 from unittest.mock import AsyncMock
 
 OptimizationAgent = AsyncMock
-# from agents.sub_agents.analysis_agent import AnalysisAgent
+# from app.agents.sub_agents.analysis_agent import AnalysisAgent
 from unittest.mock import AsyncMock
 
 AnalysisAgent = AsyncMock
-# from agents.state import DeepAgentState
+# from app.agents.state import DeepAgentState
 from unittest.mock import AsyncMock
 
 DeepAgentState = AsyncMock

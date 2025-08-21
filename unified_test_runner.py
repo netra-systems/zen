@@ -110,7 +110,14 @@ class UnifiedTestRunner:
         if args.env == "dev":
             configure_dev_environment()
         elif args.real_llm:
-            configure_real_llm()
+            # Use default values for real LLM configuration
+            configure_real_llm(
+                model="gemini-2.5-flash",  # Default model
+                timeout=60,  # Default timeout
+                parallel="auto",  # Auto-detect parallelism
+                test_level=args.level,  # Pass the test level
+                use_dedicated_env=True  # Use dedicated test environment
+            )
             
         # Set environment variables
         os.environ["TEST_LEVEL"] = args.level
@@ -203,15 +210,21 @@ class UnifiedTestRunner:
         return " ".join(cmd_parts)
     
     def _build_frontend_command(self, args: argparse.Namespace) -> str:
-        """Build test command for frontend."""
-        if args.level == "smoke":
-            return "npm run test:smoke"
-        elif args.level == "unit":
-            return "npm run test:unit"
-        elif args.level == "integration":
-            return "npm run test:integration"
-        else:
-            return "npm test"
+        """Build test command for frontend using level mapping."""
+        from test_framework.frontend_test_mapping import get_jest_command_for_level
+        
+        # Use the mapping to get appropriate Jest command
+        base_command = get_jest_command_for_level(args.level)
+        
+        # Add additional flags based on args
+        if args.no_coverage and "--coverage" not in base_command:
+            base_command += " --coverage=false"
+        if args.fast_fail and "--bail" not in base_command:
+            base_command += " --bail"
+        if args.verbose:
+            base_command += " --verbose"
+            
+        return base_command
     
     def _generate_report(self, results: Dict, args: argparse.Namespace):
         """Generate consolidated test report."""

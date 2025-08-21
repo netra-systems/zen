@@ -608,8 +608,8 @@ def mock_settings():
 
 
 @pytest.fixture
-def mock_websocket_manager():
-    """Mock WebSocket manager for performance tests"""
+def mock_performance_websocket_manager():
+    """Mock WebSocket manager for performance tests (renamed to avoid conflict)"""
     from unittest.mock import AsyncMock
     manager = AsyncMock()
     manager.broadcast = AsyncMock()

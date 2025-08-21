@@ -289,3 +289,30 @@ async def _execute_thread_creation_step(data: Dict[str, Any],
         "success": True,
         "context": {"thread": thread_data}
     }
+
+
+async def setup_test_infrastructure() -> Dict[str, Any]:
+    """Setup test infrastructure for integration tests"""
+    infrastructure = {
+        "auth_service": MockAuthService(),
+        "websocket_service": MagicMock(),
+        "database": MagicMock(),
+        "cache": MagicMock(),
+        "started_at": datetime.utcnow()
+    }
+    
+    # Initialize services
+    await asyncio.sleep(0.1)  # Simulate initialization
+    
+    return infrastructure
+
+
+async def teardown_test_infrastructure(infrastructure: Dict[str, Any]) -> None:
+    """Teardown test infrastructure after tests"""
+    # Cleanup resources
+    await asyncio.sleep(0.1)  # Simulate cleanup
+    
+    # Log test duration
+    if "started_at" in infrastructure:
+        duration = (datetime.utcnow() - infrastructure["started_at"]).total_seconds()
+        print(f"Test infrastructure ran for {duration:.2f} seconds")
