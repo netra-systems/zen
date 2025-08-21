@@ -8,12 +8,12 @@
 
 ## Executive Summary
 
-### Overall System Health Score: **14.2%** (CRITICAL)
+### Overall System Health Score: **14.0%** (CRITICAL)
 
 The Netra Apex AI Optimization Platform shows improving compliance and test coverage with relaxed, per-file violation counting.
 
 ### Trend Analysis
-- **Architecture Compliance:** 28.5% (Production code only)
+- **Architecture Compliance:** 28.0% (Production code only)
 - **Testing Compliance:** 0.0% (Based on pyramid distribution)
 - **E2E Tests Found:** 226 tests
 - **Overall Trajectory:** Improving with reasonable violation standards
@@ -23,9 +23,9 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 ### Violation Summary
 | Category | Files with Violations | Status |
 |----------|----------------------|--------|
-| Production Code | 143 | 🔴 CRITICAL |
-| Test Code | 1941 | 🔴 CRITICAL |
-| **Total** | **2084** | - |
+| Production Code | 144 | 🔴 CRITICAL |
+| Test Code | 2245 | 🔴 CRITICAL |
+| **Total** | **2389** | - |
 
 *Note: Using relaxed counting - one violation per file per type, not per occurrence*
 
@@ -42,7 +42,7 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 | Type | Count | Target Ratio | Actual Ratio | Status |
 |------|-------|--------------|--------------|--------|
 | E2E Tests (L4) | 226 | 15% | 22600.0% | ✅ GOOD |
-| Integration (L2-L3) | 0 | 60% | 0.0% | 🔴 CRITICAL |
+| Integration (L2-L3) | 55 | 60% | 5500.0% | ✅ GOOD |
 | Unit Tests (L1) | 0 | 20% | 0.0% | 🔴 CRITICAL |
 
 ### Coverage Metrics
