@@ -6,6 +6,11 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 from netra_backend.tests.e2e.example_prompts_core import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     EXAMPLE_PROMPTS, real_llm_prompt_setup, execute_full_prompt_workflow,
     create_ep_001_state, create_ep_002_state, create_ep_003_state,
     create_ep_004_state, create_ep_005_state, create_ep_006_state,

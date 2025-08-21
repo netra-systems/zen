@@ -36,6 +36,8 @@ from dev_launcher.config import LauncherConfig
 @pytest.fixture(scope="function")
 def llm_test_config() -> LLMTestConfig:
     """Create LLM test configuration from environment."""
+    # For test configuration, we still need to read test-specific env vars
+    # These are test control variables, not application config
     enabled = os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
     models_str = os.getenv("LLM_TEST_MODELS", "gpt-4,claude-3-opus,gpt-3.5-turbo")
     models = _parse_test_models(models_str)
@@ -65,11 +67,11 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.core.config import get_config
+    from netra_backend.app.core.configuration.base import unified_config_manager
     
     # Try to create real LLM manager first
     try:
-        config = get_config()
+        config = unified_config_manager.get_config()
         return LLMManager(config)
     except Exception:
         # Fallback to test manager
@@ -129,6 +131,7 @@ def cached_llm_manager(llm_test_config: LLMTestConfig) -> LLMTestManager:
 @pytest.fixture(scope="function")
 def llm_response_cache() -> LLMResponseCache:
     """Create LLM response cache for testing."""
+    # These are test-specific cache settings, not application config
     cache_path = os.getenv("LLM_CACHE_PATH")
     ttl_hours = int(os.getenv("LLM_CACHE_TTL_HOURS", "24"))
     return LLMResponseCache(cache_path, ttl_hours)
@@ -179,6 +182,7 @@ def environment_validation():
 
 def _validate_llm_environment() -> Dict[str, Any]:
     """Validate LLM testing environment configuration."""
+    # Test environment validation uses test-specific env vars
     results = {
         "real_testing_enabled": os.getenv("ENABLE_REAL_LLM_TESTING") == "true",
         "api_keys_configured": _check_api_keys(),
@@ -194,6 +198,7 @@ def _validate_llm_environment() -> Dict[str, Any]:
 
 def _check_api_keys() -> Dict[str, bool]:
     """Check if required API keys are configured."""
+    # Check test API keys directly from environment for test validation
     return {
         "openai": _is_real_api_key(os.getenv("OPENAI_API_KEY")),
         "anthropic": _is_real_api_key(os.getenv("ANTHROPIC_API_KEY")),
@@ -210,6 +215,7 @@ def _is_real_api_key(api_key: Optional[str]) -> bool:
 
 def _check_model_configuration() -> bool:
     """Check if model configuration is valid."""
+    # Test model configuration from test-specific env vars
     models_str = os.getenv("LLM_TEST_MODELS", "gpt-4")
     try:
         models = _parse_test_models(models_str)

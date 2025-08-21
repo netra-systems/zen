@@ -10,6 +10,11 @@ from netra_backend.app.services.tool_permission_service import ToolPermissionSer
 from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, BusinessRequirement
 from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 from netra_backend.tests.helpers.tool_permission_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MockRedisClient,
     create_user_plan,
     create_heavy_usage_context,

@@ -5,6 +5,11 @@ import asyncio
 
 from netra_backend.app.core.service_interfaces import BaseServiceMixin, ServiceMetrics
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestBaseServiceMixin:
     """Test BaseServiceMixin functionality."""

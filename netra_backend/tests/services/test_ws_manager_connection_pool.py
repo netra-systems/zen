@@ -5,6 +5,11 @@ Modular test suite split into focused test modules for maintainability
 
 # Import all test classes from modular test files to maintain backward compatibility
 from netra_backend.tests.test_ws_connection_mocks import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MockWebSocket, 
     MockConnectionPool, 
     WebSocketTestHelpers

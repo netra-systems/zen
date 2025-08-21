@@ -26,6 +26,11 @@ from netra_backend.app.services.billing.invoice_generator import InvoiceGenerato
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
 from netra_backend.app.schemas.billing import UsageEvent, BillingTier, Invoice
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

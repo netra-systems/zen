@@ -37,6 +37,11 @@ from netra_backend.app.services.websocket_service import WebSocketService as Web
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
 from netra_backend.tests..test_helpers.user_flow_base import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance
 )
 from netra_backend.tests..fixtures.user_journey_data import UserTestData, UserJourneyScenarios

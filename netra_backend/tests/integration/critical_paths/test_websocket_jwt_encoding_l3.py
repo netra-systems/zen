@@ -25,6 +25,11 @@ from starlette.websockets import WebSocketState
 from routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
 from netra_backend.app.db.postgres import get_async_db
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockWebSocket:
     """Mock WebSocket for testing."""

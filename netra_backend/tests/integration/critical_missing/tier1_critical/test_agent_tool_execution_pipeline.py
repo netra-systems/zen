@@ -23,6 +23,11 @@ from netra_backend.app.schemas.Request import RequestModel
 from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
 from netra_backend.app.core.exceptions_base import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Define test-specific exceptions
 class AgentTimeoutError(NetraException):
     pass

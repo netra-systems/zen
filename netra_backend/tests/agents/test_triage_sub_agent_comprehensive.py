@@ -14,6 +14,11 @@ from netra_backend.tests.agents.test_triage_edge_performance import *
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 def test_architectural_compliance():
     """Test that all functions in test modules are ≤8 lines"""

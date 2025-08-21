@@ -9,6 +9,11 @@ from config import settings
 from logging_config import central_logger as logger
 from netra_backend.tests.clickhouse_test_fixtures import get_clickhouse_config
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""

@@ -25,6 +25,11 @@ from netra_backend.app.services.tracing.otel_service import OpenTelemetryService
 from netra_backend.app.services.tracing.span_manager import SpanManager
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -14,6 +14,11 @@ from typing import List, Any
 from concurrent.futures import ThreadPoolExecutor
 
 from netra_backend.app.core.async_utils import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AsyncResourceManager,
     AsyncTaskPool,
     AsyncConnectionPool,

@@ -22,6 +22,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestFirstTimeUserJourneyE2E:
     """End-to-end first-time user journey tests."""

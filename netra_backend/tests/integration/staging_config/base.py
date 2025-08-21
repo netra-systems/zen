@@ -27,10 +27,11 @@ class StagingConfigTestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up class-level resources."""
+        # Staging-specific configuration from environment
         cls.project_id = os.getenv('GCP_PROJECT_ID', 'netra-ai-staging')
         cls.region = os.getenv('GCP_REGION', 'us-central1')
         
-        # Use actual staging URLs
+        # Use actual staging URLs from environment
         cls.staging_url = os.getenv('STAGING_URL', 'https://app.staging.netrasystems.ai')
         cls.staging_api_url = os.getenv('STAGING_API_URL', 'https://api.staging.netrasystems.ai')
         cls.staging_auth_url = os.getenv('STAGING_AUTH_URL', 'https://auth.staging.netrasystems.ai')
@@ -156,6 +157,7 @@ class StagingConfigTestBase(unittest.TestCase):
         
     def skip_if_not_staging(self):
         """Skip test if not running against staging environment."""
+        # Check staging environment from test settings
         if os.getenv('ENVIRONMENT') != 'staging':
             self.skipTest("Test requires staging environment")
         # Also skip if GCP clients are not available
@@ -164,6 +166,7 @@ class StagingConfigTestBase(unittest.TestCase):
             
     def require_gcp_credentials(self):
         """Ensure GCP credentials are available."""
+        # Check GCP credentials from environment for staging tests
         if not os.getenv('GOOGLE_APPLICATION_CREDENTIALS'):
             self.skipTest("GOOGLE_APPLICATION_CREDENTIALS not set")
         # Also check if clients are available

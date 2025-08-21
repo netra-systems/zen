@@ -12,6 +12,11 @@ from datetime import datetime
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
     """Collaboration and authentication critical tests"""

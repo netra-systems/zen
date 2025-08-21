@@ -23,6 +23,11 @@ from typing import List, Set
 import ast
 import os
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestCircularImportRegression:
     """Prevent the specific circular import regression."""

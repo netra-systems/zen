@@ -26,6 +26,11 @@ from netra_backend.app.services.api_gateway.route_manager import RouteManager
 from netra_backend.app.services.api_gateway.load_balancer import LoadBalancer
 from netra_backend.app.services.service_discovery.discovery_service import ServiceDiscoveryService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

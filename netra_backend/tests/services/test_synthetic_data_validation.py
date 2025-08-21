@@ -8,6 +8,11 @@ import os
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSpecificationValidation:
     """Validate the synthetic data generation specification"""

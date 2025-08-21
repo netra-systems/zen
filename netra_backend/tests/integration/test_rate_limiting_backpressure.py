@@ -32,6 +32,11 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Mock justification decorator
 def mock_justified(reason: str):
     """Decorator to justify mock usage per SPEC/testing.xml requirements."""

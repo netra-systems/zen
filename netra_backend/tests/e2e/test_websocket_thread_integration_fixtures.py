@@ -12,6 +12,11 @@ from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 def mock_websocket_manager():
     """Mock WebSocket manager for testing."""
     manager_mock = Mock()

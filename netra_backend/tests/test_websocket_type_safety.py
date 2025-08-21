@@ -6,6 +6,11 @@ Imports and orchestrates tests from focused modules.
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import from the focused modules
 from netra_backend.tests.websocket.test_websocket_type_safety_factory import (
     WebSocketMessageFactory, 

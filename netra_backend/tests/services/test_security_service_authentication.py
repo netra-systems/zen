@@ -11,6 +11,11 @@ from cryptography.fernet import Fernet
 
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.tests.security_service_test_mocks import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MockUser, EnhancedSecurityService, create_test_user, create_admin_user,
     create_locked_user, assert_authentication_success, assert_authentication_failure
 )

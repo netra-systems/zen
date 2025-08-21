@@ -8,6 +8,11 @@ COMPLIANCE: Modular split from 521-line monolith
 from netra_backend.tests.test_thread_repository import TestThreadRepositoryOperations
 from netra_backend.tests.test_message_repository import TestMessageRepositoryQueries
 from netra_backend.tests.test_database_connections import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TestClickHouseConnectionPool,
     TestMigrationRunnerSafety,
     TestDatabaseHealthChecks

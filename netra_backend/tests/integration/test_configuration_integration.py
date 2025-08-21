@@ -24,6 +24,11 @@ from netra_backend.app.core.configuration.base import get_unified_config, config
 from netra_backend.app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestConfigurationIntegration:
     """Integration tests for configuration loading and validation."""
@@ -117,7 +122,7 @@ class TestConfigurationIntegration:
             assert "staging" in config.database_url
             assert "staging" in config.redis_url
             
-            # Verify K_SERVICE indicates Cloud Run deployment
+            # Verify K_SERVICE indicates Cloud Run deployment (test environment check)
             assert os.environ.get("K_SERVICE") == "netra-backend"
 
     async def test_configuration_validation_and_errors(self):

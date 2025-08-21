@@ -18,6 +18,11 @@ from starlette.websockets import WebSocketDisconnect
 import tracemalloc
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 def flow_tracker():
     """Create message flow tracker."""
     return MessageFlowTracker()

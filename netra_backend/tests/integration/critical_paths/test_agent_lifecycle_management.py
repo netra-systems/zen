@@ -29,6 +29,11 @@ from netra_backend.app.services.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.registry import AgentStarted, AgentCompleted, SubAgentUpdate
 from netra_backend.app.core.config import Settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

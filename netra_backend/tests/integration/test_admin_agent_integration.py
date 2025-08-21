@@ -16,6 +16,11 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from ws_manager import WebSocketManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAdminAgentIntegration:
     """Integration tests for admin agents"""

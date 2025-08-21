@@ -16,6 +16,11 @@ from auth_integration.auth import validate_token_jwt
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from routes.mcp.main import websocket_endpoint
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

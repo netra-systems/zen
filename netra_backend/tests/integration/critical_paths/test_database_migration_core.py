@@ -26,6 +26,11 @@ from netra_backend.app.services.database.connection_manager import DatabaseConne
 from netra_backend.app.services.database.backup_service import BackupService
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

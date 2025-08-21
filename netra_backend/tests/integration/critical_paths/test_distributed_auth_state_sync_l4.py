@@ -32,6 +32,11 @@ import httpx
 from unittest.mock import patch, AsyncMock
 
 from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     Token, SessionInfo, LoginRequest, LoginResponse,
     SessionState, ReplicationEvent, ConsistencyCheck
 )

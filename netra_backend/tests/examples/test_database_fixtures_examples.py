@@ -10,6 +10,11 @@ Shows real-world usage patterns that can replace existing test code.
 import pytest
 from unittest.mock import Mock
 from netra_backend.tests.fixtures.database_test_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     async_session_mock, transaction_session_mock, query_builder,
     create_mock_user, create_mock_thread, create_mock_message,
     error_simulator, transaction_context, connection_pool,

@@ -14,6 +14,11 @@ from netra_backend.app.services.synthetic_data.generation_patterns import genera
 from netra_backend.app.services.synthetic_data.metrics import detect_anomalies, calculate_correlation
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig, ValidationResult
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def validation_service():

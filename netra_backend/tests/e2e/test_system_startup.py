@@ -35,6 +35,11 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.health_monitor import HealthMonitor
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class ServiceInfo:
     """Service information container."""

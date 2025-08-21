@@ -21,6 +21,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 import random
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.circuit_breaker import CircuitBreaker

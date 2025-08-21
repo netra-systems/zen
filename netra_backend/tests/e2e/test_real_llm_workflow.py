@@ -16,6 +16,11 @@ from schemas import SubAgentLifecycle
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 from netra_backend.tests.e2e.infrastructure.llm_test_manager import LLMTestManager, LLMTestRequest, LLMTestModel
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 async def real_llm_workflow_setup(real_agent_setup):

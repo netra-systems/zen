@@ -14,6 +14,11 @@ from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 import time
 from routes.utils.websocket_helpers import validate_websocket_token
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

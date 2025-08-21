@@ -28,6 +28,11 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app import schemas
 
 from netra_backend.tests.test_agent_service_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     mock_supervisor,
     mock_thread_service, 
     mock_message_handler,

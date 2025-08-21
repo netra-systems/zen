@@ -11,6 +11,11 @@ from netra_backend.app.websocket.state_synchronizer import ConnectionStateSynchr
 from netra_backend.app.websocket.sync_types import CriticalCallbackFailure
 from netra_backend.app.websocket.connection import ConnectionManager, ConnectionInfo
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestStateSynchronizerExceptionHandling:
     """Test exception handling in state synchronizer."""

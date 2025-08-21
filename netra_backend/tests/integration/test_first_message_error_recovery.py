@@ -19,6 +19,11 @@ from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 class TestFirstMessageErrorRecovery:

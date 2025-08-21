@@ -12,6 +12,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
 from netra_backend.app.core.exceptions import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestRealTimeChatOptimization:
     """Test real-time chat model optimization workflows."""

@@ -31,6 +31,11 @@ from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.schemas.registry import AgentStarted, AgentCompleted, SubAgentUpdate
 from test_framework.testcontainers_utils import TestcontainerHelper
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

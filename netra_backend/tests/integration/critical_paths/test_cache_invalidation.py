@@ -23,6 +23,11 @@ from netra_backend.app.services.cache.cache_manager import CacheManager
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.notification_service import NotificationService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

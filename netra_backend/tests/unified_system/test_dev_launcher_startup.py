@@ -33,6 +33,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from unittest.mock import Mock, patch
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Dev launcher imports
 from dev_launcher.launcher import DevLauncher  
 from dev_launcher.config import LauncherConfig

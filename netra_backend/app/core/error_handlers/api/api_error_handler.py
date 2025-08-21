@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
 from netra_backend.app.core.error_response import ErrorResponse
-from netra_backend.app.base_error_handler import BaseErrorHandler
+from netra_backend.app.core.error_handlers.base_error_handler import BaseErrorHandler
 from netra_backend.app.core.error_handlers.api.response_builder import ErrorResponseBuilder
 from netra_backend.app.core.error_handlers.api.exception_router import ExceptionRouter
 

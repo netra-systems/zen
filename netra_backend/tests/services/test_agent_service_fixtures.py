@@ -27,6 +27,11 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app import schemas
 
 from netra_backend.tests.test_agent_service_mock_classes import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AgentState,
     MockSupervisorAgent,
     AgentOrchestrator

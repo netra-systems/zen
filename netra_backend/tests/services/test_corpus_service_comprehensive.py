@@ -12,6 +12,11 @@ from schemas import Corpus, CorpusCreate, CorpusUpdate
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def mock_db():

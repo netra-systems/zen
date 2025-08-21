@@ -12,6 +12,11 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from routes.utils.websocket_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     authenticate_websocket_user,
     decode_token_payload,
     validate_user_id_in_payload

@@ -12,6 +12,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentE2ECriticalTools(AgentE2ETestBase):
     """Critical tests for tool integration and state management"""

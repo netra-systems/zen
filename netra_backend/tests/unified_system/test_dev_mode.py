@@ -33,6 +33,11 @@ from netra_backend.app.schemas.core_models import User
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.core.config import get_config
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDevModeAuthentication:
     """Test development mode authentication flows"""

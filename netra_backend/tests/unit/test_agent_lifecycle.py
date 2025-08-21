@@ -18,6 +18,11 @@ from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
 from netra_backend.app.agents.state import DeepAgentState
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test implementation of AgentLifecycleMixin
 class TestAgent(AgentLifecycleMixin):

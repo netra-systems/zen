@@ -16,6 +16,11 @@ from unittest.mock import patch
 from netra_backend.app.services.generation_service import run_content_generation_job
 from netra_backend.app.schemas.Generation import ContentGenParams, ContentCorpusGenParams
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def large_corpus_params():

@@ -10,6 +10,11 @@ from unittest.mock import AsyncMock
 
 from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import agent_service, mock_supervisor
 from netra_backend.tests.helpers.test_agent_orchestration_assertions import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     setup_websocket_message, assert_thread_operations_handled
 )
 

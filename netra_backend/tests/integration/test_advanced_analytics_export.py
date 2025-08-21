@@ -29,6 +29,11 @@ from unittest.mock import Mock, AsyncMock, patch
 from netra_backend.app.db.clickhouse import ClickHouseService
 from netra_backend.app.services.thread_analytics import get_analytics_dashboard
 from netra_backend.tests.helpers.analytics_export_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AdvancedAnalyticsExportInfrastructure,
     AnalyticsDataGenerator,
     ExportConfigFactory

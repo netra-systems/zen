@@ -9,7 +9,7 @@ from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITI
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.tool_permissions.permission_definitions import PermissionDefinitions
 from netra_backend.app.services.tool_permissions.permission_checker import PermissionChecker
-from netra_backend.app.services.api_gateway.rate_limiter import RateLimiter
+from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 from netra_backend.app.services.tool_permissions.tool_availability_processor import ToolAvailabilityProcessor
 
 logger = central_logger

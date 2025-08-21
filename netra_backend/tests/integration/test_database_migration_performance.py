@@ -20,6 +20,11 @@ import asyncpg
 
 from netra_backend.tests.database_migration_validators import MigrationValidator, ContainerizedDatabaseManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDatabaseMigrationPerformance:
     """Performance and concurrency migration tests."""

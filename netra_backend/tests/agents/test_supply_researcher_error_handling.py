@@ -10,6 +10,11 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 from netra_backend.app.agents.state import DeepAgentState
 from llm.llm_manager import LLMManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSupplyResearcherErrorHandling:
     """Test suite for SupplyResearcherAgent error handling"""

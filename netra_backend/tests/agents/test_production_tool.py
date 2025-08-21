@@ -5,6 +5,11 @@ from unittest.mock import AsyncMock, patch
 
 from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
 from netra_backend.tests.helpers.tool_dispatcher_assertions import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     assert_production_tool_initialized,
     assert_tool_execute_response_success,
     assert_tool_execute_response_error,

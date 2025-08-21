@@ -16,6 +16,11 @@ from test_framework.test_patterns import L3IntegrationTest
 from netra_backend.app.core.redis_client import RedisManager
 from netra_backend.app.services.session_service import SessionService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSessionManagementBasic(L3IntegrationTest):
     """Test session management from multiple angles."""

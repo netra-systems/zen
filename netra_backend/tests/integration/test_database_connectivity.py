@@ -4,6 +4,11 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 async def test_database_connectivity_check_success():

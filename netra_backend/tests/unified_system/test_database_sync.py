@@ -22,6 +22,11 @@ from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.tests.fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     test_user, test_database, clean_database_state
 )
 

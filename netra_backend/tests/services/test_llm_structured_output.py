@@ -13,6 +13,11 @@ from netra_backend.tests.helpers.llm_manager_helpers import LLMProvider, count_p
 from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
 from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class OutputSchema(BaseModel):
     """Test schema for structured output"""

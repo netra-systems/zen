@@ -34,6 +34,11 @@ from schemas import UserInDB
 from netra_backend.app.core.exceptions_base import NetraException, StateRecoveryException
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -23,6 +23,11 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 OAuthService = AsyncMock

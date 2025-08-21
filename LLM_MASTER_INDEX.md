@@ -9,13 +9,20 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
 
-### Configuration Files (Multiple Similar Names)
+### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
 |------|----------|---------|------------------|
-| `config.py` | `/app/config.py` | Main FastAPI app config | Often confused with scripts/config_setup_core.py |
-| `config_setup_core.py` | `/scripts/config_setup_core.py` | Development setup script | NOT the main config |
-| `.env` | `/` (root) | Environment variables | Check here for secrets |
-| `settings.json` | `/frontend/settings.json` | Frontend settings | Different from backend config |
+| **UNIFIED CONFIG** | `/netra_backend/app/core/configuration/` | **NEW: Single source of truth** | Replaces 110+ duplicate config files |
+| `config.py` | `/netra_backend/app/config.py` | Main config interface | Use get_config() for all access |
+| `base.py` | `/netra_backend/app/core/configuration/base.py` | Core orchestration | Central configuration manager |
+| `database.py` | `/netra_backend/app/core/configuration/database.py` | Database configs | All DB settings unified |
+| `services.py` | `/netra_backend/app/core/configuration/services.py` | External services | API endpoints, OAuth, etc |
+| `secrets.py` | `/netra_backend/app/core/configuration/secrets.py` | Secret management | GCP Secret Manager integration |
+| **DEPRECATED** | | | |
+| ~~`config_environment.py`~~ | ~~`/netra_backend/app/`~~ | **REMOVED** | Use unified config |
+| ~~`config_loader.py`~~ | ~~`/netra_backend/app/`~~ | **REMOVED** | Use unified config |
+| ~~`config_manager.py`~~ | ~~`/netra_backend/app/`~~ | **REMOVED** | Use unified config |
+| ~~`config_envvars.py`~~ | ~~`/netra_backend/app/`~~ | **REMOVED** | Use unified config |
 
 ### Database Files (Similar Names, Different DBs)
 | File | Location | Purpose | Key Functions |
@@ -72,10 +79,21 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ### Test Files (Multiple Test Types)
 | Test Type | Location | Pattern | Run Command |
 |-----------|----------|---------|-------------|
-| Unit Tests | `/app/tests/unit/` | `test_*.py` | `python -m test_framework.test_runner --level unit` |
-| E2E Tests | `/app/tests/e2e/` | `test_e2e_*.py` | `python -m test_framework.test_runner --level e2e` |
-| Real Agent Tests | `/app/tests/` | `test_real_agent_services.py` | Direct test file |
+| Unit Tests | `/netra_backend/tests/unit/` | `test_*.py` | `python -m test_framework.test_runner --level unit` |
+| Integration Tests | `/netra_backend/tests/integration/` | `test_*.py` | `python -m test_framework.test_runner --level integration` |
+| E2E Tests | `/tests/unified/e2e/` | `test_*.py` | `python -m test_framework.test_runner --level e2e` |
+| Import Tests | `/netra_backend/tests/` | `test_imports.py` | `python scripts/test_imports.py` |
+| Legacy Tests | `/legacy_integration_tests/` | `test_*.py` | **DEPRECATED - Do not use** |
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `npm test` |
+
+### Import Testing System
+| Component | Location | Purpose | Key Functions |
+|-----------|----------|---------|---------------|
+| **Import Tester** | `/test_framework/import_tester.py` | Core import validation | ImportTester class, test_module() |
+| **Standalone Script** | `/scripts/test_imports.py` | Direct CLI access | Fast-fail import checking |
+| **Test Integration** | `/netra_backend/tests/test_imports.py` | Pytest import tests | Unit test for imports |
+| **Documentation** | `/docs/import_testing.md` | Usage guide | Complete documentation |
+| **Reports** | `/test_reports/` | Import test results | JSON format reports |
 
 ### Bad Test Detection System
 | Component | Location | Purpose | Key Functions |
@@ -316,6 +334,15 @@ python scripts/test_backend.py --no-bad-test-detection
 | **`unified_configuration_management.xml`** | Config management | Unified config |
 | **`tool_auth_system.xml`** | Tool authentication | Tool access |
 | **`feature_flags.xml`** | Feature toggles | Feature management |
+
+### 📚 Critical Configuration Documentation
+| Document | Location | Purpose |
+|----------|----------|---------|
+| **Configuration System** | `/netra_backend/app/core/configuration/README.md` | Complete unified config documentation |
+| **Hot Reload Guide** | `/docs/hot-reload-configuration.md` | Zero-downtime configuration updates |
+| **Migration Guide** | `/docs/configuration-migration.md` | Migration from legacy system |
+| **Configuration Learnings** | `/SPEC/learnings/unified_configuration.xml` | Critical learnings to prevent regression |
+| **Import Testing Guide** | `/docs/import_testing.md` | Fast-fail import validation |
 
 ### 🚀 Deployment & Infrastructure
 | Spec | Purpose | Environment |

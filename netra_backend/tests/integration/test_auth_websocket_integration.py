@@ -16,6 +16,11 @@ from datetime import datetime, timedelta
 from schemas import UserInDB
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 class TestAuthToWebSocketFlow:

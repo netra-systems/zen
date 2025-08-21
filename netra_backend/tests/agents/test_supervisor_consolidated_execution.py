@@ -9,6 +9,11 @@ from llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSupervisorAgentExecution:
     """Test execution methods."""

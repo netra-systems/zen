@@ -13,6 +13,11 @@ import os
 from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any, List, Tuple
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Core config secrets components  
 from config_secrets_manager import ConfigSecretsManager
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError

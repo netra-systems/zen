@@ -32,7 +32,7 @@ from netra_backend.app.schemas.Config import AppConfig
 
 # DEPRECATED: Old config manager - kept for backward compatibility only
 try:
-    from netra_backend.app.config_manager import ConfigManager as LegacyConfigManager
+    from netra_backend.app.core.configuration.manager import ConfigManager as LegacyConfigManager
     _legacy_config_manager = LegacyConfigManager()
 except ImportError:
     _legacy_config_manager = None

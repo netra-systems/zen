@@ -33,6 +33,11 @@ from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from logging_config import central_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = central_logger.get_logger(__name__)
 
 

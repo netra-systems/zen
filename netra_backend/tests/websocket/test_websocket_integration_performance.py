@@ -15,6 +15,11 @@ from netra_backend.app.websocket.compression import WebSocketCompressor
 from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class WebSocketIntegrationTestHelper:
     """Helper class for integration testing."""

@@ -16,6 +16,11 @@ import uuid
 import jwt
 from datetime import datetime, timedelta, timezone
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthUserPersistenceRegression:
     """Regression tests for auth user persistence issues."""

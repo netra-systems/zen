@@ -12,6 +12,11 @@ from sqlalchemy import select
 import hashlib
 import json
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Test 76: Thread repository operations
 class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""

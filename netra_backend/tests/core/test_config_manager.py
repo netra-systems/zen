@@ -8,9 +8,14 @@ from pydantic import ValidationError
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from netra_backend.app.core.config_validator import ConfigValidator, ConfigurationValidationError
 from netra_backend.app.core.exceptions_config import ConfigurationError
-from config_manager import ConfigManager
+from netra_backend.app.core.configuration.manager import ConfigManager
 from config import get_config, reload_config
 from netra_backend.app.schemas.Config import AppConfig, DevelopmentConfig
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 
 
 class TestSecretManager:
@@ -322,7 +327,7 @@ class TestConfigurationIntegration:
         # Use clear=True to ensure only our test env vars are set
         with patch.dict(os.environ, test_env, clear=True):
             # Create a new config manager to avoid cached config
-            from netra_backend.app.config_manager import ConfigManager
+            from netra_backend.app.core.configuration.manager import ConfigManager
             manager = ConfigManager()
             
             # Override the _load_secrets_into_config to apply our DATABASE_URL

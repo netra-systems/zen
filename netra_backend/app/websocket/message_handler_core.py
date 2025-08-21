@@ -17,7 +17,7 @@ from typing import Dict, Any, Optional, Callable, Awaitable
 from dataclasses import dataclass
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.services.corpus.validation import MessageValidator, default_message_validator
 from netra_backend.app.services.synthetic_data.error_handler import WebSocketErrorHandler, default_error_handler
 

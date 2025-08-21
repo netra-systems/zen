@@ -13,6 +13,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from llm.llm_manager import LLMManager
 from netra_backend.tests.test_fixtures import mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher
 from netra_backend.tests.test_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     create_mock_infrastructure, create_mock_persistence, create_multiple_supervisors,
     create_concurrent_tasks, verify_concurrent_results, setup_mock_llm_with_retry,
     create_tool_execution_mocks, create_llm_response_with_tools, execute_tool_calls,

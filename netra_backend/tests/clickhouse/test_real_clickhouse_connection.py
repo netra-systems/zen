@@ -6,6 +6,11 @@ Tests actual ClickHouse connections and basic operations
 import pytest
 from logging_config import central_logger as logger
 from netra_backend.tests.clickhouse_test_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     real_clickhouse_client,
     check_system_metrics_permission
 )

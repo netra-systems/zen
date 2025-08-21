@@ -23,6 +23,11 @@ from netra_backend.app.services.observability.prometheus_exporter import Prometh
 from netra_backend.app.services.observability.tracing_service import TracingService
 from netra_backend.app.services.observability.alert_manager import AlertManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -27,6 +27,11 @@ from netra_backend.app.services.api_gateway.schema_mapper import SchemaMapper
 from netra_backend.app.services.api_gateway.data_converter import DataConverter
 from netra_backend.app.services.validation.schema_validator import SchemaValidator
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

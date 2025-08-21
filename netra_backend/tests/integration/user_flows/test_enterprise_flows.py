@@ -23,6 +23,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.tests..test_helpers.user_flow_base import UserFlowTestBase
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.integration
 @pytest.mark.asyncio

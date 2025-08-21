@@ -3,6 +3,11 @@ import time
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
 from netra_backend.app.services.llm_cache_service import LLMCacheService
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 async def test_llm_cache_service_initialization():
     cache_service = LLMCacheService()
     assert cache_service.cache_core.default_ttl == 3600

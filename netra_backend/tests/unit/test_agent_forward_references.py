@@ -6,6 +6,11 @@ instantiated with all their forward references resolved.
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import all required types
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
 from netra_backend.app.routes.unified_tools.schemas import AgentCompleted, AgentResult, AgentState

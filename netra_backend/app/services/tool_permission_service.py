@@ -8,11 +8,11 @@ All functionality has been split into focused modules ≤300 lines with function
 # Import all modular components for backward compatibility
 from typing import Dict, List, Optional, Any
 import redis
-from netra_backend.app.tool_permissions.tool_permission_service_main import ToolPermissionService
-from netra_backend.app.tool_permissions.permission_definitions import PermissionDefinitions
-from netra_backend.app.tool_permissions.permission_checker import PermissionChecker
-from netra_backend.app.tool_permissions.rate_limiter import RateLimiter
-from netra_backend.app.tool_permissions.tool_availability_processor import ToolAvailabilityProcessor
+from netra_backend.app.services.tool_permissions.tool_permission_service_main import ToolPermissionService
+from netra_backend.app.services.tool_permissions.permission_definitions import PermissionDefinitions
+from netra_backend.app.services.tool_permissions.permission_checker import PermissionChecker
+from netra_backend.app.services.tool_permissions.rate_limiter import RateLimiter
+from netra_backend.app.services.tool_permissions.tool_availability_processor import ToolAvailabilityProcessor
 from netra_backend.app.schemas.ToolPermission import (
     ToolPermission, ToolExecutionContext, PermissionCheckResult, 
     ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit

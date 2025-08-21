@@ -11,6 +11,11 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
 from cryptography.fernet import Fernet
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Test 11: config_validator_schema_validation
 class TestConfigValidator:
     """Test configuration schema validation - app/core/config_validator.py"""

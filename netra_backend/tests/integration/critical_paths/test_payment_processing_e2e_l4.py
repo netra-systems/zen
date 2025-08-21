@@ -36,6 +36,11 @@ from netra_backend.tests.unified.e2e.payment_flow_manager import PaymentFlowMana
 from netra_backend.tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from netra_backend.app.schemas.UserPlan import PlanTier
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class PaymentWebhookProcessor:
     """Processes payment webhooks with retry and validation."""

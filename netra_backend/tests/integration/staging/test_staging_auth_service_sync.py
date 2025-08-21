@@ -24,6 +24,11 @@ import aiohttp
 import jwt
 
 from netra_backend.app.core.cross_service_auth import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     CrossServiceAuthManager,
     AuthToken,
     AuthTokenType,

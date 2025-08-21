@@ -40,6 +40,46 @@ class RateLimitState:
             self.last_hour_reset = current_time
 
 
+class RateLimiter:
+    """Rate limiter for API Gateway."""
+    
+    def __init__(self, config: Optional[RateLimitConfig] = None):
+        self.config = config or RateLimitConfig(
+            requests_per_minute=60,
+            requests_per_hour=1000,
+            burst_size=10,
+            enabled=True
+        )
+        self.states: Dict[str, RateLimitState] = defaultdict(RateLimitState)
+    
+    def check_rate_limit(self, client_id: str) -> tuple[bool, Optional[str]]:
+        """Check if a client has exceeded rate limits."""
+        if not self.config.enabled:
+            return True, None
+        
+        state = self.states[client_id]
+        state.reset_if_needed()
+        
+        # Check minute limit
+        if state.requests_this_minute >= self.config.requests_per_minute:
+            return False, "Rate limit exceeded: too many requests per minute"
+        
+        # Check hour limit
+        if state.requests_this_hour >= self.config.requests_per_hour:
+            return False, "Rate limit exceeded: too many requests per hour"
+        
+        # Update counters
+        state.requests_this_minute += 1
+        state.requests_this_hour += 1
+        
+        return True, None
+    
+    def reset_client(self, client_id: str) -> None:
+        """Reset rate limit state for a client."""
+        if client_id in self.states:
+            del self.states[client_id]
+
+
 class ApiGatewayManager:
     """Manages API Gateway configuration and state."""
     

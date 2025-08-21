@@ -14,6 +14,11 @@ import re
 from unittest.mock import patch, MagicMock
 
 from netra_backend.app.core.websocket_cors import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     WebSocketCORSHandler, 
     SECURITY_CONFIG, 
     SUSPICIOUS_PATTERNS,

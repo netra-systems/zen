@@ -12,6 +12,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.tests.test_fixtures import supervisor_agent, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher
 from netra_backend.tests.test_helpers import setup_mock_llm_with_retry
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""

@@ -10,6 +10,11 @@ from fastapi.testclient import TestClient
 import websockets
 import json
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 async def test_websocket_jwt_validation_failure():

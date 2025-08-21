@@ -17,6 +17,11 @@ from test_framework.test_patterns import L3IntegrationTest
 from netra_backend.app.core.auth import TokenManager
 from netra_backend.app.core.redis_client import RedisManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthTokenRefreshFlow(L3IntegrationTest):
     """Test token refresh flow from multiple angles."""

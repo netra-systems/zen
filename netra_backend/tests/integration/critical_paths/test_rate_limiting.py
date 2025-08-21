@@ -22,6 +22,11 @@ from redis_manager import RedisManager
 import redis.asyncio as redis
 from unittest.mock import MagicMock, AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

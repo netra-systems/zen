@@ -8,6 +8,11 @@ from typing import Dict, Any
 from unittest.mock import patch, mock_open, MagicMock
 
 from netra_backend.app.core.type_validation import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TypeMismatchSeverity,
     TypeMismatch,
     TypeScriptParser,

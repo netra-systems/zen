@@ -33,6 +33,11 @@ from concurrent.futures import ThreadPoolExecutor
 from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger
 from netra_backend.app.services.health_check_service import HealthCheckService
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 RedisSessionManager = AsyncMock

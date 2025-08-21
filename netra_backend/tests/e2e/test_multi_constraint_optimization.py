@@ -8,6 +8,11 @@ import pytest
 from typing import Dict, List
 
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     create_agent_instances, build_multi_constraint_setup,
     execute_multi_constraint_workflow, create_triple_constraint_state,
     create_quality_cost_latency_state, validate_basic_workflow_execution,

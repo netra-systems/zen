@@ -34,6 +34,11 @@ from netra_backend.app.services.metrics.analytics_collector import AnalyticsColl
 from netra_backend.app.schemas.UserPlan import PlanTier
 from test_framework.test_config import configure_dedicated_test_environment
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

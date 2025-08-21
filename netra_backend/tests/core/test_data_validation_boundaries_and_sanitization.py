@@ -9,6 +9,11 @@ from netra_backend.app.websocket.validation import MessageValidator
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 from netra_backend.app.schemas.registry import WebSocketMessageType
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 def message_validator():
     """Create MessageValidator instance."""
     return MessageValidator(max_message_size=1024, max_text_length=100)

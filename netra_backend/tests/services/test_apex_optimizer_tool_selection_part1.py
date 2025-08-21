@@ -18,6 +18,11 @@ from netra_backend.app.services.context import ToolContext
 from schemas import AppConfig, RequestModel
 from netra_backend.app.core.exceptions_base import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class OptimizationCategory(Enum):
     COST_OPTIMIZATION = "cost_optimization"

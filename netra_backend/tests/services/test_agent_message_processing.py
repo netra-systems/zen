@@ -3,6 +3,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.services.agent_service import AgentService
 from schemas import AgentMessage, WebSocketMessage
 from datetime import datetime
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 class TestAgentMessageProcessing:
     
     async def test_process_user_message(self):

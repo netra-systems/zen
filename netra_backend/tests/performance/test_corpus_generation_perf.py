@@ -18,6 +18,11 @@ from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.schemas.Corpus import Corpus
 from netra_backend.app.agents.corpus_admin.models import CorpusMetadata
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestCorpusGenerationPerformance:
     """Performance tests for corpus generation"""

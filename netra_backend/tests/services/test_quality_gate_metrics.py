@@ -7,6 +7,11 @@ import pytest
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
 from netra_backend.tests.helpers.quality_gate_content import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     get_high_specificity_content,
     get_low_specificity_content,
     get_high_actionability_content,

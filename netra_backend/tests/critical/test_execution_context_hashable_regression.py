@@ -18,6 +18,11 @@ from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestExecutionContextHashableRegression:
     """Test suite to prevent ExecutionContext hashable type errors."""

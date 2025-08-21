@@ -26,6 +26,11 @@ from netra_backend.app.services.api_gateway.circuit_breaker_manager import Circu
 from netra_backend.app.services.api_gateway.fallback_service import ApiFallbackService
 from netra_backend.app.services.metrics.circuit_breaker_metrics import CircuitBreakerMetricsService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

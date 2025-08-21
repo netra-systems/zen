@@ -31,6 +31,11 @@ from unittest.mock import patch, AsyncMock
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 from netra_backend.app.logging_config import central_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = central_logger.get_logger(__name__)
 
 

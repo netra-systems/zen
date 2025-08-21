@@ -17,6 +17,11 @@ from netra_backend.app.db.base import Base
 import tempfile
 from sqlalchemy import select
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class FreeTierValueDemonstrationCore2Tests:
     """Core 2 tests for free tier value demonstration integration."""

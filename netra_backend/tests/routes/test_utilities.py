@@ -12,6 +12,11 @@ from contextlib import asynccontextmanager
 from netra_backend.app.services.security_service import SecurityService, KeyManager
 from config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def base_client():

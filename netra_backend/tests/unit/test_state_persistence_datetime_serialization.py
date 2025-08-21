@@ -9,6 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.state_serialization import DateTimeEncoder
 from netra_backend.app.schemas.agent_state import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     StatePersistenceRequest,
     CheckpointType,
     AgentPhase

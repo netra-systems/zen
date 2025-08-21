@@ -3,6 +3,11 @@
 L3 Integration Test: Agent Communication Basic Operations
 Tests agent-to-agent communication, message routing, and coordination
 from multiple angles including error cases and concurrent operations.
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 """
 
 import asyncio

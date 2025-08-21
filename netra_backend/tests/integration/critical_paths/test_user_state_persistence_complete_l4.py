@@ -19,6 +19,11 @@ from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.models.user import User, UserState, UserPreferences
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestUserStatePersistenceCompleteL4:
     """Complete user state persistence testing"""

@@ -9,6 +9,11 @@ from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime
 
 from netra_backend.app.agents.mcp_integration.context_manager import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MCPContextManager, MCPPermissionContext, MCPAgentContext
 )
 from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector

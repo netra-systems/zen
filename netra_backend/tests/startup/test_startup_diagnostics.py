@@ -14,6 +14,11 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import List, Dict, Optional
 
 from scripts.startup_diagnostics import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     StartupDiagnostics, collect_system_errors, check_port_conflicts,
     check_database_connection, check_dependencies, check_environment_variables,
     check_migrations, apply_fixes, apply_single_fix, fix_port_conflict,

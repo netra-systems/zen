@@ -20,6 +20,11 @@ import uuid
 from datetime import datetime, timedelta
 
 from netra_backend.tests.shared_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     operational_infrastructure, mcp_test_helper,
     MCPToolsTestHelper
 )

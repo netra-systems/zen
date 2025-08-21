@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 

@@ -13,6 +13,11 @@ from typing import Dict
 from unittest.mock import AsyncMock
 
 from netra_backend.app.schemas.admin_corpus_messages import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     CorpusDiscoveryRequest, CorpusDiscoveryResponse,
     CorpusGenerationRequest, CorpusGenerationResponse, 
     ConfigurationSuggestionRequest, ConfigurationSuggestionResponse,

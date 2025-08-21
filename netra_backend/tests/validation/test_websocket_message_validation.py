@@ -12,6 +12,11 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket.connection import ConnectionInfo
 import uuid
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestWebSocketMessageValidation:
     """Tests for message structure validation and field extraction."""

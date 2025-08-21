@@ -20,6 +20,11 @@ from schemas import SubAgentLifecycle
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 from netra_backend.app.core.exceptions import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def kv_cache_audit_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):

@@ -14,6 +14,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
 from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.skipif(
     os.environ.get("ENABLE_REAL_LLM_TESTING") != "true",

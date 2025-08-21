@@ -12,7 +12,13 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from netra_backend.app.services.api_gateway.rate_limiter import RateLimiter, RateLimitConfig
+from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter as RateLimiter
+from typing import NamedTuple
+
+class RateLimitConfig(NamedTuple):
+    """Configuration for rate limiting."""
+    requests_per_second: int = 10
+    burst_size: int = 20
 
 
 @dataclass

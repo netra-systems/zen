@@ -35,6 +35,11 @@ from monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.configuration.base import get_unified_config
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -26,6 +26,11 @@ from netra_backend.app.db.postgres import Database as PostgresDatabase
 from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
 from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class PerformanceTestMetrics:
     """Tracks performance test metrics and baselines."""

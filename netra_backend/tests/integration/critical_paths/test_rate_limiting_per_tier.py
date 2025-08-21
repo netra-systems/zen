@@ -37,6 +37,11 @@ from collections import defaultdict
 import logging
 
 from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TokenData, AuthProvider, SessionInfo
 )
 from auth_service.auth_core.core.jwt_handler import JWTHandler

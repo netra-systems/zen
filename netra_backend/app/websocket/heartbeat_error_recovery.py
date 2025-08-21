@@ -4,7 +4,7 @@ import asyncio
 from typing import Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.core.error_types import ErrorSeverity
 
 logger = central_logger.get_logger(__name__)

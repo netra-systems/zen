@@ -16,6 +16,11 @@ from netra_backend.app.core.secret_manager_types import SecretAccessLevel, Secre
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 from netra_backend.app.schemas.config_types import EnvironmentType
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSecretManagerCore:
     """Test suite for EnhancedSecretManager core functionality."""

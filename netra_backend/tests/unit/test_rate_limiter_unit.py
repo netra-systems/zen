@@ -20,6 +20,11 @@ import redis
 from netra_backend.app.services.tool_permissions.rate_limiter import ToolPermissionRateLimiter
 from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test fixtures for setup
 @pytest.fixture

@@ -326,7 +326,7 @@ class ImportTester:
             'netra_backend.app.routes.threads_route',
             
             # Core infrastructure
-            'netra_backend.app.core.websocket_connection_manager',
+            'netra_backend.app.websocket.ws_manager',
             'netra_backend.app.core.error_handlers',
             'netra_backend.app.core.configuration.base',
         ]

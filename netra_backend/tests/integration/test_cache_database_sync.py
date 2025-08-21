@@ -19,6 +19,11 @@ from typing import Dict, List
 
 from logging_config import central_logger
 from netra_backend.tests.cache_invalidation_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     CacheInvalidationMetrics,
     MultiLayerCacheManager,
     CACHE_TEST_CONFIG,

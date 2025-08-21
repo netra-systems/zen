@@ -3,6 +3,11 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 class TestConfigEndpoint:
     
     def test_get_public_config(self):

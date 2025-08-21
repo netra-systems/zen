@@ -9,6 +9,11 @@ from typing import Dict, Any, List
 
 from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestBroadcastMechanisms:
     """Test broadcast mechanisms and subscription management."""

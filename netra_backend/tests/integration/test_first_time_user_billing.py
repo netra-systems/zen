@@ -20,6 +20,11 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.tests.first_time_user_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     usage_service, track_usage_and_verify,
     assert_billing_metrics
 )

@@ -22,6 +22,11 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
 from netra_backend.app.services.factory_status.business_core import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     BusinessValueScore, BusinessObjective, ValueCategory, ROIEstimate
 )
 from netra_backend.app.db.models_user import User, ToolUsageLog

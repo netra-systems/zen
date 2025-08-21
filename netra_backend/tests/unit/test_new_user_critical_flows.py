@@ -29,6 +29,11 @@ from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.services.user_service import user_service
 from netra_backend.app.clients.auth_client import auth_client
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestNewUserCriticalFlows:
     """

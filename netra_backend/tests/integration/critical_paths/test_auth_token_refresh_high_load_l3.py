@@ -33,6 +33,11 @@ import random
 import statistics
 
 from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     Token, TokenData, LoginRequest, LoginResponse,
     SessionInfo, RefreshRequest, RefreshResponse
 )

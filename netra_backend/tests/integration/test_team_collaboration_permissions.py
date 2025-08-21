@@ -33,6 +33,11 @@ from netra_backend.tests.integration.critical_paths.test_workspace_resource_shar
 from netra_backend.tests.integration.critical_paths.test_concurrent_editing_performance import TestConcurrentEditingPerformance
 from netra_backend.tests.integration.critical_paths.test_team_isolation_security import TestTeamIsolationSecurity
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # All core classes and functionality moved to:
 # app/tests/integration/test_helpers/team_collaboration_base.py
 

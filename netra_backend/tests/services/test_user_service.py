@@ -13,6 +13,11 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.schemas.User import UserUpdate
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestUserService:
     """Test suite for User Service"""

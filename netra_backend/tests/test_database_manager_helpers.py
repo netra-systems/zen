@@ -36,6 +36,11 @@ from netra_backend.tests.fixtures.database_test_fixtures import create_mock_user
 import subprocess
 import shutil
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDatabaseManager:
     """Manager for test database lifecycle and utilities."""
@@ -50,6 +55,7 @@ class TestDatabaseManager:
 
     def _load_base_config(self) -> Dict[str, str]:
         """Load base database configuration."""
+        # Test-specific database configuration from environment
         return {
             "postgres_host": os.environ.get("TEST_POSTGRES_HOST", "localhost"),
             "postgres_port": os.environ.get("TEST_POSTGRES_PORT", "5432"),

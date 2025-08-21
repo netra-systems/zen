@@ -9,6 +9,11 @@ from sqlalchemy import inspect, Boolean, Integer, String, DateTime, JSON
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.db.base import Base
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSchemaConsistency:
     """Test database schema consistency."""

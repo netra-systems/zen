@@ -13,6 +13,11 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.tests.test_fixtures_common import test_database, mock_infrastructure
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentCollaborationIntegration:
     """Agent collaboration and workflow integration tests"""

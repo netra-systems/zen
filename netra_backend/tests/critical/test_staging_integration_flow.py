@@ -19,6 +19,11 @@ from main import create_app
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from startup_checks.checker import StartupChecker
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def staging_environment():

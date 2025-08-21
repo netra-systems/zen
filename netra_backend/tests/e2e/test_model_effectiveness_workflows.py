@@ -18,6 +18,11 @@ from ws_manager import WebSocketManager
 from schemas import SubAgentLifecycle
 from netra_backend.app.core.exceptions import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):

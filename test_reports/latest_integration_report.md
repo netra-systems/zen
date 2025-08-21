@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:22:05.416463  
+**Generated:** 2025-08-21T10:36:25.087877  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.39s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.90s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 5.42s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.05s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 8.29s
-- **Exit Code:** 5
+- **Total Duration:** 6.48s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
@@ -57,37 +57,54 @@ Test Configuration:
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests app/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-created: 4/4 workers
-4 workers [0 items]
-
-scheduling tests via LoadScheduling
-
 ================================================================================
-BAD TEST DETECTION REPORT
+[FAIL] TESTS FAILED with exit code 4 after 4.64s
 ================================================================================
 
-Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 18
-
-================================================================================
-
-
-[33m============================ [33mno tests ran[0m[33m in 3.89s[0m[33m ============================[0m
-================================================================================
-[FAIL] TESTS FAILED with exit code 5 after 6.76s
-================================================================================
-
-2025-08-21 10:21:59.652 | WARNING  | netra_backend.app.core.unified_logging:_emit_log:117 | Failed to load GCP secrets: 'SecretManager' object has no attribute 'load_all_secrets'
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
+netra_backend\tests\conftest.py:59: in <module>
+    from netra_backend.app.routes.mcp.main import app
+netra_backend\app\routes\mcp\__init__.py:8: in <module>
+    from netra_backend.app.routes.mcp.main import router
+netra_backend\app\routes\mcp\main.py:13: in <module>
+    from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
+netra_backend\app\auth_integration\__init__.py:87: in <module>
+    from netra_backend.app.services.synthetic_data.validators import (
+netra_backend\app\services\synthetic_data\__init__.py:5: in <module>
+    from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService, synthetic_data_service
+netra_backend\app\services\synthetic_data\core_service.py:9: in <module>
+    from netra_backend.app.services.synthetic_data.synthetic_data_service_main import SyntheticDataService, synthetic_data_service
+netra_backend\app\services\synthetic_data\synthetic_data_service_main.py:7: in <module>
+    from netra_backend.app.services.synthetic_data.generation_coordinator import GenerationCoordinator
+netra_backend\app\services\synthetic_data\generation_coordinator.py:8: in <module>
+    from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
+netra_backend\app\services\synthetic_data\core_service_base.py:13: in <module>
+    from netra_backend.app.services.synthetic_data.job_manager import JobManager
+netra_backend\app\services\synthetic_data\job_manager.py:11: in <module>
+    from netra_backend.app.services.websocket.ws_manager import manager
+netra_backend\app\services\websocket\ws_manager.py:14: in <module>
+    from netra_backend.app.ws_manager import (
+netra_backend\app\ws_manager.py:21: in <module>
+    from netra_backend.app.websocket.connection import ConnectionInfo
+netra_backend\app\websocket\connection.py:14: in <module>
+    from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+netra_backend\app\websocket\connection_manager.py:19: in <module>
+    from netra_backend.app.websocket.connection_executor import ConnectionExecutionOrchestrator
+netra_backend\app\websocket\connection_executor.py:13: in <module>
+    from netra_backend.app.agents.base.interface import (
+netra_backend\app\agents\base\__init__.py:15: in <module>
+    from netra_backend.app.agents.base_agent import BaseSubAgent
+netra_backend\app\agents\base_agent.py:9: in <module>
+    from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
+    from netra_backend.app.routes.unified_tools.router import router
+netra_backend\app\routes\unified_tools\router.py:10: in <module>
+    from netra_backend.app.services.tool_permission_service import ToolPermissionService
+netra_backend\app\services\tool_permission_service.py:11: in <module>
+    from netra_backend.app.tool_permissions.tool_permission_service_main import ToolPermissionService
+E   ModuleNotFoundError: No module named 'netra_backend.app.tool_permissions'
 
 ```
 

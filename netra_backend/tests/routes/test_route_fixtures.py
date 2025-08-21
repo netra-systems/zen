@@ -14,6 +14,11 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager  
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockDBSession:
     """Mock database session for testing."""

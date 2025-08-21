@@ -26,6 +26,11 @@ from enum import Enum
 from monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 # L3 integration test markers

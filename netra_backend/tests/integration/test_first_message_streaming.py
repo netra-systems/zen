@@ -17,6 +17,11 @@ from netra_backend.app.services.agent_service_core import AgentService
 from schemas import UserInDB, StreamingResponse
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 class TestFirstMessageStreaming:

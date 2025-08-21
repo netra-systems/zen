@@ -16,6 +16,11 @@ from netra_backend.app.services.websocket.ws_manager import WebSocketManager, Co
 from netra_backend.app.core.exceptions_base import NetraException
 
 from netra_backend.tests.test_ws_connection_mocks import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MockWebSocket, MockConnectionPool, WebSocketTestHelpers
 )
 

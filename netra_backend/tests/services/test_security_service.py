@@ -4,6 +4,11 @@ from netra_backend.app.services.security_service import SecurityService, KeyMana
 from schemas import AppConfig
 from cryptography.fernet import Fernet
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 @pytest.fixture
 def security_service():
     mock_settings = AppConfig(jwt_secret_key="a_super_secret_jwt_key_for_development_that_is_long_enough", fernet_key=Fernet.generate_key())

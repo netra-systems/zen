@@ -16,6 +16,11 @@ from netra_backend.app import schemas
 from netra_backend.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig, ClickHouseService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def full_stack():

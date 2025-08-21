@@ -272,20 +272,38 @@ RUNNERS = {
 
 # Component mappings for focused testing
 COMPONENT_MAPPINGS = {
-    "core": ["app/core", "app/config", "app/dependencies"],
-    "agents": ["app/agents", "app/services/agent"],
-    "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
-    "database": ["app/db", "app/services/database", "test_database"],
-    "api": ["app/routes", "test_api", "test_auth"],
-    "frontend": ["frontend"]
+    "backend": {
+        "paths": ["netra_backend/tests"],
+        "exclude": ["frontend", "auth_service"]
+    },
+    "frontend": {
+        "paths": ["frontend/__tests__"],
+        "exclude": []
+    },
+    "auth": {
+        "paths": ["netra_backend/tests/auth_integration", "auth_service/tests"],
+        "exclude": []
+    },
+    "agents": {
+        "paths": ["netra_backend/tests/agents"],
+        "exclude": []
+    },
+    "database": {
+        "paths": ["netra_backend/tests/database", "netra_backend/tests/clickhouse"],
+        "exclude": []
+    },
+    "websocket": {
+        "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
+        "exclude": []
+    }
 }
 
 # Shard mappings for CI/CD parallel execution (numeric sharding)
 SHARD_MAPPINGS = {
-    "1/4": ["app/core", "app/config", "app/dependencies"],
-    "2/4": ["app/agents", "app/services/agent"],
-    "3/4": ["app/ws_manager", "app/services/websocket", "app/db", "app/services/database"],
-    "4/4": ["app/routes", "test_api", "test_auth", "frontend"]
+    "1/4": ["netra_backend/app/core", "netra_backend/app/config", "netra_backend/app/dependencies"],
+    "2/4": ["netra_backend/app/agents", "netra_backend/app/services/agent"],
+    "3/4": ["netra_backend/app/ws_manager", "netra_backend/app/services/websocket", "netra_backend/app/db", "netra_backend/app/services/database"],
+    "4/4": ["netra_backend/app/routes", "test_api", "test_auth", "frontend"]
 }
 
 def configure_staging_environment(staging_url: str, staging_api_url: str):

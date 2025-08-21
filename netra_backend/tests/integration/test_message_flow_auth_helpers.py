@@ -14,6 +14,11 @@ from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 import time
 from routes.utils.websocket_helpers import validate_websocket_token
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 def create_test_token(user_id: str) -> str:
     """Create a valid test token."""
     return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")

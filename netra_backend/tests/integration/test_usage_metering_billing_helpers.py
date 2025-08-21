@@ -29,6 +29,11 @@ from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollect
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MeteringCoreHelper:
     """Helper class for metering core functionality."""

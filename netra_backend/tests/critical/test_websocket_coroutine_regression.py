@@ -11,6 +11,11 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import WebSocket
 
 from routes.utils.websocket_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     parse_json_message,
     _handle_ping_message,
     validate_and_handle_message,

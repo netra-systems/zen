@@ -11,6 +11,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 
 from netra_backend.tests.e2e.scaling_test_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     create_scaling_setup, execute_scaling_workflow,
     create_gradual_scaling_state, create_traffic_spike_state,
     validate_gradual_scaling_plan, validate_spike_handling_strategy

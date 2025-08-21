@@ -5,6 +5,11 @@ Re-exports all test classes from focused modules for backwards compatibility
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import all test classes from focused modules
 from netra_backend.tests.array_operations_tests import TestClickHouseArrayOperations
 from netra_backend.tests.log_ingestion_tests import TestRealisticLogIngestion  

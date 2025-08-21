@@ -12,6 +12,11 @@ from netra_backend.app.config import settings
 import json
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSessionCreationL3:
     """Test session creation scenarios"""

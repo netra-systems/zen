@@ -8,6 +8,11 @@ from unittest.mock import Mock, patch, AsyncMock
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDataTransformation:
     """Test data transformation capabilities"""

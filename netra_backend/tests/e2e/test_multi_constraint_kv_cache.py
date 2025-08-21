@@ -10,6 +10,11 @@ import asyncio
 from typing import Dict, List
 
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     create_test_llm_manager, create_test_websocket_manager, create_agent_instances,
     build_multi_constraint_setup, execute_multi_constraint_workflow,
     create_kv_cache_audit_state, create_comprehensive_cache_state,

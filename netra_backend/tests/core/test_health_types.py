@@ -5,6 +5,11 @@ from datetime import datetime, UTC
 from dataclasses import asdict
 
 from netra_backend.app.core.health_types import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult,
     SystemResourceMetrics, AlertSeverity, RecoveryAction
 )

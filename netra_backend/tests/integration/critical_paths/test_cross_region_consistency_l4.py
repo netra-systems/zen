@@ -30,6 +30,11 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )

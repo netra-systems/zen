@@ -7,6 +7,11 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     sample_quality_metrics,
     sla_targets,
     actual_metrics

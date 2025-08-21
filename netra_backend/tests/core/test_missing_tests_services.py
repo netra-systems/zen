@@ -14,6 +14,11 @@ import os
 from unittest.mock import Mock, patch
 from cryptography.fernet import Fernet
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test 15: logging_manager_configuration
 class TestLoggingManagerService:

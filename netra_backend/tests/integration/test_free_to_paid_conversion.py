@@ -24,6 +24,11 @@ from netra_backend.app.db.base import Base
 import tempfile
 import asyncio
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 def mock_justified(reason):
     """Decorator for justified mocks per testing standards"""

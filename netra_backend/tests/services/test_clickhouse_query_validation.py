@@ -9,6 +9,11 @@ from typing import List
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestClickHouseQueryValidator:
     """Test ClickHouse query validation functionality"""

@@ -29,6 +29,11 @@ from typing import Dict, Any, Optional
 from urllib.parse import urlencode, parse_qs, urlparse
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 OAuthService = AsyncMock

@@ -21,6 +21,11 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # from netra_backend.app.services.database.tenant_service import TenantService
 TenantService = AsyncMock
 # Permissions service replaced with auth_integration

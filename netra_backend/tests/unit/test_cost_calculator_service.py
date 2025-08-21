@@ -16,6 +16,11 @@ from decimal import Decimal, ROUND_HALF_UP
 from unittest.mock import Mock, patch
 
 from netra_backend.app.services.cost_calculator import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     CostCalculatorService, BudgetManager, CostTier, ModelCostInfo,
     create_cost_calculator, create_budget_manager, optimize_model_selection,
     calculate_cost_savings

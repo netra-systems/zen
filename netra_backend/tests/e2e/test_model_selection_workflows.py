@@ -6,6 +6,11 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import all test classes and fixtures from focused modules
 from netra_backend.tests.model_setup_helpers import model_selection_setup
 from netra_backend.tests.model_effectiveness_tests import TestModelEffectivenessAnalysis

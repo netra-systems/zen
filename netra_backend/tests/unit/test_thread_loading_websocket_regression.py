@@ -11,6 +11,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.websocket.ws_manager import manager
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 async def test_user_joins_thread_room_on_message():
     """Test that users join thread room when sending message with thread_id."""
     # Setup

@@ -21,6 +21,11 @@ from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, Permi
 from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 from netra_backend.app.core.exceptions_base import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Define test-specific exception
 class AuthorizationError(NetraException):
     pass

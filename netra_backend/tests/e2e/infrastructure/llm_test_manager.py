@@ -64,6 +64,7 @@ class LLMTestManager:
         
     def _load_config_from_env(self) -> LLMTestConfig:
         """Load configuration from environment variables."""
+        # Test-specific configuration from environment for LLM testing
         enabled = os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
         models_str = os.getenv("LLM_TEST_MODELS", "gpt-4,claude-3-opus")
         models = self._parse_models_from_string(models_str)
@@ -107,6 +108,7 @@ class LLMTestManager:
         
     def _create_openai_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create OpenAI client."""
+        # For test clients, read API key directly for test setup
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key or api_key.startswith("test-"):
             return None
@@ -118,6 +120,7 @@ class LLMTestManager:
             
     def _create_anthropic_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create Anthropic client."""
+        # For test clients, read API key directly for test setup
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key or api_key.startswith("test-"):
             return None
@@ -129,6 +132,7 @@ class LLMTestManager:
             
     def _create_gemini_client(self, model: LLMTestModel) -> Optional[Any]:
         """Create Gemini client."""
+        # For test clients, read API key directly for test setup
         api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         if not api_key or api_key.startswith("test-"):
             return None

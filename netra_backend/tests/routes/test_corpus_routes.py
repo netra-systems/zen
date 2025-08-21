@@ -17,6 +17,11 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.config import settings
 from netra_backend.tests.test_route_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     CommonResponseValidators,
     TEST_DOCUMENT_DATA
 )

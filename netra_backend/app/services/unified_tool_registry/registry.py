@@ -6,7 +6,7 @@ Provides centralized tool registration and execution management.
 
 from typing import Dict, List, Optional, Any, Callable
 import logging
-from netra_backend.app.services.apex_optimizer_agent.models import UnifiedTool, ToolExecutionResult
+from netra_backend.app.services.unified_tool_registry.models import UnifiedTool, ToolExecutionResult
 
 logger = logging.getLogger(__name__)
 

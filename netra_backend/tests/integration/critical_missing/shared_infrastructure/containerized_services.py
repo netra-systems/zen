@@ -35,7 +35,7 @@ class PostgreSQLContainer:
         """Start PostgreSQL container and return connection URL."""
         self.container.start()
         
-        # Use existing database URL for testing
+        # Use existing database URL for testing (test environment variable)
         self.connection_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/test_db")
         
         # Create connection pool for tests (optional for real testing)

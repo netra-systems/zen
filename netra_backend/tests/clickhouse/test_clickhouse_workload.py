@@ -11,6 +11,11 @@ import random
 from datetime import datetime, timedelta, UTC
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     initialize_clickhouse_tables,
     verify_workload_events_table,
     create_workload_events_table_if_missing

@@ -25,6 +25,11 @@ from sqlalchemy.orm import sessionmaker
 from logging_config import central_logger
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
 from netra_backend.tests..helpers.multi_service_auth_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     PostgreSQLContainer, AuthServiceSimulator, 
     BackendServiceSimulator, WebSocketServiceSimulator
 )

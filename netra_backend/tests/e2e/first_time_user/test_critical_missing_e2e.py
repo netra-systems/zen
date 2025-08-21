@@ -19,6 +19,11 @@ import uuid
 from netra_backend.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestCriticalMissingE2E:
     """TOP 5 most critical missing E2E tests for first-time user conversion"""

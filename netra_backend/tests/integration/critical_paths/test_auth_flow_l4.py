@@ -25,6 +25,11 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlencode, parse_qs, urlparse
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 OAuthService = AsyncMock

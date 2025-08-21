@@ -2,6 +2,11 @@
 
 import pytest
 from netra_backend.app.agents.utils import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     extract_json_from_response, 
     fix_common_json_errors,
     recover_truncated_json,

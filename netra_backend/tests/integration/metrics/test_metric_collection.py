@@ -21,6 +21,11 @@ from datetime import datetime, timezone
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.shared_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MetricEvent, MockMetricsCollector, MockUserActionTracker,
     metrics_collector, user_action_tracker
 )

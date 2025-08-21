@@ -25,6 +25,11 @@ from redis_manager import RedisManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 from netra_backend.tests.helpers.redis_l3_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     RedisContainer, 
     MockWebSocketForRedis, 
     create_test_message,

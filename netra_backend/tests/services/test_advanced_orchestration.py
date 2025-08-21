@@ -14,6 +14,11 @@ from enum import Enum
 from langchain_core.tools import BaseTool
 from netra_backend.app.core.exceptions_base import NetraException
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with error simulation capabilities"""

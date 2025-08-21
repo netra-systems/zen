@@ -30,6 +30,11 @@ import websockets
 
 from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.routes.websocket_enhanced import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     enhanced_websocket_endpoint,
     get_websocket_service_discovery,
     validate_websocket_token_enhanced,

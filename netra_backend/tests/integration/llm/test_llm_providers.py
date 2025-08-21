@@ -20,6 +20,11 @@ import time
 
 from netra_backend.tests.shared_fixtures import mock_llm_provider, mock_llm_manager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestLLMProviders:
     """BVJ: Validates LLM provider integration and fallback mechanisms."""

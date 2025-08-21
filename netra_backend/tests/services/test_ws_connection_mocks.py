@@ -15,6 +15,11 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockWebSocket:
     """Mock WebSocket for testing connection behavior"""

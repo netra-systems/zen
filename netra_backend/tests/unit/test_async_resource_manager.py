@@ -15,6 +15,11 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, Mock, patch
 
 from netra_backend.app.core.async_resource_manager import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AsyncResourceManager, AsyncTaskPool, get_global_resource_manager,
     get_global_task_pool, run_in_threadpool, shutdown_async_utils
 )

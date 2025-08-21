@@ -12,6 +12,11 @@ from datetime import datetime
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.app.agents.triage_sub_agent.models import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TriageResult, Priority, Complexity, KeyParameters, UserIntent, SuggestedWorkflow
 )
 from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse

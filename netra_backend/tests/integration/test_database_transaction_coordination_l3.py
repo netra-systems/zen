@@ -24,6 +24,11 @@ from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 from unittest.mock import patch, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Docker container management
 import docker
 from docker.errors import DockerException

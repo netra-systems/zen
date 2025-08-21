@@ -16,6 +16,11 @@ from netra_backend.app.schemas.Request import StartAgentPayload
 from netra_backend.app.core.exceptions import NetraException
 from starlette.websockets import WebSocketDisconnect
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentServiceCritical:
     """Critical agent service tests for essential functionality."""

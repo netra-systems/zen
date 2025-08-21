@@ -23,6 +23,11 @@ from netra_backend.app.core.database_connection_manager import DatabaseConnectio
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.monitoring.alerting_service import AlertingService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -17,6 +17,11 @@ from netra_backend.app.services.health_monitor import HealthMonitor
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthServiceFailoverCompleteL4:
     """Complete auth service failover testing"""

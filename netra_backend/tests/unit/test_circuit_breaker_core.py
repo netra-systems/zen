@@ -18,6 +18,11 @@ from netra_backend.app.core.shared_health_types import HealthChecker, HealthStat
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
 from netra_backend.app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test fixtures for setup
 @pytest.fixture

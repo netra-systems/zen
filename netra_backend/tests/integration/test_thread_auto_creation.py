@@ -20,6 +20,11 @@ from netra_backend.app.db.models_postgres import Thread, Message, Run, User
 from schemas import UserInDB, ThreadCreate
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 class TestThreadAutoCreation:

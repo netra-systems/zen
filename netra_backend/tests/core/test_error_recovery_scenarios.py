@@ -39,6 +39,11 @@ from netra_backend.app.websocket.recovery import WebSocketRecoveryManager, Recov
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class ErrorRecoveryTestFixtures:
     """Fixtures for controlled error injection and recovery testing"""

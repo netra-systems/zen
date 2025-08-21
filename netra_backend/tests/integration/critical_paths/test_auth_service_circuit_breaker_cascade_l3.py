@@ -24,6 +24,11 @@ from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 from clients.auth_client_cache import AuthCircuitBreakerManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

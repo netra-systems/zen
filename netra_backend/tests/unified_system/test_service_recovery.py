@@ -33,6 +33,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from unittest.mock import Mock, patch, AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Dev launcher recovery imports
 from dev_launcher.crash_recovery import CrashRecoveryManager
 from dev_launcher.crash_recovery_models import (

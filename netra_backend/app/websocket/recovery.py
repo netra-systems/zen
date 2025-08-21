@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.core.error_types import WebSocketErrorInfo as WebSocketError, ErrorSeverity
 
 logger = central_logger.get_logger(__name__)

@@ -8,6 +8,11 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
 from logging_config import central_logger as logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestClickHouseIntegration:
     """Integration tests for ClickHouse with the application"""

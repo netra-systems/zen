@@ -3,6 +3,11 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from datetime import datetime
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 class TestStatePersistence:
     
     async def test_save_agent_state(self):

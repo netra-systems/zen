@@ -4,7 +4,7 @@ Tool Registration Utilities
 Contains methods for registering different categories of tools with the unified registry.
 """
 from typing import TYPE_CHECKING
-from netra_backend.app.services.apex_optimizer_agent.models import UnifiedTool
+from netra_backend.app.services.unified_tool_registry.models import UnifiedTool
 
 if TYPE_CHECKING:
     from .registry import UnifiedToolRegistry

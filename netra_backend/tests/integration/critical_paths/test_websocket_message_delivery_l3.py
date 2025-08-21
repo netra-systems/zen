@@ -12,6 +12,11 @@ from netra_backend.app.services.websocket_service import WebSocketService
 from netra_backend.app.config import settings
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestWebSocketMessageDeliveryL3:
     """Test WebSocket message delivery scenarios"""

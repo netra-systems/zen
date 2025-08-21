@@ -16,6 +16,11 @@ from typing import Dict, Any
 from netra_backend.app.utils.circuit_breaker import CircuitBreaker
 from netra_backend.app.services.external_service_client import ExternalServiceClient
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.L3
 class TestCircuitBreakerServiceFailuresL3:

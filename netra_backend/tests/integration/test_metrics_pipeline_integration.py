@@ -16,6 +16,11 @@ from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollect
 from netra_backend.app.schemas.Metrics import MetricsSnapshot, CorpusMetric, MetricType
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockMetricsData:
     """Mock metrics data for testing."""

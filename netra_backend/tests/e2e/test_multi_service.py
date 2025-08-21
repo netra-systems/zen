@@ -39,6 +39,11 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.thread_service import ThreadService
 from dev_launcher.health_monitor import HealthMonitor
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class ServiceEndpoint:
     """Service endpoint configuration."""

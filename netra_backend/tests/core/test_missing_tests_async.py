@@ -13,6 +13,11 @@ from unittest.mock import AsyncMock, patch
 from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test 13: error_handlers_recovery (async components)
 class TestAsyncErrorHandlers:

@@ -31,6 +31,11 @@ from netra_backend.app.services.health_checker import HealthChecker
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.database.postgres_service import PostgresService
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

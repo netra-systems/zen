@@ -25,6 +25,11 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from netra_backend.app.services.user_service import user_service
 from netra_backend.app.schemas.UserPlan import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     PlanTier, UserPlan, PlanFeatures, PlanDefinition, 
     PLAN_DEFINITIONS, PlanUpgrade, UsageRecord
 )

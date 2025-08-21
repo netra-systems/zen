@@ -8,7 +8,7 @@ import asyncio
 from typing import Dict, Any, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.memory_tracker import ConnectionMemoryTracker
 from netra_backend.app.memory_metrics import MemoryMetricsCollector, MemoryHealthChecker, MemoryStatsCollector
 from netra_backend.app.memory_cleanup import MemoryCleanupManager, GarbageCollectionManager

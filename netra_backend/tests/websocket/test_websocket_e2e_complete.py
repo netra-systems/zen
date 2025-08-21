@@ -27,6 +27,11 @@ from netra_backend.app.routes.websocket_enhanced import connection_manager
 from netra_backend.app.core.network_constants import ServicePorts, URLConstants, HostConstants
 from netra_backend.app.schemas.websocket_models import UserMessagePayload, AgentUpdatePayload
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class WebSocketE2EClient:
     """E2E WebSocket test client with auth and message handling."""

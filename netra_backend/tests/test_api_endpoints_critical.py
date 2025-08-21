@@ -11,6 +11,11 @@ from netra_backend.tests.test_api_threads_messages_critical import TestAPIThread
 from netra_backend.tests.test_api_agent_generation_critical import TestAPIAgentGenerationCritical
 from netra_backend.tests.test_api_error_handling_critical import TestAPIErrorHandlingCritical
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Re-export test classes for pytest discovery
 __all__ = [
     "TestAPICoreEndpointsCritical",

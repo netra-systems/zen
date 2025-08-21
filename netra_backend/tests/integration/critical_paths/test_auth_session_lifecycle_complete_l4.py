@@ -20,6 +20,11 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.session import Session
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthSessionLifecycleCompleteL4:
     """Complete auth session lifecycle testing with edge cases"""

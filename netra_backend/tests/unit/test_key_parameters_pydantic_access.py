@@ -7,6 +7,11 @@ from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEn
 from netra_backend.app.agents.triage_sub_agent.models import KeyParameters, TriageResult
 from netra_backend.app.agents.state import DeepAgentState
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestKeyParametersAccess:
     """Test proper handling of KeyParameters as Pydantic model vs dict."""

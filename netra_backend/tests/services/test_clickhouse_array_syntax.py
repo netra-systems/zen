@@ -9,6 +9,11 @@ from typing import Dict, List, Any
 
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 def assert_array_syntax_fixed(original_query: str, fixed_query: str, original_pattern: str, expected_pattern: str) -> None:
     """Assert that array syntax was properly fixed"""

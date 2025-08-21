@@ -10,6 +10,11 @@ from typing import Dict, List
 
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestBusinessValueAdvanced(BusinessValueFixtures):
     """

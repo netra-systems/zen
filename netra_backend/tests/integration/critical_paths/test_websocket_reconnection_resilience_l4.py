@@ -13,6 +13,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import websockets
 from collections import deque
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock

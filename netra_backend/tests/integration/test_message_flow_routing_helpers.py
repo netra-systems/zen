@@ -13,6 +13,11 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage, UserMes
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from logging_config import central_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

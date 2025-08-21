@@ -10,6 +10,11 @@ from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.config import settings
 import psycopg2
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestErrorDatabaseFailuresL3:
     """Test database error handling scenarios"""

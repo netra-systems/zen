@@ -9,6 +9,11 @@ import asyncio
 from netra_backend.app.core.async_retry_logic import AsyncLock, AsyncCircuitBreaker
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError, ServiceError
 from netra_backend.tests.helpers.async_utils_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     assert_lock_state,
     create_circuit_breaker_operation,
     assert_circuit_breaker_state,

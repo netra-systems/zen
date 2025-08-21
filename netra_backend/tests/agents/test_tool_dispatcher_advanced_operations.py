@@ -5,6 +5,11 @@ from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     create_mock_tool,
     create_test_state,
     verify_dispatch_response_success,

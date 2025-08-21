@@ -12,6 +12,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Any, Optional
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import main app with error handling
 try:
     from netra_backend.app.routes.mcp.main import app

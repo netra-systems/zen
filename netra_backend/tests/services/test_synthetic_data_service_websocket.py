@@ -10,6 +10,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def ws_service():

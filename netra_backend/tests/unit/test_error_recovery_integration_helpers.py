@@ -8,6 +8,11 @@ from netra_backend.app.core.error_recovery import OperationType
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.core.agent_recovery_types import AgentType
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class ErrorRecoveryTestHelper:
     """Helper class for error recovery testing."""

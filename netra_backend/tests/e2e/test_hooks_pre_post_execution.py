@@ -22,6 +22,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import ContentType, ValidationResult, QualityMetrics
 from logging_config import central_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = central_logger.get_logger(__name__)
 
 

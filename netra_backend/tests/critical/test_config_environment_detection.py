@@ -13,6 +13,11 @@ import os
 from unittest.mock import Mock, patch
 from typing import Dict, Type
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Core configuration environment components
 from config_environment import ConfigEnvironment
 from config_loader import detect_cloud_run_environment

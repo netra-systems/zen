@@ -16,6 +16,11 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.agent_recovery_supervisor import SupervisorRecoveryStrategy
 from test_framework.mock_utils import mock_justified
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 class TestSupervisorAgentInitializationChain:

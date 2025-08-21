@@ -18,6 +18,11 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.agents.state import DeepAgentState, AgentMetadata, OptimizationsResult
 from netra_backend.app.db.models_postgres import Run, Reference
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestStatePersistenceCritical:
     """Test state persistence with actual service patterns"""

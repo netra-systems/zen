@@ -20,6 +20,11 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from netra_backend.app.services.mesh.service_mesh import ServiceMesh
 from netra_backend.app.services.mesh.service_discovery import ServiceDiscovery
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # Service authenticator replaced with mock
 from unittest.mock import AsyncMock
 ServiceAuthenticator = AsyncMock

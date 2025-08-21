@@ -10,6 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
 from netra_backend.tests.database_transaction_test_helpers import create_mock_session_factory
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def mock_async_session_factory():

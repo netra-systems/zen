@@ -17,6 +17,11 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock, mock_open
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # FastAPI and WebSocket imports
 from fastapi.testclient import TestClient
 from fastapi import WebSocket, WebSocketDisconnect

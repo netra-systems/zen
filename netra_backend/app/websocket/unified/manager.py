@@ -39,7 +39,7 @@ from .broadcasting import UnifiedBroadcastingManager
 from .state import UnifiedStateManager
 from .circuit_breaker import CircuitBreaker
 from .telemetry_manager import TelemetryManager
-from netra_backend.app.lifecycle_integration import get_lifecycle_integrator
+from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_integrator
 
 logger = central_logger.get_logger(__name__)
 

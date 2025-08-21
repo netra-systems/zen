@@ -14,6 +14,11 @@ from collections import deque
 
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestMetricsCollectorSummary:
     """Test suite for MetricsCollector summary and analysis features."""

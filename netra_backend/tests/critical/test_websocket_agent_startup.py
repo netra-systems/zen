@@ -13,6 +13,11 @@ from netra_backend.app.db.models_postgres import Thread, Run
 import uuid
 from datetime import datetime
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentStartupWithoutContext:
     """Test agent startup when there's no prior thread/context."""

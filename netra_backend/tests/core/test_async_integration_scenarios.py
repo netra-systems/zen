@@ -12,6 +12,11 @@ from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, with_retry
 from netra_backend.app.core.async_resource_manager import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AsyncResourceManager,
     AsyncTaskPool,
     AsyncBatchProcessor,

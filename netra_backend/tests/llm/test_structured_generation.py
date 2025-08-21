@@ -12,6 +12,11 @@ from llm.llm_manager import LLMManager
 from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
 from schemas import AppConfig, LLMConfig
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class SampleResponseModel(BaseModel):
     """Sample model for structured generation testing."""

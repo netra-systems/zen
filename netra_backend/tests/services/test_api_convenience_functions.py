@@ -4,6 +4,11 @@ import pytest
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.external_api_client import call_google_api, call_openai_api
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestConvenienceFunctions:
     """Test convenience functions for common APIs."""

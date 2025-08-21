@@ -6,6 +6,11 @@ enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 
 import pytest
 from test_framework.decorators import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     feature_flag,
     tdd_test,
     requires_feature,

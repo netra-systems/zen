@@ -15,24 +15,46 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 
-# Configuration
-PROJECT_ID = "netra-staging"
-REGION = "us-central1"
-REGISTRY = f"{REGION}-docker.pkg.dev"
-REGISTRY_PATH = f"{REGISTRY}/{PROJECT_ID}/netra-containers"
-BUILD_CONTEXT = "."  # Assuming the script is run from the project root
-
-# Service names (MUST match Cloud Run service names exactly)
-# CRITICAL: These are the EXACT service names required for domain mapping
-# DO NOT use "netra-backend" or "netra-frontend" without the -staging suffix
-# The auth service keeps the same name across all environments
-BACKEND_SERVICE = "netra-backend-staging"  # Maps to api.staging.netrasystems.ai
-FRONTEND_SERVICE = "netra-frontend-staging"  # Maps to app.staging.netrasystems.ai  
-AUTH_SERVICE = "netra-auth-service"  # Maps to auth.staging.netrasystems.ai
-
-# URLs for frontend build
-STAGING_API_URL = "https://api.staging.netrasystems.ai"
-STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
+# Import staging configuration alignment
+try:
+    from staging_config_alignment import StagingConfigurationManager, StagingDeploymentConfig
+    config_manager = StagingConfigurationManager()
+    deployment_config = config_manager.deployment_config
+    
+    # Use aligned configuration
+    PROJECT_ID = deployment_config.project_id
+    PROJECT_ID_NUMERICAL = deployment_config.project_id_numerical
+    REGION = deployment_config.region
+    REGISTRY = deployment_config.registry
+    REGISTRY_PATH = f"{REGISTRY}/{PROJECT_ID}/netra-containers"
+    BUILD_CONTEXT = "."  # Assuming the script is run from the project root
+    
+    # Service names from aligned config
+    BACKEND_SERVICE = deployment_config.backend_service
+    FRONTEND_SERVICE = deployment_config.frontend_service
+    AUTH_SERVICE = deployment_config.auth_service
+    
+    # URLs from aligned config
+    STAGING_API_URL = deployment_config.api_url
+    STAGING_WS_URL = deployment_config.ws_url
+    
+except ImportError:
+    # Fallback to hardcoded values if alignment module not available
+    PROJECT_ID = "netra-staging"
+    PROJECT_ID_NUMERICAL = "701982941522" 
+    REGION = "us-central1"
+    REGISTRY = f"{REGION}-docker.pkg.dev"
+    REGISTRY_PATH = f"{REGISTRY}/{PROJECT_ID}/netra-containers"
+    BUILD_CONTEXT = "."
+    
+    BACKEND_SERVICE = "netra-backend-staging"
+    FRONTEND_SERVICE = "netra-frontend-staging"  
+    AUTH_SERVICE = "netra-auth-service"
+    
+    STAGING_API_URL = "https://api.staging.netrasystems.ai"
+    STAGING_WS_URL = "wss://api.staging.netrasystems.ai/ws"
+    
+    config_manager = None
 
 # Colors for terminal output
 class Colors:
@@ -369,23 +391,29 @@ def deploy_services(auth_service_exists: bool):
     # Deploy Backend
     print_colored("  Deploying backend...", Colors.CYAN)
     try:
-        run_command([
-            "gcloud", "run", "deploy", BACKEND_SERVICE,
-            "--image", f"{REGISTRY_PATH}/backend:staging",
-            "--platform", "managed",
-            "--region", REGION,
-            "--project", PROJECT_ID,
-            "--allow-unauthenticated",
-            "--port", "8080",
-            "--memory", "1Gi",
-            "--cpu", "1",
-            "--min-instances", "0",
-            "--max-instances", "10",
-            "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=backend",
-            "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
-            "--set-secrets=DATABASE_URL=database-url-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest",
-            "--quiet"
-        ])
+        if config_manager:
+            # Use aligned configuration
+            deploy_cmd = config_manager.generate_gcloud_deploy_command("backend")
+            run_command(deploy_cmd)
+        else:
+            # Fallback to original command
+            run_command([
+                "gcloud", "run", "deploy", BACKEND_SERVICE,
+                "--image", f"{REGISTRY_PATH}/backend:staging",
+                "--platform", "managed",
+                "--region", REGION,
+                "--project", PROJECT_ID,
+                "--allow-unauthenticated",
+                "--port", "8080",
+                "--memory", "1Gi",
+                "--cpu", "1",
+                "--min-instances", "0",
+                "--max-instances", "10",
+                "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=backend,LOG_LEVEL=INFO,PYTHONUNBUFFERED=1,API_BASE_URL=https://api.staging.netrasystems.ai,FRONTEND_URL=https://app.staging.netrasystems.ai,AUTH_SERVICE_URL=https://auth.staging.netrasystems.ai,AUTH_SERVICE_ENABLED=true,REDIS_MODE=shared,CLICKHOUSE_MODE=shared,LLM_MODE=shared",
+                "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
+                "--set-secrets=DATABASE_URL=database-url-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key-staging:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key-staging:latest,GITHUB_TOKEN=github-token-staging:latest",
+                "--quiet"
+            ])
     except subprocess.CalledProcessError:
         print_colored("Backend deployment failed!", Colors.RED)
         sys.exit(1)
@@ -393,21 +421,27 @@ def deploy_services(auth_service_exists: bool):
     # Deploy Frontend
     print_colored("  Deploying frontend...", Colors.CYAN)
     try:
-        run_command([
-            "gcloud", "run", "deploy", FRONTEND_SERVICE,
-            "--image", f"{REGISTRY_PATH}/frontend:staging",
-            "--platform", "managed",
-            "--region", REGION,
-            "--project", PROJECT_ID,
-            "--allow-unauthenticated",
-            "--port", "3000",
-            "--memory", "512Mi",
-            "--cpu", "1",
-            "--min-instances", "0",
-            "--max-instances", "10",
-            f"--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_API_URL={STAGING_API_URL},NEXT_PUBLIC_WS_URL={STAGING_WS_URL}",
-            "--quiet"
-        ])
+        if config_manager:
+            # Use aligned configuration
+            deploy_cmd = config_manager.generate_gcloud_deploy_command("frontend")
+            run_command(deploy_cmd)
+        else:
+            # Fallback to original command with enhanced env vars
+            run_command([
+                "gcloud", "run", "deploy", FRONTEND_SERVICE,
+                "--image", f"{REGISTRY_PATH}/frontend:staging",
+                "--platform", "managed",
+                "--region", REGION,
+                "--project", PROJECT_ID,
+                "--allow-unauthenticated",
+                "--port", "3000",
+                "--memory", "512Mi",
+                "--cpu", "1",
+                "--min-instances", "0",
+                "--max-instances", "10",
+                f"--set-env-vars=NODE_ENV=production,NEXT_PUBLIC_API_URL={STAGING_API_URL},NEXT_PUBLIC_WS_URL={STAGING_WS_URL},NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai,NEXT_PUBLIC_ENVIRONMENT=staging",
+                "--quiet"
+            ])
     except subprocess.CalledProcessError:
         print_colored("Frontend deployment failed!", Colors.RED)
         sys.exit(1)
@@ -416,23 +450,29 @@ def deploy_services(auth_service_exists: bool):
     if auth_service_exists:
         print_colored("  Deploying auth service...", Colors.CYAN)
         try:
-            run_command([
-                "gcloud", "run", "deploy", AUTH_SERVICE,
-                "--image", f"{REGISTRY_PATH}/auth:staging",
-                "--platform", "managed",
-                "--region", REGION,
-                "--project", PROJECT_ID,
-                "--allow-unauthenticated",
-                "--port", "8001",
-                "--memory", "1Gi",
-                "--cpu", "1",
-                "--min-instances", "1",
-                "--max-instances", "2",
-                "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=auth",
-                "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
-                "--set-secrets=DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest",
-                "--quiet"
-            ])
+            if config_manager:
+                # Use aligned configuration
+                deploy_cmd = config_manager.generate_gcloud_deploy_command("auth")
+                run_command(deploy_cmd)
+            else:
+                # Fallback to original command with enhanced env vars
+                run_command([
+                    "gcloud", "run", "deploy", AUTH_SERVICE,
+                    "--image", f"{REGISTRY_PATH}/auth:staging",
+                    "--platform", "managed",
+                    "--region", REGION,
+                    "--project", PROJECT_ID,
+                    "--allow-unauthenticated",
+                    "--port", "8001",
+                    "--memory", "1Gi",
+                    "--cpu", "1",
+                    "--min-instances", "1",
+                    "--max-instances", "2",
+                    "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=auth,LOG_LEVEL=INFO,PYTHONUNBUFFERED=1,PORT=8001,FRONTEND_URL=https://app.staging.netrasystems.ai,API_URL=https://api.staging.netrasystems.ai,CORS_ORIGINS=https://app.staging.netrasystems.ai,https://api.staging.netrasystems.ai",
+                    "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
+                    "--set-secrets=DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest",
+                    "--quiet"
+                ])
         except subprocess.CalledProcessError:
             print_colored("Auth service deployment failed!", Colors.RED)
             sys.exit(1)

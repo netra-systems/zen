@@ -24,6 +24,11 @@ from unittest.mock import MagicMock
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.test_agent_service_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AgentOrchestrator,
     AgentState
 )

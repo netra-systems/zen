@@ -8,6 +8,11 @@ from netra_mcp.netra_mcp_server import NetraMCPServer
 from netra_backend.app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
 from datetime import timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 def mock_services():
     """Create mock services for testing"""
     return {

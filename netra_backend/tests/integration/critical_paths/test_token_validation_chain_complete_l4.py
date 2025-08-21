@@ -18,6 +18,11 @@ from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     InvalidTokenError,
     TokenExpiredError,
     TokenRevokedError,

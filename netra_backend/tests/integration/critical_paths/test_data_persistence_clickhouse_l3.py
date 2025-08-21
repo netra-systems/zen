@@ -11,6 +11,11 @@ from netra_backend.app.config import settings
 import uuid
 from datetime import datetime
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDataPersistenceClickHouseL3:
     """Test ClickHouse data persistence scenarios"""

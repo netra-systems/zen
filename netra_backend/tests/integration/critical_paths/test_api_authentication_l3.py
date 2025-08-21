@@ -10,6 +10,11 @@ import jwt
 from netra_backend.app.config import settings
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAPIAuthenticationL3:
     """Test API authentication scenarios"""

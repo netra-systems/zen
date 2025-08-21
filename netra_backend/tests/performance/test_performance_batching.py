@@ -12,6 +12,11 @@ from unittest.mock import Mock, AsyncMock, patch
 
 from netra_backend.app.core.performance_optimization_manager import BatchProcessor
 from netra_backend.app.websocket.batch_message_handler import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MessageBatcher, BatchConfig, BatchingStrategy, LoadMonitor
 )
 

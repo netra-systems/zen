@@ -25,6 +25,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 from netra_backend.tests.integration.helpers.user_flow_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     generate_test_user_data, MockAuthService, simulate_user_journey
 )
 

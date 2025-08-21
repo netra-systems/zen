@@ -12,6 +12,11 @@ from netra_backend.app.services.clickhouse_service import ClickHouseService
 from netra_backend.app.config import settings
 import uuid
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDataConsistencyCrossDBL3:
     """Test cross-database data consistency scenarios"""

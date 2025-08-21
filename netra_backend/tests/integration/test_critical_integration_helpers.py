@@ -30,6 +30,11 @@ import os
 from netra_backend.app.db.models_postgres import Run
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

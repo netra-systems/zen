@@ -14,6 +14,11 @@ from logging_config import central_logger
 from routes.utils.websocket_helpers import accept_websocket_connection
 from routes.utils.websocket_helpers import receive_message_with_timeout
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

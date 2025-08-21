@@ -20,6 +20,11 @@ from fastapi import WebSocket
 from datetime import datetime
 import uuid
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestCriticalMessageRoutingToAgentService:
     """CRITICAL: Tests that messages MUST reach agent service or system fails silently."""

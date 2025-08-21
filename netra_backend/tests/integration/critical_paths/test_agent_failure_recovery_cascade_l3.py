@@ -32,6 +32,11 @@ from resilience.failure_recovery import FailureRecoveryManager
 from resilience.circuit_breaker import CircuitBreaker
 from test_framework.testcontainers_utils import TestcontainerHelper
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

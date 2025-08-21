@@ -27,6 +27,11 @@ import websockets
 from unittest.mock import patch, MagicMock, AsyncMock
 import os
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"

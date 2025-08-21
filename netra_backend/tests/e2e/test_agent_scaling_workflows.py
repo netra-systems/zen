@@ -12,6 +12,11 @@ from netra_backend.tests.e2e.test_scaling_metrics import TestScalingMetricsValid
 from netra_backend.tests.e2e.test_scaling_integrity import TestScalingWorkflowIntegrity
 from netra_backend.tests.e2e.test_scaling_edge_cases import TestScalingEdgeCases
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Re-export test classes for backward compatibility
 __all__ = [
     'TestUsageIncreaseAnalysis',

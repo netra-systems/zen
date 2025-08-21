@@ -11,6 +11,11 @@ from starlette.websockets import WebSocketState
 
 from netra_backend.tests.test_fixtures_common import test_database, mock_infrastructure, create_test_user_with_oauth
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthSessionIntegration:
     """Authentication and session management integration tests"""

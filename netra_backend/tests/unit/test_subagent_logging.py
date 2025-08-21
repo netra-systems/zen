@@ -5,6 +5,11 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.observability import SubAgentLogger, get_subagent_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockSubAgent(BaseSubAgent):
     """Test implementation of BaseSubAgent."""

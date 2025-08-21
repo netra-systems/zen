@@ -9,6 +9,11 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from netra_backend.app.services.resilience_service import ResilienceService
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestErrorRecoveryMechanismsL3:
     """Test error recovery mechanism scenarios"""

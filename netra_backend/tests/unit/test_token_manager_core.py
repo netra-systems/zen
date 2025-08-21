@@ -10,6 +10,11 @@ from unittest.mock import Mock, patch
 from netra_backend.app.auth_integration.auth import JWTTokenManager
 from netra_backend.app.core.exceptions_auth import AuthenticationError
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test fixtures
 @pytest.fixture

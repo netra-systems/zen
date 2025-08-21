@@ -8,6 +8,11 @@ from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMet
 from netra_backend.app.services.fallback_response.models import FallbackContext, FailureReason
 from netra_backend.app.schemas.quality_types import ContentType
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestFallbackHandlerSimple:
     """Test suite for FallbackHandler with 25-line function limit"""

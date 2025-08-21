@@ -19,6 +19,11 @@ from datetime import datetime, timezone
 from typing import Dict
 
 from netra_backend.tests.helpers.sso_saml_components import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     SAMLAssertionValidator,
     EnterpriseTokenManager,
     MockIdPErrorGenerator

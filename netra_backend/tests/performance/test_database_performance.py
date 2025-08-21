@@ -13,6 +13,11 @@ from typing import Dict, List
 from unittest.mock import AsyncMock, patch
 
 from netra_backend.app.services.generation_service import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     save_corpus_to_clickhouse,
     get_corpus_from_clickhouse
 )

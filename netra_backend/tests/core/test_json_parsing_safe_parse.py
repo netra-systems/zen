@@ -7,6 +7,11 @@ import pytest
 import json
 from netra_backend.app.core.json_parsing_utils import safe_json_parse
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSafeJsonParse:
     """Test the safe_json_parse function."""

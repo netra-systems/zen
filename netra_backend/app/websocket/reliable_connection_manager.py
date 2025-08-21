@@ -12,14 +12,15 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
-from netra_backend.app.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.websocket.connection_manager import ModernConnectionManager as ConnectionManager
 from netra_backend.app.heartbeat import HeartbeatManager
 from netra_backend.app.services.synthetic_data.error_handler import WebSocketErrorHandler, default_error_handler
 from netra_backend.app.reliable_message_handler import ReliableMessageHandler, MessageTypeRouter
-from netra_backend.app.connection_lifecycle_manager import ConnectionLifecycleManager
-from netra_backend.app.connection_message_handler import ConnectionMessageHandler
-from netra_backend.app.connection_cleanup_monitor import ConnectionCleanupMonitor
-from netra_backend.app.connection_user_tracker import ConnectionUserTracker
+from netra_backend.app.websocket.connection_lifecycle_manager import ConnectionLifecycleManager
+from netra_backend.app.websocket.connection_message_handler import ConnectionMessageHandler
+from netra_backend.app.websocket.connection_cleanup_monitor import ConnectionCleanupMonitor
+from netra_backend.app.websocket.connection_user_tracker import ConnectionUserTracker
 
 logger = central_logger.get_logger(__name__)
 

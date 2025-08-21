@@ -33,6 +33,11 @@ from netra_backend.app.services.observability.error_tracker import ErrorTracker
 from netra_backend.app.core.exceptions_base import NetraException, ServiceUnavailableException
 from netra_backend.app.core.logging_config import get_logger
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = get_logger(__name__)
 
 

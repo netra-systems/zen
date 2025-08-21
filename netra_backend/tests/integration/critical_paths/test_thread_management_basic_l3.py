@@ -3,6 +3,11 @@
 L3 Integration Test: Thread Management Basic Operations
 Tests fundamental thread creation, retrieval, updates, and deletion
 from multiple angles including edge cases and concurrent operations.
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 """
 
 import asyncio

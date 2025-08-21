@@ -9,6 +9,11 @@ from fastapi import Response
 
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSecurityHeaders:
     """Test security headers middleware."""

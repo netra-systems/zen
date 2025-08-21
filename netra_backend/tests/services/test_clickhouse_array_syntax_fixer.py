@@ -6,6 +6,11 @@ All functions ≤8 lines per requirements.
 import pytest
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 from netra_backend.tests.clickhouse_test_helpers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     assert_array_syntax_fixed,
     assert_query_structure_preserved,
     assert_multiple_replacements,

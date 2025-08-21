@@ -13,6 +13,11 @@ from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionMan
 from netra_backend.app.websocket.broadcast_core import BroadcastManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestWebSocketClosingState:
     """Test WebSocket closing state handling."""

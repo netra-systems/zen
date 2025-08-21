@@ -28,6 +28,11 @@ from sqlalchemy import select, delete
 from argon2 import PasswordHasher
 import jwt
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import REAL implementations
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash, verify_password
 from netra_backend.app.db.session import get_db_session, session_manager

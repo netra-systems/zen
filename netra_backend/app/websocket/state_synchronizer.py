@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 from typing import Dict, Set, Optional, Callable, Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.websocket.connection_manager import ModernConnectionManager as ConnectionManager
 from netra_backend.app.core.error_types import ErrorSeverity
 from netra_backend.app.sync_types import SyncState, StateCheckpoint
 from netra_backend.app.callback_handler import CallbackHandler

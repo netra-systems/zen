@@ -11,6 +11,11 @@ from unittest.mock import AsyncMock
 
 from netra_backend.tests.deployment_config_fixtures import enterprise_deployment_infrastructure
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestEnterpriseDomainNetwork:
     """Domain configuration and service discovery tests"""

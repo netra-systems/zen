@@ -10,6 +10,11 @@ from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.config import settings
 import json
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAuthLoginValidationL3:
     """Test authentication login validation scenarios"""

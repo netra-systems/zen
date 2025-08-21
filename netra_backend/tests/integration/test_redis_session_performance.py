@@ -16,6 +16,11 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Set testing environment
 import os
 os.environ["TESTING"] = "1"

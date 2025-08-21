@@ -17,6 +17,11 @@ from datetime import datetime, timezone
 from netra_backend.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestConversionFlowE2E:
     """Cost calculator and upgrade flow E2E tests"""

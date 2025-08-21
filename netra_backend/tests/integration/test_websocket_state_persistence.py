@@ -21,6 +21,11 @@ import random
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 from netra_backend.app.websocket.reconnection_types import ReconnectionConfig
 from netra_backend.tests.websocket_recovery_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     MockWebSocket, StateRecoveryTestHelper, setup_test_manager_with_helper,
     create_standard_reconnection_config, create_state_building_messages
 )

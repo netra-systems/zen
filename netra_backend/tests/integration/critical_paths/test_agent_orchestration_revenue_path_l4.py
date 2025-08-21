@@ -28,6 +28,11 @@ from netra_backend.app.services.user_service import CRUDUser as UserService
 from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
 from netra_backend.app.services.audit_service import AuditService
 from netra_backend.app.schemas.UserPlan import PlanTier
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # from netra_backend.app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 from unittest.mock import AsyncMock, MagicMock

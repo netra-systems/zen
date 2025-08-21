@@ -20,6 +20,11 @@ from unittest.mock import AsyncMock
 
 from netra_backend.tests.shared_fixtures import mock_llm_manager, llm_test_agent
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestResponseHandling:
     """BVJ: Validates LLM response handling and formatting for agent integration."""

@@ -20,6 +20,11 @@ from llm.llm_manager import LLMManager
 from ws_manager import WebSocketManager
 from schemas import SubAgentLifecycle
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def orchestration_setup(real_agent_setup):

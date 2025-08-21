@@ -11,6 +11,11 @@ import asyncio
 from typing import Optional, Dict
 from netra_backend.tests.base import StagingConfigTestBase
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestLLMIntegration(StagingConfigTestBase):
     """Test LLM integrations in staging."""

@@ -13,6 +13,11 @@ from netra_backend.tests.core.test_async_batch_processor import TestAsyncBatchPr
 from netra_backend.tests.core.test_async_lock_circuit_breaker import TestAsyncLock, TestAsyncCircuitBreaker
 from netra_backend.tests.core.test_async_connection_pool import TestAsyncConnectionPool
 from netra_backend.tests.core.test_async_globals_threadpool import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TestGlobalInstances,
     TestRunInThreadpool,
     TestShutdownAsyncUtils,

@@ -13,6 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class ThreadLoadTests:
     """Tests for thread operations under load."""

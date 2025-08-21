@@ -25,6 +25,11 @@ from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.Config import AppConfig
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = central_logger.get_logger(__name__)
 
 

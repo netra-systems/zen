@@ -9,6 +9,11 @@ from sqlalchemy.exc import DataError, IntegrityError
 from netra_backend.app.core.error_handlers import ApiErrorHandler
 from netra_backend.app.core.exceptions_database import ErrorCode
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 def test_error_handler_sqlalchemy_logging():
     """Test that SQLAlchemy errors are logged without IndexError."""

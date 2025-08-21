@@ -13,6 +13,11 @@ from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 from netra_backend.app.db.health_checks import DatabaseHealthChecker
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""

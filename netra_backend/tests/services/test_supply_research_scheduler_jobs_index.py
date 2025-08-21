@@ -10,6 +10,11 @@ from netra_backend.tests.test_scheduler_retry_logic import TestSupplyResearchSch
 from netra_backend.tests.test_scheduler_concurrency import TestSupplyResearchSchedulerConcurrency
 from netra_backend.tests.test_scheduler_performance import TestSupplyResearchSchedulerPerformance
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Re-export for backward compatibility
 __all__ = [
     'TestSupplyResearchSchedulerJobs',

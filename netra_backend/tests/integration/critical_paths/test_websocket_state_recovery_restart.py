@@ -26,6 +26,11 @@ from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTe
 from ws_manager import WebSocketManager
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @dataclass
 class WebSocketStateData:

@@ -30,6 +30,11 @@ from testcontainers.generic import GenericContainer
 from logging_config import central_logger
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig, CircuitState
 from netra_backend.app.core.health_checkers import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     check_postgres_health, check_redis_health, check_clickhouse_health
 )
 from test_framework.testcontainers_utils import TestcontainerHelper

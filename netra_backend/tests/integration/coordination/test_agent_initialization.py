@@ -21,6 +21,11 @@ from datetime import datetime, timezone
 
 from netra_backend.tests.shared_fixtures import coordination_infrastructure, coordination_agents, MockCoordinationAgent
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAgentInitialization:
     """BVJ: Validates agent initialization and startup coordination."""

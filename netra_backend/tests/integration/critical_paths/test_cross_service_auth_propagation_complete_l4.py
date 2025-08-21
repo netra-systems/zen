@@ -14,6 +14,11 @@ import hashlib
 
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.api_gateway_service import APIGatewayService
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock

@@ -4,6 +4,11 @@ import pytest
 from unittest.mock import patch, MagicMock
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator, validate_database_environment
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 class TestDatabaseEnvironmentValidator:
     
     def test_keyword_constants(self):

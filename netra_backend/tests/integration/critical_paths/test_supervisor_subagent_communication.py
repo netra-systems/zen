@@ -36,6 +36,11 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from sqlalchemy.ext.asyncio import AsyncSession
 from unittest.mock import AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 logger = logging.getLogger(__name__)
 
 

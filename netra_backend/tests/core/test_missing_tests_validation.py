@@ -11,6 +11,11 @@ from unittest.mock import Mock
 from cryptography.fernet import Fernet
 from pydantic import ValidationError
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # Test 11: config_validator_schema_validation
 class TestConfigValidator:

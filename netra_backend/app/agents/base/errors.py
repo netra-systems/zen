@@ -19,7 +19,7 @@ from netra_backend.app.core.error_handlers.error_classification import (
     ErrorClassification, 
     ErrorClassifier
 )
-from netra_backend.app.services.synthetic_data.error_handler import ExecutionErrorHandler
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 
 logger = central_logger.get_logger(__name__)
 

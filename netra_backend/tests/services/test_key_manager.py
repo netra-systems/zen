@@ -4,6 +4,11 @@ from pydantic import ValidationError
 from netra_backend.app.services.key_manager import KeyManager
 from schemas import AppConfig
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Mock AppConfig for testing
 class MockAppConfig(AppConfig):
     jwt_secret_key: str = "a_super_secret_jwt_key_for_development_that_is_long_enough"

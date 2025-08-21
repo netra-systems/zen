@@ -34,6 +34,11 @@ from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.services.redis_service import RedisService
 from monitoring.metrics_collector import MetricsCollector
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @dataclass
 class SecurityBreachMetrics:

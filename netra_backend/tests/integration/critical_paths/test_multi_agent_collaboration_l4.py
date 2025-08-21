@@ -20,6 +20,11 @@ import uuid
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # # from agents.supervisor_agent_modern import ModernSupervisorAgent
 from unittest.mock import AsyncMock
 ModernSupervisorAgent = AsyncMock

@@ -12,6 +12,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     mock_supervisor, agent_service, mock_message_handler
 )
 from netra_backend.tests.helpers.test_agent_orchestration_assertions import (

@@ -10,6 +10,11 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.asyncio
 async def test_user_creation_with_defaults():

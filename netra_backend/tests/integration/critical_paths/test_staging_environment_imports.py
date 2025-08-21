@@ -19,6 +19,11 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.core.environment_constants import Environment, EnvironmentVariables
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestStagingEnvironmentImports:
     """Test suite for staging environment module imports and initialization."""

@@ -17,6 +17,11 @@ from netra_backend.tests.services.test_resilient_client_methods import TestResil
 from netra_backend.tests.services.test_resilient_client_health import TestResilientHTTPClientHealth
 from netra_backend.tests.services.test_retryable_client import TestRetryableHTTPClient
 from netra_backend.tests.services.test_http_client_manager import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     TestHTTPClientManager,
     TestGetHTTPClient,
     TestGlobalClientManager

@@ -52,6 +52,15 @@
         <category name="Configuration/Secrets" path="SPEC/learnings/configuration_secrets.xml" keywords="Env Vars, .env">
             <critical-takeaway>All configuration MUST utilize the unified config system. Direct `os.environ.get()` is forbidden outside the config module.</critical-takeaway>
         </category>
+        
+        <category name="Unified Configuration" path="SPEC/learnings/unified_configuration.xml" keywords="Config, Hot Reload, ConfigManager, Configuration, Secrets, GCP">
+            <critical-takeaway>Configuration MUST use single source of truth at netra_backend.app.config. 110+ duplicate config files have been REMOVED.</critical-takeaway>
+            <critical-takeaway>NEVER import removed files: config_environment.py, config_loader.py, config_manager.py, config_envvars.py - they're DELETED.</critical-takeaway>
+            <critical-takeaway>Hot reload enables zero-downtime updates via CONFIG_HOT_RELOAD=true and reload_config().</critical-takeaway>
+            <critical-takeaway>All configuration access uses: from netra_backend.app.config import get_config.</critical-takeaway>
+            <critical-takeaway>Configuration validation is MANDATORY: validate_configuration() must pass before deployment.</critical-takeaway>
+            <critical-takeaway>Secrets use unified SecretManager with GCP Secret Manager (staging/production) or local files (dev).</critical-takeaway>
+        </category>
 
         <category name="CORS/Dynamic Ports" path="SPEC/learnings/cors_dynamic_ports.xml" keywords="CORS, Dynamic Ports, Localhost, Development">
             <critical-takeaway>CRITICAL: CORS configuration MUST support dynamic ports in development. Pattern matching for localhost with ANY port must be checked FIRST.</critical-takeaway>

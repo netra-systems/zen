@@ -10,6 +10,11 @@ from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.api_client import APIClient
 from netra_backend.app.config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestErrorNetworkFailuresL3:
     """Test network error handling scenarios"""

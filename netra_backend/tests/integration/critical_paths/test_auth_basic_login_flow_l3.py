@@ -18,6 +18,11 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.auth_integration.auth import JWTTokenManager
 from netra_backend.app.redis_manager import RedisManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.mark.L3
 @pytest.mark.integration

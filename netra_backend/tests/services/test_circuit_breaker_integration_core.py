@@ -21,6 +21,11 @@ from routes.circuit_breaker_health import get_circuit_breaker_dashboard
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

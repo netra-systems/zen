@@ -19,6 +19,11 @@ import time
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import User, Thread, Message
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class CrossServiceTransactionManager:
     """Manages atomic transactions across Auth Service and Backend"""

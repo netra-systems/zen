@@ -19,6 +19,11 @@ MODULES:
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import all fixtures from modular structure
 from netra_backend.tests.test_fixtures import (
     mock_llm_manager, 

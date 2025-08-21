@@ -29,6 +29,11 @@ from ws_manager import WebSocketManager
 from config import get_config
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 # The 9 example prompts from frontend/lib/examplePrompts.ts
 EXAMPLE_PROMPTS = [

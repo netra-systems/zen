@@ -11,6 +11,11 @@ from netra_backend.app.services.postgres_service import PostgresService
 from netra_backend.app.config import settings
 import uuid
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestDataPersistencePostgresL3:
     """Test PostgreSQL data persistence scenarios"""

@@ -19,6 +19,11 @@ from typing import Dict, List, Optional
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Individual test methods will use @pytest.mark.asyncio decorator
 
 from test_framework.mock_utils import mock_justified

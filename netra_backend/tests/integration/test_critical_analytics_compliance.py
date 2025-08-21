@@ -11,6 +11,11 @@ from unittest.mock import Mock, AsyncMock
 
 from netra_backend.tests.test_fixtures_common import test_database, mock_infrastructure
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestAnalyticsComplianceIntegration:
     """Analytics and compliance integration tests"""

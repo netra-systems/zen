@@ -16,6 +16,11 @@ from redis.asyncio import Redis
 
 from netra_backend.app.models.user import User
 from netra_backend.tests.first_time_user_fixtures import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     test_user_data, auth_service, user_service,
     assert_user_registration_success, verify_user_in_database,
     simulate_oauth_callback, get_mock_provider_configs

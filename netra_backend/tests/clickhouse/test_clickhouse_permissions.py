@@ -9,6 +9,11 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from config import settings
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 def _get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""

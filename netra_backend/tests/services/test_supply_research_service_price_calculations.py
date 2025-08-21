@@ -13,6 +13,11 @@ import asyncio
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def mock_db_session():

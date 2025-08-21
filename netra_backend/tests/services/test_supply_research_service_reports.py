@@ -11,6 +11,11 @@ from unittest.mock import MagicMock, patch
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import ResearchSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 @pytest.fixture
 def service(db_session):

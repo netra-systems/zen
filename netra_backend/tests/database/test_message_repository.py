@@ -12,6 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.schemas.registry import Message, MessageType
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""

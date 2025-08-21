@@ -18,6 +18,11 @@ from test_framework.test_patterns import L3IntegrationTest
 from netra_backend.app.core.redis_client import RedisManager
 from netra_backend.app.websocket.manager import WebSocketManager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestWebSocketBasicConnection(L3IntegrationTest):
     """Test WebSocket basic connection flows from multiple angles."""

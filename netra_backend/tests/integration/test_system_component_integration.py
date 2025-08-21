@@ -8,6 +8,11 @@ from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class MockReliableAgent(AgentReliabilityMixin):
     """Mock agent with reliability mixin for integration testing."""

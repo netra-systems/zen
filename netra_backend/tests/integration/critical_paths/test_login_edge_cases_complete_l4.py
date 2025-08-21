@@ -19,6 +19,11 @@ from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.models.user import User, UserStatus
 from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
     AuthenticationError,
     RateLimitExceeded,
     AccountLocked,

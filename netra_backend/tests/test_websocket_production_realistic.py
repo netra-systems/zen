@@ -16,6 +16,11 @@ Tests cover:
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 # Import all test functions from specialized modules
 from netra_backend.tests.websocket.test_concurrent_connections import (
     test_concurrent_connection_limit_1000_users,

@@ -30,6 +30,11 @@ from netra_backend.app.services.messaging.queue_manager import QueueManager
 from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQueue
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.services.websocket.message_router import MessageRouter
+
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 # from agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 SupervisorAgent = AsyncMock

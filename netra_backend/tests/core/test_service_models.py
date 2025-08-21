@@ -4,6 +4,11 @@ from datetime import datetime, UTC
 
 from netra_backend.app.core.service_interfaces import ServiceHealth, ServiceMetrics
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+
 
 class TestServiceModels:
     """Test service model classes."""
