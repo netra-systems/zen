@@ -1,5 +1,7 @@
 import { Message } from '@/types/registry';
 import { Thread } from '@/types/registry';
+import { authInterceptor } from '@/lib/auth-interceptor';
+import { logger } from '@/lib/logger';
 
 interface PaginatedMessages {
   messages: Message[];
@@ -33,6 +35,8 @@ class MessageService {
   private queuedMessages: QueuedMessage[] = [];
   private threadStates: Map<string, MessageThreadState> = new Map();
 
+  // Auth header method kept for backward compatibility but deprecated
+  // Auth is now handled by authInterceptor
   private getAuthHeader(): string {
     const token = localStorage.getItem('jwt_token') || '';
     return `Bearer ${token}`;
@@ -40,35 +44,57 @@ class MessageService {
 
   // Thread Management
   async createThread(userId: string): Promise<Thread> {
-    const response = await fetch('/api/threads', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': this.getAuthHeader(),
-      },
-      body: JSON.stringify({ user_id: userId }),
-    });
+    try {
+      const response = await authInterceptor.post('/api/threads', { user_id: userId });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Failed to create thread: ${response.statusText}`;
+        } catch {
+          errorMessage = errorData || `Failed to create thread: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
 
-    if (!response.ok) {
-      throw new Error(`Failed to create thread: ${response.statusText}`);
+      return response.json();
+    } catch (error) {
+      logger.error('Failed to create thread', error as Error, {
+        component: 'MessageService',
+        action: 'createThread',
+        userId
+      });
+      throw error;
     }
-
-    return response.json();
   }
 
   async getThreads(userId: string): Promise<Thread[]> {
-    const response = await fetch(`/api/threads?user_id=${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': this.getAuthHeader(),
-      },
-    });
+    try {
+      const response = await authInterceptor.get(`/api/threads?user_id=${userId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Failed to fetch threads: ${response.statusText}`;
+        } catch {
+          errorMessage = errorData || `Failed to fetch threads: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch threads: ${response.statusText}`);
+      return response.json();
+    } catch (error) {
+      logger.error('Failed to fetch threads', error as Error, {
+        component: 'MessageService',
+        action: 'getThreads',
+        userId
+      });
+      throw error;
     }
-
-    return response.json();
   }
 
   // Message Persistence
@@ -91,20 +117,30 @@ class MessageService {
       };
     }
 
-    const response = await fetch(`/api/threads/${threadId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': this.getAuthHeader(),
-      },
-      body: JSON.stringify(message),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to save message: ${response.statusText}`);
+    try {
+      const response = await authInterceptor.post(`/api/threads/${threadId}/messages`, message);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Failed to save message: ${response.statusText}`;
+        } catch {
+          errorMessage = errorData || `Failed to save message: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return response.json();
+    } catch (error) {
+      logger.error('Failed to save message', error as Error, {
+        component: 'MessageService',
+        action: 'saveMessage',
+        threadId
+      });
+      throw error;
     }
-
-    return response.json();
   }
 
   async getThreadMessages(
@@ -123,25 +159,37 @@ class MessageService {
       ? `/api/threads/${threadId}/messages?${params}`
       : `/api/threads/${threadId}/messages`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': this.getAuthHeader(),
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch messages: ${response.statusText}`);
+    try {
+      const response = await authInterceptor.get(url);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Failed to fetch messages: ${response.statusText}`;
+        } catch {
+          errorMessage = errorData || `Failed to fetch messages: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      
+      // Handle both paginated and non-paginated responses
+      if (options.limit && data.messages) {
+        return data;
+      }
+      
+      return data.messages || data;
+    } catch (error) {
+      logger.error('Failed to fetch messages', error as Error, {
+        component: 'MessageService',
+        action: 'getThreadMessages',
+        threadId
+      });
+      throw error;
     }
-
-    const data = await response.json();
-    
-    // Handle both paginated and non-paginated responses
-    if (options.limit && data.messages) {
-      return data;
-    }
-    
-    return data;
   }
 
   // Local Cache Management
@@ -238,17 +286,27 @@ class MessageService {
   }
 
   async updateThreadMetadata(threadId: string, metadata: any): Promise<void> {
-    const response = await fetch(`/api/threads/${threadId}/metadata`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': this.getAuthHeader(),
-      },
-      body: JSON.stringify(metadata),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to update thread metadata: ${response.statusText}`);
+    try {
+      const response = await authInterceptor.patch(`/api/threads/${threadId}/metadata`, metadata);
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Failed to update thread metadata: ${response.statusText}`;
+        } catch {
+          errorMessage = errorData || `Failed to update thread metadata: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      logger.error('Failed to update thread metadata', error as Error, {
+        component: 'MessageService',
+        action: 'updateThreadMetadata',
+        threadId
+      });
+      throw error;
     }
   }
 

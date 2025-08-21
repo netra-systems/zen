@@ -12,6 +12,8 @@ import type {
   ExecuteToolResponse,
   ServerStatusResponse
 } from '@/types/mcp-types';
+import { authInterceptor } from '@/lib/auth-interceptor';
+import { logger } from '@/lib/logger';
 
 // ============================================
 // Service Configuration
@@ -19,22 +21,26 @@ import type {
 
 const MCP_API_BASE = '/api/mcp';
 
+// Headers are now handled by auth interceptor
+// This function is kept for backward compatibility
 const createHeaders = (): HeadersInit => {
-  const token = typeof window !== 'undefined' 
-    ? localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token')
-    : null;
-  
   return {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    'Accept': 'application/json'
   };
 };
 
 const handleApiResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`MCP API Error ${response.status}: ${errorText}`);
+    let errorMessage: string;
+    try {
+      const parsed = JSON.parse(errorText);
+      errorMessage = parsed.detail || parsed.message || parsed.error || `MCP API Error ${response.status}: ${errorText}`;
+    } catch {
+      errorMessage = errorText || `MCP API Error ${response.status}`;
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 };
@@ -44,39 +50,62 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
 // ============================================
 
 export const listServers = async (): Promise<MCPServerInfo[]> => {
-  const response = await fetch(`${MCP_API_BASE}/servers`, {
-    method: 'GET',
-    headers: createHeaders()
-  });
-  const result = await handleApiResponse<ListServersResponse>(response);
-  return result.data || [];
+  try {
+    const response = await authInterceptor.get(`${MCP_API_BASE}/servers`);
+    const result = await handleApiResponse<ListServersResponse>(response);
+    return result.data || [];
+  } catch (error) {
+    logger.error('Failed to list MCP servers', error as Error, {
+      component: 'MCPClientService',
+      action: 'listServers'
+    });
+    throw error;
+  }
 };
 
 export const getServerStatus = async (serverName: string): Promise<MCPServerInfo | null> => {
-  const response = await fetch(`${MCP_API_BASE}/servers/${serverName}/status`, {
-    method: 'GET',
-    headers: createHeaders()
-  });
-  const result = await handleApiResponse<MCPApiResponse<MCPServerInfo>>(response);
-  return result.data || null;
+  try {
+    const response = await authInterceptor.get(`${MCP_API_BASE}/servers/${serverName}/status`);
+    const result = await handleApiResponse<MCPApiResponse<MCPServerInfo>>(response);
+    return result.data || null;
+  } catch (error) {
+    logger.error('Failed to get MCP server status', error as Error, {
+      component: 'MCPClientService',
+      action: 'getServerStatus',
+      serverName
+    });
+    throw error;
+  }
 };
 
 export const connectServer = async (serverName: string): Promise<boolean> => {
-  const response = await fetch(`${MCP_API_BASE}/servers/${serverName}/connect`, {
-    method: 'POST',
-    headers: createHeaders()
-  });
-  const result = await handleApiResponse<MCPApiResponse>(response);
-  return result.success;
+  try {
+    const response = await authInterceptor.post(`${MCP_API_BASE}/servers/${serverName}/connect`);
+    const result = await handleApiResponse<MCPApiResponse>(response);
+    return result.success;
+  } catch (error) {
+    logger.error('Failed to connect MCP server', error as Error, {
+      component: 'MCPClientService',
+      action: 'connectServer',
+      serverName
+    });
+    throw error;
+  }
 };
 
 export const disconnectServer = async (serverName: string): Promise<boolean> => {
-  const response = await fetch(`${MCP_API_BASE}/servers/${serverName}/disconnect`, {
-    method: 'POST',
-    headers: createHeaders()
-  });
-  const result = await handleApiResponse<MCPApiResponse>(response);
-  return result.success;
+  try {
+    const response = await authInterceptor.post(`${MCP_API_BASE}/servers/${serverName}/disconnect`);
+    const result = await handleApiResponse<MCPApiResponse>(response);
+    return result.success;
+  } catch (error) {
+    logger.error('Failed to disconnect MCP server', error as Error, {
+      component: 'MCPClientService',
+      action: 'disconnectServer',
+      serverName
+    });
+    throw error;
+  }
 };
 
 // ============================================
@@ -84,15 +113,21 @@ export const disconnectServer = async (serverName: string): Promise<boolean> => 
 // ============================================
 
 export const discoverTools = async (serverName?: string): Promise<MCPTool[]> => {
-  const url = serverName 
-    ? `${MCP_API_BASE}/tools?server=${serverName}` 
-    : `${MCP_API_BASE}/tools`;
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: createHeaders()
-  });
-  const result = await handleApiResponse<DiscoverToolsResponse>(response);
-  return result.data || [];
+  try {
+    const url = serverName 
+      ? `${MCP_API_BASE}/tools?server=${serverName}` 
+      : `${MCP_API_BASE}/tools`;
+    const response = await authInterceptor.get(url);
+    const result = await handleApiResponse<DiscoverToolsResponse>(response);
+    return result.data || [];
+  } catch (error) {
+    logger.error('Failed to discover MCP tools', error as Error, {
+      component: 'MCPClientService',
+      action: 'discoverTools',
+      serverName
+    });
+    throw error;
+  }
 };
 
 export const executeTool = async (
@@ -100,16 +135,26 @@ export const executeTool = async (
   toolName: string,
   arguments_: Record<string, any>
 ): Promise<MCPToolResult> => {
-  const response = await fetch(`${MCP_API_BASE}/tools/execute`, {
-    method: 'POST',
-    headers: createHeaders(),
-    body: JSON.stringify({ server_name: serverName, tool_name: toolName, arguments: arguments_ })
-  });
-  const result = await handleApiResponse<ExecuteToolResponse>(response);
-  if (!result.success || !result.data) {
-    throw new Error(result.message || 'Tool execution failed');
+  try {
+    const response = await authInterceptor.post(`${MCP_API_BASE}/tools/execute`, {
+      server_name: serverName, 
+      tool_name: toolName, 
+      arguments: arguments_
+    });
+    const result = await handleApiResponse<ExecuteToolResponse>(response);
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Tool execution failed');
+    }
+    return result.data;
+  } catch (error) {
+    logger.error('Failed to execute MCP tool', error as Error, {
+      component: 'MCPClientService',
+      action: 'executeTool',
+      serverName,
+      toolName
+    });
+    throw error;
   }
-  return result.data;
 };
 
 export const getToolSchema = async (

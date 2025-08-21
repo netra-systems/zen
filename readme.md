@@ -52,53 +52,97 @@ python scripts/query_string_literals.py validate
 ### Prerequisites
 - Python 3.9+ (3.11+ recommended)
 - Node.js 18+
-- PostgreSQL 14+ (optional)
-- Redis 7+ (optional)
+- PostgreSQL 14+ (optional, can use SQLite for development)
+- Redis 7+ (optional, for caching)
 
-### Installation & Start
+### Installation
 
 ```bash
-# Clone and install
+# Clone repository
 git clone https://github.com/netra-systems/netra-apex.git
 cd netra-core-generation-1
 
-# Windows
-scripts\setup.bat
-start_dev.bat
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
-# macOS/Linux
-./scripts/setup.sh
-./start_dev.sh
+# Frontend dependencies
+cd frontend && npm install && cd ..
 ```
 
+### 🚀 Development Launcher
+
+The dev launcher is the recommended way to start all services with proper configuration:
+
+```bash
+# Default start (all services with optimal settings)
+python scripts/dev_launcher.py
+
+# With additional options
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
+
+# Show all available options
+python scripts/dev_launcher.py --help
+```
+
+**Dev Launcher Features:**
+- ✅ Automatic service discovery and startup
+- ✅ Health monitoring with visual indicators
+- ✅ Secret management integration
+- ✅ Database initialization
+- ✅ Port conflict resolution
+- ✅ Crash recovery
+- ✅ Performance optimization
+
 **Launches:**
-- Backend: http://localhost:8000
-- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Frontend UI: http://localhost:3000
+- WebSocket: ws://localhost:8000/ws
+- API Docs: http://localhost:8000/docs
 
 ### Development Database Setup
 
 ```bash
-# Quick setup with Terraform
+# Option 1: Quick setup with Terraform (recommended)
 cd terraform-dev-postgres
 powershell -ExecutionPolicy Bypass -File quick-start.ps1  # Windows
 ./quick-start.sh  # macOS/Linux
 
 # Creates: PostgreSQL, Redis, ClickHouse
 # Auto-generates: .env.development.local
+
+# Option 2: Use SQLite (no setup required)
+# Dev launcher will auto-create SQLite database
 ```
 
-### Development Commands
+### 🧪 Testing Quick Start
 
 ```bash
-# Recommended start (optimal configuration)
-python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
+# Run default test suite (fast feedback)
+python -m test_framework.test_runner
 
-# Test runner (before commits)
+# With specific options
 python -m test_framework.test_runner --level integration --no-coverage --fast-fail
 
-# Agent changes
+# Test specific areas
+python -m test_framework.test_runner --level agents        # Agent tests
+python -m test_framework.test_runner --level websocket     # WebSocket tests
+python -m test_framework.test_runner --level auth          # Auth tests
+
+# With real LLM (for agent testing)
 python -m test_framework.test_runner --level agents --real-llm
+
+# Before production release (comprehensive)
+python -m test_framework.test_runner --level integration --real-llm --env staging
 ```
+
+**Test Runner Features:**
+- 🎯 Smart test discovery and categorization
+- ⚡ Parallel execution with optimal sharding
+- 📊 Coverage reporting (target: 97%)
+- 🔄 Automatic retry for flaky tests
+- 📈 Performance baselines
+- 🎭 Mock/Real LLM switching
 
 ### System Components
 

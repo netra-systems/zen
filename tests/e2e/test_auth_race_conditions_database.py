@@ -22,6 +22,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from collections import defaultdict
 import sys
 import os
+
+# Add auth_service to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'auth_service'))
+
 from auth_core.services.auth_service import AuthService
 from auth_core.core.jwt_handler import JWTHandler
 from auth_core.core.session_manager import SessionManager

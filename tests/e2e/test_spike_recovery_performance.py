@@ -26,6 +26,9 @@ import httpx
 import sys
 import os
 
+# Import required classes from test_spike_recovery_core
+from .test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
+
 async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGenerator,
                                                  spike_metrics: SpikeLoadMetrics):
     """

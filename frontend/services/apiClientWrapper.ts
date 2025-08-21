@@ -1,9 +1,10 @@
 /**
  * Axios-like wrapper for the apiClient to support ThreadService
- * Enhanced with secure URL handling to prevent mixed content errors
+ * Enhanced with secure URL handling and centralized auth with token refresh
  */
 
 import { secureApiConfig } from '@/lib/secure-api-config';
+import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/utils/debug-logger';
 
 interface ApiResponse<T = any> {
@@ -115,14 +116,8 @@ class ApiClientWrapper {
       ...config?.headers,
     };
 
-    // Get token from localStorage or session
-    const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token')
-      : null;
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    // Auth handling is now done by the auth interceptor
+    // Token management and 401 handling is centralized
 
     const options: RequestInit = {
       method,
@@ -146,7 +141,11 @@ class ApiClientWrapper {
         }
       }
 
-      const response = await fetch(validatedUrl, options).catch(async (error) => {
+      // Use auth interceptor for authenticated requests
+      const response = await authInterceptor.authenticatedFetch(validatedUrl, {
+        ...options,
+        skipAuth: config?.headers?.['skip-auth'] === 'true'
+      }).catch(async (error) => {
         this.isConnected = false;
         await this.checkConnection();
         throw new Error(`Network error: ${error.message || 'Failed to fetch'}`);
@@ -171,6 +170,9 @@ class ApiClientWrapper {
         const error = new Error(errorMessage);
         (error as any).status = response.status;
         (error as any).response = responseData;
+        
+        // 401 handling is now done by auth interceptor
+        // This will only be reached if auth interceptor fails
         throw error;
       }
 

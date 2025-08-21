@@ -84,27 +84,67 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           webSocketService.onStatusChange = handleStatusChange;
           webSocketService.onMessage = handleMessage;
           
-          // Connect to WebSocket using configured URL - ensure immediate connection on app load
-          const wsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
+          // Connect to WebSocket using secure endpoint - ensure immediate connection on app load
+          const baseWsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
+          const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
           
-          debugLogger.debug('[WebSocketProvider] Establishing WebSocket connection on app load', {
-            wsUrl,
-            hasToken: !!token
+          debugLogger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
+            wsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
+            hasToken: !!token,
+            isSecure: true,
+            authMethod: 'subprotocol'
           });
           
-          webSocketService.connect(`${wsUrl}?token=${token}`, {
+          webSocketService.connect(wsUrl, {
+            token,
+            refreshToken: async () => {
+              // In a real app, this would call your auth service to refresh the token
+              // For now, return the current token (no-op)
+              try {
+                // TODO: Implement actual token refresh logic
+                // const refreshedToken = await authService.refreshToken();
+                // return refreshedToken;
+                return token; // Temporary: return current token
+              } catch (error) {
+                logger.error('Token refresh failed in WebSocketProvider', error as Error);
+                return null;
+              }
+            },
             onOpen: () => {
-              debugLogger.debug('[WebSocketProvider] WebSocket connection established on app load');
+              debugLogger.debug('[WebSocketProvider] Secure WebSocket connection established');
             },
             onError: (error) => {
-              logger.error('WebSocket connection error on app load', undefined, {
+              logger.error('WebSocket connection error', undefined, {
                 component: 'WebSocketProvider',
                 action: 'connection_error',
-                metadata: { error: error.message }
+                metadata: { 
+                  error: error.message,
+                  type: error.type,
+                  recoverable: error.recoverable,
+                  code: error.code
+                }
               });
+              
+              // Handle different error types
+              if (error.type === 'auth') {
+                if (error.code === 1008) {
+                  if (error.message.includes('Security violation')) {
+                    logger.error('WebSocket security violation - using deprecated authentication method');
+                    // This is a critical security issue - don't retry
+                  } else {
+                    logger.warn('WebSocket authentication failed - token may be expired or invalid');
+                    // Token refresh might help here
+                  }
+                } else {
+                  logger.warn('WebSocket authentication error', undefined, {
+                    component: 'WebSocketProvider',
+                    metadata: { code: error.code, message: error.message }
+                  });
+                }
+              }
             },
             onReconnect: () => {
-              debugLogger.debug('[WebSocketProvider] WebSocket reconnecting after connection loss');
+              debugLogger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
             },
             heartbeatInterval: 30000, // 30 second heartbeat
             rateLimit: {

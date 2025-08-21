@@ -24,6 +24,9 @@ from dataclasses import dataclass, field
 import websockets
 import httpx
 
+# Import required classes
+from .utils.rapid_message_sender import RapidMessageSender
+
 class MessageSequenceEntry:
     """Tracking entry for message sequence validation."""
     sequence_id: int

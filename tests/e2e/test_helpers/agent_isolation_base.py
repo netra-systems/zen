@@ -317,6 +317,33 @@ def assert_isolation_quality(isolation_base: AgentIsolationBase, max_violations:
     
     logger.info(f"Isolation quality assertion passed: {total_violations} violations, score {isolation_score}")
 
+async def simulate_workload_burst(agent, burst_type: str = "cpu", duration: float = 5.0):
+    """Simulate a workload burst for testing."""
+    start_time = time.time()
+    
+    if burst_type == "cpu":
+        # CPU intensive workload
+        while time.time() - start_time < duration:
+            _ = [i ** 2 for i in range(10000)]
+            await asyncio.sleep(0.01)
+    elif burst_type == "memory":
+        # Memory intensive workload
+        data = []
+        while time.time() - start_time < duration:
+            data.append([0] * 10000)
+            await asyncio.sleep(0.1)
+    elif burst_type == "io":
+        # I/O intensive workload
+        while time.time() - start_time < duration:
+            _ = str(uuid.uuid4()) * 1000
+            await asyncio.sleep(0.05)
+    else:
+        # Default mixed workload
+        while time.time() - start_time < duration:
+            _ = [i ** 2 for i in range(5000)]
+            _ = str(uuid.uuid4()) * 100
+            await asyncio.sleep(0.05)
+
 def create_test_workload_message(tenant_id: str, message_type: str = "normal", 
                                payload_size: int = 100) -> Dict[str, Any]:
     """Create a standardized test workload message."""

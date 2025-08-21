@@ -19,6 +19,13 @@ import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 from app.logging_config import central_logger
 
+# Import required classes from core module
+from .test_2_midstream_disconnection_recovery_core import (
+    ConnectionState, ResponseType, NetworkCondition, StreamBuffer, NetworkSimulator
+)
+
+logger = central_logger.get_logger(__name__)
+
 class MockStreamingWebSocket:
     """Mock WebSocket connection with streaming response capabilities."""
     
