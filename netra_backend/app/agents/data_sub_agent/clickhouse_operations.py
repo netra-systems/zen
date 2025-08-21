@@ -506,4 +506,4 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
 
 
 # Legacy compatibility alias
-DataSubAgentClickHouseOperations = ModernClickHouseOperations
+# FIXME: DataSubAgentClickHouseOperations = ModernClickHouseOperations

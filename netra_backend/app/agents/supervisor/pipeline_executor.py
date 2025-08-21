@@ -209,13 +209,14 @@ class PipelineExecutor:
     
     def _create_completion_content(self, state: DeepAgentState, run_id: str):
         """Create agent completion content."""
-        from netra_backend.app.routes.unified_tools.schemas import AgentCompleted, AgentResult
+        from netra_backend.app.schemas.Agent import AgentCompleted
+        from netra_backend.app.schemas.agent_models import AgentResult
         result = AgentResult(success=True, output=state.to_dict())
         return AgentCompleted(run_id=run_id, result=result, execution_time_ms=0.0)
     
     def _create_websocket_message(self, content) -> 'WebSocketMessage':
         """Create WebSocket message wrapper."""
-        from netra_backend.app.routes.unified_tools.schemas import WebSocketMessage
+        from netra_backend.app.schemas.websocket_models import WebSocketMessage
         return WebSocketMessage(
             type="agent_completed", payload=content.model_dump()
         )

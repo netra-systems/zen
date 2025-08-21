@@ -56,7 +56,7 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
-from netra_backend.app.routes.mcp.main import app
+from netra_backend.app.main import app
 from fastapi.testclient import TestClient
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.config import settings

@@ -6,7 +6,7 @@ modular architecture under 450-line limit.
 """
 
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.services.apex_optimizer_agent.models import (
+from netra_backend.app.agents.corpus_admin.models import (
     CorpusOperation,
     CorpusType,
     CorpusMetadata,
@@ -16,7 +16,7 @@ from netra_backend.app.services.apex_optimizer_agent.models import (
 )
 from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
 from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser
-from netra_backend.app.services.synthetic_data.validators import CorpusApprovalValidator
+from netra_backend.app.agents.corpus_admin.validators import CorpusApprovalValidator
 
 __all__ = [
     "CorpusAdminSubAgent",

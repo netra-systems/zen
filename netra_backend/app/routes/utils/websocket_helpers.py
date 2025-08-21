@@ -38,7 +38,7 @@ async def accept_websocket_connection(websocket: WebSocket) -> str:
     # Pre-validate token signature before accepting connection using auth client
     try:
         # Validate token with auth service (same as REST endpoints)
-        validation_result = await auth_client.validate_token(token)
+        validation_result = await auth_client.validate_token_jwt(token)
         
         if not validation_result or not validation_result.get("valid"):
             logger.error("[WS AUTH] Token validation failed: invalid token from auth service")
@@ -66,7 +66,7 @@ def extract_app_services(websocket: WebSocket) -> Tuple[Any, Any]:
 async def decode_token_payload(security_service, token: str) -> Dict:
     """Decode and validate token payload using auth service."""
     # Use auth service for token validation (same as REST endpoints)
-    validation_result = await auth_client.validate_token(token)
+    validation_result = await auth_client.validate_token_jwt(token)
     
     if not validation_result or not validation_result.get("valid"):
         raise ValueError("Invalid or expired token")

@@ -105,8 +105,8 @@ class LauncherConfig:
         if not self.project_root.exists():
             raise ValueError(f"Project root does not exist: {self.project_root}")
         
-        # Check for required directories
-        backend_dir = self.project_root / "app"
+        # Check for required directories - updated to correct path
+        backend_dir = self.project_root / "netra_backend" / "app"
         frontend_dir = self.project_root / "frontend"
         
         if not backend_dir.exists():

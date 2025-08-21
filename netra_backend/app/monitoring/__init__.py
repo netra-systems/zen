@@ -11,7 +11,7 @@ Architecture:
 """
 
 # Core monitoring components
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric, SystemResourceMetrics, WebSocketMetrics
+from netra_backend.app.monitoring.models import MetricsCollector, PerformanceMetric, SystemResourceMetrics, WebSocketMetrics
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 from netra_backend.app.monitoring.dashboard import PerformanceDashboard, OperationMeasurement, SystemOverview
 from netra_backend.app.monitoring.system_monitor import SystemPerformanceMonitor, MonitoringManager, performance_monitor, monitoring_manager

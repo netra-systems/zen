@@ -32,7 +32,7 @@ class AuthClientProtocol(Protocol):
         """Authenticate user and return tokens"""
         ...
     
-    async def validate_token(self, token: str) -> Optional[TokenResponse]:
+    async def validate_token_jwt(self, token: str) -> Optional[TokenResponse]:
         """Validate access token"""
         ...
     
@@ -64,7 +64,7 @@ class AuthServiceProtocol(Protocol):
         """Validate and decode access token"""
         ...
     
-    async def invalidate_token(self, token: str) -> bool:
+    async def invalidate_token_jwt(self, token: str) -> bool:
         """Invalidate token (logout)"""
         ...
 

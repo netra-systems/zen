@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Query, Depends
 
-from netra_backend.app.services.apex_optimizer_agent.models import ReportResponse, MetricResponse, GenerateReportRequest
+from netra_backend.app.routes.factory_status.models import ReportResponse, MetricResponse, GenerateReportRequest
 from netra_backend.app.routes.factory_status.report_routes import (
     get_latest_report_handler, get_report_history_handler, generate_report_handler
 )

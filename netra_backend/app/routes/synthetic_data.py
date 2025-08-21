@@ -10,14 +10,12 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 from netra_backend.app import schemas
-from netra_backend.app.services.synthetic_data_service import synthetic_data_service
+from netra_backend.app.services.synthetic_data_service import synthetic_data_service, SyntheticDataService
 from netra_backend.app.dependencies import get_db_session, get_db_dependency, DbDep
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.schemas.shared_types import BaseAgentConfig
 from netra_backend.app.services.user_auth_service import user_auth_service
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.core.configuration.services import synthetic_data_service as sds
 from netra_backend.app.routes.utils.synthetic_data_helpers import (
     build_generation_config, execute_generation_safely, extract_result_fields,
     fetch_and_validate_job_status, extract_status_fields, cancel_job_safely,
@@ -255,7 +253,7 @@ async def export_synthetic_data(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.export_data(export_request)
+        result = await synthetic_data_service.export_data(export_request)
         return result
     except Exception as e:
         logger.error(f"Export error: {str(e)}")
@@ -275,7 +273,7 @@ async def analyze_synthetic_data_quality(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.analyze_quality(analysis_request)
+        result = await synthetic_data_service.analyze_quality(analysis_request)
         return result
     except Exception as e:
         logger.error(f"Analysis error: {str(e)}")
@@ -295,7 +293,7 @@ async def cleanup_synthetic_data(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.cleanup_jobs(cleanup_request)
+        result = await synthetic_data_service.cleanup_jobs(cleanup_request)
         return result
     except Exception as e:
         logger.error(f"Cleanup error: {str(e)}")
@@ -315,7 +313,7 @@ async def convert_synthetic_data_format(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.convert_format(conversion_request)
+        result = await synthetic_data_service.convert_format(conversion_request)
         return result
     except Exception as e:
         logger.error(f"Conversion error: {str(e)}")
@@ -335,7 +333,7 @@ async def compare_synthetic_with_real_data(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.compare_with_real_data(comparison_request)
+        result = await synthetic_data_service.compare_with_real_data(comparison_request)
         return result
     except Exception as e:
         logger.error(f"Comparison error: {str(e)}")
@@ -355,7 +353,7 @@ async def create_synthetic_data_version(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.create_version(versioning_request)
+        result = await synthetic_data_service.create_version(versioning_request)
         return result
     except Exception as e:
         logger.error(f"Versioning error: {str(e)}")
@@ -375,7 +373,7 @@ async def setup_auto_refresh(
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
-        result = await sds.setup_auto_refresh(refresh_config)
+        result = await synthetic_data_service.setup_auto_refresh(refresh_config)
         return result
     except Exception as e:
         logger.error(f"Auto-refresh setup error: {str(e)}")

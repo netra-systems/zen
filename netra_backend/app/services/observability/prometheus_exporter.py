@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
 
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector, Metric, MetricType
+from netra_backend.app.monitoring.models import MetricsCollector, Metric, MetricType
 
 
 @dataclass

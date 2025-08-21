@@ -12,6 +12,10 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.message_handler_core import ModernReliableMessageHandler
 from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
 from netra_backend.app.websocket.websocket_broadcast_executor import WebSocketBroadcastExecutor
@@ -20,9 +24,6 @@ from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionMan
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestWebSocketExecutionEngineInitialization:
@@ -241,7 +242,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_none_connection_manager(self):
         """Test metrics collector doesn't crash with None connection manager."""
-        from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+        from netra_backend.app.monitoring.models import MetricsCollector
         
         collector = MetricsCollector()
         
@@ -257,7 +258,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_connection_manager_error(self):
         """Test metrics collector handles errors from connection manager."""
-        from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+        from netra_backend.app.monitoring.models import MetricsCollector
         
         collector = MetricsCollector()
         

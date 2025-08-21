@@ -12,11 +12,15 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
 from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.agents.data_sub_agent.cost_optimizer import CostOptimizer
+from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 
 from llm.llm_manager import LLMManager
@@ -26,9 +30,6 @@ from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestDataSubAgentConsolidated:
@@ -121,7 +122,7 @@ class TestDataSubAgentConsolidated:
         with patch('app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
              patch('app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
              patch('app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
-             patch('app.agents.data_sub_agent.data_sub_agent.CostOptimizer') as mock_co, \
+             patch('app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
              patch('app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
             
             agent = DataSubAgent(

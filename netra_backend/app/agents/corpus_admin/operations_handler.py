@@ -9,7 +9,7 @@ from typing import Dict, Any
 from datetime import datetime, timezone
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.apex_optimizer_agent.models import CorpusOperationRequest, CorpusOperationResult
+from netra_backend.app.agents.corpus_admin.models import CorpusOperationRequest, CorpusOperationResult
 from netra_backend.app.agents.corpus_admin.operations_crud import CorpusCRUDOperations
 from netra_backend.app.agents.corpus_admin.operations_analysis import CorpusAnalysisOperations
 

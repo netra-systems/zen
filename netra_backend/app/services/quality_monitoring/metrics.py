@@ -16,7 +16,7 @@ logger = central_logger.get_logger(__name__)
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
+from netra_backend.app.monitoring.models import MetricsCollector as CoreMetricsCollector
 
 class QualityMetricsCollector:
     """Collects and stores quality metrics"""

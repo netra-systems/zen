@@ -9,13 +9,14 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from cryptography.fernet import Fernet
 
-from netra_backend.app.services.key_manager import KeyManager
-from netra_backend.tests.security_service_test_mocks import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.key_manager import KeyManager
+from netra_backend.tests.security_service_test_mocks import (
+
+# Add project root to path
     MockUser, EnhancedSecurityService, create_test_user, create_admin_user,
     create_locked_user, assert_authentication_success, assert_authentication_failure
 )
@@ -230,7 +231,7 @@ def _assert_user_permissions(result: Dict[str, Any]) -> None:
 
 def _create_token_data(user: MockUser):
     """Create token data for user"""
-    from netra_backend.app.routes.unified_tools.schemas import TokenPayload
+    from netra_backend.app.routes.unified_tools.models import TokenPayload
     return TokenPayload(
         sub=user.email,
         user_id=user.id,
@@ -241,7 +242,7 @@ def _create_token_data(user: MockUser):
 
 def _create_expired_token_data(user: MockUser):
     """Create expired token data"""
-    from netra_backend.app.routes.unified_tools.schemas import TokenPayload
+    from netra_backend.app.routes.unified_tools.models import TokenPayload
     return TokenPayload(
         sub=user.email,
         user_id=user.id,

@@ -98,7 +98,7 @@ class WebSocketAuthHandshake:
             handshake_context["auth_data"] = token_result["data"]
             
             # Validate token
-            validation_result = await self._validate_token(token_result["data"])
+            validation_result = await self._validate_token_jwt(token_result["data"])
             if not validation_result["valid"]:
                 handshake_context["state"] = HandshakeState.FAILED
                 handshake_context["errors"].extend(validation_result["errors"])
@@ -231,7 +231,7 @@ class WebSocketAuthHandshake:
             "error": "No authentication token found in headers"
         }
     
-    async def _validate_token(self, auth_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _validate_token_jwt(self, auth_data: Dict[str, Any]) -> Dict[str, Any]:
         """Validate authentication token."""
         token = auth_data["token"]
         token_type = auth_data["type"]
@@ -494,7 +494,7 @@ class TokenVerifier:
             "type": token_type
         }
         
-        validation_result = await self.auth_handshake._validate_token(auth_data)
+        validation_result = await self.auth_handshake._validate_token_jwt(auth_data)
         
         return {
             "valid": validation_result["valid"],

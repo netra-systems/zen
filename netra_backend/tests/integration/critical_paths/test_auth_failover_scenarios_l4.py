@@ -29,12 +29,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import uuid
 
-from netra_backend.app.schemas.auth_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
     Token, LoginRequest, LoginResponse,
     SessionInfo
 )
@@ -566,7 +567,7 @@ class TestAuthFailoverScenarios:
             if operation == "token_validation":
                 # Should work using cache
                 token = "cached_token_123"
-                result = await auth_client.validate_token(token)
+                result = await auth_client.validate_token_jwt(token)
                 assert (result is not None) == should_work
                 
             elif operation == "logout":

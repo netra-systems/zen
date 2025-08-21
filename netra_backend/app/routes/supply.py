@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from netra_backend.app.dependencies import DbDep
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
-from netra_backend.app.core.configuration.services import supplier_comparison
+from netra_backend.app.services import supplier_comparison
 from netra_backend.app import schemas
 
 router = APIRouter()

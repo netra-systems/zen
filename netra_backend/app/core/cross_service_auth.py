@@ -142,7 +142,7 @@ class CrossServiceAuthManager:
             issued_at=issued_at
         )
     
-    async def validate_token(self, token_str: str) -> Optional[AuthToken]:
+    async def validate_token_jwt(self, token_str: str) -> Optional[AuthToken]:
         """Validate and decode authentication token."""
         try:
             payload = jwt.decode(token_str, self.secret_key, algorithms=[self.algorithm])
@@ -179,7 +179,7 @@ class CrossServiceAuthManager:
         permissions = []
         
         if token_str:
-            token = await self.validate_token(token_str)
+            token = await self.validate_token_jwt(token_str)
             if token:
                 user_id = token.user_id
                 service_role = token.service_role

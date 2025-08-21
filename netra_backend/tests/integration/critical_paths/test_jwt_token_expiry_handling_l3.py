@@ -30,12 +30,13 @@ from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 import freezegun
 
-from netra_backend.app.schemas.auth_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
     Token, TokenData, RefreshRequest, RefreshResponse,
     TokenExpiryNotification, TokenStatus
 )
@@ -290,7 +291,7 @@ class TestJWTTokenExpiryHandling:
             
             # Token should still be valid at original expiry time
             frozen_time.move_to("2024-01-01 12:30:00")
-            validation = await token_manager.validate_token(token_data.access_token)
+            validation = await token_manager.validate_token_jwt(token_data.access_token)
             assert validation.is_valid, "Token should be valid due to sliding window"
     
     @pytest.mark.asyncio
@@ -404,7 +405,7 @@ class TestJWTTokenExpiryHandling:
             # Start processing request
             async def long_running_request(token: str):
                 # Validate token at start
-                validation = await token_manager.validate_token(token)
+                validation = await token_manager.validate_token_jwt(token)
                 assert validation.is_valid, "Token should be valid at start"
                 
                 # Simulate long processing (40 seconds)
@@ -412,7 +413,7 @@ class TestJWTTokenExpiryHandling:
                 await asyncio.sleep(0.1)  # Simulated work
                 
                 # Token still valid (within original minute)
-                validation = await token_manager.validate_token(token)
+                validation = await token_manager.validate_token_jwt(token)
                 assert validation.is_valid, "Token should still be valid"
                 
                 # More processing (another 30 seconds)
@@ -420,7 +421,7 @@ class TestJWTTokenExpiryHandling:
                 await asyncio.sleep(0.1)
                 
                 # Token now expired during processing
-                validation = await token_manager.validate_token(token)
+                validation = await token_manager.validate_token_jwt(token)
                 return validation
             
             # Execute request
@@ -467,7 +468,7 @@ class TestJWTTokenExpiryHandling:
         
         # All child tokens should also be invalid
         for child in child_tokens:
-            validation = await token_manager.validate_token(child.access_token)
+            validation = await token_manager.validate_token_jwt(child.access_token)
             assert not validation.is_valid, \
                 "Child tokens should be invalid when parent is revoked"
     

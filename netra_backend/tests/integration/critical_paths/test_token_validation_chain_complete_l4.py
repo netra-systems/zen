@@ -13,6 +13,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 import secrets
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.token_service import TokenService
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.redis_service import RedisService
@@ -20,9 +24,6 @@ from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     InvalidTokenError,
     TokenExpiredError,
     TokenRevokedError,
@@ -64,7 +65,7 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # Immediate validation should succeed
-        validation = await token_infrastructure['token_service'].validate_token(access_token)
+        validation = await token_infrastructure['token_service'].validate_token_jwt(access_token)
         assert validation['valid']
         assert validation['user_id'] == user_id
         assert set(validation['scopes']) == {'read', 'write'}
@@ -78,7 +79,7 @@ class TestTokenValidationChainCompleteL4:
         await asyncio.sleep(1.5)
         
         # Should still be valid but near expiry
-        validation = await token_infrastructure['token_service'].validate_token(access_token)
+        validation = await token_infrastructure['token_service'].validate_token_jwt(access_token)
         assert validation['valid']
         assert validation['near_expiry']
         
@@ -87,7 +88,7 @@ class TestTokenValidationChainCompleteL4:
         
         # Should now be expired
         with pytest.raises(TokenExpiredError):
-            await token_infrastructure['token_service'].validate_token(access_token)
+            await token_infrastructure['token_service'].validate_token_jwt(access_token)
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -143,7 +144,7 @@ class TestTokenValidationChainCompleteL4:
         
         # Should detect tampering
         with pytest.raises(TokenTamperError) as exc_info:
-            await token_infrastructure['token_service'].validate_token(tampered_token)
+            await token_infrastructure['token_service'].validate_token_jwt(tampered_token)
         
         assert 'signature' in str(exc_info.value).lower()
         
@@ -211,7 +212,7 @@ class TestTokenValidationChainCompleteL4:
         
         # All should be valid initially
         for token in tokens:
-            validation = await token_infrastructure['token_service'].validate_token(token)
+            validation = await token_infrastructure['token_service'].validate_token_jwt(token)
             assert validation['valid']
         
         # Revoke all tokens for user
@@ -220,7 +221,7 @@ class TestTokenValidationChainCompleteL4:
         # All should now be revoked
         for token in tokens:
             with pytest.raises(TokenRevokedError):
-                await token_infrastructure['token_service'].validate_token(token)
+                await token_infrastructure['token_service'].validate_token_jwt(token)
         
         # Revocation should be in Redis blacklist
         for token in tokens:
@@ -244,16 +245,16 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # Concurrent validation attempts
-        async def validate_token():
+        async def validate_token_jwt():
             try:
-                result = await token_infrastructure['token_service'].validate_token(token)
+                result = await token_infrastructure['token_service'].validate_token_jwt(token)
                 return result['valid']
             except Exception:
                 return False
         
         # Launch 100 concurrent validations
         validation_tasks = [
-            asyncio.create_task(validate_token())
+            asyncio.create_task(validate_token_jwt())
             for _ in range(100)
         ]
         
@@ -342,7 +343,7 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # Validate with correct audience
-        web_validation = await token_infrastructure['token_service'].validate_token(
+        web_validation = await token_infrastructure['token_service'].validate_token_jwt(
             token=web_token,
             expected_audience='web_app'
         )
@@ -350,7 +351,7 @@ class TestTokenValidationChainCompleteL4:
         
         # Validate with wrong audience should fail
         with pytest.raises(InvalidTokenError) as exc_info:
-            await token_infrastructure['token_service'].validate_token(
+            await token_infrastructure['token_service'].validate_token_jwt(
                 token=web_token,
                 expected_audience='mobile_app'
             )
@@ -378,8 +379,8 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # Both should be valid
-        parent_valid = await token_infrastructure['token_service'].validate_token(parent_token)
-        child_valid = await token_infrastructure['token_service'].validate_token(child_token)
+        parent_valid = await token_infrastructure['token_service'].validate_token_jwt(parent_token)
+        child_valid = await token_infrastructure['token_service'].validate_token_jwt(child_token)
         
         assert parent_valid['valid']
         assert child_valid['valid']
@@ -390,11 +391,11 @@ class TestTokenValidationChainCompleteL4:
         
         # Parent should be revoked
         with pytest.raises(TokenRevokedError):
-            await token_infrastructure['token_service'].validate_token(parent_token)
+            await token_infrastructure['token_service'].validate_token_jwt(parent_token)
         
         # Child should also be revoked (chain invalidation)
         with pytest.raises(TokenRevokedError):
-            await token_infrastructure['token_service'].validate_token(child_token)
+            await token_infrastructure['token_service'].validate_token_jwt(child_token)
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -412,7 +413,7 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # Validation from same IP should succeed
-        validation = await token_infrastructure['token_service'].validate_token(
+        validation = await token_infrastructure['token_service'].validate_token_jwt(
             token=bound_token,
             request_ip=original_ip
         )
@@ -420,7 +421,7 @@ class TestTokenValidationChainCompleteL4:
         
         # Validation from different IP should fail
         with pytest.raises(InvalidTokenError) as exc_info:
-            await token_infrastructure['token_service'].validate_token(
+            await token_infrastructure['token_service'].validate_token_jwt(
                 token=bound_token,
                 request_ip=different_ip
             )
@@ -439,7 +440,7 @@ class TestTokenValidationChainCompleteL4:
         )
         
         # First validation (caches result)
-        validation1 = await token_infrastructure['token_service'].validate_token(token)
+        validation1 = await token_infrastructure['token_service'].validate_token_jwt(token)
         assert validation1['valid']
         
         # Verify it's cached
@@ -456,4 +457,4 @@ class TestTokenValidationChainCompleteL4:
         
         # Validation should now fail
         with pytest.raises(TokenRevokedError):
-            await token_infrastructure['token_service'].validate_token(token)
+            await token_infrastructure['token_service'].validate_token_jwt(token)

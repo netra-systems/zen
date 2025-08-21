@@ -22,7 +22,7 @@ from netra_backend.app.agents.triage_sub_agent.processing_monitoring import (
     TriageProcessingMonitor, TriageWebSocketMonitor, TriageProcessingErrorHelper
 )
 
-from netra_backend.app.services.apex_optimizer_agent.models import TriageResult, ExtractedEntities
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult, ExtractedEntities
 
 logger = central_logger.get_logger(__name__)
 

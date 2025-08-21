@@ -1,3 +1,11 @@
+
+class StartupCheckResult:
+    """Result of a startup check"""
+    def __init__(self, success: bool = True, message: str = "", details: dict = None):
+        self.success = success
+        self.message = message
+        self.details = details or {}
+
 # AI AGENT MODIFICATION METADATA
 # ================================
 # Timestamp: 2025-08-10T18:48:31.172894+00:00

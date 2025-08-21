@@ -162,7 +162,7 @@ class SecureWebSocketManager:
         try:
             # Send only the token part (without Bearer prefix) to auth service
             clean_token = token.replace("Bearer ", "") if token.startswith("Bearer ") else token
-            validation_result = await auth_client.validate_token(clean_token)
+            validation_result = await auth_client.validate_token_jwt(clean_token)
             
             if not validation_result or not validation_result.get("valid"):
                 self._stats["security_violations"] += 1

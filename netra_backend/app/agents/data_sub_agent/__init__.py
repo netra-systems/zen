@@ -18,7 +18,7 @@ from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
 from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.services.llm.cost_optimizer import CostOptimizer
+from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 
 # Import ClickHouse initialization function and client
@@ -47,7 +47,7 @@ __all__ = [
     'ClickHouseClient', 
     'SchemaCache',
     'PerformanceAnalyzer',
-    'CostOptimizer',
+    'LLMCostOptimizer',
     'DataValidator',
     
     # SHARED TYPES

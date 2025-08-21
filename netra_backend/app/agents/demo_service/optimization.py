@@ -26,7 +26,7 @@ import time
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
 )
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+# FIXME: from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
@@ -53,11 +53,11 @@ class DemoOptimizationService(BaseExecutionInterface):
         self._engine = self._create_execution_engine()
         self._initialize_reliability_components()
     
-    def _create_execution_engine(self) -> BaseExecutionEngine:
+    # FIXME: def _create_execution_engine(self) -> BaseExecutionEngine:
         """Create execution engine with reliability patterns."""
         reliability_manager = self._create_reliability_manager()
         monitor = ExecutionMonitor()
-        return BaseExecutionEngine(reliability_manager, monitor)
+        # FIXME: return BaseExecutionEngine(reliability_manager, monitor)
     
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with circuit breaker and retry."""

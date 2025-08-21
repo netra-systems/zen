@@ -7,7 +7,7 @@ import re
 from typing import Dict, Any
 
 from netra_backend.app.services.quality_gate_service import QualityMetrics
-from netra_backend.app.models import FallbackContext
+from netra_backend.app.services.fallback_response.models import FallbackContext
 
 
 class ContentProcessor:

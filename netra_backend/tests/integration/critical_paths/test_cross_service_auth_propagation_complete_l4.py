@@ -12,13 +12,14 @@ from typing import Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 
-from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.api_gateway_service import APIGatewayService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.api_gateway_service import APIGatewayService
+
+# Add project root to path
 # from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
@@ -197,7 +198,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
         
         # All tokens should be valid
         for service, token in tokens.items():
-            valid = await service_mesh[f'{service}_service'].validate_token(token)
+            valid = await service_mesh[f'{service}_service'].validate_token_jwt(token)
             assert valid
         
         # Invalidate at auth service level
@@ -213,7 +214,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
             else:
                 service = f'{service}_service'
             
-            valid = await service_mesh[service].validate_token(token)
+            valid = await service_mesh[service].validate_token_jwt(token)
             assert not valid
     
     @pytest.mark.asyncio
@@ -458,7 +459,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
         service_mesh['auth_service_v2'] = AuthService(version='v2')
         
         # V2 should validate V1 tokens
-        v1_validation = await service_mesh['auth_service_v2'].validate_token(
+        v1_validation = await service_mesh['auth_service_v2'].validate_token_jwt(
             token=v1_token,
             allow_legacy=True
         )
@@ -471,7 +472,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
         v2_token = await service_mesh['auth_service_v2'].migrate_token(v1_token)
         
         # V2 token has enhanced features
-        v2_validation = await service_mesh['auth_service_v2'].validate_token(v2_token)
+        v2_validation = await service_mesh['auth_service_v2'].validate_token_jwt(v2_token)
         assert v2_validation['valid']
         assert v2_validation['token_version'] == 'v2'
         assert 'enhanced_claims' in v2_validation

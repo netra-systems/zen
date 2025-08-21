@@ -421,3 +421,6 @@ def add_reply_to_message(thread_id: str, parent_message_id: str, reply_data: dic
         "reply_level": 1,
         "message_type": reply_data.get("message_type", "reply")
     }
+# Create service instances for backward compatibility
+thread_service = ThreadService()
+

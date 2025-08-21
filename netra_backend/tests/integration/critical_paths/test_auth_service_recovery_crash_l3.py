@@ -31,12 +31,13 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 import psutil
 
-from netra_backend.app.schemas.auth_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
     Token, LoginRequest, LoginResponse,
     SessionInfo, HealthResponse, ServiceStatus
 )
@@ -268,7 +269,7 @@ class TestAuthServiceRecoveryCrash:
                         LoginRequest(email="test@test.com", password="password")
                     )
                 elif request_type == "validate":
-                    result = await auth_client.validate_token(baseline_token)
+                    result = await auth_client.validate_token_jwt(baseline_token)
                 elif request_type == "refresh":
                     result = await auth_client.refresh_token(baseline_token)
                 
@@ -367,7 +368,7 @@ class TestAuthServiceRecoveryCrash:
         valid_tokens = 0
         for token in tokens[:5]:  # Test sample
             try:
-                result = await auth_client.validate_token(token)
+                result = await auth_client.validate_token_jwt(token)
                 if result.valid:
                     valid_tokens += 1
             except:

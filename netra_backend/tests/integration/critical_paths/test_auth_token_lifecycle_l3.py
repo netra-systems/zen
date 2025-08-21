@@ -9,13 +9,14 @@ import time
 import jwt
 from datetime import datetime, timedelta
 from unittest.mock import patch, AsyncMock
-from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.config import settings
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.config import settings
+
+# Add project root to path
 
 
 class TestAuthTokenLifecycleL3:
@@ -52,7 +53,7 @@ class TestAuthTokenLifecycleL3:
             algorithm="HS256"
         )
         
-        result = await auth_service.validate_token(expired_token)
+        result = await auth_service.validate_token_jwt(expired_token)
         assert result is None, "Expired token should be invalid"
     
     @pytest.mark.asyncio
@@ -90,7 +91,7 @@ class TestAuthTokenLifecycleL3:
                 await auth_service.revoke_token(token)
                 
                 # Validate revoked token
-                validation = await auth_service.validate_token(token)
+                validation = await auth_service.validate_token_jwt(token)
                 assert validation is None, "Revoked token should be invalid"
     
     @pytest.mark.asyncio
@@ -106,7 +107,7 @@ class TestAuthTokenLifecycleL3:
                 token = result["access_token"]
                 
                 # Validate token concurrently
-                tasks = [auth_service.validate_token(token) for _ in range(10)]
+                tasks = [auth_service.validate_token_jwt(token) for _ in range(10)]
                 results = await asyncio.gather(*tasks)
                 
                 assert all(r is not None for r in results), "All validations should succeed"

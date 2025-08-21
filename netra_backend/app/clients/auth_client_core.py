@@ -81,7 +81,7 @@ class AuthServiceClient:
         except Exception as e:
             return await self._handle_validation_error(token, e)
     
-    async def validate_token(self, token: str) -> Optional[Dict]:
+    async def validate_token_jwt(self, token: str) -> Optional[Dict]:
         """Validate access token with caching."""
         disabled_result = await self._check_auth_service_enabled(token)
         if disabled_result is not None:

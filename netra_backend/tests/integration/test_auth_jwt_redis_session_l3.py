@@ -20,15 +20,16 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, AsyncMock
 
 import redis.asyncio as redis
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
 from redis_manager import RedisManager
 from logging_config import central_logger
 from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 
@@ -142,7 +143,7 @@ class AuthJWTRedisManager:
                 self.test_tokens.append(token)
                 
                 # 2. Validate token
-                validation_result = self.jwt_validator.validate_token(token)
+                validation_result = self.jwt_validator.validate_token_jwt(token)
                 
                 if validation_result.valid:
                     lifecycle_results["successful_validations"] += 1
@@ -323,7 +324,7 @@ class AuthJWTRedisManager:
                 self.test_tokens.append(new_token)
                 
                 # Validate new token
-                validation_result = self.jwt_validator.validate_token(new_token)
+                validation_result = self.jwt_validator.validate_token_jwt(new_token)
                 if validation_result.valid:
                     refresh_results["token_validations"] += 1
                 

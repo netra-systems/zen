@@ -294,7 +294,7 @@ def check_project_structure(project_root: Path) -> Dict[str, bool]:
     structure = {}
     
     # Check backend
-    backend_dir = project_root / "app"
+    backend_dir = project_root / "netra_backend" / "app"
     structure['backend'] = backend_dir.exists()
     if not structure['backend']:
         logger.error(f"Backend directory not found: {backend_dir}")

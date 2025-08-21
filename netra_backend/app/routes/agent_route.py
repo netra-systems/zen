@@ -1,7 +1,7 @@
 """Agent routes - Main agent endpoint handlers."""
 from fastapi import APIRouter, Depends, Request, WebSocket
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.routes.unified_tools.schemas import RequestModel
+from netra_backend.app.schemas.Request import RequestModel
 from typing import Dict, Any, Optional
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.agent_service import get_agent_service, AgentService

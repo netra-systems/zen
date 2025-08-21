@@ -17,7 +17,8 @@ with admin tool support using the unified supervisor architecture.
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
+# FIXME: SupervisorAgent not exported from supervisor
+# from netra_backend.app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager

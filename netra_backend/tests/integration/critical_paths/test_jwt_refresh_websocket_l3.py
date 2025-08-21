@@ -20,6 +20,10 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, AsyncMock
 
 import redis.asyncio as redis
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
 from ws_manager import WebSocketManager
 from redis_manager import RedisManager
@@ -27,9 +31,6 @@ from logging_config import central_logger
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 
@@ -218,7 +219,7 @@ class JWTRefreshManager:
         old_token = session_data["token"]
         
         # Validate refresh token first
-        validation_result = self.jwt_validator.validate_token(session_data["refresh_token"], TokenType.REFRESH)
+        validation_result = self.jwt_validator.validate_token_jwt(session_data["refresh_token"], TokenType.REFRESH)
         if not validation_result.valid:
             raise ValueError(f"Refresh token invalid: {validation_result.error}")
         

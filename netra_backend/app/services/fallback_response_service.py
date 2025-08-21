@@ -8,7 +8,7 @@ fails or produces low-quality output, replacing generic error messages with help
 from typing import Dict, List, Any
 
 # Import the actual implementation
-from netra_backend.app.fallback_response import (
+from netra_backend.app.services.fallback_response import (
     FallbackResponseService as _OriginalFallbackResponseService,
     FailureReason,
     FallbackContext

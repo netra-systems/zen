@@ -28,7 +28,7 @@ from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
 from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.services.llm.cost_optimizer import CostOptimizer
+from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 
 
@@ -64,7 +64,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.clickhouse_client = ClickHouseClient()
         self.schema_cache = SchemaCache()
         self.performance_analyzer = PerformanceAnalyzer(self.clickhouse_client)
-        self.cost_optimizer = CostOptimizer(self.clickhouse_client)
+        self.cost_optimizer = LLMCostOptimizer(self.clickhouse_client)
         self.data_validator = DataValidator()
     
     @agent_type_safe

@@ -34,13 +34,14 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import patch, AsyncMock
 import redis.asyncio as aioredis
 
-from netra_backend.app.schemas.auth_types import TokenData, UserInfo
-from logging_config import central_logger
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import TokenData, UserInfo
+from logging_config import central_logger
+
+# Add project root to path
 
 logger = central_logger.get_logger(__name__)
 
@@ -72,7 +73,7 @@ class PasswordResetTokenManager:
         
         return token
     
-    async def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
+    async def validate_token_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate reset token and return user data."""
         token_hash = hashlib.sha256(token.encode()).hexdigest()
         key = f"reset_token:{token_hash}"
@@ -201,7 +202,7 @@ class PasswordResetFlowManager:
     async def complete_reset(self, token: str, new_password: str) -> Dict[str, Any]:
         """Complete password reset with token validation."""
         # Validate token
-        token_data = await self.token_manager.validate_token(token)
+        token_data = await self.token_manager.validate_token_jwt(token)
         if not token_data:
             return {"success": False, "error": "invalid_token"}
         

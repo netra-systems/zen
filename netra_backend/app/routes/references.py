@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from netra_backend.app.dependencies import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.database_operations_service import database_operations_service
-from netra_backend.app.routes.unified_tools.schemas import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
+from netra_backend.app.schemas.Reference import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
 from typing import Optional
 
 router = APIRouter()

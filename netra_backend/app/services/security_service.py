@@ -70,7 +70,7 @@ class SecurityService:
     async def get_user_email_from_token(self, token: str) -> Optional[str]:
         """Get user email from token through auth service."""
         try:
-            result = await auth_client.validate_token(token)
+            result = await auth_client.validate_token_jwt(token)
             if result and result.get("valid"):
                 return result.get("email")
             return None
@@ -112,7 +112,7 @@ class SecurityService:
 
     async def decode_access_token(self, token: str) -> Optional[Dict]:
         """Validate and decode access token through auth service."""
-        result = await auth_client.validate_token(token)
+        result = await auth_client.validate_token_jwt(token)
         if result and result.get("valid"):
             return {
                 "sub": result.get("user_id"),

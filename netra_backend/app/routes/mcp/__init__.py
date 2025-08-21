@@ -6,7 +6,7 @@ Each module handles specific MCP functionality with single responsibility.
 """
 
 from netra_backend.app.routes.mcp.main import router
-from netra_backend.app.services.apex_optimizer_agent.models import (
+from netra_backend.app.routes.mcp.models import (
     MCPClientCreateRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,

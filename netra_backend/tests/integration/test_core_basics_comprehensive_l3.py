@@ -78,7 +78,7 @@ class MockAuthService:
         if token in self.tokens:
             del self.tokens[token]
     
-    async def validate_token(self, token: str) -> bool:
+    async def validate_token_jwt(self, token: str) -> bool:
         """Mock token validation"""
         return token in self.tokens
     
@@ -366,7 +366,7 @@ class MockSessionManager:
                     del self.sessions[session_id]
             self.user_sessions[user_id] = []
     
-    async def validate_token(self, token: str) -> bool:
+    async def validate_token_jwt(self, token: str) -> bool:
         """Validate token in session context"""
         # Check if token is associated with any session
         for session in self.sessions.values():

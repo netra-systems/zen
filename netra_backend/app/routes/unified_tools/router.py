@@ -11,7 +11,7 @@ from netra_backend.app.services.tool_permission_service import ToolPermissionSer
 import redis
 from netra_backend.app.core.configuration import unified_config_manager
 
-from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
+from netra_backend.app.routes.unified_tools.models import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
 from netra_backend.app.routes.unified_tools.tool_listing import gather_tool_data, build_tool_availability_response
 from netra_backend.app.routes.unified_tools.tool_execution import process_tool_execution
 from netra_backend.app.routes.unified_tools.permissions import execute_permission_check

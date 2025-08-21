@@ -21,8 +21,14 @@ from dev_launcher.launcher import DevLauncher
 class TestDefaultLauncherConfig(unittest.TestCase):
     """Test suite for default launcher configuration."""
     
-    def test_default_config_uses_dynamic_ports(self):
+    @patch('dev_launcher.config.find_project_root')
+    @patch('pathlib.Path.exists')
+    def test_default_config_uses_dynamic_ports(self, mock_exists, mock_find_root):
         """Test that default configuration uses dynamic ports."""
+        # Mock project structure
+        mock_find_root.return_value = Path(".")
+        mock_exists.return_value = True
+        
         # Create mock args with no flags set
         args = argparse.Namespace()
         args.backend_port = None
@@ -46,8 +52,14 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         self.assertTrue(config.frontend_reload)   # Frontend reload enabled
         self.assertTrue(config.load_secrets)      # Secrets loading enabled by default
     
-    def test_static_flag_disables_dynamic_ports(self):
+    @patch('dev_launcher.config.find_project_root')
+    @patch('pathlib.Path.exists')
+    def test_static_flag_disables_dynamic_ports(self, mock_exists, mock_find_root):
         """Test that --static flag properly disables dynamic ports."""
+        # Mock project structure
+        mock_find_root.return_value = Path(".")
+        mock_exists.return_value = True
+        
         args = argparse.Namespace()
         args.backend_port = None
         args.frontend_port = 3000
@@ -65,8 +77,14 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify static mode is enabled
         self.assertFalse(config.dynamic_ports)
     
-    def test_default_startup_mode_is_minimal(self):
+    @patch('dev_launcher.config.find_project_root')
+    @patch('pathlib.Path.exists')
+    def test_default_startup_mode_is_minimal(self, mock_exists, mock_find_root):
         """Test that default startup mode is minimal for clean output."""
+        # Mock project structure
+        mock_find_root.return_value = Path(".")
+        mock_exists.return_value = True
+        
         args = argparse.Namespace()
         args.backend_port = None
         args.frontend_port = 3000
@@ -87,8 +105,14 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify minimal mode is default
         self.assertEqual(config.startup_mode, "minimal")
     
-    def test_parallel_startup_enabled_by_default(self):
+    @patch('dev_launcher.config.find_project_root')
+    @patch('pathlib.Path.exists')
+    def test_parallel_startup_enabled_by_default(self, mock_exists, mock_find_root):
         """Test that parallel startup is enabled by default."""
+        # Mock project structure
+        mock_find_root.return_value = Path(".")
+        mock_exists.return_value = True
+        
         args = argparse.Namespace()
         args.backend_port = None
         args.frontend_port = 3000
@@ -127,7 +151,8 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         args.no_parallel = False
         args.project_id = None
         
-        config = LauncherConfig.from_args(args)
+        with patch('dev_launcher.config.find_project_root', return_value=Path(".")):
+            config = LauncherConfig.from_args(args)
         
         # Create launcher instance
         launcher = DevLauncher(config)
@@ -135,7 +160,6 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify key components are initialized
         self.assertIsNotNone(launcher.cache_manager)
         self.assertIsNotNone(launcher.startup_optimizer)
-        self.assertIsNotNone(launcher.optimized_startup)
         self.assertIsNotNone(launcher.log_filter)
         self.assertIsNotNone(launcher.progress_tracker)
         

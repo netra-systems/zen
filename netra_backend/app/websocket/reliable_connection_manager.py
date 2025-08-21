@@ -45,7 +45,7 @@ class ReliableConnectionManager:
     
     def _initialize_core_components(self) -> None:
         """Initialize core components."""
-        self.connection_manager = ConnectionManager()
+        self.connection_manager = get_connection_manager()
         self.heartbeat_manager = HeartbeatManager(self.connection_manager, default_error_handler)
         self.error_handler = default_error_handler
         self.message_handler = ReliableMessageHandler()
@@ -233,4 +233,4 @@ class ReliableConnectionManager:
 
 
 # Global instance
-default_reliable_connection_manager = ReliableConnectionManager()
+default_reliable_connection_manager = Reliableget_connection_manager()

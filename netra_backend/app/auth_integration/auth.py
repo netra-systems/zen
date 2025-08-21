@@ -48,7 +48,7 @@ async def get_current_user(
     token = credentials.credentials
     
     # Validate token with auth service
-    validation_result = await auth_client.validate_token(token)
+    validation_result = await auth_client.validate_token_jwt(token)
     
     if not validation_result or not validation_result.get("valid"):
         raise HTTPException(

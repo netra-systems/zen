@@ -7,7 +7,7 @@ from netra_backend.app.agents.tool_dispatcher import (
     ToolDispatcher, ToolDispatchResponse, ProductionTool
 )
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus, ToolInput
+from netra_backend.app.routes.unified_tools.models import ToolResult, ToolStatus, ToolInput
 
 
 class MockBaseTool:

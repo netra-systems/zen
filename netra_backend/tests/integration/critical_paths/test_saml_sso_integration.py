@@ -39,12 +39,13 @@ from urllib.parse import parse_qs, urlparse
 import hashlib
 import logging
 
-from netra_backend.app.schemas.auth_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
     TokenData, SessionInfo, UserPermission,
     LoginResponse, AuthProvider
 )
@@ -662,7 +663,7 @@ class SAMLSSOTestManager:
             session_stored = stored_session is not None
             
             # Verify JWT token valid
-            token_payload = self.jwt_handler.validate_token(access_token, "access")
+            token_payload = self.jwt_handler.validate_token_jwt(access_token, "access")
             token_valid = token_payload is not None
             
             # Verify user sessions tracking

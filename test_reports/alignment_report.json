@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-21T11:10:54.695625",
+  "timestamp": "2025-08-21T11:39:33.317412",
   "import_fixes": [
     "netra_backend\\tests\\test_agent_response_serialization.py",
     "netra_backend\\tests\\test_agent_service_critical.py",
@@ -1014,15 +1014,14 @@
     "netra_backend\\tests\\integration\\critical_missing\\tier1_critical\\test_subscription_tier_enforcement.py",
     "netra_backend\\tests\\services\\agents\\test_tools.py",
     "netra_backend\\tests\\unit\\services\\test_gcp_error_service.py",
-    "netra_backend\\tests\\unit\\websocket\\test_websocket_closing_state.py",
-    "netra_backend\\tests\\example_isolated_test.py"
+    "netra_backend\\tests\\unit\\websocket\\test_websocket_closing_state.py"
   ],
   "config_fixes": [
     "test_config.py"
   ],
   "file_fixes": [],
   "summary": {
-    "total_import_fixes": 1015,
+    "total_import_fixes": 1014,
     "total_config_fixes": 1,
     "total_file_fixes": 0
   }

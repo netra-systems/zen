@@ -14,7 +14,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
 from netra_backend.app.agents.base import BaseSubAgent, BaseExecutionInterface, ExecutionContext, ExecutionResult
-from netra_backend.app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
+# FIXME: # FIXME: BaseExecutionEngine not available
+# FIXME: # from netra_backend.app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -155,7 +156,7 @@ Include specific metrics and timelines where possible."""
         retry_config = self._create_retry_config()
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
         self.execution_monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.execution_monitor)
+        # FIXME: self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.execution_monitor)
         
     def get_executive_summary_sections(self) -> list:
         """Get standard sections for executive summary reports."""

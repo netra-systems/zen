@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional, AsyncGenerator
 from fastapi.responses import StreamingResponse
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.routes.unified_tools.schemas import RequestModel
+from netra_backend.app.schemas.Request import RequestModel
 from netra_backend.app.routes.agent_route_helpers import delegate_streaming
 
 

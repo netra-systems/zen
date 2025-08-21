@@ -12,7 +12,7 @@
 from typing import TYPE_CHECKING, Optional, Dict, Any
 from datetime import datetime, UTC
 
-from netra_backend.app.routes.unified_tools.schemas import ToolInput
+from netra_backend.app.schemas.Tool import ToolInput
 from netra_backend.app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
     ToolStatus

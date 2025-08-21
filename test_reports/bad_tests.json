@@ -1,6 +1,944 @@
 {
   "version": "1.0",
-  "tests": {},
+  "tests": {
+    "dev_launcher/tests/test_default_launcher.py::TestDefaultLauncherConfig::test_default_config_uses_dynamic_ports": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.610747",
+      "last_failure": "2025-08-21T11:24:01.610747",
+      "last_pass": "2025-08-21T11:28:35.030446",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.610747",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_default_launcher.py::TestDefaultLauncherConfig::test_default_startup_mode_is_minimal": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.628722",
+      "last_failure": "2025-08-21T11:24:01.628722",
+      "last_pass": "2025-08-21T11:28:35.040860",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.628722",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_default_launcher.py::TestDefaultLauncherConfig::test_launcher_initializes_with_improvements": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.714982",
+      "last_failure": "2025-08-21T11:27:36.621491",
+      "last_pass": "2025-08-21T11:28:35.055731",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.714982",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'DevLauncher' object has no attribute 'optimized_startup'"
+        },
+        {
+          "run_id": "run_20250821_112736_56175",
+          "timestamp": "2025-08-21T11:27:36.621491",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'DevLauncher' object has no attribute 'optimized_startup'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_default_launcher.py::TestDefaultLauncherConfig::test_parallel_startup_enabled_by_default": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.731371",
+      "last_failure": "2025-08-21T11:24:01.731371",
+      "last_pass": "2025-08-21T11:28:35.061376",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.731371",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_default_launcher.py::TestDefaultLauncherConfig::test_static_flag_disables_dynamic_ports": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.746218",
+      "last_failure": "2025-08-21T11:24:01.746218",
+      "last_pass": "2025-08-21T11:28:35.070849",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.746218",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_launcher_with_user": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.815294",
+      "last_failure": "2025-08-21T11:24:01.815294",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.815294",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.auth_starter.AuthStarter'> does not have the attribute 'create_dev_user'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_environment_reset": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.857662",
+      "last_failure": "2025-08-21T11:24:01.857662",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.857662",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.cache_manager.CacheManager'> does not have the attribute 'clear_all'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_data_seeding": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.909123",
+      "last_failure": "2025-08-21T11:24:01.909123",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.909123",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher' has no attribute 'data_seeder'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_mode_switching": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:01.965523",
+      "last_failure": "2025-08-21T11:24:01.965523",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:01.965523",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: Mock object has no attribute 'dev_mode'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_service_coordination": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.012382",
+      "last_failure": "2025-08-21T11:24:02.012382",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.012382",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.auth_starter.AuthStarter'> does not have the attribute 'start'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevUserCreation::test_dev_health_monitoring": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.058060",
+      "last_failure": "2025-08-21T11:24:02.058060",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.058060",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.health_monitor.HealthMonitor'> does not have the attribute 'check_service'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevWorkflowOptimization::test_rapid_iteration_cycle": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.138167",
+      "last_failure": "2025-08-21T11:24:02.138167",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.138167",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.launcher.DevLauncher'> does not have the attribute 'detect_code_changes'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevWorkflowOptimization::test_dev_environment_isolation": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.201612",
+      "last_failure": "2025-08-21T11:24:02.201612",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.201612",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.launcher.DevLauncher'> does not have the attribute 'create_isolated_environment'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevWorkflowOptimization::test_dev_performance_profiling": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.252025",
+      "last_failure": "2025-08-21T11:24:02.252025",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.252025",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher' has no attribute 'profiler'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevLauncherIntegration::test_complete_dev_setup_workflow": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.315347",
+      "last_failure": "2025-08-21T11:24:02.315347",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.315347",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.launcher.DevLauncher'> does not have the attribute 'validate_prerequisites'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dev_user_flow.py::TestDevLauncherIntegration::test_dev_environment_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.376663",
+      "last_failure": "2025-08-21T11:24:02.376663",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.376663",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <class 'dev_launcher.recovery_manager.RecoveryManager'> does not have the attribute 'detect_failures'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_dynamic_port_health.py::TestDynamicPortHealthChecks::test_verify_auth_ready_with_dynamic_port": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.515856",
+      "last_failure": "2025-08-21T11:24:02.515856",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.515856",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: expected call not found.\nExpected: wait_for_service_with_details('http://localhost:8082/health', timeout=30)\n  Actual: wait_for_service_with_details('http://localhost:8082/health/ready', timeout=30)\n\npytest introspection follows:\n\nArgs:\nassert ('http://loca...ealth/ready',) == ('http://loca...8082/health',)\n  \n  At index 0 diff: 'http://localhost:8082/health/ready' != 'http://localhost:8082/health'\n  \n  Full diff:\n    (\n  -     'http://localhost:8082/health',\n  +     'http://loca"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestLauncherConfig::test_config_defaults": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:02.543043",
+      "last_failure": "2025-08-21T11:24:02.543043",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:02.543043",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestHealthMonitor::test_health_check_failure_and_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.065465",
+      "last_failure": "2025-08-21T11:24:04.065465",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.065465",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: True is not false"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestHealthMonitor::test_monitoring_thread": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.379687",
+      "last_failure": "2025-08-21T11:24:04.379687",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.379687",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 0 not greater than 1"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestDevLauncher::test_check_environment_missing_deps": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.474645",
+      "last_failure": "2025-08-21T11:24:04.474645",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.474645",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'check_dependencies'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestDevLauncher::test_check_environment_success": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.549069",
+      "last_failure": "2025-08-21T11:24:04.549069",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.549069",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'check_project_structure'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestDevLauncher::test_start_backend_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.635280",
+      "last_failure": "2025-08-21T11:24:04.635280",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.635280",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'create_subprocess'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestDevLauncher::test_start_backend_success": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.713801",
+      "last_failure": "2025-08-21T11:24:04.713801",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.713801",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'create_process_env'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher.py::TestIntegration::test_full_launch_cycle": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.785043",
+      "last_failure": "2025-08-21T11:24:04.785043",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.785043",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'open_browser'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_config.py::TestLauncherConfig::test_config_defaults": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.795887",
+      "last_failure": "2025-08-21T11:24:04.795887",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.795887",
+          "error_type": "ValueError",
+          "error_message": "ValueError: Backend directory not found: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nAre you running from the correct directory?"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestHealthMonitor::test_health_check_failure_and_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:04.918395",
+      "last_failure": "2025-08-21T11:24:04.918395",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:04.918395",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: True is not false"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestHealthMonitor::test_monitoring_thread": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:05.232659",
+      "last_failure": "2025-08-21T11:24:05.232659",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:05.232659",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 0 not greater than 1"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestAdvancedHealthMonitor::test_cascading_failures": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:05.247125",
+      "last_failure": "2025-08-21T11:24:05.247125",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:05.247125",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 'Service1' not found in []"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestAdvancedHealthMonitor::test_health_check_performance": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:05.257621",
+      "last_failure": "2025-08-21T11:24:05.257621",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:05.257621",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 0 != 10"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestErrorRecovery::test_network_error_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.523240",
+      "last_failure": "2025-08-21T11:24:07.523240",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.523240",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 0 != 3"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestErrorRecovery::test_port_conflict_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.605803",
+      "last_failure": "2025-08-21T11:24:07.605803",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.605803",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'load_or_create_config'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_health.py::TestErrorRecovery::test_resource_cleanup_on_error": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.699426",
+      "last_failure": "2025-08-21T11:24:07.699426",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.699426",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'load_or_create_config'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestDevLauncher::test_check_environment_missing_deps": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.799243",
+      "last_failure": "2025-08-21T11:24:07.799243",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.799243",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'check_dependencies'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestDevLauncher::test_check_environment_success": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.882630",
+      "last_failure": "2025-08-21T11:24:07.882630",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.882630",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'check_project_structure'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestDevLauncher::test_start_backend_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:07.965676",
+      "last_failure": "2025-08-21T11:24:07.965676",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:07.965676",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'create_subprocess'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestDevLauncher::test_start_backend_success": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:08.058222",
+      "last_failure": "2025-08-21T11:24:08.058222",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:08.058222",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'create_process_env'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestFullIntegration::test_full_launch_cycle": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:08.130097",
+      "last_failure": "2025-08-21T11:24:08.130097",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:08.130097",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'open_browser'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestRollingRestart::test_rolling_restart": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:08.202497",
+      "last_failure": "2025-08-21T11:24:08.202497",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:08.202497",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'wait_for_service'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_integration.py::TestMultiEnvironment::test_dev_to_prod_configuration_switch": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:08.212658",
+      "last_failure": "2025-08-21T11:24:08.212658",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:08.212658",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: type object 'ResourceMode' has no attribute 'DEVELOPMENT'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_validation.py::test_launcher_help": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:10.020955",
+      "last_failure": "2025-08-21T11:24:10.020955",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:10.020955",
+          "error_type": "Error",
+          "error_message": "assert 2 == 0\n +  where 2 = CompletedProcess(args=['C:\\\\Users\\\\antho\\\\miniconda3\\\\python.exe', 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher.py', '--help'], returncode=2, stdout='', stderr=\"C:\\\\Users\\\\antho\\\\miniconda3\\\\python.exe: can't open file 'C:\\\\\\\\Users\\\\\\\\antho\\\\\\\\OneDrive\\\\\\\\Desktop\\\\\\\\Netra\\\\\\\\netra-core-generation-1\\\\\\\\dev_launcher.py': [Errno 2] No such file or directory\\n\").returncode"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_validation.py::test_launcher_dry_run": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:10.073798",
+      "last_failure": "2025-08-21T11:24:10.073798",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:10.073798",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'load_or_create_config'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_launcher_validation.py::test_error_messages": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:10.173135",
+      "last_failure": "2025-08-21T11:24:10.173135",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:10.173135",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.launcher' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\launcher.py'> does not have the attribute 'load_or_create_config'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_phase3_multiprocessing.py::test_speedup_target_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:12.642957",
+      "last_failure": "2025-08-21T11:24:12.642957",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:12.642957",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Expected 2.5x+ speedup, got 1.1x\nassert 1.0890568316642715 >= 2.5"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_startup_comprehensive.py::TestProcessManagerWindows::test_windows_process_tree_termination": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:12.689436",
+      "last_failure": "2025-08-21T11:24:12.689436",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:12.689436",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: expected call not found.\nExpected: run(['taskkill', '/F', '/T', '/PID', '12345'], capture_output=True, text=True, timeout=10)\n  Actual: run(['taskkill', '/F', '/PID', '12345'], capture_output=True, text=True, timeout=5)\n\npytest introspection follows:\n\nArgs:\nassert (['taskkill',...D', '12345'],) == (['taskkill',...D', '12345'],)\n  \n  At index 0 diff: ['taskkill', '/F', '/PID', '12345'] != ['taskkill', '/F', '/T', '/PID', '12345']\n  \n  Full diff:\n    (\n        [\n            'taskki"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_startup_validator.py::TestStartupValidator::test_verify_frontend_ready_no_browser": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:14.048371",
+      "last_failure": "2025-08-21T11:24:14.048371",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:14.048371",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.startup_validator' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\startup_validator.py'> does not have the attribute 'open_browser'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_startup_validator.py::TestStartupValidator::test_verify_frontend_ready_with_browser": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:24:14.150663",
+      "last_failure": "2025-08-21T11:24:14.150663",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_112400_40502",
+          "timestamp": "2025-08-21T11:24:14.150663",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'dev_launcher.startup_validator' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\dev_launcher\\\\startup_validator.py'> does not have the attribute 'open_browser'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_path_resolution.py::TestPathResolution::test_backend_path_validation_legacy_structure": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:34:57.288163",
+      "last_failure": "2025-08-21T11:34:57.288163",
+      "last_pass": "2025-08-21T11:36:41.598127",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_113456_96900",
+          "timestamp": "2025-08-21T11:34:57.288163",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: ValueError not raised"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "dev_launcher/tests/test_path_validation_integration.py::TestPathValidationIntegration::test_backend_starter_uses_correct_path": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:37:53.277925",
+      "last_failure": "2025-08-21T11:37:53.277925",
+      "last_pass": "2025-08-21T11:38:19.223240",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_113752_72921",
+          "timestamp": "2025-08-21T11:37:53.277925",
+          "error_type": "TypeError",
+          "error_message": "TypeError: BackendStarter.__init__() missing 3 required positional arguments: 'services_config', 'log_manager', and 'service_discovery'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    }
+  },
   "runs": [
     {
       "run_id": "run_20250821_100416_56539",
@@ -521,10 +1459,218 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112400_40502",
+      "timestamp": "2025-08-21T11:24:14.157310",
+      "total_tests": 171,
+      "passed": 123,
+      "failed": 48,
+      "bad_tests_count": 47
+    },
+    {
+      "run_id": "run_20250821_112437_77544",
+      "timestamp": "2025-08-21T11:24:43.483534",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112450_90911",
+      "timestamp": "2025-08-21T11:24:54.078213",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112543_43442",
+      "timestamp": "2025-08-21T11:25:48.853765",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112551_51469",
+      "timestamp": "2025-08-21T11:25:57.004400",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112619_79507",
+      "timestamp": "2025-08-21T11:26:24.777512",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112709_29994",
+      "timestamp": "2025-08-21T11:27:15.398143",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112736_56175",
+      "timestamp": "2025-08-21T11:27:36.662592",
+      "total_tests": 10,
+      "passed": 9,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250821_112824_4213",
+      "timestamp": "2025-08-21T11:28:24.598197",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112826_6123",
+      "timestamp": "2025-08-21T11:28:33.381621",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112834_14785",
+      "timestamp": "2025-08-21T11:28:35.097264",
+      "total_tests": 10,
+      "passed": 10,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112902_42278",
+      "timestamp": "2025-08-21T11:29:09.784787",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112916_56454",
+      "timestamp": "2025-08-21T11:29:23.126765",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_112954_94174",
+      "timestamp": "2025-08-21T11:30:00.560076",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113004_4814",
+      "timestamp": "2025-08-21T11:30:10.987731",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113037_37929",
+      "timestamp": "2025-08-21T11:30:43.846514",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113128_88452",
+      "timestamp": "2025-08-21T11:31:36.195662",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113209_29112",
+      "timestamp": "2025-08-21T11:32:16.124192",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113255_75525",
+      "timestamp": "2025-08-21T11:33:01.569733",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113449_89109",
+      "timestamp": "2025-08-21T11:34:49.137313",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113456_96900",
+      "timestamp": "2025-08-21T11:34:57.294403",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250821_113641_1382",
+      "timestamp": "2025-08-21T11:36:41.633647",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_113752_72921",
+      "timestamp": "2025-08-21T11:37:53.283573",
+      "total_tests": 6,
+      "passed": 5,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250821_113818_98981",
+      "timestamp": "2025-08-21T11:38:19.292098",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_114117_77490",
+      "timestamp": "2025-08-21T11:41:25.741977",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_114237_57502",
+      "timestamp": "2025-08-21T11:42:44.754871",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 65,
-    "last_updated": "2025-08-21T11:23:13.660855"
+    "total_runs": 91,
+    "last_updated": "2025-08-21T11:42:44.754871"
   }
 }

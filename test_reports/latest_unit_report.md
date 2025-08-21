@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:23:05.129415  
+**Generated:** 2025-08-21T11:33:01.944802  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.38s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.46s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 6.06s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.37s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 6.84s
-- **Exit Code:** 255
+- **Total Duration:** 6.43s
+- **Exit Code:** 15
 
 ### Backend Configuration
 ```
@@ -60,59 +60,43 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/services netra_backend/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.42s
+[FAIL] TESTS FAILED with exit code 4 after 5.25s
 ================================================================================
 
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\base\monitoring.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  "system_start_time": datetime.utcnow(),
+2025-08-21 11:32:59.846 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
 netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.routes.mcp.main import app
-netra_backend\app\routes\mcp\__init__.py:8: in <module>
-    from netra_backend.app.routes.mcp.main import router
-netra_backend\app\routes\mcp\main.py:25: in <module>
-    from netra_backend.app.routes.mcp.handlers import MCPHandlers
-netra_backend\app\routes\mcp\handlers.py:11: in <module>
-    from netra_backend.app.routes.mcp.handlers_server import handle_server_info
-netra_backend\app\routes\mcp\handlers_server.py:4: in <module>
-    from netra_backend.app.services.mcp_service import MCPService
-netra_backend\app\services\mcp_service.py:20: in <module>
-    from netra_backend.app.services.agent_service import AgentService
-netra_backend\app\services\agent_service.py:8: in <module>
-    from netra_backend.app.services.agent_service_core import AgentService
-netra_backend\app\services\agent_service_core.py:13: in <module>
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-netra_backend\app\agents\supervisor_consolidated.py:43: in <module>
-    from netra_backend.app.agents.supervisor.execution_context import PipelineStep
-netra_backend\app\agents\supervisor\__init__.py:5: in <module>
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-netra_backend\app\agents\supervisor\agent_registry.py:13: in <module>
-    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-netra_backend\app\agents\triage_sub_agent\agent.py:34: in <module>
-    from netra_backend.app.agents.triage_sub_agent.executor import TriageExecutor
-netra_backend\app\agents\triage_sub_agent\executor.py:20: in <module>
-    from netra_backend.app.agents.admin_tool_dispatcher.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
-E   ImportError: cannot import name 'TriageExecutionHelpers' from 'netra_backend.app.agents.admin_tool_dispatcher.execution_helpers' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\admin_tool_dispatcher\execution_helpers.py)
+    from netra_backend.app.main import app
+netra_backend\app\main.py:93: in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+netra_backend\app\core\app_factory.py:127: in create_app
+    _configure_app_routes(app)
+netra_backend\app\core\app_factory.py:140: in _configure_app_routes
+    register_api_routes(app)
+netra_backend\app\core\app_factory.py:97: in register_api_routes
+    _import_and_register_routes(app)
+netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
+    route_modules = import_all_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:122: in import_all_route_modules
+    basic_modules = import_basic_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:5: in import_basic_route_modules
+    route_imports = _import_core_routes()
+                    ^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:11: in _import_core_routes
+    from netra_backend.app.routes import (supply, generation, admin, references, health,
+netra_backend\app\routes\quality.py:20: in <module>
+    from netra_backend.app.routes.quality_handlers import (
+netra_backend\app\routes\quality_handlers.py:19: in <module>
+    from netra_backend.app.services.quality.quality_validators import (
+E   ImportError: cannot import name 'map_content_type' from 'netra_backend.app.services.quality.quality_validators' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\quality\quality_validators.py)
 
 ```
 
 ### Frontend Output
 ```
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 255
-================================================================================
-
-Cleaning up test processes...
 
 'hooks' is not recognized as an internal or external command,
 operable program or batch file.

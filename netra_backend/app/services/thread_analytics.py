@@ -48,3 +48,6 @@ __all__ = [
     'get_analytics_dashboard',
     'get_dashboard_data'
 ]
+# Thread analytics module - exports functions directly
+thread_analytics = None  # Not a class-based service
+

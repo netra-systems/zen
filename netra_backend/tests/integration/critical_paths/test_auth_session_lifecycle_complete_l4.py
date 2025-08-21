@@ -13,6 +13,10 @@ import jwt
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.token_service import TokenService
@@ -21,9 +25,6 @@ from netra_backend.app.models.session import Session
 from netra_backend.app.config import settings
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAuthSessionLifecycleCompleteL4:
@@ -85,7 +86,7 @@ class TestAuthSessionLifecycleCompleteL4:
         # Start multiple concurrent requests
         async def make_request(token):
             await asyncio.sleep(0.1)  # Simulate request processing
-            return await auth_stack['token_service'].validate_token(token)
+            return await auth_stack['token_service'].validate_token_jwt(token)
         
         # Start requests with initial token
         request_tasks = [
@@ -147,7 +148,7 @@ class TestAuthSessionLifecycleCompleteL4:
         # Validate all tokens
         validations = []
         for token in tokens:
-            result = await auth_stack['token_service'].validate_token(token)
+            result = await auth_stack['token_service'].validate_token_jwt(token)
             validations.append(result)
         
         # First token should be invalid, others valid
@@ -160,7 +161,7 @@ class TestAuthSessionLifecycleCompleteL4:
         
         # All tokens should now be invalid
         for token in tokens[1:]:
-            result = await auth_stack['token_service'].validate_token(token)
+            result = await auth_stack['token_service'].validate_token_jwt(token)
             assert not result['valid']
     
     @pytest.mark.asyncio
@@ -243,13 +244,13 @@ class TestAuthSessionLifecycleCompleteL4:
         # Mock time to be 30 seconds in the past (clock skew)
         with patch('time.time', return_value=time.time() - 30):
             # Should still validate with reasonable clock skew
-            result = await auth_stack['token_service'].validate_token(token)
+            result = await auth_stack['token_service'].validate_token_jwt(token)
             assert result['valid']
         
         # Mock time to be 5 minutes in the future
         with patch('time.time', return_value=time.time() + 360):
             # Token should be expired
-            result = await auth_stack['token_service'].validate_token(token)
+            result = await auth_stack['token_service'].validate_token_jwt(token)
             assert not result['valid']
     
     @pytest.mark.asyncio
@@ -324,7 +325,7 @@ class TestAuthSessionLifecycleCompleteL4:
         
         # All tokens should be invalid
         for token in tokens:
-            result = await auth_stack['token_service'].validate_token(token)
+            result = await auth_stack['token_service'].validate_token_jwt(token)
             assert not result['valid']
         
         # All sessions should be expired
@@ -385,8 +386,8 @@ class TestAuthSessionLifecycleCompleteL4:
             with patch.object(auth_stack['token_service'], 'validate_with_old_keys') as mock_old:
                 mock_old.return_value = True
                 
-                result1 = await auth_stack['token_service'].validate_token(token1)
-                result2 = await auth_stack['token_service'].validate_token(token2)
+                result1 = await auth_stack['token_service'].validate_token_jwt(token1)
+                result2 = await auth_stack['token_service'].validate_token_jwt(token2)
                 
                 assert result1['valid']  # Old key token
                 assert result2['valid']  # New key token

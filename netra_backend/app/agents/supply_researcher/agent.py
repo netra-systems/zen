@@ -22,7 +22,7 @@ from netra_backend.app.agents.supply_researcher.data_extractor import SupplyData
 from netra_backend.app.agents.supply_researcher.database_manager import SupplyDatabaseManager
 
 
-class SupplyResearcherAgent(BaseSubAgent):
+# FIXME: class SupplyResearcherAgent(BaseSubAgent):
     """Agent for researching and updating AI supply information"""
     
     def __init__(
@@ -31,7 +31,7 @@ class SupplyResearcherAgent(BaseSubAgent):
         db: AsyncSession,
         supply_service: Optional[SupplyResearchService] = None
     ):
-        super().__init__(llm_manager, name="SupplyResearcherAgent", 
+        # FIXME: super().__init__(llm_manager, name="SupplyResearcherAgent", 
                         description="Researches and updates AI model supply information using Google Deep Research")
         self._init_database_components(db, supply_service)
         self._init_research_components(db)
@@ -70,7 +70,7 @@ class SupplyResearcherAgent(BaseSubAgent):
         research_session = await self._create_research_session(parsed_request, state)
         research_result = await self._conduct_research_with_updates(parsed_request, research_session, run_id, stream_updates)
         result = await self._process_and_finalize_results(research_result, parsed_request, research_session, run_id, stream_updates, state)
-        logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
+        # FIXME: logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
     
     async def _parse_and_log_request(self, request: str, run_id: str, stream_updates: bool):
         """Parse request and log details."""
@@ -286,7 +286,7 @@ class SupplyResearcherAgent(BaseSubAgent):
         stream_updates: bool
     ) -> None:
         """Handle execution errors"""
-        logger.error(f"SupplyResearcherAgent execution failed: {error}")
+        # FIXME: logger.error(f"SupplyResearcherAgent execution failed: {error}")
         await self._update_failed_session_if_exists(error)
         self._store_error_result(error, state)
         await self._send_error_notification(run_id, error, stream_updates)

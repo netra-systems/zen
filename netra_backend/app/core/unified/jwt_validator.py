@@ -80,7 +80,7 @@ class UnifiedJWTValidator:
         if secret:
             logger.warning("Direct JWT secret provided but will be ignored - auth service handles all JWT operations")
     
-    async def validate_token(
+    async def validate_token_jwt(
         self,
         token: str,
         token_type: Optional[TokenType] = None,
@@ -93,7 +93,7 @@ class UnifiedJWTValidator:
         """
         try:
             # Validate through auth service
-            result = await auth_client.validate_token(token)
+            result = await auth_client.validate_token_jwt(token)
             
             if not result:
                 return TokenValidationResult(
@@ -270,7 +270,7 @@ jwt_validator = UnifiedJWTValidator()
 # Compatibility exports
 async def validate_jwt(token: str) -> TokenValidationResult:
     """Validate JWT token via auth service."""
-    return await jwt_validator.validate_token(token)
+    return await jwt_validator.validate_token_jwt(token)
 
 
 async def create_jwt(

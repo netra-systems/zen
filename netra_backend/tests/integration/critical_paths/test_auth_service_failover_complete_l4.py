@@ -11,6 +11,10 @@ from typing import Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import random
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.auth_failover_service import AuthFailoverService
 from netra_backend.app.services.health_monitor import HealthMonitor
@@ -18,9 +22,6 @@ from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.config import settings
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAuthServiceFailoverCompleteL4:
@@ -458,7 +459,7 @@ class TestAuthServiceFailoverCompleteL4:
         # Token validation should work
         if degraded_features['token_validation']:
             token = "existing_valid_token"
-            validation = await ha_infrastructure['tertiary_auth'].validate_token(token)
+            validation = await ha_infrastructure['tertiary_auth'].validate_token_jwt(token)
             operations_results['token_validation'] = validation
         
         # Session check should work

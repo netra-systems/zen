@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:23:12.193680  
+**Generated:** 2025-08-21T11:41:25.759701  
 **Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 5.77s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 8.24s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,7 +28,7 @@
 - **Purpose:** Complete user journey validation with actual services
 - **Timeout:** 1800s
 - **Coverage Enabled:** No
-- **Total Duration:** 5.77s
+- **Total Duration:** 8.24s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -60,39 +60,46 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -vv -n 2 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m real_e2e
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 4.89s
+[FAIL] TESTS FAILED with exit code 4 after 6.82s
 ================================================================================
 
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\base\monitoring.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
-  "system_start_time": datetime.utcnow(),
+2025-08-21 11:41:22.369 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
 netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.routes.mcp.main import app
-netra_backend\app\routes\mcp\__init__.py:8: in <module>
-    from netra_backend.app.routes.mcp.main import router
-netra_backend\app\routes\mcp\main.py:25: in <module>
-    from netra_backend.app.routes.mcp.handlers import MCPHandlers
-netra_backend\app\routes\mcp\handlers.py:11: in <module>
-    from netra_backend.app.routes.mcp.handlers_server import handle_server_info
-netra_backend\app\routes\mcp\handlers_server.py:4: in <module>
-    from netra_backend.app.services.mcp_service import MCPService
-netra_backend\app\services\mcp_service.py:20: in <module>
-    from netra_backend.app.services.agent_service import AgentService
-netra_backend\app\services\agent_service.py:8: in <module>
-    from netra_backend.app.services.agent_service_core import AgentService
-netra_backend\app\services\agent_service_core.py:13: in <module>
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-netra_backend\app\agents\supervisor_consolidated.py:43: in <module>
-    from netra_backend.app.agents.supervisor.execution_context import PipelineStep
-netra_backend\app\agents\supervisor\__init__.py:5: in <module>
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-netra_backend\app\agents\supervisor\agent_registry.py:13: in <module>
-    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-netra_backend\app\agents\triage_sub_agent\agent.py:34: in <module>
-    from netra_backend.app.agents.triage_sub_agent.executor import TriageExecutor
-netra_backend\app\agents\triage_sub_agent\executor.py:20: in <module>
-    from netra_backend.app.agents.admin_tool_dispatcher.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
-E   ImportError: cannot import name 'TriageExecutionHelpers' from 'netra_backend.app.agents.admin_tool_dispatcher.execution_helpers' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\admin_tool_dispatcher\execution_helpers.py)
+    from netra_backend.app.main import app
+netra_backend\app\main.py:93: in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+netra_backend\app\core\app_factory.py:127: in create_app
+    _configure_app_routes(app)
+netra_backend\app\core\app_factory.py:140: in _configure_app_routes
+    register_api_routes(app)
+netra_backend\app\core\app_factory.py:97: in register_api_routes
+    _import_and_register_routes(app)
+netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
+    route_modules = import_all_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:124: in import_all_route_modules
+    factory_routers = import_factory_routers()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:99: in import_factory_routers
+    status_routers = _import_factory_status_routers()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_status_routers
+    from netra_backend.app.routes.factory_status import router as factory_status_router
+netra_backend\app\routes\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.routes.factory_status.router import router
+netra_backend\app\routes\factory_status\router.py:9: in <module>
+    from netra_backend.app.routes.factory_status.report_routes import (
+netra_backend\app\routes\factory_status\report_routes.py:9: in <module>
+    from netra_backend.app.routes.factory_status.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
+netra_backend\app\routes\factory_status\business_logic.py:5: in <module>
+    from netra_backend.app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
+netra_backend\app\services\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.services.factory_status.factory_status_service import FactoryStatusService
+netra_backend\app\services\factory_status\factory_status_service.py:13: in <module>
+    from netra_backend.app.monitoring.metrics_collectors import (
+E   ModuleNotFoundError: No module named 'netra_backend.app.monitoring.metrics_collectors'
 
 ```
 

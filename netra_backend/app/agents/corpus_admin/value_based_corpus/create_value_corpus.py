@@ -5,8 +5,8 @@ import json
 import os
 import sys
 from typing import Dict, Any, List
-from value_corpus_to_xml import process_corpus_to_xml
-from value_corpus_validation import validate_sync
+from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_to_xml import process_corpus_to_xml
+from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_validation import validate_sync
 
 def get_user_input(prompt: str, default: str = "") -> str:
     """Get user input with optional default."""

@@ -5,7 +5,7 @@ All functions ≤8 lines per requirements.
 
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Any, Optional
-from netra_backend.app.routes.unified_tools.schemas import TokenPayload
+from netra_backend.app.routes.unified_tools.models import TokenPayload
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager
 

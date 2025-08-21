@@ -13,7 +13,7 @@ from netra_backend.app.llm.observability import (
     start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
     log_agent_input, log_agent_output
 )
-from netra_backend.app.services.apex_optimizer_agent.models import CorpusOperation, CorpusType, CorpusMetadata, CorpusOperationRequest
+from netra_backend.app.agents.corpus_admin.models import CorpusOperation, CorpusType, CorpusMetadata, CorpusOperationRequest
 
 logger = central_logger.get_logger(__name__)
 

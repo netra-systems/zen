@@ -7,7 +7,7 @@ and modular architecture compliance.
 from typing import Dict, List, Tuple
 
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.app.services.apex_optimizer_agent.models import FailureReason
+from netra_backend.app.services.fallback_response.models import FailureReason
 from netra_backend.app.services.fallback_response.templates_optimization import OptimizationTemplates
 from netra_backend.app.services.fallback_response.templates_data import DataTemplates  
 from netra_backend.app.services.fallback_response.templates_reports import ReportTemplates

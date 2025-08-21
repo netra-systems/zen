@@ -16,7 +16,7 @@ from netra_backend.app.schemas.quality_types import (
     QualityAlert, AlertAcknowledgement, QualityReportType,
     QualityReport, QualityStatistics, QualityServiceHealth
 )
-from netra_backend.app.services.quality.quality_validators import (
+from netra_backend.app.routes.quality_validators import (
     map_content_type, format_validation_response, format_dashboard_data,
     _complete_dashboard_data, format_alert_list, _complete_alert_formatting,
     format_acknowledgement_response, format_quality_report, format_quality_statistics,

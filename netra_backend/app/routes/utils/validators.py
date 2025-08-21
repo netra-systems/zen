@@ -1,19 +1,25 @@
 """Validation utilities for route handlers."""
 
 from typing import Dict, Any, Optional
-from netra_backend.app.core.error_handlers import handle_not_found_error, handle_access_denied_error
+from fastapi import HTTPException, status
 
 
 def validate_resource_exists(resource: Any, resource_type: str, identifier: str) -> None:
     """Validate resource exists."""
     if not resource:
-        handle_not_found_error(resource_type, identifier)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{resource_type} with id {identifier} not found"
+        )
 
 
 def validate_user_access(resource: Dict[str, Any], user_id: int, resource_id: str) -> None:
     """Validate user access to resource."""
     if resource.get("user_id") != user_id:
-        handle_access_denied_error()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied to this resource"
+        )
 
 
 def validate_job_ownership(status: Dict, user_id: int, job_id: str) -> None:

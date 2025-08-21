@@ -8,7 +8,7 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.state_checkpoint_manager import StateCheckpointManager
-from netra_backend.app.services.state_recovery_manager import AgentStateRecoveryManager
+from netra_backend.app.agents.supervisor.state_recovery_manager import AgentStateRecoveryManager
 
 logger = central_logger.get_logger(__name__)
 

@@ -23,6 +23,10 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from starlette.websockets import WebSocketDisconnect
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app import schemas
@@ -30,9 +34,6 @@ from netra_backend.app import schemas
 from netra_backend.tests.test_agent_service_fixtures import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     mock_supervisor,
     mock_thread_service, 
     mock_message_handler,
@@ -249,7 +250,7 @@ class TestAgentServiceBasic:
     
     def _create_full_request_model(self):
         """Create full RequestModel with all required fields."""
-        from netra_backend.app.routes.unified_tools.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.routes.unified_tools.models import Settings, Workload, DataSource, TimeRange, RequestModel
         
         settings = Settings(debug_mode=True)
         workload = Workload(

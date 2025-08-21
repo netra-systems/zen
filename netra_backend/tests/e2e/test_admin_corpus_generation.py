@@ -12,12 +12,13 @@ import asyncio
 from typing import Dict
 from unittest.mock import AsyncMock
 
-from netra_backend.app.schemas.admin_corpus_messages import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.admin_corpus_messages import (
+
+# Add project root to path
     CorpusDiscoveryRequest, CorpusDiscoveryResponse,
     CorpusGenerationRequest, CorpusGenerationResponse, 
     ConfigurationSuggestionRequest, ConfigurationSuggestionResponse,
@@ -92,7 +93,7 @@ class TestAdminCorpusGeneration:
         # Run the agent to get real results
         await agent.execute(state, f"run-{request.session_id}", stream_updates=True)
         # Validate the agent ran successfully
-        from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+        from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Agent should complete execution"
     
     async def test_configuration_suggestions(self, admin_corpus_setup):
@@ -142,7 +143,7 @@ class TestAdminCorpusGeneration:
         # Run the agent for corpus generation
         await agent.execute(state, f"gen-{request.session_id}", stream_updates=True)
         # Validate the agent completed successfully
-        from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+        from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Generation should complete"
     
     async def test_error_recovery(self, admin_corpus_setup):
