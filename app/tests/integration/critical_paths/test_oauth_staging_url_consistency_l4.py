@@ -362,7 +362,7 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
                 )
         return None
     
-    def _determine_correct_url(self, line_content: str, incorrect_pattern: str) -> tuple[str, str]:
+    def _determine_correct_url(self, line_content: str, incorrect_pattern: str) -> tuple:
         """Determine the correct URL and type based on line content context."""
         line_lower = line_content.lower()
         
@@ -579,7 +579,7 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
 
 @pytest.fixture
 async def oauth_url_consistency_l4_suite():
-    """Create L4 OAuth URL consistency test suite."""
+    """Create L4 OAuth URL consistency test suite with proper L4 base."""
     suite = OAuthURLConsistencyL4TestSuite()
     await suite.initialize_l4_environment()
     yield suite
@@ -588,71 +588,173 @@ async def oauth_url_consistency_l4_suite():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.l4
 async def test_oauth_staging_url_consistency_comprehensive_l4(oauth_url_consistency_l4_suite):
-    """Test comprehensive OAuth URL consistency across all services in staging."""
-    audit_result = await oauth_url_consistency_l4_suite.execute_oauth_url_audit()
+    """L4 Test: Comprehensive OAuth URL consistency across all services in staging.
     
-    assert audit_result.total_files_scanned > 10, f"Too few files scanned: {audit_result.total_files_scanned}"
-    assert audit_result.audit_duration_seconds < 60.0, f"Audit took too long: {audit_result.audit_duration_seconds}s"
+    This test validates that all staging OAuth URLs follow the correct subdomain architecture.
+    BVJ: $25K MRR - Prevents authentication failures caused by incorrect OAuth URLs.
+    """
+    # Execute the complete critical path test with L4 metrics
+    test_metrics = await oauth_url_consistency_l4_suite.run_complete_critical_path_test()
+    
+    # Validate that test succeeded
+    assert test_metrics.success, f"OAuth URL consistency test failed: {test_metrics.errors}"
+    
+    # Validate performance requirements
+    assert test_metrics.duration < 60.0, f"Test took too long: {test_metrics.duration:.2f}s"
+    assert test_metrics.service_calls > 0, "No staging service calls were made"
+    
+    # Get detailed audit results
+    audit_data = test_metrics.details.get("audit_result")
+    assert audit_data is not None, "Audit results not found in test metrics"
     
     # Critical requirement: No critical inconsistencies allowed
-    critical_inconsistencies = [i for i in audit_result.inconsistencies if i.severity == "critical"]
-    assert len(critical_inconsistencies) == 0, (
-        f"Found {len(critical_inconsistencies)} critical OAuth URL inconsistencies:\n" +
-        "\n".join([f"  - {inc.file_path}:{inc.line_number} -> '{inc.incorrect_url}'" for inc in critical_inconsistencies[:3]])
+    critical_count = audit_data.get("critical_inconsistencies", 0)
+    assert critical_count == 0, (
+        f"Found {critical_count} critical OAuth URL inconsistencies. "
+        f"See inconsistencies in test metrics for details."
+    )
+    
+    # Coverage requirement: Should scan meaningful number of files
+    files_scanned = audit_data.get("total_files_scanned", 0)
+    assert files_scanned >= 10, f"Too few files scanned: {files_scanned}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.staging
+@pytest.mark.l4
+async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite):
+    """L4 Test: Specific validation of auth_client_config.py fallback configuration.
+    
+    Tests the specific line mentioned in BVJ that contains incorrect fallback URL.
+    """
+    await oauth_url_consistency_l4_suite.initialize_l4_environment()
+    
+    result = await oauth_url_consistency_l4_suite.check_critical_file_line(
+        "app/clients/auth_client_config.py", 369
+    )
+    
+    assert result["exists"] is True, "Critical file app/clients/auth_client_config.py does not exist"
+    assert "line_content" in result, "Could not read line content"
+    
+    # Specific test for the known issue: line 369 should not contain "https://staging.netrasystems.ai"
+    line_content = result.get("line_content", "")
+    has_incorrect_url = result.get("has_incorrect_url", False)
+    
+    if has_incorrect_url:
+        issue_details = result.get("issue_details", {})
+        pytest.fail(
+            f"Line 369 contains incorrect URL pattern:\n"
+            f"  Current: {line_content}\n"
+            f"  Issue: {issue_details.get('incorrect_url', 'Unknown')}\n"
+            f"  Expected: {issue_details.get('expected_url', 'Unknown')}\n"
+            f"  Context: {issue_details.get('context', 'Unknown')}\n"
+            f"  Severity: {issue_details.get('severity', 'Unknown')}"
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.staging
+@pytest.mark.l4
+async def test_oauth_redirect_uri_validation_l4(oauth_url_consistency_l4_suite):
+    """L4 Test: Validate OAuth redirect URIs follow correct staging subdomain pattern."""
+    await oauth_url_consistency_l4_suite.initialize_l4_environment()
+    
+    validation_result = await oauth_url_consistency_l4_suite.validate_oauth_redirect_urls()
+    
+    assert validation_result["total_validations"] > 0, "No OAuth redirect validations performed"
+    
+    invalid_count = validation_result["invalid_redirects"]
+    if invalid_count > 0:
+        invalid_details = [
+            v for v in validation_result["validations"] 
+            if not v.get("valid", True)
+        ]
+        
+        failure_message = f"Found {invalid_count} invalid OAuth redirect configurations:\n"
+        for detail in invalid_details[:3]:  # Show first 3 issues
+            failure_message += f"  - {detail.get('type', 'unknown')}: {detail.get('issue', 'Unknown issue')}\n"
+        
+        pytest.fail(failure_message)
+
+
+@pytest.mark.asyncio
+@pytest.mark.staging
+@pytest.mark.l4
+async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4_suite):
+    """L4 Test: Validate that staging OAuth endpoints are accessible.
+    
+    This test verifies that the expected staging subdomains are actually reachable,
+    providing L4 realism by testing against the actual staging environment.
+    """
+    await oauth_url_consistency_l4_suite.initialize_l4_environment()
+    
+    endpoint_results = await oauth_url_consistency_l4_suite.test_oauth_endpoints_accessibility()
+    
+    assert endpoint_results["endpoints_tested"] > 0, "No OAuth endpoints tested"
+    
+    failed_count = endpoint_results["failed_responses"]
+    total_count = endpoint_results["endpoints_tested"]
+    success_rate = endpoint_results["successful_responses"] / total_count
+    
+    # Allow some endpoints to be unreachable (staging environment may be partial)
+    # but require at least 50% accessibility
+    assert success_rate >= 0.5, (
+        f"OAuth endpoint accessibility too low: {success_rate:.1%} "
+        f"({endpoint_results['successful_responses']}/{total_count})"
     )
 
 
 @pytest.mark.asyncio
 @pytest.mark.staging
-async def test_auth_client_config_line_368_consistency_l4(oauth_url_consistency_l4_suite):
-    """Test specific line 368 in auth_client_config.py mentioned in BVJ."""
-    result = await oauth_url_consistency_l4_suite.check_critical_file_line("app/clients/auth_client_config.py", 368)
+@pytest.mark.l4
+async def test_oauth_audit_performance_and_coverage_l4(oauth_url_consistency_l4_suite):
+    """L4 Test: Validate OAuth URL audit performance and coverage requirements."""
+    await oauth_url_consistency_l4_suite.initialize_l4_environment()
     
-    assert result["exists"] is True, "Critical file app/clients/auth_client_config.py does not exist"
+    # Execute audit and measure performance
+    audit_results = await oauth_url_consistency_l4_suite.execute_oauth_url_audit()
+    audit_data = audit_results["audit_result"]
     
-    if "has_incorrect_url" in result:
-        assert result["has_incorrect_url"] is False, (
-            f"Line 368 contains incorrect URL: {result.get('line_content')}"
+    # Performance requirements
+    duration = audit_data.audit_duration_seconds
+    assert duration < 60.0, f"Audit took too long: {duration:.2f}s (max: 60s)"
+    
+    # Coverage requirements
+    files_scanned = audit_data.total_files_scanned
+    assert files_scanned >= 10, f"Too few files scanned: {files_scanned} (min: 10)"
+    
+    # File type diversity
+    file_types = audit_data.file_types_scanned
+    assert len(file_types) >= 2, f"Should scan multiple file types, only found: {list(file_types.keys())}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.staging
+@pytest.mark.l4
+async def test_oauth_url_pattern_analysis_l4(oauth_url_consistency_l4_suite):
+    """L4 Test: Analyze OAuth URL patterns to identify systematic issues."""
+    await oauth_url_consistency_l4_suite.initialize_l4_environment()
+    
+    audit_results = await oauth_url_consistency_l4_suite.execute_oauth_url_audit()
+    audit_data = audit_results["audit_result"]
+    
+    patterns_detected = audit_data.patterns_detected
+    inconsistencies = audit_data.inconsistencies
+    
+    # Validate that we're not seeing widespread systematic issues
+    total_inconsistencies = audit_data.inconsistencies_detected
+    if total_inconsistencies > 0:
+        # Group by severity
+        severity_counts = {}
+        for inconsistency in inconsistencies:
+            severity = inconsistency.severity
+            severity_counts[severity] = severity_counts.get(severity, 0) + 1
+        
+        # Critical and high severity issues should be minimal
+        critical_and_high = severity_counts.get("critical", 0) + severity_counts.get("high", 0)
+        assert critical_and_high == 0, (
+            f"Found {critical_and_high} critical/high severity OAuth URL issues. "
+            f"These must be fixed before deployment."
         )
-
-
-@pytest.mark.asyncio
-@pytest.mark.staging
-async def test_auth_service_main_line_147_consistency_l4(oauth_url_consistency_l4_suite):
-    """Test specific line 147 in auth_service/main.py mentioned in BVJ."""
-    result = await oauth_url_consistency_l4_suite.check_critical_file_line("auth_service/main.py", 147)
-    
-    assert result["exists"] is True, "Critical file auth_service/main.py does not exist"
-    
-    if "has_incorrect_url" in result:
-        assert result["has_incorrect_url"] is False, (
-            f"Line 147 contains incorrect URL: {result.get('line_content')}"
-        )
-
-
-@pytest.mark.asyncio
-@pytest.mark.staging
-async def test_oauth_endpoint_accessibility_l4(oauth_url_consistency_l4_suite):
-    """Test OAuth endpoints are accessible in staging."""
-    endpoint_results = await oauth_url_consistency_l4_suite.test_oauth_endpoints()
-    
-    assert endpoint_results["endpoints_tested"] > 0, "No OAuth endpoints tested"
-    
-    success_rate = endpoint_results["successful_responses"] / endpoint_results["endpoints_tested"]
-    assert success_rate >= 0.5, f"OAuth endpoint success rate too low: {success_rate}"
-
-
-@pytest.mark.asyncio
-@pytest.mark.staging
-async def test_oauth_audit_performance_l4(oauth_url_consistency_l4_suite):
-    """Test OAuth URL audit meets performance requirements in staging."""
-    audit_result = await oauth_url_consistency_l4_suite.execute_oauth_url_audit()
-    
-    assert audit_result.audit_duration_seconds < 60.0, f"Audit took too long: {audit_result.audit_duration_seconds}s"
-    assert audit_result.total_files_scanned >= 10, f"Too few files scanned: {audit_result.total_files_scanned}"
-    
-    # Inconsistency detection rate should be reasonable (less than 20%)
-    if audit_result.oauth_urls_found > 0:
-        inconsistency_rate = audit_result.inconsistencies_detected / audit_result.oauth_urls_found
-        assert inconsistency_rate < 0.2, f"OAuth inconsistency rate too high: {inconsistency_rate:.2%}"

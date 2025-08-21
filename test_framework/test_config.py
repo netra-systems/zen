@@ -393,8 +393,20 @@ def configure_gcp_staging_environment():
     # Redis configuration for staging
     os.environ["REDIS_HOST"] = "redis-staging"
     
-    # Staging URLs
-    os.environ["STAGING_URL"] = os.getenv("STAGING_URL", "https://staging.netra.ai")
+    # Actual Staging URLs
+    os.environ["STAGING_URL"] = os.getenv("STAGING_URL", "https://app.staging.netrasystems.ai")
+    os.environ["STAGING_API_URL"] = os.getenv("STAGING_API_URL", "https://api.staging.netrasystems.ai")
+    os.environ["STAGING_AUTH_URL"] = os.getenv("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai")
+    os.environ["STAGING_FRONTEND_URL"] = os.getenv("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
+    
+    # Set base URLs for tests
+    os.environ["BASE_URL"] = os.environ["STAGING_URL"]
+    os.environ["API_BASE_URL"] = os.environ["STAGING_API_URL"]
+    os.environ["AUTH_BASE_URL"] = os.environ["STAGING_AUTH_URL"]
+    os.environ["FRONTEND_URL"] = os.environ["STAGING_FRONTEND_URL"]
+    
+    # WebSocket URL
+    os.environ["WS_BASE_URL"] = os.getenv("WS_BASE_URL", "wss://api.staging.netrasystems.ai/ws")
     
     # Enable observability
     os.environ["ENABLE_OBSERVABILITY"] = "true"
@@ -404,3 +416,8 @@ def configure_gcp_staging_environment():
         print("[WARNING] GOOGLE_APPLICATION_CREDENTIALS not set - staging tests may fail")
     
     print(f"[INFO] Configured for GCP staging environment (project: {project_id})")
+    print(f"[INFO] Staging URLs:")
+    print(f"  - App: {os.environ['STAGING_URL']}")
+    print(f"  - API: {os.environ['STAGING_API_URL']}")
+    print(f"  - Auth: {os.environ['STAGING_AUTH_URL']}")
+    print(f"  - Frontend: {os.environ['STAGING_FRONTEND_URL']}")
