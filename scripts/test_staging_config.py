@@ -74,7 +74,7 @@ def _print_loading_header():
 def _load_staging_config():
     """Load staging configuration with cache clearing"""
     _clear_config_cache()
-    from app.config import get_config
+    from netra_backend.app.config import get_config
     config = get_config()
     print("\n[SUCCESS] Configuration loaded successfully!")
     return config

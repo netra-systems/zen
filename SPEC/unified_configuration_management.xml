@@ -58,14 +58,14 @@
                 <file>app/config.py</file>
                 <function>get_config() -> AppConfig</function>
                 <description>Primary access point for all configuration</description>
-                <usage>from app.config import get_config; config = get_config()</usage>
+                <usage>from netra_backend.app.config import get_config; config = get_config()</usage>
             </primary_entry>
             
             <legacy_entry>
                 <file>app/config.py</file>
                 <attribute>settings</attribute>
                 <description>Lazy-loaded settings attribute for backward compatibility</description>
-                <usage>from app.config import settings</usage>
+                <usage>from netra_backend.app.config import settings</usage>
                 <status>DEPRECATED - Use get_config() for new code</status>
             </legacy_entry>
         </entry_points>

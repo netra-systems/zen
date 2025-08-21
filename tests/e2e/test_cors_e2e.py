@@ -196,7 +196,7 @@ class TestCORSPREnvironmentValidation:
     async def test_pr_environment_dynamic_validation(self, pr_origins):
         """Test PR environment dynamic origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
-            from app.core.middleware_setup import is_origin_allowed, get_cors_origins
+            from netra_backend.app.core.middleware_setup import is_origin_allowed, get_cors_origins
             
             origins = get_cors_origins()
             
@@ -226,7 +226,7 @@ class TestCORSPREnvironmentValidation:
     async def test_cloud_run_pr_deployment_validation(self):
         """Test Cloud Run PR deployment URL validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
-            from app.core.middleware_setup import is_origin_allowed
+            from netra_backend.app.core.middleware_setup import is_origin_allowed
             
             origins = ["*"]  # Staging uses pattern matching
             
@@ -248,7 +248,6 @@ class TestCORSProductionStrictValidation:
     async def test_production_strict_origin_enforcement(self):
         """Test production environment strict origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production", "CORS_ORIGINS": ""}):
-            from app.core.middleware_setup import is_origin_allowed, get_cors_origins
             
             origins = get_cors_origins()
             
@@ -279,7 +278,7 @@ class TestCORSProductionStrictValidation:
     async def test_production_no_wildcard_allowed(self):
         """Test that production never allows wildcard origins."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
-            from app.core.middleware_setup import _evaluate_wildcard_environment
+            from netra_backend.app.core.middleware_setup import _evaluate_wildcard_environment
             
             # Production should never allow wildcards
             assert not _evaluate_wildcard_environment(), "Production should not allow wildcard origins"
@@ -307,7 +306,6 @@ class TestCORSDynamicPortValidation:
     async def test_dynamic_localhost_ports_allowed(self, dynamic_ports):
         """Test that dynamic localhost ports are allowed in development."""
         with patch.dict(os.environ, {"ENVIRONMENT": "development", "CORS_ORIGINS": "*"}):
-            from app.core.middleware_setup import is_origin_allowed
             
             origins = ["*"]
             
@@ -318,7 +316,7 @@ class TestCORSDynamicPortValidation:
     async def test_localhost_pattern_comprehensive(self):
         """Test comprehensive localhost pattern matching."""
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-            from app.core.middleware_setup import _check_localhost_pattern
+            from netra_backend.app.core.middleware_setup import _check_localhost_pattern
             
             localhost_variations = [
                 "http://localhost:3000",
@@ -566,7 +564,7 @@ class TestCORSRegressionComprehensive:
         
         # Check if environment variable is set correctly
         with patch.dict(os.environ, {"CORS_ORIGINS": "*", "ENVIRONMENT": "development"}):
-            from app.core.middleware_setup import get_cors_origins
+            from netra_backend.app.core.middleware_setup import get_cors_origins
             
             origins = get_cors_origins()
             assert "*" in origins, "Dev launcher should set CORS_ORIGINS=* for development"

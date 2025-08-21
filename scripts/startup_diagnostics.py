@@ -18,7 +18,7 @@ from datetime import datetime
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.schemas.diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticResult, DiagnosticError, DiagnosticSeverity, FixResult
 )
 from scripts.diagnostic_helpers import (
@@ -64,7 +64,7 @@ async def check_port_conflicts() -> List[DiagnosticError]:
 async def check_database_connection() -> List[DiagnosticError]:
     """Check database connectivity"""
     try:
-        result = await run_command_async(["python", "-c", "from app.db.postgres import get_db_session; print('OK')"])
+        result = await run_command_async(["python", "-c", "from netra_backend.app.db.postgres import get_db_session; print('OK')"])
         if "OK" not in result:
             return [create_db_error()]
     except Exception:

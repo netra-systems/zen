@@ -17,7 +17,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from pathlib import Path
 from datetime import datetime, timezone
 
-from .service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
 
 logger = logging.getLogger(__name__)
 

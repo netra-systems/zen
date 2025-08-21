@@ -24,8 +24,8 @@ from dataclasses import dataclass, field
 import asyncpg
 import redis.asyncio as redis
 import psutil
-from tests.e2e.conftest import E2E_CONFIG, E2EEnvironmentValidator
-from app.logging_config import central_logger
+from netra_backend.tests.e2e.conftest import E2E_CONFIG, E2EEnvironmentValidator
+from netra_backend.app.logging_config import central_logger
 
 class ConcurrencyTestMetrics:
     """Tracks metrics for concurrent tool execution testing."""

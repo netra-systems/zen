@@ -15,11 +15,11 @@ import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from app.services.thread_service import ThreadService
-from app.websocket.unified.manager import UnifiedWebSocketManager
-from app.schemas.websocket_message_types import ThreadCreatedMessage, ThreadUpdatedMessage
-from app.db.models_postgres import Thread, Message
-from app.db.session import get_db_session
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.schemas.websocket_message_types import ThreadCreatedMessage, ThreadUpdatedMessage
+from netra_backend.app.db.models_postgres import Thread, Message
+from netra_backend.app.db.session import get_db_session
 from unittest.mock import AsyncMock, MagicMock
 
 

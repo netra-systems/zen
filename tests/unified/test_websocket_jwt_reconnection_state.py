@@ -20,9 +20,9 @@ from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from .config import TEST_USERS, TEST_ENDPOINTS, TEST_SECRETS
-from .jwt_token_helpers import JWTTestHelper
-from .reconnection_test_helpers import ReconnectionTestHelpers
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TEST_SECRETS
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.reconnection_test_helpers import ReconnectionTestHelpers
 
 
 class ReconnectionPhase(Enum):

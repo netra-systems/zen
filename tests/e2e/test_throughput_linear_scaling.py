@@ -18,7 +18,7 @@ import logging
 import statistics
 from typing import Dict, Any
 
-from tests.e2e.test_helpers.throughput_helpers import (
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
     ThroughputMetrics, LoadTestResults, E2E_TEST_CONFIG,
     create_test_message, measure_system_resources
 )

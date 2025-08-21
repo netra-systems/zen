@@ -1,54 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Data</name>
-        <type>data</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-spec>
-        <description>Data Specification</description>
-        <goals>
-            <goal priority="high">Data working as a complete end to end system</goal>
-            <goal priority="critical">The Coherence of the system working in harmony front and backend together</goal>
-        </goals>
-    </primary-spec>
-    
-    <sections>
-        <section id="json-first" order="1">
-            <title>JSON First</title>
-            <requirements>
-                <requirement>Always send and recieve JSON</requirement>
-                <requirement>Data is validated with Pydantic models</requirement>
-                <requirement>Data is stored in a structured format</requirement>
-            </requirements>
-        </section>
-        
-        <section id="data-ingestion" order="2">
-            <title>Data Ingestion</title>
-            <requirements>
-                <requirement>Data is ingested from multiple sources</requirement>
-                <requirement>Ingestion is logged and monitored</requirement>
-                <requirement>Ingestion is resilient to errors</requirement>
-            </requirements>
-        </section>
-        
-        <section id="data-processing" order="3">
-            <title>Data Processing</title>
-            <requirements>
-                <requirement>Data is processed in a pipeline</requirement>
-                <requirement>Processing steps are modular and reusable</requirement>
-                <requirement>Processing is logged and monitored</requirement>
-            </requirements>
-        </section>
-        
-        <section id="data-storage" order="4">
-            <title>Data Storage</title>
-            <requirements>
-                <requirement>Data is stored in a database</requirement>
-                <requirement>The database schema is versioned</requirement>
-                <requirement>Data access is controlled and audited</requirement>
-            </requirements>
-        </section>
-    </sections>
+  <metadata>
+    <name>Data</name>
+    <type>data</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.414351</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.414351">
+      <reasons>
+        <reason>Likely outdated spec: data.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary-spec>
+    <description>Data Specification</description>
+    <goals>
+      <goal priority="high">Data working as a complete end to end system</goal>
+      <goal priority="critical">The Coherence of the system working in harmony front and backend together</goal>
+    </goals>
+  </primary-spec>
+  <sections>
+    <section id="json-first" order="1">
+      <title>JSON First</title>
+      <requirements>
+        <requirement>Always send and recieve JSON</requirement>
+        <requirement>Data is validated with Pydantic models</requirement>
+        <requirement>Data is stored in a structured format</requirement>
+      </requirements>
+    </section>
+    <section id="data-ingestion" order="2">
+      <title>Data Ingestion</title>
+      <requirements>
+        <requirement>Data is ingested from multiple sources</requirement>
+        <requirement>Ingestion is logged and monitored</requirement>
+        <requirement>Ingestion is resilient to errors</requirement>
+      </requirements>
+    </section>
+    <section id="data-processing" order="3">
+      <title>Data Processing</title>
+      <requirements>
+        <requirement>Data is processed in a pipeline</requirement>
+        <requirement>Processing steps are modular and reusable</requirement>
+        <requirement>Processing is logged and monitored</requirement>
+      </requirements>
+    </section>
+    <section id="data-storage" order="4">
+      <title>Data Storage</title>
+      <requirements>
+        <requirement>Data is stored in a database</requirement>
+        <requirement>The database schema is versioned</requirement>
+        <requirement>Data access is controlled and audited</requirement>
+      </requirements>
+    </section>
+  </sections>
 </specification>

@@ -41,16 +41,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.e2e.service_orchestrator import create_service_orchestrator
-from tests.unified.e2e.service_failure_recovery_helpers import (
+from netra_backend.tests.unified.e2e.service_orchestrator import create_service_orchestrator
+from netra_backend.tests.unified.e2e.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
     create_degradation_tester,
     create_state_preservation_validator,
     create_recovery_time_validator
 )
-from ..real_websocket_client import RealWebSocketClient
-from ..jwt_token_helpers import JWTTestHelper
-from ..test_websocket_real_connection import WebSocketRealConnectionTester
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)
 
@@ -290,8 +290,6 @@ class AuthServiceRecoveryTester:
         """Restore Auth service and verify recovery."""
         try:
             # Restart the Auth service manually
-            import subprocess
-            import sys
             
             # Get the port that was being used
             auth_service = self.orchestrator.services_manager.services.get("auth")
@@ -487,7 +485,6 @@ async def test_auth_service_failure_isolation():
 
 
 if __name__ == "__main__":
-    import sys
     import os
     
     # Add project root to path

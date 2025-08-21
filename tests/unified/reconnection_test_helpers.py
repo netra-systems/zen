@@ -14,9 +14,9 @@ from unittest.mock import MagicMock
 
 # Import utilities with fallbacks
 try:
-    from app.tests.test_utilities.auth_test_helpers import create_test_token, create_expired_token
-    from app.core.websocket_reconnection_handler import WebSocketReconnectionHandler
-    from app.core.websocket_recovery_types import ReconnectionReason, ReconnectionConfig
+    from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token, create_expired_token
+    from netra_backend.app.core.websocket_reconnection_handler import WebSocketReconnectionHandler
+    from netra_backend.app.core.websocket_recovery_types import ReconnectionReason, ReconnectionConfig
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"
@@ -50,7 +50,7 @@ except ImportError:
             return self.attempts
 
 try:
-    from app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+    from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
 except ImportError:
     class MockWebSocket:
         def __init__(self, user_id: str = None):

@@ -5,8 +5,9 @@ Validates test files follow expected conventions
 """
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 from collections import defaultdict
+from .circular_import_detector import CircularImportDetector
 
 
 class TestValidation:
@@ -43,3 +44,35 @@ class TestValidation:
                 issues["empty_files"].append(test_path)
         except FileNotFoundError:
             issues["missing_files"].append(test_path)
+    
+    def validate_circular_imports(self, project_root: Optional[Path] = None) -> Dict[str, any]:
+        """
+        Validate that there are no circular imports in the codebase
+        
+        Args:
+            project_root: Root directory to scan. If None, uses netra_backend.
+            
+        Returns:
+            Dictionary with validation results
+        """
+        if project_root is None:
+            # Default to netra_backend directory
+            current_file = Path(__file__)
+            project_root = current_file.parent.parent / "netra_backend"
+        
+        if not project_root.exists():
+            return {
+                "success": False,
+                "error": f"Project root not found at {project_root}"
+            }
+        
+        detector = CircularImportDetector(str(project_root))
+        report = detector.get_report()
+        
+        return {
+            "success": report['circular_imports_found'] == 0,
+            "circular_imports_found": report['circular_imports_found'],
+            "cycles": report['cycles'],
+            "total_modules": report['total_modules'],
+            "errors": report['errors']
+        }

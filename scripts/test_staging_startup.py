@@ -17,9 +17,9 @@ from datetime import datetime
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.core.configuration.base import UnifiedConfigManager
-from app.core.configuration.secrets import SecretManager
-from app.core.configuration.validator import ConfigurationValidator
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.validator import ConfigurationValidator
 
 
 class StagingStartupTester:

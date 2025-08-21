@@ -14,11 +14,11 @@ import time
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
 
-from ..config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..unified_e2e_harness import UnifiedE2ETestHarness
-from ..test_harness import UnifiedTestHarness
-from app.schemas.core_enums import WebSocketMessageType
-from app.logging_config import central_logger
+from tests.unified.e2e.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.unified.e2e.test_harness import UnifiedTestHarness
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

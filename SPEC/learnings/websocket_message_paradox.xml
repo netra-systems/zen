@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.981496</last_edited>
+  </metadata>
   <title>WebSocket Message Field Paradox - Frontend/Backend Disconnect</title>
   <date>2025-01-19</date>
   <severity>HIGH</severity>
   <category>websocket</category>
-  
   <issue>
     <description>
       Silent failure where frontend sends user messages with 'content' field but backend 
       message handler expects 'text' field, causing agents to never start.
     </description>
-    
     <root_cause>
       Schema (UserMessagePayload) correctly defines 'content' field, but message handler 
       implementation (_extract_message_data) was looking for 'text' field.
     </root_cause>
-    
     <symptoms>
       - Frontend sends: { type: "user_message", payload: { content: "...", references: [] } }
       - Backend receives message but extracts empty string for text
@@ -24,14 +24,12 @@
       - WebSocket connection remains active but unresponsive
     </symptoms>
   </issue>
-  
   <discovery>
     <step>Frontend inspection showed 'content' field being sent</step>
     <step>Backend schema (UserMessagePayload) defines 'content' field</step>
     <step>Message handler implementation was using payload.get("text", "")</step>
     <step>This mismatch caused silent extraction failure</step>
   </discovery>
-  
   <fix>
     <file>app/services/message_handlers.py</file>
     <change>
@@ -47,7 +45,6 @@
       Added debug logging to track message processing and payload keys
     </change>
   </fix>
-  
   <testing_gap>
     <issue>Integration tests did not catch this field mismatch</issue>
     <reason>Tests were mocking message handlers rather than testing actual field extraction</reason>
@@ -55,14 +52,12 @@
       Add end-to-end tests that verify actual payload field mapping between frontend and backend
     </recommendation>
   </testing_gap>
-  
   <prevention>
     <action>Ensure schema definitions are the single source of truth</action>
     <action>Add validation that logs warnings for unexpected field names</action>
     <action>Create integration tests that use actual frontend payloads</action>
     <action>Add field name validation in message handlers</action>
   </prevention>
-  
   <lessons>
     <lesson>Silent failures are the worst - always log when expected data is missing</lesson>
     <lesson>Schema and implementation must be kept in sync</lesson>
@@ -72,7 +67,6 @@
     <lesson>First message without thread context DOES create thread and start agent properly</lesson>
     <lesson>Error messages to users should be clear and actionable</lesson>
   </lessons>
-  
   <agent_startup_verification>
     <confirmed>Agent DOES start on first message without prior context</confirmed>
     <flow>
@@ -89,7 +83,6 @@
       <requirement>Thread creation must succeed</requirement>
     </requirements>
   </agent_startup_verification>
-  
   <related_files>
     <file>frontend/components/chat/MessageInput.tsx</file>
     <file>frontend/services/webSocketService.ts</file>

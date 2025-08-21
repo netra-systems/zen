@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 import hashlib
 
-from auth_core.database.models import AuthSession
+from auth_service.auth_core.database.models import AuthSession
 
 
 class SessionFactory:

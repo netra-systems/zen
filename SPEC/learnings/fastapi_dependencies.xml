@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="fastapi-dependencies">
-    <title>FastAPI Dependency Injection with Async Context Managers</title>
-    
-    <issue date="2025-08-16">
-        <description>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.268093</last_edited>
+  </metadata>
+  <title>FastAPI Dependency Injection with Async Context Managers</title>
+  <issue date="2025-08-16">
+    <description>
             Health check endpoint failed with error: '_AsyncGeneratorContextManager' object has no attribute 'execute'
         </description>
-        
-        <root_cause>
+    <root_cause>
             Using @asynccontextmanager decorated function directly with FastAPI's Depends() 
             causes the dependency injection to return the context manager itself instead of the yielded session.
         </root_cause>
-        
-        <incorrect_pattern>
-            <code><![CDATA[
+    <incorrect_pattern>
+      <code>
 # In postgres_session.py
 @asynccontextmanager
-async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_async_db() -&gt; AsyncGenerator[AsyncSession, None]:
     # Context manager logic
     yield session
 
@@ -24,13 +24,12 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
 async def ready(db: AsyncSession = Depends(get_async_db)):
     # ERROR: db is the context manager, not the session
     await db.execute(...)  # Fails
-            ]]></code>
-        </incorrect_pattern>
-        
-        <correct_pattern>
-            <code><![CDATA[
+            </code>
+    </incorrect_pattern>
+    <correct_pattern>
+      <code>
 # In dependencies.py - wrapper without @asynccontextmanager
-async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+async def get_db_dependency() -&gt; AsyncGenerator[AsyncSession, None]:
     async with get_async_db() as session:  # Use context manager
         yield session  # Yield the actual session
 
@@ -38,91 +37,81 @@ async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
 async def ready(db: AsyncSession = Depends(get_db_dependency)):
     # SUCCESS: db is the actual AsyncSession
     await db.execute(...)  # Works correctly
-            ]]></code>
-        </correct_pattern>
-        
-        <key_learnings>
-            <learning>
+            </code>
+    </correct_pattern>
+    <key_learnings>
+      <learning>
                 FastAPI's Depends() expects a regular async generator function, 
                 NOT an @asynccontextmanager decorated function
             </learning>
-            <learning>
+      <learning>
                 Always create a wrapper function for context managers when using with Depends()
             </learning>
-            <learning>
+      <learning>
                 The wrapper should use the context manager internally and yield the resource
             </learning>
-        </key_learnings>
-        
-        <affected_areas>
-            <area>Health check endpoints (/ready)</area>
-            <area>Any route using database session dependencies</area>
-            <area>WebSocket endpoints (already documented separately)</area>
-        </affected_areas>
-        
-        <prevention>
-            <rule>Never use @asynccontextmanager decorated functions directly with Depends()</rule>
-            <rule>Always use get_db_dependency() or similar wrappers for database sessions</rule>
-            <rule>Test health endpoints after any dependency changes</rule>
-        </prevention>
-    </issue>
-    
-    <issue date="2025-08-20">
-        <description>
+    </key_learnings>
+    <affected_areas>
+      <area>Health check endpoints (/ready)</area>
+      <area>Any route using database session dependencies</area>
+      <area>WebSocket endpoints (already documented separately)</area>
+    </affected_areas>
+    <prevention>
+      <rule>Never use @asynccontextmanager decorated functions directly with Depends()</rule>
+      <rule>Always use get_db_dependency() or similar wrappers for database sessions</rule>
+      <rule>Test health endpoints after any dependency changes</rule>
+    </prevention>
+  </issue>
+  <issue date="2025-08-20">
+    <description>
             Startup check failed with error: "'async for' requires an object with __aiter__ method, got _AsyncGeneratorContextManager"
         </description>
-        
-        <root_cause>
+    <root_cause>
             Incorrectly using 'async for' with an async context manager (decorated with @asynccontextmanager) 
             instead of 'async with'. Context managers use __aenter__/__aexit__, not __aiter__/__anext__.
         </root_cause>
-        
-        <incorrect_pattern>
-            <code><![CDATA[
+    <incorrect_pattern>
+      <code>
 # In database_checks.py
-from app.db.postgres import get_async_db  # This is @asynccontextmanager
+from netra_backend.app.db.postgres import get_async_db  # This is @asynccontextmanager
 
 async def _perform_assistant_check(self):
     # ERROR: async for with context manager
     async for db in get_async_db():
         table_exists = await self._table_exists(db, 'assistants')
-            ]]></code>
-        </incorrect_pattern>
-        
-        <correct_pattern>
-            <code><![CDATA[
+            </code>
+    </incorrect_pattern>
+    <correct_pattern>
+      <code>
 # In database_checks.py
-from app.db.postgres import get_async_db  # This is @asynccontextmanager
+from netra_backend.app.db.postgres import get_async_db  # This is @asynccontextmanager
 
 async def _perform_assistant_check(self):
     # CORRECT: async with for context manager
     async with get_async_db() as db:
         table_exists = await self._table_exists(db, 'assistants')
-            ]]></code>
-        </correct_pattern>
-        
-        <key_learnings>
-            <learning>
+            </code>
+    </correct_pattern>
+    <key_learnings>
+      <learning>
                 Functions decorated with @asynccontextmanager return async context managers,
                 which must be used with 'async with', not 'async for'
             </learning>
-            <learning>
+      <learning>
                 'async for' is only for async iterators/generators that implement __aiter__
             </learning>
-            <learning>
+      <learning>
                 Context managers implement __aenter__/__aexit__ protocol, not iteration protocol
             </learning>
-        </key_learnings>
-        
-        <affected_areas>
-            <area>Startup checks (database_checks.py)</area>
-            <area>Any code using get_async_db() or similar context managers</area>
-        </affected_areas>
-        
-        <prevention>
-            <rule>Always use 'async with' for @asynccontextmanager decorated functions</rule>
-            <rule>Use 'async for' only with async generators (async def with yield in loop)</rule>
-            <rule>Check function decorators to understand the return type</rule>
-        </prevention>
-    </issue>
+    </key_learnings>
+    <affected_areas>
+      <area>Startup checks (database_checks.py)</area>
+      <area>Any code using get_async_db() or similar context managers</area>
+    </affected_areas>
+    <prevention>
+      <rule>Always use 'async with' for @asynccontextmanager decorated functions</rule>
+      <rule>Use 'async for' only with async generators (async def with yield in loop)</rule>
+      <rule>Check function decorators to understand the return type</rule>
+    </prevention>
+  </issue>
 </learnings>

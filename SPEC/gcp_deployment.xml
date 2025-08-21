@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
   <name>GCP Deployment Infrastructure</name>
   <version>2.0.0</version>
@@ -6,7 +6,6 @@
     Comprehensive specification for GCP deployment infrastructure including
     modular architecture, robust error handling, and automated recovery.
   </description>
-  
   <metadata>
     <author>Netra Engineering</author>
     <created>2025-08-21</created>
@@ -18,15 +17,19 @@
       <ref>security.xml</ref>
       <ref>independent_services.xml</ref>
     </cross_references>
+    <last_edited>2025-08-21T08:47:28.476616</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.476616">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <architecture>
     <overview>
       The GCP deployment infrastructure uses a modular, Python-based architecture
       with comprehensive error handling, real-time monitoring, and automated rollback
       capabilities. All components follow the Single Responsibility Principle.
     </overview>
-    
     <modules>
       <module name="core">
         <description>Core deployment orchestration modules</description>
@@ -69,7 +72,6 @@
           </component>
         </components>
       </module>
-      
       <module name="monitoring">
         <description>Real-time monitoring and log analysis</description>
         <components>
@@ -102,7 +104,6 @@
           </component>
         </components>
       </module>
-      
       <module name="auth">
         <description>Authentication and credential management</description>
         <components>
@@ -128,7 +129,6 @@
       </module>
     </modules>
   </architecture>
-
   <deployment_pipeline>
     <phases>
       <phase name="pre_deployment">
@@ -140,7 +140,6 @@
           <step>Store current versions for rollback</step>
         </steps>
       </phase>
-      
       <phase name="authentication">
         <description>Setup GCP authentication</description>
         <steps>
@@ -149,7 +148,6 @@
           <step>Validate permissions</step>
         </steps>
       </phase>
-      
       <phase name="build">
         <description>Build and push Docker images</description>
         <steps>
@@ -159,7 +157,6 @@
           <step>Clean up old images</step>
         </steps>
       </phase>
-      
       <phase name="deploy">
         <description>Deploy services to Cloud Run</description>
         <steps>
@@ -169,7 +166,6 @@
           <step>Configure auto-scaling</step>
         </steps>
       </phase>
-      
       <phase name="health_check">
         <description>Validate deployed services</description>
         <steps>
@@ -179,7 +175,6 @@
           <step>Wait for service stabilization</step>
         </steps>
       </phase>
-      
       <phase name="post_deployment">
         <description>Monitor and validate</description>
         <steps>
@@ -191,7 +186,6 @@
       </phase>
     </phases>
   </deployment_pipeline>
-
   <error_handling>
     <error_categories>
       <category name="authentication">
@@ -206,7 +200,6 @@
           <action>update_iam_permissions</action>
         </recovery>
       </category>
-      
       <category name="network">
         <description>Network connectivity issues</description>
         <patterns>
@@ -219,7 +212,6 @@
           <action>check_firewall_rules</action>
         </recovery>
       </category>
-      
       <category name="resource">
         <description>Resource exhaustion</description>
         <patterns>
@@ -232,7 +224,6 @@
           <action>cleanup_old_resources</action>
         </recovery>
       </category>
-      
       <category name="configuration">
         <description>Configuration errors</description>
         <patterns>
@@ -246,20 +237,17 @@
         </recovery>
       </category>
     </error_categories>
-    
     <retry_strategies>
       <strategy name="immediate">
         <description>Retry immediately</description>
         <max_attempts>3</max_attempts>
       </strategy>
-      
       <strategy name="exponential_backoff">
         <description>Exponential backoff with jitter</description>
         <initial_delay_ms>1000</initial_delay_ms>
         <max_delay_ms>60000</max_delay_ms>
         <multiplier>2</multiplier>
       </strategy>
-      
       <strategy name="circuit_breaker">
         <description>Circuit breaker pattern</description>
         <failure_threshold>5</failure_threshold>
@@ -267,75 +255,64 @@
       </strategy>
     </retry_strategies>
   </error_handling>
-
   <monitoring>
     <log_aggregation>
       <source>GCP Cloud Logging</source>
       <filters>
         - resource.type="cloud_run_revision"
-        - severity >= ERROR
+        - severity &gt;= ERROR
       </filters>
       <retention_days>30</retention_days>
     </log_aggregation>
-    
     <metrics>
       <metric name="deployment_success_rate">
         <description>Percentage of successful deployments</description>
         <calculation>successful_deployments / total_deployments</calculation>
         <threshold>0.95</threshold>
       </metric>
-      
       <metric name="mean_time_to_recovery">
         <description>Average time to recover from failures</description>
         <calculation>sum(recovery_times) / failure_count</calculation>
         <threshold_minutes>5</threshold_minutes>
       </metric>
-      
       <metric name="error_rate">
         <description>Errors per minute post-deployment</description>
         <calculation>error_count / time_window_minutes</calculation>
         <threshold>0.05</threshold>
       </metric>
     </metrics>
-    
     <alerting>
       <alert name="deployment_failed">
         <condition>deployment_status == "failed"</condition>
         <severity>critical</severity>
         <action>notify_oncall</action>
       </alert>
-      
       <alert name="high_error_rate">
-        <condition>error_rate > 0.1</condition>
+        <condition>error_rate &gt; 0.1</condition>
         <severity>high</severity>
         <action>trigger_rollback</action>
       </alert>
-      
       <alert name="service_unhealthy">
-        <condition>health_check_failed_count > 3</condition>
+        <condition>health_check_failed_count &gt; 3</condition>
         <severity>high</severity>
         <action>restart_service</action>
       </alert>
     </alerting>
   </monitoring>
-
   <rollback>
     <triggers>
       <trigger name="health_check_failure">
         <description>Service fails health checks</description>
         <threshold>3 consecutive failures</threshold>
       </trigger>
-      
       <trigger name="high_error_rate">
         <description>Error rate exceeds threshold</description>
         <threshold>5% error rate</threshold>
       </trigger>
-      
       <trigger name="manual_trigger">
         <description>Manual rollback initiated</description>
       </trigger>
     </triggers>
-    
     <strategy>
       <step>Identify affected services</step>
       <step>Restore previous revision</step>
@@ -344,7 +321,6 @@
       <step>Generate rollback report</step>
     </strategy>
   </rollback>
-
   <configuration>
     <environments>
       <environment name="development">
@@ -353,14 +329,12 @@
         <min_instances>0</min_instances>
         <max_instances>5</max_instances>
       </environment>
-      
       <environment name="staging">
         <project_id>neuralbridge-poc</project_id>
         <region>us-central1</region>
         <min_instances>1</min_instances>
         <max_instances>10</max_instances>
       </environment>
-      
       <environment name="production">
         <project_id>netra-prod</project_id>
         <region>us-central1</region>
@@ -368,9 +342,8 @@
         <max_instances>100</max_instances>
       </environment>
     </environments>
-    
     <services>
-      <service name="netra-backend">
+      <service name="netra-backend-staging">
         <dockerfile>Dockerfile</dockerfile>
         <port>8000</port>
         <memory>1Gi</memory>
@@ -381,16 +354,14 @@
           <var name="LOG_LEVEL">INFO</var>
         </environment_variables>
       </service>
-      
-      <service name="netra-auth">
+      <service name="netra-auth-service">
         <dockerfile>Dockerfile.auth</dockerfile>
         <port>8001</port>
         <memory>512Mi</memory>
         <cpu>1</cpu>
         <health_endpoint>/health</health_endpoint>
       </service>
-      
-      <service name="netra-frontend">
+      <service name="netra-frontend-staging">
         <dockerfile>Dockerfile.frontend</dockerfile>
         <port>3000</port>
         <memory>512Mi</memory>
@@ -400,34 +371,28 @@
       </service>
     </services>
   </configuration>
-
   <best_practices>
     <practice name="pre_deployment_validation">
       Always run critical path tests before deployment to prevent
       pushing broken code to production environments.
     </practice>
-    
     <practice name="gradual_rollout">
       Use traffic splitting to gradually roll out changes and
       monitor for issues before full deployment.
     </practice>
-    
     <practice name="comprehensive_monitoring">
       Monitor all aspects of deployment including build times,
       deployment duration, error rates, and performance metrics.
     </practice>
-    
     <practice name="automated_rollback">
       Configure automatic rollback triggers based on health checks
       and error rates to minimize downtime.
     </practice>
-    
     <practice name="credential_rotation">
       Regularly rotate service account keys and credentials to
       maintain security posture.
     </practice>
   </best_practices>
-
   <tools>
     <tool name="deployment_orchestrator">
       <script>organized_root/deployment_configs/core/deployment_orchestrator.py</script>
@@ -437,7 +402,6 @@
         result = await orchestrator.execute_deployment()
       </usage>
     </tool>
-    
     <tool name="error_analyzer">
       <script>organized_root/deployment_configs/monitoring/error_analyzer.py</script>
       <usage>
@@ -446,7 +410,6 @@
         analysis = analyzer.analyze_error_batch(errors)
       </usage>
     </tool>
-    
     <tool name="health_checker">
       <script>organized_root/deployment_configs/core/health_checker.py</script>
       <usage>

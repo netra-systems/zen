@@ -11,6 +11,7 @@ export default function AuthCallbackClient() {
   useEffect(() => {
     const handleCallback = async () => {
       const token = searchParams.get('token');
+      const refreshToken = searchParams.get('refresh');
       const error = searchParams.get('message');
 
       if (error) {
@@ -20,11 +21,14 @@ export default function AuthCallbackClient() {
       }
 
       if (token) {
-        // Store the token
+        // Store both tokens
         localStorage.setItem('jwt_token', token);
+        if (refreshToken) {
+          localStorage.setItem('refresh_token', refreshToken);
+        }
         
-        // Redirect to main page or dashboard
-        router.push('/');
+        // Redirect to chat page
+        router.push('/chat');
       } else {
         logger.error('No token received');
         router.push('/login?error=no_token');

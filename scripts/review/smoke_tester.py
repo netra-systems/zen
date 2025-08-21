@@ -41,14 +41,14 @@ class SmokeTester:
     def _get_backend_test_commands(self) -> List[Tuple[str, str]]:
         """Get backend test commands"""
         return [
-            ("Backend Imports", "python -c \"from app.main import app; print('✓ FastAPI app imports successfully')\""),
-            ("Database Config", "python -c \"from app.db.postgres import get_engine; print('✓ Database connection configured')\""),
-            ("Redis Manager", "python -c \"from app.redis_manager import RedisManager; print('✓ Redis manager available')\""),
-            ("Supervisor Agent", "python -c \"from app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')\""),
-            ("Agent Service", "python -c \"from app.services.agent_service import AgentService; print('✓ Agent service available')\""),
-            ("Tool Dispatcher", "python -c \"from app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')\""),
-            ("WebSocket Manager", "python -c \"from app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')\""),
-            ("Message Handler", "python -c \"from app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')\""),
+            ("Backend Imports", "python -c \"from netra_backend.app.main import app; print('✓ FastAPI app imports successfully')\""),
+            ("Database Config", "python -c \"from netra_backend.app.db.postgres import get_engine; print('✓ Database connection configured')\""),
+            ("Redis Manager", "python -c \"from netra_backend.app.redis_manager import RedisManager; print('✓ Redis manager available')\""),
+            ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')\""),
+            ("Agent Service", "python -c \"from netra_backend.app.services.agent_service import AgentService; print('✓ Agent service available')\""),
+            ("Tool Dispatcher", "python -c \"from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')\""),
+            ("WebSocket Manager", "python -c \"from netra_backend.app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')\""),
+            ("Message Handler", "python -c \"from netra_backend.app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')\""),
         ]
     
     def _run_frontend_tests(self, review_data: ReviewData) -> bool:

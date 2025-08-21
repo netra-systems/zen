@@ -117,7 +117,6 @@ class StartupIsolationValidator:
     def _create_import_test_script(self, entry_point_path: Path) -> str:
         """Create test script for import validation."""
         return f"""
-import sys
 import os
 sys.path.insert(0, "{entry_point_path.parent}")
 os.chdir("{entry_point_path.parent}")

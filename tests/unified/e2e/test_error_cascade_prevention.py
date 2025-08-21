@@ -26,8 +26,8 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .service_orchestrator import E2EServiceOrchestrator
-from .error_cascade_core import (
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.error_cascade_core import ServiceFailureSimulator, GracefulDegradationValidator, AutoRecoveryVerifier, create_failure_simulator, create_degradation_validator, create_recovery_verifier
     ServiceFailureSimulator,
     GracefulDegradationValidator,
     AutoRecoveryVerifier,
@@ -35,9 +35,9 @@ from .error_cascade_core import (
     create_degradation_validator,
     create_recovery_verifier
 )
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
-from ..config import TEST_USERS
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 

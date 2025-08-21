@@ -25,14 +25,14 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
-from .config import TEST_USERS, TestDataFactory
-from .real_websocket_client import RealWebSocketClient
-from .real_services_manager import RealServicesManager
-from app.schemas.UserPlan import PlanTier
-from app.schemas import WebSocketMessage, SubAgentLifecycle
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.base import BaseSubAgent
-from app.llm.llm_manager import LLMManager
+from tests.unified.config import TEST_USERS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_services_manager import RealServicesManager
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas import WebSocketMessage, SubAgentLifecycle
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 @pytest.mark.asyncio

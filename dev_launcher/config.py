@@ -7,8 +7,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, Any
-from app.core.network_constants import ServicePorts, HostConstants
-from app.core.environment_constants import (
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_environment, get_current_project_id
 )
 
@@ -54,7 +54,6 @@ class LauncherConfig:
     silent_mode: bool = False  # Silent logging with minimal output
     no_cache: bool = False  # Bypass all caching
     profile_startup: bool = False  # Show detailed performance metrics
-    legacy_mode: bool = False  # Use old behavior for compatibility
     
     # Boundary monitoring configuration
     watch_boundaries: bool = False  # Real-time boundary monitoring
@@ -105,8 +104,8 @@ class LauncherConfig:
         if not self.project_root.exists():
             raise ValueError(f"Project root does not exist: {self.project_root}")
         
-        # Check for required directories
-        backend_dir = self.project_root / "app"
+        # Check for required directories - updated to correct path
+        backend_dir = self.project_root / "netra_backend" / "app"
         frontend_dir = self.project_root / "frontend"
         
         if not backend_dir.exists():
@@ -169,13 +168,6 @@ class LauncherConfig:
         silent_mode = hasattr(args, 'silent') and args.silent
         no_cache = hasattr(args, 'no_cache') and args.no_cache
         profile_startup = hasattr(args, 'profile') and args.profile
-        legacy_mode = hasattr(args, 'legacy') and args.legacy
-        
-        # Legacy mode overrides optimizations
-        if legacy_mode:
-            silent_mode = False
-            no_cache = True
-            profile_startup = False
         
         return cls(
             backend_port=args.backend_port,
@@ -197,7 +189,6 @@ class LauncherConfig:
             silent_mode=silent_mode,
             no_cache=no_cache,
             profile_startup=profile_startup,
-            legacy_mode=legacy_mode,
             project_root=find_project_root()
         )
     

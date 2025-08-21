@@ -21,8 +21,8 @@ from unittest.mock import AsyncMock, MagicMock
 from dataclasses import dataclass
 from enum import Enum
 
-from app.core.resilience.circuit_breaker import UnifiedCircuitBreaker, EnterpriseCircuitConfig
-from tests.unified.config import TEST_CONFIG, TEST_USERS, get_test_user
+from netra_backend.app.core.resilience.circuit_breaker import UnifiedCircuitBreaker, EnterpriseCircuitConfig
+from netra_backend.tests.unified.config import TEST_CONFIG, TEST_USERS, get_test_user
 
 
 class FailureScenario(Enum):

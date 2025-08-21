@@ -16,10 +16,10 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from ...real_websocket_client import RealWebSocketClient
-from ...real_client_types import ClientConfig
-from ...real_http_client import RealHTTPClient
-from .error_generators import ErrorCorrelationContext, RealErrorPropagationTester, MockTokenGenerator
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.real_client_types import ClientConfig
+from tests.unified.e2e.real_http_client import RealHTTPClient
+from tests.unified.e2e.helpers.error_propagation.error_generators import ErrorCorrelationContext, RealErrorPropagationTester, MockTokenGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -289,7 +289,6 @@ class AuthTokenValidator:
         
         try:
             import base64
-            import json
             
             # Decode header
             header_data = base64.b64decode(parts[0] + '==').decode('utf-8')
@@ -324,7 +323,6 @@ class AuthTokenValidator:
         if not expiry:
             return {"expired": None, "reason": "no_expiry_claim"}
         
-        import time
         current_time = int(time.time())
         
         return {

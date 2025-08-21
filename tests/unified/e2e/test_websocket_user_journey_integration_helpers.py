@@ -28,10 +28,10 @@ import httpx
 import websockets
 from websockets.exceptions import ConnectionClosedError
 from test_framework.mock_utils import mock_justified
-from ..config import TestTier, TestUser, TEST_ENDPOINTS, TEST_SECRETS
-from ..jwt_token_helpers import JWTTestHelper
-from .websocket_dev_utilities import WebSocketClientSimulator, ConnectionState
-from .auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.config import TestTier, TestUser, TEST_ENDPOINTS, TEST_SECRETS
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.e2e.websocket_dev_utilities import WebSocketClientSimulator, ConnectionState
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 class WebSocketUserJourneyTester:

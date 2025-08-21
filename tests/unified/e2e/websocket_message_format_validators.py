@@ -7,8 +7,8 @@ import asyncio
 import json
 import time
 from typing import Dict, Any, List, Optional
-from ..config import TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class BaseValidator:

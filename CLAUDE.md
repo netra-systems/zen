@@ -175,7 +175,7 @@ The **String Literals Index** is a critical system for maintaining consistency a
 All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`](SPEC/independent_services.xml).
 
 **List of Microservices:**
-1.  Main Backend (`/app`) (main application, 80% of code)
+1.  Main Backend (`/netra_backend/app`) (main application, 80% of code)
 2.  Auth Service (`/auth_service`)
 3.  Frontend (`/frontend`)
 

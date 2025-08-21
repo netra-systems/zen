@@ -27,15 +27,15 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from app.db.postgres import get_postgres_db
-from app.db.models_postgres import Message, Thread, Run, Assistant
-from app.db.clickhouse import get_clickhouse_client
-from app.services.quality_gate_service import QualityGateService
-from app.services.quality_gate.quality_gate_models import (
+from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.db.models_postgres import Message, Thread, Run, Assistant
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.quality_gate.quality_gate_models import (
     ContentType, QualityLevel, ValidationResult
 )
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError

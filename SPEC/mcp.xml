@@ -1,24 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>MCP Integration Specification</name>
     <version>2.0.0</version>
     <description>Model Context Protocol (MCP) integration with FastMCP 2 library</description>
     <last_updated>2025-08-12</last_updated>
+    <last_edited>2025-08-21T08:47:28.538372</last_edited>
   </metadata>
-
   <overview>
     <purpose>
       The MCP integration provides a standardized interface for AI assistants (Claude, Cursor, etc.) 
       to interact with Netra's optimization capabilities through the Model Context Protocol.
     </purpose>
-    
     <implementation>
       Using FastMCP 2.0 - the official Python framework for building MCP servers.
       FastMCP handles protocol details, tool registration, and transport management.
     </implementation>
   </overview>
-
   <architecture>
     <components>
       <component name="NetraMCPServer">
@@ -31,7 +29,6 @@
           <item>Service integration</item>
         </responsibilities>
       </component>
-      
       <component name="MCPService">
         <location>app/services/mcp_service.py</location>
         <description>Service layer for MCP operations</description>
@@ -42,7 +39,6 @@
           <item>Service coordination</item>
         </responsibilities>
       </component>
-      
       <component name="MCP Routes">
         <location>app/routes/mcp.py</location>
         <description>HTTP API endpoints for MCP access</description>
@@ -54,7 +50,6 @@
       </component>
     </components>
   </architecture>
-
   <tools>
     <category name="Agent Operations">
       <tool name="run_agent">
@@ -65,14 +60,12 @@
           <param name="config" type="object" required="false">Configuration overrides</param>
         </parameters>
       </tool>
-      
       <tool name="get_agent_status">
         <description>Check agent execution status</description>
         <parameters>
           <param name="run_id" type="string" required="true">Run ID from run_agent</param>
         </parameters>
       </tool>
-      
       <tool name="list_agents">
         <description>List available agents</description>
         <parameters>
@@ -80,7 +73,6 @@
         </parameters>
       </tool>
     </category>
-    
     <category name="Optimization">
       <tool name="analyze_workload">
         <description>Analyze AI workload characteristics</description>
@@ -89,7 +81,6 @@
           <param name="metrics" type="array" required="false">Metrics to calculate</param>
         </parameters>
       </tool>
-      
       <tool name="optimize_prompt">
         <description>Optimize prompts for cost/performance</description>
         <parameters>
@@ -98,7 +89,6 @@
           <param name="model" type="string" required="false">Target model</param>
         </parameters>
       </tool>
-      
       <tool name="execute_optimization_pipeline">
         <description>Run full optimization pipeline</description>
         <parameters>
@@ -107,7 +97,6 @@
         </parameters>
       </tool>
     </category>
-    
     <category name="Data Management">
       <tool name="query_corpus">
         <description>Search document corpus</description>
@@ -117,7 +106,6 @@
           <param name="filters" type="object" required="false">Search filters</param>
         </parameters>
       </tool>
-      
       <tool name="generate_synthetic_data">
         <description>Generate synthetic test data</description>
         <parameters>
@@ -127,7 +115,6 @@
         </parameters>
       </tool>
     </category>
-    
     <category name="Thread Management">
       <tool name="create_thread">
         <description>Create conversation thread</description>
@@ -136,7 +123,6 @@
           <param name="metadata" type="object" required="false">Thread metadata</param>
         </parameters>
       </tool>
-      
       <tool name="get_thread_history">
         <description>Get thread message history</description>
         <parameters>
@@ -145,7 +131,6 @@
         </parameters>
       </tool>
     </category>
-    
     <category name="Supply Catalog">
       <tool name="get_supply_catalog">
         <description>Get available models and providers</description>
@@ -155,29 +140,24 @@
       </tool>
     </category>
   </tools>
-
   <resources>
     <resource uri="netra://optimization/history">
       <description>Historical optimization results</description>
       <returns>JSON with optimization history</returns>
     </resource>
-    
     <resource uri="netra://config/models">
       <description>Model configurations and pricing</description>
       <returns>JSON with model parameters</returns>
     </resource>
-    
     <resource uri="netra://agents/catalog">
       <description>Detailed agent catalog</description>
       <returns>JSON with agent capabilities</returns>
     </resource>
-    
     <resource uri="netra://metrics/current">
       <description>Current system metrics</description>
       <returns>JSON with real-time metrics</returns>
     </resource>
   </resources>
-
   <prompts>
     <prompt name="optimization_request">
       <description>Generate optimization request</description>
@@ -187,7 +167,6 @@
         <param name="quality_requirements" type="string">Quality level</param>
       </parameters>
     </prompt>
-    
     <prompt name="prompt_optimization">
       <description>Optimize a prompt</description>
       <parameters>
@@ -196,7 +175,6 @@
         <param name="optimization_goal" type="string">Optimization goal</param>
       </parameters>
     </prompt>
-    
     <prompt name="model_selection">
       <description>Select best model for task</description>
       <parameters>
@@ -205,26 +183,22 @@
       </parameters>
     </prompt>
   </prompts>
-
   <transports>
     <transport name="stdio">
       <description>Standard I/O for Claude Desktop and CLI tools</description>
       <command>python -m app.mcp.run_server</command>
     </transport>
-    
     <transport name="http">
       <description>HTTP REST API</description>
       <endpoint>/api/mcp</endpoint>
       <authentication>Bearer token or API key</authentication>
     </transport>
-    
     <transport name="websocket">
       <description>WebSocket for real-time communication</description>
       <endpoint>/api/mcp/ws</endpoint>
       <authentication>Query parameter: api_key</authentication>
     </transport>
   </transports>
-
   <client_configuration>
     <client name="claude">
       <config_location>claude_desktop_config.json</config_location>
@@ -243,7 +217,6 @@
         }
       </example>
     </client>
-    
     <client name="cursor">
       <config_location>.cursor/mcp.json</config_location>
       <example>
@@ -260,19 +233,16 @@
       </example>
     </client>
   </client_configuration>
-
   <api_endpoints>
     <endpoint method="GET" path="/api/mcp/info">
       <description>Get server information and capabilities</description>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp/tools">
       <description>List available tools</description>
       <params>
         <param name="category" location="query">Filter by category</param>
       </params>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp/tools/call">
       <description>Execute a tool</description>
       <body>
@@ -281,11 +251,9 @@
         <field name="session_id" type="string" optional="true">Session ID</field>
       </body>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp/resources">
       <description>List available resources</description>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp/resources/read">
       <description>Read a resource</description>
       <body>
@@ -293,11 +261,9 @@
         <field name="session_id" type="string" optional="true">Session ID</field>
       </body>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp/prompts">
       <description>List available prompts</description>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp/prompts/get">
       <description>Get a prompt template</description>
       <body>
@@ -305,27 +271,22 @@
         <field name="arguments" type="object">Prompt arguments</field>
       </body>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp/sessions">
       <description>Create MCP session</description>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp/config">
       <description>Get client configuration</description>
     </endpoint>
-    
     <endpoint method="WS" path="/api/mcp/ws">
       <description>WebSocket connection</description>
     </endpoint>
   </api_endpoints>
-
   <testing>
     <test_client>app/mcp/test_client.py</test_client>
     <test_commands>
       <command>python app/mcp/test_client.py --direct</command>
       <description>Test direct server access</description>
     </test_commands>
-    
     <test_scenarios>
       <scenario name="Tool Execution">
         <steps>
@@ -334,7 +295,6 @@
           <step>Verify response format</step>
         </steps>
       </scenario>
-      
       <scenario name="Resource Access">
         <steps>
           <step>List resources</step>
@@ -342,7 +302,6 @@
           <step>Verify JSON response</step>
         </steps>
       </scenario>
-      
       <scenario name="Prompt Generation">
         <steps>
           <step>List prompts</step>
@@ -352,45 +311,37 @@
       </scenario>
     </test_scenarios>
   </testing>
-
   <implementation_notes>
     <note priority="high">
       FastMCP 2 handles protocol details automatically.
       We only need to define tools, resources, and prompts using decorators.
     </note>
-    
     <note priority="high">
       Service injection pattern used to connect MCP server with Netra services.
       Services are set after server creation to avoid circular dependencies.
     </note>
-    
     <note priority="medium">
       WebSocket transport partially implemented.
       Full MCP protocol over WebSocket requires additional work.
     </note>
-    
     <note priority="low">
       Sampling capability not yet implemented.
       Will require integration with LLM manager for message generation.
     </note>
   </implementation_notes>
-
   <future_enhancements>
     <enhancement>
       <title>Sampling Implementation</title>
       <description>Add LLM sampling capability for message generation</description>
     </enhancement>
-    
     <enhancement>
       <title>Full WebSocket Support</title>
       <description>Complete WebSocket transport with proper MCP protocol handling</description>
     </enhancement>
-    
     <enhancement>
       <title>Tool Streaming</title>
       <description>Support streaming responses for long-running tools</description>
     </enhancement>
-    
     <enhancement>
       <title>Authentication Improvements</title>
       <description>Add OAuth2 and JWT support for client authentication</description>

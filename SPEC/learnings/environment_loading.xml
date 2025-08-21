@@ -1,16 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
   <metadata>
     <category>Environment Loading</category>
     <version>1.0</version>
     <last_updated>2025-01-17</last_updated>
+    <last_edited>2025-08-21T08:47:29.249655</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.249655">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <learning id="simplified-single-source-loading">
     <date>2025-01-17</date>
     <category>Environment Loading</category>
     <title>Simplified Single-Source Environment Loading</title>
-    
     <problem>
       <description>Environment loader was too complex with multiple file sources</description>
       <symptoms>
@@ -26,21 +30,19 @@
         <item>Complex debugging when values come from multiple sources</item>
       </impact>
     </problem>
-
     <solution>
       <description>Simplified to single .env file with optional remote fallback</description>
       <implementation>
         <step>Load ONLY from user-controlled .env file</step>
         <step>Never auto-generate or modify .env file</step>
         <step>Use remote secrets only for missing variables</step>
-        <step>Clear priority: OS > .env > Remote > Defaults</step>
+        <step>Clear priority: OS &gt; .env &gt; Remote &gt; Defaults</step>
       </implementation>
       <code_changes>
         <file>dev_launcher/env_file_loader.py</file>
         <file>dev_launcher/secret_loader.py</file>
       </code_changes>
     </solution>
-
     <result>
       <outcome>Cleaner, simpler environment loading</outcome>
       <benefits>
@@ -50,25 +52,21 @@
         <benefit>Better observability of variable sources</benefit>
       </benefits>
     </result>
-
     <prevention>
       <practice>Keep loading logic simple - one primary source</practice>
       <practice>Make user files strictly user-controlled</practice>
       <practice>Use remote services only as fallback</practice>
       <practice>Provide clear logging of sources</practice>
     </prevention>
-
     <related>
       <spec>SPEC/environment_loading.xml</spec>
       <doc>docs/ENVIRONMENT_LOADER.md</doc>
     </related>
   </learning>
-
   <learning id="env-file-user-control">
     <date>2025-01-17</date>
     <category>Environment Loading</category>
     <title>User Control Over Environment Files</title>
-    
     <problem>
       <description>System could overwrite or auto-generate user .env files</description>
       <symptoms>
@@ -82,7 +80,6 @@
         <item>Difficulty maintaining local development settings</item>
       </impact>
     </problem>
-
     <solution>
       <description>Made .env files strictly user-controlled</description>
       <implementation>
@@ -92,7 +89,6 @@
         <step>Support copying from .env.example or .env.local</step>
       </implementation>
     </solution>
-
     <result>
       <outcome>Users maintain full control of their environment</outcome>
       <benefits>
@@ -101,19 +97,16 @@
         <benefit>Predictable local development</benefit>
       </benefits>
     </result>
-
     <prevention>
       <practice>Never programmatically modify user configuration files</practice>
       <practice>Provide templates but let users create actual files</practice>
       <practice>Validate that user files are user-controlled</practice>
     </prevention>
   </learning>
-
   <learning id="remote-fallback-optimization">
     <date>2025-01-17</date>
     <category>Environment Loading</category>
     <title>Optimized Remote Secret Fallback</title>
-    
     <problem>
       <description>All secrets fetched from remote even when available locally</description>
       <symptoms>
@@ -127,7 +120,6 @@
         <item>Requires network for local development</item>
       </impact>
     </problem>
-
     <solution>
       <description>Fetch only missing secrets from remote</description>
       <implementation>
@@ -137,7 +129,6 @@
         <step>Make remote fallback optional via parameter</step>
       </implementation>
     </solution>
-
     <result>
       <outcome>Efficient secret loading with minimal remote calls</outcome>
       <benefits>
@@ -147,7 +138,6 @@
         <benefit>Optional complete offline mode</benefit>
       </benefits>
     </result>
-
     <prevention>
       <practice>Always check local sources first</practice>
       <practice>Only fetch what's missing from remote</practice>
@@ -155,12 +145,10 @@
       <practice>Cache remote results when appropriate</practice>
     </prevention>
   </learning>
-
   <learning id="observability-in-loading">
     <date>2025-01-17</date>
     <category>Environment Loading</category>
     <title>Comprehensive Loading Observability</title>
-    
     <problem>
       <description>Unclear where environment variables were coming from</description>
       <symptoms>
@@ -174,7 +162,6 @@
         <item>Time wasted debugging</item>
       </impact>
     </problem>
-
     <solution>
       <description>Added comprehensive logging and tracking</description>
       <implementation>
@@ -185,7 +172,6 @@
         <step>Organize variables by category</step>
       </implementation>
     </solution>
-
     <result>
       <outcome>Full visibility into environment loading</outcome>
       <benefits>
@@ -195,7 +181,6 @@
         <benefit>Safe logging with masked values</benefit>
       </benefits>
     </result>
-
     <prevention>
       <practice>Always provide detailed logging for configuration</practice>
       <practice>Track source of each configuration value</practice>
@@ -203,12 +188,10 @@
       <practice>Provide summary statistics for overview</practice>
     </prevention>
   </learning>
-
   <learning id="config-placeholder-replacement-paradox">
     <date>2025-08-18</date>
     <category>Environment Loading</category>
     <title>Configuration Placeholder Replacement Paradox - Inheritance Issue</title>
-    
     <problem>
       <description>PARADOX: Configuration had placeholder replacement code that never executed due to inheritance model</description>
       <symptoms>
@@ -232,7 +215,6 @@
         <item>SSL errors when trying to use HTTPS with local HTTP-only services</item>
       </impact>
     </problem>
-
     <solution>
       <description>Fixed inheritance paradox by ALWAYS overriding configs and setting all mode fields</description>
       <implementation>
@@ -246,7 +228,6 @@
         <file>app/configuration/schemas.py - _configure_service_flags - added mode field setting</file>
       </code_changes>
     </solution>
-
     <result>
       <outcome>Configuration properly loads from environment variables</outcome>
       <benefits>
@@ -256,7 +237,6 @@
         <benefit>Clear precedence: env vars override default placeholders</benefit>
       </benefits>
     </result>
-
     <prevention>
       <practice>NEVER conditionally check for field existence when overriding parent defaults</practice>
       <practice>ALWAYS override configuration values unconditionally in child classes</practice>
@@ -265,7 +245,6 @@
       <practice>Ensure .env is loaded into os.environ before config creation</practice>
       <practice>Watch for inheritance paradoxes where parent defaults prevent child overrides</practice>
     </prevention>
-
     <related>
       <spec>SPEC/configuration.xml</spec>
       <file>app/configuration/schemas.py</file>

@@ -3,7 +3,12 @@ Auth Service Main Application
 Standalone microservice for authentication
 """
 import os
+import sys
 from pathlib import Path
+
+# Add parent directory to Python path for auth_service imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -25,7 +30,8 @@ else:
     load_dotenv()
     print("Loaded environment from current directory or system")
 
-from auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.config import AuthConfig
 
 # Configure logging
 logging.basicConfig(
@@ -66,19 +72,21 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
+    # @marked: Port must be read from environment for container deployment
     logger.info(f"Port: {os.getenv('PORT', '8080')}")
     
     # Log Redis configuration status
-    from auth_core.routes.auth_routes import auth_service
+    from auth_service.auth_core.routes.auth_routes import auth_service
     redis_enabled = auth_service.session_manager.redis_enabled
     redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
     logger.info(f"Redis session management: {redis_status}")
     
     # Check if we're in fast test mode
+    # @marked: Test mode flag for test infrastructure
     fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
-    env = os.getenv("ENVIRONMENT", "development").lower()
+    env = AuthConfig.get_environment()
     
     if fast_test_mode or env == "test":
         logger.info("Running in fast test mode - skipping database initialization")
@@ -86,7 +94,7 @@ async def lifespan(app: FastAPI):
         return
     
     # Initialize single database connection
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     
     initialization_errors = []
     
@@ -130,8 +138,9 @@ app = FastAPI(
 )
 
 # Configure CORS
+# @marked: CORS configuration from environment for security
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
-env = os.getenv("ENVIRONMENT", "development")
+env = AuthConfig.get_environment()
 
 # Handle wildcard CORS for development
 if cors_origins_env == "*":
@@ -147,7 +156,6 @@ else:
             "https://app.staging.netrasystems.ai",
             "https://auth.staging.netrasystems.ai",
             "https://api.staging.netrasystems.ai",
-            "https://backend.staging.netrasystems.ai",
             "http://localhost:3000",
             "http://localhost:8000",
             "http://localhost:8080"
@@ -182,74 +190,72 @@ else:
             "http://127.0.0.1:8082"
         ]
 
-# When using wildcard with credentials, we need custom handling
-if cors_origins == ["*"]:
-    # In development with wildcard, we can't use credentials with "*"
-    # So we'll handle CORS dynamically
-    from starlette.middleware.base import BaseHTTPMiddleware
-    from starlette.responses import Response
-    
-    class DynamicCORSMiddleware(BaseHTTPMiddleware):
-        def is_allowed_origin(self, origin: str) -> bool:
-            """Check if origin is allowed - supports dynamic ports for localhost."""
-            if not origin:
-                return False
-            
-            # In development, accept any localhost/127.0.0.1 origin with any port
-            import re
-            localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
-            if re.match(localhost_pattern, origin):
-                return True
-            
-            # Also accept standard ports without explicit port numbers
-            standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
-            if re.match(standard_localhost, origin):
-                return True
-            
-            # In non-development, could add additional checks here
-            return True  # For wildcard mode, accept all origins
+# Always use DynamicCORSMiddleware to properly handle OPTIONS requests
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+class DynamicCORSMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, allowed_origins=None):
+        super().__init__(app)
+        self.allowed_origins = allowed_origins or []
         
-        async def dispatch(self, request, call_next):
-            origin = request.headers.get("origin")
+    def is_allowed_origin(self, origin: str) -> bool:
+        """Check if origin is allowed - supports dynamic ports for localhost."""
+        if not origin:
+            return False
+        
+        # Check if it matches explicit allowed origins
+        if self.allowed_origins and origin in self.allowed_origins:
+            return True
             
-            # Handle preflight
-            if request.method == "OPTIONS":
-                response = Response(status_code=200)
-                if origin and self.is_allowed_origin(origin):
-                    response.headers["Access-Control-Allow-Origin"] = origin
-                    response.headers["Access-Control-Allow-Credentials"] = "true"
-                    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-                    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-                    response.headers["Access-Control-Max-Age"] = "3600"
-                return response
+        # If wildcard mode
+        if self.allowed_origins == ["*"]:
+            return True
             
-            # Process request
-            response = await call_next(request)
-            
-            # Add CORS headers to response
+        # In development, accept any localhost/127.0.0.1 origin with any port
+        import re
+        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
+        if re.match(localhost_pattern, origin):
+            return True
+        
+        # Also accept standard ports without explicit port numbers
+        standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
+        if re.match(standard_localhost, origin):
+            return True
+        
+        return False
+    
+    async def dispatch(self, request, call_next):
+        origin = request.headers.get("origin")
+        
+        # Handle preflight
+        if request.method == "OPTIONS":
+            response = Response(status_code=200)
             if origin and self.is_allowed_origin(origin):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
                 response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-                response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
-            
+                response.headers["Access-Control-Max-Age"] = "3600"
             return response
-    
-    app.add_middleware(DynamicCORSMiddleware)
-else:
-    # Use standard CORS middleware for specific origins
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"]
-    )
+        
+        # Process request
+        response = await call_next(request)
+        
+        # Add CORS headers to response
+        if origin and self.is_allowed_origin(origin):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+            response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
+        
+        return response
+
+app.add_middleware(DynamicCORSMiddleware, allowed_origins=cors_origins)
 
 # Security middleware for production
-if os.getenv("ENVIRONMENT") in ["staging", "production"]:
+if AuthConfig.get_environment() in ["staging", "production"]:
     allowed_hosts = [
         "*.netrasystems.ai",
         "*.run.app",
@@ -266,6 +272,7 @@ async def add_service_headers(request: Request, call_next):
     response.headers["X-Service-Version"] = "1.0.0"
     
     # Security headers
+    # @marked: Security headers toggle for production environments
     if os.getenv("SECURE_HEADERS_ENABLED", "false").lower() == "true":
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -297,7 +304,7 @@ async def health() -> Dict[str, Any]:
 async def health_ready() -> Dict[str, Any]:
     """Readiness probe to check if the service is ready to serve requests"""
     # Check if database connections are available
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     
     try:
         # Try to check database connectivity
@@ -318,7 +325,7 @@ async def health_ready() -> Dict[str, Any]:
     except Exception as e:
         logger.warning(f"Readiness check failed: {e}")
         # In development, we might still be ready even if DB check fails
-        env = os.getenv("ENVIRONMENT", "development")
+        env = AuthConfig.get_environment()
         if env == "development":
             return {
                 "status": "ready",
@@ -334,5 +341,6 @@ async def health_ready() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
+    # @marked: Port binding for container runtime
     port = int(os.getenv("PORT", "8080"))
     uvicorn.run(app, host="0.0.0.0", port=port)

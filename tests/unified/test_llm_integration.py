@@ -12,7 +12,7 @@ from decimal import Decimal
 
 import pytest
 
-from tests.unified.config import TEST_CONFIG, TestDataFactory
+from netra_backend.tests.unified.config import TEST_CONFIG, TestDataFactory
 
 
 class MockLLMProvider:

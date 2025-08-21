@@ -1,26 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="Observability">
-    <metadata>
-        <created>2025-01-16</created>
-        <updated>2025-01-16</updated>
-        <tags>observability, logging, monitoring, supervisor, agents</tags>
-    </metadata>
-    
-    <learning id="supervisor-observability-implementation">
-        <problem>
+  <metadata>
+    <created>2025-01-16</created>
+    <updated>2025-01-16</updated>
+    <tags>observability, logging, monitoring, supervisor, agents</tags>
+    <last_edited>2025-08-21T08:47:29.621072</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.621072">
+      <reasons>
+        <reason>Content contains: monolithic</reason>
+        <reason>Content contains: old</reason>
+        <reason>References old monolithic architecture</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <learning id="supervisor-observability-implementation">
+    <problem>
             Supervisor and DeepAgent lacked comprehensive observability for:
             - LLM call tracking (heartbeat, input/output)
             - Inter-agent communication
             - TODO list and flow state management
             - Pipeline execution visibility
         </problem>
-        
-        <root_cause>
+    <root_cause>
             Observability infrastructure existed but was not fully integrated into supervisor flow.
             Missing flow state tracking and TODO list visibility made debugging and monitoring difficult.
         </root_cause>
-        
-        <solution>
+    <solution>
             1. Created comprehensive observability spec (SPEC/supervisor_observability.xml)
             2. Leveraged existing observability infrastructure:
                - HeartbeatLogger for LLM call tracking
@@ -29,8 +34,7 @@
             3. Created new SupervisorFlowLogger for TODO and flow state tracking
             4. Integrated observability throughout supervisor components
         </solution>
-        
-        <implementation_details>
+    <implementation_details>
             - Created modular observability modules (all ≤300 lines):
               * observability_flow.py - Main flow logger
               * observability_integration.py - Component integration
@@ -41,99 +45,85 @@
               * INFO: Heartbeat, flow state, TODO changes
               * DEBUG: Detailed input/output data
         </implementation_details>
-        
-        <testing_approach>
+    <testing_approach>
             - 41 comprehensive tests created
             - Unit tests verify individual logging methods
             - Integration tests validate end-to-end flow
             - Supervisor-specific heartbeat scenarios tested
             - Mock-based testing for isolation
         </testing_approach>
-        
-        <prevention>
+    <prevention>
             - Always include observability in initial design
             - Use existing observability mixins and infrastructure
             - Create structured logging with correlation IDs
             - Implement at appropriate log levels (INFO vs DEBUG)
             - Test observability points during development
         </prevention>
-        
-        <impact>
+    <impact>
             - Complete visibility into supervisor operations
             - TODO list tracking for debugging
             - Flow state monitoring for performance analysis
             - Correlation ID tracking across all components
             - Machine-parsable JSON logs for dashboards
         </impact>
-    </learning>
-    
-    <learning id="modular-observability-architecture">
-        <problem>
+  </learning>
+  <learning id="modular-observability-architecture">
+    <problem>
             Observability code could easily exceed 450-line module limit if monolithic.
         </problem>
-        
-        <solution>
+    <solution>
             Split observability into focused modules:
             - Core logger class (main functionality)
             - Data builders (JSON structure creation)
             - Helper functions (global access patterns)
             - Integration bridges (component connections)
         </solution>
-        
-        <best_practices>
+    <best_practices>
             - Keep each observability aspect in separate module
             - Use composition over inheritance
             - Create helper functions for common patterns
             - Maintain backward compatibility when extending
         </best_practices>
-    </learning>
-    
-    <learning id="correlation-id-tracking">
-        <problem>
+  </learning>
+  <learning id="correlation-id-tracking">
+    <problem>
             Tracking requests across multiple agents and LLM calls was difficult without correlation.
         </problem>
-        
-        <solution>
+    <solution>
             - Use consistent correlation_id throughout request lifecycle
             - Pass correlation_id to all logging methods
             - Include in all JSON log structures
             - Generate at request entry point
         </solution>
-        
-        <implementation>
+    <implementation>
             - correlation_id generated once per request
             - Passed through supervisor → agents → LLM calls
             - Included in all observability log entries
             - Enables request tracing across components
         </implementation>
-    </learning>
-    
-    <learning id="loguru-format-strings">
-        <problem>
+  </learning>
+  <learning id="loguru-format-strings">
+    <problem>
             Logger showing raw format strings like "HTTP error: %s" instead of interpolated values.
         </problem>
-        
-        <root_cause>
+    <root_cause>
             Loguru logger uses different string formatting than Python's standard logging.
             Code was using %s format strings with loguru, which doesn't support them.
         </root_cause>
-        
-        <solution>
+    <solution>
             Use f-strings or {} placeholders for loguru logging instead of %s format strings:
             - OLD: self._logger.warning("HTTP error: %s", str(exc))
             - NEW: self._logger.warning(f"HTTP error: {str(exc)}")
         </solution>
-        
-        <prevention>
+    <prevention>
             - Always use f-strings when logging with loguru
             - Never use %s format strings with loguru
             - Be aware that central_logger.get_logger() returns a loguru instance
         </prevention>
-        
-        <impact>
+    <impact>
             - Proper log message formatting
             - Correct error information in logs
             - Better debugging capabilities
         </impact>
-    </learning>
+  </learning>
 </learnings>

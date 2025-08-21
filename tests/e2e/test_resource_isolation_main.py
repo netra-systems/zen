@@ -22,7 +22,7 @@ import time
 import logging
 from typing import Dict, Any, List
 
-from tests.e2e.test_helpers.resource_monitoring import (
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
     ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
 )
 
@@ -123,7 +123,7 @@ class TestResourceIsolationIntegration:
         recovery_successful = False
         
         while time.time() - recovery_start < 60:  # 60s timeout
-            from tests.e2e.test_helpers.resource_monitoring import check_resource_limits
+            from netra_backend.tests.e2e.test_helpers.resource_monitoring import check_resource_limits
             
             limits_check = check_resource_limits(
                 cpu_limit=INTEGRATION_CONFIG["cpu_threshold"] * INTEGRATION_CONFIG["tenant_count"],
@@ -261,7 +261,7 @@ class TestResourceIsolationIntegration:
     
     async def _create_system_stress(self):
         """Create system stress for recovery testing"""
-        from tests.e2e.test_helpers.resource_monitoring import stress_system_resources
+        from netra_backend.tests.e2e.test_helpers.resource_monitoring import stress_system_resources
         
         await stress_system_resources(
             duration_seconds=20,

@@ -24,7 +24,7 @@ def fix_validate_token_imports(file_path: str) -> bool:
         # Fix the import statement
         content = re.sub(
             r'from app\.auth_integration\.auth import([^,\n]*,\s*)?validate_token([^_\w])',
-            r'from app.auth_integration.auth import\1validate_token_jwt\2',
+            r'from netra_backend.app.auth_integration.auth import\1validate_token_jwt\2',
             content
         )
         
@@ -56,7 +56,7 @@ def fix_websockets_import(file_path: str) -> bool:
         # Fix the import statement
         content = re.sub(
             r'from app\.routes\.websockets import websocket_endpoint',
-            r'from app.routes.mcp.main import websocket_endpoint',
+            r'from netra_backend.app.routes.mcp.main import websocket_endpoint',
             content
         )
         
@@ -66,7 +66,7 @@ def fix_websockets_import(file_path: str) -> bool:
         filtered_lines = []
         
         for line in lines:
-            if line.strip().startswith('from app.routes.mcp.main import websocket_endpoint'):
+            if line.strip().startswith('from netra_backend.app.routes.mcp.main import websocket_endpoint'):
                 if line not in seen_imports:
                     seen_imports.add(line)
                     filtered_lines.append(line)
@@ -94,7 +94,7 @@ def fix_connection_manager_specs(file_path: str) -> bool:
         original_content = content
         
         # Only fix if importing from connection_manager module (not connection module)
-        if 'from app.websocket.connection_manager import' in content:
+        if 'from netra_backend.app.websocket.connection_manager import' in content:
             content = re.sub(
                 r'spec=ConnectionManager',
                 r'spec=ModernConnectionManager',

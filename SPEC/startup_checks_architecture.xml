@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <name>StartupChecksArchitecture</name>
+    <version>1.0</version>
+    <description>Defines the architecture and import structure for startup checks system</description>
+    <created>2025-08-21</created>
+  </metadata>
+
+  <module_structure>
+    <title>Startup Checks Module Organization</title>
+    <location>netra_backend/app/startup_checks/</location>
+    <description>
+      All startup check related modules are consolidated in the startup_checks directory
+      to maintain clear separation from general system utilities.
+    </description>
+    
+    <modules>
+      <module name="checker.py">
+        <class>StartupChecker</class>
+        <import_path>netra_backend.app.startup_checks.checker</import_path>
+        <responsibility>Main orchestrator for all startup checks</responsibility>
+        <dependencies>
+          <dependency>EnvironmentChecker</dependency>
+          <dependency>DatabaseChecker</dependency>
+          <dependency>ServiceChecker</dependency>
+          <dependency>SystemChecker (startup-specific)</dependency>
+        </dependencies>
+      </module>
+      
+      <module name="environment_checks.py">
+        <class>EnvironmentChecker</class>
+        <import_path>netra_backend.app.startup_checks.environment_checks</import_path>
+        <responsibility>Environment variable and configuration validation</responsibility>
+      </module>
+      
+      <module name="database_checks.py">
+        <class>DatabaseChecker</class>
+        <import_path>netra_backend.app.startup_checks.database_checks</import_path>
+        <responsibility>Database connectivity and schema validation</responsibility>
+      </module>
+      
+      <module name="service_checks.py">
+        <class>ServiceChecker</class>
+        <import_path>netra_backend.app.startup_checks.service_checks</import_path>
+        <responsibility>External service connectivity (Redis, ClickHouse, LLM providers)</responsibility>
+      </module>
+      
+      <module name="system_checks.py">
+        <class>SystemChecker</class>
+        <import_path>netra_backend.app.startup_checks.system_checks</import_path>
+        <responsibility>System resources, file permissions, network connectivity</responsibility>
+        <note>Different from app.checker.SystemChecker which is for general health monitoring</note>
+      </module>
+      
+      <module name="utils.py">
+        <functions>
+          <function>run_startup_checks</function>
+        </functions>
+        <import_path>netra_backend.app.startup_checks.utils</import_path>
+        <responsibility>Utility functions for startup check execution</responsibility>
+      </module>
+      
+      <module name="__init__.py">
+        <exports>
+          <export>StartupCheckResult</export>
+          <export>StartupChecker</export>
+          <export>run_startup_checks</export>
+          <export>EnvironmentChecker</export>
+          <export>DatabaseChecker</export>
+        </exports>
+        <import_path>netra_backend.app.startup_checks</import_path>
+        <responsibility>Public API for startup checks module</responsibility>
+      </module>
+    </modules>
+  </module_structure>
+
+  <import_rules>
+    <title>Import Rules and Patterns</title>
+    
+    <rule id="correct-startup-checker-import" priority="critical">
+      <description>Always import StartupChecker from startup_checks.checker</description>
+      <correct>from netra_backend.app.startup_checks.checker import StartupChecker</correct>
+      <incorrect>from netra_backend.app.checker import StartupChecker</incorrect>
+      <reason>StartupChecker was moved to startup_checks subdirectory for better organization</reason>
+    </rule>
+    
+    <rule id="internal-imports" priority="high">
+      <description>Modules within startup_checks should use absolute imports</description>
+      <pattern>from netra_backend.app.startup_checks.{module} import {Class}</pattern>
+      <example>from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker</example>
+    </rule>
+    
+    <rule id="public-api-imports" priority="medium">
+      <description>External code should import from __init__ when possible</description>
+      <preferred>from netra_backend.app.startup_checks import StartupChecker</preferred>
+      <alternative>from netra_backend.app.startup_checks.checker import StartupChecker</alternative>
+    </rule>
+    
+    <rule id="avoid-relative-imports" priority="high">
+      <description>Avoid relative imports to prevent path resolution issues</description>
+      <incorrect>from .checker import StartupChecker</incorrect>
+      <correct>from netra_backend.app.startup_checks.checker import StartupChecker</correct>
+    </rule>
+  </import_rules>
+
+  <naming_conventions>
+    <title>Naming Conventions to Avoid Confusion</title>
+    
+    <convention id="distinct-checker-names">
+      <problem>Multiple SystemChecker classes in different contexts</problem>
+      <solution>Use descriptive prefixes or suffixes</solution>
+      <current_state>
+        <class location="app.checker">SystemChecker (general health)</class>
+        <class location="app.startup_checks.system_checks">SystemChecker (startup-specific)</class>
+      </current_state>
+      <recommended_future>
+        <class>GeneralSystemChecker</class>
+        <class>StartupSystemChecker</class>
+      </recommended_future>
+    </convention>
+    
+    <convention id="checker-suffix">
+      <description>All checker classes should end with "Checker"</description>
+      <examples>
+        <example>StartupChecker</example>
+        <example>EnvironmentChecker</example>
+        <example>DatabaseChecker</example>
+        <example>ServiceChecker</example>
+      </examples>
+    </convention>
+  </naming_conventions>
+
+  <testing_requirements>
+    <title>Testing Requirements for Import Structure</title>
+    
+    <test_category name="import_validation">
+      <description>Tests that validate correct import paths</description>
+      <required_tests>
+        <test>Test that StartupChecker imports from correct location</test>
+        <test>Test that incorrect imports fail with clear errors</test>
+        <test>Test that all checker modules are importable</test>
+        <test>Test that public API exports work correctly</test>
+      </required_tests>
+      <test_file>netra_backend/tests/critical/test_import_structure_failures.py</test_file>
+    </test_category>
+    
+    <test_category name="namespace_validation">
+      <description>Tests that validate no namespace collisions</description>
+      <required_tests>
+        <test>Test that similar class names don't conflict</test>
+        <test>Test that module paths are unambiguous</test>
+      </required_tests>
+    </test_category>
+  </testing_requirements>
+
+  <migration_checklist>
+    <title>Checklist for Import Structure Changes</title>
+    <steps>
+      <step order="1">Identify all current import locations using grep/ripgrep</step>
+      <step order="2">Create comprehensive tests for new import structure</step>
+      <step order="3">Update imports in core application code</step>
+      <step order="4">Update imports in test files</step>
+      <step order="5">Update imports in __init__.py files</step>
+      <step order="6">Update any dynamic imports or importlib usage</step>
+      <step order="7">Update documentation and type hints</step>
+      <step order="8">Run full test suite including import tests</step>
+      <step order="9">Update learnings and specifications</step>
+    </steps>
+  </migration_checklist>
+
+  <common_errors>
+    <title>Common Import Errors and Solutions</title>
+    
+    <error id="import-error-startup-checker">
+      <symptom>ImportError: cannot import name 'StartupChecker' from 'netra_backend.app.checker'</symptom>
+      <cause>Trying to import StartupChecker from old location</cause>
+      <solution>Import from netra_backend.app.startup_checks.checker instead</solution>
+    </error>
+    
+    <error id="module-not-found-checkers">
+      <symptom>ModuleNotFoundError: No module named 'netra_backend.app.environment_checks'</symptom>
+      <cause>Checker modules are in startup_checks subdirectory</cause>
+      <solution>Import from netra_backend.app.startup_checks.environment_checks</solution>
+    </error>
+    
+    <error id="circular-import">
+      <symptom>ImportError: cannot import name X (circular import)</symptom>
+      <cause>Circular dependencies between checker modules</cause>
+      <solution>Use import at function level or refactor to remove circular dependency</solution>
+    </error>
+  </common_errors>
+</specification>

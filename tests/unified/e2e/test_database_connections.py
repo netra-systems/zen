@@ -26,10 +26,10 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
-from app.core.database_connection_manager import DatabaseConnectionManager
-from app.core.database_types import DatabaseType
-from app.startup_checks.database_checks import DatabaseChecker
-from .dev_launcher_test_fixtures import TestEnvironmentManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_types import DatabaseType
+from netra_backend.app.startup_checks.database_checks import DatabaseChecker
+from tests.unified.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
 class DatabaseConnectionTester:

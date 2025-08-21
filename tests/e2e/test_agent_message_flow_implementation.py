@@ -25,9 +25,9 @@ from typing import Dict, Any
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from app.services.agent_service_core import AgentService
-from app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 class TestAgentMessageFlowImplementation:
@@ -89,12 +89,18 @@ class TestAgentMessageFlowImplementation:
             "payload": {"content": "Hello agent", "thread_id": "thread-123"}
         }
         
-        # Mock agent service creation
+        # Mock agent service creation with LLMManager
         with patch('app.services.agent_service_factory._create_supervisor_agent') as mock_create, \
-             patch('app.services.agent_service_core.AgentService') as mock_service_cls:
+             patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+             patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+            
+            # Setup LLMManager mock
+            mock_llm = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
             
             mock_create.return_value = mock_supervisor
             mock_service = AsyncMock()
+            mock_service.handle_websocket_message = AsyncMock()
             mock_service_cls.return_value = mock_service
             
             # Process the message
@@ -133,41 +139,50 @@ class TestAgentMessageFlowImplementation:
             "payload": {"response": "Agent completed the task", "thread_id": "thread-123"}
         }
         
-        # Add connection to manager
-        connection_id = await secure_manager.add_connection(
-            user_id, mock_websocket, {"user_id": user_id, "auth_method": "header"}
-        )
-        
-        # Send message through manager
-        result = await secure_manager.send_to_user(user_id, response_message)
-        
-        # Verify message was sent
-        assert result is True
-        mock_websocket.send_json.assert_called_once_with(response_message)
+        # Mock LLMManager for connection handling
+        with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+            mock_llm = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+            
+            # Add connection to manager
+            connection_id = await secure_manager.add_connection(
+                user_id, mock_websocket, {"user_id": user_id, "auth_method": "header"}
+            )
+            
+            # Send message through manager
+            result = await secure_manager.send_to_user(user_id, response_message)
+            
+            # Verify message was sent
+            assert result is True
+            mock_websocket.send_json.assert_called_once_with(response_message)
     
     @pytest.mark.asyncio
     async def test_error_handling_for_invalid_message(self, secure_manager, mock_websocket):
         """Test error handling for invalid messages."""
         user_id = "test-user-123"
-        connection_id = "test-connection"
         
-        # Add connection to manager
-        await secure_manager.add_connection(
-            user_id, mock_websocket, {"user_id": user_id, "auth_method": "header"}
-        )
-        
-        # Test invalid JSON message
-        invalid_message = "{ invalid json"
-        result = await secure_manager.handle_message(connection_id, invalid_message)
-        
-        # Should handle error gracefully
-        assert result is False
-        
-        # Should send error response
-        mock_websocket.send_json.assert_called()
-        call_args = mock_websocket.send_json.call_args[0][0]
-        assert call_args["type"] == "error"
-        assert "Invalid JSON" in call_args["payload"]["message"]
+        # Mock LLMManager
+        with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+            mock_llm = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+            
+            # Add connection to manager
+            connection_id = await secure_manager.add_connection(
+                user_id, mock_websocket, {"user_id": user_id, "auth_method": "header"}
+            )
+            
+            # Test invalid JSON message
+            invalid_message = "{ invalid json"
+            result = await secure_manager.handle_message(connection_id, invalid_message)
+            
+            # Should handle error gracefully
+            assert result is False
+            
+            # Should send error response
+            mock_websocket.send_json.assert_called()
+            call_args = mock_websocket.send_json.call_args[0][0]
+            assert call_args["type"] == "error"
+            assert "Invalid JSON" in call_args["payload"]["message"]
     
     @pytest.mark.asyncio
     async def test_error_handling_for_agent_processing_failure(self, secure_manager, mock_websocket):
@@ -180,7 +195,12 @@ class TestAgentMessageFlowImplementation:
         
         # Mock agent service to raise exception
         with patch('app.routes.websocket_secure._create_supervisor_agent') as mock_create, \
-             patch('app.services.agent_service_core.AgentService') as mock_service_cls:
+             patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+             patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+            
+            # Setup LLMManager mock
+            mock_llm = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
             
             mock_service = AsyncMock()
             mock_service.handle_websocket_message.side_effect = Exception("Agent processing failed")
@@ -301,33 +321,38 @@ class TestAgentMessageFlowImplementation:
         user_id = "test-user-limits"
         max_connections = SECURE_WEBSOCKET_CONFIG["limits"]["max_connections_per_user"]
         
-        # Create multiple websockets
-        websockets = []
-        for i in range(max_connections + 2):
-            ws = AsyncMock()
-            ws.application_state = "CONNECTED"
-            ws.send_json = AsyncMock()
-            ws.close = AsyncMock()
-            websockets.append(ws)
-        
-        # Add connections up to limit + 2
-        connection_ids = []
-        for i, ws in enumerate(websockets):
-            conn_id = await secure_manager.add_connection(
-                user_id, ws, {"user_id": user_id, "auth_method": "header"}
-            )
-            connection_ids.append(conn_id)
-        
-        # Verify only max_connections are active
-        user_connections = [
-            conn_id for conn_id, conn in secure_manager.connections.items()
-            if conn["user_id"] == user_id
-        ]
-        assert len(user_connections) == max_connections
-        
-        # Verify oldest connections were closed
-        for ws in websockets[:2]:  # First 2 should be closed due to limit
-            ws.close.assert_called()
+        # Mock LLMManager
+        with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+            mock_llm = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+            
+            # Create multiple websockets
+            websockets = []
+            for i in range(max_connections + 2):
+                ws = AsyncMock()
+                ws.application_state = "CONNECTED"
+                ws.send_json = AsyncMock()
+                ws.close = AsyncMock()
+                websockets.append(ws)
+            
+            # Add connections up to limit + 2
+            connection_ids = []
+            for i, ws in enumerate(websockets):
+                conn_id = await secure_manager.add_connection(
+                    user_id, ws, {"user_id": user_id, "auth_method": "header"}
+                )
+                connection_ids.append(conn_id)
+            
+            # Verify only max_connections are active
+            user_connections = [
+                conn_id for conn_id, conn in secure_manager.connections.items()
+                if conn["user_id"] == user_id
+            ]
+            assert len(user_connections) == max_connections
+            
+            # Verify oldest connections were closed
+            for ws in websockets[:2]:  # First 2 should be closed due to limit
+                ws.close.assert_called()
 
     def test_statistics_tracking(self, secure_manager):
         """Test that statistics are properly tracked."""

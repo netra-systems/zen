@@ -9,7 +9,7 @@ import jwt
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List
 
-from auth_core.models.auth_models import TokenType, AuthProvider
+from auth_service.auth_core.models.auth_models import TokenType, AuthProvider
 
 
 class TokenFactory:

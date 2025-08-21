@@ -4,7 +4,7 @@ Business Value: Prevents cascading failures that cause total system outage
 Modular design: <300 lines, 25-line functions max
 """
 from typing import Dict, Any
-from .mock_services_manager import MockHttpClient, MockTimeoutException
+from tests.unified.e2e.mock_services_manager import MockHttpClient, MockTimeoutException
 
 
 class ServiceFailureScenarioTester:
@@ -203,12 +203,10 @@ class PerformanceMetricsCollector:
     
     def start_measurement(self, operation: str) -> None:
         """Start measuring operation performance."""
-        import time
         self.start_times[operation] = time.time()
     
     def end_measurement(self, operation: str) -> float:
         """End measuring operation performance and return duration."""
-        import time
         if operation not in self.start_times:
             return 0.0
         

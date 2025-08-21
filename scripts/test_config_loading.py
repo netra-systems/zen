@@ -59,8 +59,8 @@ def _print_loading_header():
 
 def _load_and_reload_config():
     """Load and reload configuration modules"""
-    from app.config import settings, get_config
-    from app.config import reload_config
+    from netra_backend.app.config import settings, get_config
+    from netra_backend.app.config import reload_config
     reload_config()
     config = get_config()
     print("\n[SUCCESS] Configuration loaded successfully!")

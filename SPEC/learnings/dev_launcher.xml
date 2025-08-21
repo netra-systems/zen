@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="dev-launcher" priority="high">
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.126419</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.126419">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>Dev Launcher Comprehensive Guide</title>
   <description>Consolidated learnings for dev launcher setup, configuration, and troubleshooting</description>
   <last_updated>2025-08-20</last_updated>
-  
-  <!-- SECTION 1: Configuration and Secrets -->
   <section name="Configuration">
-    
     <learning id="secret-key-configuration">
       <problem>Backend fails with "SECRET_KEY must be at least 32 characters"</problem>
       <solution>
@@ -16,7 +21,6 @@
       </solution>
       <prevention>Always use 64+ character keys, keep .env files synchronized</prevention>
     </learning>
-    
     <learning id="missing-api-keys">
       <problem>Environment loader warns about missing LLM API keys</problem>
       <solution>
@@ -27,7 +31,6 @@
       </solution>
       <note>Placeholders satisfy checks when LLM_MODE=shared (mocked mode)</note>
     </learning>
-    
     <learning id="service-mode-configuration">
       <problem>Services connect to cloud endpoints despite local Docker services</problem>
       <solution>
@@ -40,32 +43,26 @@
       </solution>
       <files_affected>dev_launcher/service_config.py, .env</files_affected>
     </learning>
-    
   </section>
-  
-  <!-- SECTION 2: Database and Migrations -->
   <section name="Database">
-    
     <learning id="alembic-helper-files">
       <problem>Alembic fails: "Could not determine revision id from filename"</problem>
       <cause>Helper files in alembic/versions directory</cause>
       <solution>
-        1. Create app/alembic/migrations_helpers/ directory
+        1. Create netra_backend/app/alembic/migrations_helpers/ directory
         2. Move all helper files (*_tables.py, migration_metadata.py) there
         3. Only keep proper migration files in versions/
       </solution>
       <prevention>Never place non-migration files in alembic/versions/</prevention>
     </learning>
-    
-    <learning id="migration-relative-imports">
-      <problem>Migrations fail with "attempted relative import with no known parent package"</problem>
+    <learning id="migration-absolute-imports">
+      <problem>Migrations fail with import errors when package structure is incorrect</problem>
       <solution>
-        Convert all relative imports to absolute:
-        FROM: from ..migrations_helpers.migration_metadata import
-        TO: from app.alembic.migrations_helpers.migration_metadata import
+        Use absolute imports with service namespace:
+        FROM: from migrations_helpers.migration_metadata import
+        TO: from netra_backend.app.alembic.migrations_helpers.migration_metadata import
       </solution>
     </learning>
-    
     <learning id="database-schema-sync">
       <problem>Schema validation fails with missing tables</problem>
       <solution>
@@ -80,7 +77,6 @@
         mcp_external_servers, agent_recovery_logs
       </common_missing_tables>
     </learning>
-    
     <learning id="database-metrics-schema">
       <problem>DatabaseMetrics instantiation fails with unexpected arguments</problem>
       <solution>
@@ -89,14 +85,10 @@
         - Fix parameter mismatches (query_count → total_queries)
         - Add required timestamp parameter
       </solution>
-      <files_affected>app/db/observability_metrics.py, app/monitoring/metrics_collector.py</files_affected>
+      <files_affected>netra_backend/app/db/observability_metrics.py, netra_backend/app/monitoring/metrics_collector.py</files_affected>
     </learning>
-    
   </section>
-  
-  <!-- SECTION 3: Health Checks and Timeouts -->
   <section name="HealthChecks">
-    
     <learning id="health-check-timeouts">
       <problem>Health checks timeout during database optimization</problem>
       <root_cause>Database optimization takes 10-15 seconds on startup</root_cause>
@@ -109,7 +101,6 @@
         - Overall: 120s
       </solution>
     </learning>
-    
     <learning id="dynamic-port-health-checks">
       <problem>Health checks use hardcoded ports instead of dynamic ports</problem>
       <solution>
@@ -119,7 +110,6 @@
       </solution>
       <files_affected>dev_launcher/startup_validator.py</files_affected>
     </learning>
-    
     <learning id="health-checks-development">
       <problem>Health checks fail when optional services unavailable</problem>
       <solution>
@@ -129,7 +119,6 @@
         - Check environment: os.getenv("ENVIRONMENT", "development")
       </solution>
     </learning>
-    
     <learning id="quick-health-check-method">
       <problem>QuickHealthChecker missing quick_health_check method</problem>
       <solution>
@@ -137,27 +126,19 @@
         Update all references in startup_sequencer.py and launcher_integration.py
       </solution>
     </learning>
-    
   </section>
-  
-  <!-- SECTION 4: Non-Critical Services -->
   <section name="OptionalServices">
-    
     <learning id="clickhouse-optional">
       <insight>ClickHouse is optional for development</insight>
       <behavior>Application continues despite connection failures</behavior>
       <recommendation>Warnings can be safely ignored in development</recommendation>
     </learning>
-    
     <learning id="llm-services-optional">
       <insight>LLM API keys optional for basic development</insight>
       <requirement>Required only for agent functionality</requirement>
       <keys_needed>GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY</keys_needed>
     </learning>
-    
   </section>
-  
-  <!-- BEST PRACTICES -->
   <best_practices>
     <practice priority="critical">
       Always check startup logs for critical vs non-critical failures
@@ -178,8 +159,6 @@
       Monitor actual startup times to adjust timeouts
     </practice>
   </best_practices>
-  
-  <!-- TESTING CHECKLIST -->
   <testing_checklist>
     <item>Backend starts without critical errors</item>
     <item>Frontend compiles and serves</item>
@@ -190,8 +169,6 @@
     <item>Auth system configuration loads</item>
     <item>Service discovery files created</item>
   </testing_checklist>
-  
-  <!-- TROUBLESHOOTING GUIDE -->
   <troubleshooting>
     <issue symptom="SECRET_KEY error">
       Check .env and .env.development.local for 64+ character key
@@ -200,7 +177,7 @@
       Move helper files out of alembic/versions/
     </issue>
     <issue symptom="Import errors in migrations">
-      Convert relative imports to absolute
+      Use absolute imports with service namespace
     </issue>
     <issue symptom="Health check timeouts">
       Increase timeouts in startup_validator.py
@@ -212,5 +189,4 @@
       Non-critical in development, can ignore
     </issue>
   </troubleshooting>
-  
 </learnings>

@@ -23,9 +23,9 @@ from dataclasses import dataclass
 import pytest
 from concurrent.futures import ThreadPoolExecutor
 
-from app.llm.llm_manager import LLMManager
-from app.config import get_config
-from app.agents.base import BaseSubAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
+from netra_backend.app.agents.base import BaseSubAgent
 
 
 @dataclass
@@ -280,5 +280,4 @@ class TestStressConcurrency:
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
-        import os
         return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"

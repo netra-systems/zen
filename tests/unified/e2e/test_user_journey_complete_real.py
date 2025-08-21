@@ -29,7 +29,7 @@ os.environ["TESTING"] = "1"
 os.environ["USE_REAL_SERVICES"] = "true"
 
 from dev_launcher.discovery import ServiceDiscovery
-from tests.unified.clients.factory import TestClientFactory
+from netra_backend.tests.unified.clients.factory import TestClientFactory
 from helpers.real_service_journey_helpers import (
     RealSignupHelper,
     RealLoginHelper,

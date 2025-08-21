@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
   <metadata>
     <title>Environment Loading Specification</title>
     <version>2.0</version>
     <date>2025-01-17</date>
     <description>Simplified single-source environment loading with remote fallback</description>
+    <last_edited>2025-08-21T08:47:28.449533</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.449533">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <principles>
     <principle id="single-source">
       <title>Single Source of Truth</title>
@@ -14,7 +19,6 @@
       <requirement>The .env file is strictly user-controlled</requirement>
       <requirement>System NEVER modifies or overwrites .env file</requirement>
     </principle>
-
     <principle id="clear-priority">
       <title>Clear Priority Order</title>
       <order>
@@ -24,14 +28,12 @@
         <level priority="4">Default values (lowest, non-sensitive)</level>
       </order>
     </principle>
-
     <principle id="user-control">
       <title>User Control</title>
       <requirement>Users maintain full control over .env file</requirement>
       <requirement>Remote fallback is optional and configurable</requirement>
       <requirement>Clear visibility into source of each variable</requirement>
     </principle>
-
     <principle id="observability">
       <title>Observability</title>
       <requirement>Log each step of loading process</requirement>
@@ -40,7 +42,6 @@
       <requirement>Mask sensitive values in logs</requirement>
     </principle>
   </principles>
-
   <architecture>
     <component name="EnvFileLoader">
       <responsibility>Load variables from .env file</responsibility>
@@ -48,7 +49,6 @@
       <responsibility>Provide help for creating .env</responsibility>
       <responsibility>Track missing variables</responsibility>
     </component>
-
     <component name="SecretLoader">
       <responsibility>Orchestrate loading process</responsibility>
       <responsibility>Manage remote fallback</responsibility>
@@ -57,39 +57,33 @@
       <responsibility>Provide comprehensive logging</responsibility>
     </component>
   </architecture>
-
   <loading-process>
     <step number="1">
       <name>Capture OS Environment</name>
       <description>Check existing OS environment variables</description>
       <priority>Highest - these override all other sources</priority>
     </step>
-
     <step number="2">
       <name>Load .env File</name>
       <description>Read user-defined .env file from project root</description>
       <priority>Primary configuration source</priority>
     </step>
-
     <step number="3">
       <name>Check Missing</name>
       <description>Identify required secrets not yet loaded</description>
       <action>Compare loaded against required set</action>
     </step>
-
     <step number="4">
       <name>Remote Fallback</name>
       <description>Load ONLY missing secrets from Google Secret Manager</description>
       <condition>Only if use_remote_fallback=True</condition>
       <condition>Only for secrets not in .env or OS</condition>
     </step>
-
     <step number="5">
       <name>Apply Defaults</name>
       <description>Set default values for non-sensitive configs</description>
       <examples>REDIS_HOST=localhost, REDIS_PORT=6379</examples>
     </step>
-
     <step number="6">
       <name>Merge and Set</name>
       <description>Merge all sources with priority order</description>
@@ -97,33 +91,28 @@
       <action>Track source of each variable</action>
     </step>
   </loading-process>
-
   <configuration>
     <parameter name="project_root">
       <type>Path</type>
       <default>Current working directory</default>
       <description>Root directory to look for .env file</description>
     </parameter>
-
     <parameter name="verbose">
       <type>bool</type>
       <default>False</default>
       <description>Enable detailed logging of loading process</description>
     </parameter>
-
     <parameter name="use_remote_fallback">
       <type>bool</type>
       <default>True</default>
       <description>Enable Google Secret Manager fallback for missing secrets</description>
     </parameter>
-
     <parameter name="project_id">
       <type>Optional[str]</type>
       <default>Auto-determined based on environment</default>
       <description>Google Cloud project ID for Secret Manager</description>
     </parameter>
   </configuration>
-
   <security>
     <measure>All sensitive values masked in logs (xxx***xxx format)</measure>
     <measure>Full secret values never logged</measure>
@@ -131,7 +120,6 @@
     <measure>Remote fetching optional and controllable</measure>
     <measure>OS environment always has highest priority</measure>
   </security>
-
   <migration>
     <from>Multi-file system (.env, .env.development, .env.development.local)</from>
     <to>Single .env file system</to>
@@ -141,7 +129,6 @@
       <step>Update loader initialization to use new SecretLoader</step>
     </steps>
   </migration>
-
   <best-practices>
     <practice>Keep .env in .gitignore</practice>
     <practice>Maintain .env.example with dummy values</practice>
@@ -149,19 +136,16 @@
     <practice>Enable verbose mode during development</practice>
     <practice>Disable remote fallback for offline development</practice>
   </best-practices>
-
   <required-variables>
     <category name="Security">
       <variable>JWT_SECRET_KEY</variable>
       <variable>FERNET_KEY</variable>
     </category>
-
     <category name="API Keys">
       <variable>GEMINI_API_KEY</variable>
       <variable optional="true">ANTHROPIC_API_KEY</variable>
       <variable optional="true">OPENAI_API_KEY</variable>
     </category>
-
     <category name="Database">
       <variable>CLICKHOUSE_HOST</variable>
       <variable>CLICKHOUSE_PORT</variable>
@@ -171,31 +155,26 @@
       <variable>REDIS_PORT</variable>
       <variable>REDIS_PASSWORD</variable>
     </category>
-
     <category name="OAuth" optional="true">
       <variable>GOOGLE_CLIENT_ID</variable>
       <variable>GOOGLE_CLIENT_SECRET</variable>
     </category>
-
     <category name="Monitoring" optional="true">
       <variable>LANGFUSE_PUBLIC_KEY</variable>
       <variable>LANGFUSE_SECRET_KEY</variable>
     </category>
   </required-variables>
-
   <learnings>
     <learning date="2025-01-17">
       <problem>Complex multi-file loading with confusing precedence</problem>
       <solution>Simplified to single .env file with clear priority</solution>
       <impact>Reduced complexity, improved clarity</impact>
     </learning>
-
     <learning date="2025-01-17">
       <problem>System overwrote user configurations</problem>
       <solution>Made .env strictly user-controlled, never modified</solution>
       <impact>Users maintain full control</impact>
     </learning>
-
     <learning date="2025-01-17">
       <problem>All secrets fetched from remote even if available locally</problem>
       <solution>Remote fallback only for missing secrets</solution>

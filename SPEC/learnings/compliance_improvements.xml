@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning>
   <metadata>
     <title>Compliance Reporting Improvements</title>
@@ -6,8 +6,14 @@
     <category>architecture</category>
     <impact>high</impact>
     <tags>compliance, reporting, architecture, 450-line-limit, 25-line-limit</tags>
+    <last_edited>2025-08-21T08:47:28.913378</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.913378">
+      <reasons>
+        <reason>Content contains: monolithic</reason>
+        <reason>References old monolithic architecture</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <problem>
     <description>
       The architecture compliance reporting system had several issues:
@@ -17,7 +23,6 @@
       4. No prioritization of violations by severity
       5. Duplicate type checker too aggressive (flagged legitimate usage)
     </description>
-    
     <symptoms>
       - Overwhelming output with hundreds of violations
       - Mixed counting of actual violations vs warnings
@@ -26,13 +31,11 @@
       - False positives for type duplicates
     </symptoms>
   </problem>
-
   <solution>
     <summary>
       Refactored compliance system with modular design, smart defaults,
       accurate counting, and proper type definition detection.
     </summary>
-    
     <implementation>
       <step id="1">
         <action>Split reporter.py into three modules</action>
@@ -42,7 +45,6 @@
           - reporter_utils.py: Utilities (47 lines)
         </details>
       </step>
-      
       <step id="2">
         <action>Implemented smart violation limits</action>
         <details>
@@ -52,7 +54,6 @@
           - CLI option: --show-all for everything
         </details>
       </step>
-      
       <step id="3">
         <action>Added severity-based prioritization</action>
         <details>
@@ -61,7 +62,6 @@
           - Text markers [H], [M], [L] for compatibility
         </details>
       </step>
-      
       <step id="4">
         <action>Fixed violation counting accuracy</action>
         <details>
@@ -70,7 +70,6 @@
           - Clear totals by violation type
         </details>
       </step>
-      
       <step id="5">
         <action>Enhanced duplicate type detection</action>
         <details>
@@ -81,7 +80,6 @@
         </details>
       </step>
     </implementation>
-    
     <cli-options>
       <option>--violation-limit N: Set display limit (default: 10)</option>
       <option>--show-all: Display all violations</option>
@@ -91,7 +89,6 @@
       <option>--fail-on-violation: Exit code 1 on violations</option>
     </cli-options>
   </solution>
-
   <impact>
     <positive>
       - Compliance reporting now follows 450-line rule
@@ -100,7 +97,6 @@
       - Better developer experience with smart defaults
       - Reduced false positives in type checking
     </positive>
-    
     <metrics>
       - Reporter reduced from 347 to 273 lines (21% reduction)
       - Default output shows top 10 violations per category
@@ -108,46 +104,38 @@
       - All modules now compliant with architecture rules
     </metrics>
   </impact>
-
   <prevention>
     <guideline id="1">
       Always plan module boundaries before implementation
       when creating reporting or analysis tools.
     </guideline>
-    
     <guideline id="2">
       Design with configurable limits and smart defaults
       to handle varying scales of output.
     </guideline>
-    
     <guideline id="3">
       Separate statistics, utilities, and core logic
       into focused modules from the start.
     </guideline>
-    
     <guideline id="4">
       When checking for duplicates or patterns, focus on
       definitions not usage to avoid false positives.
     </guideline>
   </prevention>
-
   <testing>
     <test id="1">
       Run: python scripts/check_architecture_compliance.py --path scripts/compliance
       Expected: All modules pass 450-line and 25-line checks
     </test>
-    
     <test id="2">
       Run: python scripts/check_architecture_compliance.py --violation-limit 3
       Expected: Shows max 3 violations per category
     </test>
-    
     <test id="3">
       Run: python scripts/check_architecture_compliance.py --no-emoji
       Expected: Uses [H], [M], [L] markers instead of emoji
     </test>
   </testing>
-
   <related>
     <spec>SPEC/compliance_reporting.xml</spec>
     <spec>SPEC/conventions.xml</spec>

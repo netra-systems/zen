@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 import hashlib
 import logging
 
-from .models import AuthUser, AuthSession, AuthAuditLog
+from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
 
 logger = logging.getLogger(__name__)
 

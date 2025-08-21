@@ -30,9 +30,9 @@ import time
 import uuid
 from decimal import Decimal
 
-from app.schemas.UserPlan import PlanTier
-from .payment_billing_helpers import BillingAccuracyValidator
-from .auth_flow_manager import AuthCompleteFlowManager
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.e2e.payment_billing_helpers import BillingAccuracyValidator
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 @pytest.mark.asyncio

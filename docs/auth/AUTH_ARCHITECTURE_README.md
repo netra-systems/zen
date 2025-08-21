@@ -63,7 +63,7 @@ Main Backend → Database → Checks passwords locally
 ### How to Validate a User Token
 ```python
 # ✅ CORRECT
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 result = await auth_client.validate_token(token)
 if result and result.get("valid"):
@@ -73,7 +73,7 @@ if result and result.get("valid"):
 ### How to Login a User
 ```python
 # ✅ CORRECT
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 result = await auth_client.login(email, password)
 if result:
@@ -83,7 +83,7 @@ if result:
 ### How to Get Current User in Endpoint
 ```python
 # ✅ CORRECT
-from app.auth_integration import ActiveUserDep
+from netra_backend.app.auth_integration import ActiveUserDep
 
 @app.get("/api/profile")
 async def get_profile(user: ActiveUserDep):

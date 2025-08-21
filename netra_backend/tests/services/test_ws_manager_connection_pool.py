@@ -1,0 +1,50 @@
+"""
+WebSocket Manager connection pooling and cleanup tests
+Modular test suite split into focused test modules for maintainability
+"""
+
+# Import all test classes from modular test files to maintain backward compatibility
+
+# Add project root to path
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+from netra_backend.tests.test_ws_connection_mocks import (
+
+# Add project root to path
+    MockWebSocket, 
+    MockConnectionPool, 
+    WebSocketTestHelpers
+)
+from netra_backend.tests.test_ws_connection_basic import (
+    TestWebSocketManagerConnectionPooling
+)
+from netra_backend.tests.test_ws_connection_performance import (
+    TestWebSocketManagerPerformanceAndScaling
+)
+
+# Re-export all classes for backward compatibility
+__all__ = [
+    'MockWebSocket',
+    'MockConnectionPool', 
+    'WebSocketTestHelpers',
+    'TestWebSocketManagerConnectionPooling',
+    'TestWebSocketManagerPerformanceAndScaling'
+]
+
+# Note: This file now serves as a compatibility layer for the modular test suite.
+# The original 650-line test file has been refactored into three focused modules:
+# - test_ws_connection_mocks.py: Mock classes and test utilities (~295 lines)
+# - test_ws_connection_basic.py: Basic connection and pooling tests (~298 lines)  
+# - test_ws_connection_performance.py: Performance and scaling tests (~298 lines)
+# 
+# All functions have been refactored to ≤8 lines using helper methods while
+# preserving complete test functionality and coverage.

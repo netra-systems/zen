@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from auth_core.database.models import AuthAuditLog
+from auth_service.auth_core.database.models import AuthAuditLog
 
 
 class AuditLogFactory:

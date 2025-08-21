@@ -1,56 +1,59 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Growth Control and Expansion Patterns</name>
-        <type>guidance</type>
-        <version>1.0</version>
-        <priority>HIGH</priority>
-        <description>
+  <metadata>
+    <name>Growth Control and Expansion Patterns</name>
+    <type>guidance</type>
+    <version>1.0</version>
+    <priority>HIGH</priority>
+    <description>
             Defines patterns for healthy system growth that maintain architectural 
             integrity while supporting business requirements. Prevents uncontrolled 
             expansion that violates 300/8 limits and system boundaries.
         </description>
-    </metadata>
-
-    <growth-philosophy>
-        <principle id="constrained-growth">
-            <title>Growth Within Constraints</title>
-            <description>
+    <last_edited>2025-08-21T08:47:28.487151</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.487151">
+      <reasons>
+        <reason>Content contains: monolithic</reason>
+        <reason>References old monolithic architecture</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <growth-philosophy>
+    <principle id="constrained-growth">
+      <title>Growth Within Constraints</title>
+      <description>
                 System growth must occur within established boundaries. Never exceed 
                 300/8 limits - instead, grow by adding new constrained modules.
             </description>
-        </principle>
-        
-        <principle id="modular-expansion">
-            <title>Modular Expansion</title>
-            <description>
+    </principle>
+    <principle id="modular-expansion">
+      <title>Modular Expansion</title>
+      <description>
                 Add functionality through new modules, not by expanding existing ones.
                 Each new module must also respect the 300/8 constraints.
             </description>
-        </principle>
-        
-        <principle id="horizontal-scaling">
-            <title>Horizontal Over Vertical</title>
-            <description>
+    </principle>
+    <principle id="horizontal-scaling">
+      <title>Horizontal Over Vertical</title>
+      <description>
                 Scale by adding siblings (horizontal) rather than making existing 
                 components larger (vertical). Prefer many small modules over few large ones.
             </description>
-        </principle>
-    </growth-philosophy>
-
-    <good-growth-patterns>
-        <pattern id="module-subdivision">
-            <title>Module Subdivision Pattern</title>
-            <description>When a module approaches 300 lines, subdivide it</description>
-            <example>
-                <before>
+    </principle>
+  </growth-philosophy>
+  <good-growth-patterns>
+    <pattern id="module-subdivision">
+      <title>Module Subdivision Pattern</title>
+      <description>When a module approaches 300 lines, subdivide it</description>
+      <example>
+        <before>
                     app/services/user_service.py (290 lines)
                     ├── user management
                     ├── permission handling  
                     ├── profile management
                     └── notification preferences
                 </before>
-                <after>
+        <after>
                     app/services/user/
                     ├── __init__.py (exports)
                     ├── user_management.py (95 lines)
@@ -58,20 +61,19 @@
                     ├── profile.py (78 lines)
                     └── notifications.py (65 lines)
                 </after>
-            </example>
-            <benefits>
-                <benefit>Maintains 450-line limit</benefit>
-                <benefit>Clear separation of concerns</benefit>
-                <benefit>Easier testing and maintenance</benefit>
-                <benefit>Supports team parallelization</benefit>
-            </benefits>
-        </pattern>
-
-        <pattern id="function-extraction">
-            <title>Function Extraction Pattern</title>
-            <description>When a function approaches 8 lines, extract subfunctions</description>
-            <example>
-                <before>
+      </example>
+      <benefits>
+        <benefit>Maintains 450-line limit</benefit>
+        <benefit>Clear separation of concerns</benefit>
+        <benefit>Easier testing and maintenance</benefit>
+        <benefit>Supports team parallelization</benefit>
+      </benefits>
+    </pattern>
+    <pattern id="function-extraction">
+      <title>Function Extraction Pattern</title>
+      <description>When a function approaches 8 lines, extract subfunctions</description>
+      <example>
+        <before>
                     def process_user_data(user_data):
                         # Validate input (3 lines)
                         # Transform data (4 lines)  
@@ -79,7 +81,7 @@
                         # Send notification (2 lines)
                         # Total: 12 lines - VIOLATION
                 </before>
-                <after>
+        <after>
                     def process_user_data(user_data):
                         validated_data = _validate_user_input(user_data)
                         transformed_data = _transform_user_data(validated_data)
@@ -88,20 +90,19 @@
                         return saved_user
                     # Total: 5 lines - COMPLIANT
                 </after>
-            </example>
-            <benefits>
-                <benefit>Each function has single responsibility</benefit>
-                <benefit>Individual functions easily testable</benefit>
-                <benefit>Improved readability and maintainability</benefit>
-                <benefit>Reusable components</benefit>
-            </benefits>
-        </pattern>
-
-        <pattern id="interface-aggregation">
-            <title>Interface Aggregation Pattern</title>
-            <description>Use aggregator modules to provide unified interfaces</description>
-            <example>
-                <structure>
+      </example>
+      <benefits>
+        <benefit>Each function has single responsibility</benefit>
+        <benefit>Individual functions easily testable</benefit>
+        <benefit>Improved readability and maintainability</benefit>
+        <benefit>Reusable components</benefit>
+      </benefits>
+    </pattern>
+    <pattern id="interface-aggregation">
+      <title>Interface Aggregation Pattern</title>
+      <description>Use aggregator modules to provide unified interfaces</description>
+      <example>
+        <structure>
                     app/services/analytics/
                     ├── __init__.py          # Public interface aggregator
                     ├── data_collector.py    # Individual modules
@@ -109,26 +110,25 @@
                     ├── dashboard_service.py
                     └── export_service.py
                 </structure>
-                <interface>
+        <interface>
                     # __init__.py exports only what's needed
                     from .data_collector import collect_metrics
                     from .report_generator import generate_report
                     # Internal modules stay private
                 </interface>
-            </example>
-            <benefits>
-                <benefit>Clean public API</benefit>
-                <benefit>Internal complexity hidden</benefit>
-                <benefit>Easy to extend without breaking changes</benefit>
-                <benefit>Testable in isolation</benefit>
-            </benefits>
-        </pattern>
-
-        <pattern id="composition-over-inheritance">
-            <title>Composition Over Inheritance</title>
-            <description>Build complex functionality through composition of simple parts</description>
-            <example>
-                <good>
+      </example>
+      <benefits>
+        <benefit>Clean public API</benefit>
+        <benefit>Internal complexity hidden</benefit>
+        <benefit>Easy to extend without breaking changes</benefit>
+        <benefit>Testable in isolation</benefit>
+      </benefits>
+    </pattern>
+    <pattern id="composition-over-inheritance">
+      <title>Composition Over Inheritance</title>
+      <description>Build complex functionality through composition of simple parts</description>
+      <example>
+        <good>
                     class NotificationService:
                         def __init__(self):
                             self.email_sender = EmailSender()      # 50 lines
@@ -137,20 +137,19 @@
                             self.template_engine = TemplateEngine() # 70 lines
                         # Total: 8 lines for main class + small focused components
                 </good>
-                <bad>
+        <bad>
                     class MonolithicNotificationService:
                         # 400+ lines handling all notification types
                         # VIOLATES 450-line limit
                         # Complex, hard to test, tightly coupled
                 </bad>
-            </example>
-        </pattern>
-
-        <pattern id="feature-modules">
-            <title>Feature Module Pattern</title>
-            <description>Organize by business features, not technical concerns</description>
-            <example>
-                <good>
+      </example>
+    </pattern>
+    <pattern id="feature-modules">
+      <title>Feature Module Pattern</title>
+      <description>Organize by business features, not technical concerns</description>
+      <example>
+        <good>
                     app/features/
                     ├── user_management/     # Business feature
                     │   ├── service.py       # 120 lines
@@ -163,242 +162,218 @@
                         ├── schemas.py       # 75 lines
                         └── routes.py        # 130 lines
                 </good>
-                <bad>
+        <bad>
                     app/
                     ├── services/all_services.py   # 800+ lines
                     ├── repositories/all_repos.py  # 600+ lines  
                     └── schemas/all_schemas.py     # 500+ lines
                 </bad>
-            </example>
-        </pattern>
-    </good-growth-patterns>
-
-    <bad-growth-patterns>
-        <anti-pattern id="file-bloat">
-            <title>File Bloat Anti-Pattern</title>
-            <description>Continuously adding to existing files instead of creating new ones</description>
-            <warning-signs>
-                <sign>Files approaching or exceeding 300 lines</sign>
-                <sign>Functions growing beyond 8 lines</sign>
-                <sign>Comments like "TODO: refactor this file"</sign>
-                <sign>Multiple responsibilities in single file</sign>
-            </warning-signs>
-            <consequences>
-                <consequence>Cognitive overload for developers</consequence>
-                <consequence>Increased merge conflicts</consequence>
-                <consequence>Harder to test and debug</consequence>
-                <consequence>Violation of architectural principles</consequence>
-            </consequences>
-            <remediation>Apply module subdivision pattern immediately</remediation>
-        </anti-pattern>
-
-        <anti-pattern id="function-monoliths">
-            <title>Function Monolith Anti-Pattern</title>
-            <description>Creating large functions that handle multiple responsibilities</description>
-            <warning-signs>
-                <sign>Functions exceeding 8 lines</sign>
-                <sign>Multiple levels of nesting</sign>
-                <sign>Comments describing different "sections"</sign>
-                <sign>Difficulty writing unit tests</sign>
-            </warning-signs>
-            <remediation>Apply function extraction pattern immediately</remediation>
-        </anti-pattern>
-
-        <anti-pattern id="copy-paste-growth">
-            <title>Copy-Paste Growth Anti-Pattern</title>
-            <description>Duplicating code instead of extracting reusable components</description>
-            <warning-signs>
-                <sign>Similar code blocks in multiple files</sign>
-                <sign>Duplicate type definitions</sign>
-                <sign>Nearly identical functions with slight variations</sign>
-            </warning-signs>
-            <remediation>
-                <step>Extract common functionality into shared modules</step>
-                <step>Use composition and configuration for variations</step>
-                <step>Eliminate duplicates through refactoring</step>
-            </remediation>
-        </anti-pattern>
-
-        <anti-pattern id="god-modules">
-            <title>God Module Anti-Pattern</title>
-            <description>Central modules that know about and control everything</description>
-            <warning-signs>
-                <sign>Modules imported by everything else</sign>
-                <sign>Modules with dozens of functions</sign>
-                <sign>Modules handling multiple unrelated concerns</sign>
-                <sign>Difficulty understanding module purpose</sign>
-            </warning-signs>
-            <remediation>
-                <step>Break into focused modules with single responsibilities</step>
-                <step>Use dependency injection for loose coupling</step>
-                <step>Apply interface segregation principle</step>
-            </remediation>
-        </anti-pattern>
-
-        <anti-pattern id="deep-nesting">
-            <title>Deep Nesting Anti-Pattern</title>
-            <description>Creating deeply nested module hierarchies</description>
-            <warning-signs>
-                <sign>Import paths with 5+ levels</sign>
-                <sign>Circular import dependencies</sign>
-                <sign>Difficulty finding where functionality lives</sign>
-            </warning-signs>
-            <remediation>Flatten hierarchy and use aggregation patterns</remediation>
-        </anti-pattern>
-    </bad-growth-patterns>
-
-    <growth-monitoring>
-        <metrics>
-            <metric id="file-size-distribution">
-                <description>Track distribution of file sizes</description>
-                <target>95% of files under 200 lines, 0% over 300 lines</target>
-                <frequency>Weekly</frequency>
-                <tool>scripts/check_architecture_compliance.py</tool>
-            </metric>
-
-            <metric id="function-complexity-distribution">
-                <description>Track distribution of function complexity</description>
-                <target>95% of functions under 6 lines, 0% over 8 lines</target>
-                <frequency>Weekly</frequency>
-                <tool>scripts/check_architecture_compliance.py</tool>
-            </metric>
-
-            <metric id="module-count-growth">
-                <description>Track rate of new module creation</description>
-                <target>Module count grows faster than file size</target>
-                <frequency>Monthly</frequency>
-                <indicator>Healthy horizontal scaling</indicator>
-            </metric>
-
-            <metric id="dependency-depth">
-                <description>Monitor import dependency depth</description>
-                <target>Average depth under 3 levels</target>
-                <frequency>Weekly</frequency>
-                <tool>Import analysis scripts</tool>
-            </metric>
-
-            <metric id="type-duplication-rate">
-                <description>Track duplicate type definitions</description>
-                <target>0 duplicate types</target>
-                <frequency>Daily</frequency>
-                <tool>scripts/check_architecture_compliance.py</tool>
-            </metric>
-        </metrics>
-
-        <early-warning-system>
-            <warning id="approaching-limits">
-                <trigger>File reaches 250 lines or function reaches 6 lines</trigger>
-                <action>Automatic reminder to refactor</action>
-                <escalation>Daily reminders until resolved</escalation>
-            </warning>
-
-            <warning id="growth-velocity">
-                <trigger>File size increases by 50+ lines in single PR</trigger>
-                <action>Require architecture review</action>
-                <focus>Ensure growth follows good patterns</focus>
-            </warning>
-
-            <warning id="duplicate-detection">
-                <trigger>New type definition matches existing type</trigger>
-                <action>Prevent merge until resolved</action>
-                <resolution>Use existing type or justify new one</resolution>
-            </warning>
-        </early-warning-system>
-    </growth-monitoring>
-
-    <growth-guidelines>
-        <before-adding-code>
-            <checklist>
-                <item>Does this belong in an existing module?</item>
-                <item>Will this cause any module to exceed 300 lines?</item>
-                <item>Will any function exceed 8 lines?</item>
-                <item>Am I duplicating existing functionality?</item>
-                <item>Can I use composition instead of extension?</item>
-            </checklist>
-        </before-adding-code>
-
-        <refactoring-triggers>
-            <trigger>File reaches 250 lines - plan subdivision</trigger>
-            <trigger>Function reaches 6 lines - plan extraction</trigger>
-            <trigger>Module has 3+ unrelated responsibilities</trigger>
-            <trigger>Copy-paste detected - extract shared component</trigger>
-            <trigger>Import depth exceeds 4 levels</trigger>
-        </refactoring-triggers>
-
-        <growth-reviews>
-            <review type="weekly">
-                <focus>Identify modules approaching limits</focus>
-                <action>Plan proactive refactoring</action>
-            </review>
-
-            <review type="monthly">
-                <focus>System-wide growth patterns</focus>
-                <action>Adjust architecture if needed</action>
-            </review>
-
-            <review type="quarterly">
-                <focus>Overall system health and boundaries</focus>
-                <action>Update growth guidelines if needed</action>
-            </review>
-        </growth-reviews>
-    </growth-guidelines>
-
-    <success-patterns>
-        <pattern id="microservices-within-monolith">
-            <title>Microservices Architecture Within Monolith</title>
-            <description>Apply microservice principles at module level</description>
-            <principles>
-                <principle>Small, focused modules</principle>
-                <principle>Clear interfaces between modules</principle>
-                <principle>Independent testability</principle>
-                <principle>Loose coupling, high cohesion</principle>
-            </principles>
-        </pattern>
-
-        <pattern id="bounded-contexts">
-            <title>Bounded Context Pattern</title>
-            <description>Each module represents a clear bounded context</description>
-            <implementation>
-                <step>Define clear boundaries for business concepts</step>
-                <step>Keep related functionality together</step>
-                <step>Minimize cross-boundary dependencies</step>
-                <step>Use events for loose communication</step>
-            </implementation>
-        </pattern>
-
-        <pattern id="evolutionary-architecture">
-            <title>Evolutionary Architecture</title>
-            <description>Architecture that can grow and adapt while maintaining constraints</description>
-            <practices>
-                <practice>Regular architecture reviews</practice>
-                <practice>Automated constraint enforcement</practice>
-                <practice>Continuous refactoring</practice>
-                <practice>Team education on patterns</practice>
-            </practices>
-        </pattern>
-    </success-patterns>
-
-    <enforcement-integration>
-        <tools>
-            <tool>scripts/check_architecture_compliance.py</tool>
-            <tool>Pre-commit hooks for limit checking</tool>
-            <tool>CI/CD pipeline enforcement</tool>
-            <tool>Code review checklists</tool>
-        </tools>
-
-        <processes>
-            <process>Growth pattern education for team</process>
-            <process>Regular architecture health checks</process>
-            <process>Proactive refactoring schedules</process>
-            <process>Growth metric monitoring</process>
-        </processes>
-    </enforcement-integration>
-
-    <references>
-        <reference>SPEC/system_boundaries.xml - Hard limits and constraints</reference>
-        <reference>SPEC/conventions.xml - Implementation guidelines</reference>
-        <reference>SPEC/type_safety.xml - Type boundary enforcement</reference>
-        <reference>scripts/check_architecture_compliance.py - Monitoring tool</reference>
-        <reference>CLAUDE.md - Overall architectural philosophy</reference>
-    </references>
+      </example>
+    </pattern>
+  </good-growth-patterns>
+  <bad-growth-patterns>
+    <anti-pattern id="file-bloat">
+      <title>File Bloat Anti-Pattern</title>
+      <description>Continuously adding to existing files instead of creating new ones</description>
+      <warning-signs>
+        <sign>Files approaching or exceeding 300 lines</sign>
+        <sign>Functions growing beyond 8 lines</sign>
+        <sign>Comments like "TODO: refactor this file"</sign>
+        <sign>Multiple responsibilities in single file</sign>
+      </warning-signs>
+      <consequences>
+        <consequence>Cognitive overload for developers</consequence>
+        <consequence>Increased merge conflicts</consequence>
+        <consequence>Harder to test and debug</consequence>
+        <consequence>Violation of architectural principles</consequence>
+      </consequences>
+      <remediation>Apply module subdivision pattern immediately</remediation>
+    </anti-pattern>
+    <anti-pattern id="function-monoliths">
+      <title>Function Monolith Anti-Pattern</title>
+      <description>Creating large functions that handle multiple responsibilities</description>
+      <warning-signs>
+        <sign>Functions exceeding 8 lines</sign>
+        <sign>Multiple levels of nesting</sign>
+        <sign>Comments describing different "sections"</sign>
+        <sign>Difficulty writing unit tests</sign>
+      </warning-signs>
+      <remediation>Apply function extraction pattern immediately</remediation>
+    </anti-pattern>
+    <anti-pattern id="copy-paste-growth">
+      <title>Copy-Paste Growth Anti-Pattern</title>
+      <description>Duplicating code instead of extracting reusable components</description>
+      <warning-signs>
+        <sign>Similar code blocks in multiple files</sign>
+        <sign>Duplicate type definitions</sign>
+        <sign>Nearly identical functions with slight variations</sign>
+      </warning-signs>
+      <remediation>
+        <step>Extract common functionality into shared modules</step>
+        <step>Use composition and configuration for variations</step>
+        <step>Eliminate duplicates through refactoring</step>
+      </remediation>
+    </anti-pattern>
+    <anti-pattern id="god-modules">
+      <title>God Module Anti-Pattern</title>
+      <description>Central modules that know about and control everything</description>
+      <warning-signs>
+        <sign>Modules imported by everything else</sign>
+        <sign>Modules with dozens of functions</sign>
+        <sign>Modules handling multiple unrelated concerns</sign>
+        <sign>Difficulty understanding module purpose</sign>
+      </warning-signs>
+      <remediation>
+        <step>Break into focused modules with single responsibilities</step>
+        <step>Use dependency injection for loose coupling</step>
+        <step>Apply interface segregation principle</step>
+      </remediation>
+    </anti-pattern>
+    <anti-pattern id="deep-nesting">
+      <title>Deep Nesting Anti-Pattern</title>
+      <description>Creating deeply nested module hierarchies</description>
+      <warning-signs>
+        <sign>Import paths with 5+ levels</sign>
+        <sign>Circular import dependencies</sign>
+        <sign>Difficulty finding where functionality lives</sign>
+      </warning-signs>
+      <remediation>Flatten hierarchy and use aggregation patterns</remediation>
+    </anti-pattern>
+  </bad-growth-patterns>
+  <growth-monitoring>
+    <metrics>
+      <metric id="file-size-distribution">
+        <description>Track distribution of file sizes</description>
+        <target>95% of files under 200 lines, 0% over 300 lines</target>
+        <frequency>Weekly</frequency>
+        <tool>scripts/check_architecture_compliance.py</tool>
+      </metric>
+      <metric id="function-complexity-distribution">
+        <description>Track distribution of function complexity</description>
+        <target>95% of functions under 6 lines, 0% over 8 lines</target>
+        <frequency>Weekly</frequency>
+        <tool>scripts/check_architecture_compliance.py</tool>
+      </metric>
+      <metric id="module-count-growth">
+        <description>Track rate of new module creation</description>
+        <target>Module count grows faster than file size</target>
+        <frequency>Monthly</frequency>
+        <indicator>Healthy horizontal scaling</indicator>
+      </metric>
+      <metric id="dependency-depth">
+        <description>Monitor import dependency depth</description>
+        <target>Average depth under 3 levels</target>
+        <frequency>Weekly</frequency>
+        <tool>Import analysis scripts</tool>
+      </metric>
+      <metric id="type-duplication-rate">
+        <description>Track duplicate type definitions</description>
+        <target>0 duplicate types</target>
+        <frequency>Daily</frequency>
+        <tool>scripts/check_architecture_compliance.py</tool>
+      </metric>
+    </metrics>
+    <early-warning-system>
+      <warning id="approaching-limits">
+        <trigger>File reaches 250 lines or function reaches 6 lines</trigger>
+        <action>Automatic reminder to refactor</action>
+        <escalation>Daily reminders until resolved</escalation>
+      </warning>
+      <warning id="growth-velocity">
+        <trigger>File size increases by 50+ lines in single PR</trigger>
+        <action>Require architecture review</action>
+        <focus>Ensure growth follows good patterns</focus>
+      </warning>
+      <warning id="duplicate-detection">
+        <trigger>New type definition matches existing type</trigger>
+        <action>Prevent merge until resolved</action>
+        <resolution>Use existing type or justify new one</resolution>
+      </warning>
+    </early-warning-system>
+  </growth-monitoring>
+  <growth-guidelines>
+    <before-adding-code>
+      <checklist>
+        <item>Does this belong in an existing module?</item>
+        <item>Will this cause any module to exceed 300 lines?</item>
+        <item>Will any function exceed 8 lines?</item>
+        <item>Am I duplicating existing functionality?</item>
+        <item>Can I use composition instead of extension?</item>
+      </checklist>
+    </before-adding-code>
+    <refactoring-triggers>
+      <trigger>File reaches 250 lines - plan subdivision</trigger>
+      <trigger>Function reaches 6 lines - plan extraction</trigger>
+      <trigger>Module has 3+ unrelated responsibilities</trigger>
+      <trigger>Copy-paste detected - extract shared component</trigger>
+      <trigger>Import depth exceeds 4 levels</trigger>
+    </refactoring-triggers>
+    <growth-reviews>
+      <review type="weekly">
+        <focus>Identify modules approaching limits</focus>
+        <action>Plan proactive refactoring</action>
+      </review>
+      <review type="monthly">
+        <focus>System-wide growth patterns</focus>
+        <action>Adjust architecture if needed</action>
+      </review>
+      <review type="quarterly">
+        <focus>Overall system health and boundaries</focus>
+        <action>Update growth guidelines if needed</action>
+      </review>
+    </growth-reviews>
+  </growth-guidelines>
+  <success-patterns>
+    <pattern id="microservices-within-monolith">
+      <title>Microservices Architecture Within Monolith</title>
+      <description>Apply microservice principles at module level</description>
+      <principles>
+        <principle>Small, focused modules</principle>
+        <principle>Clear interfaces between modules</principle>
+        <principle>Independent testability</principle>
+        <principle>Loose coupling, high cohesion</principle>
+      </principles>
+    </pattern>
+    <pattern id="bounded-contexts">
+      <title>Bounded Context Pattern</title>
+      <description>Each module represents a clear bounded context</description>
+      <implementation>
+        <step>Define clear boundaries for business concepts</step>
+        <step>Keep related functionality together</step>
+        <step>Minimize cross-boundary dependencies</step>
+        <step>Use events for loose communication</step>
+      </implementation>
+    </pattern>
+    <pattern id="evolutionary-architecture">
+      <title>Evolutionary Architecture</title>
+      <description>Architecture that can grow and adapt while maintaining constraints</description>
+      <practices>
+        <practice>Regular architecture reviews</practice>
+        <practice>Automated constraint enforcement</practice>
+        <practice>Continuous refactoring</practice>
+        <practice>Team education on patterns</practice>
+      </practices>
+    </pattern>
+  </success-patterns>
+  <enforcement-integration>
+    <tools>
+      <tool>scripts/check_architecture_compliance.py</tool>
+      <tool>Pre-commit hooks for limit checking</tool>
+      <tool>CI/CD pipeline enforcement</tool>
+      <tool>Code review checklists</tool>
+    </tools>
+    <processes>
+      <process>Growth pattern education for team</process>
+      <process>Regular architecture health checks</process>
+      <process>Proactive refactoring schedules</process>
+      <process>Growth metric monitoring</process>
+    </processes>
+  </enforcement-integration>
+  <references>
+    <reference>SPEC/system_boundaries.xml - Hard limits and constraints</reference>
+    <reference>SPEC/conventions.xml - Implementation guidelines</reference>
+    <reference>SPEC/type_safety.xml - Type boundary enforcement</reference>
+    <reference>scripts/check_architecture_compliance.py - Monitoring tool</reference>
+    <reference>CLAUDE.md - Overall architectural philosophy</reference>
+  </references>
 </specification>

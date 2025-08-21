@@ -1,47 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Alembic AsyncPG Greenlet Error Learning</name>
-        <type>learnings</type>
-        <category>Database/Migration</category>
-        <version>1.0</version>
-        <last_updated>2025-08-20</last_updated>
-        <description>Learning from Alembic migration failure with asyncpg and greenlet error</description>
-    </metadata>
-    
-    <learning>
-        <id>alembic-asyncpg-greenlet-sync-context</id>
-        <category>Database/Migration</category>
-        <date>2025-08-20</date>
-        <severity>critical</severity>
-        <title>Alembic Synchronous Migration with AsyncPG Driver Error</title>
-        
-        <problem>
-            <description>Alembic migrations fail when database URL uses asyncpg driver in synchronous context</description>
-            <symptoms>
-                <symptom>sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called</symptom>
-                <symptom>Error occurs during alembic upgrade head command</symptom>
-                <symptom>Migration fails at connection.connect() in env.py:27</symptom>
-                <symptom>Database URL being converted from postgresql:// to postgresql+asyncpg://</symptom>
-            </symptoms>
-            <root_cause>
-                <item>Alembic env.py uses synchronous SQLAlchemy engine_from_config()</item>
-                <item>Database URL is converted to postgresql+asyncpg:// for async operations</item>
-                <item>asyncpg driver requires async context or greenlet for synchronous operations</item>
-                <item>Synchronous Alembic context cannot handle async driver without greenlet</item>
-            </root_cause>
-        </problem>
-        
-        <solution>
-            <description>Use synchronous PostgreSQL driver for Alembic migrations</description>
-            <implementation>
-                <approach>Separate sync and async database URLs</approach>
-                <steps>
-                    <step order="1">
-                        <file>app/alembic/env.py</file>
-                        <action>Create function to ensure synchronous database URL</action>
-                        <code><![CDATA[
-def _ensure_sync_database_url(url: str) -> str:
+  <metadata>
+    <name>Alembic AsyncPG Greenlet Error Learning</name>
+    <type>learnings</type>
+    <category>Database/Migration</category>
+    <version>1.0</version>
+    <last_updated>2025-08-20</last_updated>
+    <description>Learning from Alembic migration failure with asyncpg and greenlet error</description>
+    <last_edited>2025-08-21T08:47:28.808113</last_edited>
+  </metadata>
+  <learning>
+    <id>alembic-asyncpg-greenlet-sync-context</id>
+    <category>Database/Migration</category>
+    <date>2025-08-20</date>
+    <severity>critical</severity>
+    <title>Alembic Synchronous Migration with AsyncPG Driver Error</title>
+    <problem>
+      <description>Alembic migrations fail when database URL uses asyncpg driver in synchronous context</description>
+      <symptoms>
+        <symptom>sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called</symptom>
+        <symptom>Error occurs during alembic upgrade head command</symptom>
+        <symptom>Migration fails at connection.connect() in env.py:27</symptom>
+        <symptom>Database URL being converted from postgresql:// to postgresql+asyncpg://</symptom>
+      </symptoms>
+      <root_cause>
+        <item>Alembic env.py uses synchronous SQLAlchemy engine_from_config()</item>
+        <item>Database URL is converted to postgresql+asyncpg:// for async operations</item>
+        <item>asyncpg driver requires async context or greenlet for synchronous operations</item>
+        <item>Synchronous Alembic context cannot handle async driver without greenlet</item>
+      </root_cause>
+    </problem>
+    <solution>
+      <description>Use synchronous PostgreSQL driver for Alembic migrations</description>
+      <implementation>
+        <approach>Separate sync and async database URLs</approach>
+        <steps>
+          <step order="1">
+            <file>netra_backend/app/alembic/env.py</file>
+            <action>Create function to ensure synchronous database URL</action>
+            <code>
+def _ensure_sync_database_url(url: str) -&gt; str:
     """Ensure database URL uses synchronous driver for migrations."""
     if not url:
         return url
@@ -58,15 +56,15 @@ def _ensure_sync_database_url(url: str) -> str:
         url = url.replace("postgres://", "postgresql://", 1)
     
     return url
-                        ]]></code>
-                    </step>
-                    <step order="2">
-                        <file>app/alembic/env.py</file>
-                        <action>Apply sync URL conversion in _get_configuration()</action>
-                        <code><![CDATA[
-def _get_configuration() -> dict:
+                        </code>
+          </step>
+          <step order="2">
+            <file>netra_backend/app/alembic/env.py</file>
+            <action>Apply sync URL conversion in _get_configuration()</action>
+            <code>
+def _get_configuration() -&gt; dict:
     """Get database configuration from environment."""
-    from app.config import get_config
+    from netra_backend.app.config import get_config
     app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
     if app_config.database_url:
@@ -74,13 +72,13 @@ def _get_configuration() -> dict:
         sync_url = _ensure_sync_database_url(app_config.database_url)
         configuration['sqlalchemy.url'] = sync_url
     return configuration
-                        ]]></code>
-                    </step>
-                    <step order="3">
-                        <file>app/core/configuration/database.py</file>
-                        <action>Add method to get sync database URL</action>
-                        <code><![CDATA[
-def get_sync_database_url(self) -> Optional[str]:
+                        </code>
+          </step>
+          <step order="3">
+            <file>netra_backend/app/core/configuration/database.py</file>
+            <action>Add method to get sync database URL</action>
+            <code>
+def get_sync_database_url(self) -&gt; Optional[str]:
     """Get synchronous database URL for migrations."""
     url = self._get_postgres_url()
     if not url:
@@ -93,83 +91,77 @@ def get_sync_database_url(self) -> Optional[str]:
             url = url.replace("ssl=", "sslmode=")
     
     return url
-                        ]]></code>
-                    </step>
-                </steps>
-            </implementation>
-            <verification>
-                <step>Run: python -m alembic upgrade head</step>
-                <step>Verify no greenlet errors occur</step>
-                <step>Check migrations applied successfully</step>
-                <step>Confirm async operations still work with async URL</step>
-            </verification>
-        </solution>
-        
-        <alternative_solutions>
-            <alternative>
-                <name>Install greenlet package</name>
-                <description>Install greenlet to allow sync execution of async code</description>
-                <pros>
-                    <item>Simple package addition</item>
-                    <item>No code changes required</item>
-                </pros>
-                <cons>
-                    <item>Additional dependency</item>
-                    <item>May mask async/sync issues</item>
-                    <item>Not addressing root cause</item>
-                </cons>
-                <implementation>pip install greenlet</implementation>
-            </alternative>
-            
-            <alternative>
-                <name>Async Alembic configuration</name>
-                <description>Configure Alembic to run in async mode</description>
-                <pros>
-                    <item>Consistent async throughout</item>
-                    <item>Modern approach</item>
-                </pros>
-                <cons>
-                    <item>Complex Alembic reconfiguration</item>
-                    <item>Less documented approach</item>
-                    <item>May break existing migrations</item>
-                </cons>
-            </alternative>
-        </alternative_solutions>
-        
-        <prevention>
-            <guideline>Keep migration database URLs synchronous</guideline>
-            <guideline>Separate sync migration URLs from async application URLs</guideline>
-            <guideline>Document URL format requirements for different contexts</guideline>
-            <guideline>Test migrations in development before deployment</guideline>
-            <guideline>Add explicit checks for URL format in migration scripts</guideline>
-        </prevention>
-        
-        <related_issues>
-            <issue>Database connection during startup</issue>
-            <issue>Async/sync context management</issue>
-            <issue>SQLAlchemy driver selection</issue>
-            <issue>Cloud SQL proxy connections</issue>
-        </related_issues>
-        
-        <testing>
-            <test_case>
-                <name>Migration with sync URL</name>
-                <command>DATABASE_URL=postgresql://user:pass@localhost/db python -m alembic upgrade head</command>
-                <expected>Migrations complete without greenlet error</expected>
-            </test_case>
-            <test_case>
-                <name>Application with async URL</name>
-                <command>DATABASE_URL=postgresql://user:pass@localhost/db python scripts/dev_launcher.py</command>
-                <expected>Application starts with async database operations</expected>
-            </test_case>
-        </testing>
-    </learning>
-    
-    <references>
-        <reference>app/alembic/env.py</reference>
-        <reference>app/db/postgres_core.py</reference>
-        <reference>app/core/configuration/database.py</reference>
-        <reference>SPEC/learnings/database_asyncio.xml</reference>
-        <reference>SPEC/learnings/startup.xml</reference>
-    </references>
+                        </code>
+          </step>
+        </steps>
+      </implementation>
+      <verification>
+        <step>Run: python -m alembic upgrade head</step>
+        <step>Verify no greenlet errors occur</step>
+        <step>Check migrations applied successfully</step>
+        <step>Confirm async operations still work with async URL</step>
+      </verification>
+    </solution>
+    <alternative_solutions>
+      <alternative>
+        <name>Install greenlet package</name>
+        <description>Install greenlet to allow sync execution of async code</description>
+        <pros>
+          <item>Simple package addition</item>
+          <item>No code changes required</item>
+        </pros>
+        <cons>
+          <item>Additional dependency</item>
+          <item>May mask async/sync issues</item>
+          <item>Not addressing root cause</item>
+        </cons>
+        <implementation>pip install greenlet</implementation>
+      </alternative>
+      <alternative>
+        <name>Async Alembic configuration</name>
+        <description>Configure Alembic to run in async mode</description>
+        <pros>
+          <item>Consistent async throughout</item>
+          <item>Modern approach</item>
+        </pros>
+        <cons>
+          <item>Complex Alembic reconfiguration</item>
+          <item>Less documented approach</item>
+          <item>May break existing migrations</item>
+        </cons>
+      </alternative>
+    </alternative_solutions>
+    <prevention>
+      <guideline>Keep migration database URLs synchronous</guideline>
+      <guideline>Separate sync migration URLs from async application URLs</guideline>
+      <guideline>Document URL format requirements for different contexts</guideline>
+      <guideline>Test migrations in development before deployment</guideline>
+      <guideline>Add explicit checks for URL format in migration scripts</guideline>
+    </prevention>
+    <related_issues>
+      <issue>Database connection during startup</issue>
+      <issue>Async/sync context management</issue>
+      <issue>SQLAlchemy driver selection</issue>
+      <issue>Cloud SQL proxy connections</issue>
+    </related_issues>
+    <testing>
+      <test_case>
+        <name>Migration with sync URL</name>
+        <command>DATABASE_URL=postgresql://user:pass@localhost/db python -m alembic upgrade head</command>
+        <expected>Migrations complete without greenlet error</expected>
+      </test_case>
+      <test_case>
+        <name>Application with async URL</name>
+        <command>DATABASE_URL=postgresql://user:pass@localhost/db python scripts/dev_launcher.py</command>
+        <expected>Application starts with async database operations</expected>
+      </test_case>
+    </testing>
+  </learning>
+  <references>
+    <reference>netra_backend/app/alembic/env.py</reference>
+    <reference>netra_backend/app/db/postgres_core.py</reference>
+    <reference>netra_backend/app/core/configuration/database.py</reference>
+    <reference>SPEC/learnings/database_asyncio.xml</reference>
+    <reference>SPEC/learnings/startup.xml</reference>
+  </references>
 </specification>

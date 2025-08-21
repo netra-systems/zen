@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+    <name>Alembic Configuration Management</name>
+    <version>1.0.0</version>
+    <description>
+        Specification for Alembic database migration configuration management.
+        Defines correct path resolution, file locations, and configuration patterns.
+    </description>
+    
+    <configuration>
+        <alembic-ini-location>
+            <path>config/alembic.ini</path>
+            <description>Single alembic.ini file at project root config directory</description>
+            <rationale>Centralized configuration accessible from all services</rationale>
+        </alembic-ini-location>
+        
+        <script-location>
+            <path>netra_backend/app/alembic</path>
+            <description>Migration scripts location relative to project root</description>
+        </script-location>
+        
+        <path-resolution>
+            <function>_get_alembic_ini_path</function>
+            <location>netra_backend/app/db/migration_utils.py</location>
+            <implementation>
+                <code>
+def _get_alembic_ini_path() -> str:
+    """Get absolute path to alembic.ini file."""
+    project_root = Path(__file__).parent.parent.parent.parent
+    return str(project_root / "config" / "alembic.ini")
+                </code>
+                <explanation>
+                    From migration_utils.py:
+                    - parent: db/
+                    - parent.parent: app/
+                    - parent.parent.parent: netra_backend/
+                    - parent.parent.parent.parent: project root
+                </explanation>
+            </implementation>
+        </path-resolution>
+    </configuration>
+    
+    <patterns>
+        <pattern id="absolute-path-resolution">
+            <name>Always Use Absolute Paths</name>
+            <description>Configuration files must use absolute paths calculated from __file__</description>
+            <example>
+                project_root = Path(__file__).parent.parent.parent.parent
+                config_path = project_root / "config" / "alembic.ini"
+            </example>
+        </pattern>
+        
+        <pattern id="single-config-file">
+            <name>Single Configuration File</name>
+            <description>Maintain only one alembic.ini file to prevent confusion</description>
+            <rule>Remove any duplicate alembic.ini files</rule>
+            <rule>All services reference the same config/alembic.ini</rule>
+        </pattern>
+        
+        <pattern id="validation-before-use">
+            <name>Validate Path Existence</name>
+            <description>Always validate configuration file exists before use</description>
+            <example>
+                if not Path(alembic_ini_path).exists():
+                    raise FileNotFoundError(f"Alembic configuration file not found: {alembic_ini_path}")
+            </example>
+        </pattern>
+    </patterns>
+    
+    <usage>
+        <startup-integration>
+            <location>netra_backend/app/startup_module.py</location>
+            <flow>
+                1. Call run_database_migrations()
+                2. Get sync database URL
+                3. Create alembic config using create_alembic_config()
+                4. Check current revision vs head
+                5. Execute migrations if needed
+            </flow>
+        </startup-integration>
+        
+        <docker-integration>
+            <dockerfile>Dockerfile.backend</dockerfile>
+            <copy-command>COPY config/alembic.ini ./config/alembic.ini</copy-command>
+            <note>Ensure Docker maintains the same directory structure</note>
+        </docker-integration>
+    </usage>
+    
+    <testing>
+        <test-file>netra_backend/tests/db/test_alembic_ini_path.py</test-file>
+        <test-cases>
+            <case>Verify alembic.ini exists at expected path</case>
+            <case>Verify only one alembic.ini file exists</case>
+            <case>Verify create_alembic_config succeeds</case>
+            <case>Verify path calculation is correct</case>
+        </test-cases>
+    </testing>
+    
+    <common-issues>
+        <issue>
+            <symptom>FileNotFoundError: Alembic configuration file not found</symptom>
+            <cause>Incorrect path calculation in _get_alembic_ini_path</cause>
+            <solution>Ensure path goes up 4 levels from migration_utils.py to project root</solution>
+        </issue>
+        
+        <issue>
+            <symptom>Multiple alembic.ini files causing confusion</symptom>
+            <cause>Duplicate configuration files in different locations</cause>
+            <solution>Remove all except config/alembic.ini at project root</solution>
+        </issue>
+    </common-issues>
+</spec>

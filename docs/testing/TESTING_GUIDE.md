@@ -345,8 +345,8 @@ tests/
 ```python
 # tests/agents/test_supervisor_agent.py
 import pytest
-from app.agents.supervisor import SupervisorAgent
-from app.schemas.Agent import AgentRequest
+from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.schemas.Agent import AgentRequest
 
 @pytest.mark.asyncio
 async def test_supervisor_orchestration():
@@ -371,7 +371,7 @@ async def test_supervisor_orchestration():
 import pytest
 import json
 from httpx import AsyncClient
-from app.ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 @pytest.mark.asyncio
 async def test_websocket_agent_execution(
@@ -410,8 +410,8 @@ async def test_websocket_agent_execution(
 ```python
 # tests/services/test_database_repositories.py
 import pytest
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.unit_of_work import UnitOfWork
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
 
 @pytest.mark.asyncio
 async def test_thread_repository_crud():
@@ -449,9 +449,9 @@ import pytest
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from httpx import AsyncClient
-from app.main import app
-from app.db.models_postgres import Base
-from app.auth.auth import create_access_token
+from netra_backend.app.main import app
+from netra_backend.app.db.models_postgres import Base
+from netra_backend.app.auth.auth import create_access_token
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -500,9 +500,9 @@ async def authenticated_client(async_client, auth_token):
 ```python
 # tests/test_helpers.py
 from datetime import datetime
-from app.schemas.User import UserCreate
-from app.schemas.Thread import ThreadCreate
-from app.schemas.Message import MessageCreate
+from netra_backend.app.schemas.User import UserCreate
+from netra_backend.app.schemas.Thread import ThreadCreate
+from netra_backend.app.schemas.Message import MessageCreate
 
 def create_test_user(email="test@example.com"):
     """Factory for test user"""
@@ -657,8 +657,8 @@ async def test_complete_user_flow(async_client: AsyncClient):
 ```python
 # tests/integration/test_database_integration.py
 import pytest
-from app.services.database.unit_of_work import UnitOfWork
-from app.services.agent_service import AgentService
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
+from netra_backend.app.services.agent_service import AgentService
 
 @pytest.mark.asyncio
 async def test_agent_state_persistence():

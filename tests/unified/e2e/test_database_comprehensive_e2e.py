@@ -13,6 +13,11 @@ Business Value Justification (BVJ):
 Module Architecture Compliance: Under 300 lines, functions under 8 lines
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import pytest
 import pytest_asyncio
 import asyncio

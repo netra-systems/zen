@@ -9,7 +9,7 @@ import time
 import logging
 from typing import Dict, List
 
-from .data_models import ResourceMetrics, PerformanceImpactReport
+from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics, PerformanceImpactReport
 
 logger = logging.getLogger(__name__)
 

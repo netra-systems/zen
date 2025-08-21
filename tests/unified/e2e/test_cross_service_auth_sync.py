@@ -27,9 +27,9 @@ import time
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
-from .unified_e2e_harness import create_e2e_harness
-from .user_journey_executor import TestUser
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.unified.e2e.user_journey_executor import TestUser
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

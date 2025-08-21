@@ -31,7 +31,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from test_framework.fake_test_detector import FakeTestDetector, FakeTestResult
 from test_framework.bad_test_detector import BadTestDetector
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

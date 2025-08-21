@@ -211,7 +211,7 @@ class TierBasedRateLimitTester:
     
     async def _test_user_limits(self, token: str, tier: str) -> Dict[str, Any]:
         """Test rate limits for a specific user tier."""
-        from .rate_limiting_core import MessageSender
+        from tests.unified.e2e.rate_limiting_core import MessageSender
         sender = MessageSender(token)
         
         # Send messages until rate limited

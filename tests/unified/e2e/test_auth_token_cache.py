@@ -14,8 +14,8 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 from unittest.mock import Mock, patch, AsyncMock
 
-from app.clients.auth_client_cache import AuthTokenCache, CachedToken, AuthServiceSettings
-from app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.clients.auth_client_cache import AuthTokenCache, CachedToken, AuthServiceSettings
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class MockAuthService:

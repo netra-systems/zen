@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <startup_optimization>
   <metadata>
     <title>Startup Optimization Specification</title>
@@ -9,34 +9,35 @@
       <impact>Increases productivity across all customer segments</impact>
       <value_capture>More features shipped = more value for customers</value_capture>
     </business_value>
+    <last_edited>2025-08-21T08:47:28.589217</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.589217">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <current_bottlenecks>
     <bottleneck priority="HIGH">
       <name>Sequential Service Startup</name>
       <description>Services start one after another (auth → backend → frontend)</description>
       <impact_seconds>15-20</impact_seconds>
     </bottleneck>
-    
     <bottleneck priority="MEDIUM">
       <name>Redundant Environment Checks</name>
       <description>Full environment validation on every startup</description>
       <impact_seconds>3-5</impact_seconds>
     </bottleneck>
-    
     <bottleneck priority="MEDIUM">
       <name>Secret Loading</name>
       <description>Loading secrets from Google Cloud on every startup</description>
       <impact_seconds>5-10</impact_seconds>
     </bottleneck>
-    
     <bottleneck priority="LOW">
       <name>Configuration Parsing</name>
       <description>Parsing and validating all configs repeatedly</description>
       <impact_seconds>1-2</impact_seconds>
     </bottleneck>
   </current_bottlenecks>
-
   <optimizations>
     <optimization implemented="true">
       <name>Parallel Service Startup</name>
@@ -44,28 +45,24 @@
       <improvement>60-70% reduction in startup time</improvement>
       <implementation>dev_launcher/optimized_launcher.py</implementation>
     </optimization>
-    
     <optimization implemented="true">
       <name>Startup State Caching</name>
       <description>Cache environment state and skip unchanged checks</description>
       <improvement>3-5 seconds saved on subsequent starts</improvement>
       <implementation>StartupCache class in optimized_launcher.py</implementation>
     </optimization>
-    
     <optimization implemented="true">
       <name>Lazy Secret Loading</name>
       <description>Skip secret loading in dev mode unless explicitly needed</description>
       <improvement>5-10 seconds saved</improvement>
       <implementation>Disabled by default in fast_dev.py</implementation>
     </optimization>
-    
     <optimization implemented="true">
       <name>Port Pre-allocation</name>
       <description>Allocate all ports upfront to avoid sequential allocation</description>
       <improvement>1-2 seconds saved</improvement>
       <implementation>_allocate_ports method</implementation>
     </optimization>
-    
     <optimization implemented="false">
       <name>Service Health Prediction</name>
       <description>Predict service readiness based on historical data</description>
@@ -73,7 +70,6 @@
       <status>Future enhancement</status>
     </optimization>
   </optimizations>
-
   <usage>
     <default_start>
       <command>python scripts/dev_launcher.py</command>
@@ -81,21 +77,18 @@
       <typical_time>10-15 seconds</typical_time>
       <note>Parallel startup is enabled by default</note>
     </default_start>
-    
     <sequential_start>
       <command>python scripts/dev_launcher.py --no-parallel</command>
       <description>Sequential startup for debugging (old behavior)</description>
       <typical_time>20-30 seconds</typical_time>
       <use_case>Debugging service startup issues</use_case>
     </sequential_start>
-    
     <quick_modes>
       <command>python scripts/dev_launcher.py --no-secrets</command>
       <description>Skip secret loading for faster local dev</description>
       <time_saved>5-10 seconds</time_saved>
     </quick_modes>
   </usage>
-
   <architecture_notes>
     <note priority="HIGH">
       All new files follow 450-line limit and 25-line function requirements
@@ -110,27 +103,23 @@
       Backward compatible with existing dev_launcher
     </note>
   </architecture_notes>
-
   <future_improvements>
     <improvement>
       <name>Service Dependency Graph</name>
       <description>Start services based on dependency order</description>
       <benefit>Further parallelization opportunities</benefit>
     </improvement>
-    
     <improvement>
       <name>Incremental Compilation</name>
       <description>Cache TypeScript/Python compilation results</description>
       <benefit>2-5 seconds additional savings</benefit>
     </improvement>
-    
     <improvement>
       <name>Docker-based Services</name>
       <description>Pre-built containers for instant startup</description>
       <benefit>Near-instant service availability</benefit>
     </improvement>
   </future_improvements>
-
   <benchmarks>
     <benchmark>
       <scenario>Cold Start (no cache)</scenario>
@@ -138,14 +127,12 @@
       <new_time>10-12 seconds</new_time>
       <improvement>65% faster</improvement>
     </benchmark>
-    
     <benchmark>
       <scenario>Warm Start (with cache)</scenario>
       <old_time>20-25 seconds</old_time>
       <new_time>5-8 seconds</new_time>
       <improvement>72% faster</improvement>
     </benchmark>
-    
     <benchmark>
       <scenario>Minimal Mode</scenario>
       <old_time>15-20 seconds</old_time>

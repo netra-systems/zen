@@ -37,7 +37,7 @@ from contextlib import asynccontextmanager
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
-    from tests.unified.harness_complete import TestHarnessContext, TestClient
+    from netra_backend.tests.unified.harness_complete import TestHarnessContext, TestClient
 except ImportError:
     # Create mock classes if dependencies not available
     class TestHarnessContext:

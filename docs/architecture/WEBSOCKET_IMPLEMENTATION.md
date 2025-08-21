@@ -87,8 +87,8 @@ The Netra platform uses WebSockets to provide real-time, bidirectional communica
 ```python
 # app/routes/websockets.py
 from fastapi import WebSocket, WebSocketDisconnect, Depends, Query
-from app.services.websocket_manager import WebSocketManager
-from app.auth.dependencies import verify_websocket_token
+from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.auth.dependencies import verify_websocket_token
 
 class WebSocketEndpoint:
     def __init__(self):

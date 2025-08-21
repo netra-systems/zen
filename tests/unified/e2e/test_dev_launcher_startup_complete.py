@@ -154,8 +154,6 @@ class RealDevLauncherTester:
     
     async def _start_dev_launcher(self):
         """Start dev launcher using subprocess to avoid signal handler issues."""
-        import subprocess
-        import os
         
         try:
             # Use subprocess to run dev launcher in separate process

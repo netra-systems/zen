@@ -14,13 +14,13 @@ import time
 import statistics
 from typing import Dict, Any, List, Callable
 
-from tests.unified.config import TEST_USERS
-from tests.unified.e2e.thread_test_fixtures_core import (
+from netra_backend.tests.unified.config import TEST_USERS
+from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
     ThreadWebSocketFixtures, ThreadContextManager, ThreadPerformanceUtils,
     unified_harness, ws_thread_fixtures, thread_context_manager, performance_utils
 )
-from app.schemas.core_enums import WebSocketMessageType
-from app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

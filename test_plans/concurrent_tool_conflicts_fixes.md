@@ -34,7 +34,7 @@ ImportError: cannot import name 'DatabaseHealthChecker' from 'app.core.database_
 **Code Changes**:
 ```python
 # Before (problematic import)
-from app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 self.db_manager = DatabaseConnectionManager(DatabaseType.POSTGRESQL)
 
 # After (simplified approach)

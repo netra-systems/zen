@@ -214,6 +214,5 @@ async def run_health_cascade_integration_tests():
 
 
 if __name__ == "__main__":
-    import asyncio
     result = asyncio.run(run_health_cascade_integration_tests())
     print(f"Integration test results: {result}")

@@ -10,7 +10,7 @@ import socket
 from pathlib import Path
 from typing import List, Optional
 
-from app.schemas.diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticError, SystemState, DiagnosticConfiguration,
     DiagnosticSeverity, ServiceType, StartupPhase, FixResult
 )

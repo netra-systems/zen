@@ -23,10 +23,10 @@ from unittest.mock import patch, Mock
 import pytest
 from datetime import datetime, timezone
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 # Import MockWebSocket from the actual location
 try:
-    from app.tests.services.test_ws_connection_mocks import MockWebSocket
+    from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket
     # Create dummy classes for missing ones
     class WebSocketBuilder:
         def build(self):
@@ -55,8 +55,8 @@ except ImportError:
         
         def simulate_message(self, message):
             return message
-from app.websocket.connection_manager import get_connection_manager
-from app.logging_config import central_logger
+from netra_backend.app.websocket.connection_manager import get_connection_manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

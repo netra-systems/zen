@@ -1,32 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:30.145130</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:30.145130">
+      <reasons>
+        <reason>In archived/legacy folder</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>ExecutionContext Hashable Type Error Prevention</title>
   <category>Error Prevention</category>
   <priority>CRITICAL</priority>
   <last_updated>2025-08-18</last_updated>
-  
   <summary>
     ExecutionContext is now hashable after adding __hash__ and __eq__ methods,
     allowing it to be used as dictionary keys or in sets without errors.
   </summary>
-  
   <problem>
     <description>
       ExecutionContext was not hashable by default, causing TypeError when
       used as a dictionary key or set member.
     </description>
-    
     <error_message>
       [BACKEND] ❌ ERROR | app.agents.base.executor:_handle_execution_failure:143 | 
       Execution failed for websocket_connection: unhashable type: 'ExecutionContext'
     </error_message>
-    
     <root_cause>
       ExecutionContext lacked __hash__ and __eq__ methods, making it unhashable.
       This prevented its use in dictionaries as keys or in sets.
     </root_cause>
   </problem>
-  
   <solution>
     <fix location="app/agents/base/interface.py">
       <description>
@@ -47,7 +50,6 @@
       </code>
     </fix>
   </solution>
-  
   <patterns>
     <pattern type="GOOD">
       <description>ExecutionContext can now be used as dictionary key (after fix)</description>
@@ -57,7 +59,6 @@
         active_contexts = {context: data}
       </code>
     </pattern>
-    
     <pattern type="GOOD">
       <description>ExecutionContext can be added to sets</description>
       <code>
@@ -66,14 +67,12 @@
             processed_contexts.add(context)
       </code>
     </pattern>
-    
     <pattern type="GOOD">
       <description>Use context.run_id for simple key needs</description>
       <code>
         self._active_executions[context.run_id] = time.time()
       </code>
     </pattern>
-    
     <pattern type="IMPORTANT">
       <description>Hash is based on run_id and agent_name only</description>
       <code>
@@ -86,7 +85,6 @@
       </code>
     </pattern>
   </patterns>
-  
   <guidelines>
     <guideline>
       ExecutionContext is now hashable and can be used as dict keys or in sets
@@ -104,14 +102,12 @@
       Use frozen=True on dataclasses if they should be immutable and hashable by default
     </guideline>
   </guidelines>
-  
   <affected_areas>
     <area>app/agents/base/error_handler.py - cache_fallback_data method</area>
     <area>app/agents/base/monitoring.py - _active_executions tracking</area>
     <area>app/websocket/message_router.py - routing context storage</area>
     <area>app/agents/mcp_integration/context_manager.py - active contexts</area>
   </affected_areas>
-  
   <testing>
     <test_file>app/tests/critical/test_execution_context_hashable_regression.py</test_file>
     <test_cases>
@@ -123,12 +119,10 @@
       <test>test_fixed_cache_fallback_data_method</test>
     </test_cases>
   </testing>
-  
   <business_value>
     Prevents runtime crashes that would cause service interruptions and degrade
     customer experience. Critical for maintaining platform stability.
   </business_value>
-  
   <related_specs>
     <spec>type_safety.xml</spec>
     <spec>conventions.xml</spec>

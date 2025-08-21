@@ -35,9 +35,9 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 
-from .config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from .jwt_token_helpers import JWTTestHelper
-from .real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class WebSocketRealConnectionTester:

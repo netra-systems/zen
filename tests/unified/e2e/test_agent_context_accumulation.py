@@ -18,13 +18,13 @@ from typing import Dict, Any, List, Optional
 import pytest
 from unittest.mock import MagicMock
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.agents.supervisor_agent_modern import ModernSupervisorAgent
-from app.llm.llm_manager import LLMManager
-from app.config import get_config
-from app.services.quality_gate_service import QualityGateService
-from tests.unified.e2e.agent_response_test_utilities import AgentResponseSimulator
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.tests.unified.e2e.agent_response_test_utilities import AgentResponseSimulator
 
 
 class AgentContextAccumulationTester:
@@ -40,7 +40,6 @@ class AgentContextAccumulationTester:
 
     async def create_test_supervisor_with_context(self, thread_id: str) -> ModernSupervisorAgent:
         """Create supervisor agent with context tracking enabled."""
-        from unittest.mock import MagicMock
         mock_db = MagicMock()
         mock_websocket = MagicMock()
         mock_tool_dispatcher = MagicMock()

@@ -26,7 +26,7 @@ import jwt
 from fastapi import Request, HTTPException
 from fastapi.testclient import TestClient
 
-from app.core.cross_service_auth import (
+from netra_backend.app.core.cross_service_auth import (
     CrossServiceAuthManager,
     AuthToken,
     AuthTokenType,
@@ -35,7 +35,7 @@ from app.core.cross_service_auth import (
     AuthenticationMiddleware,
     setup_authentication
 )
-from app.clients.auth_client import AuthClient
+from netra_backend.app.clients.auth_client import AuthClient
 from test_framework.mock_utils import mock_justified
 
 

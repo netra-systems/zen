@@ -30,8 +30,8 @@ from typing import Dict, Optional, List, Any
 from datetime import datetime, timezone
 import pytest
 
-from ..jwt_token_helpers import JWTTestHelper
-from ..clients import TestClientFactory
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.clients import TestClientFactory
 
 
 # Enable real services for this test module

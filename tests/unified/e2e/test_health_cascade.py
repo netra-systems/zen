@@ -30,12 +30,12 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.health_service_checker import ServiceHealthChecker
-from tests.unified.health_check_core import (
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
+from netra_backend.tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
     create_service_error_result, create_healthy_result
 )
-from app.schemas.core_enums import CircuitBreakerState
+from netra_backend.app.schemas.core_enums import CircuitBreakerState
 
 logger = logging.getLogger(__name__)
 
@@ -444,6 +444,5 @@ async def run_health_cascade_test():
 
 
 if __name__ == "__main__":
-    import asyncio
     result = asyncio.run(run_health_cascade_test())
     print(f"Health cascade test results: {result}")

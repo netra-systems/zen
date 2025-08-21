@@ -28,12 +28,12 @@ import pytest
 import pytest_asyncio
 import uuid
 
-from app.db.clickhouse import ClickHouseDatabase
-from app.db.clickhouse_init import create_workload_events_table_if_missing
-from app.services.cost_calculator import CostCalculatorService, BudgetManager
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
-from app.schemas.UserPlan import PlanTier, UsageRecord
-from app.services.metrics.agent_metrics import AgentMetricsCollector
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
+from netra_backend.app.services.cost_calculator import CostCalculatorService, BudgetManager
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord
+from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 
 class BillingPipelineTestCore:

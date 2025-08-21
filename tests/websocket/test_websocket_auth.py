@@ -21,7 +21,7 @@ import aiohttp
 import time
 from typing import Dict, Any, Optional
 
-from tests.unified.e2e.staging_test_helpers import (
+from netra_backend.tests.unified.e2e.staging_test_helpers import (
     get_staging_suite,
     create_test_user_with_token,
     test_websocket_connection_flow

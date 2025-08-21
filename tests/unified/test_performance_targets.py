@@ -33,8 +33,8 @@ from dataclasses import dataclass, field
 from unittest.mock import AsyncMock, patch
 import pytest
 
-from .config import UnifiedTestConfig, TestUser
-from .service_manager import ServiceManager
+from tests.unified.config import UnifiedTestConfig, TestUser
+from tests.unified.service_manager import ServiceManager
 
 
 @dataclass

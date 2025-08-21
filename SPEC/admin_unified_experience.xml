@@ -1,507 +1,473 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Admin Unified Experience Specification</name>
-        <type>admin_unified_experience</type>
-        <version>1.0</version>
-        <created>2025-08-11</created>
-        <description>Admin features as progressive enhancement of unified chat experience with intelligent permission system and agent-integrated tools</description>
-    </metadata>
-    
-    <primary-goal>DEPRECATED - This specification has been superseded by tool_auth_system.xml which implements per-tool permissions instead of role-based admin system</primary-goal>
-    
-    <deprecation-notice>
-        <deprecated-date>2025-08-11</deprecated-date>
-        <replacement>tool_auth_system.xml</replacement>
-        <reason>Admin functionality is now integrated into the universal tool permission system rather than being a separate layer</reason>
-        <migration-path>Admin tools become regular tools with higher permission requirements</migration-path>
-    </deprecation-notice>
-    
-    <core-principles>
-        <principle id="unified-experience">
-            <name>One Experience, Not Two</name>
-            <description>Admin features are NOT a separate interface - they are intelligent mixins that enhance the unified chat when appropriate permissions exist</description>
-            <implementation>
-                <rule>All admin capabilities appear as natural extensions of chat interface</rule>
-                <rule>Chat history sidebar includes admin threads alongside regular conversations</rule>
-                <rule>Admin tools are invoked through agent interactions, not separate forms</rule>
-                <rule>Visual consistency maintained - no jarring mode switches</rule>
-            </implementation>
-        </principle>
-        
-        <principle id="progressive-disclosure">
-            <name>Context-Aware Admin Features</name>
-            <description>Admin features appear progressively based on user permissions and context</description>
-            <levels>
-                <level name="standard">Base chat experience for all users</level>
-                <level name="power-user">Extended features for experienced users</level>
-                <level name="developer">Development tools and debugging</level>
-                <level name="admin">Full system administration capabilities</level>
-            </levels>
-        </principle>
-        
-        <principle id="intelligent-defaults">
-            <name>Smart Defaults and Examples</name>
-            <description>Every admin action has sensible defaults and real examples to guide users</description>
-            <defaults>
-                <corpus-creation>Pre-filled with domain-specific templates</corpus-creation>
-                <synthetic-data>Common patterns with one-click generation</synthetic-data>
-                <log-analysis>Smart time ranges based on activity patterns</log-analysis>
-                <user-management>Role templates with standard permissions</user-management>
-            </defaults>
-        </principle>
-        
-        <principle id="agent-as-interface">
-            <name>Agent-Driven Administration</name>
-            <description>Complex admin tasks handled through natural language with agent tools</description>
-            <examples>
-                <example>"Create a corpus for financial services workloads"</example>
-                <example>"Generate 10,000 synthetic optimization traces"</example>
-                <example>"Show me failed requests from the last hour"</example>
-                <example>"Grant developer access to the analytics team"</example>
-            </examples>
-        </principle>
-    </core-principles>
-    
-    <permission-system>
-        <user-types>
-            <type id="standard-user">
-                <description>Regular users with basic chat access</description>
-                <capabilities>
-                    <chat>Full chat functionality</chat>
-                    <history>Own chat history only</history>
-                    <tools>Basic optimization tools</tools>
-                </capabilities>
-                <restrictions>
-                    <no-admin-tools>Cannot access admin agent tools</no-admin-tools>
-                    <no-system-settings>Cannot modify system configuration</no-system-settings>
-                    <no-user-management>Cannot manage other users</no-user-management>
-                </restrictions>
-            </type>
-            
-            <type id="power-user">
-                <description>Advanced users with extended capabilities</description>
-                <inherits>standard-user</inherits>
-                <additional-capabilities>
-                    <corpus-read>View available corpus tables</corpus-read>
-                    <synthetic-preview>Preview synthetic data generation</synthetic-preview>
-                    <advanced-analytics>Access detailed optimization reports</advanced-analytics>
-                    <api-keys>Manage own API keys</api-keys>
-                </additional-capabilities>
-            </type>
-            
-            <type id="developer" auto-admin="true">
-                <description>Developers automatically get admin capabilities</description>
-                <detection>
-                    <environment-variable>DEV_MODE=true</environment-variable>
-                    <email-domain>@netrasystems.ai</email-domain>
-                    <github-membership>netra-ai organization</github-membership>
-                </detection>
-                <inherits>power-user</inherits>
-                <additional-capabilities>
-                    <corpus-management>Full CRUD on corpus tables</corpus-management>
-                    <synthetic-generation>Generate synthetic data</synthetic-generation>
-                    <log-access>Query all ClickHouse logs</log-access>
-                    <debug-panel>Access overflow debug panel</debug-panel>
-                    <impersonation>View system as other users (read-only)</impersonation>
-                    <experiment-flags>Toggle feature flags</experiment-flags>
-                </additional-capabilities>
-            </type>
-            
-            <type id="admin">
-                <description>Full system administration</description>
-                <inherits>developer</inherits>
-                <additional-capabilities>
-                    <user-management>Create, modify, delete users</user-management>
-                    <system-configuration>Modify all system settings</system-configuration>
-                    <billing-access>View and modify billing settings</billing-access>
-                    <security-settings>Configure security policies</security-settings>
-                    <audit-logs>Access complete audit trail</audit-logs>
-                </additional-capabilities>
-            </type>
-            
-            <type id="super-admin">
-                <description>Root-level access for system maintenance</description>
-                <inherits>admin</inherits>
-                <additional-capabilities>
-                    <database-management>Direct database access</database-management>
-                    <service-control>Start/stop/restart services</service-control>
-                    <backup-restore>System backup and restoration</backup-restore>
-                    <emergency-override>Bypass all restrictions in emergencies</emergency-override>
-                </additional-capabilities>
-            </type>
-        </user-types>
-        
-        <permission-resolution>
-            <rule id="auto-elevation">
-                <description>Developers automatically elevated to admin on detection</description>
-                <implementation>
-                    <check-on-login>Evaluate developer criteria on each login</check-on-login>
-                    <cache-duration>Permission cache for 1 hour</cache-duration>
-                    <audit-trail>Log all auto-elevations</audit-trail>
-                </implementation>
-            </rule>
-            
-            <rule id="least-privilege">
-                <description>Users get minimum required permissions by default</description>
-                <fallback>Standard user if no special criteria met</fallback>
-            </rule>
-            
-            <rule id="explicit-grants">
-                <description>Additional permissions through explicit role assignment</description>
-                <storage>PostgreSQL userbase table with role column</storage>
-            </rule>
-        </permission-resolution>
-    </permission-system>
-    
-    <admin-mixins>
-        <mixin id="admin-chat-history">
-            <description>Enhanced chat sidebar for admin users</description>
-            <location>ChatSidebar component extension</location>
-            <features>
-                <all-threads-toggle>Switch between "My Chats" and "All System Chats"</all-threads-toggle>
-                <admin-threads>
-                    <system-label>Admin threads marked with shield icon</system-label>
-                    <categorization>Group by type: Corpus, Synthetic, Config, Users</categorization>
-                    <search>Full-text search across all threads</search>
-                    <filters>
-                        <by-user>Filter by user email or ID</by-user>
-                        <by-date>Date range picker</by-date>
-                        <by-type>Admin action type</by-type>
-                        <by-status>Success, failed, in-progress</by-status>
-                    </filters>
-                </admin-threads>
-                <quick-actions>
-                    <new-corpus>Quick create corpus button</new-corpus>
-                    <generate-data>Quick synthetic data generation</generate-data>
-                    <view-logs>Jump to log analysis</view-logs>
-                </quick-actions>
-            </features>
-            <visibility>Only shown to users with developer or admin permissions</visibility>
-        </mixin>
-        
-        <mixin id="admin-agent-tools">
-            <description>Additional tools available to admin agents</description>
-            <location>Agent tool dispatcher extension</location>
-            <tools>
-                <tool name="corpus_manager">
-                    <description>Create, update, delete corpus tables</description>
-                    <capabilities>
-                        <create-corpus>Generate new corpus with templates</create-corpus>
-                        <import-corpus>Import from CSV, JSON, or API</import-corpus>
-                        <validate-corpus>Check corpus integrity and coverage</validate-corpus>
-                        <optimize-corpus>Remove duplicates, balance categories</optimize-corpus>
-                    </capabilities>
-                    <examples>
-                        <example>
+  <metadata>
+    <name>Admin Unified Experience Specification</name>
+    <type>admin_unified_experience</type>
+    <version>1.0</version>
+    <created>2025-08-11</created>
+    <description>Admin features as progressive enhancement of unified chat experience with intelligent permission system and agent-integrated tools</description>
+    <last_edited>2025-08-21T08:47:28.333935</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.333935">
+      <reasons>
+        <reason>Content contains: DEPRECATED</reason>
+        <reason>Content contains: SUPERSEDED</reason>
+        <reason>Content contains: deprecated</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary-goal>DEPRECATED - This specification has been superseded by tool_auth_system.xml which implements per-tool permissions instead of role-based admin system</primary-goal>
+  <deprecation-notice>
+    <deprecated-date>2025-08-11</deprecated-date>
+    <replacement>tool_auth_system.xml</replacement>
+    <reason>Admin functionality is now integrated into the universal tool permission system rather than being a separate layer</reason>
+    <migration-path>Admin tools become regular tools with higher permission requirements</migration-path>
+  </deprecation-notice>
+  <core-principles>
+    <principle id="unified-experience">
+      <name>One Experience, Not Two</name>
+      <description>Admin features are NOT a separate interface - they are intelligent mixins that enhance the unified chat when appropriate permissions exist</description>
+      <implementation>
+        <rule>All admin capabilities appear as natural extensions of chat interface</rule>
+        <rule>Chat history sidebar includes admin threads alongside regular conversations</rule>
+        <rule>Admin tools are invoked through agent interactions, not separate forms</rule>
+        <rule>Visual consistency maintained - no jarring mode switches</rule>
+      </implementation>
+    </principle>
+    <principle id="progressive-disclosure">
+      <name>Context-Aware Admin Features</name>
+      <description>Admin features appear progressively based on user permissions and context</description>
+      <levels>
+        <level name="standard">Base chat experience for all users</level>
+        <level name="power-user">Extended features for experienced users</level>
+        <level name="developer">Development tools and debugging</level>
+        <level name="admin">Full system administration capabilities</level>
+      </levels>
+    </principle>
+    <principle id="intelligent-defaults">
+      <name>Smart Defaults and Examples</name>
+      <description>Every admin action has sensible defaults and real examples to guide users</description>
+      <defaults>
+        <corpus-creation>Pre-filled with domain-specific templates</corpus-creation>
+        <synthetic-data>Common patterns with one-click generation</synthetic-data>
+        <log-analysis>Smart time ranges based on activity patterns</log-analysis>
+        <user-management>Role templates with standard permissions</user-management>
+      </defaults>
+    </principle>
+    <principle id="agent-as-interface">
+      <name>Agent-Driven Administration</name>
+      <description>Complex admin tasks handled through natural language with agent tools</description>
+      <examples>
+        <example>"Create a corpus for financial services workloads"</example>
+        <example>"Generate 10,000 synthetic optimization traces"</example>
+        <example>"Show me failed requests from the last hour"</example>
+        <example>"Grant developer access to the analytics team"</example>
+      </examples>
+    </principle>
+  </core-principles>
+  <permission-system>
+    <user-types>
+      <type id="standard-user">
+        <description>Regular users with basic chat access</description>
+        <capabilities>
+          <chat>Full chat functionality</chat>
+          <history>Own chat history only</history>
+          <tools>Basic optimization tools</tools>
+        </capabilities>
+        <restrictions>
+          <no-admin-tools>Cannot access admin agent tools</no-admin-tools>
+          <no-system-settings>Cannot modify system configuration</no-system-settings>
+          <no-user-management>Cannot manage other users</no-user-management>
+        </restrictions>
+      </type>
+      <type id="power-user">
+        <description>Advanced users with extended capabilities</description>
+        <inherits>standard-user</inherits>
+        <additional-capabilities>
+          <corpus-read>View available corpus tables</corpus-read>
+          <synthetic-preview>Preview synthetic data generation</synthetic-preview>
+          <advanced-analytics>Access detailed optimization reports</advanced-analytics>
+          <api-keys>Manage own API keys</api-keys>
+        </additional-capabilities>
+      </type>
+      <type id="developer" auto-admin="true">
+        <description>Developers automatically get admin capabilities</description>
+        <detection>
+          <environment-variable>DEV_MODE=true</environment-variable>
+          <email-domain>@netrasystems.ai</email-domain>
+          <github-membership>netra-ai organization</github-membership>
+        </detection>
+        <inherits>power-user</inherits>
+        <additional-capabilities>
+          <corpus-management>Full CRUD on corpus tables</corpus-management>
+          <synthetic-generation>Generate synthetic data</synthetic-generation>
+          <log-access>Query all ClickHouse logs</log-access>
+          <debug-panel>Access overflow debug panel</debug-panel>
+          <impersonation>View system as other users (read-only)</impersonation>
+          <experiment-flags>Toggle feature flags</experiment-flags>
+        </additional-capabilities>
+      </type>
+      <type id="admin">
+        <description>Full system administration</description>
+        <inherits>developer</inherits>
+        <additional-capabilities>
+          <user-management>Create, modify, delete users</user-management>
+          <system-configuration>Modify all system settings</system-configuration>
+          <billing-access>View and modify billing settings</billing-access>
+          <security-settings>Configure security policies</security-settings>
+          <audit-logs>Access complete audit trail</audit-logs>
+        </additional-capabilities>
+      </type>
+      <type id="super-admin">
+        <description>Root-level access for system maintenance</description>
+        <inherits>admin</inherits>
+        <additional-capabilities>
+          <database-management>Direct database access</database-management>
+          <service-control>Start/stop/restart services</service-control>
+          <backup-restore>System backup and restoration</backup-restore>
+          <emergency-override>Bypass all restrictions in emergencies</emergency-override>
+        </additional-capabilities>
+      </type>
+    </user-types>
+    <permission-resolution>
+      <rule id="auto-elevation">
+        <description>Developers automatically elevated to admin on detection</description>
+        <implementation>
+          <check-on-login>Evaluate developer criteria on each login</check-on-login>
+          <cache-duration>Permission cache for 1 hour</cache-duration>
+          <audit-trail>Log all auto-elevations</audit-trail>
+        </implementation>
+      </rule>
+      <rule id="least-privilege">
+        <description>Users get minimum required permissions by default</description>
+        <fallback>Standard user if no special criteria met</fallback>
+      </rule>
+      <rule id="explicit-grants">
+        <description>Additional permissions through explicit role assignment</description>
+        <storage>PostgreSQL userbase table with role column</storage>
+      </rule>
+    </permission-resolution>
+  </permission-system>
+  <admin-mixins>
+    <mixin id="admin-chat-history">
+      <description>Enhanced chat sidebar for admin users</description>
+      <location>ChatSidebar component extension</location>
+      <features>
+        <all-threads-toggle>Switch between "My Chats" and "All System Chats"</all-threads-toggle>
+        <admin-threads>
+          <system-label>Admin threads marked with shield icon</system-label>
+          <categorization>Group by type: Corpus, Synthetic, Config, Users</categorization>
+          <search>Full-text search across all threads</search>
+          <filters>
+            <by-user>Filter by user email or ID</by-user>
+            <by-date>Date range picker</by-date>
+            <by-type>Admin action type</by-type>
+            <by-status>Success, failed, in-progress</by-status>
+          </filters>
+        </admin-threads>
+        <quick-actions>
+          <new-corpus>Quick create corpus button</new-corpus>
+          <generate-data>Quick synthetic data generation</generate-data>
+          <view-logs>Jump to log analysis</view-logs>
+        </quick-actions>
+      </features>
+      <visibility>Only shown to users with developer or admin permissions</visibility>
+    </mixin>
+    <mixin id="admin-agent-tools">
+      <description>Additional tools available to admin agents</description>
+      <location>Agent tool dispatcher extension</location>
+      <tools>
+        <tool name="corpus_manager">
+          <description>Create, update, delete corpus tables</description>
+          <capabilities>
+            <create-corpus>Generate new corpus with templates</create-corpus>
+            <import-corpus>Import from CSV, JSON, or API</import-corpus>
+            <validate-corpus>Check corpus integrity and coverage</validate-corpus>
+            <optimize-corpus>Remove duplicates, balance categories</optimize-corpus>
+          </capabilities>
+          <examples>
+            <example>
                             User: "Create a corpus for e-commerce optimization scenarios"
                             Agent: Uses corpus_manager tool with e-commerce template
                         </example>
-                    </examples>
-                </tool>
-                
-                <tool name="synthetic_generator">
-                    <description>Generate synthetic workload data</description>
-                    <capabilities>
-                        <pattern-generation>Create realistic usage patterns</pattern-generation>
-                        <scale-testing>Generate load test data</scale-testing>
-                        <anomaly-injection>Add controlled anomalies</anomaly-injection>
-                        <real-time-streaming>Stream data to ClickHouse</real-time-streaming>
-                    </capabilities>
-                    <smart-defaults>
-                        <workload-templates>
-                            <template name="typical-day">24-hour typical usage pattern</template>
-                            <template name="black-friday">High-load e-commerce pattern</template>
-                            <template name="gradual-rollout">Progressive feature adoption</template>
-                            <template name="incident-scenario">Service degradation pattern</template>
-                        </workload-templates>
-                    </smart-defaults>
-                </tool>
-                
-                <tool name="user_admin">
-                    <description>User and permission management</description>
-                    <capabilities>
-                        <create-users>Bulk user creation with CSV import</create-users>
-                        <permission-audit>Review permission assignments</permission-audit>
-                        <access-reports>Generate access pattern reports</access-reports>
-                        <role-templates>Apply standard role configurations</role-templates>
-                    </capabilities>
-                </tool>
-                
-                <tool name="system_configurator">
-                    <description>Modify system settings through chat</description>
-                    <capabilities>
-                        <clickhouse-config>Update ClickHouse settings</clickhouse-config>
-                        <model-selection>Change default models</model-selection>
-                        <rate-limits>Adjust rate limiting</rate-limits>
-                        <feature-flags>Toggle features on/off</feature-flags>
-                    </capabilities>
-                    <validation>All changes validated before application</validation>
-                </tool>
-                
-                <tool name="log_analyzer">
-                    <description>Advanced log analysis and querying</description>
-                    <capabilities>
-                        <natural-language-query>Convert questions to ClickHouse queries</natural-language-query>
-                        <pattern-detection>Find anomalies and patterns</pattern-detection>
-                        <performance-analysis>Identify bottlenecks</performance-analysis>
-                        <cost-attribution>Break down costs by user/feature</cost-attribution>
-                    </capabilities>
-                </tool>
-            </tools>
-        </mixin>
-        
-        <mixin id="admin-response-cards">
-            <description>Enhanced response cards for admin operations</description>
-            <location>PersistentResponseCard extension</location>
-            <enhancements>
-                <admin-badge>
-                    <visual>Purple gradient header for admin operations</visual>
-                    <icon>Shield icon indicating admin action</icon>
-                    <permission-level>Shows required permission level</permission-level>
-                </admin-badge>
-                
-                <progress-tracking>
-                    <corpus-creation>Live progress of corpus generation</corpus-creation>
-                    <synthetic-generation>Records/second counter with ETA</synthetic-generation>
-                    <user-import>Progress bar for bulk operations</user-import>
-                </progress-tracking>
-                
-                <action-results>
-                    <structured-output>Tables for data results</structured-output>
-                    <clickable-references>Click to navigate to created resources</clickable-references>
-                    <rollback-option>Undo button for reversible operations</rollback-option>
-                    <audit-trail>Who, what, when, why for each action</audit-trail>
-                </action-results>
-                
-                <smart-suggestions>
-                    <next-steps>Suggested follow-up actions</next-steps>
-                    <related-docs>Links to relevant documentation</related-docs>
-                    <similar-examples>Previous similar operations</similar-examples>
-                </smart-suggestions>
-            </enhancements>
-        </mixin>
-        
-        <mixin id="admin-input-helpers">
-            <description>Enhanced input for admin commands</description>
-            <location>ChatInput component extension</location>
-            <features>
-                <command-palette>
-                    <trigger>Type "/" to see admin commands</trigger>
-                    <commands>
-                        <command>/corpus - Corpus management commands</command>
-                        <command>/synthetic - Synthetic data commands</command>
-                        <command>/users - User management commands</command>
-                        <command>/config - System configuration</command>
-                        <command>/logs - Log analysis commands</command>
-                    </commands>
-                    <autocomplete>Context-aware suggestions</autocomplete>
-                </command-palette>
-                
-                <template-insertion>
-                    <description>Quick insert common admin requests</description>
-                    <templates>
-                        <template name="Create Financial Corpus">
+          </examples>
+        </tool>
+        <tool name="synthetic_generator">
+          <description>Generate synthetic workload data</description>
+          <capabilities>
+            <pattern-generation>Create realistic usage patterns</pattern-generation>
+            <scale-testing>Generate load test data</scale-testing>
+            <anomaly-injection>Add controlled anomalies</anomaly-injection>
+            <real-time-streaming>Stream data to ClickHouse</real-time-streaming>
+          </capabilities>
+          <smart-defaults>
+            <workload-templates>
+              <template name="typical-day">24-hour typical usage pattern</template>
+              <template name="black-friday">High-load e-commerce pattern</template>
+              <template name="gradual-rollout">Progressive feature adoption</template>
+              <template name="incident-scenario">Service degradation pattern</template>
+            </workload-templates>
+          </smart-defaults>
+        </tool>
+        <tool name="user_admin">
+          <description>User and permission management</description>
+          <capabilities>
+            <create-users>Bulk user creation with CSV import</create-users>
+            <permission-audit>Review permission assignments</permission-audit>
+            <access-reports>Generate access pattern reports</access-reports>
+            <role-templates>Apply standard role configurations</role-templates>
+          </capabilities>
+        </tool>
+        <tool name="system_configurator">
+          <description>Modify system settings through chat</description>
+          <capabilities>
+            <clickhouse-config>Update ClickHouse settings</clickhouse-config>
+            <model-selection>Change default models</model-selection>
+            <rate-limits>Adjust rate limiting</rate-limits>
+            <feature-flags>Toggle features on/off</feature-flags>
+          </capabilities>
+          <validation>All changes validated before application</validation>
+        </tool>
+        <tool name="log_analyzer">
+          <description>Advanced log analysis and querying</description>
+          <capabilities>
+            <natural-language-query>Convert questions to ClickHouse queries</natural-language-query>
+            <pattern-detection>Find anomalies and patterns</pattern-detection>
+            <performance-analysis>Identify bottlenecks</performance-analysis>
+            <cost-attribution>Break down costs by user/feature</cost-attribution>
+          </capabilities>
+        </tool>
+      </tools>
+    </mixin>
+    <mixin id="admin-response-cards">
+      <description>Enhanced response cards for admin operations</description>
+      <location>PersistentResponseCard extension</location>
+      <enhancements>
+        <admin-badge>
+          <visual>Purple gradient header for admin operations</visual>
+          <icon>Shield icon indicating admin action</icon>
+          <permission-level>Shows required permission level</permission-level>
+        </admin-badge>
+        <progress-tracking>
+          <corpus-creation>Live progress of corpus generation</corpus-creation>
+          <synthetic-generation>Records/second counter with ETA</synthetic-generation>
+          <user-import>Progress bar for bulk operations</user-import>
+        </progress-tracking>
+        <action-results>
+          <structured-output>Tables for data results</structured-output>
+          <clickable-references>Click to navigate to created resources</clickable-references>
+          <rollback-option>Undo button for reversible operations</rollback-option>
+          <audit-trail>Who, what, when, why for each action</audit-trail>
+        </action-results>
+        <smart-suggestions>
+          <next-steps>Suggested follow-up actions</next-steps>
+          <related-docs>Links to relevant documentation</related-docs>
+          <similar-examples>Previous similar operations</similar-examples>
+        </smart-suggestions>
+      </enhancements>
+    </mixin>
+    <mixin id="admin-input-helpers">
+      <description>Enhanced input for admin commands</description>
+      <location>ChatInput component extension</location>
+      <features>
+        <command-palette>
+          <trigger>Type "/" to see admin commands</trigger>
+          <commands>
+            <command>/corpus - Corpus management commands</command>
+            <command>/synthetic - Synthetic data commands</command>
+            <command>/users - User management commands</command>
+            <command>/config - System configuration</command>
+            <command>/logs - Log analysis commands</command>
+          </commands>
+          <autocomplete>Context-aware suggestions</autocomplete>
+        </command-palette>
+        <template-insertion>
+          <description>Quick insert common admin requests</description>
+          <templates>
+            <template name="Create Financial Corpus">
                             Create a corpus for financial services with examples for:
                             - Market data analysis
                             - Risk assessment
                             - Portfolio optimization
                             - Compliance checking
                         </template>
-                        <template name="Generate Test Data">
+            <template name="Generate Test Data">
                             Generate 10,000 synthetic optimization requests with:
                             - 70% successful optimizations
                             - 20% partial optimizations
                             - 10% failed requests
                             - Realistic latency distribution
                         </template>
-                        <template name="User Access Audit">
+            <template name="User Access Audit">
                             Show me all admin actions performed in the last 7 days, 
                             grouped by user and sorted by frequency
                         </template>
-                    </templates>
-                </template-insertion>
-                
-                <parameter-builder>
-                    <description>Visual parameter builder for complex commands</description>
-                    <activation>Click [+] button for structured input</activation>
-                    <forms>
-                        <corpus-form>Domain, size, categories, examples</corpus-form>
-                        <synthetic-form>Volume, distribution, time range, patterns</synthetic-form>
-                        <user-form>Email, role, permissions, expiration</user-form>
-                    </forms>
-                    <conversion>Form inputs converted to natural language</conversion>
-                </parameter-builder>
-            </features>
-        </mixin>
-        
-        <mixin id="admin-overflow-panel">
-            <description>Extended overflow panel for admins</description>
-            <location>OverflowPanel component extension</location>
-            <additional-sections>
-                <section name="Admin Operations Log">
-                    <content>Real-time feed of all admin actions system-wide</content>
-                    <features>
-                        <live-updates>WebSocket stream of admin events</live-updates>
-                        <filtering>By user, action type, status</filtering>
-                        <details>Expandable to show full operation details</details>
-                    </features>
-                </section>
-                
-                <section name="System Health">
-                    <content>Service status and health metrics</content>
-                    <metrics>
-                        <service-status>PostgreSQL, ClickHouse, Redis status</service-status>
-                        <resource-usage>CPU, memory, disk across services</resource-usage>
-                        <queue-depths>Background task queues</queue-depths>
-                        <error-rates>System-wide error tracking</error-rates>
-                    </metrics>
-                </section>
-                
-                <section name="Permission Explorer">
-                    <content>Interactive permission testing tool</content>
-                    <features>
-                        <user-selector>Pick any user to view their permissions</user-selector>
-                        <action-tester>Test if user can perform specific actions</action-tester>
-                        <permission-tree>Visual hierarchy of all permissions</permission-tree>
-                    </features>
-                </section>
-                
-                <section name="Quick Admin Tools">
-                    <content>Direct action buttons for common tasks</content>
-                    <actions>
-                        <clear-cache>Clear Redis cache</clear-cache>
-                        <restart-workers>Restart background workers</restart-workers>
-                        <export-logs>Download logs for time range</export-logs>
-                        <backup-trigger>Initiate backup</backup-trigger>
-                    </actions>
-                </section>
-            </additional-sections>
-        </mixin>
-    </admin-mixins>
-    
-    <default-workflows>
-        <workflow id="first-time-admin">
-            <description>Onboarding flow for new admin users</description>
-            <steps>
-                <step>Detection: System detects developer/admin permission</step>
-                <step>Welcome: Show welcome message with available admin features</step>
-                <step>Examples: Provide 3 example admin commands to try</step>
-                <step>Templates: Highlight template library in command palette</step>
-                <step>Documentation: Link to admin feature documentation</step>
-            </steps>
-            <implementation>
-                <storage>localStorage flag for onboarding completion</storage>
-                <dismissible>User can skip or complete onboarding</dismissible>
-            </implementation>
-        </workflow>
-        
-        <workflow id="corpus-creation-wizard">
-            <description>Guided corpus creation with smart defaults</description>
-            <triggers>
-                <command>/corpus create</command>
-                <natural-language>User asks to create a corpus</natural-language>
-            </triggers>
-            <steps>
-                <step>Domain Selection: Choose from preset domains or custom</step>
-                <step>Template Selection: Pick starting template or blank</step>
-                <step>Size Configuration: Small (1K), Medium (10K), Large (100K+)</step>
-                <step>Example Review: Show sample entries for confirmation</step>
-                <step>Generation: Create corpus with progress tracking</step>
-                <step>Validation: Automatic validation and report</step>
-            </steps>
-            <defaults>
-                <domain>Inferred from recent user queries</domain>
-                <size>Medium (10K records)</size>
-                <distribution>Balanced across categories</distribution>
-            </defaults>
-        </workflow>
-        
-        <workflow id="synthetic-generation-express">
-            <description>Quick synthetic data generation with one command</description>
-            <presets>
-                <preset name="Quick Test">
-                    <volume>1,000 records</volume>
-                    <time>Last 1 hour</time>
-                    <pattern>Steady traffic</pattern>
-                </preset>
-                <preset name="Load Test">
-                    <volume>100,000 records</volume>
-                    <time>Next 24 hours</time>
-                    <pattern>Gradual ramp-up</pattern>
-                </preset>
-                <preset name="Incident Simulation">
-                    <volume>50,000 records</volume>
-                    <time>Last 6 hours</time>
-                    <pattern>Normal → Spike → Degradation → Recovery</pattern>
-                </preset>
-            </presets>
-            <one-click>Each preset available as single button/command</one-click>
-        </workflow>
-    </default-workflows>
-    
-    <implementation-approach>
-        <phase number="1" name="Permission System">
-            <task priority="critical">Extend User model with role and permission fields</task>
-            <task priority="critical">Implement developer auto-detection logic</task>
-            <task priority="critical">Create permission checking middleware</task>
-            <task>Add permission caching layer in Redis</task>
-            <task>Create permission audit logging</task>
-        </phase>
-        
-        <phase number="2" name="Agent Tool Integration">
-            <task priority="critical">Create AdminToolRegistry for admin-only tools</task>
-            <task priority="critical">Implement corpus_manager tool with ClickHouse integration</task>
-            <task priority="critical">Implement synthetic_generator tool with streaming</task>
-            <task>Add user_admin tool for user management</task>
-            <task>Create system_configurator tool</task>
-            <task>Implement log_analyzer with natural language queries</task>
-        </phase>
-        
-        <phase number="3" name="UI Mixins">
-            <task priority="critical">Extend ChatSidebar with admin thread filtering</task>
-            <task priority="critical">Add admin badge to PersistentResponseCard</task>
-            <task priority="critical">Implement command palette in ChatInput</task>
-            <task>Add template library to input helpers</task>
-            <task>Extend OverflowPanel with admin sections</task>
-            <task>Create parameter builder UI component</task>
-        </phase>
-        
-        <phase number="4" name="Smart Defaults">
-            <task>Create domain-specific corpus templates</task>
-            <task>Build synthetic data generation presets</task>
-            <task>Add workflow wizards for common tasks</task>
-            <task>Implement context-aware suggestions</task>
-            <task>Create onboarding flow for new admins</task>
-        </phase>
-        
-        <phase number="5" name="Testing and Polish">
-            <task>Test permission system with various user types</task>
-            <task>Validate admin tool security boundaries</task>
-            <task>Test UI mixin progressive disclosure</task>
-            <task>Performance test with large corpus operations</task>
-            <task>Create admin feature documentation</task>
-        </phase>
-    </implementation-approach>
-    
-    <security-considerations>
-        <permission-enforcement>
-            <backend>All admin endpoints check permissions</backend>
-            <frontend>UI elements hidden based on permissions</frontend>
-            <agent-tools>Tools validate permissions before execution</agent-tools>
-        </permission-enforcement>
-        
-        <audit-logging>
-            <what>Log all admin actions with full context</what>
-            <who>User ID, email, IP address</who>
-            <when>Timestamp with timezone</when>
-            <why>Command or action that triggered operation</why>
-            <result>Success, failure, partial completion</result>
-        </audit-logging>
-        
-        <rate-limiting>
-            <admin-operations>Separate higher limits for admin users</admin-operations>
-            <bulk-operations>Progressive throttling for large operations</bulk-operations>
-        </rate-limiting>
-    </security-considerations>
+          </templates>
+        </template-insertion>
+        <parameter-builder>
+          <description>Visual parameter builder for complex commands</description>
+          <activation>Click [+] button for structured input</activation>
+          <forms>
+            <corpus-form>Domain, size, categories, examples</corpus-form>
+            <synthetic-form>Volume, distribution, time range, patterns</synthetic-form>
+            <user-form>Email, role, permissions, expiration</user-form>
+          </forms>
+          <conversion>Form inputs converted to natural language</conversion>
+        </parameter-builder>
+      </features>
+    </mixin>
+    <mixin id="admin-overflow-panel">
+      <description>Extended overflow panel for admins</description>
+      <location>OverflowPanel component extension</location>
+      <additional-sections>
+        <section name="Admin Operations Log">
+          <content>Real-time feed of all admin actions system-wide</content>
+          <features>
+            <live-updates>WebSocket stream of admin events</live-updates>
+            <filtering>By user, action type, status</filtering>
+            <details>Expandable to show full operation details</details>
+          </features>
+        </section>
+        <section name="System Health">
+          <content>Service status and health metrics</content>
+          <metrics>
+            <service-status>PostgreSQL, ClickHouse, Redis status</service-status>
+            <resource-usage>CPU, memory, disk across services</resource-usage>
+            <queue-depths>Background task queues</queue-depths>
+            <error-rates>System-wide error tracking</error-rates>
+          </metrics>
+        </section>
+        <section name="Permission Explorer">
+          <content>Interactive permission testing tool</content>
+          <features>
+            <user-selector>Pick any user to view their permissions</user-selector>
+            <action-tester>Test if user can perform specific actions</action-tester>
+            <permission-tree>Visual hierarchy of all permissions</permission-tree>
+          </features>
+        </section>
+        <section name="Quick Admin Tools">
+          <content>Direct action buttons for common tasks</content>
+          <actions>
+            <clear-cache>Clear Redis cache</clear-cache>
+            <restart-workers>Restart background workers</restart-workers>
+            <export-logs>Download logs for time range</export-logs>
+            <backup-trigger>Initiate backup</backup-trigger>
+          </actions>
+        </section>
+      </additional-sections>
+    </mixin>
+  </admin-mixins>
+  <default-workflows>
+    <workflow id="first-time-admin">
+      <description>Onboarding flow for new admin users</description>
+      <steps>
+        <step>Detection: System detects developer/admin permission</step>
+        <step>Welcome: Show welcome message with available admin features</step>
+        <step>Examples: Provide 3 example admin commands to try</step>
+        <step>Templates: Highlight template library in command palette</step>
+        <step>Documentation: Link to admin feature documentation</step>
+      </steps>
+      <implementation>
+        <storage>localStorage flag for onboarding completion</storage>
+        <dismissible>User can skip or complete onboarding</dismissible>
+      </implementation>
+    </workflow>
+    <workflow id="corpus-creation-wizard">
+      <description>Guided corpus creation with smart defaults</description>
+      <triggers>
+        <command>/corpus create</command>
+        <natural-language>User asks to create a corpus</natural-language>
+      </triggers>
+      <steps>
+        <step>Domain Selection: Choose from preset domains or custom</step>
+        <step>Template Selection: Pick starting template or blank</step>
+        <step>Size Configuration: Small (1K), Medium (10K), Large (100K+)</step>
+        <step>Example Review: Show sample entries for confirmation</step>
+        <step>Generation: Create corpus with progress tracking</step>
+        <step>Validation: Automatic validation and report</step>
+      </steps>
+      <defaults>
+        <domain>Inferred from recent user queries</domain>
+        <size>Medium (10K records)</size>
+        <distribution>Balanced across categories</distribution>
+      </defaults>
+    </workflow>
+    <workflow id="synthetic-generation-express">
+      <description>Quick synthetic data generation with one command</description>
+      <presets>
+        <preset name="Quick Test">
+          <volume>1,000 records</volume>
+          <time>Last 1 hour</time>
+          <pattern>Steady traffic</pattern>
+        </preset>
+        <preset name="Load Test">
+          <volume>100,000 records</volume>
+          <time>Next 24 hours</time>
+          <pattern>Gradual ramp-up</pattern>
+        </preset>
+        <preset name="Incident Simulation">
+          <volume>50,000 records</volume>
+          <time>Last 6 hours</time>
+          <pattern>Normal → Spike → Degradation → Recovery</pattern>
+        </preset>
+      </presets>
+      <one-click>Each preset available as single button/command</one-click>
+    </workflow>
+  </default-workflows>
+  <implementation-approach>
+    <phase number="1" name="Permission System">
+      <task priority="critical">Extend User model with role and permission fields</task>
+      <task priority="critical">Implement developer auto-detection logic</task>
+      <task priority="critical">Create permission checking middleware</task>
+      <task>Add permission caching layer in Redis</task>
+      <task>Create permission audit logging</task>
+    </phase>
+    <phase number="2" name="Agent Tool Integration">
+      <task priority="critical">Create AdminToolRegistry for admin-only tools</task>
+      <task priority="critical">Implement corpus_manager tool with ClickHouse integration</task>
+      <task priority="critical">Implement synthetic_generator tool with streaming</task>
+      <task>Add user_admin tool for user management</task>
+      <task>Create system_configurator tool</task>
+      <task>Implement log_analyzer with natural language queries</task>
+    </phase>
+    <phase number="3" name="UI Mixins">
+      <task priority="critical">Extend ChatSidebar with admin thread filtering</task>
+      <task priority="critical">Add admin badge to PersistentResponseCard</task>
+      <task priority="critical">Implement command palette in ChatInput</task>
+      <task>Add template library to input helpers</task>
+      <task>Extend OverflowPanel with admin sections</task>
+      <task>Create parameter builder UI component</task>
+    </phase>
+    <phase number="4" name="Smart Defaults">
+      <task>Create domain-specific corpus templates</task>
+      <task>Build synthetic data generation presets</task>
+      <task>Add workflow wizards for common tasks</task>
+      <task>Implement context-aware suggestions</task>
+      <task>Create onboarding flow for new admins</task>
+    </phase>
+    <phase number="5" name="Testing and Polish">
+      <task>Test permission system with various user types</task>
+      <task>Validate admin tool security boundaries</task>
+      <task>Test UI mixin progressive disclosure</task>
+      <task>Performance test with large corpus operations</task>
+      <task>Create admin feature documentation</task>
+    </phase>
+  </implementation-approach>
+  <security-considerations>
+    <permission-enforcement>
+      <backend>All admin endpoints check permissions</backend>
+      <frontend>UI elements hidden based on permissions</frontend>
+      <agent-tools>Tools validate permissions before execution</agent-tools>
+    </permission-enforcement>
+    <audit-logging>
+      <what>Log all admin actions with full context</what>
+      <who>User ID, email, IP address</who>
+      <when>Timestamp with timezone</when>
+      <why>Command or action that triggered operation</why>
+      <result>Success, failure, partial completion</result>
+    </audit-logging>
+    <rate-limiting>
+      <admin-operations>Separate higher limits for admin users</admin-operations>
+      <bulk-operations>Progressive throttling for large operations</bulk-operations>
+    </rate-limiting>
+  </security-considerations>
 </specification>

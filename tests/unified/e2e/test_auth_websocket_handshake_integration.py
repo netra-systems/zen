@@ -20,10 +20,10 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 
-from ..jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig, ConnectionState
-from .token_lifecycle_helpers import TokenLifecycleManager
+from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager
 
 
 class AuthWebSocketTester:
@@ -75,7 +75,6 @@ class TestAuthWebSocketHandshakeIntegration:
         assert self.auth_tester.jwt_helper.validate_token_structure(expired_token), "Expired token should still have valid structure"
         
         # Test that token is properly expired
-        import jwt
         payload = jwt.decode(expired_token, options={"verify_signature": False})
         exp_timestamp = payload["exp"]
         current_timestamp = datetime.now(timezone.utc).timestamp()
@@ -306,7 +305,6 @@ class TestAuthWebSocketHandshakeIntegration:
         assert self.auth_tester.jwt_helper.validate_token_structure(refresh_token), "Refresh token should have valid structure"
         
         # Test refresh flow (without requiring auth service)
-        import jwt
         refresh_payload = jwt.decode(refresh_token, options={"verify_signature": False})
         assert refresh_payload["token_type"] == "refresh", "Should be refresh token type"
         assert refresh_payload["sub"] == user_id, "Should have correct user ID"

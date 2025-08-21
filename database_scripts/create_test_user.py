@@ -14,10 +14,10 @@ sys.path.insert(0, str(project_root))
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from app.db.models_postgres import User
-from app.config import settings
-from app.services.security_service import SecurityService
-from app.services.key_manager import KeyManager
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.config import settings
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.key_manager import KeyManager
 import uuid
 
 async def create_test_user():

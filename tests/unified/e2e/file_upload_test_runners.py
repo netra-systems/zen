@@ -7,8 +7,8 @@ Breaks down test execution into 25-line functions for architectural compliance.
 
 import asyncio
 
-from .file_upload_test_context import create_file_upload_context
-from .file_upload_pipeline_executor import create_pipeline_executor
+from tests.unified.e2e.file_upload_test_context import create_file_upload_context
+from tests.unified.e2e.file_upload_pipeline_executor import create_pipeline_executor
 
 
 async def execute_single_user_pipeline_test(harness, file_size: float = 5.0):

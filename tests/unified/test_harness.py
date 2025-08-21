@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from .test_environment_config import (
+from tests.unified.test_environment_config import (
     get_test_environment_config,
     TestEnvironmentConfig,
     TestEnvironmentType

@@ -32,8 +32,8 @@ import pytest
 
 # Note: Config imports are for full test framework - not needed for simplified validation
 try:
-    from ..config import TEST_USERS
-    from ..real_services_manager import RealServicesManager
+    from tests.unified.config import TEST_USERS
+    from tests.unified.real_services_manager import RealServicesManager
 except ImportError:
     # Fallback for standalone execution
     TEST_USERS = {}
@@ -70,8 +70,8 @@ class WebSocketDatabaseSessionTester:
         
         try:
             # Import the routes to check for WebSocket endpoints
-            from app.routes import websockets, demo
-            from app.routes.mcp import main as mcp_main
+            from netra_backend.app.routes import websockets, demo
+            from netra_backend.app.routes.mcp import main as mcp_main
             
             # Check main websocket routes
             websocket_files = [
@@ -117,7 +117,6 @@ class WebSocketDatabaseSessionTester:
         
         try:
             # Get the source code
-            import inspect
             source = inspect.getsource(module)
             lines = source.split('\n')
             
@@ -214,7 +213,7 @@ class WebSocketDatabaseSessionTester:
         
         try:
             # Check websocket helpers for correct patterns
-            from app.routes.utils import websocket_helpers
+            from netra_backend.app.routes.utils import websocket_helpers
             
             source = inspect.getsource(websocket_helpers)
             lines = source.split('\n')
@@ -261,7 +260,7 @@ class WebSocketDatabaseSessionTester:
         start_time = time.time()
         
         try:
-            from app.db.postgres import get_async_db
+            from netra_backend.app.db.postgres import get_async_db
             
             # Test the correct pattern
             session_acquired = False
@@ -309,7 +308,6 @@ class WebSocketDatabaseSessionTester:
         start_time = time.time()
         
         try:
-            from app.db.postgres import get_async_db
             from fastapi import Depends
             
             # Simulate what happens with Depends() in WebSocket
@@ -408,13 +406,11 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         # Check demo WebSocket endpoint (known to have the issue)
         try:
             import sys
-            import os
             # Add project root to path for standalone execution
             if 'app' not in sys.modules:
                 sys.path.insert(0, os.path.abspath('.'))
             
-            from app.routes.demo import demo_websocket_endpoint
-            import inspect
+            from netra_backend.app.routes.demo import demo_websocket_endpoint
             
             source = inspect.getsource(demo_websocket_endpoint)
             if "Depends(" in source and "websocket" in source.lower():
@@ -448,8 +444,7 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         
         # Test 2: Check for correct patterns in websocket helpers
         try:
-            from app.routes.utils.websocket_helpers import authenticate_websocket_user
-            import inspect
+            from netra_backend.app.routes.utils.websocket_helpers import authenticate_websocket_user
             
             source = inspect.getsource(authenticate_websocket_user)
             if "async with get_async_db()" in source:
@@ -480,13 +475,13 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         depends_issue_demo = {}
         try:
             from fastapi import Depends
-            try:
-                from app.db.postgres import get_async_db
-            except ImportError:
-                # Mock for standalone execution
-                async def get_async_db():
-                    return None
-            
+            from netra_backend.app.db.postgres import get_async_db
+        except ImportError:
+            # Mock for standalone execution
+            async def get_async_db():
+                return None
+        
+        try:
             # This shows what Depends() returns (a callable, not a session)
             depends_result = Depends(get_async_db)
             
@@ -639,8 +634,6 @@ async def test_websocket_db_session_performance():
             
             # Check patterns without database connection
             try:
-                from app.routes.demo import demo_websocket_endpoint
-                import inspect
                 
                 source = inspect.getsource(demo_websocket_endpoint)
                 has_depends = "Depends(" in source
@@ -686,7 +679,6 @@ async def test_websocket_db_session_performance():
 
 if __name__ == "__main__":
     # Allow running this test standalone
-    import asyncio
     
     async def main():
         print("Running WebSocket Database Session Handling Test...")

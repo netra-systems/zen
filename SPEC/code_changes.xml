@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>Workflow.CodeChangeProtocol</name>
@@ -7,19 +7,17 @@
     <description>
       CRITICAL: Mandatory checklist for AI agents executing code modifications.
     </description>
+    <last_edited>2025-08-21T08:47:28.391463</last_edited>
   </metadata>
-  
   <ai-workflow-integration>
     <title>AI Agent Operational Mandate</title>
     <instruction>AI Agents MUST follow this procedure for EVERY code modification task.</instruction>
   </ai-workflow-integration>
-
   <section title="Mandatory Protocol for ALL Changes">
     <step id="CC-ALL-001" priority="CRITICAL">
       <title>Agent Tracking Header</title>
       <instruction>Add or update the agent tracking metadata header at the top of every modified source file.</instruction>
     </step>
-
     <step id="CC-ALL-002" priority="CRITICAL">
       <title>Update Import Tests</title>
       <instruction>If new modules or dependencies are introduced, update the corresponding import test files.</instruction>
@@ -28,41 +26,35 @@
         <frontend>frontend/__tests__/imports/*.test.tsx</frontend>
       </locations>
     </step>
-    
     <step id="CC-ALL-003">
       <title>Type Synchronization</title>
       <instruction>If API contracts (Pydantic schemas) are modified, ensure synchronization.</instruction>
       <protocol>Run `python scripts/schema_sync.py` after backend schema changes.</protocol>
     </step>
   </section>
-  
   <section title="Context-Specific Protocols">
     <protocol context="Backend: Dependency Injection (Singletons)" priority="CRITICAL">
       <instruction>Inject singletons using provider functions, NOT the class directly.</instruction>
       <example>CORRECT: `Depends(get_llm_manager)`. INCORRECT: `Depends(LLMManager)`.</example>
     </protocol>
-
     <protocol context="Backend: Database Session Typing" priority="CRITICAL">
-        <instruction>Explicitly type hint AsyncSession in all dependency functions.</instruction>
-        <example>CORRECT: `db_session: AsyncSession = Depends(get_db_session)`.</example>
-        <example>INCORRECT: `db_session = Depends(get_db_session)`.</example>
+      <instruction>Explicitly type hint AsyncSession in all dependency functions.</instruction>
+      <example>CORRECT: `db_session: AsyncSession = Depends(get_db_session)`.</example>
+      <example>INCORRECT: `db_session = Depends(get_db_session)`.</example>
     </protocol>
-
     <protocol context="Frontend: State Management (Zustand)" priority="CRITICAL">
-        <instruction>Use individual selectors. Object-returning selectors are FORBIDDEN.</instruction>
-        <reference>SPEC/conventions.xml#FE-001</reference>
+      <instruction>Use individual selectors. Object-returning selectors are FORBIDDEN.</instruction>
+      <reference>SPEC/conventions.xml#FE-001</reference>
     </protocol>
-
     <protocol context="Backend: CORS Configuration">
-        <instruction>Ensure `cors_redirect_middleware` is active or `redirect_slashes=False` is set on APIRouter to handle FastAPI redirects correctly.</instruction>
+      <instruction>Ensure `cors_redirect_middleware` is active or `redirect_slashes=False` is set on APIRouter to handle FastAPI redirects correctly.</instruction>
     </protocol>
   </section>
-
   <section title="Validation Workflow">
     <instruction>Execute the following sequence after code generation and before finalizing the response.</instruction>
     <workflow>
-        <step>1. Architectural Compliance Check: `python scripts/check_architecture_compliance.py` (Zero tolerance).</step>
-        <step>2. Quick Test Execution: `python test_runner.py --mode quick`.</step>
+      <step>1. Architectural Compliance Check: `python scripts/check_architecture_compliance.py` (Zero tolerance).</step>
+      <step>2. Quick Test Execution: `python test_runner.py --mode quick`.</step>
     </workflow>
   </section>
 </specification>

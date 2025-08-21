@@ -27,19 +27,19 @@ except ImportError:
 
 # Test categories for organized testing
 TEST_CATEGORIES = {
-    "unit": ["app/tests/services", "app/tests/core"],
-    "integration": ["integration_tests", "app/tests/routes"],
-    "agent": ["app/tests/agents", "app/tests/services/agents", "app/tests/services/apex_optimizer_agent"],
-    "websocket": ["app/tests/test_websocket.py", "app/tests/routes/test_websocket_*.py"],
-    "auth": ["app/tests/test_auth*.py", "app/tests/routes/test_*auth*.py"],
-    "database": ["app/tests/services/database", "app/tests/test_database*.py"],
-    "critical": ["app/tests/test_api_endpoints_critical.py", "app/tests/test_agent_service_critical.py"],
+    "unit": ["netra_backend/tests/services", "netra_backend/tests/core"],
+    "integration": ["netra_backend/tests/integration", "netra_backend/tests/routes"],
+    "agent": ["netra_backend/tests/agents", "netra_backend/tests/services/agents", "netra_backend/tests/services/apex_optimizer_agent"],
+    "websocket": ["netra_backend/tests/test_websocket.py", "netra_backend/tests/routes/test_websocket_*.py"],
+    "auth": ["netra_backend/tests/test_auth*.py", "netra_backend/tests/routes/test_*auth*.py"],
+    "database": ["netra_backend/tests/services/database", "netra_backend/tests/test_database*.py"],
+    "critical": ["netra_backend/tests/test_api_endpoints_critical.py", "netra_backend/tests/test_agent_service_critical.py"],
     "smoke": [
-        "app/tests/routes/test_health_route.py",
-        "app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
-        "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
-        "app/tests/services/test_security_service.py::test_encrypt_and_decrypt",
-        "app/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading"
+        "netra_backend/tests/routes/test_health_route.py",
+        "netra_backend/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
+        "netra_backend/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
+        "netra_backend/tests/services/test_security_service.py::test_encrypt_and_decrypt",
+        "netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading"
     ],
 }
 
@@ -202,7 +202,7 @@ def _add_test_paths(args, pytest_args):
     elif args.tests:
         pytest_args.extend(args.tests)
     else:
-        pytest_args.extend(["app/tests", "tests", "integration_tests"])
+        pytest_args.extend(["netra_backend/tests", "tests", "integration_tests"])
 
 def _handle_category_selection(args, pytest_args):
     """Handle test category selection"""
@@ -464,7 +464,7 @@ def _get_advanced_usage_examples():
   python scripts/test_backend.py --coverage --min-coverage 80
   
   # Run specific test file
-  python scripts/test_backend.py app/tests/test_main.py
+  python scripts/test_backend.py netra_backend/tests/test_main.py
   
   # Run tests matching keyword
   python scripts/test_backend.py -k "test_login"

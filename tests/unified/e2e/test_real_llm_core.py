@@ -23,11 +23,11 @@ from typing import Dict, Any
 import pytest
 from unittest.mock import patch
 
-from app.llm.llm_manager import LLMManager
-from app.config import get_config
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 class RealLLMTestManager:

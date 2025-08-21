@@ -17,7 +17,7 @@ import time
 import uuid
 from typing import Dict, List, Any, Optional
 
-from .concurrent_user_models import (
+from tests.unified.e2e.concurrent_user_models import ConcurrentUserMetrics, UserSession, MockServiceManager, MockWebSocketClient, IsolationValidator
     ConcurrentUserMetrics,
     UserSession, 
     MockServiceManager,

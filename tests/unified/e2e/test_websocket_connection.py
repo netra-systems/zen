@@ -19,8 +19,8 @@ import json
 import websockets
 from typing import Dict, Optional, List
 from datetime import datetime
-from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketConnectionTester:

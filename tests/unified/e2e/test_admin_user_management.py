@@ -22,9 +22,9 @@ import pytest
 import time
 from typing import Dict, Any
 
-from .admin_user_management_tester import AdminUserManagementTester
-from .admin_audit_trail_validator import AdminAuditTrailValidator
-from .auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.admin_user_management_tester import AdminUserManagementTester
+from tests.unified.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 # Pytest Test Implementations

@@ -6,7 +6,7 @@ works correctly and integrates with the test harness.
 
 import pytest
 import os
-from tests.unified.config import (
+from netra_backend.tests.unified.config import (
     TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TEST_SECRETS,
     TestTier, TestDataFactory, TestTokenManager, TestDatabaseManager,
     create_unified_config, get_test_user

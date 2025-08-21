@@ -48,8 +48,11 @@ load_dotenv()
 # Import test framework modules
 from .runner import UnifiedTestRunner
 from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm, configure_gcp_staging_environment
+from .test_validation import TestValidation
+from .circular_import_detector import CircularImportDetector
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
+from .import_tester import ImportTester
 
 def handle_test_discovery(args):
     """Handle test discovery and listing."""
@@ -323,6 +326,14 @@ def add_main_test_arguments(parser):
         "--exclusive", action="store_true",
         help="Run ONLY tests at specified level (no superset inclusion)"
     )
+    parser.add_argument(
+        "--import-test", action="store_true",
+        help="Run import tests before main test suite (fast-fail on import errors)"
+    )
+    parser.add_argument(
+        "--import-only", action="store_true",
+        help="Run ONLY import tests (skip main test suite)"
+    )
 
 def add_component_arguments(parser):
     """Add component selection arguments"""
@@ -511,6 +522,20 @@ def execute_test_run(parser, args):
     if hasattr(args, 'fix_test_violations') and args.fix_test_violations:
         return handle_fix_test_violations()
     
+    # Handle import-only mode
+    if hasattr(args, 'import_only') and args.import_only:
+        return run_import_tests_only()
+    
+    # Run import tests if requested (fast-fail mode)
+    if hasattr(args, 'import_test') and args.import_test:
+        print("\n" + "="*80)
+        print("RUNNING IMPORT TESTS (Fast-Fail Mode)")
+        print("="*80)
+        if not run_import_tests_fast_fail():
+            print("\n[X] Import test failed - aborting test run")
+            return 1
+        print("\n[OK] All import tests passed - continuing with main test suite\n")
+    
     configure_environment_if_requested(args)
     speed_opts = configure_speed_options(args)
     runner = initialize_test_runner()
@@ -687,6 +712,11 @@ def run_level_based_tests(args, runner, speed_opts):
     """Run tests based on specified level"""
     config = TEST_LEVELS[args.level].copy()  # Copy to avoid modifying original
     level = args.level
+    
+    # Handle custom validation for code-quality checks
+    if 'custom_validation' in config:
+        return run_custom_validation(config['custom_validation'], level)
+    
     # Handle exclusive mode (no superset inclusion)
     if hasattr(args, 'exclusive') and args.exclusive:
         print(f"[EXCLUSIVE] Running ONLY {level} level tests (no superset)")
@@ -695,6 +725,55 @@ def run_level_based_tests(args, runner, speed_opts):
     real_llm_config = configure_real_llm_if_requested(args, level, config)
     exit_code = execute_test_suite(args, config, runner, real_llm_config, speed_opts, level)
     return finalize_test_run(runner, level, config, "", exit_code)
+
+def run_custom_validation(validations, level):
+    """Run custom validation checks for code quality"""
+    print(f"\nRunning code quality validation: {level}")
+    print("=" * 60)
+    
+    all_passed = True
+    results = {}
+    
+    for validation in validations:
+        if validation == "circular_imports":
+            print("\nChecking for circular imports...")
+            project_root = PROJECT_ROOT / "netra_backend"
+            detector = CircularImportDetector(str(project_root))
+            report = detector.get_report()
+            
+            if report['circular_imports_found'] > 0:
+                print(f"[ERROR] Found {report['circular_imports_found']} circular import(s):")
+                for cycle in report['cycles']:
+                    print(f"\n  Cycle:")
+                    for module in cycle['modules']:
+                        print(f"    - {module}")
+                all_passed = False
+                results['circular_imports'] = {
+                    'passed': False,
+                    'count': report['circular_imports_found'],
+                    'cycles': report['cycles']
+                }
+            else:
+                print(f"[SUCCESS] No circular imports detected ({report['total_modules']} modules analyzed)")
+                results['circular_imports'] = {
+                    'passed': True,
+                    'total_modules': report['total_modules']
+                }
+    
+    print("\n" + "=" * 60)
+    print("CODE QUALITY VALIDATION SUMMARY")
+    print("=" * 60)
+    
+    for validation, result in results.items():
+        status = "[PASS]" if result['passed'] else "[FAIL]"
+        print(f"{status} {validation}")
+    
+    if all_passed:
+        print("\n[SUCCESS] All code quality checks passed!")
+        return 0
+    else:
+        print("\n[ERROR] Some code quality checks failed. Please fix the issues above.")
+        return 1
 
 def apply_shard_filtering(args, config):
     """Apply shard or component filtering if specified"""
@@ -908,6 +987,92 @@ def validate_real_test_requirements():
     except Exception as e:
         print(f"Warning: Real test validation failed: {e}")
         return True  # Don't block on validation errors
+
+
+def run_import_tests_fast_fail():
+    """Run import tests in fast-fail mode - stops on first error"""
+    try:
+        tester = ImportTester(root_path=PROJECT_ROOT, verbose=False)
+        
+        # Critical modules that must import successfully
+        critical_modules = [
+            'netra_backend.app.main',
+            'netra_backend.app.config',
+            'netra_backend.app.startup_module',
+            'netra_backend.app.db.database_connectivity_master',
+            'netra_backend.app.services.agent_service',
+            'netra_backend.app.agents.supervisor_consolidated',
+        ]
+        
+        print("\nTesting critical module imports...")
+        for module_path in critical_modules:
+            result = tester.test_module(module_path)
+            if not result.success:
+                print(f"\n[X] IMPORT FAILURE DETECTED!\n")
+                print(f"Module: {result.module_path}")
+                print(f"Error Type: {result.error_type}")
+                print(f"Error: {result.error_message}")
+                
+                if result.missing_dependencies:
+                    print(f"\nMissing Dependencies: {', '.join(result.missing_dependencies)}")
+                    print(f"Try: pip install {' '.join(result.missing_dependencies)}")
+                
+                if result.circular_imports:
+                    print(f"\nCircular Import Detected:")
+                    print(f"  Path: {' -> '.join(result.circular_imports)}")
+                
+                print("\nTroubleshooting:")
+                print("1. Check if all dependencies are installed: pip install -r requirements.txt")
+                print("2. Verify the module file exists and has no syntax errors")
+                print("3. Check for circular imports between modules")
+                print("4. Ensure proper Python path configuration")
+                
+                return False
+            else:
+                print(f"  [OK] {module_path}")
+        
+        print("\n[OK] All critical imports successful!")
+        return True
+        
+    except Exception as e:
+        print(f"\n[X] Import test framework error: {e}")
+        return False
+
+
+def run_import_tests_only():
+    """Run comprehensive import tests and exit"""
+    try:
+        print("\n" + "="*80)
+        print("RUNNING COMPREHENSIVE IMPORT TESTS")
+        print("="*80)
+        
+        tester = ImportTester(root_path=PROJECT_ROOT, verbose=True)
+        
+        # Run comprehensive import test on the main app package
+        report = tester.test_package('netra_backend.app', recursive=True)
+        
+        # Print results
+        print(report.get_summary())
+        
+        if report.failed_imports > 0:
+            print(report.get_failures_report())
+            
+            # Save detailed JSON report
+            json_path = PROJECT_ROOT / "test_reports" / "import_test_results.json"
+            json_path.parent.mkdir(exist_ok=True, parents=True)
+            report.save_json_report(str(json_path))
+            print(f"\nDetailed report saved to: {json_path}")
+            
+            return 1
+        else:
+            print("\n[OK] All imports successful!")
+            return 0
+            
+    except Exception as e:
+        print(f"\n[X] Import test error: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
 
 
 if __name__ == "__main__":

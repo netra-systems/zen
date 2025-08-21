@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="domain-mapping">
   <metadata>
     <title>Cloud Run Domain Mapping and DNS Configuration Learnings</title>
     <created>2025-08-16</created>
     <updated>2025-08-16</updated>
     <tags>cloud-run, dns, domain-mapping, staging, terraform, pr-deployments</tags>
+    <last_edited>2025-08-21T08:47:29.166128</last_edited>
   </metadata>
-
   <learning id="domain-001" priority="critical">
     <title>Apex Domain vs Subdomain Mapping</title>
     <problem>
@@ -20,7 +20,6 @@
       Apex domains require A records with IP addresses, not supported by Cloud Run's dynamic IPs.
     </solution>
   </learning>
-
   <learning id="domain-002" priority="high">
     <title>PR-Based Dynamic Subdomain Strategy</title>
     <problem>
@@ -65,7 +64,6 @@
       ```
     </terraform-implementation>
   </learning>
-
   <learning id="domain-003" priority="medium">
     <title>Domain Mapping Commands</title>
     <problem>
@@ -94,7 +92,6 @@
       ```
     </solution>
   </learning>
-
   <learning id="domain-004" priority="high">
     <title>DNS Record Creation Order</title>
     <problem>
@@ -116,7 +113,6 @@
       ```
     </solution>
   </learning>
-
   <learning id="domain-005" priority="critical">
     <title>CloudBuild Integration for PR Deployments</title>
     <problem>
@@ -141,7 +137,6 @@
       ```
     </solution>
   </learning>
-
   <learning id="domain-006" priority="medium">
     <title>Service Naming Convention</title>
     <problem>
@@ -153,7 +148,6 @@
       - **Feature branches**: netra-backend-feature-name, netra-frontend-feature-name
     </recommended-convention>
   </learning>
-
   <learning id="domain-007" priority="low">
     <title>TTL Settings for DNS Records</title>
     <problem>
@@ -164,7 +158,6 @@
       Production can use higher TTL (3600+ seconds) for better caching.
     </solution>
   </learning>
-
   <best-practices>
     <practice>Use wildcard DNS for dynamic PR preview environments</practice>
     <practice>Implement different domain strategies for main vs PR deployments</practice>
@@ -173,7 +166,6 @@
     <practice>Keep TTL low for staging environments</practice>
     <practice>Document domain structure in terraform variables</practice>
   </best-practices>
-
   <terraform-variables>
     ```hcl
     variable "domain_config" {
@@ -192,7 +184,6 @@
     }
     ```
   </terraform-variables>
-
   <deployment-urls>
     <current-deployment>
       <frontend>https://app.staging.netrasystems.ai</frontend>

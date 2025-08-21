@@ -22,10 +22,10 @@ import asyncio
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, patch
 
-from ..config import TEST_USERS
-from .clickhouse_billing_helper import ClickHouseBillingHelper
-from .websocket_resilience_core import WebSocketResilienceTestCore
-from app.schemas.UserPlan import PlanTier, UsageRecord
+from tests.unified.config import TEST_USERS
+from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord
 
 
 class AgentBillingTestCore:

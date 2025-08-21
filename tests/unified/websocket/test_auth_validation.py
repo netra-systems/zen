@@ -35,14 +35,14 @@ import httpx
 from fastapi.testclient import TestClient
 
 # Import from unified test config to avoid config issues
-from tests.unified.config import setup_test_environment
-from tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.config import setup_test_environment
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 # Set up test environment first
 test_config = setup_test_environment()
 
 # Now import app components  
-from app.main import app
+from netra_backend.app.main import app
 
 
 class WebSocketAuthTester:

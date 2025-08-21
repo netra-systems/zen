@@ -43,13 +43,13 @@ class TestFixer:
                         if 'Mock()' in lines[j]:
                             # Replace Mock() with real instantiation
                             if 'llm_manager = Mock()' in lines[j]:
-                                lines[j] = '        from app.llm.llm_manager import LLMManager\n'
+                                lines[j] = '        from netra_backend.app.llm.llm_manager import LLMManager\n'
                                 lines.insert(j + 1, '        llm_manager = LLMManager()\n')
                             elif 'tool_dispatcher = Mock()' in lines[j]:
-                                lines[j] = '        from app.agents.tool_dispatcher import ToolDispatcher\n'
+                                lines[j] = '        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher\n'
                                 lines.insert(j + 1, '        tool_dispatcher = ToolDispatcher(llm_manager)\n')
                             elif 'websocket_manager = Mock()' in lines[j]:
-                                lines[j] = '        from app.websocket.unified.manager import UnifiedWebSocketManager\n'
+                                lines[j] = '        from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager\n'
                                 lines.insert(j + 1, '        websocket_manager = UnifiedWebSocketManager()\n')
                         j += 1
                     break
@@ -325,8 +325,8 @@ from typing import Dict, List, Any, Optional
                 content = re.sub(pattern, replacement, content)
             
             # Add import for real components
-            if 'from app.llm.llm_manager import LLMManager' not in content:
-                import_line = 'from app.llm.llm_manager import LLMManager\n'
+            if 'from netra_backend.app.llm.llm_manager import LLMManager' not in content:
+                import_line = 'from netra_backend.app.llm.llm_manager import LLMManager\n'
                 content = content.replace('import pytest', f'import pytest\n{import_line}')
             
             with open(file_path, 'w', encoding='utf-8') as f:

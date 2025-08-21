@@ -27,7 +27,7 @@ import time
 import base64
 import json
 
-from auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.jwt_handler import JWTHandler
 
 
 class TestJWTClaimsExtraction(unittest.TestCase):

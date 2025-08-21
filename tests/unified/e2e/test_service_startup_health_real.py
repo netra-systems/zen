@@ -42,10 +42,10 @@ sys.path.insert(0, str(project_root))
 
 from dev_launcher.startup_optimizer import StartupPhase, PhaseStep
 from dev_launcher.service_discovery import ServiceDiscovery
-from tests.unified.health_check_core import (
+from netra_backend.tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, create_healthy_result, create_service_error_result
 )
-from tests.unified.health_service_checker import ServiceHealthChecker
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

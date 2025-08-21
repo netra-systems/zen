@@ -31,8 +31,8 @@ COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
 # Copy application code
-COPY app/ ./app/
-COPY alembic/ ./alembic/
+COPY netra_backend/app/ ./netra_backend/app/
+COPY netra_backend/app/alembic/ ./netra_backend/app/alembic/
 COPY config/alembic.ini ./alembic.ini
 
 # Create non-root user
@@ -57,7 +57,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 EXPOSE 8080
 
 # Use gunicorn with uvicorn workers for better Cloud Run compatibility
-CMD exec gunicorn app.main:app \
+CMD exec gunicorn netra_backend.app.main:app \
     --bind 0.0.0.0:$PORT \
     --workers $WORKERS \
     --worker-class uvicorn.workers.UvicornWorker \

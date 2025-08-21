@@ -1,177 +1,176 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
-    <title>WebSocket Ideal State Architecture</title>
-    <version>2.0</version>
-    <date>2025-08-19</date>
-    <business_value>Reduces WebSocket failures by 70%, improves real-time performance by 40%</business_value>
-    
-    <architecture>
-        <overview>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.706484</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.706484">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <title>WebSocket Ideal State Architecture</title>
+  <version>2.0</version>
+  <date>2025-08-19</date>
+  <business_value>Reduces WebSocket failures by 70%, improves real-time performance by 40%</business_value>
+  <architecture>
+    <overview>
             Modern WebSocket architecture using standardized execution patterns with
             BaseExecutionInterface for all components, ensuring reliability, monitoring,
             and consistent error handling across the WebSocket subsystem.
         </overview>
-        
-        <core_principles>
-            <principle>All WebSocket components implement BaseExecutionInterface</principle>
-            <principle>BaseExecutionEngine provides orchestration for all operations</principle>
-            <principle>ReliabilityManager ensures circuit breaker and retry patterns</principle>
-            <principle>ExecutionMonitor tracks performance metrics</principle>
-            <principle>Late imports prevent circular dependencies</principle>
-        </core_principles>
-        
-        <component_hierarchy>
-            <layer name="Entry Points">
-                <component>WebSocket Routes (/ws endpoint)</component>
-                <component>WebSocketManager (unified connection management)</component>
-            </layer>
-            <layer name="Message Processing">
-                <component>ModernReliableMessageHandler (message validation and routing)</component>
-                <component>ModernMessageTypeRouter (type-based routing)</component>
-            </layer>
-            <layer name="Execution Layer">
-                <component>BaseExecutionEngine (orchestration)</component>
-                <component>ReliabilityManager (resilience patterns)</component>
-                <component>ExecutionMonitor (performance tracking)</component>
-            </layer>
-            <layer name="Connection Management">
-                <component>ModernConnectionManager (connection lifecycle)</component>
-                <component>ConnectionExecutionOrchestrator (connection operations)</component>
-            </layer>
-            <layer name="Broadcasting">
-                <component>WebSocketBroadcastExecutor (broadcast operations)</component>
-                <component>RoomManager (room-based broadcasting)</component>
-            </layer>
-        </component_hierarchy>
-    </architecture>
-    
-    <execution_flow>
-        <step number="1">
-            <action>Client connects to /ws endpoint</action>
-            <component>WebSocket Route Handler</component>
-            <validation>Token authentication via security service</validation>
-        </step>
-        <step number="2">
-            <action>Connection established in WebSocketManager</action>
-            <component>ModernConnectionManager</component>
-            <execution>ConnectionExecutionOrchestrator with BaseExecutionEngine</execution>
-        </step>
-        <step number="3">
-            <action>Message received from client</action>
-            <component>WebSocketManager.receive_message()</component>
-            <validation>JSON parsing and structure validation</validation>
-        </step>
-        <step number="4">
-            <action>Message processing initiated</action>
-            <component>ModernReliableMessageHandler</component>
-            <execution>BaseExecutionEngine.execute() with ExecutionContext</execution>
-        </step>
-        <step number="5">
-            <action>Message routed by type</action>
-            <component>ModernMessageTypeRouter</component>
-            <execution>Route to appropriate handler based on message type</execution>
-        </step>
-        <step number="6">
-            <action>Business logic execution</action>
-            <component>Agent Service or specific handler</component>
-            <execution>Process message and generate response</execution>
-        </step>
-        <step number="7">
-            <action>Response broadcast</action>
-            <component>WebSocketBroadcastExecutor</component>
-            <execution>Send response to appropriate connections</execution>
-        </step>
-    </execution_flow>
-    
-    <reliability_patterns>
-        <pattern name="Circuit Breaker">
-            <threshold>5 failures</threshold>
-            <recovery_timeout>30 seconds</recovery_timeout>
-            <fallback>Graceful degradation with user notification</fallback>
-        </pattern>
-        <pattern name="Retry Logic">
-            <max_retries>3</max_retries>
-            <backoff>Exponential with jitter</backoff>
-            <idempotency>Ensure message processing is idempotent</idempotency>
-        </pattern>
-        <pattern name="Dead Letter Queue">
-            <trigger>Max retries exceeded</trigger>
-            <storage>Failed messages stored for analysis</storage>
-            <alerting>Notify monitoring system</alerting>
-        </pattern>
-    </reliability_patterns>
-    
-    <error_handling>
-        <strategy name="Validation Errors">
-            <action>Return error message to client</action>
-            <logging>Log with warning level</logging>
-            <metrics>Track validation failure rate</metrics>
-        </strategy>
-        <strategy name="Processing Errors">
-            <action>Retry with exponential backoff</action>
-            <logging>Log with error level including stack trace</logging>
-            <metrics>Track processing failure rate and latency</metrics>
-        </strategy>
-        <strategy name="Connection Errors">
-            <action>Attempt reconnection with backoff</action>
-            <logging>Log connection state changes</logging>
-            <metrics>Track connection stability metrics</metrics>
-        </strategy>
-    </error_handling>
-    
-    <monitoring>
-        <metric name="Message Processing Latency">
-            <target>P95 &lt; 100ms</target>
-            <alerting>Alert if P95 &gt; 200ms</alerting>
-        </metric>
-        <metric name="Connection Success Rate">
-            <target>&gt; 99.9%</target>
-            <alerting>Alert if &lt; 99%</alerting>
-        </metric>
-        <metric name="Message Delivery Rate">
-            <target>&gt; 99.99%</target>
-            <alerting>Alert if &lt; 99.9%</alerting>
-        </metric>
-        <metric name="Circuit Breaker Opens">
-            <target>&lt; 1 per hour</target>
-            <alerting>Alert on any circuit breaker open</alerting>
-        </metric>
-    </monitoring>
-    
-    <implementation_requirements>
-        <requirement priority="CRITICAL">
+    <core_principles>
+      <principle>All WebSocket components implement BaseExecutionInterface</principle>
+      <principle>BaseExecutionEngine provides orchestration for all operations</principle>
+      <principle>ReliabilityManager ensures circuit breaker and retry patterns</principle>
+      <principle>ExecutionMonitor tracks performance metrics</principle>
+      <principle>Late imports prevent circular dependencies</principle>
+    </core_principles>
+    <component_hierarchy>
+      <layer name="Entry Points">
+        <component>WebSocket Routes (/ws endpoint)</component>
+        <component>WebSocketManager (unified connection management)</component>
+      </layer>
+      <layer name="Message Processing">
+        <component>ModernReliableMessageHandler (message validation and routing)</component>
+        <component>ModernMessageTypeRouter (type-based routing)</component>
+      </layer>
+      <layer name="Execution Layer">
+        <component>BaseExecutionEngine (orchestration)</component>
+        <component>ReliabilityManager (resilience patterns)</component>
+        <component>ExecutionMonitor (performance tracking)</component>
+      </layer>
+      <layer name="Connection Management">
+        <component>ModernConnectionManager (connection lifecycle)</component>
+        <component>ConnectionExecutionOrchestrator (connection operations)</component>
+      </layer>
+      <layer name="Broadcasting">
+        <component>WebSocketBroadcastExecutor (broadcast operations)</component>
+        <component>RoomManager (room-based broadcasting)</component>
+      </layer>
+    </component_hierarchy>
+  </architecture>
+  <execution_flow>
+    <step number="1">
+      <action>Client connects to /ws endpoint</action>
+      <component>WebSocket Route Handler</component>
+      <validation>Token authentication via security service</validation>
+    </step>
+    <step number="2">
+      <action>Connection established in WebSocketManager</action>
+      <component>ModernConnectionManager</component>
+      <execution>ConnectionExecutionOrchestrator with BaseExecutionEngine</execution>
+    </step>
+    <step number="3">
+      <action>Message received from client</action>
+      <component>WebSocketManager.receive_message()</component>
+      <validation>JSON parsing and structure validation</validation>
+    </step>
+    <step number="4">
+      <action>Message processing initiated</action>
+      <component>ModernReliableMessageHandler</component>
+      <execution>BaseExecutionEngine.execute() with ExecutionContext</execution>
+    </step>
+    <step number="5">
+      <action>Message routed by type</action>
+      <component>ModernMessageTypeRouter</component>
+      <execution>Route to appropriate handler based on message type</execution>
+    </step>
+    <step number="6">
+      <action>Business logic execution</action>
+      <component>Agent Service or specific handler</component>
+      <execution>Process message and generate response</execution>
+    </step>
+    <step number="7">
+      <action>Response broadcast</action>
+      <component>WebSocketBroadcastExecutor</component>
+      <execution>Send response to appropriate connections</execution>
+    </step>
+  </execution_flow>
+  <reliability_patterns>
+    <pattern name="Circuit Breaker">
+      <threshold>5 failures</threshold>
+      <recovery_timeout>30 seconds</recovery_timeout>
+      <fallback>Graceful degradation with user notification</fallback>
+    </pattern>
+    <pattern name="Retry Logic">
+      <max_retries>3</max_retries>
+      <backoff>Exponential with jitter</backoff>
+      <idempotency>Ensure message processing is idempotent</idempotency>
+    </pattern>
+    <pattern name="Dead Letter Queue">
+      <trigger>Max retries exceeded</trigger>
+      <storage>Failed messages stored for analysis</storage>
+      <alerting>Notify monitoring system</alerting>
+    </pattern>
+  </reliability_patterns>
+  <error_handling>
+    <strategy name="Validation Errors">
+      <action>Return error message to client</action>
+      <logging>Log with warning level</logging>
+      <metrics>Track validation failure rate</metrics>
+    </strategy>
+    <strategy name="Processing Errors">
+      <action>Retry with exponential backoff</action>
+      <logging>Log with error level including stack trace</logging>
+      <metrics>Track processing failure rate and latency</metrics>
+    </strategy>
+    <strategy name="Connection Errors">
+      <action>Attempt reconnection with backoff</action>
+      <logging>Log connection state changes</logging>
+      <metrics>Track connection stability metrics</metrics>
+    </strategy>
+  </error_handling>
+  <monitoring>
+    <metric name="Message Processing Latency">
+      <target>P95 &lt; 100ms</target>
+      <alerting>Alert if P95 &gt; 200ms</alerting>
+    </metric>
+    <metric name="Connection Success Rate">
+      <target>&gt; 99.9%</target>
+      <alerting>Alert if &lt; 99%</alerting>
+    </metric>
+    <metric name="Message Delivery Rate">
+      <target>&gt; 99.99%</target>
+      <alerting>Alert if &lt; 99.9%</alerting>
+    </metric>
+    <metric name="Circuit Breaker Opens">
+      <target>&lt; 1 per hour</target>
+      <alerting>Alert on any circuit breaker open</alerting>
+    </metric>
+  </monitoring>
+  <implementation_requirements>
+    <requirement priority="CRITICAL">
             All WebSocket components MUST have initialized execution_engine
         </requirement>
-        <requirement priority="CRITICAL">
+    <requirement priority="CRITICAL">
             Use late imports for BaseExecutionEngine to avoid circular dependencies
         </requirement>
-        <requirement priority="HIGH">
+    <requirement priority="HIGH">
             Implement comprehensive error handling with user feedback
         </requirement>
-        <requirement priority="HIGH">
+    <requirement priority="HIGH">
             Track all operations with ExecutionMonitor
         </requirement>
-        <requirement priority="MEDIUM">
+    <requirement priority="MEDIUM">
             Implement graceful degradation for partial failures
         </requirement>
-    </implementation_requirements>
-    
-    <testing_requirements>
-        <test type="Unit">
-            <coverage>All WebSocket components individually</coverage>
-            <focus>Execution engine initialization and method contracts</focus>
-        </test>
-        <test type="Integration">
-            <coverage>End-to-end message flow</coverage>
-            <focus>Message routing, processing, and response</focus>
-        </test>
-        <test type="Load">
-            <coverage>1000+ concurrent connections</coverage>
-            <focus>Performance under load, resource usage</focus>
-        </test>
-        <test type="Resilience">
-            <coverage>Failure scenarios</coverage>
-            <focus>Circuit breaker, retry logic, error recovery</focus>
-        </test>
-    </testing_requirements>
+  </implementation_requirements>
+  <testing_requirements>
+    <test type="Unit">
+      <coverage>All WebSocket components individually</coverage>
+      <focus>Execution engine initialization and method contracts</focus>
+    </test>
+    <test type="Integration">
+      <coverage>End-to-end message flow</coverage>
+      <focus>Message routing, processing, and response</focus>
+    </test>
+    <test type="Load">
+      <coverage>1000+ concurrent connections</coverage>
+      <focus>Performance under load, resource usage</focus>
+    </test>
+    <test type="Resilience">
+      <coverage>Failure scenarios</coverage>
+      <focus>Circuit breaker, retry logic, error recovery</focus>
+    </test>
+  </testing_requirements>
 </spec>

@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 from enum import Enum
 from pathlib import Path
 
-from app.core.network_constants import (
+from netra_backend.app.core.network_constants import (
     DatabaseConstants,
     ServicePorts,
     HostConstants,

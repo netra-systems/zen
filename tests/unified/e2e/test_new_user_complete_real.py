@@ -32,9 +32,9 @@ from contextlib import asynccontextmanager
 os.environ["TESTING"] = "1"
 os.environ["AUTH_FAST_TEST_MODE"] = "true"
 
-from ..database_test_connections import DatabaseTestConnections
+from tests.unified.database_test_connections import DatabaseTestConnections
 import aiosqlite
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 from helpers.new_user_journey_helpers import (
     DatabaseSetupHelper,
     SignupFlowHelper,
@@ -221,5 +221,4 @@ async def test_new_user_journey_performance_validation():
             
         print(f"[PERFORMANCE] Journey completed in {total_time:.2f}s")
         print("[UX] All steps meet performance requirements")
-
 

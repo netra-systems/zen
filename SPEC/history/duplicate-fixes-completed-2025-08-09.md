@@ -35,8 +35,8 @@ Successfully fixed all major duplicate issues identified in the codebase.
 ### 5. ✅ Verified All Imports
 - **Checked**: No broken imports from deleted files
 - **Tested**: Key imports work correctly:
-  - `from app.schemas import WebSocketMessage` ✓
-  - `from app.schemas import User, AuthConfigResponse` ✓
+  - `from netra_backend.app.schemas import WebSocketMessage` ✓
+  - `from netra_backend.app.schemas import User, AuthConfigResponse` ✓
 - **Result**: All imports functioning correctly
 
 ## Benefits Achieved

@@ -23,9 +23,9 @@ Without effective limit enforcement, free users never convert.
 """
 import pytest
 
-from .auth_flow_manager import AuthCompleteFlowManager
-from .free_tier_limit_tester import FreeTierLimitTester
-from .free_tier_limit_managers import LimitEnforcementManager
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.free_tier_limit_tester import FreeTierLimitTester
+from tests.unified.e2e.free_tier_limit_managers import LimitEnforcementManager
 
 
 @pytest.mark.asyncio
@@ -153,5 +153,4 @@ async def test_limit_enforcement_edge_cases():
 if __name__ == "__main__":
     # Allow direct execution for debugging
     import sys
-    import pytest
     sys.exit(pytest.main([__file__, "-v", "-s"]))

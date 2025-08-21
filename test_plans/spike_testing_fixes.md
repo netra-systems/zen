@@ -25,7 +25,7 @@ This report documents the issues identified during the execution of Test Suite 5
 **Root Cause**: 
 ```
 ModuleNotFoundError: No module named 'auth_core'
-File "auth_service\main.py", line 28, in from auth_core.routes.auth_routes import router as auth_router
+File "auth_service\main.py", line 28, in from auth_service.auth_core.routes.auth_routes import router as auth_router
 ```
 
 **Fix Applied**:

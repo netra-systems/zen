@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
-from app.core.network_constants import (
+from netra_backend.app.core.network_constants import (
     DatabaseConstants,
     ServicePorts, 
     HostConstants,

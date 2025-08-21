@@ -1,12 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.636943</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.636943">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <name>Test Reporting System</name>
   <version>2.0</version>
   <status>active</status>
   <description>
     Comprehensive test reporting system specification that ensures clear, accurate, and persistent test tracking.
   </description>
-
   <critical-requirements>
     <requirement>
       <id>TR-001</id>
@@ -14,7 +22,6 @@
       <description>All test categories MUST be tracked persistently</description>
       <rationale>Test counts should remain visible even when collection fails</rationale>
     </requirement>
-    
     <requirement>
       <id>TR-002</id>
       <priority>CRITICAL</priority>
@@ -28,7 +35,6 @@
         real_e2e, real_services, mock_only
       </known-levels>
     </requirement>
-    
     <requirement>
       <id>TR-003</id>
       <priority>HIGH</priority>
@@ -42,7 +48,6 @@
       </states>
     </requirement>
   </critical-requirements>
-
   <reporting-structure>
     <report-files>
       <file>
@@ -58,7 +63,6 @@
           <section>Quick Actions</section>
         </sections>
       </file>
-      
       <file>
         <path>test_reports/summary.md</path>
         <purpose>Concise summary of test results</purpose>
@@ -68,7 +72,6 @@
           <section>Issues</section>
         </sections>
       </file>
-      
       <file>
         <path>test_reports/test_state.json</path>
         <purpose>Persistent test state tracking</purpose>
@@ -79,14 +82,12 @@
           <field>last_update</field>
         </data>
       </file>
-      
       <file>
         <path>test_reports/test_history.json</path>
         <purpose>Historical test runs (last 50)</purpose>
       </file>
     </report-files>
   </reporting-structure>
-
   <implementation>
     <module>
       <name>comprehensive_reporter.py</name>
@@ -98,7 +99,6 @@
         <responsibility>Show all known categories</responsibility>
       </responsibilities>
     </module>
-    
     <module>
       <name>report_manager.py</name>
       <location>test_framework/report_manager.py</location>
@@ -108,7 +108,6 @@
         <responsibility>Print summaries</responsibility>
       </responsibilities>
     </module>
-    
     <module>
       <name>runner.py</name>
       <location>test_framework/runner.py</location>
@@ -118,66 +117,55 @@
       </responsibilities>
     </module>
   </implementation>
-
   <anti-patterns>
     <anti-pattern>
       <name>Missing Categories</name>
       <description>Never hide test categories that exist</description>
       <solution>Always show all known categories, even with 0 tests</solution>
     </anti-pattern>
-    
     <anti-pattern>
       <name>Lost Test Counts</name>
       <description>Test counts disappearing when collection fails</description>
       <solution>Persist last known successful counts</solution>
     </anti-pattern>
-    
     <anti-pattern>
       <name>Confusing Status</name>
       <description>Unclear or ambiguous test status reporting</description>
       <solution>Use clear icons and explicit status messages</solution>
     </anti-pattern>
-    
     <anti-pattern>
       <name>Legacy Artifacts</name>
       <description>Multiple conflicting report formats</description>
       <solution>Single comprehensive reporter as source of truth</solution>
     </anti-pattern>
   </anti-patterns>
-
   <testing>
     <test-case>
       <name>All categories visible</name>
       <verify>Dashboard shows all 17+ test levels</verify>
     </test-case>
-    
     <test-case>
       <name>Persistent counts</name>
       <verify>Test counts remain after collection failure</verify>
     </test-case>
-    
     <test-case>
       <name>Clear status icons</name>
       <verify>Each status has distinct icon and message</verify>
     </test-case>
-    
     <test-case>
       <name>History tracking</name>
       <verify>Last 50 test runs are preserved</verify>
     </test-case>
   </testing>
-
   <learnings>
     <learning date="2025-08-17">
       Enhanced reporter was causing confusion with missing categories.
       Solution: Created comprehensive_reporter.py with all known categories.
     </learning>
-    
     <learning date="2025-08-17">
       Test counts were disappearing on collection failures.
       Solution: Added persistent test_state.json tracking.
     </learning>
-    
     <learning date="2025-08-17">
       Multiple report formats were creating legacy artifacts.
       Solution: Unified under comprehensive_reporter as single source of truth.

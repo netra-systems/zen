@@ -6,8 +6,8 @@ import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from app.db.models_postgres import User
-from app.config import settings
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.config import settings
 
 async def check_users():
     # Create async engine

@@ -19,12 +19,12 @@ from typing import Dict, Any, List, Optional
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.websocket.unified.manager import WebSocketManager
-from app.websocket.connection import ConnectionInfo
-from app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
-from app.schemas.registry import WebSocketMessage, ServerMessage
-from app.schemas.websocket_models import WebSocketStats, BroadcastResult
-from tests.unified.e2e.agent_response_test_utilities import ResponseStreamingVerifier
+from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
+from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.schemas.websocket_models import WebSocketStats, BroadcastResult
+from netra_backend.tests.unified.e2e.agent_response_test_utilities import ResponseStreamingVerifier
 
 
 class WebSocketStreamingTester:

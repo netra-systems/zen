@@ -23,7 +23,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
-from .dev_launcher_test_fixtures import TestEnvironmentManager
+from tests.unified.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
 @dataclass

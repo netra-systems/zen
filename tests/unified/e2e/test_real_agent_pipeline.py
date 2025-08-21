@@ -25,14 +25,14 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
-from .agent_conversation_helpers import AgentConversationTestCore
-from .websocket_resilience_core import WebSocketResilienceTestCore
-from ..config import TEST_USERS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
-from app.schemas.UserPlan import PlanTier
-from app.agents.state import DeepAgentState
-from app.schemas import SubAgentLifecycle, WebSocketMessage
-from app.agents.supervisor_consolidated import SupervisorAgent
+from tests.unified.e2e.agent_conversation_helpers import AgentConversationTestCore
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.unified.config import TEST_USERS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 @pytest.mark.asyncio

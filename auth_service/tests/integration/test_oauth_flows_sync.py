@@ -13,7 +13,7 @@ from pathlib import Path
 auth_service_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(auth_service_dir))
 from main import app
-from auth_core.models.auth_models import AuthProvider
+from auth_service.auth_core.models.auth_models import AuthProvider
 
 # Test client
 client = TestClient(app)

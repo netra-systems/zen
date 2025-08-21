@@ -15,9 +15,9 @@ from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
-from app.logging_config import central_logger
+from tests.unified.e2e.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -291,7 +291,7 @@ class WebSocketTestManager:
         """Create test JWT token with proper authentication"""
         try:
             # Try to create real JWT token first
-            from app.auth_integration.auth import create_access_token
+            from netra_backend.app.auth_integration.auth import create_access_token
             token_data = {"sub": user_id, "user_id": user_id, "email": f"{user_id}@test.com"}
             return create_access_token(data=token_data)
         except (ImportError, Exception) as e:

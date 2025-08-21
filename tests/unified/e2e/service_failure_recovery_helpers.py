@@ -16,9 +16,9 @@ import json
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 
-from .service_orchestrator import E2EServiceOrchestrator
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
 
 logger = logging.getLogger(__name__)
 

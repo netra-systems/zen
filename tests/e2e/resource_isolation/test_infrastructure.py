@@ -19,7 +19,7 @@ Business Value Justification (BVJ):
 """
 
 # Re-export all infrastructure components for backward compatibility
-from .infrastructure import (
+from tests.e2e.resource_isolation.infrastructure import ResourceMetrics, TenantAgent, ResourceViolation, PerformanceImpactReport, RESOURCE_LIMITS, ResourceMonitor, ResourceLeakDetector, PerformanceIsolationValidator, QuotaEnforcer
     ResourceMetrics, TenantAgent, ResourceViolation, PerformanceImpactReport,
     RESOURCE_LIMITS, ResourceMonitor, ResourceLeakDetector, 
     PerformanceIsolationValidator, QuotaEnforcer

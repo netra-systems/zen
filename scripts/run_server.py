@@ -16,7 +16,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 # Verify app module can be found
-app_dir = project_root / "app"
+app_dir = project_root / "netra_backend" / "app"
 if not app_dir.exists():
     print(f"ERROR: app directory not found at {app_dir}")
     print(f"Current directory: {Path.cwd()}")
@@ -101,11 +101,11 @@ if __name__ == "__main__":
         print(f"\nDebug Info:")
         print(f"  Project root: {project_root}")
         print(f"  Python path: {sys.path[:3]}")
-        print(f"  App directory exists: {(project_root / 'app').exists()}")
+        print(f"  App directory exists: {(project_root / 'netra_backend' / 'app').exists()}")
         print(f"  Current directory: {Path.cwd()}")
     
     uvicorn.run(
-        "app.main:app",
+        "netra_backend.app.main:app",
         host=args.host,
         port=port,
         reload=not args.no_reload

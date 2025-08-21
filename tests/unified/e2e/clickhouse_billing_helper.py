@@ -19,7 +19,7 @@ import time
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 class MockClickHouseBillingClient:

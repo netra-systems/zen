@@ -1,511 +1,490 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <title>Unified Agent Architecture Specification</title>
-        <version>2.0</version>
-        <created>2025-01-20</created>
-        <purpose>Consolidated and aligned specification for all agent components in Netra Apex platform</purpose>
-        <business_impact>CRITICAL - Directly impacts AI cost optimization and value capture across all customer segments</business_impact>
-        <supersedes>
-            <spec>agent_architecture.xml</spec>
-            <spec>subagents.xml</spec>
-            <spec>agent_testing.xml</spec>
-            <spec>agent_tracking.xml</spec>
-            <spec>e2e-agent-workflows-unified.xml</spec>
-        </supersedes>
-    </metadata>
-
-    <overview>
-        <description>
+  <metadata>
+    <title>Unified Agent Architecture Specification</title>
+    <version>2.0</version>
+    <created>2025-01-20</created>
+    <purpose>Consolidated and aligned specification for all agent components in Netra Apex platform</purpose>
+    <business_impact>CRITICAL - Directly impacts AI cost optimization and value capture across all customer segments</business_impact>
+    <supersedes>
+      <spec>agent_architecture.xml</spec>
+      <spec>subagents.xml</spec>
+      <spec>agent_testing.xml</spec>
+      <spec>agent_tracking.xml</spec>
+      <spec>e2e-agent-workflows-unified.xml</spec>
+    </supersedes>
+    <last_edited>2025-08-21T08:47:28.680826</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.680826">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <overview>
+    <description>
             The Netra Apex agent system employs a hierarchical multi-agent architecture designed to 
             optimize AI workloads through intelligent coordination, specialized processing, and 
             measurable value creation. This unified specification consolidates all agent-related 
             requirements to ensure system-wide coherence and business alignment.
         </description>
-        <key_principles>
-            <principle id="UP-001">Business Value Justification (BVJ) required for every agent</principle>
-            <principle id="UP-002">Single responsibility with 450-line file and 25-line function limits</principle>
-            <principle id="UP-003">Strong typing with Pydantic models for all interfaces</principle>
-            <principle id="UP-004">Real LLM integration with intelligent fallback mechanisms</principle>
-            <principle id="UP-005">Complete observability through metrics, logs, and traces</principle>
-            <principle id="UP-006">Test coverage minimum 90% with real > mock preference</principle>
-        </key_principles>
-    </overview>
-
-    <agent_hierarchy>
-        <layer name="Orchestration">
-            <agent id="supervisor" class="SupervisorAgent" type="ORCHESTRATOR">
-                <purpose>Central coordination and workflow management</purpose>
-                <responsibilities>
-                    <responsibility>Route requests to appropriate SubAgents</responsibility>
-                    <responsibility>Manage agent lifecycle and state transitions</responsibility>
-                    <responsibility>Monitor system health and circuit breakers</responsibility>
-                    <responsibility>Aggregate results and manage user communication</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Valid user request received</condition>
-                    <condition>Authentication verified</condition>
-                    <condition>Thread context established</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Final response sent to user</condition>
-                    <condition>All SubAgents completed or failed</condition>
-                    <condition>Error threshold exceeded</condition>
-                </exit_conditions>
-                <bvj>
-                    <segment>All</segment>
-                    <goal>Workflow Orchestration</goal>
-                    <value_impact>Enables all AI optimization workflows</value_impact>
-                    <revenue_impact>Foundation for all value creation</revenue_impact>
-                </bvj>
-            </agent>
-        </layer>
-
-        <layer name="Core SubAgents">
-            <agent id="triage" class="TriageSubAgent" type="LLM_WORKFLOW">
-                <purpose>Intelligent request classification and routing</purpose>
-                <responsibilities>
-                    <responsibility>Categorize user requests by intent and complexity</responsibility>
-                    <responsibility>Extract entities and enrich context</responsibility>
-                    <responsibility>Determine optimal agent workflow</responsibility>
-                    <responsibility>Validate request feasibility</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Raw user request available</condition>
-                    <condition>Supervisor handoff received</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Request categorized with confidence score</condition>
-                    <condition>Routing decision made</condition>
-                    <condition>Context enriched</condition>
-                </exit_conditions>
-                <llm_requirements>
-                    <model>gpt-4 or claude-3-opus</model>
-                    <prompt_template>TRIAGE_CLASSIFICATION_PROMPT</prompt_template>
-                    <max_tokens>2000</max_tokens>
-                    <temperature>0.3</temperature>
-                </llm_requirements>
-                <bvj>
-                    <segment>All</segment>
-                    <goal>Request Optimization</goal>
-                    <value_impact>Reduces processing time by 40%</value_impact>
-                    <revenue_impact>Enables accurate cost attribution</revenue_impact>
-                </bvj>
-            </agent>
-
-            <agent id="data" class="DataSubAgent" type="LLM_WORKFLOW">
-                <purpose>Data analysis, enrichment, and insights generation</purpose>
-                <responsibilities>
-                    <responsibility>Query ClickHouse for performance metrics</responsibility>
-                    <responsibility>Analyze patterns and anomalies</responsibility>
-                    <responsibility>Generate data-driven insights</responsibility>
-                    <responsibility>Cache frequently accessed data</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Triage classification completed</condition>
-                    <condition>Data requirements specified</condition>
-                    <condition>Database connections available</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Required data retrieved and analyzed</condition>
-                    <condition>Insights generated</condition>
-                    <condition>Results cached</condition>
-                </exit_conditions>
-                <llm_requirements>
-                    <model>gpt-4 or claude-3-opus</model>
-                    <prompt_template>DATA_ANALYSIS_PROMPT</prompt_template>
-                    <max_tokens>4000</max_tokens>
-                    <temperature>0.2</temperature>
-                </llm_requirements>
-                <bvj>
-                    <segment>Growth, Mid, Enterprise</segment>
-                    <goal>Data-Driven Optimization</goal>
-                    <value_impact>Identifies optimization opportunities worth 15-30% cost savings</value_impact>
-                    <revenue_impact>Primary driver for performance fee capture</revenue_impact>
-                </bvj>
-            </agent>
-
-            <agent id="optimization_core" class="OptimizationsCoreSubAgent" type="LLM_WORKFLOW">
-                <purpose>Core optimization logic and strategy generation</purpose>
-                <responsibilities>
-                    <responsibility>Analyze data for optimization opportunities</responsibility>
-                    <responsibility>Generate optimization strategies</responsibility>
-                    <responsibility>Calculate expected savings and impacts</responsibility>
-                    <responsibility>Prioritize optimizations by ROI</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Data analysis completed</condition>
-                    <condition>Performance baselines established</condition>
-                    <condition>Constraints defined</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Optimization plan generated</condition>
-                    <condition>Impact projections calculated</condition>
-                    <condition>Recommendations prioritized</condition>
-                </exit_conditions>
-                <llm_requirements>
-                    <model>gpt-4 or claude-3-opus</model>
-                    <prompt_template>OPTIMIZATION_STRATEGY_PROMPT</prompt_template>
-                    <max_tokens>6000</max_tokens>
-                    <temperature>0.4</temperature>
-                </llm_requirements>
-                <bvj>
-                    <segment>Mid, Enterprise</segment>
-                    <goal>AI Spend Optimization</goal>
-                    <value_impact>Core value generation engine</value_impact>
-                    <revenue_impact>20-40% cost reduction opportunities</revenue_impact>
-                </bvj>
-            </agent>
-
-            <agent id="actions_to_meet_goals" class="ActionsToMeetGoalsSubAgent" type="LLM_WORKFLOW">
-                <purpose>Translate optimizations into actionable implementation plans</purpose>
-                <responsibilities>
-                    <responsibility>Convert strategies to concrete actions</responsibility>
-                    <responsibility>Generate configuration changes</responsibility>
-                    <responsibility>Create implementation timelines</responsibility>
-                    <responsibility>Define success metrics</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Optimization strategies defined</condition>
-                    <condition>System constraints known</condition>
-                    <condition>Implementation context available</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Action plan created</condition>
-                    <condition>Configurations generated</condition>
-                    <condition>Timeline established</condition>
-                </exit_conditions>
-                <llm_requirements>
-                    <model>gpt-4 or claude-3-opus</model>
-                    <prompt_template>ACTION_PLAN_PROMPT</prompt_template>
-                    <max_tokens>8000</max_tokens>
-                    <temperature>0.3</temperature>
-                </llm_requirements>
-                <bvj>
-                    <segment>Mid, Enterprise</segment>
-                    <goal>Implementation Enablement</goal>
-                    <value_impact>Reduces implementation time by 60%</value_impact>
-                    <revenue_impact>Accelerates value realization</revenue_impact>
-                </bvj>
-            </agent>
-
-            <agent id="reporting" class="ReportingSubAgent" type="LLM_WORKFLOW">
-                <purpose>Generate comprehensive reports and summaries</purpose>
-                <responsibilities>
-                    <responsibility>Aggregate results from all agents</responsibility>
-                    <responsibility>Generate executive summaries</responsibility>
-                    <responsibility>Create detailed technical reports</responsibility>
-                    <responsibility>Track KPIs and success metrics</responsibility>
-                </responsibilities>
-                <entry_conditions>
-                    <condition>Agent workflow completed</condition>
-                    <condition>Results available for aggregation</condition>
-                </entry_conditions>
-                <exit_conditions>
-                    <condition>Report generated</condition>
-                    <condition>Metrics tracked</condition>
-                    <condition>User notified</condition>
-                </exit_conditions>
-                <llm_requirements>
-                    <model>gpt-3.5-turbo or gpt-4</model>
-                    <prompt_template>REPORT_GENERATION_PROMPT</prompt_template>
-                    <max_tokens>4000</max_tokens>
-                    <temperature>0.5</temperature>
-                </llm_requirements>
-                <bvj>
-                    <segment>All</segment>
-                    <goal>Value Communication</goal>
-                    <value_impact>Demonstrates ROI to stakeholders</value_impact>
-                    <revenue_impact>Supports retention and upsell</revenue_impact>
-                </bvj>
-            </agent>
-        </layer>
-
-        <layer name="Supporting Components">
-            <component_categories>
-                <category name="Execution Components" suffix="Executor/Manager">
-                    <description>Infrastructure patterns for execution and state management</description>
-                    <examples>execution_core, state_manager, circuit_breaker_core</examples>
-                </category>
-                <category name="Service Components" suffix="Service">
-                    <description>Specialized processors for specific domains</description>
-                    <examples>clickhouse_service, cache_service, validation_service</examples>
-                </category>
-                <category name="Utility Modules" suffix="(descriptive name)">
-                    <description>Shared functionality and helpers</description>
-                    <examples>json_extractor, error_handler, fallback_helpers</examples>
-                </category>
-            </component_categories>
-        </layer>
-    </agent_hierarchy>
-
-    <workflow_specification>
-        <standard_flow>
-            <step order="1">User Request → SupervisorAgent</step>
-            <step order="2">SupervisorAgent → TriageSubAgent</step>
-            <step order="3">TriageSubAgent → SupervisorAgent (classification)</step>
-            <step order="4">SupervisorAgent → DataSubAgent</step>
-            <step order="5">DataSubAgent → SupervisorAgent (insights)</step>
-            <step order="6">SupervisorAgent → OptimizationsCoreSubAgent</step>
-            <step order="7">OptimizationsCoreSubAgent → SupervisorAgent (strategies)</step>
-            <step order="8">SupervisorAgent → ActionsToMeetGoalsSubAgent</step>
-            <step order="9">ActionsToMeetGoalsSubAgent → SupervisorAgent (actions)</step>
-            <step order="10">SupervisorAgent → ReportingSubAgent</step>
-            <step order="11">ReportingSubAgent → SupervisorAgent (report)</step>
-            <step order="12">SupervisorAgent → User (final response)</step>
-        </standard_flow>
-
-        <error_handling>
-            <strategy name="Circuit Breaker">
-                <description>Prevent cascade failures</description>
-                <thresholds>
-                    <threshold>5 failures in 60 seconds triggers circuit open</threshold>
-                    <threshold>30 second cooldown before retry</threshold>
-                </thresholds>
-            </strategy>
-            <strategy name="Fallback">
-                <description>Graceful degradation when LLM fails</description>
-                <levels>
-                    <level>Try alternative LLM model</level>
-                    <level>Use cached results if available</level>
-                    <level>Return partial results with explanation</level>
-                </levels>
-            </strategy>
-            <strategy name="Retry">
-                <description>Exponential backoff for transient failures</description>
-                <configuration>
-                    <max_retries>3</max_retries>
-                    <base_delay>1 second</base_delay>
-                    <max_delay>30 seconds</max_delay>
-                </configuration>
-            </strategy>
-        </error_handling>
-    </workflow_specification>
-
-    <implementation_requirements>
-        <requirement id="IR-001" priority="CRITICAL">
-            <title>BaseSubAgent Extension</title>
-            <description>All LLM agents MUST extend BaseSubAgent class</description>
-            <implementation>
-                <import>from app.agents.base import BaseSubAgent</import>
-                <inheritance>class MyAgent(BaseSubAgent)</inheritance>
-                <required_methods>
-                    <method>async def execute(self, state: DeepAgentState) -> DeepAgentState</method>
-                    <method>def check_entry_conditions(self, state: DeepAgentState) -> bool</method>
-                    <method>async def _run_llm(self, prompt: str) -> str</method>
-                </required_methods>
-            </implementation>
-        </requirement>
-
-        <requirement id="IR-002" priority="CRITICAL">
-            <title>State Management</title>
-            <description>Use DeepAgentState for all state transitions</description>
-            <implementation>
-                <import>from app.agents.state import DeepAgentState</import>
-                <validation>State transitions must be atomic and validated</validation>
-                <persistence>Critical state persisted to Redis/PostgreSQL</persistence>
-            </implementation>
-        </requirement>
-
-        <requirement id="IR-003" priority="HIGH">
-            <title>WebSocket Integration</title>
-            <description>Real-time updates through WebSocket</description>
-            <implementation>
-                <import>from app.websocket.unified.manager import UnifiedWebSocketManager</import>
-                <updates>Send progress updates during execution</updates>
-                <format>Use WebSocketMessage model for all messages</format>
-            </implementation>
-        </requirement>
-
-        <requirement id="IR-004" priority="HIGH">
-            <title>Observability</title>
-            <description>Complete metrics, logs, and traces</description>
-            <implementation>
-                <metrics>Prometheus metrics for latency, errors, throughput</metrics>
-                <logging>Structured logging with correlation IDs</logging>
-                <tracing>OpenTelemetry spans for distributed tracing</tracing>
-            </implementation>
-        </requirement>
-
-        <requirement id="IR-005" priority="CRITICAL">
-            <title>Architecture Compliance</title>
-            <description>Strict adherence to architecture limits</description>
-            <limits>
-                <limit>Files ≤ 300 lines</limit>
-                <limit>Functions ≤ 8 lines</limit>
-                <limit>Single responsibility per module</limit>
-                <limit>No code duplication</limit>
-            </limits>
-            <validation>Run scripts/check_architecture_compliance.py</validation>
-        </requirement>
-    </implementation_requirements>
-
-    <testing_requirements>
-        <requirement id="TR-001" priority="CRITICAL">
-            <title>Coverage Requirements</title>
-            <description>Minimum test coverage per agent type</description>
-            <targets>
-                <target>Core SubAgents: 90% coverage minimum</target>
-                <target>Execution Components: 85% coverage minimum</target>
-                <target>Service Components: 85% coverage minimum</target>
-                <target>Utility Modules: 80% coverage minimum</target>
-            </targets>
-        </requirement>
-
-        <requirement id="TR-002" priority="CRITICAL">
-            <title>Test Types</title>
-            <description>Required test types for each agent</description>
-            <types>
-                <type name="Unit Tests">
-                    <coverage>All public methods</coverage>
-                    <mocking>Mock external dependencies only</mocking>
-                </type>
-                <type name="Integration Tests">
-                    <coverage>Agent interactions and handoffs</coverage>
-                    <mocking>Use real components where possible</mocking>
-                </type>
-                <type name="E2E Tests with Real LLM">
-                    <coverage>Complete workflows with actual LLM calls</coverage>
-                    <configuration>ENABLE_REAL_LLM_TESTING=true</configuration>
-                </type>
-            </types>
-        </requirement>
-
-        <requirement id="TR-003" priority="HIGH">
-            <title>Test Data</title>
-            <description>Production-like test data requirements</description>
-            <datasets>
-                <dataset>100K+ production-mirror records</dataset>
-                <dataset>All 9 example prompts with expected outputs</dataset>
-                <dataset>Edge cases and error scenarios</dataset>
-                <dataset>Performance stress test data</dataset>
-            </datasets>
-        </requirement>
-
-        <requirement id="TR-004" priority="HIGH">
-            <title>Test Execution</title>
-            <description>Test runner integration requirements</description>
-            <execution>
-                <command>python -m test_framework.test_runner --level agents</command>
-                <ci_cd>Automated in GitHub Actions on every PR</ci_cd>
-                <performance>All tests complete in &lt;30 seconds</performance>
-            </execution>
-        </requirement>
-    </testing_requirements>
-
-    <monitoring_and_metrics>
-        <sli_definitions>
-            <sli name="agent_latency">
-                <description>P99 latency for agent execution</description>
-                <target>&lt;2 seconds per agent</target>
-                <measurement>Prometheus histogram</measurement>
-            </sli>
-            <sli name="agent_success_rate">
-                <description>Percentage of successful agent executions</description>
-                <target>&gt;99.5%</target>
-                <measurement>Success/total executions</measurement>
-            </sli>
-            <sli name="llm_token_efficiency">
-                <description>Average tokens used per request type</description>
-                <target>Within budgeted limits</target>
-                <measurement>Token counter per agent</measurement>
-            </sli>
-            <sli name="cache_hit_rate">
-                <description>Percentage of requests served from cache</description>
-                <target>&gt;60% for repeated queries</target>
-                <measurement>Cache hits/total requests</measurement>
-            </sli>
-        </sli_definitions>
-
-        <dashboards>
-            <dashboard name="Agent Performance">
-                <panels>
-                    <panel>Agent execution latency by type</panel>
-                    <panel>Success/failure rates</panel>
-                    <panel>Token usage trends</panel>
-                    <panel>Cache effectiveness</panel>
-                </panels>
-            </dashboard>
-            <dashboard name="Business Metrics">
-                <panels>
-                    <panel>Cost savings generated</panel>
-                    <panel>Optimization opportunities identified</panel>
-                    <panel>Customer segment usage</panel>
-                    <panel>Value capture rate</panel>
-                </panels>
-            </dashboard>
-        </dashboards>
-
-        <alerts>
-            <alert name="High Agent Latency" severity="WARNING">
-                <condition>P99 latency &gt; 3 seconds for 5 minutes</condition>
-                <action>Scale compute resources</action>
-            </alert>
-            <alert name="Agent Failure Rate" severity="CRITICAL">
-                <condition>Success rate &lt; 95% for 2 minutes</condition>
-                <action>Activate circuit breaker, page on-call</action>
-            </alert>
-            <alert name="LLM Token Budget Exceeded" severity="WARNING">
-                <condition>Token usage &gt; 120% of budget</condition>
-                <action>Review and optimize prompts</action>
-            </alert>
-        </alerts>
-    </monitoring_and_metrics>
-
-    <migration_plan>
-        <phase id="1" name="Spec Alignment">
-            <description>Update all agents to comply with unified spec</description>
-            <tasks>
-                <task>Rename agents to follow naming conventions</task>
-                <task>Ensure all agents extend BaseSubAgent</task>
-                <task>Add missing entry/exit conditions</task>
-                <task>Implement proper state management</task>
-            </tasks>
-            <timeline>1 week</timeline>
-        </phase>
-
-        <phase id="2" name="Testing Implementation">
-            <description>Achieve required test coverage</description>
-            <tasks>
-                <task>Write missing unit tests</task>
-                <task>Add integration tests for agent handoffs</task>
-                <task>Implement E2E tests with real LLM</task>
-                <task>Generate production-like test data</task>
-            </tasks>
-            <timeline>2 weeks</timeline>
-        </phase>
-
-        <phase id="3" name="Observability">
-            <description>Complete monitoring implementation</description>
-            <tasks>
-                <task>Add Prometheus metrics to all agents</task>
-                <task>Implement structured logging</task>
-                <task>Add OpenTelemetry tracing</task>
-                <task>Create dashboards and alerts</task>
-            </tasks>
-            <timeline>1 week</timeline>
-        </phase>
-
-        <phase id="4" name="Performance Optimization">
-            <description>Optimize for production scale</description>
-            <tasks>
-                <task>Implement caching strategies</task>
-                <task>Optimize LLM prompts for token efficiency</task>
-                <task>Add connection pooling</task>
-                <task>Performance testing and tuning</task>
-            </tasks>
-            <timeline>1 week</timeline>
-        </phase>
-    </migration_plan>
-
-    <success_criteria>
-        <criterion>All agents comply with unified architecture specification</criterion>
-        <criterion>Test coverage meets or exceeds targets (90% for core agents)</criterion>
-        <criterion>P99 latency &lt;2 seconds for all agent operations</criterion>
-        <criterion>Success rate &gt;99.5% in production</criterion>
-        <criterion>Zero architecture compliance violations</criterion>
-        <criterion>All 9 example prompts have passing E2E tests</criterion>
-        <criterion>Complete observability with metrics, logs, and traces</criterion>
-        <criterion>Documented value creation for each customer segment</criterion>
-    </success_criteria>
+    <key_principles>
+      <principle id="UP-001">Business Value Justification (BVJ) required for every agent</principle>
+      <principle id="UP-002">Single responsibility with 450-line file and 25-line function limits</principle>
+      <principle id="UP-003">Strong typing with Pydantic models for all interfaces</principle>
+      <principle id="UP-004">Real LLM integration with intelligent fallback mechanisms</principle>
+      <principle id="UP-005">Complete observability through metrics, logs, and traces</principle>
+      <principle id="UP-006">Test coverage minimum 90% with real &gt; mock preference</principle>
+    </key_principles>
+  </overview>
+  <agent_hierarchy>
+    <layer name="Orchestration">
+      <agent id="supervisor" class="SupervisorAgent" type="ORCHESTRATOR">
+        <purpose>Central coordination and workflow management</purpose>
+        <responsibilities>
+          <responsibility>Route requests to appropriate SubAgents</responsibility>
+          <responsibility>Manage agent lifecycle and state transitions</responsibility>
+          <responsibility>Monitor system health and circuit breakers</responsibility>
+          <responsibility>Aggregate results and manage user communication</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Valid user request received</condition>
+          <condition>Authentication verified</condition>
+          <condition>Thread context established</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Final response sent to user</condition>
+          <condition>All SubAgents completed or failed</condition>
+          <condition>Error threshold exceeded</condition>
+        </exit_conditions>
+        <bvj>
+          <segment>All</segment>
+          <goal>Workflow Orchestration</goal>
+          <value_impact>Enables all AI optimization workflows</value_impact>
+          <revenue_impact>Foundation for all value creation</revenue_impact>
+        </bvj>
+      </agent>
+    </layer>
+    <layer name="Core SubAgents">
+      <agent id="triage" class="TriageSubAgent" type="LLM_WORKFLOW">
+        <purpose>Intelligent request classification and routing</purpose>
+        <responsibilities>
+          <responsibility>Categorize user requests by intent and complexity</responsibility>
+          <responsibility>Extract entities and enrich context</responsibility>
+          <responsibility>Determine optimal agent workflow</responsibility>
+          <responsibility>Validate request feasibility</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Raw user request available</condition>
+          <condition>Supervisor handoff received</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Request categorized with confidence score</condition>
+          <condition>Routing decision made</condition>
+          <condition>Context enriched</condition>
+        </exit_conditions>
+        <llm_requirements>
+          <model>gpt-4 or claude-3-opus</model>
+          <prompt_template>TRIAGE_CLASSIFICATION_PROMPT</prompt_template>
+          <max_tokens>2000</max_tokens>
+          <temperature>0.3</temperature>
+        </llm_requirements>
+        <bvj>
+          <segment>All</segment>
+          <goal>Request Optimization</goal>
+          <value_impact>Reduces processing time by 40%</value_impact>
+          <revenue_impact>Enables accurate cost attribution</revenue_impact>
+        </bvj>
+      </agent>
+      <agent id="data" class="DataSubAgent" type="LLM_WORKFLOW">
+        <purpose>Data analysis, enrichment, and insights generation</purpose>
+        <responsibilities>
+          <responsibility>Query ClickHouse for performance metrics</responsibility>
+          <responsibility>Analyze patterns and anomalies</responsibility>
+          <responsibility>Generate data-driven insights</responsibility>
+          <responsibility>Cache frequently accessed data</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Triage classification completed</condition>
+          <condition>Data requirements specified</condition>
+          <condition>Database connections available</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Required data retrieved and analyzed</condition>
+          <condition>Insights generated</condition>
+          <condition>Results cached</condition>
+        </exit_conditions>
+        <llm_requirements>
+          <model>gpt-4 or claude-3-opus</model>
+          <prompt_template>DATA_ANALYSIS_PROMPT</prompt_template>
+          <max_tokens>4000</max_tokens>
+          <temperature>0.2</temperature>
+        </llm_requirements>
+        <bvj>
+          <segment>Growth, Mid, Enterprise</segment>
+          <goal>Data-Driven Optimization</goal>
+          <value_impact>Identifies optimization opportunities worth 15-30% cost savings</value_impact>
+          <revenue_impact>Primary driver for performance fee capture</revenue_impact>
+        </bvj>
+      </agent>
+      <agent id="optimization_core" class="OptimizationsCoreSubAgent" type="LLM_WORKFLOW">
+        <purpose>Core optimization logic and strategy generation</purpose>
+        <responsibilities>
+          <responsibility>Analyze data for optimization opportunities</responsibility>
+          <responsibility>Generate optimization strategies</responsibility>
+          <responsibility>Calculate expected savings and impacts</responsibility>
+          <responsibility>Prioritize optimizations by ROI</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Data analysis completed</condition>
+          <condition>Performance baselines established</condition>
+          <condition>Constraints defined</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Optimization plan generated</condition>
+          <condition>Impact projections calculated</condition>
+          <condition>Recommendations prioritized</condition>
+        </exit_conditions>
+        <llm_requirements>
+          <model>gpt-4 or claude-3-opus</model>
+          <prompt_template>OPTIMIZATION_STRATEGY_PROMPT</prompt_template>
+          <max_tokens>6000</max_tokens>
+          <temperature>0.4</temperature>
+        </llm_requirements>
+        <bvj>
+          <segment>Mid, Enterprise</segment>
+          <goal>AI Spend Optimization</goal>
+          <value_impact>Core value generation engine</value_impact>
+          <revenue_impact>20-40% cost reduction opportunities</revenue_impact>
+        </bvj>
+      </agent>
+      <agent id="actions_to_meet_goals" class="ActionsToMeetGoalsSubAgent" type="LLM_WORKFLOW">
+        <purpose>Translate optimizations into actionable implementation plans</purpose>
+        <responsibilities>
+          <responsibility>Convert strategies to concrete actions</responsibility>
+          <responsibility>Generate configuration changes</responsibility>
+          <responsibility>Create implementation timelines</responsibility>
+          <responsibility>Define success metrics</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Optimization strategies defined</condition>
+          <condition>System constraints known</condition>
+          <condition>Implementation context available</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Action plan created</condition>
+          <condition>Configurations generated</condition>
+          <condition>Timeline established</condition>
+        </exit_conditions>
+        <llm_requirements>
+          <model>gpt-4 or claude-3-opus</model>
+          <prompt_template>ACTION_PLAN_PROMPT</prompt_template>
+          <max_tokens>8000</max_tokens>
+          <temperature>0.3</temperature>
+        </llm_requirements>
+        <bvj>
+          <segment>Mid, Enterprise</segment>
+          <goal>Implementation Enablement</goal>
+          <value_impact>Reduces implementation time by 60%</value_impact>
+          <revenue_impact>Accelerates value realization</revenue_impact>
+        </bvj>
+      </agent>
+      <agent id="reporting" class="ReportingSubAgent" type="LLM_WORKFLOW">
+        <purpose>Generate comprehensive reports and summaries</purpose>
+        <responsibilities>
+          <responsibility>Aggregate results from all agents</responsibility>
+          <responsibility>Generate executive summaries</responsibility>
+          <responsibility>Create detailed technical reports</responsibility>
+          <responsibility>Track KPIs and success metrics</responsibility>
+        </responsibilities>
+        <entry_conditions>
+          <condition>Agent workflow completed</condition>
+          <condition>Results available for aggregation</condition>
+        </entry_conditions>
+        <exit_conditions>
+          <condition>Report generated</condition>
+          <condition>Metrics tracked</condition>
+          <condition>User notified</condition>
+        </exit_conditions>
+        <llm_requirements>
+          <model>gpt-3.5-turbo or gpt-4</model>
+          <prompt_template>REPORT_GENERATION_PROMPT</prompt_template>
+          <max_tokens>4000</max_tokens>
+          <temperature>0.5</temperature>
+        </llm_requirements>
+        <bvj>
+          <segment>All</segment>
+          <goal>Value Communication</goal>
+          <value_impact>Demonstrates ROI to stakeholders</value_impact>
+          <revenue_impact>Supports retention and upsell</revenue_impact>
+        </bvj>
+      </agent>
+    </layer>
+    <layer name="Supporting Components">
+      <component_categories>
+        <category name="Execution Components" suffix="Executor/Manager">
+          <description>Infrastructure patterns for execution and state management</description>
+          <examples>execution_core, state_manager, circuit_breaker_core</examples>
+        </category>
+        <category name="Service Components" suffix="Service">
+          <description>Specialized processors for specific domains</description>
+          <examples>clickhouse_service, cache_service, validation_service</examples>
+        </category>
+        <category name="Utility Modules" suffix="(descriptive name)">
+          <description>Shared functionality and helpers</description>
+          <examples>json_extractor, error_handler, fallback_helpers</examples>
+        </category>
+      </component_categories>
+    </layer>
+  </agent_hierarchy>
+  <workflow_specification>
+    <standard_flow>
+      <step order="1">User Request → SupervisorAgent</step>
+      <step order="2">SupervisorAgent → TriageSubAgent</step>
+      <step order="3">TriageSubAgent → SupervisorAgent (classification)</step>
+      <step order="4">SupervisorAgent → DataSubAgent</step>
+      <step order="5">DataSubAgent → SupervisorAgent (insights)</step>
+      <step order="6">SupervisorAgent → OptimizationsCoreSubAgent</step>
+      <step order="7">OptimizationsCoreSubAgent → SupervisorAgent (strategies)</step>
+      <step order="8">SupervisorAgent → ActionsToMeetGoalsSubAgent</step>
+      <step order="9">ActionsToMeetGoalsSubAgent → SupervisorAgent (actions)</step>
+      <step order="10">SupervisorAgent → ReportingSubAgent</step>
+      <step order="11">ReportingSubAgent → SupervisorAgent (report)</step>
+      <step order="12">SupervisorAgent → User (final response)</step>
+    </standard_flow>
+    <error_handling>
+      <strategy name="Circuit Breaker">
+        <description>Prevent cascade failures</description>
+        <thresholds>
+          <threshold>5 failures in 60 seconds triggers circuit open</threshold>
+          <threshold>30 second cooldown before retry</threshold>
+        </thresholds>
+      </strategy>
+      <strategy name="Fallback">
+        <description>Graceful degradation when LLM fails</description>
+        <levels>
+          <level>Try alternative LLM model</level>
+          <level>Use cached results if available</level>
+          <level>Return partial results with explanation</level>
+        </levels>
+      </strategy>
+      <strategy name="Retry">
+        <description>Exponential backoff for transient failures</description>
+        <configuration>
+          <max_retries>3</max_retries>
+          <base_delay>1 second</base_delay>
+          <max_delay>30 seconds</max_delay>
+        </configuration>
+      </strategy>
+    </error_handling>
+  </workflow_specification>
+  <implementation_requirements>
+    <requirement id="IR-001" priority="CRITICAL">
+      <title>BaseSubAgent Extension</title>
+      <description>All LLM agents MUST extend BaseSubAgent class</description>
+      <implementation>
+        <import>from netra_backend.app.agents.base import BaseSubAgent</import>
+        <inheritance>class MyAgent(BaseSubAgent)</inheritance>
+        <required_methods>
+          <method>async def execute(self, state: DeepAgentState) -&gt; DeepAgentState</method>
+          <method>def check_entry_conditions(self, state: DeepAgentState) -&gt; bool</method>
+          <method>async def _run_llm(self, prompt: str) -&gt; str</method>
+        </required_methods>
+      </implementation>
+    </requirement>
+    <requirement id="IR-002" priority="CRITICAL">
+      <title>State Management</title>
+      <description>Use DeepAgentState for all state transitions</description>
+      <implementation>
+        <import>from netra_backend.app.agents.state import DeepAgentState</import>
+        <validation>State transitions must be atomic and validated</validation>
+        <persistence>Critical state persisted to Redis/PostgreSQL</persistence>
+      </implementation>
+    </requirement>
+    <requirement id="IR-003" priority="HIGH">
+      <title>WebSocket Integration</title>
+      <description>Real-time updates through WebSocket</description>
+      <implementation>
+        <import>from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager</import>
+        <updates>Send progress updates during execution</updates>
+        <format>Use WebSocketMessage model for all messages</format>
+      </implementation>
+    </requirement>
+    <requirement id="IR-004" priority="HIGH">
+      <title>Observability</title>
+      <description>Complete metrics, logs, and traces</description>
+      <implementation>
+        <metrics>Prometheus metrics for latency, errors, throughput</metrics>
+        <logging>Structured logging with correlation IDs</logging>
+        <tracing>OpenTelemetry spans for distributed tracing</tracing>
+      </implementation>
+    </requirement>
+    <requirement id="IR-005" priority="CRITICAL">
+      <title>Architecture Compliance</title>
+      <description>Strict adherence to architecture limits</description>
+      <limits>
+        <limit>Files ≤ 300 lines</limit>
+        <limit>Functions ≤ 8 lines</limit>
+        <limit>Single responsibility per module</limit>
+        <limit>No code duplication</limit>
+      </limits>
+      <validation>Run scripts/check_architecture_compliance.py</validation>
+    </requirement>
+  </implementation_requirements>
+  <testing_requirements>
+    <requirement id="TR-001" priority="CRITICAL">
+      <title>Coverage Requirements</title>
+      <description>Minimum test coverage per agent type</description>
+      <targets>
+        <target>Core SubAgents: 90% coverage minimum</target>
+        <target>Execution Components: 85% coverage minimum</target>
+        <target>Service Components: 85% coverage minimum</target>
+        <target>Utility Modules: 80% coverage minimum</target>
+      </targets>
+    </requirement>
+    <requirement id="TR-002" priority="CRITICAL">
+      <title>Test Types</title>
+      <description>Required test types for each agent</description>
+      <types>
+        <type name="Unit Tests">
+          <coverage>All public methods</coverage>
+          <mocking>Mock external dependencies only</mocking>
+        </type>
+        <type name="Integration Tests">
+          <coverage>Agent interactions and handoffs</coverage>
+          <mocking>Use real components where possible</mocking>
+        </type>
+        <type name="E2E Tests with Real LLM">
+          <coverage>Complete workflows with actual LLM calls</coverage>
+          <configuration>ENABLE_REAL_LLM_TESTING=true</configuration>
+        </type>
+      </types>
+    </requirement>
+    <requirement id="TR-003" priority="HIGH">
+      <title>Test Data</title>
+      <description>Production-like test data requirements</description>
+      <datasets>
+        <dataset>100K+ production-mirror records</dataset>
+        <dataset>All 9 example prompts with expected outputs</dataset>
+        <dataset>Edge cases and error scenarios</dataset>
+        <dataset>Performance stress test data</dataset>
+      </datasets>
+    </requirement>
+    <requirement id="TR-004" priority="HIGH">
+      <title>Test Execution</title>
+      <description>Test runner integration requirements</description>
+      <execution>
+        <command>python -m test_framework.test_runner --level agents</command>
+        <ci_cd>Automated in GitHub Actions on every PR</ci_cd>
+        <performance>All tests complete in &lt;30 seconds</performance>
+      </execution>
+    </requirement>
+  </testing_requirements>
+  <monitoring_and_metrics>
+    <sli_definitions>
+      <sli name="agent_latency">
+        <description>P99 latency for agent execution</description>
+        <target>&lt;2 seconds per agent</target>
+        <measurement>Prometheus histogram</measurement>
+      </sli>
+      <sli name="agent_success_rate">
+        <description>Percentage of successful agent executions</description>
+        <target>&gt;99.5%</target>
+        <measurement>Success/total executions</measurement>
+      </sli>
+      <sli name="llm_token_efficiency">
+        <description>Average tokens used per request type</description>
+        <target>Within budgeted limits</target>
+        <measurement>Token counter per agent</measurement>
+      </sli>
+      <sli name="cache_hit_rate">
+        <description>Percentage of requests served from cache</description>
+        <target>&gt;60% for repeated queries</target>
+        <measurement>Cache hits/total requests</measurement>
+      </sli>
+    </sli_definitions>
+    <dashboards>
+      <dashboard name="Agent Performance">
+        <panels>
+          <panel>Agent execution latency by type</panel>
+          <panel>Success/failure rates</panel>
+          <panel>Token usage trends</panel>
+          <panel>Cache effectiveness</panel>
+        </panels>
+      </dashboard>
+      <dashboard name="Business Metrics">
+        <panels>
+          <panel>Cost savings generated</panel>
+          <panel>Optimization opportunities identified</panel>
+          <panel>Customer segment usage</panel>
+          <panel>Value capture rate</panel>
+        </panels>
+      </dashboard>
+    </dashboards>
+    <alerts>
+      <alert name="High Agent Latency" severity="WARNING">
+        <condition>P99 latency &gt; 3 seconds for 5 minutes</condition>
+        <action>Scale compute resources</action>
+      </alert>
+      <alert name="Agent Failure Rate" severity="CRITICAL">
+        <condition>Success rate &lt; 95% for 2 minutes</condition>
+        <action>Activate circuit breaker, page on-call</action>
+      </alert>
+      <alert name="LLM Token Budget Exceeded" severity="WARNING">
+        <condition>Token usage &gt; 120% of budget</condition>
+        <action>Review and optimize prompts</action>
+      </alert>
+    </alerts>
+  </monitoring_and_metrics>
+  <migration_plan>
+    <phase id="1" name="Spec Alignment">
+      <description>Update all agents to comply with unified spec</description>
+      <tasks>
+        <task>Rename agents to follow naming conventions</task>
+        <task>Ensure all agents extend BaseSubAgent</task>
+        <task>Add missing entry/exit conditions</task>
+        <task>Implement proper state management</task>
+      </tasks>
+      <timeline>1 week</timeline>
+    </phase>
+    <phase id="2" name="Testing Implementation">
+      <description>Achieve required test coverage</description>
+      <tasks>
+        <task>Write missing unit tests</task>
+        <task>Add integration tests for agent handoffs</task>
+        <task>Implement E2E tests with real LLM</task>
+        <task>Generate production-like test data</task>
+      </tasks>
+      <timeline>2 weeks</timeline>
+    </phase>
+    <phase id="3" name="Observability">
+      <description>Complete monitoring implementation</description>
+      <tasks>
+        <task>Add Prometheus metrics to all agents</task>
+        <task>Implement structured logging</task>
+        <task>Add OpenTelemetry tracing</task>
+        <task>Create dashboards and alerts</task>
+      </tasks>
+      <timeline>1 week</timeline>
+    </phase>
+    <phase id="4" name="Performance Optimization">
+      <description>Optimize for production scale</description>
+      <tasks>
+        <task>Implement caching strategies</task>
+        <task>Optimize LLM prompts for token efficiency</task>
+        <task>Add connection pooling</task>
+        <task>Performance testing and tuning</task>
+      </tasks>
+      <timeline>1 week</timeline>
+    </phase>
+  </migration_plan>
+  <success_criteria>
+    <criterion>All agents comply with unified architecture specification</criterion>
+    <criterion>Test coverage meets or exceeds targets (90% for core agents)</criterion>
+    <criterion>P99 latency &lt;2 seconds for all agent operations</criterion>
+    <criterion>Success rate &gt;99.5% in production</criterion>
+    <criterion>Zero architecture compliance violations</criterion>
+    <criterion>All 9 example prompts have passing E2E tests</criterion>
+    <criterion>Complete observability with metrics, logs, and traces</criterion>
+    <criterion>Documented value creation for each customer segment</criterion>
+  </success_criteria>
 </specification>

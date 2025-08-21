@@ -18,7 +18,7 @@ import redis.asyncio as redis
 import websockets
 import httpx
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class SessionSyncValidator:

@@ -16,10 +16,10 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
-from tests.unified.database_sync_fixtures import DatabaseSyncValidator
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.database_sync_fixtures import DatabaseSyncValidator
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 @dataclass

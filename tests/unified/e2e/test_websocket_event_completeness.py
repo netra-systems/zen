@@ -14,14 +14,14 @@ from datetime import datetime, timezone
 import pytest
 import pytest_asyncio
 
-from ..config import TEST_USERS
-from .helpers.websocket_test_helpers import (
+from tests.unified.config import TEST_USERS
+from tests.unified.e2e.helpers.websocket_test_helpers import WebSocketTestManager, create_agent_request, extract_events_by_type, validate_event_payload
     WebSocketTestManager, 
     create_agent_request,
     extract_events_by_type,
     validate_event_payload
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 pytestmark = pytest.mark.asyncio

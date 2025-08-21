@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Agent E2E Testing Learnings</title>
@@ -6,13 +6,19 @@
     <created>2025-08-16</created>
     <status>Active</status>
     <priority>Critical</priority>
+    <last_edited>2025-08-21T08:47:28.774068</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.774068">
+      <reasons>
+        <reason>Content contains: monolithic</reason>
+        <reason>Content contains: old</reason>
+        <reason>References old monolithic architecture</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     Comprehensive learnings from E2E agent workflow testing with real LLMs.
     These patterns prevent common failures and ensure robust agent operations.
   </overview>
-
   <critical_fixes>
     <fix id="AF-001">
       <issue>Missing execution_time_ms in AgentExecutionMetrics</issue>
@@ -35,7 +41,6 @@
         ALWAYS convert time to milliseconds for execution_time_ms.
       </prevention>
     </fix>
-
     <fix id="AF-002">
       <issue>ClickHouse array syntax errors with toFloat64OrZero</issue>
       <root_cause>
@@ -59,7 +64,6 @@
         ALWAYS check ClickHouse column types before applying conversions.
       </prevention>
     </fix>
-
     <fix id="AF-003">
       <issue>JSON parsing failures with non-JSON agent responses</issue>
       <root_cause>
@@ -85,7 +89,6 @@
       </prevention>
     </fix>
   </critical_fixes>
-
   <testing_patterns>
     <pattern id="TP-001">
       <name>Real LLM Testing Setup</name>
@@ -99,7 +102,6 @@
         4. Cache responses for faster re-runs
       </implementation>
     </pattern>
-
     <pattern id="TP-002">
       <name>Agent State Validation</name>
       <description>
@@ -112,7 +114,6 @@
         4. Test error states and recovery mechanisms
       </implementation>
     </pattern>
-
     <pattern id="TP-003">
       <name>Artifact Validation Between Agents</name>
       <description>
@@ -126,33 +127,28 @@
       </implementation>
     </pattern>
   </testing_patterns>
-
   <common_failures>
     <failure id="CF-001">
       <symptom>pydantic_core._pydantic_core.ValidationError: execution_time_ms Field required</symptom>
       <cause>Missing or incorrectly named field in AgentExecutionMetrics</cause>
       <fix>Ensure execution_time_ms is calculated and passed in milliseconds</fix>
     </failure>
-
     <failure id="CF-002">
       <symptom>Illegal type Array(Float64) of first argument of function toFloat64OrZero</symptom>
       <cause>Applying string conversion to Float64 array elements</cause>
       <fix>Use arrayElement directly without toFloat64OrZero wrapper</fix>
     </failure>
-
     <failure id="CF-003">
       <symptom>Parsed JSON is not a dict: class 'str'</symptom>
       <cause>Agent returning plain text or command arguments instead of JSON</cause>
       <fix>Wrap non-JSON responses in structured JSON objects</fix>
     </failure>
-
     <failure id="CF-004">
       <symptom>Replacement index 0 out of range for positional args tuple</symptom>
       <cause>String formatting error in error messages</cause>
       <fix>Check format string placeholders match provided arguments</fix>
     </failure>
   </common_failures>
-
   <architecture_compliance>
     <rule id="AC-001">
       <requirement>All functions must be 8 lines or less</requirement>
@@ -161,7 +157,6 @@
         Use composition over monolithic implementations.
       </enforcement>
     </rule>
-
     <rule id="AC-002">
       <requirement>All files must be 300 lines or less</requirement>
       <enforcement>
@@ -169,7 +164,6 @@
         Each module should have single responsibility.
       </enforcement>
     </rule>
-
     <rule id="AC-003">
       <requirement>No duplicate type definitions</requirement>
       <enforcement>
@@ -178,7 +172,6 @@
       </enforcement>
     </rule>
   </architecture_compliance>
-
   <best_practices>
     <practice id="BP-001">
       <name>Always Calculate Execution Time in Milliseconds</name>
@@ -186,7 +179,6 @@
         execution_time_ms = (time.time() - start_time) * 1000.0
       </implementation>
     </practice>
-
     <practice id="BP-002">
       <name>Validate ClickHouse Column Types</name>
       <implementation>
@@ -194,7 +186,6 @@
         Use appropriate functions for each type.
       </implementation>
     </practice>
-
     <practice id="BP-003">
       <name>Handle Non-JSON Agent Responses</name>
       <implementation>
@@ -202,7 +193,6 @@
         Categorize and handle different response types.
       </implementation>
     </practice>
-
     <practice id="BP-004">
       <name>Test with Real LLMs Regularly</name>
       <implementation>
@@ -211,7 +201,6 @@
       </implementation>
     </practice>
   </best_practices>
-
   <test_coverage>
     <coverage_area>
       <name>Agent Orchestration</name>
@@ -222,7 +211,6 @@
       </files>
       <status>PASSING (7/7, 4/5, 14/14)</status>
     </coverage_area>
-
     <coverage_area>
       <name>Error Handling</name>
       <files>
@@ -232,7 +220,6 @@
       </files>
       <status>PASSING</status>
     </coverage_area>
-
     <coverage_area>
       <name>Concurrency</name>
       <files>
@@ -242,43 +229,36 @@
       <status>PASSING</status>
     </coverage_area>
   </test_coverage>
-
   <monitoring>
     <metric id="M-001">
       <name>Test Success Rate</name>
       <target>95%</target>
       <current>92.3% (24/26 passing)</current>
     </metric>
-
     <metric id="M-002">
       <name>Average Execution Time</name>
       <target>Under 5 minutes per suite</target>
       <current>3:53 for real_agent_orchestration</current>
     </metric>
-
     <metric id="M-003">
       <name>Architecture Compliance</name>
       <target>100%</target>
       <current>39.1% (needs improvement)</current>
     </metric>
   </monitoring>
-
   <future_improvements>
     <improvement>
       <description>Add more comprehensive artifact validation</description>
       <priority>High</priority>
     </improvement>
-
     <improvement>
       <description>Implement automatic retry mechanisms for transient failures</description>
       <priority>Medium</priority>
     </improvement>
-
     <improvement>
       <description>Add performance benchmarking for agent pipelines</description>
       <priority>Low</priority>
     </improvement>
-
     <improvement>
       <description>Improve architecture compliance to reach 100%</description>
       <priority>Critical</priority>

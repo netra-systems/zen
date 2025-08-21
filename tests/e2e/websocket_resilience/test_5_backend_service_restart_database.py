@@ -15,10 +15,10 @@ from enum import Enum
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import required classes from core module
-from .test_5_backend_service_restart_core import MockBackendServer
+from tests.e2e.websocket_resilience.test_5_backend_service_restart_core import MockBackendServer
 
 logger = central_logger.get_logger(__name__)
 

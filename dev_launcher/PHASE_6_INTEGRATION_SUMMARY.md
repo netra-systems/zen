@@ -47,7 +47,6 @@ Complete integration of all dev launcher optimization phases for sub-10 second s
 - `--silent`: Minimal output (< 20 lines on success)
 - `--no-cache`: Bypass all caching for testing
 - `--profile`: Show detailed performance metrics
-- `--legacy`: Use old behavior for compatibility
 
 ### Usage Examples
 ```bash
@@ -59,9 +58,6 @@ python -m dev_launcher --silent --profile
 
 # No caching for testing
 python -m dev_launcher --no-cache
-
-# Legacy compatibility
-python -m dev_launcher --legacy
 ```
 
 ## Architecture Changes
@@ -71,12 +67,11 @@ python -m dev_launcher --legacy
 2. `dev_launcher/launcher_integration.py` - NEW: Component wiring and step implementations
 3. `dev_launcher/config.py` - New configuration flags
 4. `dev_launcher/__main__.py` - New command line arguments  
-5. `dev_launcher/launcher.py` - Legacy mode support
+5. `dev_launcher/launcher.py` - Performance optimizations
 
 ### Integration Flow
 ```
 DevLauncher.run()
-├── Legacy Mode: legacy_runner.run_services_sequential()
 └── Optimized Mode: optimized_startup.run_optimized_startup()
     ├── SmartStartupSequencer.execute_sequence()
     ├── ParallelExecutor for concurrent operations
@@ -117,7 +112,6 @@ DevLauncher.run()
 - Clear progress indication without noise
 - Intelligent error reporting with context
 - Performance profiling for optimization
-- Backward compatibility via --legacy flag
 
 ## Implementation Quality
 
@@ -132,7 +126,6 @@ DevLauncher.run()
 - ✅ Syntax validation: All modules compile successfully
 - ✅ Import validation: All integration imports work
 - ✅ Configuration validation: New flags parse correctly
-- ✅ Backward compatibility: --legacy mode preserves old behavior
 
 ## Future Optimizations
 
@@ -155,8 +148,7 @@ DevLauncher.run()
 ### Immediate Use
 1. All integration is backward compatible
 2. Default behavior uses optimized mode
-3. Use `--legacy` flag if issues occur
-4. Use `--profile` flag to verify performance targets
+3. Use `--profile` flag to verify performance targets
 
 ### Monitoring
 - Enable `--profile` in staging to monitor performance

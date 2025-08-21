@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Architecture Compliance Reporting Specification</title>
@@ -6,8 +6,13 @@
     <created>2025-08-17</created>
     <purpose>Define standards for compliance checking and reporting</purpose>
     <priority>HIGH</priority>
+    <last_edited>2025-08-21T08:47:28.391463</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.391463">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     <description>
       This specification defines the architecture compliance reporting system
@@ -16,7 +21,6 @@
       and prioritized violation reporting.
     </description>
   </overview>
-
   <compliance-rules>
     <rule id="file-size">
       <name>File Size Limit</name>
@@ -25,7 +29,6 @@
       <description>No file should exceed 300 lines</description>
       <remediation>Split into focused modules with single responsibilities</remediation>
     </rule>
-    
     <rule id="function-complexity">
       <name>Function Line Limit</name>
       <limit>8 lines</limit>
@@ -33,14 +36,12 @@
       <description>Functions must not exceed 8 lines</description>
       <remediation>Extract logic into smaller, focused functions</remediation>
     </rule>
-    
     <rule id="duplicate-types">
       <name>Single Source of Truth</name>
       <severity>medium</severity>
       <description>Type definitions must not be duplicated</description>
       <remediation>Consolidate into single definition location</remediation>
     </rule>
-    
     <rule id="test-stubs">
       <name>No Test Stubs in Production</name>
       <severity>high</severity>
@@ -48,7 +49,6 @@
       <remediation>Replace with production implementation</remediation>
     </rule>
   </compliance-rules>
-
   <reporting-features>
     <feature id="smart-limits">
       <name>Intelligent Display Limits</name>
@@ -60,7 +60,6 @@
       </description>
       <cli-option>--no-smart-limits</cli-option>
     </feature>
-    
     <feature id="severity-sorting">
       <name>Violation Prioritization</name>
       <description>
@@ -70,7 +69,6 @@
         3. File path (alphabetical)
       </description>
     </feature>
-    
     <feature id="detailed-statistics">
       <name>Accurate Statistics</name>
       <description>
@@ -80,7 +78,6 @@
         - Files affected
       </description>
     </feature>
-    
     <feature id="severity-markers">
       <name>Visual Severity Indicators</name>
       <description>
@@ -92,57 +89,44 @@
       <cli-option>--no-emoji</cli-option>
     </feature>
   </reporting-features>
-
   <cli-interface>
     <command>python scripts/check_architecture_compliance.py</command>
-    
     <options>
       <option name="--path" default=".">
         <description>Root path to check</description>
       </option>
-      
       <option name="--max-file-lines" default="300">
         <description>Maximum lines per file</description>
       </option>
-      
       <option name="--max-function-lines" default="8">
         <description>Maximum lines per function</description>
       </option>
-      
       <option name="--violation-limit" default="10">
         <description>Max violations to display per category</description>
       </option>
-      
       <option name="--show-all">
         <description>Show all violations instead of top ones</description>
       </option>
-      
       <option name="--no-smart-limits">
         <description>Disable smart limit detection</description>
       </option>
-      
       <option name="--no-emoji">
         <description>Disable emoji severity markers</description>
       </option>
-      
       <option name="--json-output">
         <description>Output JSON report to file</description>
       </option>
-      
       <option name="--json-only">
         <description>Output only JSON, no human-readable report</description>
       </option>
-      
       <option name="--fail-on-violation">
         <description>Exit with non-zero code on violations</description>
       </option>
-      
       <option name="--threshold" default="0.0">
         <description>Minimum compliance score (0-100) to pass</description>
       </option>
     </options>
   </cli-interface>
-
   <module-structure>
     <module path="/scripts/compliance/">
       <file name="__init__.py" lines="20">Package initialization</file>
@@ -158,34 +142,28 @@
       <file name="stub_checker.py" lines="~100">Stub detection</file>
     </module>
   </module-structure>
-
   <usage-examples>
     <example id="basic">
       <command>python scripts/check_architecture_compliance.py</command>
       <description>Basic compliance check with defaults</description>
     </example>
-    
     <example id="limited">
       <command>python scripts/check_architecture_compliance.py --violation-limit 5</command>
       <description>Show only top 5 violations per category</description>
     </example>
-    
     <example id="all">
       <command>python scripts/check_architecture_compliance.py --show-all</command>
       <description>Show all violations without truncation</description>
     </example>
-    
     <example id="ci">
       <command>python scripts/check_architecture_compliance.py --fail-on-violation --json-output report.json</command>
       <description>CI/CD usage with failure on violations</description>
     </example>
-    
     <example id="no-emoji">
       <command>python scripts/check_architecture_compliance.py --no-emoji</command>
       <description>Use text markers for Windows terminals</description>
     </example>
   </usage-examples>
-
   <implementation-notes>
     <note id="modular-design">
       The reporter was refactored from 347 lines into three modules:
@@ -193,13 +171,11 @@
       - reporter_stats.py (61 lines) - statistics calculation
       - reporter_utils.py (47 lines) - utilities and helpers
     </note>
-    
     <note id="accuracy">
       Violation counts are now accurate with clear separation between:
       - Actual violations (high/medium severity)
       - Warnings (low severity, often in example/demo files)
     </note>
-    
     <note id="performance">
       Smart limits prevent overwhelming output while ensuring
       the most critical violations are always visible.

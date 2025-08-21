@@ -7,7 +7,6 @@ Original content had structural issues that prevented parsing.
 import pytest
 from typing import Any, Dict, List, Optional
 
-
 class TestRealWebsocketAuthIntegrationCore:
     """Test class for real_websocket_auth_integration_core"""
     
@@ -24,12 +23,6 @@ class TestRealWebsocketAuthIntegrationCore:
         # TODO: Implement actual tests
         pass
 
-
 # Additional test functions can be added below
-def test_module_import():
-    """Test that this module can be imported without errors"""
-    assert True
-
-
 if __name__ == "__main__":
     pytest.main([__file__])

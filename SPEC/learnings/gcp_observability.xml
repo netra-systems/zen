@@ -1,10 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings category="gcp_observability" last_updated="2025-01-18">
   <metadata>
     <purpose>Document learnings from GCP Cloud Observability integration</purpose>
     <impact>Enterprise error monitoring and deployment safety</impact>
+    <last_edited>2025-08-21T08:47:29.372945</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.372945">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <learning id="gcp-error-001">
     <title>Modular Service Architecture for GCP Integration</title>
     <context>
@@ -23,7 +28,6 @@
       Changes to one aspect don't affect others.
     </impact>
   </learning>
-
   <learning id="gcp-error-002">
     <title>Service Account vs Default Credentials Strategy</title>
     <context>
@@ -41,7 +45,6 @@
       without configuration changes.
     </impact>
   </learning>
-
   <learning id="gcp-error-003">
     <title>Rate Limiting for External API Calls</title>
     <context>
@@ -60,7 +63,6 @@
       enables monitoring of API usage patterns.
     </impact>
   </learning>
-
   <learning id="gcp-error-004">
     <title>PII Redaction in Error Messages</title>
     <context>
@@ -79,7 +81,6 @@
       prevents security breaches through error logs.
     </impact>
   </learning>
-
   <learning id="gcp-error-005">
     <title>Deployment Error Categorization</title>
     <context>
@@ -98,7 +99,6 @@
       enables accurate deployment health assessment.
     </impact>
   </learning>
-
   <learning id="gcp-error-006">
     <title>PowerShell Integration for Windows Deployment</title>
     <context>
@@ -116,7 +116,6 @@
       maintains existing workflow compatibility.
     </impact>
   </learning>
-
   <learning id="gcp-error-007">
     <title>Error Severity Scoring Algorithm</title>
     <context>
@@ -136,7 +135,6 @@
       catches critical problems immediately.
     </impact>
   </learning>
-
   <learning id="gcp-error-008">
     <title>Mock Testing for External Services</title>
     <context>
@@ -156,7 +154,6 @@
       predictable test outcomes.
     </impact>
   </learning>
-
   <learning id="gcp-error-009">
     <title>API Endpoint Organization</title>
     <context>
@@ -176,7 +173,6 @@
       easier maintenance and testing.
     </impact>
   </learning>
-
   <learning id="gcp-error-010">
     <title>Dependency Injection for Service Configuration</title>
     <context>
@@ -196,7 +192,6 @@
       clean separation between web and business logic.
     </impact>
   </learning>
-
   <best_practices>
     <practice>Always implement rate limiting for external API calls</practice>
     <practice>Use time-based categorization for deployment-related errors</practice>
@@ -207,7 +202,6 @@
     <practice>Provide dual authentication methods for flexibility</practice>
     <practice>Use exit codes for script integration communication</practice>
   </best_practices>
-
   <learning id="gcp-error-011">
     <title>Google Cloud Logging API v3 Changes</title>
     <context>
@@ -227,7 +221,6 @@
       simplifies dependency management.
     </impact>
   </learning>
-
   <common_pitfalls>
     <pitfall>
       <issue>Treating all errors during deployment as deployment-caused</issue>

@@ -17,10 +17,10 @@ from enum import Enum
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import required classes from core module
-from .test_2_midstream_disconnection_recovery_core import (
+from tests.e2e.websocket_resilience.test_2_midstream_disconnection_recovery_core import ConnectionState, ResponseType, NetworkCondition, StreamBuffer, NetworkSimulator
     ConnectionState, ResponseType, NetworkCondition, StreamBuffer, NetworkSimulator
 )
 

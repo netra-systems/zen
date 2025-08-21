@@ -10,8 +10,8 @@ import gc
 import logging
 from typing import Optional
 
-from .unified_e2e_harness import UnifiedE2ETestHarness
-from .memory_leak_utilities import (
+from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.unified.e2e.memory_leak_utilities import MemoryLeakMetrics, UserActivitySimulator, MemoryLeakDetector
     MemoryLeakMetrics, 
     UserActivitySimulator, 
     MemoryLeakDetector
@@ -139,7 +139,6 @@ async def test_websocket_connection_stability():
 
 if __name__ == "__main__":
     # Quick test execution for development
-    import asyncio
     
     async def main():
         print("Running quick memory leak detection test...")

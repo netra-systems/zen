@@ -1,79 +1,75 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Architecture.SystemBoundaries</name>
-        <version>2.0</version>
-        <priority>CRITICAL</priority>
-        <description>
+  <metadata>
+    <name>Architecture.SystemBoundaries</name>
+    <version>2.0</version>
+    <priority>CRITICAL</priority>
+    <description>
             Definition of NON-NEGOTIABLE system boundaries and hard limits (300/8).
         </description>
-    </metadata>
-
-    <section title="Hard Limits (Static Analysis Constraints)">
-        <constraint id="SB-LIM-001" priority="CRITICAL">
-            <title>File Size Limit (300 LOC)</title>
-            <max-value>300</max-value>
-            <enforcement>Build failure on violation.</enforcement>
-            <rationale>Optimizes AI context windows and enforces modularity.</rationale>
-        </constraint>
-
-        <constraint id="SB-LIM-002" priority="CRITICAL">
-            <title>Function/Method Complexity Limit (8 LOC)</title>
-            <max-value>8</max-value>
-            <enforcement>Build failure on violation.</enforcement>
-            <rationale>Enforces SRP and reduces cognitive complexity for AI analysis.</rationale>
-        </constraint>
-    </section>
-
-    <section title="Architectural Layering">
-        <definition id="SB-LAYER-001">
-            <title>Layer Separation</title>
-            <instruction>Maintain strict separation and enforce unidirectional dependency flow: Presentation -&gt; Business Logic -&gt; Data Access.</instruction>
-            
-            <layer name="Presentation">
-                <locations>app/routes/, frontend/components/</locations>
-                <forbidden-dependencies>app/db/models_*, app/services/database/*</forbidden-dependencies>
-            </layer>
-
-            <layer name="Business Logic (Services)">
-                <locations>app/services/</locations>
-                <forbidden-dependencies>app/routes/*</forbidden-dependencies>
-            </layer>
-
-            <layer name="Data Access (Repositories)">
-                <locations>app/services/database/, app/db/</locations>
-            </layer>
-        </definition>
-    </section>
-
-    <section title="Refactoring Protocols (AI Remediation)">
-        <ai-directive>If the AI agent detects a violation of the Hard Limits during code generation or via the compliance tool, it MUST execute the relevant protocol autonomously.</ai-directive>
-
-        <protocol id="RP-001">
-            <title>Extract Module Protocol (Violation SB-LIM-001)</title>
-            <trigger>File exceeds 300 LOC.</trigger>
-            <steps>
-                <step>1. Analyze the file to identify distinct responsibilities.</step>
-                <step>2. Create new module(s) for the extracted responsibilities.</step>
-                <step>3. Move relevant code and update all imports.</step>
-                <step>4. Update import tests (SPEC/code_changes.xml).</step>
-            </steps>
-        </protocol>
-
-        <protocol id="RP-002">
-            <title>Extract Function Protocol (Violation SB-LIM-002)</title>
-            <trigger>Function/Method exceeds 8 LOC.</trigger>
-            <steps>
-                <step>1. Identify logical blocks of code within the function.</step>
-                <step>2. Extract blocks into smaller, descriptively named helper functions.</step>
-                <step>3. Refactor the original function to orchestrate the helpers.</step>
-            </steps>
-        </protocol>
-    </section>
-
-    <section title="Enforcement">
-        <tool>scripts/check_architecture_compliance.py</tool>
-        <frequency>During AI Code Generation, Pre-commit, and CI/CD.</frequency>
-        <threshold>0 violations allowed.</threshold>
-    </section>
+    <last_edited>2025-08-21T08:47:28.617743</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.617743">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <section title="Hard Limits (Static Analysis Constraints)">
+    <constraint id="SB-LIM-001" priority="CRITICAL">
+      <title>File Size Limit (300 LOC)</title>
+      <max-value>300</max-value>
+      <enforcement>Build failure on violation.</enforcement>
+      <rationale>Optimizes AI context windows and enforces modularity.</rationale>
+    </constraint>
+    <constraint id="SB-LIM-002" priority="CRITICAL">
+      <title>Function/Method Complexity Limit (8 LOC)</title>
+      <max-value>8</max-value>
+      <enforcement>Build failure on violation.</enforcement>
+      <rationale>Enforces SRP and reduces cognitive complexity for AI analysis.</rationale>
+    </constraint>
+  </section>
+  <section title="Architectural Layering">
+    <definition id="SB-LAYER-001">
+      <title>Layer Separation</title>
+      <instruction>Maintain strict separation and enforce unidirectional dependency flow: Presentation -&gt; Business Logic -&gt; Data Access.</instruction>
+      <layer name="Presentation">
+        <locations>app/routes/, frontend/components/</locations>
+        <forbidden-dependencies>app/db/models_*, app/services/database/*</forbidden-dependencies>
+      </layer>
+      <layer name="Business Logic (Services)">
+        <locations>app/services/</locations>
+        <forbidden-dependencies>app/routes/*</forbidden-dependencies>
+      </layer>
+      <layer name="Data Access (Repositories)">
+        <locations>app/services/database/, app/db/</locations>
+      </layer>
+    </definition>
+  </section>
+  <section title="Refactoring Protocols (AI Remediation)">
+    <ai-directive>If the AI agent detects a violation of the Hard Limits during code generation or via the compliance tool, it MUST execute the relevant protocol autonomously.</ai-directive>
+    <protocol id="RP-001">
+      <title>Extract Module Protocol (Violation SB-LIM-001)</title>
+      <trigger>File exceeds 300 LOC.</trigger>
+      <steps>
+        <step>1. Analyze the file to identify distinct responsibilities.</step>
+        <step>2. Create new module(s) for the extracted responsibilities.</step>
+        <step>3. Move relevant code and update all imports.</step>
+        <step>4. Update import tests (SPEC/code_changes.xml).</step>
+      </steps>
+    </protocol>
+    <protocol id="RP-002">
+      <title>Extract Function Protocol (Violation SB-LIM-002)</title>
+      <trigger>Function/Method exceeds 8 LOC.</trigger>
+      <steps>
+        <step>1. Identify logical blocks of code within the function.</step>
+        <step>2. Extract blocks into smaller, descriptively named helper functions.</step>
+        <step>3. Refactor the original function to orchestrate the helpers.</step>
+      </steps>
+    </protocol>
+  </section>
+  <section title="Enforcement">
+    <tool>scripts/check_architecture_compliance.py</tool>
+    <frequency>During AI Code Generation, Pre-commit, and CI/CD.</frequency>
+    <threshold>0 violations allowed.</threshold>
+  </section>
 </specification>

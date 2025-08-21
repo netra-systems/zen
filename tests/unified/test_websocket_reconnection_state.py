@@ -12,8 +12,8 @@ import pytest
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 
-from .config import TEST_USERS
-from app.core.websocket_recovery_types import ConnectionState, MessageState
+from tests.unified.config import TEST_USERS
+from netra_backend.app.core.websocket_recovery_types import ConnectionState, MessageState
 
 
 class WebSocketStateManager:

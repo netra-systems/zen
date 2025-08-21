@@ -1,114 +1,111 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Instructions</name>
-        <type>instructions</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <sections>
-        <section id="triage" order="0.1">
-            <title>Triage</title>
-            <items>
-                <item>The name of the company is Netra</item>
-                <item>Read: As BACKGROUND CONTEXT ONLY: other files in Spec/*</item>
-                <item>Read: As BACKGROUND CONTEXT ONLY: "/plans/{*}-plan.md" documents</item>
-                <item priority="critical">Consider coherence with all BACKGROUND CONTEXT including existing specs and plans</item>
-                <item>Read and be prepared to discuss all existing relevant code and system concepts</item>
-                <item>Reflect on work in progress if relevant</item>
-            </items>
-        </section>
-        
-        <section id="conventions" order="0.1.1">
-            <title>Conventions</title>
-            <items>
-                <item>Follow all conventions in SPEC/conventions.txt</item>
-                <item>Connection between services look at shared/schema.json for alignment</item>
-                <item>Use lowercase for settings in python. e.g. settings.var_name</item>
-                <item>Check existing folders. e.g. check if services folder exists before making a services folder</item>
-            </items>
-            <commercial-context>
+  <metadata>
+    <name>Instructions</name>
+    <type>instructions</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.495325</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.495325">
+      <reasons>
+        <reason>Content contains: old</reason>
+        <reason>Likely outdated spec: instructions.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <sections>
+    <section id="triage" order="0.1">
+      <title>Triage</title>
+      <items>
+        <item>The name of the company is Netra</item>
+        <item>Read: As BACKGROUND CONTEXT ONLY: other files in Spec/*</item>
+        <item>Read: As BACKGROUND CONTEXT ONLY: "/plans/{*}-plan.md" documents</item>
+        <item priority="critical">Consider coherence with all BACKGROUND CONTEXT including existing specs and plans</item>
+        <item>Read and be prepared to discuss all existing relevant code and system concepts</item>
+        <item>Reflect on work in progress if relevant</item>
+      </items>
+    </section>
+    <section id="conventions" order="0.1.1">
+      <title>Conventions</title>
+      <items>
+        <item>Follow all conventions in SPEC/conventions.txt</item>
+        <item>Connection between services look at shared/schema.json for alignment</item>
+        <item>Use lowercase for settings in python. e.g. settings.var_name</item>
+        <item>Check existing folders. e.g. check if services folder exists before making a services folder</item>
+      </items>
+      <commercial-context>
                 The intention of the overall business is to offer the most intelligent optimization agents in the world. All actions are in support of this overarching goal.
             </commercial-context>
-        </section>
-        
-        <section id="plan" order="0.2">
-            <title>Plan</title>
-            <description>Make a plan to execute the detailed instructions {spec_name}.
+    </section>
+    <section id="plan" order="0.2">
+      <title>Plan</title>
+      <description>Make a plan to execute the detailed instructions {spec_name}.
              Look at all items in order to the end. 
              Plan to fix potential new bugs introduced from changes and related classes
               of issues at the same time. Zoom in and out and look at it from a spherical point of view.
                Save the plan to "/plans/{*}-plan.md".</description>
-        </section>
-        
-        <section id="review" order="0.3">
-            <title>Review</title>
-            <description>Review the plan and the required concepts, including very careful and thoughtful integration with all existing code. Update "/plans/{*}-plan.md".</description>
-        </section>
-        
-        <section id="background" order="0.4">
-            <title>Background</title>
-            <description>Think deeply and carefully to architect and implement holistic, complete, and working components and concepts. The code must be scalable, clean, robust, reliable, and easy to ready for human engineers. Update "/plans/{*}-plan.md".</description>
-        </section>
-        
-        <section id="go" order="0.5">
-            <title>Go</title>
-            <description>After planning, execute all steps. Complete all items to consider your overall task complete. Keep rerunning tests until they pass.</description>
-        </section>
-        
-        <section id="validate" order="0.6" priority="critical">
-            <title>Validate Work</title>
-            <validations>
-                <validation>Validate and protect against regressions</validation>
-                <validation>Validate and protect against duplicate code</validation>
-                <validation>Validate and protect against repetition, especially in newly introduced code</validation>
-                <validation>Use as strong type checking and types as possible</validation>
-                <validation>Validate up to five (5) steps in any direction in the system, especially with data marshalling and unmarshalling. E.g. double check concepts are only being cast as types an appropriate amount of times</validation>
-            </validations>
-        </section>
-        
-        <section id="coherence" order="0.7" priority="super-critical">
-            <title>Coherence</title>
-            <description>Code must be coherent and well integrated with the entire Netra system application context</description>
-            <items>
-                <item>Limit coherence reflection to be at most 30 most relevant categories and 100 items total</item>
-                <item>Scope: Keep scope of changes in mind. Focus on making changes strictly relevant to the scope described in "1:0" as the primary goal and limit side effects and focus on related changes to the scope of "1:0" only</item>
-                <item>Every added line, function, file, class, etc: Use Project Conventions</item>
-                <item>
-                    <title>Once completed Spec:</title>
-                    <subitems>
-                        <subitem>Update docs: Update "/docs/{spec_name}-doc.md"</subitem>
-                        <subitem>Update shared/schema.json for alignment</subitem>
-                        <subitem>Limit scope creep. Focus on what's actually needed to get to the next step in the system only. Use existing dependencies as much as possible</subitem>
-                        <subitem>For areas with mature code limit total changes at any single time</subitem>
-                        <subitem>Keep the overall project structure as is</subitem>
-                        <subitem>Keep names the same unless expressly refactoring</subitem>
-                    </subitems>
-                </item>
-            </items>
-        </section>
-        
-        <remember>
-            <item>0:7. Remember: 0:1 to 0:7 including all sub items. Limit to 20 subitems</item>
-            <item>Remember: {spec_name} items. Limit to 20 subitems</item>
-            <item>All other specs are for background context and coherence. Scope to an implement {spec_name} only</item>
-        </remember>
-        
-        <section id="ui-ux-patterns" order="0.65">
-            <title>UI/UX Pattern Validation</title>
-            <description>Ensure UI/UX changes follow established patterns and user expectations</description>
-            <items>
-                <item priority="critical">When implementing UI changes, validate against common patterns in popular applications (ChatGPT, Claude, etc.)</item>
-                <item>Check for dual-sidebar anti-patterns that create disconnected experiences</item>
-                <item>Ensure persistent elements (navigation, history) are globally accessible</item>
-                <item>Validate that chat history is integrated into the main application sidebar, not isolated within specific pages</item>
-                <item>Test responsive behavior across different viewport sizes</item>
-                <item>Consider user navigation flows and ensure consistency across all pages</item>
-            </items>
-            <rationale>
+    </section>
+    <section id="review" order="0.3">
+      <title>Review</title>
+      <description>Review the plan and the required concepts, including very careful and thoughtful integration with all existing code. Update "/plans/{*}-plan.md".</description>
+    </section>
+    <section id="background" order="0.4">
+      <title>Background</title>
+      <description>Think deeply and carefully to architect and implement holistic, complete, and working components and concepts. The code must be scalable, clean, robust, reliable, and easy to ready for human engineers. Update "/plans/{*}-plan.md".</description>
+    </section>
+    <section id="go" order="0.5">
+      <title>Go</title>
+      <description>After planning, execute all steps. Complete all items to consider your overall task complete. Keep rerunning tests until they pass.</description>
+    </section>
+    <section id="validate" order="0.6" priority="critical">
+      <title>Validate Work</title>
+      <validations>
+        <validation>Validate and protect against regressions</validation>
+        <validation>Validate and protect against duplicate code</validation>
+        <validation>Validate and protect against repetition, especially in newly introduced code</validation>
+        <validation>Use as strong type checking and types as possible</validation>
+        <validation>Validate up to five (5) steps in any direction in the system, especially with data marshalling and unmarshalling. E.g. double check concepts are only being cast as types an appropriate amount of times</validation>
+      </validations>
+    </section>
+    <section id="coherence" order="0.7" priority="super-critical">
+      <title>Coherence</title>
+      <description>Code must be coherent and well integrated with the entire Netra system application context</description>
+      <items>
+        <item>Limit coherence reflection to be at most 30 most relevant categories and 100 items total</item>
+        <item>Scope: Keep scope of changes in mind. Focus on making changes strictly relevant to the scope described in "1:0" as the primary goal and limit side effects and focus on related changes to the scope of "1:0" only</item>
+        <item>Every added line, function, file, class, etc: Use Project Conventions</item>
+        <item>
+          <title>Once completed Spec:</title>
+          <subitems>
+            <subitem>Update docs: Update "/docs/{spec_name}-doc.md"</subitem>
+            <subitem>Update shared/schema.json for alignment</subitem>
+            <subitem>Limit scope creep. Focus on what's actually needed to get to the next step in the system only. Use existing dependencies as much as possible</subitem>
+            <subitem>For areas with mature code limit total changes at any single time</subitem>
+            <subitem>Keep the overall project structure as is</subitem>
+            <subitem>Keep names the same unless expressly refactoring</subitem>
+          </subitems>
+        </item>
+      </items>
+    </section>
+    <remember>
+      <item>0:7. Remember: 0:1 to 0:7 including all sub items. Limit to 20 subitems</item>
+      <item>Remember: {spec_name} items. Limit to 20 subitems</item>
+      <item>All other specs are for background context and coherence. Scope to an implement {spec_name} only</item>
+    </remember>
+    <section id="ui-ux-patterns" order="0.65">
+      <title>UI/UX Pattern Validation</title>
+      <description>Ensure UI/UX changes follow established patterns and user expectations</description>
+      <items>
+        <item priority="critical">When implementing UI changes, validate against common patterns in popular applications (ChatGPT, Claude, etc.)</item>
+        <item>Check for dual-sidebar anti-patterns that create disconnected experiences</item>
+        <item>Ensure persistent elements (navigation, history) are globally accessible</item>
+        <item>Validate that chat history is integrated into the main application sidebar, not isolated within specific pages</item>
+        <item>Test responsive behavior across different viewport sizes</item>
+        <item>Consider user navigation flows and ensure consistency across all pages</item>
+      </items>
+      <rationale>
                 Recurring UI issues often stem from architectural decisions that diverge from user expectations.
                 Following established patterns from successful applications reduces user confusion and improves adoption.
             </rationale>
-        </section>
-    </sections>
+    </section>
+  </sections>
 </specification>

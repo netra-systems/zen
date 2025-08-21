@@ -123,7 +123,7 @@ class StartupValidator:
             # Import and run auth service validation
             import sys
             sys.path.insert(0, str(Path(__file__).parent.parent))
-            from app.tests.startup.test_comprehensive_startup import AuthServiceValidator
+            from netra_backend.app.tests.startup.test_comprehensive_startup import AuthServiceValidator
             
             validator = AuthServiceValidator()
             result = await validator.validate_connectivity()
@@ -148,7 +148,7 @@ class StartupValidator:
             # Import and run database validations
             import sys
             sys.path.insert(0, str(Path(__file__).parent.parent))
-            from app.tests.startup.test_comprehensive_startup import (
+            from netra_backend.app.tests.startup.test_comprehensive_startup import (
                 ClickHouseValidator, RedisValidator
             )
             

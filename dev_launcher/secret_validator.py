@@ -8,7 +8,7 @@ import os
 import logging
 from typing import Dict, Set
 from dataclasses import dataclass
-from app.core.environment_constants import (
+from netra_backend.app.core.environment_constants import (
     Environment, get_current_environment
 )
 

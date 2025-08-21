@@ -14,14 +14,14 @@ import time
 from unittest.mock import AsyncMock, MagicMock
 
 # Import our enhanced components
-from app.websocket.enhanced_lifecycle_manager import (
+from netra_backend.app.websocket.enhanced_lifecycle_manager import (
     EnhancedLifecycleManager,
     HeartbeatConfig,
     ConnectionPool,
     ShutdownConfig
 )
-from app.websocket.lifecycle_integration import WebSocketLifecycleIntegrator
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.lifecycle_integration import WebSocketLifecycleIntegrator
+from netra_backend.app.websocket.connection import ConnectionInfo
 from datetime import datetime, timezone
 
 

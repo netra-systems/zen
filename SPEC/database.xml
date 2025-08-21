@@ -1,51 +1,53 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Database</name>
-        <type>database</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <primary-spec>
-        <description>Database Specification</description>
-        <goals>
-            <goal priority="high">Database working as a complete end to end system</goal>
-            <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
-            <goal>The production, development, testing databases are Separate</goal>
-            <goal>Postgres specifics see SPEC:postgres</goal>
-        </goals>
-    </primary-spec>
-    
-    <sections>
-        <section id="schema" order="1">
-            <title>Schema</title>
-            <requirements>
-                <requirement>
-                    <description>The database schema is defined in app/models</description>
-                    <validation>Self-check at startup: At system startup the live database schema is validated against the schema defined in postgres models</validation>
-                </requirement>
-                <requirement>
-                    <description>The schema is versioned using Alembic</description>
-                    <automation>Migrations are run automatically on startup</automation>
-                </requirement>
-            </requirements>
-        </section>
-        
-        <section id="models" order="2">
-            <title>Models</title>
-            <requirements>
-                <requirement>Models are defined using SQLAlchemy aligned with Schema</requirement>
-                <requirement>Models are validated with Pydantic</requirement>
-                <requirement>Relationships between models are clearly defined</requirement>
-            </requirements>
-        </section>
-        
-        <section id="test-seeding" order="3">
-            <title>TEST Seeding</title>
-            <requirements>
-                <requirement>The test database is seeded with initial data</requirement>
-                <requirement>test Seeding scripts are idempotent</requirement>
-            </requirements>
-        </section>
-    </sections>
+  <metadata>
+    <name>Database</name>
+    <type>database</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.414351</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.414351">
+      <reasons>
+        <reason>Likely outdated spec: database.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary-spec>
+    <description>Database Specification</description>
+    <goals>
+      <goal priority="high">Database working as a complete end to end system</goal>
+      <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
+      <goal>The production, development, testing databases are Separate</goal>
+      <goal>Postgres specifics see SPEC:postgres</goal>
+    </goals>
+  </primary-spec>
+  <sections>
+    <section id="schema" order="1">
+      <title>Schema</title>
+      <requirements>
+        <requirement>
+          <description>The database schema is defined in app/models</description>
+          <validation>Self-check at startup: At system startup the live database schema is validated against the schema defined in postgres models</validation>
+        </requirement>
+        <requirement>
+          <description>The schema is versioned using Alembic</description>
+          <automation>Migrations are run automatically on startup</automation>
+        </requirement>
+      </requirements>
+    </section>
+    <section id="models" order="2">
+      <title>Models</title>
+      <requirements>
+        <requirement>Models are defined using SQLAlchemy aligned with Schema</requirement>
+        <requirement>Models are validated with Pydantic</requirement>
+        <requirement>Relationships between models are clearly defined</requirement>
+      </requirements>
+    </section>
+    <section id="test-seeding" order="3">
+      <title>TEST Seeding</title>
+      <requirements>
+        <requirement>The test database is seeded with initial data</requirement>
+        <requirement>test Seeding scripts are idempotent</requirement>
+      </requirements>
+    </section>
+  </sections>
 </specification>

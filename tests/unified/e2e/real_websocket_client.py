@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from .real_client_types import ClientConfig, ConnectionState
+from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 
 
 class RealWebSocketClient:

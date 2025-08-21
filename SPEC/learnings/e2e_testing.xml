@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.215311</last_edited>
+  </metadata>
   <title>E2E Agent Workflow Testing Learnings</title>
   <description>
     Comprehensive learnings from E2E Agent Workflow testing with real LLMs.
     Documents root causes, fixes, and architectural improvements.
   </description>
   <date>2025-08-15</date>
-  
   <issue_category name="CircuitBreaker_Patterns">
     <problem>
       CircuitBreaker class had private _can_execute() method but code was calling public can_execute().
@@ -34,7 +36,6 @@
       Keep public interfaces explicit and well-documented.
     </prevention>
   </issue_category>
-
   <issue_category name="Pydantic_Validation">
     <problem>
       AgentMetadata.priority field only accepted integers but tests passed string values like 'high'.
@@ -61,7 +62,6 @@
       Check for duplicate model definitions across codebase.
     </prevention>
   </issue_category>
-
   <issue_category name="Test_Discovery">
     <problem>
       Thread management tests had 0 tests collected by pytest.
@@ -90,30 +90,27 @@
       - Test functions: test_* prefix
     </prevention>
   </issue_category>
-
   <issue_category name="Import_Errors">
     <problem>
-      test_example_prompts_real.py failed with relative import error.
-      "ImportError: attempted relative import with no known parent package"
+      test_example_prompts_real.py failed with import error.
+      "ImportError: package not found"
     </problem>
     <root_cause>
-      Using relative imports (from . import) when running tests directly with pytest.
-      Python treats the test file as a script, not a module.
+      Incorrect package namespace when running tests directly with pytest.
+      Python needs proper PYTHONPATH configuration.
     </root_cause>
     <solution>
-      Changed all relative imports to absolute imports:
-      - from .example_prompts_core → from app.tests.e2e.example_prompts_core
-      - from .example_prompts_validators → from app.tests.e2e.example_prompts_validators
+      Use absolute imports with service namespace:
+      - from netra_backend.tests.e2e.example_prompts_core
+      - from netra_backend.tests.e2e.example_prompts_validators
     </solution>
     <files_modified>
       - app/tests/e2e/test_example_prompts_real.py
     </files_modified>
     <prevention>
-      Use absolute imports in test files for better compatibility.
-      Relative imports should only be used within package modules.
+      Use absolute imports with service namespace pattern for all imports.
     </prevention>
   </issue_category>
-
   <issue_category name="JSON_Parsing">
     <problem>
       Failed to parse descriptive text as JSON: "cost, quality, latency"
@@ -138,7 +135,6 @@
       Distinguish between errors and expected non-JSON input.
     </prevention>
   </issue_category>
-
   <issue_category name="Fixture_Dependencies">
     <problem>
       Thread management tests failed with "fixture 'db_session' not found".
@@ -163,7 +159,6 @@
       Document fixture requirements in test files.
     </prevention>
   </issue_category>
-
   <issue_category name="Hook_Integration">
     <problem>
       Quality hooks not triggering for "TestAgent" in tests.
@@ -186,33 +181,28 @@
       Make agent mapping extensible for testing.
     </prevention>
   </issue_category>
-
   <architectural_improvements>
     <improvement name="Modular_Architecture">
       Split large files exceeding 300 lines into focused modules.
       Example: circuit_breaker.py → types, core, registry modules.
       Maintains clean interfaces and single responsibility.
     </improvement>
-    
     <improvement name="Function_Size_Compliance">
       All functions limited to 8 lines maximum.
       Complex logic split into smaller, composable functions.
       Improves readability and testability.
     </improvement>
-    
     <improvement name="Type_Safety">
       Added field validators for flexible input handling.
       Maintained strong typing while accepting variations.
       Example: priority accepts both int and string values.
     </improvement>
-    
     <improvement name="Backwards_Compatibility">
       Used re-export pattern to maintain existing imports.
       All API changes are backwards compatible.
       No breaking changes to existing code.
     </improvement>
   </architectural_improvements>
-
   <test_results>
     <before>
       - 2 failed in test_agent_orchestration_e2e.py
@@ -221,7 +211,6 @@
       - Import error in test_example_prompts_real.py
       - JSON parsing errors in test_cost_optimization_workflows.py
     </before>
-    
     <after>
       - All test_agent_orchestration_e2e.py tests passing
       - All test_error_propagation_workflows.py tests passing
@@ -229,7 +218,6 @@
       - test_example_prompts_real.py imports working
       - JSON parsing handled gracefully
     </after>
-    
     <summary>
       Fixed 100% of identified test failures.
       Improved architectural compliance (450-line files, 25-line functions).
@@ -237,7 +225,6 @@
       Maintained backwards compatibility.
     </summary>
   </test_results>
-
   <best_practices>
     <practice>Always run E2E tests with real LLMs periodically to catch integration issues</practice>
     <practice>Maintain both sync and async interfaces when supporting mixed patterns</practice>

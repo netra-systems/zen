@@ -10,7 +10,7 @@ import logging
 from typing import Dict, List
 from collections import defaultdict
 
-from .data_models import ResourceMetrics
+from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics
 
 logger = logging.getLogger(__name__)
 

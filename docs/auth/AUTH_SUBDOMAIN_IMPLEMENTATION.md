@@ -391,7 +391,7 @@ async def health_check():
 ```python
 # tests/unit/test_auth_service.py
 import pytest
-from app.auth.auth_service import encode_state, decode_state
+from netra_backend.app.auth.auth_service import encode_state, decode_state
 
 def test_state_encoding():
     state_data = {

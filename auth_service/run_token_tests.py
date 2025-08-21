@@ -22,7 +22,7 @@ os.environ.update({
 })
 
 # Import test classes
-from tests.test_token_validation import (
+from netra_backend.tests.test_token_validation import (
     TestJWTTokenGeneration,
     TestJWTTokenValidation,
     TestJWTTokenExpiry,

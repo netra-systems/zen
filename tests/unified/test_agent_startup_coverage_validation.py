@@ -28,8 +28,8 @@ import pytest
 import importlib.util
 
 # Test infrastructure
-from .config import TEST_CONFIG, TestTier
-from .agent_startup_validators import AgentStartupValidatorSuite
+from tests.unified.config import TEST_CONFIG, TestTier
+from tests.unified.agent_startup_validators import AgentStartupValidatorSuite
 
 
 class CoverageLevel(str, Enum):

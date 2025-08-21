@@ -1,54 +1,49 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>CodeQuality.NoTestStubsInProduction</name>
     <priority>CRITICAL</priority>
     <description>Protocol to strictly prohibit test stubs, mocks, and fake implementations from production code paths.</description>
+    <last_edited>2025-08-21T08:47:28.553372</last_edited>
   </metadata>
-
   <directive id="NTS-001">
     <title>Absolute Segregation of Test Code</title>
     <instruction>Production services MUST contain only real, functional implementations.</instruction>
     <instruction>Test code MUST reside exclusively within `app/tests/` or `frontend/__tests__/`.</instruction>
     <ai-directive>If asked to create a "stub" or "mock" in production code, the AI agent MUST reject the request and explain this policy.</ai-directive>
   </directive>
-
   <forbidden-patterns>
     <pattern id="NTS-FP-001">
       <title>Mock Implementations in Service Methods</title>
       <instruction>Service methods must implement actual logic. Returning hardcoded data is forbidden.</instruction>
       <code-example language="python" context="Violation Example">
-<![CDATA[
+
 async def get_all_users(self, db: AsyncSession):
     # Mock implementation for testing - VIOLATION
     return [
         {"id": "1", "email": "user1@test.com"}
     ]
-]]>
+
       </code-example>
     </pattern>
-
     <pattern id="NTS-FP-003">
       <title>Generic *args, **kwargs Stubs</title>
       <instruction>Do not implement functions that accept generic arguments and return static success messages.</instruction>
-       <code-example language="python" context="Violation Example">
-<![CDATA[
+      <code-example language="python" context="Violation Example">
+
 async def bulk_index(*args, **kwargs):
     return {"status": "ok"} # VIOLATION
-]]>
+
       </code-example>
     </pattern>
   </forbidden-patterns>
-
   <static-analysis-rules>
     <title>Automated Detection Signatures</title>
     <instruction>AI agents must scan generated code for these signatures.</instruction>
-    
     <rule id="DETECT-001">
       <description>Detect keywords indicating test code in comments/docstrings.</description>
       <regex-pattern>(?i)(test implementation|mock implementation|for testing|test stub|fake data)</regex-pattern>
     </rule>
-
     <rule id="DETECT-002">
       <description>Detect generic function stubs returning static dictionaries.</description>
       <regex-pattern>def \w+\(\*args, \*\*kwargs\):\s*return \{.*\}</regex-pattern>

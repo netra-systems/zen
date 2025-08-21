@@ -8,9 +8,9 @@ import httpx
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
 
 
 class TokenLifecycleManager:

@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Architecture Specification</title>
     <version>1.0.0</version>
     <description>System architecture, components, and design patterns for the Netra platform</description>
     <created>2025-01-11</created>
+    <last_edited>2025-08-21T08:47:28.359941</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.359941">
+      <reasons>
+        <reason>Likely outdated spec: architecture.xml</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <system_overview>
     <description>Netra AI Optimization Platform - Enterprise-grade AI workload optimization system</description>
     <tech_stack>
@@ -16,37 +21,33 @@
       <realtime>WebSocket-based communication</realtime>
     </tech_stack>
   </system_overview>
-
   <backend_architecture>
     <entry_point>app/main.py</entry_point>
-    
     <routes>
-      <route path="auth/" description="Authentication endpoints (login, OAuth)"/>
-      <route path="websockets.py" description="WebSocket connections"/>
-      <route path="agent_route.py" description="Agent interactions"/>
-      <route path="threads_route.py" description="Thread management"/>
-      <route path="generation.py" description="Content generation"/>
-      <route path="llm_cache.py" description="LLM cache management"/>
-      <route path="synthetic_data.py" description="Synthetic data generation"/>
-      <route path="corpus.py" description="Corpus management"/>
-      <route path="config.py" description="Configuration endpoints"/>
-      <route path="supply.py" description="Supply catalog"/>
-      <route path="references.py" description="Reference management"/>
-      <route path="health.py" description="Health checks"/>
-      <route path="admin.py" description="Admin functions"/>
+      <route path="auth/" description="Authentication endpoints (login, OAuth)" />
+      <route path="websockets.py" description="WebSocket connections" />
+      <route path="agent_route.py" description="Agent interactions" />
+      <route path="threads_route.py" description="Thread management" />
+      <route path="generation.py" description="Content generation" />
+      <route path="llm_cache.py" description="LLM cache management" />
+      <route path="synthetic_data.py" description="Synthetic data generation" />
+      <route path="corpus.py" description="Corpus management" />
+      <route path="config.py" description="Configuration endpoints" />
+      <route path="supply.py" description="Supply catalog" />
+      <route path="references.py" description="Reference management" />
+      <route path="health.py" description="Health checks" />
+      <route path="admin.py" description="Admin functions" />
     </routes>
-    
     <services>
-      <service name="agent_service.py" description="Main agent service"/>
-      <service name="apex_optimizer_agent/" description="Specialized optimization agent with 30+ tools"/>
-      <service name="database/" description="Repository pattern implementations"/>
-      <service name="websocket/" description="WebSocket message handling"/>
-      <service name="core/" description="Core service containers"/>
-      <service name="cache/" description="LLM caching services"/>
-      <service name="state/" description="State management and persistence"/>
-      <service name="llm_manager.py" description="Central LLM management and configuration"/>
+      <service name="agent_service.py" description="Main agent service" />
+      <service name="apex_optimizer_agent/" description="Specialized optimization agent with 30+ tools" />
+      <service name="database/" description="Repository pattern implementations" />
+      <service name="websocket/" description="WebSocket message handling" />
+      <service name="core/" description="Core service containers" />
+      <service name="cache/" description="LLM caching services" />
+      <service name="state/" description="State management and persistence" />
+      <service name="llm_manager.py" description="Central LLM management and configuration" />
     </services>
-    
     <llm_configuration>
       <manager location="app/llm/llm_manager.py">
         <features>
@@ -57,29 +58,27 @@
           <feature>Streaming support</feature>
         </features>
         <supported_providers>
-          <provider name="google" library="langchain_google_genai" models="gemini-*"/>
-          <provider name="openai" library="langchain_openai" models="gpt-3.5-turbo, gpt-4, gpt-4-turbo"/>
+          <provider name="google" library="langchain_google_genai" models="gemini-*" />
+          <provider name="openai" library="langchain_openai" models="gpt-3.5-turbo, gpt-4, gpt-4-turbo" />
         </supported_providers>
       </manager>
-      
       <configuration location="app/schemas/Config.py:167-197">
         <structure>
-          <field name="provider" type="str" description="LLM provider (google, openai)"/>
-          <field name="model_name" type="str" description="Model identifier"/>
-          <field name="api_key" type="Optional[str]" description="API key (populated via SecretReference)"/>
-          <field name="generation_config" type="Dict[str, Any]" description="Model parameters (temperature, max_tokens, etc.)"/>
+          <field name="provider" type="str" description="LLM provider (google, openai)" />
+          <field name="model_name" type="str" description="Model identifier" />
+          <field name="api_key" type="Optional[str]" description="API key (populated via SecretReference)" />
+          <field name="generation_config" type="Dict[str, Any]" description="Model parameters (temperature, max_tokens, etc.)" />
         </structure>
         <contexts>
-          <context name="default" description="General purpose LLM"/>
-          <context name="triage" description="Message classification and routing"/>
-          <context name="data" description="Data analysis and processing"/>
-          <context name="optimizations_core" description="AI workload optimization"/>
-          <context name="actions_to_meet_goals" description="Goal-driven task execution"/>
-          <context name="reporting" description="Report generation"/>
-          <context name="analysis" description="General analysis tasks"/>
+          <context name="default" description="General purpose LLM" />
+          <context name="triage" description="Message classification and routing" />
+          <context name="data" description="Data analysis and processing" />
+          <context name="optimizations_core" description="AI workload optimization" />
+          <context name="actions_to_meet_goals" description="Goal-driven task execution" />
+          <context name="reporting" description="Report generation" />
+          <context name="analysis" description="General analysis tasks" />
         </contexts>
       </configuration>
-      
       <secret_management>
         <description>API keys managed via SecretReference system</description>
         <location>app/schemas/Config.py:21-32</location>
@@ -87,10 +86,9 @@
           SecretReference(name="openai-api-key", target_models=["llm_configs.gpt4"], target_field="api_key")
         </example>
       </secret_management>
-      
       <usage_example>
         <code>
-          from app.llm.llm_manager import LLMManager
+          from netra_backend.app.llm.llm_manager import LLMManager
           
           llm_manager = LLMManager(settings)
           # Synchronous
@@ -103,28 +101,27 @@
         </code>
       </usage_example>
     </llm_configuration>
-    
     <databases>
       <database type="PostgreSQL">
         <purpose>User data, configurations, persistent state</purpose>
         <tables>
-          <table name="userbase" description="User accounts and authentication"/>
-          <table name="threads" description="Conversation threads with user association"/>
-          <table name="messages" description="Chat messages with role and metadata"/>
-          <table name="runs" description="Agent execution runs with detailed tracking"/>
-          <table name="thread_runs" description="Association between threads and runs"/>
-          <table name="agent_runs" description="Individual agent execution records"/>
-          <table name="agent_reports" description="Generated reports from agents"/>
-          <table name="references" description="Document references with embedding support"/>
-          <table name="supply_catalog" description="Model and provider catalog"/>
-          <table name="user_secrets" description="Encrypted user API keys"/>
-          <table name="oauth_secrets" description="OAuth provider configurations"/>
+          <table name="userbase" description="User accounts and authentication" />
+          <table name="threads" description="Conversation threads with user association" />
+          <table name="messages" description="Chat messages with role and metadata" />
+          <table name="runs" description="Agent execution runs with detailed tracking" />
+          <table name="thread_runs" description="Association between threads and runs" />
+          <table name="agent_runs" description="Individual agent execution records" />
+          <table name="agent_reports" description="Generated reports from agents" />
+          <table name="references" description="Document references with embedding support" />
+          <table name="supply_catalog" description="Model and provider catalog" />
+          <table name="user_secrets" description="Encrypted user API keys" />
+          <table name="oauth_secrets" description="OAuth provider configurations" />
         </tables>
       </database>
       <database type="ClickHouse">
         <purpose>Time-series log data and analytics</purpose>
         <tables>
-          <table name="workload_events" description="Time-series log data with structured event tracking"/>
+          <table name="workload_events" description="Time-series log data with structured event tracking" />
         </tables>
       </database>
       <database type="Redis">
@@ -132,41 +129,35 @@
       </database>
     </databases>
   </backend_architecture>
-
   <frontend_architecture>
     <framework>Next.js 14 with App Router</framework>
-    
     <pages>
-      <page path="chat/" description="Main chat interface"/>
-      <page path="auth/" description="Authentication pages"/>
-      <page path="corpus/" description="Corpus management UI"/>
-      <page path="synthetic-data-generation/" description="Data generation UI"/>
-      <page path="demo/" description="Demo features"/>
-      <page path="enterprise-demo/" description="Enterprise demo"/>
+      <page path="chat/" description="Main chat interface" />
+      <page path="auth/" description="Authentication pages" />
+      <page path="corpus/" description="Corpus management UI" />
+      <page path="synthetic-data-generation/" description="Data generation UI" />
+      <page path="demo/" description="Demo features" />
+      <page path="enterprise-demo/" description="Enterprise demo" />
     </pages>
-    
     <components>
       <component_group name="chat/">
-        <component name="MainChat.tsx" description="Main unified chat component"/>
-        <component name="ChatSidebar.tsx" description="Thread navigation sidebar (v5)"/>
-        <component name="OverflowPanel.tsx" description="Developer debugging panel (Ctrl+Shift+D)"/>
-        <component name="PersistentResponseCard.tsx" description="Three-layer response card"/>
+        <component name="MainChat.tsx" description="Main unified chat component" />
+        <component name="ChatSidebar.tsx" description="Thread navigation sidebar (v5)" />
+        <component name="OverflowPanel.tsx" description="Developer debugging panel (Ctrl+Shift+D)" />
+        <component name="PersistentResponseCard.tsx" description="Three-layer response card" />
       </component_group>
-      <component_group name="ui/" description="Reusable UI components"/>
-      <component_group name="demo/" description="Demo components"/>
+      <component_group name="ui/" description="Reusable UI components" />
+      <component_group name="demo/" description="Demo components" />
     </components>
-    
     <state_management>
-      <store name="unified-chat.ts" description="Unified chat store with thread management and deduplication"/>
+      <store name="unified-chat.ts" description="Unified chat store with thread management and deduplication" />
       <library>Zustand</library>
     </state_management>
-    
     <hooks>
-      <hook name="useWebSocket" description="WebSocket connection management"/>
-      <hook name="useAgent" description="Agent interaction hook"/>
+      <hook name="useWebSocket" description="WebSocket connection management" />
+      <hook name="useAgent" description="Agent interaction hook" />
     </hooks>
   </frontend_architecture>
-
   <agent_system>
     <supervisor>
       <file>app/agents/supervisor.py</file>
@@ -178,22 +169,20 @@
         <feature>Pipeline orchestration</feature>
       </features>
     </supervisor>
-    
     <sub_agents>
-      <agent name="TriageSubAgent" purpose="Request triage and approach determination"/>
-      <agent name="DataSubAgent" purpose="Data collection and context gathering"/>
-      <agent name="OptimizationsCoreSubAgent" purpose="Core optimization recommendations"/>
-      <agent name="ActionsToMeetGoalsSubAgent" purpose="Goal-oriented action planning"/>
-      <agent name="ReportingSubAgent" purpose="Final report compilation"/>
+      <agent name="TriageSubAgent" purpose="Request triage and approach determination" />
+      <agent name="DataSubAgent" purpose="Data collection and context gathering" />
+      <agent name="OptimizationsCoreSubAgent" purpose="Core optimization recommendations" />
+      <agent name="ActionsToMeetGoalsSubAgent" purpose="Goal-oriented action planning" />
+      <agent name="ReportingSubAgent" purpose="Final report compilation" />
     </sub_agents>
-    
     <apex_optimizer>
       <tools count="30+">
-        <tool_category name="Cost Analysis"/>
-        <tool_category name="Latency Optimization"/>
-        <tool_category name="KV Cache Management"/>
-        <tool_category name="Performance Prediction"/>
-        <tool_category name="Policy Simulation"/>
+        <tool_category name="Cost Analysis" />
+        <tool_category name="Latency Optimization" />
+        <tool_category name="KV Cache Management" />
+        <tool_category name="Performance Prediction" />
+        <tool_category name="Policy Simulation" />
       </tools>
       <features>
         <feature>Dynamic tool routing</feature>
@@ -201,7 +190,6 @@
         <feature>Production-ready optimizations</feature>
       </features>
     </apex_optimizer>
-    
     <workflow>
       <step order="1">User message received via WebSocket with authentication</step>
       <step order="2">Message validated and queued with rate limiting</step>
@@ -214,7 +202,6 @@
       <step order="9">Database records updated</step>
     </workflow>
   </agent_system>
-
   <design_patterns>
     <pattern name="WebSocket Communication">
       <feature>Connection pooling and per-user tracking</feature>
@@ -222,28 +209,22 @@
       <feature>Automatic retry with exponential backoff</feature>
       <feature>Comprehensive statistics and monitoring</feature>
     </pattern>
-    
     <pattern name="Dependency Injection">
       <description>Services injected via FastAPI dependency system</description>
     </pattern>
-    
     <pattern name="Async/Await">
       <description>Pervasive async patterns for scalability</description>
     </pattern>
-    
     <pattern name="Type Safety">
       <description>Pydantic models with auto-generated TypeScript types</description>
     </pattern>
-    
     <pattern name="Repository Pattern">
       <description>Database access through repositories with unit of work</description>
     </pattern>
-    
     <pattern name="Error Context">
       <description>Trace IDs with middleware-based tracking</description>
     </pattern>
   </design_patterns>
-
   <authentication>
     <flow name="Standard Login">
       <step>Frontend sends login request to /api/auth/login</step>
@@ -252,7 +233,6 @@
       <step>Frontend stores token in localStorage/cookies</step>
       <step>Token included in Authorization header for API calls</step>
     </flow>
-    
     <flow name="Google OAuth">
       <step>User clicks Google login button</step>
       <step>Redirected to Google OAuth consent screen</step>
@@ -262,7 +242,6 @@
       <step>JWT token issued and returned to frontend</step>
       <step>Session management with secure cookies</step>
     </flow>
-    
     <flow name="WebSocket Authentication">
       <step>JWT token passed as query parameter on connection</step>
       <step>Token validated and user context established</step>
@@ -270,14 +249,12 @@
       <step>Automatic cleanup on disconnection</step>
     </flow>
   </authentication>
-
   <important_files>
     <category name="Core Configuration">
       <file>app/config.py</file>
       <file>app/config.yaml</file>
       <file>alembic.ini</file>
     </category>
-    
     <category name="Agent System">
       <file>app/agents/supervisor.py</file>
       <file>app/agents/orchestration/</file>
@@ -285,7 +262,6 @@
       <file>app/agents/tool_dispatcher.py</file>
       <file>app/services/tool_registry.py</file>
     </category>
-    
     <category name="WebSocket">
       <file>app/routes/websockets.py</file>
       <file>app/ws_manager.py</file>
@@ -293,7 +269,6 @@
       <file>frontend/providers/WebSocketProvider.tsx</file>
       <file>frontend/hooks/useWebSocket.ts</file>
     </category>
-    
     <category name="Database">
       <file>app/db/postgres.py</file>
       <file>app/db/clickhouse.py</file>
@@ -301,14 +276,12 @@
       <file>app/services/state/</file>
       <file>app/redis_manager.py</file>
     </category>
-    
     <category name="Authentication">
       <file>app/auth/auth.py</file>
       <file>app/auth/auth_dependencies.py</file>
       <file>app/services/security_service.py</file>
       <file>app/services/key_manager.py</file>
     </category>
-    
     <category name="Error Handling">
       <file>app/core/exceptions.py</file>
       <file>app/core/error_handlers.py</file>

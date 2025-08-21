@@ -25,7 +25,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock
 import time
 
-from auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.jwt_handler import JWTHandler
 
 
 class TestJWTTokenGeneration(unittest.TestCase):

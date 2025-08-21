@@ -16,7 +16,7 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 
 class AuthAgentFlowHarness:

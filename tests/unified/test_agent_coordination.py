@@ -13,7 +13,7 @@ Real agent interactions only - no mocked placeholders
 import pytest
 import asyncio
 from datetime import datetime
-from tests.unified.agent_orchestration_fixtures import (
+from netra_backend.tests.unified.agent_orchestration_fixtures import (
     mock_supervisor_agent, mock_sub_agents, sample_agent_state, coordination_test_data
 )
 

@@ -24,26 +24,26 @@ Test Modules:
 """
 
 # Import all modular agent orchestration tests
-from tests.unified.test_supervisor_routing import (
+from netra_backend.tests.unified.test_supervisor_routing import (
     TestSupervisorRouting,
     TestRoutingValidation, 
     TestRoutingPerformance
 )
 
-from tests.unified.test_multi_agent_coordination import (
+from netra_backend.tests.unified.test_multi_agent_coordination import (
     TestMultiAgentCoordination,
     TestAgentSynchronization,
     TestDataFlowOrchestration
 )
 
-from tests.unified.test_agent_failure_recovery import (
+from netra_backend.tests.unified.test_agent_failure_recovery import (
     TestAgentFailureRecovery,
     TestFailureDetection,
     TestFailureRecoveryStrategies,
     TestRecoveryValidation
 )
 
-from tests.unified.test_agent_response_streaming import (
+from netra_backend.tests.unified.test_agent_response_streaming import (
     TestAgentResponseStreaming,
     TestStreamingReliability,
     TestStreamingPerformance,
@@ -51,7 +51,7 @@ from tests.unified.test_agent_response_streaming import (
 )
 
 # Import shared fixtures
-from tests.unified.agent_orchestration_fixtures import (
+from netra_backend.tests.unified.agent_orchestration_fixtures import (
     mock_supervisor_agent,
     mock_sub_agents,
     sample_agent_state,

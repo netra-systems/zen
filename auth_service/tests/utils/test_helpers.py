@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
-from ..factories import (
+from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
+from auth_service.tests.factories import (
     UserFactory, AuthUserFactory,
     SessionFactory, AuthSessionFactory,
     TokenFactory, AuditLogFactory

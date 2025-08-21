@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional, Union
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 
-from ..factories import TokenFactory
+from auth_service.tests.factories import TokenFactory
 
 
 class AuthTestClient:

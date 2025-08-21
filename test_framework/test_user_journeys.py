@@ -27,7 +27,7 @@ import pytest
 import pytest_asyncio
 from pathlib import Path
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from test_framework.decorators import performance_test, integration_only
 
 logger = central_logger.get_logger(__name__)

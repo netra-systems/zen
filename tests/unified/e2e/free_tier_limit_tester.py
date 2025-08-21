@@ -19,8 +19,8 @@ import uuid
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 
-from app.schemas.UserPlan import PlanTier
-from .free_tier_limit_managers import LimitEnforcementManager, UpgradePromptManager
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.e2e.free_tier_limit_managers import LimitEnforcementManager, UpgradePromptManager
 
 
 class FreeTierLimitTester:

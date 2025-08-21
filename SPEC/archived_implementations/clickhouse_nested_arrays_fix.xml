@@ -1,9 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.735474</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.735474">
+      <reasons>
+        <reason>In archived/legacy folder</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>ClickHouse Nested Types and Array Function Fixes</title>
   <version>1.0</version>
   <date>2025-08-10</date>
-  
   <problem>
     <description>
       ClickHouse queries were failing with error code 386 (NO_COMMON_TYPE) when querying 
@@ -16,7 +23,6 @@
       some of them are Array and some of them are not
     </error_message>
   </problem>
-
   <root_cause>
     <description>
       The workload_events table uses ClickHouse's Nested type for metrics, which creates 
@@ -25,36 +31,34 @@
       handled.
     </description>
     <schema>
-      <![CDATA[
+      
       metrics Nested(
           name Array(String),
           value Array(Float64),
           unit Array(String)
       )
-      ]]>
+      
     </schema>
   </root_cause>
-
   <solution>
     <changes>
       <change file="app/agents/data_sub_agent.py">
         <description>Replace indexOf() with arrayFirstIndex() for array operations</description>
         <before>indexOf(metrics.name, 'latency_ms')</before>
-        <after>arrayFirstIndex(x -> x = 'latency_ms', metrics.name)</after>
+        <after>arrayFirstIndex(x -&gt; x = 'latency_ms', metrics.name)</after>
       </change>
       <change file="app/agents/data_sub_agent.py">
         <description>Replace has() with arrayExists() for array existence checks</description>
         <before>has(metrics.name, 'latency_ms')</before>
-        <after>arrayExists(x -> x = 'latency_ms', metrics.name)</after>
+        <after>arrayExists(x -&gt; x = 'latency_ms', metrics.name)</after>
       </change>
       <change file="app/services/permission_service.py">
         <description>Fix incorrect import path for logging module</description>
-        <before>from app.core.logging_config import central_logger</before>
-        <after>from app.logging_config import central_logger</after>
+        <before>from netra_backend.app.core.logging_config import central_logger</before>
+        <after>from netra_backend.app.logging_config import central_logger</after>
       </change>
     </changes>
   </solution>
-
   <best_practices>
     <practice>
       <title>Working with ClickHouse Nested Types</title>
@@ -73,24 +77,22 @@
         - Each index position represents related data across the parallel arrays
       </description>
       <example>
-        <![CDATA[
+        
         data = {
             'metrics.name': ['latency_ms', 'throughput', 'cost_cents'],
             'metrics.value': [150.5, 1000.0, 25.0],
             'metrics.unit': ['ms', 'req/s', 'cents']
         }
-        ]]>
+        
       </example>
     </practice>
   </best_practices>
-
   <testing>
     <test_commands>
       <command>python -m pytest app/tests/test_main.py -v</command>
       <command>python test_scripts/test_runner.py --mode quick</command>
     </test_commands>
   </testing>
-
   <documentation_updates>
     <update file="CLAUDE.md">
       <section>ClickHouse Troubleshooting &amp; Best Practices</section>
@@ -100,7 +102,6 @@
       </description>
     </update>
   </documentation_updates>
-
   <impact>
     <severity>HIGH</severity>
     <affected_components>
@@ -110,7 +111,6 @@
       - Any future ClickHouse queries using Nested types
     </affected_components>
   </impact>
-
   <prevention>
     <recommendation>
       Always use array-specific functions when querying Nested type fields in ClickHouse.

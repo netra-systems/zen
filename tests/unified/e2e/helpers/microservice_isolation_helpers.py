@@ -77,7 +77,7 @@ class MicroserviceIsolationValidator:
                 path=self.project_root / "auth_service",
                 module_namespace="auth_core",
                 forbidden_imports=[
-                    "from app.",
+                    "from netra_backend.app.",
                     "import app.",
                     "from app ",
                     "import app "
@@ -433,7 +433,7 @@ class MicroserviceIsolationValidator:
             return True
         
         # Allow specific documented sync imports
-        if "main_db_sync.py" in file_path_str and "from app.db.models_postgres" in import_line:
+        if "main_db_sync.py" in file_path_str and "from netra_backend.app.db.models_postgres" in import_line:
             return True
         
         # Allow mock files
@@ -861,7 +861,7 @@ async def test_auth_service_no_app_imports():
     
     app_violations = [
         v for v in auth_result.get("violations", [])
-        if any(pattern in v.get("import", "") for pattern in ["from app.", "import app."])
+        if any(pattern in v.get("import", "") for pattern in ["from netra_backend.app.", "import app."])
     ]
     
     assert len(app_violations) == 0, (

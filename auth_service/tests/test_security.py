@@ -10,9 +10,9 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 import json
 
-from auth_core.routes.auth_routes import router as auth_router
-from auth_core.services.auth_service import AuthService  
-from auth_core.models.auth_models import (
+from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.services.auth_service import AuthService  
+from auth_service.auth_core.models.auth_models import (
     LoginRequest, AuthProvider, ServiceTokenRequest
 )
 

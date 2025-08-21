@@ -14,12 +14,12 @@ import pytest
 import asyncio
 from typing import Dict, Any
 
-from tests.unified.harness_complete import (
+from netra_backend.tests.unified.harness_complete import (
     UnifiedTestHarnessComplete,
     TestHarnessContext,
     create_test_harness
 )
-from tests.unified.config import setup_test_environment
+from netra_backend.tests.unified.config import setup_test_environment
 
 
 class TestUnifiedHarness:

@@ -39,7 +39,7 @@ except ImportError:
 
 # Mock User class if app imports fail
 try:
-    from app.schemas import User
+    from netra_backend.app.schemas import User
 except ImportError:
     class User:
         def __init__(self, id, email, is_active=True, is_superuser=False):
@@ -163,13 +163,13 @@ def app(
     
     # Only include routes if they can be imported
     try:
-        from app.routes.websockets import router as websockets_router
+        from netra_backend.app.routes.websockets import router as websockets_router
         app.include_router(websockets_router)
     except ImportError:
         pass
         
     try:
-        from app.routes.auth import router as auth_router
+        from netra_backend.app.routes.auth import router as auth_router
         app.include_router(auth_router, prefix="/api/auth")
     except ImportError:
         pass
@@ -194,7 +194,7 @@ def test_user():
 @pytest.fixture
 def auth_headers(test_user):
     try:
-        from app.auth_integration.auth import create_access_token
+        from netra_backend.app.auth_integration.auth import create_access_token
         token = create_access_token(data={"sub": test_user.email})
         return {"Authorization": f"Bearer {token}"}
     except ImportError:
@@ -268,7 +268,7 @@ async def service_discovery(dev_launcher):
 async def real_services(dev_launcher, service_discovery):
     """Provides real services with typed clients."""
     try:
-        from tests.unified.clients import TestClientFactory
+        from netra_backend.tests.unified.clients import TestClientFactory
     except ImportError:
         pytest.skip("Test client factory not available")
         return

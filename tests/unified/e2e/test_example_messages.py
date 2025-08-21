@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from uuid import uuid4
 
-from app.handlers.example_message_handler import ExampleMessageHandler
-from tests.unified.e2e.database_consistency_fixtures import database_test_session
+from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+from netra_backend.tests.unified.e2e.database_consistency_fixtures import database_test_session
 
 
 # Example prompts from SPEC/exampleNetraPrompts.xml (first 4)

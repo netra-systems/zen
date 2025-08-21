@@ -15,7 +15,7 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-from tests.unified.e2e.fixtures.error_propagation_fixtures import (
+from netra_backend.tests.unified.e2e.fixtures.error_propagation_fixtures import (
     service_orchestrator, real_websocket_client, real_http_client,
     error_correlation_context, test_user, ErrorCorrelationContext
 )

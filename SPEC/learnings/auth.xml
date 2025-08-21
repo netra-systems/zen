@@ -1,285 +1,283 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Auth Learnings</name>
-        <type>learnings</type>
-        <version>1.1</version>
-        <last_updated>2025-08-18</last_updated>
-        <description>Authentication and OAuth related learnings and fixes</description>
-    </metadata>
-    
-    <learning id="mandatory-auth-integration" priority="CRITICAL">
-        <title>🔴 MANDATORY: All Auth Must Use auth_integration Module</title>
-        <problem>
+  <metadata>
+    <name>Auth Learnings</name>
+    <type>learnings</type>
+    <version>1.1</version>
+    <last_updated>2025-08-18</last_updated>
+    <description>Authentication and OAuth related learnings and fixes</description>
+    <last_edited>2025-08-21T08:47:28.849822</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.849822">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <learning id="mandatory-auth-integration" priority="CRITICAL">
+    <title>🔴 MANDATORY: All Auth Must Use auth_integration Module</title>
+    <problem>
             Multiple duplicate auth implementations scattered across codebase:
-            - app/auth/ directory (legacy, MUST be removed)
-            - app/schemas/Auth.py (duplicate models)
-            - Test files importing from app.auth.*
+            - netra_backend/app/auth/ directory (legacy, MUST be removed)
+            - netra_backend/app/schemas/Auth.py (duplicate models)
+            - Test files importing from netra_backend.app.auth.*
             - Services implementing their own auth logic
         </problem>
-        <root_cause>
+    <root_cause>
             Historical evolution led to multiple auth implementations.
             No clear architectural boundary enforcement.
             Developers creating local auth implementations instead of using central service.
         </root_cause>
-        <solution>
-            <step>ALL auth MUST use app/auth_integration/auth.py</step>
-            <step>Legacy app/auth/ directory completely removed</step>
-            <step>All imports changed from app.auth.* to app.auth_integration.*</step>
-            <step>Backward compatibility stubs added for migration period</step>
-            <step>Security service uses auth_integration only</step>
-        </solution>
-        <files_modified>
-            <file>app/auth_integration/auth.py - Added compatibility stubs</file>
-            <file>SPEC/shared_auth_integration.xml - Updated to mandate single source</file>
-            <file>All test files - Updated imports to auth_integration</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>ALL auth MUST use netra_backend/app/auth_integration/auth.py</step>
+      <step>Legacy netra_backend/app/auth/ directory completely removed</step>
+      <step>All imports changed from netra_backend.app.auth.* to netra_backend.app.auth_integration.*</step>
+      <step>Backward compatibility stubs added for migration period</step>
+      <step>Security service uses auth_integration only</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/auth_integration/auth.py - Added compatibility stubs</file>
+      <file>SPEC/shared_auth_integration.xml - Updated to mandate single source</file>
+      <file>All test files - Updated imports to auth_integration</file>
+    </files_modified>
+    <prevention>
             NEVER create duplicate auth logic.
-            ALWAYS import from app.auth_integration.auth.
-            Run: grep -r "from app.auth" --exclude-dir=auth_integration
+            ALWAYS import from netra_backend.app.auth_integration.auth.
+            Run: grep -r "from netra_backend.app.auth" --exclude-dir=auth_integration
             Expected: No results (only auth_integration should be imported).
         </prevention>
-        <business_impact>
+    <business_impact>
             Security: Single point for security updates and patches.
             Compliance: Centralized audit trail for all auth operations.
             Revenue: Prevents auth-related downtime that impacts customers.
             Enterprise: Consistent auth experience across all tiers.
         </business_impact>
-    </learning>
-    
-    <learning id="dev-user-creation-duplication" priority="CRITICAL">
-        <title>🔴 CRITICAL: Dev User Creation Must Use Single Source</title>
-        <problem>
+  </learning>
+  <learning id="dev-user-creation-duplication" priority="CRITICAL">
+    <title>🔴 CRITICAL: Dev User Creation Must Use Single Source</title>
+    <problem>
             Multiple duplicate get_or_create_dev_user implementations causing:
             - UniqueViolationError: duplicate key value violates unique constraint "ix_userbase_email"
             - Multiple functions trying to create same dev@example.com user
             - Race conditions between different creation points
             - Inconsistent dev user attributes across creation points
         </problem>
-        <root_cause>
+    <root_cause>
             Historical implementations created separate dev user creation logic in:
-            - app/routes/auth_routes/dev_login.py
-            - app/services/apex_optimizer_agent/dev_utils.py
-            - app/auth_integration/auth.py (inline logic)
+            - netra_backend/app/routes/auth_routes/dev_login.py
+            - netra_backend/app/services/apex_optimizer_agent/dev_utils.py
+            - netra_backend/app/auth_integration/auth.py (inline logic)
             Each trying to create users independently without proper duplicate checking.
         </root_cause>
-        <solution>
-            <step>Created SINGLE get_or_create_dev_user in user_service</step>
-            <step>All dev user creation now uses user_service.get_or_create_dev_user()</step>
-            <step>Function properly handles existing users and race conditions</step>
-            <step>Uses IntegrityError catching for concurrent request handling</step>
-        </solution>
-        <files_modified>
-            <file>app/services/user_service.py - Added centralized get_or_create_dev_user</file>
-            <file>app/routes/auth_routes/dev_login.py - Updated to use centralized function</file>
-            <file>app/services/apex_optimizer_agent/dev_utils.py - Updated to use centralized function</file>
-            <file>app/auth_integration/auth.py - Simplified to use centralized function</file>
-            <file>app/routes/auth_routes/callback_processor.py - Uses get_or_create for OAuth</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>Created SINGLE get_or_create_dev_user in user_service</step>
+      <step>All dev user creation now uses user_service.get_or_create_dev_user()</step>
+      <step>Function properly handles existing users and race conditions</step>
+      <step>Uses IntegrityError catching for concurrent request handling</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/services/user_service.py - Added centralized get_or_create_dev_user</file>
+      <file>netra_backend/app/routes/auth_routes/dev_login.py - Updated to use centralized function</file>
+      <file>netra_backend/app/services/apex_optimizer_agent/dev_utils.py - Updated to use centralized function</file>
+      <file>netra_backend/app/auth_integration/auth.py - Simplified to use centralized function</file>
+      <file>netra_backend/app/routes/auth_routes/callback_processor.py - Uses get_or_create for OAuth</file>
+    </files_modified>
+    <prevention>
             NEVER create User models directly for dev/test users.
             ALWAYS use user_service.get_or_create_dev_user() for dev users.
             ALWAYS use user_service.get_or_create() for regular users.
             Run: grep -r "User(" --include="*.py" | grep -v "test_" | grep email
             Expected: No direct User model creation outside user_service.
         </prevention>
-        <business_impact>
+    <business_impact>
             Stability: Prevents startup failures in development/staging.
             Developer Experience: No duplicate key errors blocking development.
             Revenue: Prevents auth service downtime from impacting customers.
             Testing: Consistent dev user creation for reliable testing.
         </business_impact>
-    </learning>
-    
-    <learning id="oauth-local-staging-mismatch">
-        <title>OAuth Configuration Mismatch for Local Development</title>
-        <problem>
+  </learning>
+  <learning id="oauth-local-staging-mismatch">
+    <title>OAuth Configuration Mismatch for Local Development</title>
+    <problem>
             OAuth returns errors when running locally:
             - invalid_client: Unauthorized
             - mismatching_state: CSRF Warning! State not equal in request and response
         </problem>
-        <root_cause>
+    <root_cause>
             Multiple configuration issues:
             1. Environment detection incorrectly uses staging OAuth for local development
             2. OAuth credentials not properly loaded from environment variables
             3. Session middleware configuration incompatible with local development
             4. Redirect URI mismatch between configured and actual URLs
         </root_cause>
-        <solution>
-            <step>Update environment detection to properly handle local development</step>
-            <step>Support multiple OAuth credential naming conventions</step>
-            <step>Configure session middleware for local development</step>
-            <step>Add localhost:3010 to allowed redirect URIs</step>
-        </solution>
-        <files_modified>
-            <file>app/auth/environment_config.py</file>
-            <file>app/routes/auth/auth.py</file>
-            <file>app/auth/auth.py</file>
-            <file>app/core/middleware_setup.py</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>Update environment detection to properly handle local development</step>
+      <step>Support multiple OAuth credential naming conventions</step>
+      <step>Configure session middleware for local development</step>
+      <step>Add localhost:3010 to allowed redirect URIs</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/auth/environment_config.py</file>
+      <file>netra_backend/app/routes/auth/auth.py</file>
+      <file>netra_backend/app/auth/auth.py</file>
+      <file>netra_backend/app/core/middleware_setup.py</file>
+    </files_modified>
+    <prevention>
             Always test OAuth flow locally before deploying to staging.
             Use environment-specific configuration files (.env.local.staging).
             Run OAuth diagnostic script: python scripts/fix_oauth_local.py
         </prevention>
-    </learning>
-    
-    <learning id="oauth-environment-variables">
-        <title>OAuth Environment Variable Configuration</title>
-        <problem>
+  </learning>
+  <learning id="oauth-environment-variables">
+    <title>OAuth Environment Variable Configuration</title>
+    <problem>
             OAuth credentials not loading from environment variables
         </problem>
-        <root_cause>
+    <root_cause>
             Multiple naming conventions for OAuth credentials:
             - GOOGLE_CLIENT_ID vs GOOGLE_OAUTH_CLIENT_ID_DEV
             - Environment variables not loaded before checking
         </root_cause>
-        <solution>
-            <step>Support both naming conventions in environment_config.py</step>
-            <step>Load .env file in diagnostic scripts</step>
-            <step>Create .env.local.staging for local staging-like setup</step>
-        </solution>
-        <files_modified>
-            <file>app/auth/environment_config.py</file>
-            <file>scripts/fix_oauth_local.py</file>
-            <file>.env.local.staging</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>Support both naming conventions in environment_config.py</step>
+      <step>Load .env file in diagnostic scripts</step>
+      <step>Create .env.local.staging for local staging-like setup</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/auth/environment_config.py</file>
+      <file>scripts/fix_oauth_local.py</file>
+      <file>.env.local.staging</file>
+    </files_modified>
+    <prevention>
             Standardize environment variable naming across environments.
             Document required environment variables in .env.example.
         </prevention>
-    </learning>
-    
-    <learning id="oauth-session-middleware">
-        <title>Session Middleware Configuration for OAuth</title>
-        <problem>
+  </learning>
+  <learning id="oauth-session-middleware">
+    <title>Session Middleware Configuration for OAuth</title>
+    <problem>
             OAuth state parameter validation fails due to session issues
         </problem>
-        <root_cause>
+    <root_cause>
             Session middleware configured with https_only=true for local development.
             Same-site cookie policy incompatible with OAuth flow.
         </root_cause>
-        <solution>
-            <step>Configure session middleware based on environment</step>
-            <step>Use same_site="lax" for local development</step>
-            <step>Add DISABLE_HTTPS_ONLY option for local testing</step>
-            <step>Set appropriate session max_age</step>
-        </solution>
-        <files_modified>
-            <file>app/core/middleware_setup.py</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>Configure session middleware based on environment</step>
+      <step>Use same_site="lax" for local development</step>
+      <step>Add DISABLE_HTTPS_ONLY option for local testing</step>
+      <step>Set appropriate session max_age</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/core/middleware_setup.py</file>
+    </files_modified>
+    <prevention>
             Test OAuth flow with different cookie configurations.
             Document session requirements for OAuth in each environment.
         </prevention>
-    </learning>
-    
-    <learning id="oauth-redirect-uri-mismatch">
-        <title>OAuth Redirect URI Configuration</title>
-        <problem>
+  </learning>
+  <learning id="oauth-redirect-uri-mismatch">
+    <title>OAuth Redirect URI Configuration</title>
+    <problem>
             Google OAuth returns redirect_uri_mismatch error
         </problem>
-        <root_cause>
+    <root_cause>
             Redirect URIs in Google Cloud Console don't match application configuration.
             Different ports used for local development (3000, 3010, 8000).
         </root_cause>
-        <solution>
-            <step>Add all local development URLs to Google Cloud Console OAuth app</step>
-            <step>Update environment_config.py to include all redirect URIs</step>
-            <step>Log redirect URI being used for debugging</step>
-        </solution>
-        <files_modified>
-            <file>app/auth/environment_config.py</file>
-            <file>app/routes/auth/auth.py</file>
-        </files_modified>
-        <prevention>
+    <solution>
+      <step>Add all local development URLs to Google Cloud Console OAuth app</step>
+      <step>Update environment_config.py to include all redirect URIs</step>
+      <step>Log redirect URI being used for debugging</step>
+    </solution>
+    <files_modified>
+      <file>netra_backend/app/auth/environment_config.py</file>
+      <file>netra_backend/app/routes/auth/auth.py</file>
+    </files_modified>
+    <prevention>
             Maintain list of authorized redirect URIs in documentation.
             Log OAuth configuration during initialization.
             Check redirect URIs match between code and Google Cloud Console.
         </prevention>
-    </learning>
-    
-    <learning id="oauth-diagnostic-tool">
-        <title>OAuth Diagnostic Tool Creation</title>
-        <problem>
+  </learning>
+  <learning id="oauth-diagnostic-tool">
+    <title>OAuth Diagnostic Tool Creation</title>
+    <problem>
             Difficult to diagnose OAuth configuration issues
         </problem>
-        <solution>
+    <solution>
             Created diagnostic script: scripts/fix_oauth_local.py
             - Checks environment variables
             - Validates OAuth configuration
             - Suggests specific fixes
             - Loads .env file automatically
         </solution>
-        <files_created>
-            <file>scripts/fix_oauth_local.py</file>
-        </files_created>
-        <usage>
+    <files_created>
+      <file>scripts/fix_oauth_local.py</file>
+    </files_created>
+    <usage>
             Run: python scripts/fix_oauth_local.py
             Checks all OAuth-related configuration and suggests fixes.
         </usage>
-    </learning>
-    
-    <learning id="oauth-staging-localhost-2025">
-        <title>OAuth Staging Errors on Localhost (January 2025)</title>
-        <problem>
+  </learning>
+  <learning id="oauth-staging-localhost-2025">
+    <title>OAuth Staging Errors on Localhost (January 2025)</title>
+    <problem>
             When running locally with staging configuration:
             - invalid_client: Unauthorized (wrong OAuth credentials)
             - mismatching_state: CSRF Warning (session not maintaining state)
         </problem>
-        <root_cause>
+    <root_cause>
             Critical configuration mismatches:
             1. Environment detection was simplified and removed localhost checks
             2. Staging OAuth credentials used with localhost redirect URIs
             3. Session middleware not properly configured for localhost
             4. OAuth state parameter lost due to cookie configuration
         </root_cause>
-        <solution>
-            <step>Enhanced environment detection to force development OAuth for localhost</step>
-            <step>Added localhost detection based on multiple indicators</step>
-            <step>Fixed session middleware to use lax same-site for localhost</step>
-            <step>Added validation to ensure redirect URI matches allowed list</step>
-            <step>Created setup_oauth_local.py for proper configuration</step>
-        </solution>
-        <code_changes>
-            <change file="app/auth/environment_config.py">
+    <solution>
+      <step>Enhanced environment detection to force development OAuth for localhost</step>
+      <step>Added localhost detection based on multiple indicators</step>
+      <step>Fixed session middleware to use lax same-site for localhost</step>
+      <step>Added validation to ensure redirect URI matches allowed list</step>
+      <step>Created setup_oauth_local.py for proper configuration</step>
+    </solution>
+    <code_changes>
+      <change file="netra_backend/app/auth/environment_config.py">
                 Added localhost detection logic to _detect_environment()
                 Forces development OAuth unless FORCE_STAGING_OAUTH=true
             </change>
-            <change file="app/core/middleware_setup.py">
+      <change file="netra_backend/app/core/middleware_setup.py">
                 Fixed session middleware to detect localhost properly
                 Sets same_site="lax" and https_only=False for localhost
             </change>
-            <change file="app/routes/auth/auth.py">
+      <change file="netra_backend/app/routes/auth/auth.py">
                 Added OAuth credential validation
                 Enhanced redirect URI validation
                 Better error handling with specific messages
             </change>
-        </code_changes>
-        <prevention>
+    </code_changes>
+    <prevention>
             ALWAYS force development OAuth for localhost URLs.
             Test OAuth flow locally before deploying.
             Run: python scripts/setup_oauth_local.py to configure.
             Check Google Console redirect URIs match exactly.
         </prevention>
-    </learning>
-    
-    <learning id="oauth-configuration-hierarchy">
-        <title>OAuth Configuration Environment Hierarchy</title>
-        <insight>
+  </learning>
+  <learning id="oauth-configuration-hierarchy">
+    <title>OAuth Configuration Environment Hierarchy</title>
+    <insight>
             OAuth must use environment-appropriate credentials:
             - Localhost MUST use development credentials
             - Staging deployments use staging credentials
             - Production uses production credentials
         </insight>
-        <rules>
-            <rule>Never use staging/production OAuth with localhost URLs</rule>
-            <rule>Always validate redirect URI is in allowed list</rule>
-            <rule>Session cookies need same_site="lax" for localhost</rule>
-            <rule>Log OAuth configuration for debugging</rule>
-        </rules>
-        <environment_detection>
+    <rules>
+      <rule>Never use staging/production OAuth with localhost URLs</rule>
+      <rule>Always validate redirect URI is in allowed list</rule>
+      <rule>Session cookies need same_site="lax" for localhost</rule>
+      <rule>Log OAuth configuration for debugging</rule>
+    </rules>
+    <environment_detection>
             Priority order for detecting localhost:
             1. FRONTEND_URL contains localhost
             2. API_URL contains localhost
@@ -287,98 +285,95 @@
             4. Not running in Cloud Run (no K_SERVICE)
             5. FORCE_LOCAL_OAUTH=true
         </environment_detection>
-    </learning>
-    
-    <learning id="oauth-setup-script">
-        <title>OAuth Setup Automation</title>
-        <problem>
+  </learning>
+  <learning id="oauth-setup-script">
+    <title>OAuth Setup Automation</title>
+    <problem>
             Manual OAuth configuration is error-prone
         </problem>
-        <solution>
+    <solution>
             Created comprehensive setup scripts:
             - setup_oauth_local.py: Configure for localhost
             - fix_oauth_local.py: Diagnose issues
         </solution>
-        <usage>
+    <usage>
             # Setup OAuth for local development
             python scripts/setup_oauth_local.py
             
             # Diagnose OAuth issues
             python scripts/fix_oauth_local.py
         </usage>
-        <features>
+    <features>
             - Detects existing configuration
             - Validates Google Console setup
             - Creates .env.local with proper settings
             - Runs diagnostic checks
             - Provides clear next steps
         </features>
-    </learning>
-    
-    <learning id="shared-auth-integration-mandatory" date="2025-01-17" severity="CRITICAL">
-        <problem>
+  </learning>
+  <learning id="shared-auth-integration-mandatory" date="2025-01-17" severity="CRITICAL">
+    <problem>
             Authentication logic was potentially duplicated across multiple files in the system.
             This created maintenance burden and risk of inconsistent auth behavior.
         </problem>
-        <root_cause>
+    <root_cause>
             Previous directory name "dependencies_auth" did not clearly communicate 
             that this was the MANDATORY shared auth service for the entire system.
         </root_cause>
-        <solution>
-            1. Renamed app/dependencies_auth/ to app/auth_integration/ for clarity
+    <solution>
+            1. Renamed netra_backend/app/dependencies_auth/ to netra_backend/app/auth_integration/ for clarity
             2. Updated all imports throughout the system
             3. Created SPEC/shared_auth_integration.xml documenting MANDATORY use
             4. Added clear documentation that ALL auth MUST use this service
         </solution>
-        <prevention>
+    <prevention>
             - Directory name "auth_integration" clearly indicates integration point
             - Documentation emphasizes MANDATORY use throughout system
             - No duplicate auth logic allowed anywhere
             - Single source of truth for all authentication
         </prevention>
-        <key_functions>
+    <key_functions>
             - get_current_user(): For protected routes (returns user or 401)
             - get_current_user_optional(): For optional auth (returns user or None)
             - validate_token(): For WebSocket authentication
         </key_functions>
-        <impact>
+    <impact>
             - Consistent auth behavior across entire system
             - Single point for security updates
             - Easier testing with single mock point
             - Reduced code duplication
             - Simplified compliance and auditing
         </impact>
-    </learning>
-    
-    <learning id="auth-service-singleton-initialization" date="2025-08-18" severity="CRITICAL">
-        <title>Auth Service Singleton Not Initialized in Routes</title>
-        <problem>
+  </learning>
+  <learning id="auth-service-singleton-initialization" date="2025-08-18" severity="CRITICAL">
+    <title>Auth Service Singleton Not Initialized in Routes</title>
+    <problem>
             auth_routes.py uses auth_service variable throughout (lines 119, 135, 143, etc.)
             but never creates an instance of AuthService class.
             Error: "name 'auth_service' is not defined" when accessing /auth/dev/login endpoint.
         </problem>
-        <root_cause>
+    <root_cause>
             The file imports AuthService class but doesn't create a singleton instance.
             All route handlers expect auth_service to be a module-level singleton.
             Missing initialization code that creates and configures the AuthService instance.
         </root_cause>
-        <solution>
+    <solution>
             Add singleton initialization after imports in auth_routes.py:
             auth_service = AuthService()
             This creates single shared instance for all route handlers.
         </solution>
-        <files_modified>
-            <file>auth_service/auth_core/routes/auth_routes.py - Added auth_service initialization</file>
-        </files_modified>
-        <prevention>
+    <files_modified>
+      <file>auth_service/auth_core/routes/auth_routes.py - Added auth_service initialization</file>
+    </files_modified>
+    <prevention>
             ALWAYS initialize service instances when importing service classes.
             Use singleton pattern for stateful services like auth.
             Test all endpoints after adding new route files.
         </prevention>
-        <business_impact>
+    <business_impact>
             Critical: Auth service failures block all user access.
             Revenue: Users cannot login means zero platform usage.
             Enterprise: Auth failures are immediate escalation issues.
         </business_impact>
-    </learning>
+  </learning>
 </specification>

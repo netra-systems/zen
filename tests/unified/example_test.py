@@ -9,7 +9,7 @@ import pytest
 import asyncio
 from typing import Dict, Any
 
-from . import UnifiedTestHarness, TestHarnessContext, TestClient
+from tests.unified import UnifiedTestHarness, TestHarnessContext, TestClient
 
 
 @pytest.mark.asyncio

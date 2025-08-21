@@ -25,18 +25,18 @@ from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime
 
-from tests.unified.e2e.unified_e2e_harness import (
+from netra_backend.tests.unified.e2e.unified_e2e_harness import (
     UnifiedE2ETestHarness,
     create_e2e_harness
 )
-from tests.unified.test_environment_config import (
+from netra_backend.tests.unified.test_environment_config import (
     get_test_environment_config,
     TestEnvironmentType,
     TestEnvironment,
     setup_test_environment
 )
-from tests.unified.real_services_manager import RealServicesManager
-from app.core.configuration.base import (
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from netra_backend.app.core.configuration.base import (
     UnifiedConfigManager,
     get_unified_config,
     validate_config_integrity
@@ -209,7 +209,6 @@ async def get_staging_suite() -> StagingTestSuite:
 
 
 # Pytest fixture for automatic staging suite management
-import pytest
 
 @pytest.fixture
 async def staging_suite():

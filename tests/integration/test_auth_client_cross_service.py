@@ -12,7 +12,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import httpx
 
 from test_framework.mock_utils import mock_justified
-from app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from dev_launcher.service_discovery import ServiceDiscovery
 
 
@@ -211,7 +211,7 @@ class TestWebSocketSecurityIntegration:
     
     def test_websocket_validation_with_cross_service_context(self):
         """Test WebSocket message validation in cross-service context."""
-        from app.websocket.validation_security import validate_payload_security, has_valid_payload_structure
+        from netra_backend.app.websocket.validation_security import validate_payload_security, has_valid_payload_structure
         
         # Test message with cross-service metadata
         cross_service_message = {
@@ -235,7 +235,7 @@ class TestWebSocketSecurityIntegration:
     
     def test_websocket_security_prevents_malicious_cross_service_messages(self):
         """Test WebSocket security prevents malicious cross-service messages."""
-        from app.websocket.validation_security import validate_payload_security
+        from netra_backend.app.websocket.validation_security import validate_payload_security
         
         # Test malicious message disguised as cross-service
         malicious_message = {

@@ -30,11 +30,11 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from ..config import TEST_USERS, TEST_ENDPOINTS
-from ..reconnection_test_helpers import ReconnectionTestHelpers
-from ..reconnection_test_fixtures import reconnection_fixture
-from .agent_conversation_helpers import AgentConversationHelpers
-from .token_lifecycle_helpers import TokenLifecycleManager
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.unified.reconnection_test_fixtures import reconnection_fixture
+from tests.unified.e2e.agent_conversation_helpers import AgentConversationHelpers
+from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager
 
 
 class MockWebSocketReconnectionManager:

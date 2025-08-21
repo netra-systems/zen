@@ -23,16 +23,21 @@ Test Coverage:
 Architecture: Modular helper functions maintain readability while staying under line limits.
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import asyncio
 import pytest
 import time
 import aiohttp
 from typing import Dict, Any
 
-from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
-from tests.unified.test_environment_config import get_test_environment_config, TestEnvironment
-from app.core.auth_constants import HeaderConstants, JWTConstants, AuthConstants
-from app.core.network_constants import URLConstants, ServicePorts
+from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from netra_backend.tests.unified.test_environment_config import get_test_environment_config, TestEnvironment
+from netra_backend.app.core.auth_constants import HeaderConstants, JWTConstants, AuthConstants
+from netra_backend.app.core.network_constants import URLConstants, ServicePorts
 
 
 class StagingE2ETestSuite:

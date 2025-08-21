@@ -16,12 +16,12 @@ import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 
-from app.auth_integration.auth import get_current_user
-from app.redis_manager import redis_manager
-from app.websocket.unified.manager import UnifiedWebSocketManager
-from app.schemas.websocket_message_types import WebSocketConnectionState
-from app.db.models_postgres import User
-from .config import TEST_CONFIG
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.schemas.websocket_message_types import WebSocketConnectionState
+from netra_backend.app.db.models_postgres import User
+from tests.unified.e2e.config import TEST_CONFIG
 
 
 class SessionStateManager:

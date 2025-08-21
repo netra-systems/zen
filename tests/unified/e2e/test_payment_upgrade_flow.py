@@ -22,9 +22,9 @@ we cannot convert free users to paid, which is the entire business model.
 import pytest
 import time
 
-from app.schemas.UserPlan import PlanTier
-from .auth_flow_manager import AuthCompleteFlowManager
-from .payment_upgrade_flow_tester import PaymentUpgradeFlowTester
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.payment_upgrade_flow_tester import PaymentUpgradeFlowTester
 
 
 @pytest.mark.asyncio

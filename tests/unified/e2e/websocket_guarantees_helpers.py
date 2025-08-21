@@ -16,9 +16,9 @@ from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..config import TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
+from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
 
 
 class MessageState(Enum):

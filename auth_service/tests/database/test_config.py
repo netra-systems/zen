@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy import text
 from contextlib import asynccontextmanager
 
-from auth_core.database.models import Base
+from auth_service.auth_core.database.models import Base
 
 logger = logging.getLogger(__name__)
 

@@ -17,7 +17,7 @@ import random
 from typing import Dict, Any, List
 from dataclasses import dataclass
 
-from tests.e2e.test_helpers.concurrency_base import (
+from netra_backend.tests.e2e.test_helpers.concurrency_base import (
     ConcurrencyTestBase, UserSessionResult, PerformanceMetrics
 )
 

@@ -18,9 +18,9 @@ load_dotenv('.env.development')
 load_dotenv('.env.development.local')
 
 from sqlalchemy.ext.asyncio import create_async_engine
-from app.db.base import Base
-from app.db.models_postgres import *  # Import all models
-from app.logging_config import central_logger
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_postgres import *  # Import all models
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

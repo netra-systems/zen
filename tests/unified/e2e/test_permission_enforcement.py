@@ -21,8 +21,8 @@ import pytest
 import time
 from typing import Dict, Any
 
-from .permission_enforcement_helpers import PermissionEnforcementTester
-from .auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.permission_enforcement_helpers import PermissionEnforcementTester
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 @pytest.mark.asyncio

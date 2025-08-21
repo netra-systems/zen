@@ -26,14 +26,77 @@ import os
 # Add auth_service to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'auth_service'))
 
-from auth_core.services.auth_service import AuthService
-from auth_core.core.jwt_handler import JWTHandler
-from auth_core.core.session_manager import SessionManager
-from auth_core.models.auth_models import (
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.models.auth_models import (
     LoginRequest, LoginResponse, AuthProvider, TokenResponse
 )
-from tests.factories.user_factory import UserFactory
+from netra_backend.tests.factories.user_factory import UserFactory
 import jwt as jwt_lib
+
+# Configure logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
+# Test configuration constants
+CONCURRENCY_TEST_CONFIG = {
+    "max_workers": 20,
+    "operation_timeout": 5.0,
+    "race_detection_threshold": 0.5,
+    "memory_leak_threshold": 10 * 1024 * 1024,  # 10MB
+    "min_success_rate": 0.90,
+    "max_response_time": 2.0,
+    "max_sessions_per_user": 5,
+}
+
+@pytest.fixture
+async def isolated_auth_environment():
+    """Create an isolated auth environment for testing"""
+    # Mock auth service components
+    auth_service = AsyncMock(spec=AuthService)
+    jwt_handler = MagicMock(spec=JWTHandler)
+    session_manager = AsyncMock(spec=SessionManager)
+    
+    # Configure JWT handler
+    jwt_handler.create_refresh_token = MagicMock(return_value="test_refresh_token")
+    jwt_handler.create_access_token = MagicMock(return_value="test_access_token")
+    jwt_handler.verify_token = MagicMock(return_value={"user_id": "test_user_id"})
+    
+    auth_service.jwt_handler = jwt_handler
+    auth_service.session_manager = session_manager
+    auth_service.refresh_tokens = AsyncMock(return_value={
+        "access_token": "new_access_token",
+        "refresh_token": "new_refresh_token"
+    })
+    
+    # Create test users
+    test_users = [
+        {"id": f"user_{i}", "email": f"user{i}@test.com", "password": "password123"}
+        for i in range(3)
+    ]
+    
+    return {
+        "auth_service": auth_service,
+        "jwt_handler": jwt_handler,
+        "session_manager": session_manager,
+        "test_users": test_users
+    }
+
+@pytest.fixture
+def concurrent_executor():
+    """Provide concurrent execution utilities"""
+    class ConcurrentExecutor:
+        async def execute_simultaneously(self, operations):
+            """Execute operations concurrently"""
+            return await asyncio.gather(*operations, return_exceptions=True)
+    
+    return ConcurrentExecutor()
+
+@pytest.fixture
+def race_detector():
+    """Provide race condition detection utilities"""
+    return RaceConditionDetector()
 
 class RaceConditionDetector:
     """Advanced race condition detection and monitoring utility"""
@@ -630,7 +693,6 @@ class TestJWTTokenCollisionDetection:
         for token in all_tokens:
             try:
                 # Decode without verification to check structure
-                import jwt as jwt_lib
                 payload = jwt_lib.decode(token, options={"verify_signature": False})
                 
                 # Verify required fields

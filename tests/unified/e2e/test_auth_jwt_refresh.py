@@ -27,7 +27,7 @@ from typing import Dict, Any
 import jwt
 from uuid import uuid4
 
-from .test_auth_jwt_generation import JWTGenerationTestManager, TokenSet
+from tests.unified.e2e.test_auth_jwt_generation import JWTGenerationTestManager, TokenSet
 
 logger = logging.getLogger(__name__)
 

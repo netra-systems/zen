@@ -24,11 +24,11 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from .agent_collaboration_helpers import (
+from tests.unified.e2e.agent_collaboration_helpers import AgentCollaborationTestCore, MultiAgentFlowSimulator, CollaborationFlowValidator, AgentCollaborationTestUtils, RealTimeOrchestrationValidator, AgentCollaborationTurn
     AgentCollaborationTestCore, MultiAgentFlowSimulator, CollaborationFlowValidator,
     AgentCollaborationTestUtils, RealTimeOrchestrationValidator, AgentCollaborationTurn
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio

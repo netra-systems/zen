@@ -14,8 +14,8 @@ sys.path.insert(0, str(project_root))
 os.chdir(project_root)
 
 try:
-    from app.core.schema_sync import SchemaSynchronizer, SchemaValidationLevel
-    from app.core.exceptions_service import ServiceError
+    from netra_backend.app.core.schema_sync import SchemaSynchronizer, SchemaValidationLevel
+    from netra_backend.app.core.exceptions_service import ServiceError
 except ImportError as e:
     print(f"Import error: {e}")
     print("Make sure you're running this from the project root and dependencies are installed")

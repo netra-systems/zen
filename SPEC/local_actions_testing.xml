@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.522149</last_edited>
+  </metadata>
   <title>Local GitHub Actions Testing with ACT</title>
   <version>1.0.0</version>
   <status>Active</status>
   <priority>High</priority>
-  
   <overview>
     <purpose>Enable local testing and validation of GitHub Actions workflows using ACT tool</purpose>
     <goals>
@@ -14,7 +16,6 @@
       <goal>Reduced CI/CD failures from workflow errors</goal>
     </goals>
   </overview>
-
   <architecture>
     <component name="act_wrapper">
       <description>Python wrapper for ACT CLI providing simplified interface</description>
@@ -26,7 +27,6 @@
         <responsibility>Provide workflow listing and selection</responsibility>
       </responsibilities>
     </component>
-    
     <component name="workflow_validator">
       <description>Validation system for workflow files before deployment</description>
       <location>scripts/workflow_validator.py</location>
@@ -37,7 +37,6 @@
         <responsibility>Required secrets verification</responsibility>
       </responsibilities>
     </component>
-    
     <component name="local_secrets_manager">
       <description>Secure local secrets storage for workflow testing</description>
       <location>scripts/local_secrets_manager.py</location>
@@ -49,7 +48,6 @@
       </responsibilities>
     </component>
   </architecture>
-
   <implementation>
     <phase number="1" name="Core Infrastructure">
       <task>Install and configure ACT tool</task>
@@ -57,14 +55,12 @@
       <task>Implement basic workflow execution capability</task>
       <task>Add environment variable management</task>
     </phase>
-    
     <phase number="2" name="Validation System">
       <task>Create workflow syntax validator</task>
       <task>Add GitHub Actions schema validation</task>
       <task>Implement pre-commit hook integration</task>
       <task>Create validation report generator</task>
     </phase>
-    
     <phase number="3" name="Advanced Features">
       <task>Add staging deployment capability</task>
       <task>Implement matrix build support</task>
@@ -72,71 +68,60 @@
       <task>Add performance profiling</task>
     </phase>
   </implementation>
-
   <usage>
     <command name="validate">
       <syntax>python scripts/act_wrapper.py validate</syntax>
       <description>Validate all workflows in .github/workflows/</description>
     </command>
-    
     <command name="run">
       <syntax>python scripts/act_wrapper.py run [workflow-name] [--job job-name]</syntax>
       <description>Run specific workflow or job locally</description>
     </command>
-    
     <command name="list">
       <syntax>python scripts/act_wrapper.py list</syntax>
       <description>List all available workflows and jobs</description>
     </command>
-    
     <command name="staging-deploy">
       <syntax>python scripts/act_wrapper.py staging-deploy</syntax>
       <description>Trigger staging deployment locally</description>
     </command>
   </usage>
-
   <requirements>
     <requirement type="software">Docker Desktop installed and running</requirement>
     <requirement type="software">ACT CLI tool installed</requirement>
     <requirement type="software">Python 3.11+</requirement>
     <requirement type="configuration">Local .env file with required secrets</requirement>
   </requirements>
-
   <compatibility>
     <limitation>GitHub-hosted runner specific actions may not work</limitation>
     <limitation>Some marketplace actions require modifications</limitation>
     <limitation>Large artifacts handling differs from GitHub</limitation>
     <limitation>Concurrency and rate limits differ locally</limitation>
   </compatibility>
-
   <security>
     <measure>Secrets stored encrypted at rest</measure>
     <measure>No secrets in command history</measure>
     <measure>Separate secret stores for different environments</measure>
     <measure>Automatic secret rotation reminders</measure>
   </security>
-
   <testing>
     <test_type name="Unit Tests">
       <coverage>ACT wrapper functions</coverage>
       <coverage>Validation logic</coverage>
       <coverage>Secrets management</coverage>
     </test_type>
-    
     <test_type name="Integration Tests">
       <coverage>Workflow execution</coverage>
       <coverage>Environment setup</coverage>
       <coverage>Error handling</coverage>
     </test_type>
   </testing>
-
   <monitoring>
     <metric>Workflow validation success rate</metric>
     <metric>Local execution time vs GitHub execution time</metric>
     <metric>Secrets usage tracking</metric>
     <metric>ACT compatibility issues encountered</metric>
   </monitoring>
-
   <documentation>
     <document>User guide for local workflow testing</document>
     <document>Troubleshooting common ACT issues</document>

@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:28.404660</last_edited>
+  </metadata>
   <title>Corpus Generation and XML Conversion System</title>
   <version>1.0.0</version>
   <date>2025-08-19</date>
   <author>Elite Engineering Team</author>
-  
   <overview>
     <description>
       This specification documents the corpus generation and XML conversion system implemented in the
@@ -17,7 +19,6 @@
       the quality and relevance of AI responses, increasing customer value.
     </business_value>
   </overview>
-
   <architecture>
     <module name="corpus_to_xml.py">
       <path>app/agents/corpus_admin/corpus_to_xml.py</path>
@@ -44,7 +45,6 @@
         </function>
       </functions>
     </module>
-    
     <module name="create_corpus_xml.py">
       <path>app/agents/corpus_admin/create_corpus_xml.py</path>
       <lines>202</lines>
@@ -73,7 +73,6 @@
         </function>
       </functions>
     </module>
-
     <module name="corpus_creation_helpers.py">
       <path>app/agents/corpus_admin/corpus_creation_helpers.py</path>
       <lines>28</lines>
@@ -89,7 +88,6 @@
         </function>
       </functions>
     </module>
-
     <module name="corpus_creation_io.py">
       <path>app/agents/corpus_admin/corpus_creation_io.py</path>
       <lines>166</lines>
@@ -118,7 +116,6 @@
         </function>
       </functions>
     </module>
-
     <module name="corpus_creation_validation.py">
       <path>app/agents/corpus_admin/corpus_creation_validation.py</path>
       <lines>109</lines>
@@ -147,7 +144,6 @@
         </function>
       </functions>
     </module>
-
     <module name="corpus_creation_storage.py">
       <path>app/agents/corpus_admin/corpus_creation_storage.py</path>
       <lines>108</lines>
@@ -177,13 +173,11 @@
       </functions>
     </module>
   </architecture>
-
   <handler_integration>
     <description>
       The create_corpus_xml.py script integrates with existing corpus handlers to provide
       advanced error recovery, validation, indexing, and upload capabilities.
     </description>
-    
     <handler name="corpus_validation_handlers">
       <purpose>Document validation with automatic error recovery</purpose>
       <capabilities>
@@ -192,7 +186,6 @@
         <capability>Detailed validation reports for manual review</capability>
       </capabilities>
     </handler>
-    
     <handler name="corpus_indexing_handlers">
       <purpose>Document indexing for search capabilities</purpose>
       <capabilities>
@@ -201,7 +194,6 @@
         <capability>Queue management for deferred indexing</capability>
       </capabilities>
     </handler>
-    
     <handler name="corpus_upload_handlers">
       <purpose>File upload with size and error management</purpose>
       <capabilities>
@@ -210,7 +202,6 @@
         <capability>Chunked upload fallback</capability>
       </capabilities>
     </handler>
-    
     <operation_modes>
       <mode name="standalone">
         <description>Basic validation without full handler infrastructure</description>
@@ -224,7 +215,6 @@
       </mode>
     </operation_modes>
   </handler_integration>
-
   <categorization_rules>
     <update_frequency>
       <rule workload_type="failed_request" frequency="static">
@@ -240,7 +230,6 @@
         <rationale>RAG content dependent on frequently changing data sources</rationale>
       </rule>
     </update_frequency>
-    
     <domain_classification>
       <precedence level="1" domain="suspicious-general">
         <condition>workload_type == "failed_request"</condition>
@@ -271,7 +260,6 @@
       </precedence>
     </domain_classification>
   </categorization_rules>
-
   <implementation_process>
     <step number="1">
       <action>Data Collection</action>
@@ -308,7 +296,6 @@
       </description>
     </step>
   </implementation_process>
-
   <dependencies>
     <dependency name="xml.etree.ElementTree" version="stdlib">
       <purpose>XML creation and manipulation</purpose>
@@ -317,7 +304,6 @@
       <purpose>XML pretty-printing</purpose>
     </dependency>
   </dependencies>
-
   <output_structure>
     <directory name="categorized_xml_output">
       <file_pattern>{domain}-{frequency}.xml</file_pattern>
@@ -331,7 +317,6 @@
       </xml_structure>
     </directory>
   </output_structure>
-
   <testing>
     <test_data>
       <file>corpus-content.json</file>
@@ -348,7 +333,6 @@
       <check>Update frequency mapping is consistent</check>
     </validation>
   </testing>
-
   <learnings>
     <learning id="1">
       <issue>User may provide invalid JSON format</issue>
@@ -390,7 +374,6 @@
       </implementation>
     </learning>
   </learnings>
-
   <business_impact>
     <metric name="Data Organization">
       <value>Automated categorization reduces manual effort by 95%</value>
@@ -405,7 +388,6 @@
       <value>System can process thousands of prompt-response pairs in seconds</value>
     </metric>
   </business_impact>
-
   <future_enhancements>
     <enhancement priority="high">
       <description>Add support for incremental corpus updates without full regeneration</description>

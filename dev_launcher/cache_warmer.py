@@ -206,8 +206,8 @@ class CacheWarmer:
         """Get migration file paths."""
         return [
             self.project_root / "alembic" / "versions",
-            self.project_root / "app" / "models.py",
-            self.project_root / "app" / "database.py", 
+            self.project_root / "netra_backend" / "app" / "models.py",
+            self.project_root / "netra_backend" / "app" / "database.py", 
             self.project_root / "alembic.ini"
         ]
     

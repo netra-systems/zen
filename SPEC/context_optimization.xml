@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
   <metadata>
     <name>Context Optimization</name>
@@ -11,13 +11,19 @@
     </business_value>
     <created>2025-01-17</created>
     <last_updated>2025-01-17</last_updated>
+    <last_edited>2025-08-21T08:47:28.398319</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.398319">
+      <reasons>
+        <reason>Content contains: monolithic</reason>
+        <reason>Content contains: old</reason>
+        <reason>References old monolithic architecture</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <purpose>
     Ensure optimal LLM context usage by preventing context bloat patterns and enforcing
     strict size limits. Every byte of context must provide value.
   </purpose>
-
   <critical_limits>
     <file_size>
       <max_lines>300</max_lines>
@@ -33,58 +39,50 @@
       <warning_threshold>10</warning_threshold>
     </import_count>
   </critical_limits>
-
   <context_heavy_patterns>
     <pattern name="monolithic_files">
       <description>Files exceeding 300 lines consume excessive context</description>
-      <detection>Line count > 300</detection>
+      <detection>Line count &gt; 300</detection>
       <solution>Split into focused modules by responsibility</solution>
       <priority>HIGH</priority>
     </pattern>
-    
     <pattern name="long_functions">
       <description>Functions over 8 lines require full context loading</description>
-      <detection>Function body > 8 lines</detection>
+      <detection>Function body &gt; 8 lines</detection>
       <solution>Extract to composed helper functions</solution>
       <priority>HIGH</priority>
     </pattern>
-    
     <pattern name="circular_dependencies">
       <description>Circular imports force loading multiple files</description>
       <detection>Import cycles detected</detection>
       <solution>Use dependency injection or interfaces</solution>
       <priority>HIGH</priority>
     </pattern>
-    
     <pattern name="duplicate_code">
       <description>Similar code in multiple places wastes context</description>
-      <detection>Code similarity > 80%</detection>
+      <detection>Code similarity &gt; 80%</detection>
       <solution>Extract to shared utilities</solution>
       <priority>MEDIUM</priority>
     </pattern>
-    
     <pattern name="test_stubs">
       <description>Mock/stub code provides no production value</description>
       <detection>Files with 'stub', 'mock', 'dummy' in name</detection>
       <solution>Remove or isolate from production</solution>
       <priority>MEDIUM</priority>
     </pattern>
-    
     <pattern name="dead_code">
       <description>Unused code consumes context without value</description>
       <detection>No references to function/class</detection>
       <solution>Delete immediately</solution>
       <priority>MEDIUM</priority>
     </pattern>
-    
     <pattern name="verbose_comments">
       <description>Excessive documentation in code files</description>
-      <detection>Comment ratio > 30%</detection>
+      <detection>Comment ratio &gt; 30%</detection>
       <solution>Move to external docs</solution>
       <priority>LOW</priority>
     </pattern>
   </context_heavy_patterns>
-
   <optimization_process>
     <phase number="1" name="analysis">
       <step>Run compliance checker: python scripts/check_architecture_compliance.py</step>
@@ -93,14 +91,12 @@
       <step>Detect circular dependencies</step>
       <step>Calculate context efficiency score</step>
     </phase>
-    
     <phase number="2" name="prioritization">
       <step>Sort violations by context impact</step>
       <step>Calculate fix effort vs savings</step>
       <step>Create prioritized fix list</step>
       <step>Estimate ROI per fix</step>
     </phase>
-    
     <phase number="3" name="refactoring">
       <step>Split files at natural boundaries</step>
       <step>Extract long functions</step>
@@ -108,14 +104,12 @@
       <step>Remove dead code</step>
       <step>Update imports and dependencies</step>
     </phase>
-    
     <phase number="4" name="validation">
       <step>Re-run compliance checker</step>
       <step>Verify all tests pass</step>
       <step>Measure context efficiency improvement</step>
       <step>Calculate cost savings</step>
     </phase>
-    
     <phase number="5" name="prevention">
       <step>Add pre-commit hooks</step>
       <step>Update CI/CD checks</step>
@@ -123,72 +117,61 @@
       <step>Document patterns in learnings</step>
     </phase>
   </optimization_process>
-
   <metrics>
     <metric name="context_efficiency">
       <formula>(Used_Context / Total_Context) * 100</formula>
       <target>85%</target>
       <current>35%</current>
     </metric>
-    
     <metric name="average_file_size">
       <formula>Total_Lines / File_Count</formula>
       <target>120</target>
       <current>185</current>
     </metric>
-    
     <metric name="violation_count">
       <formula>Files_Over_300 + Functions_Over_8</formula>
       <target>0</target>
       <current>1171</current>
     </metric>
-    
     <metric name="api_cost_per_feature">
       <formula>Monthly_API_Cost / Features_Developed</formula>
       <target>50% reduction</target>
     </metric>
   </metrics>
-
   <automation>
     <tool name="context_analyzer">
       <purpose>Detect context-heavy patterns automatically</purpose>
       <script>scripts/analyze_context_usage.py</script>
       <frequency>On every commit</frequency>
     </tool>
-    
     <tool name="auto_splitter">
       <purpose>Suggest file splits at natural boundaries</purpose>
       <script>scripts/suggest_module_splits.py</script>
       <frequency>Weekly</frequency>
     </tool>
-    
     <tool name="efficiency_reporter">
       <purpose>Track context efficiency over time</purpose>
       <script>scripts/context_efficiency_report.py</script>
       <frequency>Daily</frequency>
     </tool>
   </automation>
-
   <enforcement>
     <rule name="file_size_limit">
-      <condition>file.line_count > 300</condition>
+      <condition>file.line_count &gt; 300</condition>
       <action>BLOCK_COMMIT</action>
       <message>File exceeds 300 line limit. Split into modules.</message>
     </rule>
-    
     <rule name="function_size_limit">
-      <condition>function.line_count > 8</condition>
+      <condition>function.line_count &gt; 8</condition>
       <action>BLOCK_COMMIT</action>
       <message>Function exceeds 8 line limit. Extract to helpers.</message>
     </rule>
-    
     <rule name="import_limit">
-      <condition>file.import_count > 15</condition>
+      <condition>file.import_count &gt; 15</condition>
       <action>WARNING</action>
       <message>Too many imports. Consider splitting file.</message>
     </rule>
   </enforcement>
-
   <best_practices>
     <practice>Plan module boundaries BEFORE writing code</practice>
     <practice>Each file should have single responsibility</practice>
@@ -201,7 +184,6 @@
     <practice>Monitor context usage in development</practice>
     <practice>Review context impact in PRs</practice>
   </best_practices>
-
   <roi_tracking>
     <baseline>
       <date>2025-01-17</date>
@@ -209,21 +191,18 @@
       <context_efficiency>35</context_efficiency>
       <development_velocity>1.0</development_velocity>
     </baseline>
-    
     <target>
       <date>2025-02-17</date>
       <monthly_api_cost>5000</monthly_api_cost>
       <context_efficiency>85</context_efficiency>
       <development_velocity>1.2</development_velocity>
     </target>
-    
     <tracking>
       <frequency>Weekly</frequency>
       <report>context_optimization_metrics.json</report>
       <dashboard>monitoring/context-efficiency</dashboard>
     </tracking>
   </roi_tracking>
-
   <emergency_procedures>
     <situation name="massive_context_bloat">
       <trigger>Context efficiency drops below 25%</trigger>
@@ -235,7 +214,6 @@
         <step>Resume development only after 50% efficiency</step>
       </action>
     </situation>
-    
     <situation name="api_cost_spike">
       <trigger>Daily API cost exceeds $500</trigger>
       <action>

@@ -26,7 +26,7 @@ import pytest
 import pytest_asyncio
 from pathlib import Path
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from test_framework.decorators import performance_test, integration_only
 from test_framework.test_user_journeys import JourneyTestBase, JourneyTestResult, ServiceOrchestrator
 

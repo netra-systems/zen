@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings_document>
+    <metadata>
+        <title>Backend Startup Learnings</title>
+        <description>Lessons learned from backend startup issues and resolutions</description>
+        <tags>backend, startup, path, configuration</tags>
+        <created>2025-01-21</created>
+        <updated>2025-01-21</updated>
+    </metadata>
+
+    <learnings>
+        <learning id="backend-app-path" date="2025-01-21">
+            <title>Backend App Directory Path Configuration</title>
+            <issue>Backend startup script (run_server.py) was looking for app directory at project_root/app instead of project_root/netra_backend/app</issue>
+            <symptom>Error: "app directory not found at C:\...\netra-core-generation-1\app"</symptom>
+            <root_cause>Incorrect path configuration in run_server.py script</root_cause>
+            <solution>
+                Updated run_server.py to:
+                1. Check for app at "netra_backend/app" instead of "app"
+                2. Use "netra_backend.app.main:app" instead of "app.main:app" for uvicorn import
+            </solution>
+            <test>test_framework/tests/test_backend_startup_path.py</test>
+            <impact>Critical - Backend cannot start without this fix</impact>
+            <prevention>Always verify directory paths match actual project structure</prevention>
+        </learning>
+    </learnings>
+
+    <best_practices>
+        <practice id="path-verification">
+            <title>Always Verify Path Configurations</title>
+            <description>
+                When configuring paths in startup scripts:
+                1. Verify the actual directory structure
+                2. Use correct module import paths for Python
+                3. Test with --help flag to ensure script can initialize
+            </description>
+        </practice>
+        
+        <practice id="test-driven-fixes">
+            <title>Create Tests Before Fixing Path Issues</title>
+            <description>
+                When fixing path-related bugs:
+                1. First create a failing test that exposes the issue
+                2. Fix the implementation
+                3. Verify the test passes
+                4. Document the learning
+            </description>
+        </practice>
+    </best_practices>
+
+    <references>
+        <reference>scripts/run_server.py</reference>
+        <reference>test_framework/tests/test_backend_startup_path.py</reference>
+        <reference>dev_launcher/backend_starter.py</reference>
+    </references>
+</learnings_document>

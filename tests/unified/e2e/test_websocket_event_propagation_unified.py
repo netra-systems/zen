@@ -20,7 +20,7 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 try:
-    from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+    from tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
 except ImportError:
     # Fallback if config not available
     TEST_CONFIG = {}
@@ -30,11 +30,11 @@ except ImportError:
         pass
 
 try:
-    from ..real_websocket_client import RealWebSocketClient
+    from tests.unified.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Use clients factory if available
-    from ..clients.websocket_client import WebSocketTestClient as RealWebSocketClient
-from app.logging_config import central_logger
+    from tests.unified.clients.websocket_client import WebSocketTestClient as RealWebSocketClient
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

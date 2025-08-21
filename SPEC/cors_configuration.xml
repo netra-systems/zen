@@ -1,383 +1,355 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>CORS Configuration Specification</name>
-        <type>cors_configuration</type>
-        <version>1.0</version>
-        <created>2025-08-20</created>
-        <description>Comprehensive CORS configuration for all environments and services to prevent regressions</description>
-        <priority>CRITICAL</priority>
-    </metadata>
-    
-    <problem-statement>
-        <issue>Recurring CORS errors across local development and staging environments</issue>
-        <example>Access to fetch at 'http://localhost:8081/auth/config' from origin 'http://localhost:3001' has been blocked by CORS policy</example>
-        <root-causes>
-            <cause>Inconsistent CORS configuration between main backend and auth service</cause>
-            <cause>Missing CORS headers in auth service responses</cause>
-            <cause>Port mismatches in development environment</cause>
-            <cause>Preflight request handling issues</cause>
-            <cause>Dynamic origin validation failures</cause>
-            <cause priority="CRITICAL">Dynamic ports in development environment not properly handled in CORS configuration</cause>
-        </root-causes>
-    </problem-statement>
-    
-    <core-principles>
-        <principle id="cors-consistency">
-            <name>Configuration Consistency</name>
-            <description>All services MUST have consistent CORS configuration for the same environment</description>
-            <enforcement>Use shared configuration module or environment variables</enforcement>
-        </principle>
-        
-        <principle id="explicit-configuration">
-            <name>Explicit Configuration</name>
-            <description>CORS settings must be explicitly configured, never implicit or missing</description>
-            <enforcement>Every service must configure CORS middleware on startup</enforcement>
-        </principle>
-        
-        <principle id="environment-aware">
-            <name>Environment-Specific Settings</name>
-            <description>CORS configuration must adapt to the deployment environment</description>
-            <environments>development, testing, staging, production</environments>
-        </principle>
-        
-        <principle id="dynamic-port-support">
-            <name>Dynamic Port Support</name>
-            <description>CORS configuration MUST properly handle dynamic ports in development environments</description>
-            <enforcement>Use port-agnostic pattern matching or extract port from request origin dynamically</enforcement>
-            <critical>True - Root cause of many dev environment CORS failures</critical>
-        </principle>
-        
-        <principle id="preflight-support">
-            <name>Preflight Request Support</name>
-            <description>All services MUST properly handle OPTIONS preflight requests</description>
-            <enforcement>Return 200 OK with appropriate headers for OPTIONS requests</enforcement>
-        </principle>
-    </core-principles>
-    
-    <environment-configurations>
-        <environment name="development">
-            <description>Local development configuration with maximum flexibility</description>
-            <configuration-strategy>
-                <approach>Dynamic CORS with wildcard support</approach>
-                <rationale>Development uses dynamic ports requiring flexible CORS handling</rationale>
-                <implementation>DynamicCORSMiddleware for both services</implementation>
-            </configuration-strategy>
-            
-            <main-backend>
-                <port>8000</port>
-                <cors-mode>dynamic-wildcard</cors-mode>
-                <environment-variable>CORS_ORIGINS=*</environment-variable>
-                <middleware>CustomCORSMiddleware</middleware>
-                <allowed_origins>
-                    <!-- When CORS_ORIGINS=*, all origins are allowed dynamically -->
-                    <dynamic>true</dynamic>
-                    <fallback-origins>
-                        <origin>http://localhost:3000</origin>
-                        <origin>http://localhost:3001</origin>
-                        <origin>http://localhost:8000</origin>
-                        <origin>http://localhost:8001</origin>
-                        <origin>http://localhost:8080</origin>
-                        <origin>http://localhost:8081</origin>
-                        <origin>http://127.0.0.1:3000</origin>
-                        <origin>http://127.0.0.1:3001</origin>
-                        <origin>http://127.0.0.1:8000</origin>
-                        <origin>http://127.0.0.1:8001</origin>
-                        <origin>http://127.0.0.1:8080</origin>
-                        <origin>http://127.0.0.1:8081</origin>
-                    </fallback-origins>
-                </allowed_origins>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
-                <max_age>3600</max_age>
-                <preflight-handling>
-                    <auto-response>true</auto-response>
-                    <status-code>200</status-code>
-                </preflight-handling>
-            </main-backend>
-            
-            <auth-service>
-                <port>8081</port>
-                <cors-mode>dynamic-wildcard</cors-mode>
-                <environment-variable>CORS_ORIGINS=*</environment-variable>
-                <middleware>DynamicCORSMiddleware</middleware>
-                <allowed_origins>
-                    <!-- When CORS_ORIGINS=*, all origins are allowed dynamically -->
-                    <dynamic>true</dynamic>
-                    <fallback-origins>
-                        <origin>http://localhost:3000</origin>
-                        <origin>http://localhost:3001</origin>
-                        <origin>http://localhost:8000</origin>
-                        <origin>http://localhost:8001</origin>
-                        <origin>http://localhost:8080</origin>
-                        <origin>http://localhost:8081</origin>
-                        <origin>http://127.0.0.1:3000</origin>
-                        <origin>http://127.0.0.1:3001</origin>
-                        <origin>http://127.0.0.1:8000</origin>
-                        <origin>http://127.0.0.1:8001</origin>
-                        <origin>http://127.0.0.1:8080</origin>
-                        <origin>http://127.0.0.1:8081</origin>
-                    </fallback-origins>
-                </allowed_origins>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type, Set-Cookie</expose_headers>
-                <max_age>3600</max_age>
-                <preflight-handling>
-                    <auto-response>true</auto-response>
-                    <status-code>200</status-code>
-                </preflight-handling>
-            </auth-service>
-            
-            <frontend>
-                <port>3000</port>
-                <alternate-port>3001</alternate-port>
-                <api_url>http://localhost:8000</api_url>
-                <auth_url>http://localhost:8081</auth_url>
-                <ws_url>ws://localhost:8000</ws_url>
-                <dev-server-proxy>
-                    <enabled>false</enabled>
-                    <comment>Frontend dev server should not proxy, rely on backend CORS</comment>
-                </dev-server-proxy>
-            </frontend>
-        </environment>
-        
-        <environment name="staging">
-            <description>Staging environment with dynamic PR deployments</description>
-            <main-backend>
-                <allowed_origins>
-                    <comment>NOTE: Wildcard subdomains (*.staging) are NOT supported in CORS - must list explicit origins</comment>
-                    <origin>https://app.staging.netrasystems.ai</origin>
-                    <origin>https://auth.staging.netrasystems.ai</origin>
-                    <origin>https://api.staging.netrasystems.ai</origin>
-                    <origin>https://backend.staging.netrasystems.ai</origin>
-                    <origin>http://localhost:3000</origin>
-                    <origin>http://localhost:3001</origin>
-                    <origin>http://localhost:8000</origin>
-                    <origin>http://localhost:8080</origin>
-                </allowed_origins>
-                <cloud_run_patterns>
-                    <pattern>https://netra-frontend-*.us-central1.run.app</pattern>
-                    <pattern>https://netra-backend-*.us-central1.run.app</pattern>
-                    <pattern>https://netra-auth-*.us-central1.run.app</pattern>
-                </cloud_run_patterns>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
-            </main-backend>
-            
-            <auth-service>
-                <allowed_origins>
-                    <pattern>https://*.staging.netrasystems.ai</pattern>
-                    <pattern>https://pr-*.staging.netrasystems.ai</pattern>
-                    <origin>https://app.staging.netrasystems.ai</origin>
-                    <origin>https://app.staging.netrasystems.ai</origin>
-                    <origin>https://auth.staging.netrasystems.ai</origin>
-                    <origin>https://backend.staging.netrasystems.ai</origin>
-                    <origin>http://localhost:3000</origin>
-                    <origin>http://localhost:3001</origin>
-                </allowed_origins>
-                <cloud_run_patterns>
-                    <pattern>https://netra-frontend-*.us-central1.run.app</pattern>
-                    <pattern>https://netra-backend-*.us-central1.run.app</pattern>
-                    <pattern>https://netra-auth-*.us-central1.run.app</pattern>
-                </cloud_run_patterns>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
-            </auth-service>
-        </environment>
-        
-        <environment name="production">
-            <description>Production environment with strict origin validation</description>
-            <main-backend>
-                <allowed_origins>
-                    <origin>https://netrasystems.ai</origin>
-                    <origin>https://www.netrasystems.ai</origin>
-                    <origin>https://app.netrasystems.ai</origin>
-                    <origin>https://api.netrasystems.ai</origin>
-                    <origin>https://auth.netrasystems.ai</origin>
-                </allowed_origins>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID</expose_headers>
-            </main-backend>
-            
-            <auth-service>
-                <allowed_origins>
-                    <origin>https://netrasystems.ai</origin>
-                    <origin>https://www.netrasystems.ai</origin>
-                    <origin>https://app.netrasystems.ai</origin>
-                    <origin>https://api.netrasystems.ai</origin>
-                    <origin>https://auth.netrasystems.ai</origin>
-                </allowed_origins>
-                <allow_credentials>true</allow_credentials>
-                <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH</allow_methods>
-                <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID</allow_headers>
-                <expose_headers>X-Trace-ID, X-Request-ID</expose_headers>
-            </auth-service>
-        </environment>
-    </environment-configurations>
-    
-    <implementation-requirements>
-        <requirement id="cors-req-001" priority="CRITICAL">
-            <description>Auth service MUST configure CORS middleware on startup</description>
-            <location>auth_service/main.py</location>
-            <validation>Check for CORSMiddleware or DynamicCORSMiddleware configuration</validation>
-            <implementation-note>Must handle CORS_ORIGINS=* with DynamicCORSMiddleware</implementation-note>
-        </requirement>
-        
-        <requirement id="cors-req-002" priority="CRITICAL">
-            <description>Main backend MUST configure CORS middleware consistently</description>
-            <location>app/core/middleware_setup.py</location>
-            <validation>Verify CustomCORSMiddleware handles all environments correctly</validation>
-            <implementation-note>CustomCORSMiddleware required for wildcard with credentials</implementation-note>
-        </requirement>
-        
-        <requirement id="cors-req-003" priority="HIGH">
-            <description>Environment variables must be consistent across services</description>
-            <variables>
-                <variable name="CORS_ORIGINS">Comma-separated list of allowed origins or "*"</variable>
-                <variable name="ENVIRONMENT">Current environment (development/staging/production)</variable>
-            </variables>
-            <dev-launcher-requirements>
-                <requirement>dev_launcher/launcher.py must set CORS_ORIGINS=*</requirement>
-                <requirement>dev_launcher/auth_starter.py must set CORS_ORIGINS=*</requirement>
-            </dev-launcher-requirements>
-        </requirement>
-        
-        <requirement id="cors-req-004" priority="CRITICAL">
-            <description>Preflight OPTIONS requests must return proper headers</description>
-            <response>
-                <status>200 OK</status>
-                <headers>
-                    <header>Access-Control-Allow-Origin: {requesting_origin}</header>
-                    <header>Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</header>
-                    <header>Access-Control-Allow-Headers: Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</header>
-                    <header>Access-Control-Allow-Credentials: true</header>
-                    <header>Access-Control-Max-Age: 3600</header>
-                </headers>
-                <implementation-note>OPTIONS must return immediately without calling next middleware</implementation-note>
-            </response>
-        </requirement>
-        
-        <requirement id="cors-req-005" priority="HIGH">
-            <description>Dynamic origin validation for staging PR environments</description>
-            <pattern-matching>
-                <pattern>https://pr-{number}.staging.netrasystems.ai</pattern>
-                <pattern>https://{service}-pr-{number}.staging.netrasystems.ai</pattern>
-            </pattern-matching>
-        </requirement>
-        
-        <requirement id="cors-req-006" priority="CRITICAL">
-            <description>Auth service /auth/config endpoint must include CORS headers</description>
-            <endpoints>
-                <endpoint>/auth/config</endpoint>
-                <endpoint>/auth/login</endpoint>
-                <endpoint>/auth/callback</endpoint>
-                <endpoint>/auth/token</endpoint>
-                <endpoint>/auth/logout</endpoint>
-                <endpoint>/auth/status</endpoint>
-                <endpoint>/health</endpoint>
-                <endpoint>/health/ready</endpoint>
-            </endpoints>
-            <implementation-note>All endpoints must have CORS headers, including health checks</implementation-note>
-        </requirement>
-        
-        <requirement id="cors-req-007" priority="CRITICAL">
-            <description>Middleware ordering must be correct</description>
-            <order>
-                <position>1</position>
-                <middleware>CORS Middleware (first to handle preflight)</middleware>
-            </order>
-            <order>
-                <position>2</position>
-                <middleware>Session Middleware</middleware>
-            </order>
-            <order>
-                <position>3+</position>
-                <middleware>Other middleware</middleware>
-            </order>
-        </requirement>
-        
-        <requirement id="cors-req-008" priority="CRITICAL">
-            <description>Dev launcher must propagate CORS configuration</description>
-            <files>
-                <file>dev_launcher/launcher.py</file>
-                <file>dev_launcher/service_startup.py</file>
-                <file>dev_launcher/auth_starter.py</file>
-            </files>
-            <validation>All services started via dev launcher must receive CORS_ORIGINS=*</validation>
-        </requirement>
-    </implementation-requirements>
-    
-    <common-issues-and-solutions>
-        <issue id="issue-001">
-            <problem>No 'Access-Control-Allow-Origin' header is present on the requested resource</problem>
-            <causes>
-                <cause>CORS middleware not configured for the service</cause>
-                <cause>Origin not in allowed origins list</cause>
-                <cause>Middleware ordering issue (CORS must be early in chain)</cause>
-            </causes>
-            <solutions>
-                <solution>Ensure CORS middleware is configured in service main.py</solution>
-                <solution>Add origin to CORS_ORIGINS environment variable</solution>
-                <solution>Place CORS middleware before other middleware</solution>
-            </solutions>
-        </issue>
-        
-        <issue id="issue-002">
-            <problem>Preflight request fails with 404 or 405</problem>
-            <causes>
-                <cause>OPTIONS method not handled by middleware</cause>
-                <cause>Route does not accept OPTIONS method</cause>
-            </causes>
-            <solutions>
-                <solution>Ensure middleware handles OPTIONS requests explicitly</solution>
-                <solution>Return 200 OK for OPTIONS without calling next handler</solution>
-            </solutions>
-        </issue>
-        
-        <issue id="issue-003">
-            <problem>Credentials flag causes CORS failure with wildcard origin</problem>
-            <causes>
-                <cause>Cannot use credentials:true with origin:*</cause>
-            </causes>
-            <solutions>
-                <solution>Use DynamicCORSMiddleware to echo back requesting origin</solution>
-                <solution>Explicitly list all allowed origins</solution>
-            </solutions>
-        </issue>
-        
-        <issue id="issue-004">
-            <problem>Port mismatch in development causing CORS errors</problem>
-            <causes>
-                <cause>Auth service running on unexpected port</cause>
-                <cause>Frontend configured with wrong auth service URL</cause>
-                <cause priority="CRITICAL">Dynamic ports not properly extracted from origin header</cause>
-                <cause>CORS configuration hardcoding specific ports instead of pattern matching</cause>
-            </causes>
-            <solutions>
-                <solution>Standardize ports: Backend=8000, Auth=8081, Frontend=3000/3001</solution>
-                <solution>Use environment variables for service URLs</solution>
-                <solution priority="CRITICAL">Extract port dynamically from request origin header</solution>
-                <solution>Implement hostname-based matching ignoring port numbers for localhost/127.0.0.1</solution>
-            </solutions>
-        </issue>
-    </common-issues-and-solutions>
-    
-    <implementation-patterns>
-        <pattern id="dynamic-cors-middleware">
-            <name>DynamicCORSMiddleware Pattern</name>
-            <description>Custom middleware for handling wildcard CORS with credentials</description>
-            <code-template>
-                <![CDATA[
+  <metadata>
+    <name>CORS Configuration Specification</name>
+    <type>cors_configuration</type>
+    <version>1.0</version>
+    <created>2025-08-20</created>
+    <description>Comprehensive CORS configuration for all environments and services to prevent regressions</description>
+    <priority>CRITICAL</priority>
+    <last_edited>2025-08-21T08:47:28.408673</last_edited>
+  </metadata>
+  <problem-statement>
+    <issue>Recurring CORS errors across local development and staging environments</issue>
+    <example>Access to fetch at 'http://localhost:8081/auth/config' from origin 'http://localhost:3001' has been blocked by CORS policy</example>
+    <root-causes>
+      <cause>Inconsistent CORS configuration between main backend and auth service</cause>
+      <cause>Missing CORS headers in auth service responses</cause>
+      <cause>Port mismatches in development environment</cause>
+      <cause>Preflight request handling issues</cause>
+      <cause>Dynamic origin validation failures</cause>
+      <cause priority="CRITICAL">Dynamic ports in development environment not properly handled in CORS configuration</cause>
+    </root-causes>
+  </problem-statement>
+  <core-principles>
+    <principle id="cors-consistency">
+      <name>Configuration Consistency</name>
+      <description>All services MUST have consistent CORS configuration for the same environment</description>
+      <enforcement>Use shared configuration module or environment variables</enforcement>
+    </principle>
+    <principle id="explicit-configuration">
+      <name>Explicit Configuration</name>
+      <description>CORS settings must be explicitly configured, never implicit or missing</description>
+      <enforcement>Every service must configure CORS middleware on startup</enforcement>
+    </principle>
+    <principle id="environment-aware">
+      <name>Environment-Specific Settings</name>
+      <description>CORS configuration must adapt to the deployment environment</description>
+      <environments>development, testing, staging, production</environments>
+    </principle>
+    <principle id="dynamic-port-support">
+      <name>Dynamic Port Support</name>
+      <description>CORS configuration MUST properly handle dynamic ports in development environments</description>
+      <enforcement>Use port-agnostic pattern matching or extract port from request origin dynamically</enforcement>
+      <critical>True - Root cause of many dev environment CORS failures</critical>
+    </principle>
+    <principle id="preflight-support">
+      <name>Preflight Request Support</name>
+      <description>All services MUST properly handle OPTIONS preflight requests</description>
+      <enforcement>Return 200 OK with appropriate headers for OPTIONS requests</enforcement>
+    </principle>
+  </core-principles>
+  <environment-configurations>
+    <environment name="development">
+      <description>Local development configuration with maximum flexibility</description>
+      <configuration-strategy>
+        <approach>Dynamic CORS with wildcard support</approach>
+        <rationale>Development uses dynamic ports requiring flexible CORS handling</rationale>
+        <implementation>DynamicCORSMiddleware for both services</implementation>
+      </configuration-strategy>
+      <main-backend>
+        <port>8000</port>
+        <cors-mode>dynamic-wildcard</cors-mode>
+        <environment-variable>CORS_ORIGINS=*</environment-variable>
+        <middleware>CustomCORSMiddleware</middleware>
+        <allowed_origins>
+          <dynamic>true</dynamic>
+          <fallback-origins>
+            <origin>http://localhost:3000</origin>
+            <origin>http://localhost:3001</origin>
+            <origin>http://localhost:8000</origin>
+            <origin>http://localhost:8001</origin>
+            <origin>http://localhost:8080</origin>
+            <origin>http://localhost:8081</origin>
+            <origin>http://127.0.0.1:3000</origin>
+            <origin>http://127.0.0.1:3001</origin>
+            <origin>http://127.0.0.1:8000</origin>
+            <origin>http://127.0.0.1:8001</origin>
+            <origin>http://127.0.0.1:8080</origin>
+            <origin>http://127.0.0.1:8081</origin>
+          </fallback-origins>
+        </allowed_origins>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
+        <max_age>3600</max_age>
+        <preflight-handling>
+          <auto-response>true</auto-response>
+          <status-code>200</status-code>
+        </preflight-handling>
+      </main-backend>
+      <auth-service>
+        <port>8081</port>
+        <cors-mode>dynamic-wildcard</cors-mode>
+        <environment-variable>CORS_ORIGINS=*</environment-variable>
+        <middleware>DynamicCORSMiddleware</middleware>
+        <allowed_origins>
+          <dynamic>true</dynamic>
+          <fallback-origins>
+            <origin>http://localhost:3000</origin>
+            <origin>http://localhost:3001</origin>
+            <origin>http://localhost:8000</origin>
+            <origin>http://localhost:8001</origin>
+            <origin>http://localhost:8080</origin>
+            <origin>http://localhost:8081</origin>
+            <origin>http://127.0.0.1:3000</origin>
+            <origin>http://127.0.0.1:3001</origin>
+            <origin>http://127.0.0.1:8000</origin>
+            <origin>http://127.0.0.1:8001</origin>
+            <origin>http://127.0.0.1:8080</origin>
+            <origin>http://127.0.0.1:8081</origin>
+          </fallback-origins>
+        </allowed_origins>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type, Set-Cookie</expose_headers>
+        <max_age>3600</max_age>
+        <preflight-handling>
+          <auto-response>true</auto-response>
+          <status-code>200</status-code>
+        </preflight-handling>
+      </auth-service>
+      <frontend>
+        <port>3000</port>
+        <alternate-port>3001</alternate-port>
+        <api_url>http://localhost:8000</api_url>
+        <auth_url>http://localhost:8081</auth_url>
+        <ws_url>ws://localhost:8000</ws_url>
+        <dev-server-proxy>
+          <enabled>false</enabled>
+          <comment>Frontend dev server should not proxy, rely on backend CORS</comment>
+        </dev-server-proxy>
+      </frontend>
+    </environment>
+    <environment name="staging">
+      <description>Staging environment with dynamic PR deployments</description>
+      <main-backend>
+        <allowed_origins>
+          <comment>NOTE: Wildcard subdomains (*.staging) are NOT supported in CORS - must list explicit origins</comment>
+          <origin>https://app.staging.netrasystems.ai</origin>
+          <origin>https://auth.staging.netrasystems.ai</origin>
+          <origin>https://api.staging.netrasystems.ai</origin>
+          <origin>https://backend.staging.netrasystems.ai</origin>
+          <origin>http://localhost:3000</origin>
+          <origin>http://localhost:3001</origin>
+          <origin>http://localhost:8000</origin>
+          <origin>http://localhost:8080</origin>
+        </allowed_origins>
+        <cloud_run_patterns>
+          <pattern>https://netra-frontend-*.us-central1.run.app</pattern>
+          <pattern>https://netra-backend-*.us-central1.run.app</pattern>
+          <pattern>https://netra-auth-*.us-central1.run.app</pattern>
+        </cloud_run_patterns>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
+      </main-backend>
+      <auth-service>
+        <allowed_origins>
+          <pattern>https://*.staging.netrasystems.ai</pattern>
+          <pattern>https://pr-*.staging.netrasystems.ai</pattern>
+          <origin>https://app.staging.netrasystems.ai</origin>
+          <origin>https://app.staging.netrasystems.ai</origin>
+          <origin>https://auth.staging.netrasystems.ai</origin>
+          <origin>https://backend.staging.netrasystems.ai</origin>
+          <origin>http://localhost:3000</origin>
+          <origin>http://localhost:3001</origin>
+        </allowed_origins>
+        <cloud_run_patterns>
+          <pattern>https://netra-frontend-*.us-central1.run.app</pattern>
+          <pattern>https://netra-backend-*.us-central1.run.app</pattern>
+          <pattern>https://netra-auth-*.us-central1.run.app</pattern>
+        </cloud_run_patterns>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID, Content-Length, Content-Type</expose_headers>
+      </auth-service>
+    </environment>
+    <environment name="production">
+      <description>Production environment with strict origin validation</description>
+      <main-backend>
+        <allowed_origins>
+          <origin>https://netrasystems.ai</origin>
+          <origin>https://www.netrasystems.ai</origin>
+          <origin>https://app.netrasystems.ai</origin>
+          <origin>https://api.netrasystems.ai</origin>
+          <origin>https://auth.netrasystems.ai</origin>
+        </allowed_origins>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID</expose_headers>
+      </main-backend>
+      <auth-service>
+        <allowed_origins>
+          <origin>https://netrasystems.ai</origin>
+          <origin>https://www.netrasystems.ai</origin>
+          <origin>https://app.netrasystems.ai</origin>
+          <origin>https://api.netrasystems.ai</origin>
+          <origin>https://auth.netrasystems.ai</origin>
+        </allowed_origins>
+        <allow_credentials>true</allow_credentials>
+        <allow_methods>GET, POST, PUT, DELETE, OPTIONS, PATCH</allow_methods>
+        <allow_headers>Authorization, Content-Type, X-Request-ID, X-Trace-ID</allow_headers>
+        <expose_headers>X-Trace-ID, X-Request-ID</expose_headers>
+      </auth-service>
+    </environment>
+  </environment-configurations>
+  <implementation-requirements>
+    <requirement id="cors-req-001" priority="CRITICAL">
+      <description>Auth service MUST configure CORS middleware on startup</description>
+      <location>auth_service/main.py</location>
+      <validation>Check for CORSMiddleware or DynamicCORSMiddleware configuration</validation>
+      <implementation-note>Must handle CORS_ORIGINS=* with DynamicCORSMiddleware</implementation-note>
+    </requirement>
+    <requirement id="cors-req-002" priority="CRITICAL">
+      <description>Main backend MUST configure CORS middleware consistently</description>
+      <location>app/core/middleware_setup.py</location>
+      <validation>Verify CustomCORSMiddleware handles all environments correctly</validation>
+      <implementation-note>CustomCORSMiddleware required for wildcard with credentials</implementation-note>
+    </requirement>
+    <requirement id="cors-req-003" priority="HIGH">
+      <description>Environment variables must be consistent across services</description>
+      <variables>
+        <variable name="CORS_ORIGINS">Comma-separated list of allowed origins or "*"</variable>
+        <variable name="ENVIRONMENT">Current environment (development/staging/production)</variable>
+      </variables>
+      <dev-launcher-requirements>
+        <requirement>dev_launcher/launcher.py must set CORS_ORIGINS=*</requirement>
+        <requirement>dev_launcher/auth_starter.py must set CORS_ORIGINS=*</requirement>
+      </dev-launcher-requirements>
+    </requirement>
+    <requirement id="cors-req-004" priority="CRITICAL">
+      <description>Preflight OPTIONS requests must return proper headers</description>
+      <response>
+        <status>200 OK</status>
+        <headers>
+          <header>Access-Control-Allow-Origin: {requesting_origin}</header>
+          <header>Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD</header>
+          <header>Access-Control-Allow-Headers: Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With</header>
+          <header>Access-Control-Allow-Credentials: true</header>
+          <header>Access-Control-Max-Age: 3600</header>
+        </headers>
+        <implementation-note>OPTIONS must return immediately without calling next middleware</implementation-note>
+      </response>
+    </requirement>
+    <requirement id="cors-req-005" priority="HIGH">
+      <description>Dynamic origin validation for staging PR environments</description>
+      <pattern-matching>
+        <pattern>https://pr-{number}.staging.netrasystems.ai</pattern>
+        <pattern>https://{service}-pr-{number}.staging.netrasystems.ai</pattern>
+      </pattern-matching>
+    </requirement>
+    <requirement id="cors-req-006" priority="CRITICAL">
+      <description>Auth service /auth/config endpoint must include CORS headers</description>
+      <endpoints>
+        <endpoint>/auth/config</endpoint>
+        <endpoint>/auth/login</endpoint>
+        <endpoint>/auth/callback</endpoint>
+        <endpoint>/auth/token</endpoint>
+        <endpoint>/auth/logout</endpoint>
+        <endpoint>/auth/status</endpoint>
+        <endpoint>/health</endpoint>
+        <endpoint>/health/ready</endpoint>
+      </endpoints>
+      <implementation-note>All endpoints must have CORS headers, including health checks</implementation-note>
+    </requirement>
+    <requirement id="cors-req-007" priority="CRITICAL">
+      <description>Middleware ordering must be correct</description>
+      <order>
+        <position>1</position>
+        <middleware>CORS Middleware (first to handle preflight)</middleware>
+      </order>
+      <order>
+        <position>2</position>
+        <middleware>Session Middleware</middleware>
+      </order>
+      <order>
+        <position>3+</position>
+        <middleware>Other middleware</middleware>
+      </order>
+    </requirement>
+    <requirement id="cors-req-008" priority="CRITICAL">
+      <description>Dev launcher must propagate CORS configuration</description>
+      <files>
+        <file>dev_launcher/launcher.py</file>
+        <file>dev_launcher/service_startup.py</file>
+        <file>dev_launcher/auth_starter.py</file>
+      </files>
+      <validation>All services started via dev launcher must receive CORS_ORIGINS=*</validation>
+    </requirement>
+  </implementation-requirements>
+  <common-issues-and-solutions>
+    <issue id="issue-001">
+      <problem>No 'Access-Control-Allow-Origin' header is present on the requested resource</problem>
+      <causes>
+        <cause>CORS middleware not configured for the service</cause>
+        <cause>Origin not in allowed origins list</cause>
+        <cause>Middleware ordering issue (CORS must be early in chain)</cause>
+      </causes>
+      <solutions>
+        <solution>Ensure CORS middleware is configured in service main.py</solution>
+        <solution>Add origin to CORS_ORIGINS environment variable</solution>
+        <solution>Place CORS middleware before other middleware</solution>
+      </solutions>
+    </issue>
+    <issue id="issue-002">
+      <problem>Preflight request fails with 404 or 405</problem>
+      <causes>
+        <cause>OPTIONS method not handled by middleware</cause>
+        <cause>Route does not accept OPTIONS method</cause>
+      </causes>
+      <solutions>
+        <solution>Ensure middleware handles OPTIONS requests explicitly</solution>
+        <solution>Return 200 OK for OPTIONS without calling next handler</solution>
+      </solutions>
+    </issue>
+    <issue id="issue-003">
+      <problem>Credentials flag causes CORS failure with wildcard origin</problem>
+      <causes>
+        <cause>Cannot use credentials:true with origin:*</cause>
+      </causes>
+      <solutions>
+        <solution>Use DynamicCORSMiddleware to echo back requesting origin</solution>
+        <solution>Explicitly list all allowed origins</solution>
+      </solutions>
+    </issue>
+    <issue id="issue-004">
+      <problem>Port mismatch in development causing CORS errors</problem>
+      <causes>
+        <cause>Auth service running on unexpected port</cause>
+        <cause>Frontend configured with wrong auth service URL</cause>
+        <cause priority="CRITICAL">Dynamic ports not properly extracted from origin header</cause>
+        <cause>CORS configuration hardcoding specific ports instead of pattern matching</cause>
+      </causes>
+      <solutions>
+        <solution>Standardize ports: Backend=8000, Auth=8081, Frontend=3000/3001</solution>
+        <solution>Use environment variables for service URLs</solution>
+        <solution priority="CRITICAL">Extract port dynamically from request origin header</solution>
+        <solution>Implement hostname-based matching ignoring port numbers for localhost/127.0.0.1</solution>
+      </solutions>
+    </issue>
+  </common-issues-and-solutions>
+  <implementation-patterns>
+    <pattern id="dynamic-cors-middleware">
+      <name>DynamicCORSMiddleware Pattern</name>
+      <description>Custom middleware for handling wildcard CORS with credentials</description>
+      <code-template>
+                
 class DynamicCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         origin = request.headers.get("origin")
@@ -405,19 +377,18 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
         
         return response
-                ]]>
+                
             </code-template>
-        </pattern>
-        
-        <pattern id="dynamic-port-handling">
-            <name>Dynamic Port Handling Pattern</name>
-            <description>Properly handle dynamic ports in development CORS configuration</description>
-            <code-template>
-                <![CDATA[
+    </pattern>
+    <pattern id="dynamic-port-handling">
+      <name>Dynamic Port Handling Pattern</name>
+      <description>Properly handle dynamic ports in development CORS configuration</description>
+      <code-template>
+                
 class DynamicPortCORSMiddleware(BaseHTTPMiddleware):
     """Middleware that handles CORS with dynamic ports in development"""
     
-    def is_development_origin(self, origin: str) -> bool:
+    def is_development_origin(self, origin: str) -&gt; bool:
         """Check if origin is from a development host regardless of port"""
         if not origin:
             return False
@@ -457,15 +428,14 @@ class DynamicPortCORSMiddleware(BaseHTTPMiddleware):
         
         # Fallback for non-development origins
         return await call_next(request)
-                ]]>
+                
             </code-template>
-        </pattern>
-        
-        <pattern id="env-var-handling">
-            <name>Environment Variable Handling</name>
-            <description>Proper CORS_ORIGINS environment variable handling</description>
-            <code-template>
-                <![CDATA[
+    </pattern>
+    <pattern id="env-var-handling">
+      <name>Environment Variable Handling</name>
+      <description>Proper CORS_ORIGINS environment variable handling</description>
+      <code-template>
+                
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
 
 if cors_origins_env == "*":
@@ -485,62 +455,55 @@ elif cors_origins_env:
 else:
     # Default based on environment
     # ... environment-specific defaults
-                ]]>
+                
             </code-template>
-        </pattern>
-    </implementation-patterns>
-    
-    <testing-strategy>
-        <test-category name="unit">
-            <test id="test-cors-middleware-config">Verify CORS middleware configuration for each environment</test>
-            <test id="test-origin-pattern-matching">Test origin pattern matching for staging</test>
-            <test id="test-preflight-headers">Validate preflight response headers</test>
-            <test id="test-dynamic-cors">Test DynamicCORSMiddleware with various origins</test>
-            <test id="test-env-var-parsing">Test CORS_ORIGINS environment variable parsing</test>
-        </test-category>
-        
-        <test-category name="integration">
-            <test id="test-frontend-backend-cors">Cross-origin requests between frontend (3001) and backend (8000)</test>
-            <test id="test-frontend-auth-cors">Cross-origin requests between frontend (3001) and auth service (8081)</test>
-            <test id="test-websocket-cors">WebSocket connection with CORS</test>
-            <test id="test-auth-config-endpoint">Test /auth/config endpoint CORS headers</test>
-            <test id="test-preflight-options">Test OPTIONS preflight for all endpoints</test>
-        </test-category>
-        
-        <test-category name="e2e">
-            <test id="test-complete-auth-flow">Complete authentication flow across services</test>
-            <test id="test-pr-environment">PR environment dynamic origin validation</test>
-            <test id="test-production-strict">Production strict origin enforcement</test>
-            <test id="test-dynamic-port">Test with dynamic localhost ports</test>
-            <test id="test-credentials-flow">Test credential-based requests across services</test>
-        </test-category>
-        
-        <test-commands>
-            <command>python -m pytest tests/test_cors_configuration.py -v</command>
-            <command>python -m pytest tests/integration/test_cors_integration.py -v</command>
-            <command>python -m pytest tests/e2e/test_cors_e2e.py -v</command>
-        </test-commands>
-    </testing-strategy>
-    
-    <monitoring>
-        <metrics>
-            <metric name="cors_rejection_count">Count of rejected CORS requests by origin</metric>
-            <metric name="preflight_request_count">Number of OPTIONS preflight requests</metric>
-            <metric name="cors_header_missing_count">Requests missing expected CORS headers</metric>
-        </metrics>
-        
-        <logging>
-            <log level="DEBUG">Log all CORS decisions (allowed/rejected) with origin</log>
-            <log level="WARNING">Log CORS rejections with detailed reason</log>
-            <log level="ERROR">Log CORS middleware configuration failures</log>
-        </logging>
-    </monitoring>
-    
-    <references>
-        <reference>SPEC/code_changes.xml - Contains CORS configuration note</reference>
-        <reference>SPEC/system_startup.xml - Service startup procedures</reference>
-        <reference>SPEC/auth_subdomain_architecture.xml - Auth service architecture</reference>
-        <reference>app/core/middleware_setup.py - Main backend CORS implementation</reference>
-        <reference>auth_service/main.py - Auth service CORS implementation</reference>
-    </references>
+    </pattern>
+  </implementation-patterns>
+  <testing-strategy>
+    <test-category name="unit">
+      <test id="test-cors-middleware-config">Verify CORS middleware configuration for each environment</test>
+      <test id="test-origin-pattern-matching">Test origin pattern matching for staging</test>
+      <test id="test-preflight-headers">Validate preflight response headers</test>
+      <test id="test-dynamic-cors">Test DynamicCORSMiddleware with various origins</test>
+      <test id="test-env-var-parsing">Test CORS_ORIGINS environment variable parsing</test>
+    </test-category>
+    <test-category name="integration">
+      <test id="test-frontend-backend-cors">Cross-origin requests between frontend (3001) and backend (8000)</test>
+      <test id="test-frontend-auth-cors">Cross-origin requests between frontend (3001) and auth service (8081)</test>
+      <test id="test-websocket-cors">WebSocket connection with CORS</test>
+      <test id="test-auth-config-endpoint">Test /auth/config endpoint CORS headers</test>
+      <test id="test-preflight-options">Test OPTIONS preflight for all endpoints</test>
+    </test-category>
+    <test-category name="e2e">
+      <test id="test-complete-auth-flow">Complete authentication flow across services</test>
+      <test id="test-pr-environment">PR environment dynamic origin validation</test>
+      <test id="test-production-strict">Production strict origin enforcement</test>
+      <test id="test-dynamic-port">Test with dynamic localhost ports</test>
+      <test id="test-credentials-flow">Test credential-based requests across services</test>
+    </test-category>
+    <test-commands>
+      <command>python -m pytest tests/test_cors_configuration.py -v</command>
+      <command>python -m pytest tests/integration/test_cors_integration.py -v</command>
+      <command>python -m pytest tests/e2e/test_cors_e2e.py -v</command>
+    </test-commands>
+  </testing-strategy>
+  <monitoring>
+    <metrics>
+      <metric name="cors_rejection_count">Count of rejected CORS requests by origin</metric>
+      <metric name="preflight_request_count">Number of OPTIONS preflight requests</metric>
+      <metric name="cors_header_missing_count">Requests missing expected CORS headers</metric>
+    </metrics>
+    <logging>
+      <log level="DEBUG">Log all CORS decisions (allowed/rejected) with origin</log>
+      <log level="WARNING">Log CORS rejections with detailed reason</log>
+      <log level="ERROR">Log CORS middleware configuration failures</log>
+    </logging>
+  </monitoring>
+  <references>
+    <reference>SPEC/code_changes.xml - Contains CORS configuration note</reference>
+    <reference>SPEC/system_startup.xml - Service startup procedures</reference>
+    <reference>SPEC/auth_subdomain_architecture.xml - Auth service architecture</reference>
+    <reference>app/core/middleware_setup.py - Main backend CORS implementation</reference>
+    <reference>auth_service/main.py - Auth service CORS implementation</reference>
+  </references>
 </specification>

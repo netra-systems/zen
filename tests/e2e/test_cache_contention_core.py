@@ -23,9 +23,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from collections import defaultdict, Counter
 from contextlib import asynccontextmanager
 import statistics
-import asyncio
 import os
-from app.core.network_constants import NetworkEnvironmentHelper
+from netra_backend.app.core.network_constants import NetworkEnvironmentHelper
 
 # Get Redis URL from environment helper
 REDIS_URL = NetworkEnvironmentHelper.get_database_urls_for_environment()["redis"]

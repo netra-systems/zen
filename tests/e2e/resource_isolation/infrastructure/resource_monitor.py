@@ -13,7 +13,7 @@ import statistics
 from typing import Dict, List, Optional
 from collections import defaultdict
 
-from .data_models import ResourceMetrics, ResourceViolation, RESOURCE_LIMITS
+from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics, ResourceViolation, RESOURCE_LIMITS
 
 logger = logging.getLogger(__name__)
 

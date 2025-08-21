@@ -31,13 +31,13 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from .agent_billing_test_helpers import (
+from tests.unified.e2e.agent_billing_test_helpers import AgentBillingTestCore, AgentRequestSimulator, BillingFlowValidator, AgentBillingTestUtils
     AgentBillingTestCore,
     AgentRequestSimulator, 
     BillingFlowValidator,
     AgentBillingTestUtils
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio
@@ -61,7 +61,7 @@ class TestAgentBillingFlow:
     def billing_validator(self):
         """Initialize billing flow validator."""
         # Create a new billing helper for validation
-        from .clickhouse_billing_helper import ClickHouseBillingHelper
+        from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
         billing_helper = ClickHouseBillingHelper()
         return BillingFlowValidator(billing_helper)
     

@@ -32,13 +32,13 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .service_orchestrator import E2EServiceOrchestrator
-from .error_cascade_core import ServiceFailureSimulator, GracefulDegradationValidator, AutoRecoveryVerifier
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
-from app.core.circuit_breaker_core import CircuitBreaker
-from app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
-from app.logging_config import central_logger
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.error_cascade_core import ServiceFailureSimulator, GracefulDegradationValidator, AutoRecoveryVerifier
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -597,8 +597,7 @@ def validate_circuit_breaker_implementation() -> bool:
     """Validate that circuit breaker implementation exists and is accessible."""
     try:
         # Test that we can import and instantiate circuit breaker
-        from app.core.circuit_breaker_core import CircuitBreaker
-        from app.core.circuit_breaker_types import CircuitConfig
+        from netra_backend.app.core.circuit_breaker_types import CircuitConfig
         
         config = CircuitConfig(
             name="validation_test",

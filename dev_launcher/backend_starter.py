@@ -126,7 +126,7 @@ class BackendStarter:
     
     def _build_uvicorn_command(self, port: int) -> list:
         """Build uvicorn command."""
-        return [sys.executable, "-m", "uvicorn", "app.main:app", 
+        return [sys.executable, "-m", "uvicorn", "netra_backend.app.main:app", 
                 "--host", "0.0.0.0", "--port", str(port)]
     
     def _add_backend_flags(self, cmd: list, server_script: Optional[Path]):
@@ -230,7 +230,7 @@ class BackendStarter:
         print("\nPossible causes:")
         print("  • Port already in use (try --dynamic flag)")
         print("  • Python dependencies missing (check requirements.txt)")
-        print("  • Invalid Python syntax in app/main.py")
+        print("  • Invalid Python syntax in netra_backend/app/main.py")
         print("  • Database connection issues (check config)")
     
     def _finalize_backend_startup(self, port: int, process: subprocess.Popen):

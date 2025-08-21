@@ -11,9 +11,9 @@ import uuid
 from typing import Dict, Any
 from datetime import datetime, timezone
 
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
 
 
 class SessionPersistenceManager:
@@ -182,10 +182,8 @@ class SessionPersistenceManager:
                 # Quick health check on backend service
                 response = await client.get("http://localhost:8000/health")
                 if response.status_code not in [200, 500]:
-                    import pytest
                     pytest.skip("Backend service not available for E2E test")
         except Exception:
-            import pytest
             pytest.skip("Required services not available for E2E test")
     
     async def cleanup(self) -> None:

@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.366723</last_edited>
+  </metadata>
   <title>GCP Database Connection Failures - Backend and Auth Service</title>
   <date>2025-08-20</date>
   <severity>CRITICAL</severity>
@@ -9,21 +12,18 @@
     Auth: Password authentication failure for postgres user.
     Root cause: Incorrect database configuration and URL parameter handling.
   </summary>
-  
   <issue_discovery>
     <backend_service>
       <symptom>Readiness probe failed: connect() got an unexpected keyword argument 'sslmode'</symptom>
       <root_cause>Backend health check passes sslmode to asyncpg which expects 'ssl' parameter</root_cause>
       <location>app/routes/health.py:72</location>
     </backend_service>
-    
     <auth_service>
       <symptom>RuntimeError: Critical database failures: password authentication failed for user "postgres"</symptom>
       <root_cause>Incorrect database credentials in staging secret</root_cause>
       <additional_issue>Worker failed to boot due to database initialization failure</additional_issue>
     </auth_service>
   </issue_discovery>
-  
   <current_state_analysis>
     <database_instances>
       <instance>
@@ -33,14 +33,12 @@
         <status>Active and configured with Cloud SQL proxy</status>
       </instance>
     </database_instances>
-    
     <service_configurations>
       <backend>
         <service_name>netra-backend-staging</service_name>
         <cloudsql_instances>Not configured</cloudsql_instances>
         <database_url_secret>database-url-staging</database_url_secret>
       </backend>
-      
       <auth>
         <service_name>netra-auth-service</service_name>
         <cloudsql_instances>netra-staging:us-central1:staging-shared-postgres</cloudsql_instances>
@@ -48,7 +46,6 @@
       </auth>
     </service_configurations>
   </current_state_analysis>
-  
   <required_fixes>
     <fix priority="1">
       <title>Fix Backend sslmode Parameter Handling</title>
@@ -62,7 +59,6 @@
         Follow the pattern already used in auth service.
       </solution>
     </fix>
-    
     <fix priority="2">
       <title>Update Database URL Secret</title>
       <description>
@@ -75,7 +71,6 @@
         <update>echo -n "NEW_URL" | gcloud secrets versions add database-url-staging --data-file=- --project=netra-staging</update>
       </commands>
     </fix>
-    
     <fix priority="3">
       <title>Add Cloud SQL Proxy to Backend Service</title>
       <description>
@@ -88,7 +83,6 @@
           --project=netra-staging
       </command>
     </fix>
-    
     <fix priority="4">
       <title>Verify Database User and Password</title>
       <description>
@@ -101,14 +95,12 @@
       </commands>
     </fix>
   </required_fixes>
-  
   <implementation_plan>
     <step number="1">
       <action>Fix backend health check sslmode handling</action>
       <files>app/routes/health.py, app/core/postgres.py</files>
       <test>Verify health check passes with asyncpg connection</test>
     </step>
-    
     <step number="2">
       <action>Verify correct database credentials</action>
       <commands>
@@ -117,19 +109,16 @@
         - Test connection with psql client
       </commands>
     </step>
-    
     <step number="3">
       <action>Update database-url-staging secret</action>
       <format>Unix socket format with correct credentials</format>
       <validation>Test connection from both services</validation>
     </step>
-    
     <step number="4">
       <action>Configure Cloud SQL proxy for backend</action>
       <command>Update Cloud Run service with cloudsql-instances</command>
       <validation>Check service configuration shows Cloud SQL instance</validation>
     </step>
-    
     <step number="5">
       <action>Redeploy both services</action>
       <sequence>
@@ -140,18 +129,15 @@
       </sequence>
     </step>
   </implementation_plan>
-  
   <testing_checklist>
     <test name="health_check_backend">
       <endpoint>/health/ready</endpoint>
       <expected>200 OK with database connectivity confirmed</expected>
     </test>
-    
     <test name="health_check_auth">
       <endpoint>/health/ready</endpoint>
       <expected>200 OK with database initialized</expected>
     </test>
-    
     <test name="database_queries">
       <description>Verify actual database operations work</description>
       <operations>
@@ -161,29 +147,25 @@
       </operations>
     </test>
   </testing_checklist>
-  
   <monitoring>
     <log_queries>
       <backend_errors>
         gcloud logging read "resource.type=cloud_run_revision AND 
         resource.labels.service_name=netra-backend-staging AND 
-        severity>=ERROR" --limit=20 --format=json --project=netra-staging
+        severity&gt;=ERROR" --limit=20 --format=json --project=netra-staging
       </backend_errors>
-      
       <auth_errors>
         gcloud logging read "resource.type=cloud_run_revision AND 
         resource.labels.service_name=netra-auth-service AND 
-        severity>=ERROR" --limit=20 --format=json --project=netra-staging
+        severity&gt;=ERROR" --limit=20 --format=json --project=netra-staging
       </auth_errors>
     </log_queries>
-    
     <metrics>
       <health_check_success_rate>Monitor /health/ready success rate</health_check_success_rate>
       <database_connection_pool>Track active connections</database_connection_pool>
       <query_latency>Monitor database query performance</query_latency>
     </metrics>
   </monitoring>
-  
   <prevention>
     <practice>Always test database connections in staging before production</practice>
     <practice>Use Cloud SQL proxy for all GCP deployments</practice>
@@ -193,26 +175,31 @@
     <practice>Avoid special characters in database passwords that may break URL parsing</practice>
     <practice>Test URL parsing logic with Unix socket connections before deployment</practice>
   </prevention>
-  
   <resolution_status>
     <backend_sslmode_fix>COMPLETED - Code fixed and deployed</backend_sslmode_fix>
     <database_password_issue>RESOLVED - Changed to simple password "6K8LHm"</database_password_issue>
     <url_parsing_fix>COMPLETED - Modified configuration to handle Unix socket URLs</url_parsing_fix>
     <ssl_validation_fix>COMPLETED - Fixed SSL validation for Cloud SQL Unix sockets</ssl_validation_fix>
     <auth_service>WORKING - Successfully connects to database</auth_service>
-    <backend_service>PENDING - Still has startup issues with SECRET_KEY validation</backend_service>
+    <backend_service>WORKING - Fixed SSL requirement issue (2025-08-21)</backend_service>
   </resolution_status>
-  
   <working_configuration>
-    <database_url>postgresql://postgres:6K8LHm@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres</database_url>
+    <database_url>postgresql://postgres:6K8LHm@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres&amp;sslmode=require</database_url>
     <notes>
       - Simple password without special characters
       - Unix socket connection via Cloud SQL proxy
-      - No sslmode parameter needed for Unix sockets
+      - MUST include sslmode=require parameter for staging/production
       - Both services configured with same DATABASE_URL secret
     </notes>
   </working_configuration>
-  
+  <ssl_mode_requirement_fix>
+    <date>2025-08-21</date>
+    <issue>Backend service failing with "SSL required for staging environment" error</issue>
+    <root_cause>DATABASE_URL secret was missing the required sslmode parameter</root_cause>
+    <solution>Added sslmode=require to the database-url-staging secret</solution>
+    <verification>All services (backend, auth, frontend) now healthy in staging</verification>
+    <important_note>Cloud SQL connections in staging/production MUST have sslmode parameter even with Unix sockets</important_note>
+  </ssl_mode_requirement_fix>
   <critical_fixes_applied>
     <fix file="app/db/postgres_core.py">
       Convert sslmode to ssl for asyncpg, skip for Unix sockets
@@ -224,4 +211,30 @@
       Skip SSL requirement check for Unix socket connections
     </fix>
   </critical_fixes_applied>
+  <regression_fix_2025_08_21>
+    <date>2025-08-21</date>
+    <issue>Performance test failed: connect() got an unexpected keyword argument 'sslmode'</issue>
+    <location>app/services/database/health_checker.py:126</location>
+    <root_cause>
+      The URL conversion logic was not properly handling Cloud SQL connections.
+      While the staging database URL requires sslmode=require for configuration validation,
+      asyncpg does not understand the sslmode parameter and expects 'ssl' instead.
+      The previous logic was excluding Cloud SQL connections from conversion, causing the error.
+    </root_cause>
+    <solution>
+      Updated _convert_postgresql_url and _convert_postgres_url functions to:
+      1. For Cloud SQL Unix socket connections (/cloudsql/): Remove sslmode parameter entirely
+         as SSL is handled by the Cloud SQL proxy
+      2. For regular connections: Convert sslmode to ssl as before
+    </solution>
+    <files_modified>
+      - app/db/postgres_core.py: Fixed URL conversion logic for Cloud SQL connections
+    </files_modified>
+    <key_insight>
+      Cloud SQL Unix socket connections do not need SSL parameters in asyncpg as the 
+      Cloud SQL proxy handles SSL encryption transparently. The sslmode parameter is
+      only needed in the configuration for validation but must be removed when creating
+      the actual asyncpg connection.
+    </key_insight>
+  </regression_fix_2025_08_21>
 </learnings>

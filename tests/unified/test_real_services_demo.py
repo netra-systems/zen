@@ -6,8 +6,8 @@ This is a demonstration of the real services infrastructure.
 import pytest
 import asyncio
 from pathlib import Path
-from .real_services_manager import create_real_services_manager
-from .real_services_health import RealServicesContext, ServiceHealthMonitor
+from tests.unified.real_services_manager import create_real_services_manager
+from tests.unified.real_services_health import RealServicesContext, ServiceHealthMonitor
 
 
 @pytest.mark.asyncio

@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
-from app.db.base import Base
+from netra_backend.app.db.base import Base
 # Import all model modules to ensure all tables are registered with Base
-from app.db.models_user import User, Secret, ToolUsageLog
-from app.db.models_postgres import Supply, Analysis, AnalysisResult, SupplyOption
-from app.db.models_content import *  # Import all content models
-from app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.db.models_postgres import Supply, Analysis, AnalysisResult, SupplyOption
+from netra_backend.app.db.models_content import *  # Import all content models
+from netra_backend.app.db.models_agent_state import *  # Import all agent state models
 
 DATABASE_URL = "postgresql://postgres:123@localhost/netra"
 

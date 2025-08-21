@@ -5,7 +5,7 @@ This demonstrates how to use the unified test configuration
 system for consistent testing across all customer tiers.
 """
 
-from tests.unified.config import (
+from netra_backend.tests.unified.config import (
     TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TEST_SECRETS,
     TestTier, TestDataFactory, TestTokenManager, TestDatabaseManager,
     create_unified_config, get_test_user
@@ -140,4 +140,4 @@ if __name__ == "__main__":
     
     print("Demo completed successfully!")
     print("\nTo use in your tests:")
-    print("from tests.unified.config import TEST_USERS, get_test_user, TestDataFactory")
+    print("from netra_backend.tests.unified.config import TEST_USERS, get_test_user, TestDataFactory")

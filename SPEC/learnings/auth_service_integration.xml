@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="auth" subcategory="integration">
+    <metadata>
+        <created>2025-08-21</created>
+        <impact>high</impact>
+        <systems>auth_service, testing, integration</systems>
+    </metadata>
+
+    <learning id="auth-service-architecture">
+        <title>Auth service is OAuth-first with dev mode support</title>
+        <discovery>
+            Auth service designed primarily for OAuth flows (Google OAuth)
+            with development mode support via /auth/dev/login
+        </discovery>
+        <endpoints>
+            - GET /auth/config - Returns auth configuration
+            - GET /auth/login - Initiates OAuth flow
+            - POST /auth/login - Username/password login (requires existing user)
+            - POST /auth/logout - Logout with token
+            - POST /auth/validate - Validate access token
+            - POST /auth/refresh - Refresh tokens
+            - POST /auth/service-token - Service-to-service auth
+            - GET /auth/verify - Quick token verification
+            - GET /auth/me - Get current user from token
+            - GET /auth/session - Get session info
+            - POST /auth/dev/login - Development mode login
+            - GET /auth/callback - OAuth callback handler
+            - GET /auth/health - Health check
+            - POST /auth/password-reset/request - Request password reset
+            - POST /auth/password-reset/confirm - Confirm password reset
+        </endpoints>
+        <important>
+            No /auth/register endpoint - registration handled by OAuth or main app
+        </important>
+    </learning>
+
+    <learning id="dev-login-behavior">
+        <title>Dev login creates fixed development user</title>
+        <behavior>
+            /auth/dev/login endpoint:
+            1. Only works in development environment
+            2. Creates/uses user with email "dev@example.com"
+            3. Syncs with main database to get consistent user ID
+            4. Returns full JWT tokens and session
+            5. Requires no request body (empty JSON {})
+        </behavior>
+        <database_sync>
+            Calls _sync_user_to_main_db() to ensure user exists in both
+            auth service database and main app database with same ID
+        </database_sync>
+        <tokens>
+            Returns standard response:
+            - access_token (JWT, 15 min expiry)
+            - refresh_token 
+            - token_type: "Bearer"
+            - user object with id, email, name, session_id
+        </tokens>
+    </learning>
+
+    <learning id="auth-database-separation">
+        <title>Auth service uses separate database tables</title>
+        <discovery>
+            Auth service maintains its own auth_users table separate from
+            main app's users table, but syncs IDs between them
+        </discovery>
+        <tables>
+            - auth_users: Auth service user records
+            - users: Main app user records (in postgres)
+        </tables>
+        <sync_process>
+            1. Auth service creates auth_user record
+            2. Syncs to main app database via _sync_user_to_main_db
+            3. Uses consistent user ID across both databases
+        </sync_process>
+        <issue>
+            Tests fail if auth_users table not created via migrations
+        </issue>
+    </learning>
+
+    <learning id="jwt-token-structure">
+        <title>JWT tokens contain user ID and permissions</title>
+        <token_creation>
+            auth_service.jwt_handler.create_access_token(
+                user_id=user_id,
+                email=email,
+                permissions=["read", "write", "admin"]  # for dev user
+            )
+        </token_creation>
+        <validation>
+            Token validation via POST /auth/validate returns:
+            - valid: boolean
+            - user_id: string
+            - email: string
+            - permissions: array (if present)
+        </validation>
+        <session_management>
+            Sessions stored in Redis with key pattern:
+            session:{user_id}:{token_prefix}
+        </session_management>
+    </learning>
+
+    <learning id="cors-configuration">
+        <title>Auth service has dynamic CORS middleware</title>
+        <behavior>
+            Custom DynamicCORSMiddleware class that:
+            1. Accepts any localhost origin in development
+            2. Uses regex to match localhost with any port
+            3. Handles preflight OPTIONS requests
+            4. Adds CORS headers dynamically based on origin
+        </behavior>
+        <allowed_origins_dev>
+            - http://localhost:* (any port)
+            - http://127.0.0.1:* (any port)
+            - Wildcard "*" if CORS_ORIGINS env var set to "*"
+        </allowed_origins_dev>
+    </learning>
+
+    <learning id="redis-session-optional">
+        <title>Redis sessions optional in staging/dev</title>
+        <discovery>
+            auth_service.session_manager.redis_enabled can be false
+            in staging environment, service still reports healthy
+        </discovery>
+        <health_check>
+            Service healthy if (redis_ok OR not redis_enabled)
+            Allows operation without Redis in development/staging
+        </health_check>
+    </learning>
+
+    <learning id="auth-test-patterns">
+        <title>Correct patterns for testing auth flows</title>
+        <pattern name="dev_login_test">
+            ```python
+            async with session.post(
+                f"{auth_service_url}/auth/dev/login",
+                json={}  # Empty body
+            ) as resp:
+                assert resp.status == 200
+                data = await resp.json()
+                user_id = data["user"]["id"]
+                access_token = data["access_token"]
+            ```
+        </pattern>
+        <pattern name="token_validation_test">
+            ```python
+            async with session.post(
+                f"{auth_service_url}/auth/validate",
+                json={"token": access_token}
+            ) as resp:
+                assert resp.status == 200
+                data = await resp.json()
+                assert data["valid"] == True
+            ```
+        </pattern>
+        <pattern name="authenticated_request">
+            ```python
+            headers = {"Authorization": f"Bearer {access_token}"}
+            async with session.get(
+                f"{auth_service_url}/auth/me",
+                headers=headers
+            ) as resp:
+                assert resp.status == 200
+            ```
+        </pattern>
+    </learning>
+
+    <summary>
+        Auth service key points:
+        1. OAuth-first design, no registration endpoint
+        2. Dev login for testing creates fixed user
+        3. Separate auth_users table synced with main DB
+        4. JWT tokens with user ID and permissions
+        5. Dynamic CORS for development flexibility
+        6. Redis sessions optional in dev/staging
+        7. Use /auth prefix, not /api/v1/auth
+        8. Test with dev login, not registration
+    </summary>
+</learnings>

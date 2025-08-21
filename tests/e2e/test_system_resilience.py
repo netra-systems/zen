@@ -25,11 +25,11 @@ from unittest.mock import Mock, patch, AsyncMock
 from dataclasses import dataclass
 import httpx
 
-from app.logging_config import central_logger
-from app.db.graceful_degradation_manager import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.graceful_degradation_manager import (
     GracefulDegradationManager, ServiceLevel, DatabaseStatus
 )
-from app.core.unified.retry_decorator import (
+from netra_backend.app.core.unified.retry_decorator import (
     unified_retry, RetryStrategy, CircuitBreakerState
 )
 

@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 
 from pydantic import ValidationError
 
-from tests.unified.clients.factory import TestClientFactory
+from netra_backend.tests.unified.clients.factory import TestClientFactory
 
 
 class TestWebSocketEventStructure:

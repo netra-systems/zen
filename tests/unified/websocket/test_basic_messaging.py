@@ -25,9 +25,9 @@ import pytest_asyncio
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 
-from tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import create_test_config
+from netra_backend.tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS, TestDataFactory
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.real_client_types import create_test_config
 
 
 class BasicMessagingTester:
@@ -42,7 +42,7 @@ class BasicMessagingTester:
     def _create_test_token(self) -> str:
         """Create test JWT token for authentication."""
         try:
-            from app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
             return create_test_token("basic_messaging_user")
         except ImportError:
             return "mock-token-basic-messaging-user"

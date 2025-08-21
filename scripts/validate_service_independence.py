@@ -50,7 +50,7 @@ class ServiceIndependenceValidator:
     def _check_no_main_app_imports(self):
         """Check for imports from main app."""
         import_patterns = [
-            "from app.",
+            "from netra_backend.app.",
             "from app import",
             "import app.",
             "import app"

@@ -22,10 +22,10 @@ from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
-from app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
-from app.schemas.UserPlan import PlanTier
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 class RateLimitFlowTester:
@@ -354,7 +354,7 @@ async def test_rate_limiting_and_quota_enforcement_e2e(unified_test_harness):
 @pytest.mark.integration
 async def test_rate_limiter_configuration_validation():
     """Test rate limiter configuration and quota calculations."""
-    from app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
+    from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
     
     # Test free tier configuration
     free_config = RateLimitConfig(
@@ -382,5 +382,4 @@ async def test_rate_limiter_configuration_validation():
 if __name__ == "__main__":
     # Allow direct execution for debugging
     import sys
-    import pytest
     sys.exit(pytest.main([__file__, "-v", "-s"]))

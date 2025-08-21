@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Frontend Authentication Alignment Specification</title>
@@ -6,8 +6,14 @@
     <created>2025-08-21</created>
     <author>Claude</author>
     <purpose>Document the aligned frontend authentication implementation with backend security standards</purpose>
+    <last_edited>2025-08-21T08:47:28.457928</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.457928">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     <description>
       This specification documents the comprehensive frontend authentication alignment implemented
@@ -20,7 +26,6 @@
       <strategic>Enables enterprise security compliance and certification</strategic>
     </business_value>
   </overview>
-
   <security_vulnerabilities_addressed>
     <vulnerability priority="critical">
       <title>Query Parameter Token Transmission</title>
@@ -28,14 +33,12 @@
       <risk>Tokens exposed in browser history, server logs, proxy logs, referrer headers</risk>
       <resolution>Eliminated all query parameter token usage, now using secure headers</resolution>
     </vulnerability>
-    
     <vulnerability priority="high">
       <title>Missing Token Refresh</title>
       <description>No automatic token refresh during active connections</description>
       <risk>Users disconnected unexpectedly when tokens expire</risk>
       <resolution>Implemented automatic token refresh every 50 minutes</resolution>
     </vulnerability>
-    
     <vulnerability priority="high">
       <title>Inconsistent Auth Headers</title>
       <description>API calls had inconsistent Authorization header usage</description>
@@ -43,7 +46,6 @@
       <resolution>Centralized auth interceptor for all API calls</resolution>
     </vulnerability>
   </security_vulnerabilities_addressed>
-
   <implementation_details>
     <websocket_authentication>
       <method>Subprotocol Authentication</method>
@@ -62,7 +64,6 @@
         <reconnection>Seamless with fresh token</reconnection>
       </token_lifecycle>
     </websocket_authentication>
-
     <api_authentication>
       <centralized_interceptor>
         <location>frontend/lib/auth-interceptor.ts</location>
@@ -73,7 +74,6 @@
           <feature>Token refresh on auth failure</feature>
         </features>
       </centralized_interceptor>
-      
       <unified_auth_service>
         <location>frontend/lib/unified-auth-service.ts</location>
         <interface>
@@ -85,7 +85,6 @@
         </interface>
       </unified_auth_service>
     </api_authentication>
-
     <service_updates>
       <service name="ApiClientWrapper">
         <changes>Integrated auth interceptor for all requests</changes>
@@ -104,7 +103,6 @@
       </service>
     </service_updates>
   </implementation_details>
-
   <testing_strategy>
     <test_suite>
       <test file="websocket-auth-headers.test.tsx">
@@ -114,7 +112,6 @@
           <assertion>No tokens in URL query parameters</assertion>
         </assertions>
       </test>
-      
       <test file="websocket-subprotocol-auth.test.tsx">
         <purpose>Test subprotocol authentication implementation</purpose>
         <assertions>
@@ -122,7 +119,6 @@
           <assertion>Proper protocol negotiation</assertion>
         </assertions>
       </test>
-      
       <test file="websocket-auth-rejection.test.tsx">
         <purpose>Verify security rejection handling</purpose>
         <assertions>
@@ -130,7 +126,6 @@
           <assertion>Graceful error handling</assertion>
         </assertions>
       </test>
-      
       <test file="websocket-token-refresh.test.tsx">
         <purpose>Test token lifecycle management</purpose>
         <assertions>
@@ -138,7 +133,6 @@
           <assertion>Seamless reconnection with new token</assertion>
         </assertions>
       </test>
-      
       <test file="websocket-cors-validation.test.tsx">
         <purpose>Verify CORS and origin validation</purpose>
         <assertions>
@@ -147,7 +141,6 @@
         </assertions>
       </test>
     </test_suite>
-    
     <integration_test>
       <location>frontend/lib/auth-integration-test.ts</location>
       <execution>window.testAuth() in browser console</execution>
@@ -159,13 +152,11 @@
       </validates>
     </integration_test>
   </testing_strategy>
-
   <migration_guide>
     <existing_code>
       <note>No changes required - backward compatible</note>
       <automatic>Existing services automatically use new auth</automatic>
     </existing_code>
-    
     <new_development>
       <imports>
         import { unifiedAuthService, authInterceptor } from '@/lib/unified-auth-service';
@@ -178,7 +169,6 @@
       </auth_operations>
     </new_development>
   </migration_guide>
-
   <compliance_achieved>
     <standard name="OWASP">
       <requirement>No sensitive data in URLs</requirement>
@@ -197,14 +187,12 @@
       <status>COMPLIANT</status>
     </standard>
   </compliance_achieved>
-
   <monitoring_and_observability>
     <logging>
       <auth_events>All auth events logged without exposing tokens</auth_events>
       <errors>Detailed error classification and logging</errors>
       <performance>Token refresh timing and latency metrics</performance>
     </logging>
-    
     <metrics>
       <metric>auth_success_rate</metric>
       <metric>token_refresh_success_rate</metric>
@@ -212,14 +200,12 @@
       <metric>api_401_retry_success_rate</metric>
     </metrics>
   </monitoring_and_observability>
-
   <future_enhancements>
     <enhancement priority="medium">
       <title>Authorization Header Support for WebSocket</title>
       <description>Add Authorization header support when browser APIs allow</description>
       <benefit>Align with preferred backend method</benefit>
     </enhancement>
-    
     <enhancement priority="low">
       <title>Token Rotation</title>
       <description>Implement token rotation for enhanced security</description>

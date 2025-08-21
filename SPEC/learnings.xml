@@ -737,26 +737,30 @@
             </item>
             
             <item id="alembic-configuration-path-issues">
-                <problem>Alembic migration configuration error "No 'script_location' key found in configuration"</problem>
-                <root-cause>Relative path to alembic.ini file fails when working directory differs from project root</root-cause>
-                <solution>Use absolute path calculated from __file__ location instead of relative path</solution>
+                <problem>Alembic migration configuration error "Alembic configuration file not found"</problem>
+                <root-cause>Incorrect path calculation to alembic.ini file - was looking in netra_backend/config/ instead of project root config/</root-cause>
+                <solution>Use correct absolute path calculated from __file__ location going up 4 levels to project root</solution>
                 <fix-details>
-                    <before>cfg = alembic.config.Config("config/alembic.ini")</before>
-                    <after>
-                        alembic_ini_path = _get_alembic_ini_path()
-                        cfg = alembic.config.Config(alembic_ini_path)
-                    </after>
-                    <helper-function>
+                    <before>
                         def _get_alembic_ini_path() -> str:
-                            project_root = Path(__file__).parent.parent.parent
+                            project_root = Path(__file__).parent.parent.parent  # Goes to netra_backend
                             return str(project_root / "config" / "alembic.ini")
-                    </helper-function>
+                    </before>
+                    <after>
+                        def _get_alembic_ini_path() -> str:
+                            project_root = Path(__file__).parent.parent.parent.parent  # Goes to project root
+                            return str(project_root / "config" / "alembic.ini")
+                    </after>
                 </fix-details>
                 <affected-files>
                     <file>app/db/migration_utils.py</file>
                 </affected-files>
-                <prevention>Always use absolute paths for configuration files in startup processes</prevention>
-                <resolution-date>2025-08-15</resolution-date>
+                <prevention>
+                    <rule>Always verify path calculations against actual file locations</rule>
+                    <rule>Maintain single alembic.ini file at config/alembic.ini in project root</rule>
+                    <rule>Remove duplicate configuration files to prevent confusion</rule>
+                </prevention>
+                <resolution-date>2025-08-21</resolution-date>
             </item>
             
             <item id="staging-startup-checks-critical-failures">
@@ -1003,8 +1007,8 @@
                         load_dotenv('.env.development.local')
                         
                         from sqlalchemy.ext.asyncio import create_async_engine
-                        from app.db.base import Base
-                        from app.db.models_postgres import *
+                        from netra_backend.app.db.base import Base
+                        from netra_backend.app.db.models_postgres import *
                         
                         async def create_tables():
                             database_url = os.getenv("DATABASE_URL")
@@ -1524,8 +1528,8 @@
                     <cause>Duplicate type definitions across multiple files violating single source of truth</cause>
                 </root-causes>
                 <comprehensive-solution>
-                    <step>Fixed WebSocketConnectionManager import - changed from app.core.websocket_recovery_strategies to app.websocket.connection.ConnectionManager</step>
-                    <step>Fixed AgentConfig import - changed from app.schemas.shared_types to app.agents.config</step>
+                    <step>Fixed WebSocketConnectionManager import - changed from netra_backend.app.core.websocket_recovery_strategies to app.websocket.connection.ConnectionManager</step>
+                    <step>Fixed AgentConfig import - changed from netra_backend.app.schemas.shared_types to app.agents.config</step>
                     <step>Updated agent state transitions to allow RUNNING->RUNNING and FAILED->RUNNING for proper retry scenarios</step>
                     <step>Added default value 'unknown' to TriageResult.category field for fallback compatibility</step>
                     <step>Added missing 'messages: List[Dict[str, Any]]' field to DeepAgentState for test compatibility</step>
@@ -2706,11 +2710,11 @@
                 </files-changed>
             </solution>
             <validation>
-                <test>python -c "from app.core.circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.agents.supervisor_circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.services.synthetic_data.circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.core.error_recovery import CircuitBreaker" - Success</test>
-                <test>python -c "from app.core.reliability_circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.agents.supervisor_circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.services.synthetic_data.circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.error_recovery import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.reliability_circuit_breaker import CircuitBreaker" - Success</test>
                 <test>python test_runner.py --level smoke - 7/7 tests passed</test>
             </validation>
             <key-learnings>

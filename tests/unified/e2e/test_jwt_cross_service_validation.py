@@ -33,10 +33,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
-from tests.unified.test_data_factory import create_test_service_credentials, create_test_user
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
+from netra_backend.tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
+from netra_backend.tests.unified.test_data_factory import create_test_service_credentials, create_test_user
 
 
 class CrossServiceJWTValidator:

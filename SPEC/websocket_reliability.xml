@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>WebSocket Reliability and Silent Failure Prevention</name>
@@ -12,15 +12,19 @@
       <impact>Ensures 99.9% message delivery guaranteeing customer trust</impact>
       <revenue_impact>Prevents $50K+ MRR churn from reliability issues</revenue_impact>
     </business_value>
+    <last_edited>2025-08-21T08:47:28.706484</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.706484">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <cross_references>
     <reference>websockets.xml</reference>
     <reference>websocket_communication.xml</reference>
     <reference>error_handling_principles.xml</reference>
     <reference>websocket_ideal_state.xml</reference>
   </cross_references>
-
   <critical_issues>
     <issue id="1" severity="CRITICAL">
       <title>Non-Transactional Batch Flushing</title>
@@ -28,28 +32,24 @@
       <description>Messages removed from queue before send confirmation causing permanent data loss</description>
       <impact>Silent data loss under network failures</impact>
     </issue>
-    
     <issue id="2" severity="CRITICAL">
       <title>Ignored Synchronization Exceptions</title>
       <location>state_synchronizer.py</location>
       <description>return_exceptions=True without result inspection silently discards failures</description>
       <impact>State desynchronization without notification</impact>
     </issue>
-    
     <issue id="3" severity="HIGH">
       <title>Ghost Connection State Corruption</title>
       <location>connection_manager.py</location>
       <description>Failed closures leave connections tracked causing resource leaks</description>
       <impact>Connection limit exhaustion preventing new connections</impact>
     </issue>
-    
     <issue id="4" severity="MEDIUM">
       <title>Functional Silent Failures</title>
       <location>reconnection_manager.py</location>
       <description>Critical callbacks fail silently with only logging</description>
       <impact>Dependent components miss critical state updates</impact>
     </issue>
-    
     <issue id="5" severity="MEDIUM">
       <title>Partial Monitoring Failures</title>
       <location>performance_monitor_core.py</location>
@@ -57,7 +57,6 @@
       <impact>Incomplete monitoring coverage</impact>
     </issue>
   </critical_issues>
-
   <mandatory_patterns>
     <pattern id="transactional_operations">
       <name>Transactional Message Processing</name>
@@ -82,7 +81,6 @@
         ```
       </example>
     </pattern>
-
     <pattern id="explicit_exception_handling">
       <name>Explicit Exception Result Handling</name>
       <rule>ALWAYS inspect gather results when using return_exceptions=True</rule>
@@ -105,7 +103,6 @@
         ```
       </example>
     </pattern>
-
     <pattern id="atomic_state_updates">
       <name>Atomic State Management</name>
       <rule>State updates MUST be atomic and reversible</rule>
@@ -133,7 +130,6 @@
         ```
       </example>
     </pattern>
-
     <pattern id="fail_fast_monitoring">
       <name>Independent Monitoring Checks</name>
       <rule>Monitoring checks MUST be independent and parallel</rule>
@@ -159,7 +155,6 @@
         ```
       </example>
     </pattern>
-
     <pattern id="callback_failure_propagation">
       <name>Critical Callback Propagation</name>
       <rule>Critical callback failures MUST affect system behavior</rule>
@@ -186,29 +181,24 @@
       </example>
     </pattern>
   </mandatory_patterns>
-
   <implementation_requirements>
     <requirement id="message_durability">
       <description>All messages MUST be durable until acknowledged</description>
       <validation>Message loss rate must be 0% under all failure scenarios</validation>
     </requirement>
-    
     <requirement id="state_consistency">
       <description>Connection state MUST match actual connection status</description>
       <validation>No ghost connections after 100 random disconnections</validation>
     </requirement>
-    
     <requirement id="exception_visibility">
       <description>All exceptions MUST be handled explicitly</description>
       <validation>No silent failures in 24-hour stress test</validation>
     </requirement>
-    
     <requirement id="monitoring_completeness">
       <description>All monitoring checks MUST execute regardless of individual failures</description>
       <validation>100% monitoring coverage even with 50% check failures</validation>
     </requirement>
   </implementation_requirements>
-
   <testing_requirements>
     <test_scenario id="network_failure">
       <name>Network Failure During Batch Send</name>
@@ -216,14 +206,12 @@
       <expected>All 100 messages retained and retried</expected>
       <validation>Zero message loss</validation>
     </test_scenario>
-    
     <test_scenario id="callback_failure">
       <name>Critical Callback Exception</name>
       <setup>Force exception in state synchronization callback</setup>
       <expected>System enters error state, admin notified</expected>
       <validation>No silent continuation</validation>
     </test_scenario>
-    
     <test_scenario id="connection_closure_failure">
       <name>WebSocket Close Failure</name>
       <setup>Simulate close() method throwing exception</setup>
@@ -231,7 +219,6 @@
       <validation>No ghost connections</validation>
     </test_scenario>
   </testing_requirements>
-
   <migration_guide>
     <step order="1">
       <action>Audit all asyncio.gather usage for return_exceptions=True</action>
@@ -254,7 +241,6 @@
       <priority>MEDIUM</priority>
     </step>
   </migration_guide>
-
   <compliance_check>
     <check>python scripts/check_websocket_reliability.py</check>
     <frequency>On every commit</frequency>

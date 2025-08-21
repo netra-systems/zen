@@ -21,7 +21,7 @@ import asyncio
 from typing import Dict, List, Any
 from datetime import datetime, timezone
 
-from .test_resource_usage import ResourceMonitor, ResourceLimits, ResourceMetrics
+from tests.unified.test_resource_usage import ResourceMonitor, ResourceLimits, ResourceMetrics
 
 
 class TestResourceEfficiencyIntegration:

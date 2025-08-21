@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="testing" subcategory="imports">
+    <metadata>
+        <created>2025-08-21</created>
+        <impact>high</impact>
+        <systems>testing, imports, auth</systems>
+    </metadata>
+
+    <learning id="test-imports-netra-backend-namespace">
+        <title>Test imports must use netra_backend namespace</title>
+        <problem>
+            Tests failing with ModuleNotFoundError when using old import patterns
+            that don't include the netra_backend namespace prefix
+        </problem>
+        <root_cause>
+            Project structure changed to use netra_backend namespace. All imports
+            must now use absolute imports with the netra_backend prefix.
+        </root_cause>
+        <solution>
+            Use netra_backend namespace for all imports:
+            - Change: from db.models_postgres import User
+            - To: from netra_backend.app.db.models_postgres import User
+            - Change: from netra_backend.app.core.auth import validate_token
+            - To: from netra_backend.app.core.auth import validate_token
+        </solution>
+        <prevention>
+            Always use absolute imports with netra_backend namespace.
+            All imports must start with netra_backend.app.* or netra_backend.tests.*
+        </prevention>
+    </learning>
+
+    <learning id="auth-service-endpoints">
+        <title>Auth service uses /auth prefix not /api/v1/auth</title>
+        <problem>
+            Tests failing with 404 errors when calling auth service at
+            /api/v1/auth/register or /api/v1/auth/login
+        </problem>
+        <root_cause>
+            Auth service router configured with prefix="/auth" not "/api/v1/auth"
+            Router definition: router = APIRouter(prefix="/auth", tags=["authentication"])
+        </root_cause>
+        <solution>
+            Update all auth service calls to use correct prefix:
+            - Change: http://localhost:8081/api/v1/auth/login
+            - To: http://localhost:8081/auth/login
+        </solution>
+        <prevention>
+            Document service endpoints clearly and maintain consistency
+            between services
+        </prevention>
+    </learning>
+
+    <learning id="auth-no-register-endpoint">
+        <title>Auth service has no register endpoint</title>
+        <problem>
+            Tests trying to register users via /auth/register endpoint
+            which returns 404
+        </problem>
+        <root_cause>
+            Auth service is OAuth-focused and doesn't handle user registration.
+            Registration handled by main app or OAuth providers.
+            Available endpoints: login, logout, validate, refresh, dev/login
+        </root_cause>
+        <solution>
+            For testing, use /auth/dev/login endpoint which creates/uses
+            a development user automatically without registration
+        </solution>
+        <prevention>
+            Design tests to work with available endpoints, use dev endpoints
+            for testing scenarios
+        </prevention>
+    </learning>
+
+
+    <learning id="dev-login-database-requirement">
+        <title>Dev login requires initialized auth database</title>
+        <problem>
+            /auth/dev/login returns 500 with error:
+            sqlite3.OperationalError: no such table: auth_users
+        </problem>
+        <root_cause>
+            Auth service dev login tries to query/create users in auth_users
+            table but database tables not initialized
+        </root_cause>
+        <solution>
+            Ensure auth service database is initialized before running tests:
+            - Run migrations for auth service
+            - Or mock the database layer for tests
+        </solution>
+        <prevention>
+            Include database setup in test fixtures or use in-memory
+            test databases
+        </prevention>
+    </learning>
+
+    <learning id="test-environment-setup">
+        <title>Test environment requires proper PYTHONPATH</title>
+        <problem>
+            Tests cannot import app modules when PYTHONPATH not set correctly
+        </problem>
+        <root_cause>
+            Windows environment variable %PYTHONPATH% not expanding properly
+            in shell commands
+        </root_cause>
+        <solution>
+            Set PYTHONPATH explicitly when running tests:
+            set PYTHONPATH=C:\path\to\netra-core-generation-1
+        </solution>
+        <prevention>
+            Use pytest.ini or setup.cfg to configure test paths consistently
+        </prevention>
+    </learning>
+
+    <learning id="pydantic-dll-issues">
+        <title>Pydantic DLL loading issues on Windows</title>
+        <problem>
+            ImportError: DLL load failed while importing _pydantic_core
+        </problem>
+        <root_cause>
+            Pydantic binary compatibility issues or corrupted installation
+            on Windows with mixed Python environments
+        </root_cause>
+        <solution>
+            Reinstall pydantic and pydantic-core:
+            pip uninstall pydantic pydantic-core -y
+            pip install pydantic pydantic-core --force-reinstall
+        </solution>
+        <prevention>
+            Use virtual environments consistently and avoid mixing
+            conda and pip packages
+        </prevention>
+    </learning>
+
+    <learning id="auth-token-validation">
+        <title>Token validation uses separate endpoint</title>
+        <problem>
+            Tests trying to use TokenValidator class that doesn't exist
+            in the refactored codebase
+        </problem>
+        <root_cause>
+            Old test code referencing classes that were refactored.
+            Token validation now done via /auth/validate endpoint
+        </root_cause>
+        <solution>
+            Use auth service endpoints for validation:
+            POST /auth/validate with {"token": access_token}
+        </solution>
+        <prevention>
+            Keep tests updated when refactoring authentication logic
+        </prevention>
+    </learning>
+
+    <learning id="test-imports-structure">
+        <title>Tests must use netra_backend.tests namespace not netra_backend.app.tests</title>
+        <problem>
+            Incorrect import patterns using netra_backend.app.tests.* when tests
+            are actually located at netra_backend.tests.*
+        </problem>
+        <root_cause>
+            Tests directory is at netra_backend/tests/ not netra_backend/app/tests/.
+            The app directory contains application code only, tests are separate.
+        </root_cause>
+        <solution>
+            WRONG: from netra_backend.app.tests.conftest_helpers import ...
+            RIGHT: from netra_backend.tests.conftest_helpers import ...
+            
+            All test-related imports must use netra_backend.tests.* pattern
+        </solution>
+        <prevention>
+            Remember the structure:
+            - Application code: netra_backend.app.*
+            - Test code: netra_backend.tests.*
+            Never mix these namespaces. Tests are NOT under app.
+        </prevention>
+    </learning>
+
+    <summary>
+        Key testing fixes required:
+        1. Use netra_backend namespace for all test imports
+        2. Use correct auth service endpoints (/auth not /api/v1/auth)
+        3. Use dev login for testing instead of registration
+        4. Use absolute imports with netra_backend.app.* for application code
+        5. Use absolute imports with netra_backend.tests.* for test code (NOT netra_backend.app.tests.*)
+        6. Ensure database initialization for auth service
+        7. Set proper PYTHONPATH for test execution (project root, not app directory)
+        8. Handle pydantic installation issues on Windows
+        9. Update tests to use current API endpoints
+    </summary>
+</learnings>

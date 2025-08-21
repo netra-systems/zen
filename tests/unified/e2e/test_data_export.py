@@ -28,8 +28,8 @@ from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class ChatHistoryCreator:

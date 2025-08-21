@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Model Context Protocol (MCP) Client Specification</title>
@@ -7,8 +7,8 @@
     <created>2025-08-16</created>
     <author>Netra AI Platform Team</author>
     <priority>CRITICAL</priority>
+    <last_edited>2025-08-21T08:47:28.543373</last_edited>
   </metadata>
-
   <overview>
     <description>
       The MCP Client enables Netra to connect to external MCP servers and use their tools, resources,
@@ -25,7 +25,6 @@
       <goal priority="medium">Registry management for external servers</goal>
     </goals>
   </overview>
-
   <architecture>
     <principles>
       <principle>Modular design with 450-line maximum per file</principle>
@@ -35,7 +34,6 @@
       <principle>Security by default</principle>
       <principle>Performance through caching and pooling</principle>
     </principles>
-    
     <module_structure>
       <module name="client_core">
         <file>app/mcp_client/client_core.py</file>
@@ -46,7 +44,6 @@
           <item>Session management</item>
         </responsibilities>
       </module>
-      
       <module name="connection_manager">
         <file>app/mcp_client/connection_manager.py</file>
         <max_lines>300</max_lines>
@@ -56,7 +53,6 @@
           <item>Reconnection logic</item>
         </responsibilities>
       </module>
-      
       <module name="tool_proxy">
         <file>app/mcp_client/tool_proxy.py</file>
         <max_lines>300</max_lines>
@@ -66,7 +62,6 @@
           <item>Result transformation</item>
         </responsibilities>
       </module>
-      
       <module name="resource_proxy">
         <file>app/mcp_client/resource_proxy.py</file>
         <max_lines>300</max_lines>
@@ -76,7 +71,6 @@
           <item>Content caching</item>
         </responsibilities>
       </module>
-      
       <module name="transport_clients">
         <submodules>
           <module name="stdio_client">
@@ -93,7 +87,6 @@
           </module>
         </submodules>
       </module>
-      
       <module name="registry">
         <file>app/mcp_client/registry.py</file>
         <max_lines>300</max_lines>
@@ -103,7 +96,6 @@
           <item>Discovery service</item>
         </responsibilities>
       </module>
-      
       <module name="cache">
         <file>app/mcp_client/cache.py</file>
         <max_lines>300</max_lines>
@@ -113,7 +105,6 @@
           <item>TTL management</item>
         </responsibilities>
       </module>
-      
       <module name="security">
         <file>app/mcp_client/security.py</file>
         <max_lines>300</max_lines>
@@ -125,7 +116,6 @@
       </module>
     </module_structure>
   </architecture>
-
   <core_components>
     <component name="MCPClient">
       <description>Main client class for connecting to external MCP servers</description>
@@ -136,14 +126,12 @@
           </params>
           <returns>MCPConnection</returns>
         </method>
-        
         <method name="discover_tools">
           <params>
             <param name="connection" type="MCPConnection">Active connection</param>
           </params>
           <returns>List[MCPTool]</returns>
         </method>
-        
         <method name="execute_tool">
           <params>
             <param name="connection" type="MCPConnection">Active connection</param>
@@ -152,7 +140,6 @@
           </params>
           <returns>MCPToolResult</returns>
         </method>
-        
         <method name="get_resource">
           <params>
             <param name="connection" type="MCPConnection">Active connection</param>
@@ -162,7 +149,6 @@
         </method>
       </interface>
     </component>
-    
     <component name="MCPConnectionManager">
       <description>Manages connections to multiple MCP servers</description>
       <features>
@@ -172,7 +158,6 @@
         <feature>Load balancing across connections</feature>
       </features>
     </component>
-    
     <component name="MCPToolProxy">
       <description>Proxies tool execution to external servers</description>
       <features>
@@ -182,28 +167,26 @@
         <feature>Error handling and retry</feature>
       </features>
     </component>
-    
     <component name="MCPRegistry">
       <description>Registry of external MCP servers</description>
       <storage>
         <table name="mcp_external_servers">
-          <column name="id" type="UUID" primary="true"/>
-          <column name="name" type="VARCHAR(255)" unique="true"/>
-          <column name="url" type="TEXT"/>
-          <column name="transport" type="VARCHAR(20)"/>
-          <column name="auth_type" type="VARCHAR(50)"/>
-          <column name="credentials" type="JSONB" encrypted="true"/>
-          <column name="capabilities" type="JSONB"/>
-          <column name="metadata" type="JSONB"/>
-          <column name="status" type="VARCHAR(20)"/>
-          <column name="last_health_check" type="TIMESTAMP"/>
-          <column name="created_at" type="TIMESTAMP"/>
-          <column name="updated_at" type="TIMESTAMP"/>
+          <column name="id" type="UUID" primary="true" />
+          <column name="name" type="VARCHAR(255)" unique="true" />
+          <column name="url" type="TEXT" />
+          <column name="transport" type="VARCHAR(20)" />
+          <column name="auth_type" type="VARCHAR(50)" />
+          <column name="credentials" type="JSONB" encrypted="true" />
+          <column name="capabilities" type="JSONB" />
+          <column name="metadata" type="JSONB" />
+          <column name="status" type="VARCHAR(20)" />
+          <column name="last_health_check" type="TIMESTAMP" />
+          <column name="created_at" type="TIMESTAMP" />
+          <column name="updated_at" type="TIMESTAMP" />
         </table>
       </storage>
     </component>
   </core_components>
-
   <data_models>
     <model name="MCPServerConfig">
       <fields>
@@ -215,7 +198,6 @@
         <field name="retry_config" type="RetryConfig" required="false">Retry configuration</field>
       </fields>
     </model>
-    
     <model name="MCPConnection">
       <fields>
         <field name="id" type="str">Connection ID</field>
@@ -227,7 +209,6 @@
         <field name="created_at" type="datetime">Creation timestamp</field>
       </fields>
     </model>
-    
     <model name="MCPTool">
       <fields>
         <field name="name" type="str">Tool identifier</field>
@@ -238,7 +219,6 @@
         <field name="metadata" type="Dict[str, Any]">Additional metadata</field>
       </fields>
     </model>
-    
     <model name="MCPToolResult">
       <fields>
         <field name="tool_name" type="str">Tool that was executed</field>
@@ -250,7 +230,6 @@
       </fields>
     </model>
   </data_models>
-
   <external_server_examples>
     <server name="filesystem">
       <description>Local filesystem access via MCP</description>
@@ -269,7 +248,6 @@
         <tool>search_files</tool>
       </tools>
     </server>
-    
     <server name="github">
       <description>GitHub repository access</description>
       <config>
@@ -290,7 +268,6 @@
         <tool>create_issue</tool>
       </tools>
     </server>
-    
     <server name="postgres">
       <description>PostgreSQL database access</description>
       <config>
@@ -307,7 +284,6 @@
         <tool>describe_table</tool>
       </tools>
     </server>
-    
     <server name="readme">
       <description>Documentation server for README files</description>
       <config>
@@ -328,7 +304,6 @@
       </resources>
     </server>
   </external_server_examples>
-
   <caching_strategy>
     <cache_levels>
       <level name="tool_results">
@@ -336,62 +311,52 @@
         <description>Cache tool execution results for 5 minutes</description>
         <key_pattern>{server_name}:{tool_name}:{args_hash}</key_pattern>
       </level>
-      
       <level name="resource_content">
         <ttl>600</ttl>
         <description>Cache resource content for 10 minutes</description>
         <key_pattern>{server_name}:{resource_uri}</key_pattern>
       </level>
-      
       <level name="tool_definitions">
         <ttl>3600</ttl>
         <description>Cache tool definitions for 1 hour</description>
         <key_pattern>{server_name}:tools</key_pattern>
       </level>
     </cache_levels>
-    
     <invalidation>
       <trigger>Manual cache clear via API</trigger>
       <trigger>Server reconnection</trigger>
       <trigger>TTL expiration</trigger>
     </invalidation>
   </caching_strategy>
-
   <security_model>
     <authentication>
       <method name="api_key">
         <storage>Encrypted in database</storage>
         <rotation>Support for key rotation</rotation>
       </method>
-      
       <method name="oauth2">
         <providers>GitHub, Google, Custom</providers>
         <token_refresh>Automatic refresh before expiry</token_refresh>
       </method>
-      
       <method name="environment">
         <description>Environment variables for sensitive data</description>
         <interpolation>Support for ${VAR_NAME} in configs</interpolation>
       </method>
     </authentication>
-    
     <authorization>
       <policy name="server_whitelist">
         <description>Only connect to whitelisted servers</description>
         <enforcement>Check before connection</enforcement>
       </policy>
-      
       <policy name="tool_permissions">
         <description>Restrict tool execution based on user role</description>
         <enforcement>Check before tool execution</enforcement>
       </policy>
-      
       <policy name="resource_access">
         <description>Control resource access patterns</description>
         <enforcement>URI pattern matching</enforcement>
       </policy>
     </authorization>
-    
     <sandboxing>
       <feature>Input sanitization before forwarding</feature>
       <feature>Output validation after execution</feature>
@@ -399,7 +364,6 @@
       <feature>Execution timeout enforcement</feature>
     </sandboxing>
   </security_model>
-
   <api_endpoints>
     <endpoint method="POST" path="/api/mcp-client/servers">
       <description>Register a new external MCP server</description>
@@ -409,28 +373,24 @@
         <field name="config" type="MCPServerConfig">Server configuration</field>
       </body>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp-client/servers">
       <description>List registered MCP servers</description>
       <response>
         <field name="servers" type="List[MCPServerInfo]">Server list</field>
       </response>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp-client/servers/{server_name}/connect">
       <description>Connect to an MCP server</description>
       <params>
         <param name="server_name" location="path">Server to connect</param>
       </params>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp-client/servers/{server_name}/tools">
       <description>List tools from external server</description>
       <params>
         <param name="server_name" location="path">Server name</param>
       </params>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp-client/tools/execute">
       <description>Execute tool from external server</description>
       <body>
@@ -439,14 +399,12 @@
         <field name="arguments" type="Dict">Tool arguments</field>
       </body>
     </endpoint>
-    
     <endpoint method="GET" path="/api/mcp-client/servers/{server_name}/resources">
       <description>List resources from external server</description>
       <params>
         <param name="server_name" location="path">Server name</param>
       </params>
     </endpoint>
-    
     <endpoint method="POST" path="/api/mcp-client/resources/read">
       <description>Read resource from external server</description>
       <body>
@@ -454,7 +412,6 @@
         <field name="uri" type="str">Resource URI</field>
       </body>
     </endpoint>
-    
     <endpoint method="DELETE" path="/api/mcp-client/cache">
       <description>Clear MCP client cache</description>
       <params>
@@ -463,34 +420,28 @@
       </params>
     </endpoint>
   </api_endpoints>
-
   <integration_flow>
     <step number="1">
       <action>Register external MCP server configuration</action>
       <details>Admin adds server config with authentication details</details>
     </step>
-    
     <step number="2">
       <action>Establish connection to server</action>
       <details>Client connects using appropriate transport</details>
     </step>
-    
     <step number="3">
       <action>Discover available tools and resources</action>
       <details>Query server for capabilities and cache results</details>
     </step>
-    
     <step number="4">
       <action>Execute tools or read resources</action>
       <details>Proxy requests through security layer</details>
     </step>
-    
     <step number="5">
       <action>Return results to Netra agents</action>
       <details>Transform and validate results before returning</details>
     </step>
   </integration_flow>
-
   <chat_interface_integration>
     <overview>
       <description>
@@ -507,7 +458,6 @@
         <goal priority="high">Natural language invocation of MCP capabilities</goal>
       </goals>
     </overview>
-
     <agent_integration>
       <supervisor_agent>
         <capabilities>
@@ -523,7 +473,6 @@
           <step>Aggregate results from MCP operations</step>
         </flow>
       </supervisor_agent>
-
       <triage_agent>
         <capabilities>
           <capability>Execute diagnostic MCP tools</capability>
@@ -536,7 +485,6 @@
           <tool>Log file analysis via filesystem MCP</tool>
         </tools>
       </triage_agent>
-
       <data_agent>
         <capabilities>
           <capability>Query external databases via MCP</capability>
@@ -550,7 +498,6 @@
         </tools>
       </data_agent>
     </agent_integration>
-
     <message_processing>
       <detection>
         <pattern>Explicit MCP tool invocation: "use MCP tool {tool_name}"</pattern>
@@ -558,7 +505,6 @@
         <pattern>Resource access: "get resource {uri}"</pattern>
         <pattern>Natural language: AI detects MCP-solvable queries</pattern>
       </detection>
-
       <routing>
         <rule>
           <condition>User requests external data or file access</condition>
@@ -574,7 +520,6 @@
         </rule>
       </routing>
     </message_processing>
-
     <websocket_protocol>
       <message_types>
         <message type="mcp_tool_discovery">
@@ -583,7 +528,6 @@
             <field name="tools" type="List[MCPTool]">Available tools</field>
           </fields>
         </message>
-
         <message type="mcp_tool_execution">
           <fields>
             <field name="tool_name" type="str">Tool being executed</field>
@@ -591,7 +535,6 @@
             <field name="status" type="str">pending|executing|completed|error</field>
           </fields>
         </message>
-
         <message type="mcp_tool_result">
           <fields>
             <field name="tool_name" type="str">Tool that executed</field>
@@ -600,7 +543,6 @@
           </fields>
         </message>
       </message_types>
-
       <event_flow>
         <event>User sends message requiring MCP tool</event>
         <event>Supervisor identifies MCP requirement</event>
@@ -612,7 +554,6 @@
         <event>Update chat layers with formatted result</event>
       </event_flow>
     </websocket_protocol>
-
     <ui_components>
       <component name="MCPToolIndicator">
         <location>MessageItem component</location>
@@ -622,7 +563,6 @@
           <item>Show execution status and timing</item>
         </display>
       </component>
-
       <component name="MCPServerStatus">
         <location>ChatHeader component</location>
         <display>
@@ -631,7 +571,6 @@
           <item>Click to view server details</item>
         </display>
       </component>
-
       <component name="MCPResultCard">
         <location>Within message layers</location>
         <display>
@@ -641,7 +580,6 @@
         </display>
       </component>
     </ui_components>
-
     <user_scenarios>
       <scenario name="Query External Database">
         <user_message>Can you check the user_stats table in our analytics database?</user_message>
@@ -653,7 +591,6 @@
           <step>Returns formatted results in medium layer</step>
         </flow>
       </scenario>
-
       <scenario name="Access GitHub Issues">
         <user_message>Show me open issues labeled as 'bug' in our repo</user_message>
         <flow>
@@ -664,7 +601,6 @@
           <step>Displays issues in fast layer</step>
         </flow>
       </scenario>
-
       <scenario name="Read External Files">
         <user_message>Can you analyze the log files in /var/logs/app?</user_message>
         <flow>
@@ -675,7 +611,6 @@
           <step>Analyzes content and returns insights</step>
         </flow>
       </scenario>
-
       <scenario name="Multi-Server Operation">
         <user_message>Compare our GitHub issues with entries in the bug database</user_message>
         <flow>
@@ -688,7 +623,6 @@
         </flow>
       </scenario>
     </user_scenarios>
-
     <permissions_model>
       <user_roles>
         <role name="admin">
@@ -712,7 +646,6 @@
           </permissions>
         </role>
       </user_roles>
-
       <tool_restrictions>
         <restriction>
           <tool_pattern>*_write|*_delete|*_update</tool_pattern>
@@ -724,7 +657,6 @@
         </restriction>
       </tool_restrictions>
     </permissions_model>
-
     <error_handling>
       <error_type name="server_unavailable">
         <handling>Fallback to cached results if available</handling>
@@ -740,7 +672,6 @@
       </error_type>
     </error_handling>
   </chat_interface_integration>
-
   <testing_requirements>
     <unit_tests>
       <test_file>app/tests/mcp_client/test_client_core.py</test_file>
@@ -749,42 +680,35 @@
       <test_file>app/tests/mcp_client/test_cache.py</test_file>
       <test_file>app/tests/mcp_client/test_security.py</test_file>
     </unit_tests>
-    
     <integration_tests>
       <test_file>app/tests/mcp_client/test_stdio_integration.py</test_file>
       <test_file>app/tests/mcp_client/test_http_integration.py</test_file>
       <test_file>app/tests/mcp_client/test_websocket_integration.py</test_file>
     </integration_tests>
-    
     <e2e_tests>
       <test_file>app/tests/mcp_client/test_e2e_filesystem.py</test_file>
       <test_file>app/tests/mcp_client/test_e2e_github.py</test_file>
       <test_file>app/tests/mcp_client/test_e2e_multi_server.py</test_file>
     </e2e_tests>
   </testing_requirements>
-
   <performance_targets>
     <metric name="connection_time">
       <target>&lt; 500ms</target>
       <description>Time to establish connection</description>
     </metric>
-    
     <metric name="tool_discovery">
       <target>&lt; 100ms (cached)</target>
       <description>Time to list available tools</description>
     </metric>
-    
     <metric name="tool_execution">
       <target>&lt; 50ms overhead</target>
       <description>Additional latency for proxying</description>
     </metric>
-    
     <metric name="concurrent_servers">
       <target>50+</target>
       <description>Number of simultaneous server connections</description>
     </metric>
   </performance_targets>
-
   <monitoring>
     <metrics>
       <metric name="mcp_client_connections_total">Active connections by server</metric>
@@ -793,14 +717,12 @@
       <metric name="mcp_client_cache_hits">Cache hit rate by type</metric>
       <metric name="mcp_client_latency">Request latency by operation</metric>
     </metrics>
-    
     <logging>
       <level>INFO</level>
       <structured>JSON format with trace_id</structured>
       <sensitive_data>Redact authentication tokens</sensitive_data>
     </logging>
   </monitoring>
-
   <deployment>
     <environment_variables>
       <var name="MCP_CLIENT_ENABLED" default="true">Enable MCP client</var>
@@ -808,30 +730,25 @@
       <var name="MCP_CLIENT_TIMEOUT" default="30000">Default timeout in ms</var>
       <var name="MCP_CLIENT_MAX_RETRIES" default="3">Max retry attempts</var>
     </environment_variables>
-    
     <dependencies>
       <dependency name="httpx">Async HTTP client</dependency>
       <dependency name="websockets">WebSocket client</dependency>
       <dependency name="asyncio">Async subprocess for stdio</dependency>
     </dependencies>
   </deployment>
-
   <future_enhancements>
     <enhancement priority="high">
       <title>Tool Composition</title>
       <description>Combine tools from multiple servers into workflows</description>
     </enhancement>
-    
     <enhancement priority="medium">
       <title>Server Discovery</title>
       <description>Automatic discovery of MCP servers via mDNS/DNS-SD</description>
     </enhancement>
-    
     <enhancement priority="low">
       <title>Tool Translation</title>
       <description>Translate between different tool formats and schemas</description>
     </enhancement>
-    
     <enhancement priority="medium">
       <title>Federated Execution</title>
       <description>Execute tools across multiple servers in parallel</description>

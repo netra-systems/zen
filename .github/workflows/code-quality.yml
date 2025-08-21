@@ -262,6 +262,43 @@ jobs:
             echo "✅ Complexity analysis completed: $COMPLEX_FUNCS high-complexity functions"
           fi
           
+      - name: Circular Import Check
+        id: circular-import-check
+        run: |
+          echo "🔄 Checking for circular imports..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock circular import check"
+            echo "- Circular imports: 0 (mock)"
+            echo "circular_imports=0" >> $GITHUB_OUTPUT
+            echo "circular_score=10" >> $GITHUB_OUTPUT
+          else
+            # Run circular import detection
+            echo "Running circular import detection..."
+            python -m test_framework.test_runner --level code-quality > circular_output.txt 2>&1
+            
+            # Parse output for circular imports
+            if grep -q "ERROR.*circular import" circular_output.txt; then
+              CIRCULAR_IMPORTS=$(grep -c "Cycle:" circular_output.txt || echo "0")
+            else
+              CIRCULAR_IMPORTS=0
+            fi
+            
+            # Calculate score
+            if [ $CIRCULAR_IMPORTS -eq 0 ]; then
+              SCORE=10
+              echo "✅ No circular imports detected"
+            else
+              SCORE=0
+              echo "❌ Found $CIRCULAR_IMPORTS circular import(s)"
+              grep -A 5 "Cycle:" circular_output.txt || true
+            fi
+            
+            echo "circular_imports=$CIRCULAR_IMPORTS" >> $GITHUB_OUTPUT
+            echo "circular_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Circular import check completed: $CIRCULAR_IMPORTS found"
+          fi
+          
       - name: Aggregate Quality Results
         id: aggregate
         run: |
@@ -272,15 +309,17 @@ jobs:
           LINT_SCORE="${{ steps.lint-check.outputs.lint_score || '10' }}"
           TYPE_SCORE="${{ steps.type-check.outputs.type_score || '10' }}"
           COMPLEXITY_SCORE="${{ steps.complexity-check.outputs.complexity_score || '10' }}"
+          CIRCULAR_SCORE="${{ steps.circular-import-check.outputs.circular_score || '10' }}"
           
-          # Calculate weighted average (architecture has higher weight)
-          TOTAL=$((ARCH_SCORE * 3 + STYLE_SCORE + LINT_SCORE + TYPE_SCORE + COMPLEXITY_SCORE))
-          QUALITY_SCORE=$((TOTAL / 7))
+          # Calculate weighted average (architecture and circular imports have higher weight)
+          TOTAL=$((ARCH_SCORE * 3 + CIRCULAR_SCORE * 2 + STYLE_SCORE + LINT_SCORE + TYPE_SCORE + COMPLEXITY_SCORE))
+          QUALITY_SCORE=$((TOTAL / 9))
           
           echo "quality_score=$QUALITY_SCORE" >> $GITHUB_OUTPUT
           
           echo "=== Code Quality Summary ==="
           echo "Architecture compliance: $ARCH_SCORE/10"
+          echo "Circular imports: $CIRCULAR_SCORE/10"
           echo "Code style: $STYLE_SCORE/10"
           echo "Linting: $LINT_SCORE/10"
           echo "Type checking: $TYPE_SCORE/10"
@@ -302,6 +341,7 @@ jobs:
           | Category | Score | Issues |
           |----------|-------|--------|
           | Architecture | ${{ steps.architecture-check.outputs.arch_score }}/10 | ${{ steps.architecture-check.outputs.arch_violations }} |
+          | Circular Imports | ${{ steps.circular-import-check.outputs.circular_score }}/10 | ${{ steps.circular-import-check.outputs.circular_imports }} |
           | Code Style | ${{ steps.style-check.outputs.style_score }}/10 | ${{ steps.style-check.outputs.style_issues }} |
           | Linting | ${{ steps.lint-check.outputs.lint_score }}/10 | ${{ steps.lint-check.outputs.lint_issues }} |
           | Type Safety | ${{ steps.type-check.outputs.type_score }}/10 | ${{ steps.type-check.outputs.type_errors }} |

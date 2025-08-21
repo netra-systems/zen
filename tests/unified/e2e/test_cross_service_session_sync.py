@@ -39,8 +39,8 @@ import websockets
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 # Test infrastructure
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from .unified_e2e_harness import create_e2e_harness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
 
 
 @dataclass

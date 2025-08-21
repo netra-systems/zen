@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <name>CodeQuality.TypeSafetyProtocol</name>
     <version>3.0.0</version>
     <priority>CRITICAL</priority>
     <description>Protocols for enforcing strict type safety and maintaining a Single Source of Truth (SSOT).</description>
+    <last_edited>2025-08-21T08:47:28.666801</last_edited>
   </metadata>
-
   <core-principles>
     <principle id="TS-P1" priority="CRITICAL">
       <title>Single Source of Truth (SSOT)</title>
@@ -18,36 +18,32 @@
         <step>4. If NOT found, define the new type in the canonical location.</step>
       </ai-workflow>
     </principle>
-    
     <principle id="TS-P2" priority="CRITICAL">
       <title>Strict Typing / No Any</title>
       <instruction>Avoid `Any` (Python) or `any` (TypeScript). Use explicit types, `unknown`, or generics.</instruction>
     </principle>
   </core-principles>
-
   <section title="Canonical Type Locations">
     <location domain="API Contracts (Backend)">app/schemas/[domain].py</location>
     <location domain="Database Models (Backend)">app/db/models_postgres.py</location>
     <location domain="API Contracts (Frontend)">frontend/types/backend_schema_auto_generated.ts</location>
   </section>
-
   <section title="Cross-Platform Synchronization">
     <protocol id="TS-SYNC-001">
-        <title>Schema Synchronization</title>
-        <instruction>Ensure TypeScript types reflect backend Pydantic schemas.</instruction>
-        <workflow>
-            <step>1. Modify Pydantic models in `app/schemas/`.</step>
-            <step>2. Execute the synchronization tool.</step>
-        </workflow>
-        <ai-directive>After modifying any Pydantic schema, the AI agent MUST execute: `python scripts/schema_sync.py`.</ai-directive>
+      <title>Schema Synchronization</title>
+      <instruction>Ensure TypeScript types reflect backend Pydantic schemas.</instruction>
+      <workflow>
+        <step>1. Modify Pydantic models in `app/schemas/`.</step>
+        <step>2. Execute the synchronization tool.</step>
+      </workflow>
+      <ai-directive>After modifying any Pydantic schema, the AI agent MUST execute: `python scripts/schema_sync.py`.</ai-directive>
     </protocol>
   </section>
-
   <section title="Critical Patterns">
     <pattern id="ZUSTAND-SELECTORS" context="Frontend" priority="CRITICAL">
-        <title>Zustand Selector Stability</title>
-        <instruction>Use individual selectors only.</instruction>
-        <reference>SPEC/conventions.xml#FE-001</reference>
+      <title>Zustand Selector Stability</title>
+      <instruction>Use individual selectors only.</instruction>
+      <reference>SPEC/conventions.xml#FE-001</reference>
     </pattern>
   </section>
 </specification>

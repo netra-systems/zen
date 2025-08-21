@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>ClickHouse Table Initialization Specification</title>
@@ -7,15 +7,19 @@
     <author>Claude Opus 4.1</author>
     <priority>critical</priority>
     <category>database-initialization</category>
+    <last_edited>2025-08-21T08:47:28.756245</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.756245">
+      <reasons>
+        <reason>In archived/legacy folder</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <problem_statement>
     <description>
       The ClickHouse database tables, particularly the 'workload_events' table, are not being created
       automatically on application startup, causing query failures in the DataSubAgent and other components
       that depend on these tables.
     </description>
-    
     <root_cause>
       <issue>Missing table initialization logic</issue>
       <details>
@@ -24,20 +28,17 @@
         This led to "UNKNOWN_TABLE" errors when components tried to query the workload_events table.
       </details>
     </root_cause>
-    
     <symptoms>
       <symptom>Error: "Unknown table expression identifier 'workload_events'"</symptom>
       <symptom>Error code 60 from ClickHouse: DB::Exception</symptom>
       <symptom>Failed anomaly detection, workload event fetching, and usage pattern analysis</symptom>
     </symptoms>
   </problem_statement>
-
   <solution>
     <overview>
       Implement automatic ClickHouse table initialization on application startup with graceful
       error handling and recovery mechanisms.
     </overview>
-    
     <implementation>
       <step number="1">
         <description>Create ClickHouse initialization module</description>
@@ -49,7 +50,6 @@
           - Implement create_workload_events_table_if_missing() for runtime recovery
         </actions>
       </step>
-      
       <step number="2">
         <description>Add table schema to models</description>
         <file>app/db/models_clickhouse.py</file>
@@ -59,7 +59,6 @@
           - Ensure schema matches documentation in docs/DATABASE_SCHEMA.md
         </actions>
       </step>
-      
       <step number="3">
         <description>Integrate initialization in application startup</description>
         <file>app/main.py</file>
@@ -70,7 +69,6 @@
           - Skip initialization during testing (pytest detection)
         </actions>
       </step>
-      
       <step number="4">
         <description>Add runtime table creation fallback</description>
         <file>app/agents/data_sub_agent.py</file>
@@ -84,25 +82,24 @@
       </step>
     </implementation>
   </solution>
-
   <table_schema>
     <table name="workload_events">
       <description>Stores time-series event data for workload analysis</description>
       <columns>
-        <column name="event_id" type="UUID" default="generateUUIDv4()"/>
-        <column name="timestamp" type="DateTime64(3)" default="now()"/>
-        <column name="user_id" type="UInt32"/>
-        <column name="workload_id" type="String"/>
-        <column name="event_type" type="String"/>
-        <column name="event_category" type="String"/>
-        <column name="metrics" type="Nested(name Array(String), value Array(Float64), unit Array(String))"/>
-        <column name="dimensions" type="Map(String, String)"/>
-        <column name="metadata" type="String"/>
+        <column name="event_id" type="UUID" default="generateUUIDv4()" />
+        <column name="timestamp" type="DateTime64(3)" default="now()" />
+        <column name="user_id" type="UInt32" />
+        <column name="workload_id" type="String" />
+        <column name="event_type" type="String" />
+        <column name="event_category" type="String" />
+        <column name="metrics" type="Nested(name Array(String), value Array(Float64), unit Array(String))" />
+        <column name="dimensions" type="Map(String, String)" />
+        <column name="metadata" type="String" />
       </columns>
       <indexes>
-        <index name="idx_user_id" type="minmax" granularity="8192"/>
-        <index name="idx_workload_id" type="bloom_filter" granularity="1"/>
-        <index name="idx_event_type" type="set(100)" granularity="1"/>
+        <index name="idx_user_id" type="minmax" granularity="8192" />
+        <index name="idx_workload_id" type="bloom_filter" granularity="1" />
+        <index name="idx_event_type" type="set(100)" granularity="1" />
       </indexes>
       <engine>MergeTree()</engine>
       <partition>toYYYYMM(timestamp)</partition>
@@ -110,7 +107,6 @@
       <ttl>timestamp + INTERVAL 90 DAY</ttl>
     </table>
   </table_schema>
-
   <prevention_measures>
     <measure>
       <title>Startup validation</title>
@@ -119,7 +115,6 @@
         Log success/failure of table creation attempts.
       </description>
     </measure>
-    
     <measure>
       <title>Runtime recovery</title>
       <description>
@@ -127,7 +122,6 @@
         This provides resilience against manual table deletions or connection issues.
       </description>
     </measure>
-    
     <measure>
       <title>Environment-specific handling</title>
       <description>
@@ -135,7 +129,6 @@
         Use mock clients in development when ClickHouse is disabled.
       </description>
     </measure>
-    
     <measure>
       <title>Graceful degradation</title>
       <description>
@@ -144,7 +137,6 @@
       </description>
     </measure>
   </prevention_measures>
-
   <testing_strategy>
     <test>Verify table creation on clean ClickHouse instance</test>
     <test>Test recovery from UNKNOWN_TABLE errors</test>
@@ -152,14 +144,12 @@
     <test>Validate table schema matches expected structure</test>
     <test>Test TTL and partition settings work correctly</test>
   </testing_strategy>
-
   <monitoring>
     <metric>Table creation success/failure rate on startup</metric>
     <metric>Runtime table creation attempts</metric>
     <metric>Query failures due to missing tables</metric>
     <metric>ClickHouse connection availability</metric>
   </monitoring>
-
   <related_files>
     <file>app/db/clickhouse.py - ClickHouse client configuration</file>
     <file>app/db/clickhouse_base.py - Base ClickHouse database class</file>
@@ -168,23 +158,19 @@
     <file>app/agents/data_sub_agent.py - Primary consumer of workload_events</file>
     <file>docs/DATABASE_SCHEMA.md - Documentation of all database schemas</file>
   </related_files>
-
   <lessons_learned>
     <lesson>
       Always ensure database initialization code exists alongside schema definitions.
       Documentation alone is not sufficient.
     </lesson>
-    
     <lesson>
       Implement both proactive (startup) and reactive (runtime) table creation strategies
       for maximum resilience.
     </lesson>
-    
     <lesson>
       Error messages should be descriptive enough to identify root causes quickly.
       The "UNKNOWN_TABLE" error was key to diagnosing this issue.
     </lesson>
-    
     <lesson>
       Separation of concerns: Keep table schemas, initialization logic, and error recovery
       in separate, well-defined modules.

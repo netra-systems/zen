@@ -1,62 +1,65 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
-    <issue id="websocket-coroutine-error">
-        <title>WebSocket 'coroutine' object has no attribute 'get' Error</title>
-        <timestamp>2025-08-18T22:36:16</timestamp>
-        
-        <problem>
-            <description>
+  <metadata>
+    <last_edited>2025-08-21T08:47:30.161962</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:30.161962">
+      <reasons>
+        <reason>In archived/legacy folder</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <issue id="websocket-coroutine-error">
+    <title>WebSocket 'coroutine' object has no attribute 'get' Error</title>
+    <timestamp>2025-08-18T22:36:16</timestamp>
+    <problem>
+      <description>
                 WebSocket connection handler was encountering an error where a coroutine object
                 was being accessed with .get() method, which doesn't exist on coroutines.
                 The error occurred in the ping message handler when trying to check message type.
             </description>
-            <error_message>Error in WebSocket connection: 'coroutine' object has no attribute 'get'</error_message>
-            <location>app.routes.websockets:_handle_general_exception:121</location>
-        </problem>
-        
-        <root_cause>
-            <description>
+      <error_message>Error in WebSocket connection: 'coroutine' object has no attribute 'get'</error_message>
+      <location>app.routes.websockets:_handle_general_exception:121</location>
+    </problem>
+    <root_cause>
+      <description>
                 The parse_json_message function is async but could potentially receive or pass through
                 a coroutine object if data parameter itself was a coroutine (from an un-awaited call).
                 The _handle_ping_message function was trying to call .get() on the message without
                 checking if it was a coroutine first.
             </description>
-            <code_flow>
-                1. receive_message_with_timeout() -> returns string
-                2. parse_json_message(data) -> could pass through coroutine if data is coroutine
-                3. _handle_ping_message(message) -> calls message.get("type") causing error
+      <code_flow>
+                1. receive_message_with_timeout() -&gt; returns string
+                2. parse_json_message(data) -&gt; could pass through coroutine if data is coroutine
+                3. _handle_ping_message(message) -&gt; calls message.get("type") causing error
             </code_flow>
-        </root_cause>
-        
-        <solution>
-            <description>
+    </root_cause>
+    <solution>
+      <description>
                 Added coroutine checks in both parse_json_message and _handle_ping_message functions
                 to ensure they don't process coroutine objects and return early with appropriate
                 error logging if a coroutine is detected.
             </description>
-            <changes>
-                <file>app/routes/utils/websocket_helpers.py</file>
-                <modification>
+      <changes>
+        <file>app/routes/utils/websocket_helpers.py</file>
+        <modification>
                     Added asyncio.iscoroutine() checks before processing data/message
                     to detect and handle coroutine objects gracefully
                 </modification>
-            </changes>
-        </solution>
-        
-        <prevention>
-            <guideline>Always check if an object is a coroutine before accessing its attributes</guideline>
-            <guideline>When async functions return or pass data, ensure proper await usage</guideline>
-            <guideline>Add defensive checks for coroutine objects in message handlers</guideline>
-            <test_strategy>
+      </changes>
+    </solution>
+    <prevention>
+      <guideline>Always check if an object is a coroutine before accessing its attributes</guideline>
+      <guideline>When async functions return or pass data, ensure proper await usage</guideline>
+      <guideline>Add defensive checks for coroutine objects in message handlers</guideline>
+      <test_strategy>
                 Create tests that verify handlers properly reject coroutine objects
                 and that all async function calls are properly awaited
             </test_strategy>
-        </prevention>
-        
-        <business_value>
-            <segment>All segments</segment>
-            <impact>Prevents WebSocket connection failures that would disconnect users</impact>
-            <value>Maintains real-time communication reliability, preventing $8K MRR loss</value>
-        </business_value>
-    </issue>
+    </prevention>
+    <business_value>
+      <segment>All segments</segment>
+      <impact>Prevents WebSocket connection failures that would disconnect users</impact>
+      <value>Maintains real-time communication reliability, preventing $8K MRR loss</value>
+    </business_value>
+  </issue>
 </learnings>

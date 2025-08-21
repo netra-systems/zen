@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>WebSocket Communication System Specification</title>
@@ -6,8 +6,14 @@
     <created>2025-08-11</created>
     <author>Claude</author>
     <purpose>Define the complete WebSocket event flow between agents and frontend</purpose>
+    <last_edited>2025-08-21T08:47:28.704470</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.704470">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <overview>
     <description>
       The Netra AI platform uses WebSocket communication for real-time updates from agents to the frontend.
@@ -20,7 +26,6 @@
       MUST comply with SPEC:websocket_reliability for silent failure prevention
     </critical_reference>
   </overview>
-
   <authentication_implementation status="completed">
     <security_update version="2.0" date="2025-08-21">
       <title>WebSocket Authentication Security Alignment</title>
@@ -46,7 +51,6 @@
       </files_updated>
     </security_update>
   </authentication_implementation>
-  
   <current_issues>
     <issue priority="critical">
       <title>Event Structure Mismatch</title>
@@ -56,7 +60,6 @@
         <file>app/services/websocket/message_handler.py:86-92</file>
       </files>
     </issue>
-    
     <issue priority="critical">
       <title>Missing Unified Events</title>
       <description>Frontend expects events that backend never sends</description>
@@ -71,7 +74,6 @@
         <file>app/agents/supervisor_consolidated.py:170-175</file>
       </files>
     </issue>
-    
     <issue priority="high">
       <title>AgentStarted Payload Incomplete</title>
       <description>Backend sends only run_id, frontend expects agent_name and timestamp</description>
@@ -82,7 +84,6 @@
         <file>frontend/store/unified-chat.ts:147-183</file>
       </files>
     </issue>
-    
     <issue priority="medium">
       <title>Duplicate WebSocket Systems</title>
       <description>Frontend has both legacy and unified WebSocket handlers competing</description>
@@ -92,104 +93,95 @@
       </files>
     </issue>
   </current_issues>
-
   <event_catalog>
     <section name="Agent Lifecycle Events">
       <event name="agent_started" status="partial">
         <description>Signals the beginning of agent execution</description>
         <current_backend>
           <payload>
-            <field name="run_id" type="string" required="true"/>
+            <field name="run_id" type="string" required="true" />
           </payload>
         </current_backend>
         <required_payload>
-          <field name="run_id" type="string" required="true"/>
-          <field name="agent_name" type="string" required="true"/>
-          <field name="timestamp" type="number" required="true"/>
+          <field name="run_id" type="string" required="true" />
+          <field name="agent_name" type="string" required="true" />
+          <field name="timestamp" type="number" required="true" />
         </required_payload>
         <frontend_handler>frontend/store/unified-chat.ts:145-183</frontend_handler>
       </event>
-      
       <event name="agent_completed" status="implemented">
         <description>Signals agent execution completion</description>
         <payload>
-          <field name="agent_name" type="string" required="true"/>
-          <field name="duration_ms" type="number" required="true"/>
-          <field name="result" type="object" required="true"/>
-          <field name="metrics" type="object" required="false"/>
+          <field name="agent_name" type="string" required="true" />
+          <field name="duration_ms" type="number" required="true" />
+          <field name="result" type="object" required="true" />
+          <field name="metrics" type="object" required="false" />
         </payload>
         <frontend_handler>frontend/store/unified-chat.ts:230-291</frontend_handler>
       </event>
-      
       <event name="sub_agent_update" status="implemented">
         <description>Real-time status updates from individual agents</description>
         <payload>
-          <field name="sub_agent_name" type="string" required="true"/>
-          <field name="state" type="SubAgentState" required="true"/>
+          <field name="sub_agent_name" type="string" required="true" />
+          <field name="state" type="SubAgentState" required="true" />
         </payload>
         <frontend_handler>Legacy handler in useChatWebSocket.ts</frontend_handler>
       </event>
     </section>
-    
     <section name="Progress Events" status="not_implemented">
       <event name="agent_thinking">
         <description>Intermediate reasoning updates from agents</description>
         <required_payload>
-          <field name="thought" type="string" required="true"/>
-          <field name="agent_name" type="string" required="true"/>
-          <field name="step_number" type="number" required="false"/>
-          <field name="total_steps" type="number" required="false"/>
+          <field name="thought" type="string" required="true" />
+          <field name="agent_name" type="string" required="true" />
+          <field name="step_number" type="number" required="false" />
+          <field name="total_steps" type="number" required="false" />
         </required_payload>
         <frontend_handler>frontend/store/unified-chat.ts:203-213</frontend_handler>
       </event>
-      
       <event name="partial_result">
         <description>Streaming content updates as agent generates output</description>
         <required_payload>
-          <field name="content" type="string" required="true"/>
-          <field name="agent_name" type="string" required="true"/>
-          <field name="is_complete" type="boolean" required="true"/>
+          <field name="content" type="string" required="true" />
+          <field name="agent_name" type="string" required="true" />
+          <field name="is_complete" type="boolean" required="true" />
         </required_payload>
         <frontend_handler>frontend/store/unified-chat.ts:215-228</frontend_handler>
       </event>
     </section>
-    
     <section name="Tool Events" status="misaligned">
       <event name="tool_executing">
         <description>Tool execution start notification</description>
         <required_payload>
-          <field name="tool_name" type="string" required="true"/>
-          <field name="agent_name" type="string" required="true"/>
-          <field name="timestamp" type="number" required="true"/>
+          <field name="tool_name" type="string" required="true" />
+          <field name="agent_name" type="string" required="true" />
+          <field name="timestamp" type="number" required="true" />
         </required_payload>
         <frontend_handler>frontend/store/unified-chat.ts:186-201</frontend_handler>
       </event>
-      
       <event name="tool_call" status="backend_only">
         <description>Current backend tool call event (needs alignment)</description>
         <current_payload>
-          <field name="tool_name" type="string"/>
-          <field name="tool_args" type="object"/>
-          <field name="sub_agent_name" type="string"/>
+          <field name="tool_name" type="string" />
+          <field name="tool_args" type="object" />
+          <field name="sub_agent_name" type="string" />
         </current_payload>
       </event>
     </section>
-    
     <section name="Final Results">
       <event name="final_report" status="not_implemented">
         <description>Complete analysis results from agent pipeline</description>
         <required_payload>
-          <field name="report" type="object" required="true"/>
-          <field name="total_duration_ms" type="number" required="true"/>
-          <field name="agent_metrics" type="array" required="false"/>
-          <field name="recommendations" type="array" required="false"/>
-          <field name="action_plan" type="array" required="false"/>
+          <field name="report" type="object" required="true" />
+          <field name="total_duration_ms" type="number" required="true" />
+          <field name="agent_metrics" type="array" required="false" />
+          <field name="recommendations" type="array" required="false" />
+          <field name="action_plan" type="array" required="false" />
         </required_payload>
         <frontend_handler>frontend/store/unified-chat.ts:311-350</frontend_handler>
       </event>
     </section>
   </event_catalog>
-
   <ui_layer_requirements>
     <layer name="Fast Layer" timing="0-100ms">
       <purpose>Immediate visual feedback for user actions</purpose>
@@ -204,7 +196,6 @@
         <event>tool_executing</event>
       </events_consumed>
     </layer>
-    
     <layer name="Medium Layer" timing="100ms-1s">
       <purpose>Progressive updates during processing</purpose>
       <displays>
@@ -217,7 +208,6 @@
         <event>partial_result</event>
       </events_consumed>
     </layer>
-    
     <layer name="Slow Layer" timing="1s+">
       <purpose>Final results and comprehensive reports</purpose>
       <displays>
@@ -232,7 +222,6 @@
       </events_consumed>
     </layer>
   </ui_layer_requirements>
-
   <implementation_requirements>
     <requirement priority="critical">
       <title>Standardize Message Structure</title>
@@ -243,7 +232,6 @@
         3. Update WebSocketMessage model in schemas/Agent.py
       </implementation>
     </requirement>
-    
     <requirement priority="critical">
       <title>Implement Missing Events</title>
       <description>Backend MUST send all events expected by frontend unified system</description>
@@ -254,7 +242,6 @@
         4. Add final_report event with comprehensive results
       </implementation>
     </requirement>
-    
     <requirement priority="high">
       <title>Fix AgentStarted Payload</title>
       <description>Include agent_name and timestamp in agent_started event</description>
@@ -264,7 +251,6 @@
         - timestamp from current time
       </implementation>
     </requirement>
-    
     <requirement priority="medium">
       <title>Consolidate WebSocket Handlers</title>
       <description>Remove legacy WebSocket system, use only unified system</description>
@@ -275,7 +261,6 @@
       </implementation>
     </requirement>
   </implementation_requirements>
-
   <testing_requirements>
     <test name="Event Flow Integration">
       <description>Verify all events flow correctly from agents to UI layers</description>
@@ -286,7 +271,6 @@
         <scenario>Final report displays in slow layer</scenario>
       </scenarios>
     </test>
-    
     <test name="Event Payload Validation">
       <description>Ensure all event payloads match expected structure</description>
       <validations>
@@ -295,17 +279,15 @@
         <validation>Type checking for all fields</validation>
       </validations>
     </test>
-    
     <test name="Layer Update Timing">
       <description>Verify layers update within expected time windows</description>
       <timing_requirements>
-        <fast_layer max_latency="100ms"/>
-        <medium_layer max_latency="1000ms"/>
-        <slow_layer min_delay="1000ms"/>
+        <fast_layer max_latency="100ms" />
+        <medium_layer max_latency="1000ms" />
+        <slow_layer min_delay="1000ms" />
       </timing_requirements>
     </test>
   </testing_requirements>
-
   <migration_plan>
     <phase number="1" name="Event Structure Standardization">
       <tasks>
@@ -314,7 +296,6 @@
         <task>Test existing functionality still works</task>
       </tasks>
     </phase>
-    
     <phase number="2" name="Add Missing Events">
       <tasks>
         <task>Implement agent_thinking in supervisor</task>
@@ -323,7 +304,6 @@
         <task>Generate final_report at pipeline completion</task>
       </tasks>
     </phase>
-    
     <phase number="3" name="Frontend Consolidation">
       <tasks>
         <task>Remove legacy WebSocket handlers</task>
@@ -331,7 +311,6 @@
         <task>Remove duplicate event processing logic</task>
       </tasks>
     </phase>
-    
     <phase number="4" name="Testing and Validation">
       <tasks>
         <task>Run comprehensive e2e tests</task>

@@ -70,7 +70,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive": {
         "description": "Full test suite with coverage including staging tests (30-45 minutes)",
         "purpose": "Pre-release validation, full system testing including staging environment",
-        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
+        "backend_args": ["netra_backend/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
         "timeout": 2700,  # 45 minutes to handle real LLM tests
         "run_coverage": True,
@@ -80,7 +80,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-backend": {
         "description": "Comprehensive backend tests only (15-20 minutes)",
         "purpose": "Full backend validation without frontend",
-        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast", "--markers", "not frontend"],
+        "backend_args": ["netra_backend/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast", "--markers", "not frontend"],
         "frontend_args": [],
         "timeout": 1200,  # 20 minutes
         "run_coverage": True,
@@ -98,7 +98,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-core": {
         "description": "Core functionality comprehensive tests (10-15 minutes)",
         "purpose": "Deep validation of core components only",
-        "backend_args": ["app/core", "app/config", "app/dependencies", "app/tests/unit/test_*core*", "app/tests/*core*", "tests/*core*", "tests/unified/test_*core*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "backend_args": ["netra_backend/app/core", "netra_backend/app/config", "netra_backend/app/dependencies", "netra_backend/tests/unit/test_*core*", "netra_backend/tests/*core*", "tests/*core*", "tests/unified/test_*core*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
         "frontend_args": [],
         "timeout": 900,  # 15 minutes
         "run_coverage": True,
@@ -107,7 +107,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-agents": {
         "description": "Agent system comprehensive tests (10-15 minutes)",
         "purpose": "Deep validation of multi-agent system",
-        "backend_args": ["app/agents", "app/services/agent*", "app/tests/*agent*", "app/tests/**/*agent*", "tests/*agent*", "tests/**/*agent*", "tests/unified/test_*agent*", "tests/agents", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "backend_args": ["netra_backend/app/agents", "netra_backend/app/services/agent*", "netra_backend/tests/*agent*", "netra_backend/tests/**/*agent*", "tests/*agent*", "tests/**/*agent*", "tests/unified/test_*agent*", "tests/agents", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
         "frontend_args": [],
         "timeout": 900,  # 15 minutes
         "run_coverage": True,
@@ -118,7 +118,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-websocket": {
         "description": "WebSocket comprehensive tests (5-10 minutes)",
         "purpose": "Deep validation of WebSocket functionality",
-        "backend_args": ["app/websocket", "app/routes/websocket_secure.py", "app/tests/*websocket*", "app/tests/**/*websocket*", "tests/*websocket*", "tests/**/*websocket*", "integration_tests/test_websocket*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "backend_args": ["netra_backend/app/websocket", "netra_backend/app/routes/websocket_secure.py", "netra_backend/tests/*websocket*", "netra_backend/tests/**/*websocket*", "tests/*websocket*", "tests/**/*websocket*", "integration_tests/test_websocket*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
         "frontend_args": [],
         "timeout": 600,  # 10 minutes
         "run_coverage": True,
@@ -127,7 +127,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-database": {
         "description": "Database comprehensive tests (10-15 minutes)",
         "purpose": "Deep validation of all database operations",
-        "backend_args": ["app/db", "app/repositories", "app/tests/*database*", "app/tests/*db*", "app/tests/**/*database*", "tests/*database*", "tests/*db*", "tests/**/*database*", "tests/unified/test_*database*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "backend_args": ["netra_backend/app/db", "netra_backend/app/repositories", "netra_backend/tests/*database*", "netra_backend/tests/*db*", "netra_backend/tests/**/*database*", "tests/*database*", "tests/*db*", "tests/**/*database*", "tests/unified/test_*database*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
         "frontend_args": [],
         "timeout": 900,  # 15 minutes
         "run_coverage": True,
@@ -136,11 +136,21 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive-api": {
         "description": "API comprehensive tests (10-15 minutes)",
         "purpose": "Deep validation of all API endpoints",
-        "backend_args": ["app/routes", "app/handlers", "app/tests/*api*", "app/tests/*auth*", "app/tests/**/*api*", "tests/*api*", "tests/*auth*", "tests/**/*api*", "tests/unified/test_*api*", "integration_tests/test_*api*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "backend_args": ["netra_backend/app/routes", "netra_backend/app/handlers", "netra_backend/tests/*api*", "netra_backend/tests/*auth*", "netra_backend/tests/**/*api*", "tests/*api*", "tests/*auth*", "tests/**/*api*", "tests/unified/test_*api*", "integration_tests/test_*api*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
         "frontend_args": [],
         "timeout": 900,  # 15 minutes
         "run_coverage": True,
         "run_both": False
+    },
+    "code-quality": {
+        "description": "Code quality checks including circular imports (< 1 minute)",
+        "purpose": "Static code analysis and import validation",
+        "backend_args": [],
+        "frontend_args": [],
+        "timeout": 60,
+        "run_coverage": False,
+        "run_both": False,
+        "custom_validation": ["circular_imports"]
     },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
@@ -202,7 +212,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "staging": {
         "description": "Staging environment configuration integration tests (10-15 minutes)",
         "purpose": "Validate staging deployment configuration and GCP resource integration",
-        "backend_args": ["app/tests/integration/staging_config", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
+        "backend_args": ["netra_backend/tests/integration/staging_config", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
         "frontend_args": [],
         "timeout": 900,
         "run_coverage": False,
@@ -222,13 +232,13 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "description": "Tests against real staging environment at staging.netrasystems.ai (5-10 minutes)",
         "purpose": "Validate actual staging deployment health and functionality",
         "backend_args": [
-            "app/tests/integration/staging_config/test_health_checks.py",
-            "app/tests/integration/staging_config/test_cors_configuration.py",
-            "app/tests/integration/staging_config/test_deployment_rollback.py",
-            "app/tests/integration/staging_config/test_llm_integration.py",
-            "app/tests/integration/staging_config/test_observability_pipeline.py",
-            "app/tests/integration/staging_config/test_resource_limits.py",
-            "app/tests/integration/staging_config/test_websocket_load_balancer.py",
+            "netra_backend/tests/integration/staging_config/test_health_checks.py",
+            "netra_backend/tests/integration/staging_config/test_cors_configuration.py",
+            "netra_backend/tests/integration/staging_config/test_deployment_rollback.py",
+            "netra_backend/tests/integration/staging_config/test_llm_integration.py",
+            "netra_backend/tests/integration/staging_config/test_observability_pipeline.py",
+            "netra_backend/tests/integration/staging_config/test_resource_limits.py",
+            "netra_backend/tests/integration/staging_config/test_websocket_load_balancer.py",
             "-v", "--fail-fast"
         ],
         "frontend_args": [],
@@ -250,8 +260,8 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "description": "Quick staging validation tests (2-3 minutes)",
         "purpose": "Fast staging health check for deployment verification",
         "backend_args": [
-            "app/tests/integration/staging_config/test_secret_manager_integration.py",
-            "app/tests/integration/staging_config/test_health_checks.py",
+            "netra_backend/tests/integration/staging_config/test_secret_manager_integration.py",
+            "netra_backend/tests/integration/staging_config/test_health_checks.py",
             "-v", "--fail-fast"
         ],
         "frontend_args": [],
@@ -272,20 +282,58 @@ RUNNERS = {
 
 # Component mappings for focused testing
 COMPONENT_MAPPINGS = {
-    "core": ["app/core", "app/config", "app/dependencies"],
-    "agents": ["app/agents", "app/services/agent"],
-    "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
-    "database": ["app/db", "app/services/database", "test_database"],
-    "api": ["app/routes", "test_api", "test_auth"],
-    "frontend": ["frontend"]
+    "backend": {
+        "paths": ["netra_backend/tests"],
+        "exclude": ["frontend", "auth_service"]
+    },
+    "frontend": {
+        "paths": ["frontend/__tests__"],
+        "exclude": []
+    },
+    "auth": {
+        "paths": ["netra_backend/tests/auth_integration", "auth_service/tests"],
+        "exclude": []
+    },
+    "agents": {
+        "paths": ["netra_backend/tests/agents"],
+        "exclude": []
+    },
+    "database": {
+        "paths": ["netra_backend/tests/database", "netra_backend/tests/clickhouse"],
+        "exclude": []
+    },
+    "websocket": {
+        "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
+        "exclude": []
+    },
+    "frontend": {
+        "paths": ["frontend/__tests__"],
+        "exclude": []
+    },
+    "auth": {
+        "paths": ["netra_backend/tests/auth_integration", "auth_service/tests"],
+        "exclude": []
+    },
+    "agents": {
+        "paths": ["netra_backend/tests/agents"],
+        "exclude": []
+    },
+    "database": {
+        "paths": ["netra_backend/tests/database", "netra_backend/tests/clickhouse"],
+        "exclude": []
+    },
+    "websocket": {
+        "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
+        "exclude": []
+    }
 }
 
 # Shard mappings for CI/CD parallel execution (numeric sharding)
 SHARD_MAPPINGS = {
-    "1/4": ["app/core", "app/config", "app/dependencies"],
-    "2/4": ["app/agents", "app/services/agent"],
-    "3/4": ["app/ws_manager", "app/services/websocket", "app/db", "app/services/database"],
-    "4/4": ["app/routes", "test_api", "test_auth", "frontend"]
+    "1/4": ["netra_backend/app/core", "netra_backend/app/config", "netra_backend/app/dependencies"],
+    "2/4": ["netra_backend/app/agents", "netra_backend/app/services/agent"],
+    "3/4": ["netra_backend/app/ws_manager", "netra_backend/app/services/websocket", "netra_backend/app/db", "netra_backend/app/services/database"],
+    "4/4": ["netra_backend/app/routes", "test_api", "test_auth", "frontend"]
 }
 
 def configure_staging_environment(staging_url: str, staging_api_url: str):

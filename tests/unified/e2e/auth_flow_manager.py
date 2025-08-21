@@ -19,8 +19,8 @@ from contextlib import asynccontextmanager
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from ..test_harness import UnifiedTestHarness
-from .auth_flow_testers import AuthFlowE2ETester
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.auth_flow_testers import AuthFlowE2ETester
 
 
 class AuthCompleteFlowManager:

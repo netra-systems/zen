@@ -23,8 +23,8 @@
                 Produces arrayElement(nested.very.deep.field, expr)
             </solution>
             <files_affected>
-                <file>app/db/clickhouse_query_fixer.py</file>
-                <file>app/tests/services/test_clickhouse_regex_patterns.py</file>
+                <file>netra_backend/app/db/clickhouse_query_fixer.py</file>
+                <file>netra_backend/app/netra_backend/tests/services/test_clickhouse_regex_patterns.py</file>
             </files_affected>
             <verification>All ClickHouse array syntax tests passing</verification>
         </learning>
@@ -42,8 +42,8 @@
                 Maintains type safety for ClickHouse queries
             </solution>
             <files_affected>
-                <file>app/db/clickhouse_query_fixer.py</file>
-                <file>app/tests/services/test_clickhouse_array_syntax.py</file>
+                <file>netra_backend/app/db/clickhouse_query_fixer.py</file>
+                <file>netra_backend/app/netra_backend/tests/services/test_clickhouse_array_syntax.py</file>
             </files_affected>
             <verification>Mixed syntax tests now pass with correct wrappers</verification>
         </learning>
@@ -62,9 +62,9 @@
                 Created automated script to fix import issues systematically
             </solution>
             <files_affected>
-                <file>app/tests/e2e/test_websocket_integration_*.py</file>
-                <file>tests/unified/e2e/*.py</file>
-                <file>tests/websocket/*.py</file>
+                <file>netra_backend/app/netra_backend/tests/e2e/test_websocket_integration_*.py</file>
+                <file>netra_backend/tests/unified/e2e/*.py</file>
+                <file>netra_backend/tests/websocket/*.py</file>
                 <file>scripts/fix_e2e_connection_manager_imports.py</file>
             </files_affected>
             <verification>All e2e test imports now resolve correctly</verification>
@@ -84,9 +84,9 @@
                 Standardized fixture patterns across all e2e test files
             </solution>
             <files_affected>
-                <file>app/tests/e2e/conftest.py</file>
-                <file>app/tests/e2e/test_websocket_integration_core.py</file>
-                <file>app/tests/e2e/test_websocket_integration_fixtures.py</file>
+                <file>netra_backend/app/netra_backend/tests/e2e/conftest.py</file>
+                <file>netra_backend/app/netra_backend/tests/e2e/test_websocket_integration_core.py</file>
+                <file>netra_backend/app/netra_backend/tests/e2e/test_websocket_integration_fixtures.py</file>
                 <file>scripts/fix_e2e_tests_comprehensive.py</file>
             </files_affected>
             <verification>408 e2e tests now collected successfully, fixture tests passing</verification>
@@ -106,8 +106,8 @@
                 Fixed empty import statements and orphaned parentheses
             </solution>
             <files_affected>
-                <file>app/tests/agents/test_supervisor_integration_core.py</file>
-                <file>app/tests/agents/test_supervisor_integration_helpers.py</file>
+                <file>netra_backend/app/netra_backend/tests/agents/test_supervisor_integration_core.py</file>
+                <file>netra_backend/app/netra_backend/tests/agents/test_supervisor_integration_helpers.py</file>
                 <file>24 other test files with empty imports</file>
             </files_affected>
             <verification>No more pytest collection warnings for TestSyntaxFix</verification>
@@ -128,7 +128,7 @@
                 Database coordination, Circuit breakers, Cache invalidation
             </solution>
             <files_affected>
-                <file>app/tests/integration/test_critical_missing_integration.py</file>
+                <file>netra_backend/app/netra_backend/tests/integration/test_critical_missing_integration.py</file>
                 <file>agent_to_agent/integration_tests_implementation_report.md</file>
             </files_affected>
             <verification>20 integration tests validating business-critical paths</verification>
@@ -141,6 +141,33 @@
                 - Circuit Breaker Cascade: $25K MRR
                 - Additional 15 tests: $267K MRR combined
             </business_value>
+        </learning>
+        
+        <learning id="test-import-resolution-microservice-structure">
+            <title>Test Import Resolution in Microservice Architecture</title>
+            <problem>
+                Tests in netra_backend/tests/agents/ using "from netra_backend.app.agents.state import" is the correct pattern
+                Python path resolution requires absolute imports from project root
+                Confusion about whether tests should be moved to top-level directory
+            </problem>
+            <solution>
+                Keep tests in netra_backend/tests/ - this follows the canonical project structure
+                Use absolute imports with full namespace: "from netra_backend.app.agents.state import"
+                Run tests from project root: python -m pytest netra_backend/tests/
+                Each microservice (app, auth_service, frontend) maintains its own test directory
+            </solution>
+            <rationale>
+                Project has independent microservices per SPEC/independent_services.xml
+                Top-level netra_backend/tests/ and integration_netra_backend/tests/ exist for cross-service testing
+                netra_backend/app/netra_backend/tests/ contains app-specific tests maintaining proper boundaries
+                Moving tests to top-level would violate microservice isolation
+            </rationale>
+            <files_affected>
+                <file>netra_backend/app/netra_backend/tests/agents/test_agent_e2e_critical_setup.py</file>
+                <file>netra_backend/app/netra_backend/tests/agents/test_agent_e2e_critical_*.py</file>
+                <file>pytest.ini - configured with testpaths including netra_backend/tests</file>
+            </files_affected>
+            <verification>Tests run successfully with relative imports from project root</verification>
         </learning>
         
         <learning id="integration-test-architecture-compliance">
@@ -162,7 +189,7 @@
                 - fixtures/ directory for shared test infrastructure
             </solution>
             <files_affected>
-                <file>app/tests/integration/test_critical_missing_integration.py</file>
+                <file>netra_backend/app/netra_backend/tests/integration/test_critical_missing_integration.py</file>
             </files_affected>
             <verification>File modularization maintains 450-line compliance</verification>
             <next_action>Split file into 8 modules within 24 hours</next_action>
@@ -204,7 +231,7 @@
                 </pattern>
             </key_patterns>
             <files_affected>
-                <file>app/tests/integration/test_critical_missing_integration.py</file>
+                <file>netra_backend/app/netra_backend/tests/integration/test_critical_missing_integration.py</file>
             </files_affected>
             <verification>All async patterns tested with realistic workflows</verification>
         </learning>
@@ -263,7 +290,7 @@
                 Use mock.patch for interceptor in tests to avoid state pollution
             </solution>
             <files_affected>
-                <file>app/tests/services/test_clickhouse_query_interceptor.py</file>
+                <file>netra_backend/app/netra_backend/tests/services/test_clickhouse_query_interceptor.py</file>
             </files_affected>
             <note>Test isolation critical for singleton patterns</note>
         </learning>
@@ -358,13 +385,13 @@
             <problem>
                 Error: 'real_llm' not found in `markers` configuration option
                 Pytest.main() called from scripts/test_backend.py couldn't find pytest.ini
-                Tests in app/tests/ need app/pytest.ini configuration
-                Multiple pytest.ini files (root and app/) causing confusion
+                Tests in netra_backend/app/netra_backend/tests/ need netra_backend/app/pytest.ini configuration
+                Multiple pytest.ini files (root and netra_backend/app/) causing confusion
             </problem>
             <solution>
                 Added explicit configuration file path to pytest arguments
                 Use -c flag to specify pytest.ini location
-                Prefer app/pytest.ini for app/tests, root pytest.ini as fallback
+                Prefer netra_backend/pytest.ini for netra_backend/tests, root pytest.ini as fallback
                 Added _add_config_file_args() function to build_pytest_args()
             </solution>
             <files_affected>
@@ -373,7 +400,7 @@
             <technical_details>
                 Root cause: pytest.main() doesn't auto-discover config when run from scripts/
                 Solution: Explicitly pass -c path/to/pytest.ini
-                Priority: app/pytest.ini > root pytest.ini
+                Priority: netra_backend/app/pytest.ini > root pytest.ini
             </technical_details>
             <verification>Tests with real_llm marker now run without configuration errors</verification>
         </learning>
@@ -413,7 +440,7 @@
                 Repeated mock setup code across 800+ test files
             </problem>
             <solution>
-                Created modular test utilities framework in app/tests/test_utilities/
+                Created modular test utilities framework in netra_backend/app/netra_backend/tests/test_utilities/
                 Extracted top 30 reusable components into focused modules
                 Each utility module under 300 lines with functions under 8 lines
                 Implemented builder pattern for complex mock configurations
@@ -467,7 +494,7 @@
                 test_framework/decorators.py - Test decorators for feature flagging (327 lines)
                 frontend/test-utils/feature-flags.ts - Frontend Jest utilities (170 lines)
                 test_feature_flags.json - Central feature configuration
-                app/tests/unit/test_feature_flags_example.py - Usage examples and patterns
+                netra_backend/app/netra_backend/tests/unit/test_feature_flags_example.py - Usage examples and patterns
             </components_implemented>
             <decorator_patterns>
                 @feature_flag("feature_name") - Skip tests if feature not enabled
@@ -683,9 +710,9 @@
                 Call service factories directly in WebSocket handlers
             </solution>
             <files_affected>
-                <file>app/routes/demo.py</file>
-                <file>app/routes/websockets.py</file>
-                <file>tests/unified/e2e/test_websocket_db_session_handling.py</file>
+                <file>netra_backend/app/routes/demo.py</file>
+                <file>netra_backend/app/routes/websockets.py</file>
+                <file>netra_backend/tests/unified/e2e/test_websocket_db_session_handling.py</file>
             </files_affected>
             <verification>WebSocket DB session tests validate correct patterns</verification>
         </learning>
@@ -702,7 +729,7 @@
                 pytest-asyncio is installed but decorator comes from pytest
             </solution>
             <files_affected>
-                <file>tests/unified/e2e/test_oauth_proxy_staging.py</file>
+                <file>netra_backend/tests/unified/e2e/test_oauth_proxy_staging.py</file>
             </files_affected>
             <verification>OAuth proxy tests now run without import errors</verification>
         </learning>
@@ -721,8 +748,8 @@
                 Factory pattern allows gradual migration from old approach
             </solution>
             <files_affected>
-                <file>tests/unified/dev_launcher_real_system.py</file>
-                <file>tests/unified/real_services_manager.py</file>
+                <file>netra_backend/tests/unified/dev_launcher_real_system.py</file>
+                <file>netra_backend/tests/unified/real_services_manager.py</file>
             </files_affected>
             <verification>Services start reliably with proper health checking</verification>
         </learning>
@@ -741,8 +768,8 @@
                 Tests should be self-contained with their own data setup
             </solution>
             <files_affected>
-                <file>tests/unified/e2e/test_websocket_event_completeness.py</file>
-                <file>tests/unified/e2e/test_cross_service_session_sync.py</file>
+                <file>netra_backend/tests/unified/e2e/test_websocket_event_completeness.py</file>
+                <file>netra_backend/tests/unified/e2e/test_cross_service_session_sync.py</file>
             </files_affected>
             <verification>Tests pass when database properly seeded with test users</verification>
         </learning>

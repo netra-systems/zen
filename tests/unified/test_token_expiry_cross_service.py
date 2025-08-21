@@ -14,8 +14,8 @@ import pytest
 import websockets
 from datetime import datetime, timedelta, timezone
 
-from .jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from .test_harness import UnifiedTestHarness
+from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 @pytest.fixture

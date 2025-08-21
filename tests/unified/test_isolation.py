@@ -33,10 +33,10 @@ os.environ["clickhouse-default-password"] = "test-clickhouse-password"
 
 # Mock complex imports to avoid configuration issues
 try:
-    from app.tests.isolated_test_config import isolated_full_stack
-    from app.agents.state import AgentMetadata
-    from app.core.error_types import NetraException, ErrorCode
-    from app.logging_config import central_logger
+    from netra_backend.app.tests.isolated_test_config import isolated_full_stack
+    from netra_backend.app.agents.state import AgentMetadata
+    from netra_backend.app.core.error_types import NetraException, ErrorCode
+    from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     IMPORTS_AVAILABLE = True
 except ImportError:

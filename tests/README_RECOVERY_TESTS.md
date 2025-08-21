@@ -170,7 +170,7 @@ python -m pytest tests/test_unified_recovery_simple.py::TestIntegratedRecoverySc
 
 ### Live Recovery Validation
 ```bash
-python -c "from tests.test_unified_recovery_simple import *; import asyncio; asyncio.run(comprehensive_recovery_test())"
+python -c "from netra_backend.tests.test_unified_recovery_simple import *; import asyncio; asyncio.run(comprehensive_recovery_test())"
 ```
 
 ## Business Value Justification (BVJ)

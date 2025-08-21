@@ -9,13 +9,12 @@ from unittest.mock import Mock, AsyncMock, patch
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 from starlette.responses import Response
-from app.core.middleware_setup import CustomCORSMiddleware, setup_cors_middleware
+from netra_backend.app.core.middleware_setup import CustomCORSMiddleware, setup_cors_middleware
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
 from dev_launcher.launcher import DevLauncher
 from datetime import datetime
 from dev_launcher.config import LauncherConfig
-import os
 import os
 
 

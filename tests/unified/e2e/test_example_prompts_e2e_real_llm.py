@@ -17,6 +17,11 @@ ARCHITECTURAL COMPLIANCE:
 - Complete workflow testing from triage to reporting
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import asyncio
 import os
 import time
@@ -25,9 +30,9 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
-from app.schemas.UserPlan import PlanTier
-from app.schemas.agent_requests import AgentRequest
-from .agent_conversation_helpers import (
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.Agent import AgentRequest
+from netra_backend.agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowValidator,
     AgentConversationTestUtils
@@ -301,7 +306,7 @@ class TestExamplePromptsE2ERealLLM:
         """Execute individual agent step."""
         if use_real_llm:
             # Real LLM execution
-            from app.llm.llm_manager import LLMManager
+            from netra_backend.app.llm.llm_manager import LLMManager
             llm_manager = LLMManager()
             
             prompt = self._build_agent_prompt(agent_name, workflow_context, workflow_state)

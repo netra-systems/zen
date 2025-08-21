@@ -13,7 +13,7 @@ from typing import Dict, Any
 
 import aiofiles
 
-from .unified_e2e_harness import UnifiedE2ETestHarness
+from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 
 class FileUploadTestContext:

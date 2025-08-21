@@ -10,7 +10,7 @@ Maintains compatibility with existing test runners and CI/CD pipelines.
 
 import pytest
 import asyncio
-from . import ServiceIndependenceValidator, TEST_TIMEOUT
+from tests.unified.e2e.helpers.service_independence import ServiceIndependenceValidator, TEST_TIMEOUT
 
 
 @pytest.mark.critical

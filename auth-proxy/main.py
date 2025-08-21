@@ -46,7 +46,7 @@ class WildcardCORSMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(WildcardCORSMiddleware)
 
-BACKEND_URL = os.getenv("BACKEND_URL", "https://backend.staging.netrasystems.ai")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://api.staging.netrasystems.ai")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://app.staging.netrasystems.ai")
 
 # Simplified Health Interface for Auth Proxy

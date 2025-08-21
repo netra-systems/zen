@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import asyncio
 from typing import Dict, Any, Optional
 import httpx
-from .real_client_types import ConnectionMetrics, ClientConfig
+from tests.unified.real_client_types import ConnectionMetrics, ClientConfig
 
 
 class RealHTTPClient:

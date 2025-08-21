@@ -40,12 +40,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-from tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_client_types import create_auth_config, create_backend_config
+from netra_backend.tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
+from netra_backend.tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
+from netra_backend.tests.unified.real_http_client import RealHTTPClient
+from netra_backend.tests.unified.real_client_types import create_auth_config, create_backend_config
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

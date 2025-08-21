@@ -203,5 +203,4 @@ async def run_health_cascade_unit_tests():
 
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(run_health_cascade_unit_tests())

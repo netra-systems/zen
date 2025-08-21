@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="testing" subcategory="environment">
+    <metadata>
+        <created>2025-08-21</created>
+        <impact>high</impact>
+        <systems>testing, environment, windows</systems>
+    </metadata>
+
+    <learning id="windows-path-issues">
+        <title>Windows-specific path and environment issues</title>
+        <problem>
+            Multiple Windows-specific issues affecting test execution:
+            1. PYTHONPATH not expanding with %PYTHONPATH% syntax
+            2. Bash commands need proper quoting for Windows paths
+            3. Mixed Python environments (conda vs system)
+        </problem>
+        <solutions>
+            <pythonpath>
+                Use explicit set command:
+                set PYTHONPATH=C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+            </pythonpath>
+            <path_quoting>
+                Always quote paths with spaces:
+                cd "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1"
+            </path_quoting>
+            <python_env>
+                Prefer single Python environment, avoid mixing conda and pip
+            </python_env>
+        </solutions>
+    </learning>
+
+    <learning id="test-runner-execution">
+        <title>Test runner module execution patterns</title>
+        <problem>
+            test_framework.test_runner fails with:
+            - ModuleNotFoundError when using -m flag
+            - Import error when running directly
+        </problem>
+        <root_cause>
+            Test runner needs proper PYTHONPATH configuration for
+            absolute imports to work correctly
+        </root_cause>
+        <working_patterns>
+            From app directory:
+            - python -m pytest tests/ (works)
+            - python scripts/test_backend.py (works)
+            - python -m test_framework.test_runner (fails)
+        </working_patterns>
+    </learning>
+
+    <learning id="loguru-cleanup-errors">
+        <title>Loguru handler cleanup errors are non-fatal</title>
+        <observation>
+            Frequent "I/O operation on closed file" errors from Loguru
+            at test cleanup, but these don't affect test results
+        </observation>
+        <error_pattern>
+            ```
+            --- Logging error in Loguru Handler #11 ---
+            ValueError: I/O operation on closed file.
+            ```
+        </error_pattern>
+        <impact>
+            Cosmetic issue only - tests still run and report correctly
+        </impact>
+    </learning>
+
+    <learning id="test-size-violations">
+        <title>Many tests exceed size limits</title>
+        <discovery>
+            2804 test size violations found:
+            - 791 files exceeding 450-line limit
+            - 2013 functions exceeding 25-line limit
+        </discovery>
+        <worst_offenders>
+            - test_websocket_auth_cold_start_extended_l3.py: 3035 lines
+            - test_security_breach_response_l4.py: 2051 lines
+            - test_service_mesh_l4.py: 1594 lines
+        </worst_offenders>
+        <spec_requirement>
+            Per SPEC/testing.xml:
+            - Test files: 300 lines maximum
+            - Test functions: 8 lines maximum
+        </spec_requirement>
+        <impact>
+            Tests run despite violations but should be refactored
+        </impact>
+    </learning>
+
+    <learning id="deprecation-warnings">
+        <title>Multiple deprecation warnings in codebase</title>
+        <warnings>
+            1. Pydantic V1 @validator deprecated (use @field_validator)
+            2. datetime.utcnow() deprecated (use datetime.now(UTC))
+            3. Various package version conflicts
+        </warnings>
+        <locations>
+            - schemas/auth_types.py: Pydantic validators
+            - agents/base/monitoring.py: datetime.utcnow()
+        </locations>
+        <action>
+            Update to modern patterns to avoid deprecation
+        </action>
+    </learning>
+
+    <learning id="package-conflicts">
+        <title>Package dependency conflicts</title>
+        <conflicts>
+            - google-generativeai wants older google-ai-generativelanguage
+            - gradio wants older markupsafe and pillow
+            - gradio-client wants older websockets
+        </conflicts>
+        <resolution>
+            These conflicts exist but don't prevent operation.
+            Consider updating requirements.txt for consistency
+        </resolution>
+    </learning>
+
+    <learning id="test-collection-imports">
+        <title>Test collection triggers all imports</title>
+        <behavior>
+            When pytest collects tests, it imports all test modules
+            which triggers initialization of app configuration,
+            database connections, and logging
+        </behavior>
+        <output_pattern>
+            ```
+            Loaded .env file...
+            Loaded .env.development file...
+            Created testing configuration
+            PostgreSQL async engine created...
+            ```
+        </output_pattern>
+        <implication>
+            Import errors prevent any tests from running,
+            even if the error is in an unrelated test file
+        </implication>
+    </learning>
+
+    <learning id="mock-vs-real-services">
+        <title>Tests marked to avoid real services</title>
+        <marker>
+            pytest mark "not real_services" used to skip tests
+            requiring actual LLM or external service calls
+        </marker>
+        <usage>
+            Default test command includes: -m "not real_services"
+            This skips expensive external API calls
+        </usage>
+    </learning>
+
+    <learning id="fix-automation-patterns">
+        <title>Bulk fix patterns for test issues</title>
+        <pattern name="import_fixer">
+            ```python
+            # Fix imports in all test files
+            replacements = [
+                (r'^from app\.db\.', 'from db.'),
+                (r'^from app\.core\.', 'from core.'),
+                (r'^from app\.', 'from '),
+            ]
+            for pattern, replacement in replacements:
+                content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
+            ```
+        </pattern>
+        <pattern name="url_fixer">
+            ```python
+            # Fix auth URLs
+            content = re.sub(r'/api/v1/auth/', '/auth/', content)
+            ```
+        </pattern>
+        <effectiveness>
+            Automated fixes successfully updated 238+ test files
+        </effectiveness>
+    </learning>
+
+    <summary>
+        Test environment key fixes:
+        1. Set PYTHONPATH explicitly on Windows
+        2. Run tests from app directory with proper imports
+        3. Ignore Loguru cleanup errors (cosmetic)
+        4. Address test size violations (technical debt)
+        5. Update deprecated patterns (Pydantic, datetime)
+        6. Use -m "not real_services" to skip external calls
+        7. Automate bulk fixes with Python scripts
+        8. Handle import errors before test collection
+    </summary>
+</learnings>

@@ -24,13 +24,13 @@ import pytest
 from typing import Dict, Any, List
 from datetime import datetime, UTC
 
-from tests.unified.health_check_core import (
+from netra_backend.tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
     create_healthy_result, create_service_error_result,
     calculate_overall_health_score, get_critical_services
 )
-from tests.unified.health_service_checker import ServiceHealthChecker
-from app.logging_config import central_logger
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -228,7 +228,7 @@ class ServiceHealthMonitor:
         """Check PostgreSQL database dependency."""
         try:
             # Import here to avoid circular imports
-            from app.db.postgres import async_engine
+            from netra_backend.app.db.postgres import async_engine
             from sqlalchemy import text
             
             async with async_engine.begin() as conn:
@@ -244,7 +244,7 @@ class ServiceHealthMonitor:
     async def _check_clickhouse_dependency(self, start_time: float) -> HealthCheckResult:
         """Check ClickHouse database dependency."""
         try:
-            from app.db.clickhouse import get_clickhouse_client
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
             
             async with get_clickhouse_client() as client:
                 client.ping()

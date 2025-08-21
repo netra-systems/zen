@@ -22,12 +22,12 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 import pytest
 import asyncio
 from datetime import datetime
-from tests.unified.database_sync_fixtures import (
+from netra_backend.tests.unified.database_sync_fixtures import (
     DatabaseSyncValidator,
     create_test_user_data,
     create_eventual_consistency_user
 )
-from tests.unified.database_sync_helpers import (
+from netra_backend.tests.unified.database_sync_helpers import (
     sync_user_to_backend,
     insert_user_creation_event,
     verify_sync_consistency,

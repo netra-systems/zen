@@ -18,7 +18,7 @@ import secrets
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 
-from .auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 async def create_test_user_session(auth_tester) -> Dict:

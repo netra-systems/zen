@@ -1,180 +1,174 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>DataSubAgent Enhancement Specification</name>
-        <type>agent_enhancement</type>
-        <version>2.0</version>
-        <created>2025-08-10</created>
-        <priority>critical</priority>
-        <ai_agent_metadata>
-            <agent_id>claude-opus-4-1-20250805</agent_id>
-            <session_id>data-agent-enhancement-session</session_id>
-            <modification_type>major_enhancement</modification_type>
-        </ai_agent_metadata>
-    </metadata>
-    
-    <primary_spec>
-        <description>Transform DataSubAgent from LLM-only to real data-driven agent with ClickHouse integration</description>
-        <goals>
-            <goal priority="critical">Connect directly to ClickHouse for time-series workload data</goal>
-            <goal priority="critical">Implement real-time data aggregation and analytics</goal>
-            <goal priority="high">Enable pattern detection and anomaly analysis</goal>
-            <goal priority="high">Provide quantifiable metrics with statistical analysis</goal>
-            <goal priority="medium">Implement caching for frequently accessed data</goal>
-            <goal priority="medium">Support multi-dimensional data analysis</goal>
-        </goals>
-    </primary_spec>
-    
-    <current_limitations>
-        <limitation>No actual database connections - relies entirely on LLM responses</limitation>
-        <limitation>Cannot fetch real workload events from ClickHouse</limitation>
-        <limitation>No statistical analysis capabilities</limitation>
-        <limitation>No caching or performance optimization</limitation>
-        <limitation>Cannot correlate data across different sources</limitation>
-        <limitation>No time-series analysis capabilities</limitation>
-    </current_limitations>
-    
-    <architecture>
-        <component id="data_sources">
-            <title>Data Source Integration</title>
-            <sources>
-                <source name="clickhouse" priority="primary">
-                    <tables>
-                        <table>workload_events - Time-series event data</table>
-                        <table>aggregated_metrics - Pre-aggregated metrics</table>
-                        <table>user_activity - User activity patterns</table>
-                    </tables>
-                    <capabilities>
-                        <capability>Time-series queries with window functions</capability>
-                        <capability>Aggregation pipelines</capability>
-                        <capability>Pattern matching with regex</capability>
-                        <capability>Statistical functions (quantiles, stddev, correlation)</capability>
-                    </capabilities>
-                </source>
-                <source name="postgresql" priority="secondary">
-                    <tables>
-                        <table>supply_catalog - Model configurations and pricing</table>
-                        <table>threads - Conversation history</table>
-                        <table>agent_reports - Previous analysis results</table>
-                    </tables>
-                </source>
-                <source name="redis" priority="cache">
-                    <purpose>Cache frequently accessed metrics and aggregations</purpose>
-                    <ttl>300 seconds for real-time metrics</ttl>
-                    <ttl>3600 seconds for historical aggregations</ttl>
-                </source>
-            </sources>
-        </component>
-        
-        <component id="query_engine">
-            <title>Intelligent Query Engine</title>
-            <features>
-                <feature>Dynamic query generation based on request context</feature>
-                <feature>Query optimization with proper indexing</feature>
-                <feature>Parallel query execution for multiple metrics</feature>
-                <feature>Adaptive sampling for large datasets</feature>
-                <feature>Query result caching with invalidation</feature>
-            </features>
-        </component>
-        
-        <component id="analytics_pipeline">
-            <title>Analytics Pipeline</title>
-            <stages>
-                <stage order="1">Data Collection - Fetch raw events from ClickHouse</stage>
-                <stage order="2">Data Cleaning - Handle nulls, outliers, duplicates</stage>
-                <stage order="3">Feature Engineering - Calculate derived metrics</stage>
-                <stage order="4">Statistical Analysis - Mean, median, percentiles, std deviation</stage>
-                <stage order="5">Pattern Detection - Identify trends, seasonality, anomalies</stage>
-                <stage order="6">Correlation Analysis - Find relationships between metrics</stage>
-                <stage order="7">Predictive Modeling - Forecast future trends</stage>
-            </stages>
-        </component>
-    </architecture>
-    
-    <implementation>
-        <class_structure>
-            <imports>
-                <import>from app.db.clickhouse import get_clickhouse_client</import>
-                <import>from app.db.postgres import get_session</import>
-                <import>from app.redis_manager import get_redis_client</import>
-                <import>import numpy as np</import>
-                <import>import pandas as pd</import>
-                <import>from typing import Dict, List, Optional, Any</import>
-                <import>from datetime import datetime, timedelta</import>
-                <import>import asyncio</import>
-                <import>from functools import lru_cache</import>
-            </imports>
-            
-            <class name="DataSubAgent">
-                <attributes>
-                    <attribute>clickhouse_client: ClickHouseDatabase</attribute>
-                    <attribute>postgres_session: AsyncSession</attribute>
-                    <attribute>redis_client: Redis</attribute>
-                    <attribute>query_builder: QueryBuilder</attribute>
-                    <attribute>metrics_calculator: MetricsCalculator</attribute>
-                    <attribute>pattern_detector: PatternDetector</attribute>
-                    <attribute>cache_manager: CacheManager</attribute>
-                </attributes>
-                
-                <methods>
-                    <method name="fetch_workload_events">
-                        <description>Fetch time-series workload events from ClickHouse</description>
-                        <parameters>
-                            <param>user_id: int</param>
-                            <param>workload_id: Optional[str]</param>
-                            <param>time_range: Dict[str, datetime]</param>
-                            <param>event_types: Optional[List[str]]</param>
-                            <param>aggregation_level: str = "minute"</param>
-                        </parameters>
-                        <returns>pd.DataFrame</returns>
-                    </method>
-                    
-                    <method name="calculate_performance_metrics">
-                        <description>Calculate detailed performance metrics</description>
-                        <metrics>
-                            <metric>latency_p50, p95, p99</metric>
-                            <metric>throughput_avg, peak</metric>
-                            <metric>error_rate</metric>
-                            <metric>cost_per_request</metric>
-                            <metric>resource_utilization</metric>
-                        </metrics>
-                    </method>
-                    
-                    <method name="detect_anomalies">
-                        <description>Identify anomalies using statistical methods</description>
-                        <algorithms>
-                            <algorithm>Z-score for outlier detection</algorithm>
-                            <algorithm>Moving average for trend deviation</algorithm>
-                            <algorithm>Isolation Forest for multivariate anomalies</algorithm>
-                        </algorithms>
-                    </method>
-                    
-                    <method name="analyze_patterns">
-                        <description>Analyze patterns in workload data</description>
-                        <patterns>
-                            <pattern>Hourly/Daily/Weekly seasonality</pattern>
-                            <pattern>Peak usage times</pattern>
-                            <pattern>Growth trends</pattern>
-                            <pattern>Correlation patterns</pattern>
-                        </patterns>
-                    </method>
-                    
-                    <method name="generate_insights">
-                        <description>Generate actionable insights from data</description>
-                        <insights>
-                            <insight>Cost optimization opportunities</insight>
-                            <insight>Performance bottlenecks</insight>
-                            <insight>Capacity planning recommendations</insight>
-                            <insight>Model selection guidance</insight>
-                        </insights>
-                    </method>
-                </methods>
-            </class>
-        </class_structure>
-        
-        <query_templates>
-            <template name="performance_metrics">
-                <sql><![CDATA[
+  <metadata>
+    <name>DataSubAgent Enhancement Specification</name>
+    <type>agent_enhancement</type>
+    <version>2.0</version>
+    <created>2025-08-10</created>
+    <priority>critical</priority>
+    <ai_agent_metadata>
+      <agent_id>claude-opus-4-1-20250805</agent_id>
+      <session_id>data-agent-enhancement-session</session_id>
+      <modification_type>major_enhancement</modification_type>
+    </ai_agent_metadata>
+    <last_edited>2025-08-21T08:47:28.418385</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.418385">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <primary_spec>
+    <description>Transform DataSubAgent from LLM-only to real data-driven agent with ClickHouse integration</description>
+    <goals>
+      <goal priority="critical">Connect directly to ClickHouse for time-series workload data</goal>
+      <goal priority="critical">Implement real-time data aggregation and analytics</goal>
+      <goal priority="high">Enable pattern detection and anomaly analysis</goal>
+      <goal priority="high">Provide quantifiable metrics with statistical analysis</goal>
+      <goal priority="medium">Implement caching for frequently accessed data</goal>
+      <goal priority="medium">Support multi-dimensional data analysis</goal>
+    </goals>
+  </primary_spec>
+  <current_limitations>
+    <limitation>No actual database connections - relies entirely on LLM responses</limitation>
+    <limitation>Cannot fetch real workload events from ClickHouse</limitation>
+    <limitation>No statistical analysis capabilities</limitation>
+    <limitation>No caching or performance optimization</limitation>
+    <limitation>Cannot correlate data across different sources</limitation>
+    <limitation>No time-series analysis capabilities</limitation>
+  </current_limitations>
+  <architecture>
+    <component id="data_sources">
+      <title>Data Source Integration</title>
+      <sources>
+        <source name="clickhouse" priority="primary">
+          <tables>
+            <table>workload_events - Time-series event data</table>
+            <table>aggregated_metrics - Pre-aggregated metrics</table>
+            <table>user_activity - User activity patterns</table>
+          </tables>
+          <capabilities>
+            <capability>Time-series queries with window functions</capability>
+            <capability>Aggregation pipelines</capability>
+            <capability>Pattern matching with regex</capability>
+            <capability>Statistical functions (quantiles, stddev, correlation)</capability>
+          </capabilities>
+        </source>
+        <source name="postgresql" priority="secondary">
+          <tables>
+            <table>supply_catalog - Model configurations and pricing</table>
+            <table>threads - Conversation history</table>
+            <table>agent_reports - Previous analysis results</table>
+          </tables>
+        </source>
+        <source name="redis" priority="cache">
+          <purpose>Cache frequently accessed metrics and aggregations</purpose>
+          <ttl>300 seconds for real-time metrics</ttl>
+          <ttl>3600 seconds for historical aggregations</ttl>
+        </source>
+      </sources>
+    </component>
+    <component id="query_engine">
+      <title>Intelligent Query Engine</title>
+      <features>
+        <feature>Dynamic query generation based on request context</feature>
+        <feature>Query optimization with proper indexing</feature>
+        <feature>Parallel query execution for multiple metrics</feature>
+        <feature>Adaptive sampling for large datasets</feature>
+        <feature>Query result caching with invalidation</feature>
+      </features>
+    </component>
+    <component id="analytics_pipeline">
+      <title>Analytics Pipeline</title>
+      <stages>
+        <stage order="1">Data Collection - Fetch raw events from ClickHouse</stage>
+        <stage order="2">Data Cleaning - Handle nulls, outliers, duplicates</stage>
+        <stage order="3">Feature Engineering - Calculate derived metrics</stage>
+        <stage order="4">Statistical Analysis - Mean, median, percentiles, std deviation</stage>
+        <stage order="5">Pattern Detection - Identify trends, seasonality, anomalies</stage>
+        <stage order="6">Correlation Analysis - Find relationships between metrics</stage>
+        <stage order="7">Predictive Modeling - Forecast future trends</stage>
+      </stages>
+    </component>
+  </architecture>
+  <implementation>
+    <class_structure>
+      <imports>
+        <import>from netra_backend.app.db.clickhouse import get_clickhouse_client</import>
+        <import>from netra_backend.app.db.postgres import get_session</import>
+        <import>from netra_backend.app.redis_manager import get_redis_client</import>
+        <import>import numpy as np</import>
+        <import>import pandas as pd</import>
+        <import>from typing import Dict, List, Optional, Any</import>
+        <import>from datetime import datetime, timedelta</import>
+        <import>import asyncio</import>
+        <import>from functools import lru_cache</import>
+      </imports>
+      <class name="DataSubAgent">
+        <attributes>
+          <attribute>clickhouse_client: ClickHouseDatabase</attribute>
+          <attribute>postgres_session: AsyncSession</attribute>
+          <attribute>redis_client: Redis</attribute>
+          <attribute>query_builder: QueryBuilder</attribute>
+          <attribute>metrics_calculator: MetricsCalculator</attribute>
+          <attribute>pattern_detector: PatternDetector</attribute>
+          <attribute>cache_manager: CacheManager</attribute>
+        </attributes>
+        <methods>
+          <method name="fetch_workload_events">
+            <description>Fetch time-series workload events from ClickHouse</description>
+            <parameters>
+              <param>user_id: int</param>
+              <param>workload_id: Optional[str]</param>
+              <param>time_range: Dict[str, datetime]</param>
+              <param>event_types: Optional[List[str]]</param>
+              <param>aggregation_level: str = "minute"</param>
+            </parameters>
+            <returns>pd.DataFrame</returns>
+          </method>
+          <method name="calculate_performance_metrics">
+            <description>Calculate detailed performance metrics</description>
+            <metrics>
+              <metric>latency_p50, p95, p99</metric>
+              <metric>throughput_avg, peak</metric>
+              <metric>error_rate</metric>
+              <metric>cost_per_request</metric>
+              <metric>resource_utilization</metric>
+            </metrics>
+          </method>
+          <method name="detect_anomalies">
+            <description>Identify anomalies using statistical methods</description>
+            <algorithms>
+              <algorithm>Z-score for outlier detection</algorithm>
+              <algorithm>Moving average for trend deviation</algorithm>
+              <algorithm>Isolation Forest for multivariate anomalies</algorithm>
+            </algorithms>
+          </method>
+          <method name="analyze_patterns">
+            <description>Analyze patterns in workload data</description>
+            <patterns>
+              <pattern>Hourly/Daily/Weekly seasonality</pattern>
+              <pattern>Peak usage times</pattern>
+              <pattern>Growth trends</pattern>
+              <pattern>Correlation patterns</pattern>
+            </patterns>
+          </method>
+          <method name="generate_insights">
+            <description>Generate actionable insights from data</description>
+            <insights>
+              <insight>Cost optimization opportunities</insight>
+              <insight>Performance bottlenecks</insight>
+              <insight>Capacity planning recommendations</insight>
+              <insight>Model selection guidance</insight>
+            </insights>
+          </method>
+        </methods>
+      </class>
+    </class_structure>
+    <query_templates>
+      <template name="performance_metrics">
+        <sql>
                 SELECT
                     toStartOfMinute(timestamp) as minute,
                     quantile(0.5)(metrics.value[indexOf(metrics.name, 'latency_ms')]) as latency_p50,
@@ -186,24 +180,23 @@
                     sum(metrics.value[indexOf(metrics.name, 'cost_cents')]) / 100.0 as total_cost
                 FROM workload_events
                 WHERE user_id = {user_id}
-                    AND timestamp >= {start_time}
-                    AND timestamp <= {end_time}
+                    AND timestamp &gt;= {start_time}
+                    AND timestamp &lt;= {end_time}
                     AND workload_id = {workload_id}
                 GROUP BY minute
                 ORDER BY minute DESC
-                ]]></sql>
-            </template>
-            
-            <template name="anomaly_detection">
-                <sql><![CDATA[
+                </sql>
+      </template>
+      <template name="anomaly_detection">
+        <sql>
                 WITH stats AS (
                     SELECT
                         avg(metrics.value[indexOf(metrics.name, 'latency_ms')]) as mean_latency,
                         stddevPop(metrics.value[indexOf(metrics.name, 'latency_ms')]) as std_latency
                     FROM workload_events
                     WHERE user_id = {user_id}
-                        AND timestamp >= {start_time} - INTERVAL 7 DAY
-                        AND timestamp <= {end_time}
+                        AND timestamp &gt;= {start_time} - INTERVAL 7 DAY
+                        AND timestamp &lt;= {end_time}
                 )
                 SELECT
                     timestamp,
@@ -211,22 +204,21 @@
                     metrics.value[indexOf(metrics.name, 'latency_ms')] as latency,
                     (latency - stats.mean_latency) / stats.std_latency as z_score,
                     CASE
-                        WHEN abs(z_score) > 3 THEN 'anomaly'
-                        WHEN abs(z_score) > 2 THEN 'warning'
+                        WHEN abs(z_score) &gt; 3 THEN 'anomaly'
+                        WHEN abs(z_score) &gt; 2 THEN 'warning'
                         ELSE 'normal'
                     END as status
                 FROM workload_events, stats
                 WHERE user_id = {user_id}
-                    AND timestamp >= {start_time}
-                    AND timestamp <= {end_time}
-                    AND abs(z_score) > 2
+                    AND timestamp &gt;= {start_time}
+                    AND timestamp &lt;= {end_time}
+                    AND abs(z_score) &gt; 2
                 ORDER BY z_score DESC
                 LIMIT 100
-                ]]></sql>
-            </template>
-            
-            <template name="usage_patterns">
-                <sql><![CDATA[
+                </sql>
+      </template>
+      <template name="usage_patterns">
+        <sql>
                 SELECT
                     toHour(timestamp) as hour_of_day,
                     toDayOfWeek(timestamp) as day_of_week,
@@ -235,314 +227,278 @@
                     sum(metrics.value[indexOf(metrics.name, 'cost_cents')]) / 100.0 as total_cost
                 FROM workload_events
                 WHERE user_id = {user_id}
-                    AND timestamp >= now() - INTERVAL 30 DAY
+                    AND timestamp &gt;= now() - INTERVAL 30 DAY
                 GROUP BY hour_of_day, day_of_week
                 ORDER BY hour_of_day, day_of_week
-                ]]></sql>
-            </template>
-        </query_templates>
-        
-        <tools_integration>
-            <tool name="WorkloadEventsFetcher">
-                <description>Fetch workload events with filtering and aggregation</description>
-                <capabilities>
-                    <capability>Time-range filtering</capability>
-                    <capability>Event type filtering</capability>
-                    <capability>Multi-dimensional aggregation</capability>
-                    <capability>Sampling for large datasets</capability>
-                </capabilities>
-            </tool>
-            
-            <tool name="MetricsAggregator">
-                <description>Aggregate metrics with statistical functions</description>
-                <functions>
-                    <function>Percentiles (p50, p75, p90, p95, p99)</function>
-                    <function>Moving averages</function>
-                    <function>Rate calculations</function>
-                    <function>Cumulative sums</function>
-                </functions>
-            </tool>
-            
-            <tool name="PatternAnalyzer">
-                <description>Analyze patterns and detect anomalies</description>
-                <algorithms>
-                    <algorithm>Seasonal decomposition</algorithm>
-                    <algorithm>Trend analysis</algorithm>
-                    <algorithm>Correlation matrix</algorithm>
-                    <algorithm>Clustering analysis</algorithm>
-                </algorithms>
-            </tool>
-        </tools_integration>
-    </implementation>
-    
-    <data_flow>
-        <step order="1">
-            <name>Request Analysis</name>
-            <actions>
-                <action>Parse triage results for data requirements</action>
-                <action>Identify required metrics and time ranges</action>
-                <action>Determine aggregation levels</action>
-            </actions>
-        </step>
-        
-        <step order="2">
-            <name>Cache Check</name>
-            <actions>
-                <action>Check Redis for cached results</action>
-                <action>Validate cache freshness</action>
-                <action>Return cached data if valid</action>
-            </actions>
-        </step>
-        
-        <step order="3">
-            <name>Query Execution</name>
-            <actions>
-                <action>Build optimized ClickHouse queries</action>
-                <action>Execute queries in parallel</action>
-                <action>Handle query failures with retry logic</action>
-            </actions>
-        </step>
-        
-        <step order="4">
-            <name>Data Processing</name>
-            <actions>
-                <action>Clean and validate data</action>
-                <action>Calculate derived metrics</action>
-                <action>Perform statistical analysis</action>
-            </actions>
-        </step>
-        
-        <step order="5">
-            <name>Pattern Analysis</name>
-            <actions>
-                <action>Detect anomalies</action>
-                <action>Identify trends</action>
-                <action>Find correlations</action>
-            </actions>
-        </step>
-        
-        <step order="6">
-            <name>Insight Generation</name>
-            <actions>
-                <action>Generate actionable insights</action>
-                <action>Prioritize findings</action>
-                <action>Format results for downstream agents</action>
-            </actions>
-        </step>
-        
-        <step order="7">
-            <name>Result Caching</name>
-            <actions>
-                <action>Store results in Redis</action>
-                <action>Set appropriate TTL</action>
-                <action>Update cache metadata</action>
-            </actions>
-        </step>
-    </data_flow>
-    
-    <performance_optimizations>
-        <optimization name="Query Optimization">
-            <techniques>
-                <technique>Use proper ClickHouse indexes</technique>
-                <technique>Leverage materialized views for common aggregations</technique>
-                <technique>Implement query result caching</technique>
-                <technique>Use sampling for exploratory queries</technique>
-            </techniques>
-        </optimization>
-        
-        <optimization name="Parallel Processing">
-            <techniques>
-                <technique>Execute independent queries concurrently</technique>
-                <technique>Use asyncio for I/O operations</technique>
-                <technique>Implement thread pools for CPU-intensive calculations</technique>
-            </techniques>
-        </optimization>
-        
-        <optimization name="Memory Management">
-            <techniques>
-                <technique>Stream large result sets</technique>
-                <technique>Use generators for data processing</technique>
-                <technique>Implement result pagination</technique>
-                <technique>Clear unused DataFrames from memory</technique>
-            </techniques>
-        </optimization>
-    </performance_optimizations>
-    
-    <error_handling>
-        <scenario name="Database Connection Failure">
-            <actions>
-                <action>Retry with exponential backoff</action>
-                <action>Fall back to cached data if available</action>
-                <action>Log detailed error information</action>
-                <action>Return graceful degradation response</action>
-            </actions>
-        </scenario>
-        
-        <scenario name="Query Timeout">
-            <actions>
-                <action>Cancel long-running queries</action>
-                <action>Reduce query scope automatically</action>
-                <action>Use sampling for large datasets</action>
-                <action>Alert monitoring system</action>
-            </actions>
-        </scenario>
-        
-        <scenario name="Invalid Data">
-            <actions>
-                <action>Validate data types and ranges</action>
-                <action>Handle null values appropriately</action>
-                <action>Log data quality issues</action>
-                <action>Apply data cleaning rules</action>
-            </actions>
-        </scenario>
-    </error_handling>
-    
-    <testing_requirements>
-        <test_category name="Unit Tests">
-            <test>Query builder generates correct SQL</test>
-            <test>Metrics calculator produces accurate results</test>
-            <test>Pattern detector identifies known patterns</test>
-            <test>Cache manager handles TTL correctly</test>
-        </test_category>
-        
-        <test_category name="Integration Tests">
-            <test>ClickHouse connection and query execution</test>
-            <test>Redis caching and retrieval</test>
-            <test>PostgreSQL catalog lookups</test>
-            <test>End-to-end data pipeline</test>
-        </test_category>
-        
-        <test_category name="Performance Tests">
-            <test>Query performance under load</test>
-            <test>Memory usage with large datasets</test>
-            <test>Concurrent request handling</test>
-            <test>Cache hit rate optimization</test>
-        </test_category>
-    </testing_requirements>
-    
-    <success_metrics>
-        <metric name="Query Performance">
-            <target>95% of queries complete in under 500ms</target>
-            <measurement>ClickHouse query logs</measurement>
-        </metric>
-        
-        <metric name="Data Accuracy">
-            <target>99.9% accuracy in metric calculations</target>
-            <measurement>Validation against known datasets</measurement>
-        </metric>
-        
-        <metric name="Cache Hit Rate">
-            <target>70% cache hit rate for common queries</target>
-            <measurement>Redis cache statistics</measurement>
-        </metric>
-        
-        <metric name="Insight Quality">
-            <target>80% of insights rated as actionable by users</target>
-            <measurement>User feedback and adoption metrics</measurement>
-        </metric>
-    </success_metrics>
-    
-    <error_handler_modernization>
-        <implementation_date>2025-08-18</implementation_date>
-        <implementation_status>completed</implementation_status>
-        <agent_id>AGT-121</agent_id>
-        
-        <overview>
-            <description>Modernized data_sub_agent/error_handler.py to integrate with ExecutionErrorHandler from base/errors.py</description>
-            <business_value>Reduces data processing errors by 60% through advanced fallback strategies and error classification</business_value>
-            <compliance>File: 235 lines (&lt;300), All 26 functions ≤8 lines</compliance>
-        </overview>
-        
-        <key_improvements>
-            <improvement type="integration">
-                <description>Inherits from ExecutionErrorHandler for unified error management</description>
-                <benefit>Consistent error handling patterns across all agents</benefit>
-            </improvement>
-            
-            <improvement type="classification">
-                <description>Advanced error classification using ErrorClassifier</description>
-                <benefit>Intelligent fallback strategy selection based on error type</benefit>
-            </improvement>
-            
-            <improvement type="recovery">
-                <description>Integrated recovery managers for ClickHouse, data fetching, and metrics</description>
-                <benefit>Automated recovery from common failure scenarios</benefit>
-            </improvement>
-            
-            <improvement type="metrics">
-                <description>Error tracking metrics with success rate calculations</description>
-                <benefit>Monitoring and optimization of error handling performance</benefit>
-            </improvement>
-        </key_improvements>
-        
-        <modernized_components>
-            <component name="DataSubAgentErrorHandler">
-                <parent_class>ExecutionErrorHandler</parent_class>
-                <key_methods>
-                    <method>handle_data_error</method>
-                    <method>get_error_metrics</method>
-                    <method>_classify_data_error</method>
-                    <method>_process_classified_error</method>
-                </key_methods>
-                <recovery_strategies>
-                    <strategy>ClickHouse query recovery with simplified queries</strategy>
-                    <strategy>Data fetching recovery with alternative sources</strategy>
-                    <strategy>Metrics calculation recovery with basic fallbacks</strategy>
-                </recovery_strategies>
-            </component>
-            
-            <component name="DataAnalysisCompensation">
-                <purpose>Compensation strategies for data analysis failures</purpose>
-                <fallback_type>Alternative analysis when primary analysis fails</fallback_type>
-            </component>
-        </modernized_components>
-        
-        <backward_compatibility>
-            <maintained_exports>
-                <export>DataSubAgentError</export>
-                <export>ClickHouseQueryError</export>
-                <export>DataFetchingError</export>
-                <export>MetricsCalculationError</export>
-                <export>ClickHouseRecoveryManager</export>
-                <export>DataFetchingRecoveryManager</export>
-                <export>MetricsRecoveryManager</export>
-                <export>FallbackDataProvider</export>
-                <export>data_sub_agent_error_handler</export>
-            </maintained_exports>
-            <breaking_changes>None - Full backward compatibility maintained</breaking_changes>
-        </backward_compatibility>
-        
-        <architectural_compliance>
-            <file_size>235 lines (under 300 line limit)</file_size>
-            <function_compliance>All 26 functions ≤8 lines</function_compliance>
-            <modular_design>Inherits from base ExecutionErrorHandler, uses existing recovery managers</modular_design>
-            <type_safety>Strong typing with Union types and ExecutionResult interface</type_safety>
-        </architectural_compliance>
-        
-        <error_flow>
-            <step number="1">Error occurs in data sub agent operation</step>
-            <step number="2">handle_data_error() classifies error type</step>
-            <step number="3">Specific recovery method selected based on error type</step>
-            <step number="4">Recovery executed via appropriate recovery manager</step>
-            <step number="5">Success result returned or graceful degradation applied</step>
-            <step number="6">Error metrics updated for monitoring</step>
-        </error_flow>
-        
-        <integration_points>
-            <integration component="ExecutionErrorHandler">Base error handling framework</integration>
-            <integration component="ErrorClassifier">Error classification and categorization</integration>
-            <integration component="ClickHouseRecoveryManager">ClickHouse query failure recovery</integration>
-            <integration component="DataFetchingRecoveryManager">Data source failure recovery</integration>
-            <integration component="MetricsRecoveryManager">Metrics calculation failure recovery</integration>
-            <integration component="FallbackDataProvider">Ultimate fallback data sources</integration>
-        </integration_points>
-        
-        <validation_results>
-            <syntax_check>PASSED - Valid Python syntax</syntax_check>
-            <structure_check>PASSED - All required classes and methods present</structure_check>
-            <import_check>PASSED - All required imports available</import_check>
-            <compliance_check>PASSED - 235 lines, all 26 functions ≤8 lines</compliance_check>
-            <backward_compatibility_check>PASSED - All legacy exports maintained</backward_compatibility_check>
-        </validation_results>
-    </error_handler_modernization>
+                </sql>
+      </template>
+    </query_templates>
+    <tools_integration>
+      <tool name="WorkloadEventsFetcher">
+        <description>Fetch workload events with filtering and aggregation</description>
+        <capabilities>
+          <capability>Time-range filtering</capability>
+          <capability>Event type filtering</capability>
+          <capability>Multi-dimensional aggregation</capability>
+          <capability>Sampling for large datasets</capability>
+        </capabilities>
+      </tool>
+      <tool name="MetricsAggregator">
+        <description>Aggregate metrics with statistical functions</description>
+        <functions>
+          <function>Percentiles (p50, p75, p90, p95, p99)</function>
+          <function>Moving averages</function>
+          <function>Rate calculations</function>
+          <function>Cumulative sums</function>
+        </functions>
+      </tool>
+      <tool name="PatternAnalyzer">
+        <description>Analyze patterns and detect anomalies</description>
+        <algorithms>
+          <algorithm>Seasonal decomposition</algorithm>
+          <algorithm>Trend analysis</algorithm>
+          <algorithm>Correlation matrix</algorithm>
+          <algorithm>Clustering analysis</algorithm>
+        </algorithms>
+      </tool>
+    </tools_integration>
+  </implementation>
+  <data_flow>
+    <step order="1">
+      <name>Request Analysis</name>
+      <actions>
+        <action>Parse triage results for data requirements</action>
+        <action>Identify required metrics and time ranges</action>
+        <action>Determine aggregation levels</action>
+      </actions>
+    </step>
+    <step order="2">
+      <name>Cache Check</name>
+      <actions>
+        <action>Check Redis for cached results</action>
+        <action>Validate cache freshness</action>
+        <action>Return cached data if valid</action>
+      </actions>
+    </step>
+    <step order="3">
+      <name>Query Execution</name>
+      <actions>
+        <action>Build optimized ClickHouse queries</action>
+        <action>Execute queries in parallel</action>
+        <action>Handle query failures with retry logic</action>
+      </actions>
+    </step>
+    <step order="4">
+      <name>Data Processing</name>
+      <actions>
+        <action>Clean and validate data</action>
+        <action>Calculate derived metrics</action>
+        <action>Perform statistical analysis</action>
+      </actions>
+    </step>
+    <step order="5">
+      <name>Pattern Analysis</name>
+      <actions>
+        <action>Detect anomalies</action>
+        <action>Identify trends</action>
+        <action>Find correlations</action>
+      </actions>
+    </step>
+    <step order="6">
+      <name>Insight Generation</name>
+      <actions>
+        <action>Generate actionable insights</action>
+        <action>Prioritize findings</action>
+        <action>Format results for downstream agents</action>
+      </actions>
+    </step>
+    <step order="7">
+      <name>Result Caching</name>
+      <actions>
+        <action>Store results in Redis</action>
+        <action>Set appropriate TTL</action>
+        <action>Update cache metadata</action>
+      </actions>
+    </step>
+  </data_flow>
+  <performance_optimizations>
+    <optimization name="Query Optimization">
+      <techniques>
+        <technique>Use proper ClickHouse indexes</technique>
+        <technique>Leverage materialized views for common aggregations</technique>
+        <technique>Implement query result caching</technique>
+        <technique>Use sampling for exploratory queries</technique>
+      </techniques>
+    </optimization>
+    <optimization name="Parallel Processing">
+      <techniques>
+        <technique>Execute independent queries concurrently</technique>
+        <technique>Use asyncio for I/O operations</technique>
+        <technique>Implement thread pools for CPU-intensive calculations</technique>
+      </techniques>
+    </optimization>
+    <optimization name="Memory Management">
+      <techniques>
+        <technique>Stream large result sets</technique>
+        <technique>Use generators for data processing</technique>
+        <technique>Implement result pagination</technique>
+        <technique>Clear unused DataFrames from memory</technique>
+      </techniques>
+    </optimization>
+  </performance_optimizations>
+  <error_handling>
+    <scenario name="Database Connection Failure">
+      <actions>
+        <action>Retry with exponential backoff</action>
+        <action>Fall back to cached data if available</action>
+        <action>Log detailed error information</action>
+        <action>Return graceful degradation response</action>
+      </actions>
+    </scenario>
+    <scenario name="Query Timeout">
+      <actions>
+        <action>Cancel long-running queries</action>
+        <action>Reduce query scope automatically</action>
+        <action>Use sampling for large datasets</action>
+        <action>Alert monitoring system</action>
+      </actions>
+    </scenario>
+    <scenario name="Invalid Data">
+      <actions>
+        <action>Validate data types and ranges</action>
+        <action>Handle null values appropriately</action>
+        <action>Log data quality issues</action>
+        <action>Apply data cleaning rules</action>
+      </actions>
+    </scenario>
+  </error_handling>
+  <testing_requirements>
+    <test_category name="Unit Tests">
+      <test>Query builder generates correct SQL</test>
+      <test>Metrics calculator produces accurate results</test>
+      <test>Pattern detector identifies known patterns</test>
+      <test>Cache manager handles TTL correctly</test>
+    </test_category>
+    <test_category name="Integration Tests">
+      <test>ClickHouse connection and query execution</test>
+      <test>Redis caching and retrieval</test>
+      <test>PostgreSQL catalog lookups</test>
+      <test>End-to-end data pipeline</test>
+    </test_category>
+    <test_category name="Performance Tests">
+      <test>Query performance under load</test>
+      <test>Memory usage with large datasets</test>
+      <test>Concurrent request handling</test>
+      <test>Cache hit rate optimization</test>
+    </test_category>
+  </testing_requirements>
+  <success_metrics>
+    <metric name="Query Performance">
+      <target>95% of queries complete in under 500ms</target>
+      <measurement>ClickHouse query logs</measurement>
+    </metric>
+    <metric name="Data Accuracy">
+      <target>99.9% accuracy in metric calculations</target>
+      <measurement>Validation against known datasets</measurement>
+    </metric>
+    <metric name="Cache Hit Rate">
+      <target>70% cache hit rate for common queries</target>
+      <measurement>Redis cache statistics</measurement>
+    </metric>
+    <metric name="Insight Quality">
+      <target>80% of insights rated as actionable by users</target>
+      <measurement>User feedback and adoption metrics</measurement>
+    </metric>
+  </success_metrics>
+  <error_handler_modernization>
+    <implementation_date>2025-08-18</implementation_date>
+    <implementation_status>completed</implementation_status>
+    <agent_id>AGT-121</agent_id>
+    <overview>
+      <description>Modernized data_sub_agent/error_handler.py to integrate with ExecutionErrorHandler from base/errors.py</description>
+      <business_value>Reduces data processing errors by 60% through advanced fallback strategies and error classification</business_value>
+      <compliance>File: 235 lines (&lt;300), All 26 functions ≤8 lines</compliance>
+    </overview>
+    <key_improvements>
+      <improvement type="integration">
+        <description>Inherits from ExecutionErrorHandler for unified error management</description>
+        <benefit>Consistent error handling patterns across all agents</benefit>
+      </improvement>
+      <improvement type="classification">
+        <description>Advanced error classification using ErrorClassifier</description>
+        <benefit>Intelligent fallback strategy selection based on error type</benefit>
+      </improvement>
+      <improvement type="recovery">
+        <description>Integrated recovery managers for ClickHouse, data fetching, and metrics</description>
+        <benefit>Automated recovery from common failure scenarios</benefit>
+      </improvement>
+      <improvement type="metrics">
+        <description>Error tracking metrics with success rate calculations</description>
+        <benefit>Monitoring and optimization of error handling performance</benefit>
+      </improvement>
+    </key_improvements>
+    <modernized_components>
+      <component name="DataSubAgentErrorHandler">
+        <parent_class>ExecutionErrorHandler</parent_class>
+        <key_methods>
+          <method>handle_data_error</method>
+          <method>get_error_metrics</method>
+          <method>_classify_data_error</method>
+          <method>_process_classified_error</method>
+        </key_methods>
+        <recovery_strategies>
+          <strategy>ClickHouse query recovery with simplified queries</strategy>
+          <strategy>Data fetching recovery with alternative sources</strategy>
+          <strategy>Metrics calculation recovery with basic fallbacks</strategy>
+        </recovery_strategies>
+      </component>
+      <component name="DataAnalysisCompensation">
+        <purpose>Compensation strategies for data analysis failures</purpose>
+        <fallback_type>Alternative analysis when primary analysis fails</fallback_type>
+      </component>
+    </modernized_components>
+    <backward_compatibility>
+      <maintained_exports>
+        <export>DataSubAgentError</export>
+        <export>ClickHouseQueryError</export>
+        <export>DataFetchingError</export>
+        <export>MetricsCalculationError</export>
+        <export>ClickHouseRecoveryManager</export>
+        <export>DataFetchingRecoveryManager</export>
+        <export>MetricsRecoveryManager</export>
+        <export>FallbackDataProvider</export>
+        <export>data_sub_agent_error_handler</export>
+      </maintained_exports>
+      <breaking_changes>None - Full backward compatibility maintained</breaking_changes>
+    </backward_compatibility>
+    <architectural_compliance>
+      <file_size>235 lines (under 300 line limit)</file_size>
+      <function_compliance>All 26 functions ≤8 lines</function_compliance>
+      <modular_design>Inherits from base ExecutionErrorHandler, uses existing recovery managers</modular_design>
+      <type_safety>Strong typing with Union types and ExecutionResult interface</type_safety>
+    </architectural_compliance>
+    <error_flow>
+      <step number="1">Error occurs in data sub agent operation</step>
+      <step number="2">handle_data_error() classifies error type</step>
+      <step number="3">Specific recovery method selected based on error type</step>
+      <step number="4">Recovery executed via appropriate recovery manager</step>
+      <step number="5">Success result returned or graceful degradation applied</step>
+      <step number="6">Error metrics updated for monitoring</step>
+    </error_flow>
+    <integration_points>
+      <integration component="ExecutionErrorHandler">Base error handling framework</integration>
+      <integration component="ErrorClassifier">Error classification and categorization</integration>
+      <integration component="ClickHouseRecoveryManager">ClickHouse query failure recovery</integration>
+      <integration component="DataFetchingRecoveryManager">Data source failure recovery</integration>
+      <integration component="MetricsRecoveryManager">Metrics calculation failure recovery</integration>
+      <integration component="FallbackDataProvider">Ultimate fallback data sources</integration>
+    </integration_points>
+    <validation_results>
+      <syntax_check>PASSED - Valid Python syntax</syntax_check>
+      <structure_check>PASSED - All required classes and methods present</structure_check>
+      <import_check>PASSED - All required imports available</import_check>
+      <compliance_check>PASSED - 235 lines, all 26 functions ≤8 lines</compliance_check>
+      <backward_compatibility_check>PASSED - All legacy exports maintained</backward_compatibility_check>
+    </validation_results>
+  </error_handler_modernization>
 </specification>

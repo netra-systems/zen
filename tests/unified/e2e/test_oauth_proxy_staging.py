@@ -40,10 +40,10 @@ from contextlib import asynccontextmanager
 import httpx
 import urllib.parse
 
-from ..oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
-from ..real_services_manager import create_real_services_manager  
-from ..real_http_client import RealHTTPClient
-from app.logging_config import central_logger
+from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
+from tests.unified.real_services_manager import create_real_services_manager
+from tests.unified.real_http_client import RealHTTPClient
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

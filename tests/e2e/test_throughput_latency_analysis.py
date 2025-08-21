@@ -17,7 +17,7 @@ import logging
 import statistics
 from typing import Dict, List
 
-from tests.e2e.test_helpers.throughput_helpers import (
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
     LatencyMeasurement, analyze_latency_distribution, E2E_TEST_CONFIG
 )
 

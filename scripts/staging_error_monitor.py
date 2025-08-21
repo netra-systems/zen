@@ -24,8 +24,8 @@ from loguru import logger
 
 # Import existing monitoring infrastructure
 sys.path.append(str(Path(__file__).parent.parent))
-from app.services.monitoring.gcp_error_service import GCPErrorService
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
+from netra_backend.app.schemas.monitoring_schemas import (
     GCPErrorServiceConfig, GCPCredentialsConfig, ErrorQuery, 
     ErrorResponse, GCPError, ErrorSeverity, ErrorStatus
 )

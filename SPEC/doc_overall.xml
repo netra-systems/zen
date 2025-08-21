@@ -1,23 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Documentation Overall</name>
-        <type>doc_overall</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <task>
-        <description>Create extensive documentation for new engineers</description>
-        <requirements>
-            <requirement>Explain in multiple levels of detail and abstraction how everything works</requirement>
-            <requirement>Include high level overview</requirement>
-            <requirement>Explain how components flow together</requirement>
-            <requirement>Document hierarchy</requirement>
-            <requirement>Identify mature and developing parts of codebase</requirement>
-        </requirements>
-        <output>
-            <location>New documentation folder</location>
-            <format>Single .md file</format>
-        </output>
-    </task>
+  <metadata>
+    <name>Documentation Overall</name>
+    <type>doc_overall</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.435821</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.435821">
+      <reasons>
+        <reason>Content contains: old</reason>
+        <reason>Likely outdated spec: doc_overall.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <task>
+    <description>Create extensive documentation for new engineers</description>
+    <requirements>
+      <requirement>Explain in multiple levels of detail and abstraction how everything works</requirement>
+      <requirement>Include high level overview</requirement>
+      <requirement>Explain how components flow together</requirement>
+      <requirement>Document hierarchy</requirement>
+      <requirement>Identify mature and developing parts of codebase</requirement>
+    </requirements>
+    <output>
+      <location>New documentation folder</location>
+      <format>Single .md file</format>
+    </output>
+  </task>
 </specification>

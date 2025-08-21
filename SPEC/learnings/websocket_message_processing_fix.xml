@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learning>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.995277</last_edited>
+  </metadata>
   <title>WebSocket Message Processing Fix</title>
   <date>2025-08-18</date>
   <category>websocket</category>
   <severity>critical</severity>
-  
   <problem>
     <description>WebSocket messages were being sent from client but agents were not starting</description>
     <symptoms>
@@ -20,7 +22,6 @@
       4. Null payload fields returned None instead of empty strings
     </root_cause>
   </problem>
-  
   <solution>
     <changes>
       <file path="app/services/agent_service_core.py">
@@ -36,43 +37,38 @@
         <change>Already had critical fix to always forward user messages to agent service</change>
       </file>
     </changes>
-    
     <code_examples>
       <example title="Message type validation">
-        <![CDATA[
+        
         # Validate message type is present
         if not message_type:
             await manager.send_error(user_id, "Message type is required")
             return
-        ]]>
+        
       </example>
-      
       <example title="Unknown message type handling">
-        <![CDATA[
+        
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
         # Send error to user for unknown message type
         await manager.send_error(user_id, f"Unknown message type: {message_type}")
-        ]]>
+        
       </example>
-      
       <example title="Specific error messages">
-        <![CDATA[
+        
         # Provide more specific error messages based on exception type
         error_message = "Internal server error"
         if isinstance(e, (TypeError, AttributeError)):
             error_message = "Invalid message format or structure"
         elif isinstance(e, KeyError):
             error_message = f"Missing required field: {str(e)}"
-        ]]>
+        
       </example>
     </code_examples>
   </solution>
-  
   <testing>
     <test_file>app/tests/critical/test_websocket_message_regression.py</test_file>
     <test_results>All 23 tests passing after fixes</test_results>
   </testing>
-  
   <prevention>
     <recommendations>
       - Always validate message structure before processing
@@ -82,7 +78,6 @@
       - Test edge cases for message validation
     </recommendations>
   </prevention>
-  
   <business_impact>
     <impact>Critical - Users could not interact with agents</impact>
     <value>Restored core functionality allowing agent interactions</value>

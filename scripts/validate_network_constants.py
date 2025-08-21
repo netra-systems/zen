@@ -21,7 +21,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from app.core.network_constants import (
+    from netra_backend.app.core.network_constants import (
         ServicePorts, HostConstants, DatabaseConstants, 
         URLConstants, ServiceEndpoints, NetworkEnvironmentHelper
     )

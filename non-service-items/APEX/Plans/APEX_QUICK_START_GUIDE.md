@@ -135,7 +135,7 @@ BVJ: [Business Value Justification]
 """
 
 from typing import Optional, List, Dict
-from app.core.exceptions import NetraException
+from netra_backend.app.core.exceptions import NetraException
 
 class YourClass:
     """Single responsibility class."""
@@ -155,7 +155,7 @@ class YourClass:
 ```python
 # app/tests/unit/test_your_module.py
 import pytest
-from app.your_module.your_file import YourClass
+from netra_backend.app.your_module.your_file import YourClass
 
 class TestYourClass:
     def test_your_method_success(self):
@@ -480,7 +480,7 @@ def fetch_data():
 ### Error Handling
 ```python
 # Use NetraException for better error tracking
-from app.core.exceptions import NetraException
+from netra_backend.app.core.exceptions import NetraException
 
 raise NetraException(
     code="CACHE_MISS",

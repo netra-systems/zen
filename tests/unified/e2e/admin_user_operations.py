@@ -17,7 +17,7 @@ import time
 import uuid
 from typing import Dict, Any, List
 
-from .auth_flow_testers import AuthFlowE2ETester
+from tests.unified.e2e.auth_flow_testers import AuthFlowE2ETester
 
 
 class AdminUserOperations:

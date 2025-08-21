@@ -1,5 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <learnings>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.811798</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.811798">
+      <reasons>
+        <reason>Content contains: old</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
   <title>Terraform Database Configuration Root Cause Analysis and Prevention</title>
   <date>2025-08-19</date>
   <severity>CRITICAL</severity>
@@ -7,10 +15,8 @@
     Root cause analysis of database URL mismatch and comprehensive solution for future Terraform deployments.
     The issue stems from manual secret creation with hardcoded values instead of dynamic Terraform-managed configuration.
   </summary>
-  
   <root_cause_analysis>
     <problem>Manual vs Terraform-Managed Configuration Disconnect</problem>
-    
     <finding id="1">
       <title>Secret Created Manually Outside Terraform</title>
       <evidence>
@@ -21,7 +27,6 @@
         Terraform doesn't know about or manage this secret, leading to configuration drift.
       </impact>
     </finding>
-    
     <finding id="2">
       <title>Hardcoded Variable Instead of Dynamic Reference</title>
       <evidence>
@@ -34,7 +39,6 @@
         Connection string must be manually updated when infrastructure changes.
       </impact>
     </finding>
-    
     <finding id="3">
       <title>Multiple Database Instances Causing Confusion</title>
       <evidence>
@@ -46,7 +50,6 @@
         Unclear which instance should be used for which service.
       </impact>
     </finding>
-    
     <finding id="4">
       <title>IP Address 34.68.229.240 Origin Unknown</title>
       <analysis>
@@ -58,13 +61,11 @@
       </analysis>
     </finding>
   </root_cause_analysis>
-  
   <terraform_solution>
     <principle>All infrastructure and secrets must be managed by Terraform with dynamic references</principle>
-    
     <step id="1">
       <title>Create Data Source for Existing Cloud SQL Instance</title>
-      <code><![CDATA[
+      <code>
 # terraform-gcp/data_sources.tf
 data "google_sql_database_instance" "staging_postgres" {
   name    = "netra-postgres-2db4ccab"
@@ -76,12 +77,11 @@ data "google_sql_database" "staging_db" {
   instance = data.google_sql_database_instance.staging_postgres.name
   project  = var.project_id
 }
-      ]]></code>
+      </code>
     </step>
-    
     <step id="2">
       <title>Generate Database URL Dynamically</title>
-      <code><![CDATA[
+      <code>
 # terraform-gcp/locals.tf
 locals {
   # Dynamically construct database URL from actual resources
@@ -93,42 +93,39 @@ locals {
     data.google_sql_database.staging_db.name
   )
 }
-      ]]></code>
+      </code>
     </step>
-    
     <step id="3">
       <title>Update Secret Resource to Use Dynamic Value</title>
-      <code><![CDATA[
+      <code>
 # terraform-gcp/auth_service.tf
 resource "google_secret_manager_secret_version" "database_url_staging" {
   count       = var.environment == "staging" ? 1 : 0
   secret      = google_secret_manager_secret.database_url_staging[0].id
   secret_data = local.database_url_staging  # Use dynamic local instead of variable
 }
-      ]]></code>
+      </code>
     </step>
-    
     <step id="4">
       <title>Add Validation Resource</title>
-      <code><![CDATA[
+      <code>
 # terraform-gcp/validations.tf
 resource "null_resource" "validate_database_connection" {
   depends_on = [google_secret_manager_secret_version.database_url_staging]
   
   provisioner "local-exec" {
-    command = <<-EOT
+    command = &lt;&lt;-EOT
       echo "Testing database connection..."
       psql "${local.database_url_staging}" -c "SELECT 1" || exit 1
       echo "Database connection successful!"
     EOT
   }
 }
-      ]]></code>
+      </code>
     </step>
-    
     <step id="5">
       <title>Create Output for Verification</title>
-      <code><![CDATA[
+      <code>
 # terraform-gcp/outputs.tf
 output "database_connection_info" {
   value = {
@@ -139,14 +136,13 @@ output "database_connection_info" {
   }
   description = "Database connection information for verification"
 }
-      ]]></code>
+      </code>
     </step>
   </terraform_solution>
-  
   <immediate_action_plan>
     <action priority="1">
       <description>Reset database password and update secret</description>
-      <commands><![CDATA[
+      <commands>
 # Reset password for netra_user
 gcloud sql users set-password netra_user \
   --instance=netra-postgres-2db4ccab \
@@ -161,12 +157,11 @@ echo -n "postgresql://netra_user:[NEW_PASSWORD]@34.132.142.103:5432/netra?sslmod
 gcloud run services update netra-auth-service \
   --region=us-central1 \
   --project=netra-staging
-      ]]></commands>
+      </commands>
     </action>
-    
     <action priority="2">
       <description>Import existing resources into Terraform</description>
-      <commands><![CDATA[
+      <commands>
 # Import the existing secret
 terraform import google_secret_manager_secret.database_url_staging \
   projects/netra-staging/secrets/database-url-staging
@@ -174,10 +169,9 @@ terraform import google_secret_manager_secret.database_url_staging \
 # Import the Cloud SQL instance
 terraform import google_sql_database_instance.staging \
   projects/netra-staging/instances/netra-postgres-2db4ccab
-      ]]></commands>
+      </commands>
     </action>
   </immediate_action_plan>
-  
   <prevention_checklist>
     <item checked="false">
       All secrets are managed by Terraform with dynamic values
@@ -204,7 +198,6 @@ terraform import google_sql_database_instance.staging \
       Monitoring alerts for connection failures
     </item>
   </prevention_checklist>
-  
   <best_practices>
     <practice>
       <title>Single Source of Truth</title>
@@ -213,7 +206,6 @@ terraform import google_sql_database_instance.staging \
         Never create or modify resources manually in staging/production.
       </description>
     </practice>
-    
     <practice>
       <title>Dynamic References</title>
       <description>
@@ -221,7 +213,6 @@ terraform import google_sql_database_instance.staging \
         This ensures configuration updates automatically when infrastructure changes.
       </description>
     </practice>
-    
     <practice>
       <title>Environment Separation</title>
       <description>
@@ -229,7 +220,6 @@ terraform import google_sql_database_instance.staging \
         Never share resources between environments.
       </description>
     </practice>
-    
     <practice>
       <title>Automated Validation</title>
       <description>
@@ -237,7 +227,6 @@ terraform import google_sql_database_instance.staging \
         Fail fast if connections cannot be established.
       </description>
     </practice>
-    
     <practice>
       <title>Clear Naming Conventions</title>
       <description>
@@ -246,7 +235,6 @@ terraform import google_sql_database_instance.staging \
       </description>
     </practice>
   </best_practices>
-  
   <monitoring_setup>
     <metric name="database_connection_success_rate">
       <query>
@@ -254,14 +242,12 @@ terraform import google_sql_database_instance.staging \
       </query>
       <alert_threshold>less than 0.95</alert_threshold>
     </metric>
-    
     <metric name="secret_access_failures">
       <query>
         sum(rate(secret_manager_access_denied[5m])) by (secret_name)
       </query>
       <alert_threshold>greater than 0</alert_threshold>
     </metric>
-    
     <metric name="terraform_drift_detection">
       <description>
         Run terraform plan daily and alert if changes detected
@@ -269,7 +255,6 @@ terraform import google_sql_database_instance.staging \
       <schedule>0 9 * * *</schedule>
     </metric>
   </monitoring_setup>
-  
   <long_term_improvements>
     <improvement>
       <title>Migrate to Cloud SQL Auth Proxy</title>
@@ -280,7 +265,6 @@ terraform import google_sql_database_instance.staging \
         - Better security
       </benefits>
     </improvement>
-    
     <improvement>
       <title>Implement GitOps for Infrastructure</title>
       <benefits>
@@ -290,7 +274,6 @@ terraform import google_sql_database_instance.staging \
         - Rollback capability
       </benefits>
     </improvement>
-    
     <improvement>
       <title>Database Connection Pool Management</title>
       <benefits>

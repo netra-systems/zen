@@ -37,13 +37,13 @@ from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor
 
 # Test infrastructure imports
-from ..unified_e2e_harness import create_e2e_harness
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
 from tests.unified.database_test_operations import (
     UserDataOperations, 
     ChatMessageOperations,
     SessionCacheOperations
 )
-from tests.unified.database_test_connections import DatabaseTestConnections
+from netra_backend.tests.unified.database_test_connections import DatabaseTestConnections
 
 logger = logging.getLogger(__name__)
 

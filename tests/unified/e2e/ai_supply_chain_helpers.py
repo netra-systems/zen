@@ -12,9 +12,9 @@ from unittest.mock import AsyncMock, Mock
 from dataclasses import dataclass
 from enum import Enum
 
-from app.llm.fallback_handler import LLMFallbackHandler
-from app.llm.fallback_config import FallbackConfig
-from app.schemas.llm_base_types import LLMProvider
+from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
+from netra_backend.app.llm.fallback_config import FallbackConfig
+from netra_backend.app.schemas.llm_base_types import LLMProvider
 
 
 class ProviderStatus(Enum):

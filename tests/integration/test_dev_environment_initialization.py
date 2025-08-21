@@ -617,7 +617,6 @@ class TestDevEnvironmentEdgeCases:
     
     def teardown_method(self):
         """Clean up test environment."""
-        import shutil
         if self.temp_dir and Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir, ignore_errors=True)
     
@@ -774,7 +773,6 @@ class TestDevEnvironmentRealServices:
                 print(f"Database validation: {db_result}")
                 
                 # Cleanup
-                import shutil
                 shutil.rmtree(temp_dir, ignore_errors=True)
                 
         except Exception as e:

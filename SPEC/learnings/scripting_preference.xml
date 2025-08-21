@@ -1,68 +1,61 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>ScriptingPreference</name>
-        <type>LearningReport</type>
-        <version>1.0</version>
-        <description>Established patterns for script selection and implementation</description>
-        <date>2025-08-20</date>
-    </metadata>
-
-    <learning id="python-over-shell">
-        <title>Always Use Python Over Shell/PowerShell Scripts</title>
-        <status>MANDATORY</status>
-        
-        <problem-statement>
+  <metadata>
+    <name>ScriptingPreference</name>
+    <type>LearningReport</type>
+    <version>1.0</version>
+    <description>Established patterns for script selection and implementation</description>
+    <date>2025-08-20</date>
+    <last_edited>2025-08-21T08:47:29.736261</last_edited>
+  </metadata>
+  <learning id="python-over-shell">
+    <title>Always Use Python Over Shell/PowerShell Scripts</title>
+    <status>MANDATORY</status>
+    <problem-statement>
             Shell scripts (bash, PowerShell) create platform-specific dependencies, 
             inconsistent behavior across environments, and maintenance challenges.
         </problem-statement>
-
-        <critical-insight>
+    <critical-insight>
             Python provides superior cross-platform compatibility, better error handling,
             cleaner syntax, and integration with the existing Python codebase.
         </critical-insight>
-
-        <solution>
-            <principle>ALWAYS implement automation and deployment scripts in Python</principle>
-            <benefits>
-                <benefit>Cross-platform compatibility (Windows, Linux, macOS)</benefit>
-                <benefit>Superior error handling with try/except blocks</benefit>
-                <benefit>Consistent behavior across all environments</benefit>
-                <benefit>Direct integration with existing Python utilities</benefit>
-                <benefit>Better testability and debugging capabilities</benefit>
-                <benefit>Type hints and IDE support</benefit>
-                <benefit>Rich standard library (pathlib, subprocess, json, etc.)</benefit>
-            </benefits>
-        </solution>
-
-        <implementation-guidelines>
-            <guideline>Use subprocess.run() for external command execution</guideline>
-            <guideline>Use pathlib.Path for cross-platform file operations</guideline>
-            <guideline>Use argparse for command-line argument parsing</guideline>
-            <guideline>Include colored output using ANSI codes for better UX</guideline>
-            <guideline>Implement proper error handling and exit codes</guideline>
-            <guideline>Make scripts executable with shebang: #!/usr/bin/env python3</guideline>
-        </implementation-guidelines>
-
-        <examples>
-            <example context="deployment">
-                <!-- GOOD: Python script -->
+    <solution>
+      <principle>ALWAYS implement automation and deployment scripts in Python</principle>
+      <benefits>
+        <benefit>Cross-platform compatibility (Windows, Linux, macOS)</benefit>
+        <benefit>Superior error handling with try/except blocks</benefit>
+        <benefit>Consistent behavior across all environments</benefit>
+        <benefit>Direct integration with existing Python utilities</benefit>
+        <benefit>Better testability and debugging capabilities</benefit>
+        <benefit>Type hints and IDE support</benefit>
+        <benefit>Rich standard library (pathlib, subprocess, json, etc.)</benefit>
+      </benefits>
+    </solution>
+    <implementation-guidelines>
+      <guideline>Use subprocess.run() for external command execution</guideline>
+      <guideline>Use pathlib.Path for cross-platform file operations</guideline>
+      <guideline>Use argparse for command-line argument parsing</guideline>
+      <guideline>Include colored output using ANSI codes for better UX</guideline>
+      <guideline>Implement proper error handling and exit codes</guideline>
+      <guideline>Make scripts executable with shebang: #!/usr/bin/env python3</guideline>
+    </implementation-guidelines>
+    <examples>
+      <example context="deployment">
+                
                 deploy_staging_reliable.py with argparse, subprocess, and pathlib
                 
-                <!-- BAD: PowerShell script -->
+                
                 deploy-staging-reliable.ps1 with platform-specific cmdlets
             </example>
-            
-            <example context="automation">
-                <!-- GOOD: Python script -->
+      <example context="automation">
+                
                 run_migrations.py using subprocess for database operations
                 
-                <!-- BAD: Bash script -->
+                
                 run-migrations.sh with shell-specific syntax
             </example>
-        </examples>
-
-        <migration-pattern>
+    </examples>
+    <migration-pattern>
             When converting shell scripts to Python:
             1. Preserve all functionality and command-line arguments
             2. Use argparse for argument parsing
@@ -72,17 +65,15 @@
             6. Test on all target platforms
             7. Delete the original shell script after verification
         </migration-pattern>
-
-        <exceptions>
-            <exception>GitHub Actions workflow files (YAML format required)</exception>
-            <exception>Docker entrypoint scripts (if minimal and container-specific)</exception>
-            <exception>System-level init scripts (if required by OS)</exception>
-        </exceptions>
-
-        <enforcement>
-            <rule>No new .sh, .ps1, or .bat files in the codebase</rule>
-            <rule>Convert existing shell scripts to Python during refactoring</rule>
-            <rule>Code reviews must reject shell script additions</rule>
-        </enforcement>
-    </learning>
+    <exceptions>
+      <exception>GitHub Actions workflow files (YAML format required)</exception>
+      <exception>Docker entrypoint scripts (if minimal and container-specific)</exception>
+      <exception>System-level init scripts (if required by OS)</exception>
+    </exceptions>
+    <enforcement>
+      <rule>No new .sh, .ps1, or .bat files in the codebase</rule>
+      <rule>Convert existing shell scripts to Python during refactoring</rule>
+      <rule>Code reviews must reject shell script additions</rule>
+    </enforcement>
+  </learning>
 </specification>

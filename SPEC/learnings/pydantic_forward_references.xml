@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <spec>
+  <metadata>
+    <last_edited>2025-08-21T08:47:29.658482</last_edited>
+  </metadata>
   <title>Pydantic Forward Reference Resolution</title>
   <description>
     Documentation of issues and solutions related to Pydantic forward references
     and model rebuilding, particularly for complex nested models with circular dependencies.
   </description>
   <date>2025-08-16</date>
-  
   <critical_findings>
     <finding severity="CRITICAL">
       <title>AgentCompleted Model Not Fully Defined</title>
@@ -23,7 +25,6 @@
       </root_cause>
     </finding>
   </critical_findings>
-
   <issue_category name="Forward_Reference_Chain">
     <problem>
       Complex chain of forward references causing model definition failures:
@@ -46,12 +47,11 @@
       4. Avoid automatic model_rebuild() calls that may execute too early
     </solution>
     <files_modified>
-      - app/schemas/agent_models.py (removed TYPE_CHECKING imports)
-      - app/schemas/Generation.py (direct import of WorkloadProfile)
-      - app/schemas/Agent.py (removed automatic rebuild)
+      - netra_backend/app/schemas/agent_models.py (removed TYPE_CHECKING imports)
+      - netra_backend/app/schemas/Generation.py (direct import of WorkloadProfile)
+      - netra_backend/app/schemas/Agent.py (removed automatic rebuild)
     </files_modified>
   </issue_category>
-
   <patterns_established>
     <pattern name="Direct_Import_Pattern">
       <description>
@@ -60,7 +60,7 @@
       <example>
         # Instead of TYPE_CHECKING conditional imports:
         try:
-            from app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         except ImportError:
             TriageResult = None  # type: ignore
       </example>
@@ -70,7 +70,6 @@
         - Graceful handling of missing modules
       </benefits>
     </pattern>
-    
     <pattern name="No_String_Annotations">
       <description>
         Use direct type references instead of string annotations when possible
@@ -89,26 +88,22 @@
       </benefits>
     </pattern>
   </patterns_established>
-
   <architectural_improvements>
     <improvement name="Type_Import_Strategy">
       Changed from conditional TYPE_CHECKING imports to direct imports with
       error handling, ensuring types are available at runtime for Pydantic
     </improvement>
-    
     <improvement name="Removed_Manual_Rebuild">
       Eliminated manual model_rebuild() calls by ensuring all types are
       properly imported when models are defined
     </improvement>
-    
     <improvement name="Simplified_Dependencies">
       Reduced complexity of type dependencies by importing all required
       types upfront rather than relying on deferred resolution
     </improvement>
   </architectural_improvements>
-
   <test_coverage>
-    <test_file>app/tests/unit/test_agent_forward_references.py</test_file>
+    <test_file>netra_backend/tests/unit/test_agent_forward_references.py</test_file>
     <test_cases>
       - test_agent_completed_model_rebuild: Verifies AgentCompleted can be instantiated
       - test_deep_agent_state_with_triage_result: Tests DeepAgentState with TriageResult
@@ -119,7 +114,6 @@
       All critical forward reference scenarios tested and passing
     </coverage>
   </test_coverage>
-
   <best_practices>
     <practice>Import all Pydantic model dependencies directly at module level</practice>
     <practice>Use try/except for imports that might have circular dependencies</practice>
@@ -128,7 +122,6 @@
     <practice>Test model instantiation with all optional fields populated</practice>
     <practice>Document forward reference chains in complex model hierarchies</practice>
   </best_practices>
-
   <prevention_strategies>
     <strategy>
       Always test model instantiation after adding new type references
@@ -143,7 +136,6 @@
       Avoid deeply nested forward references by flattening model hierarchies
     </strategy>
   </prevention_strategies>
-
   <related_issues>
     <issue>Circular import prevention strategies</issue>
     <issue>Pydantic v2 migration and type handling changes</issue>

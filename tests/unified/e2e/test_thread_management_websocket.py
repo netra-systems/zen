@@ -15,9 +15,9 @@ from typing import Dict, List, Any
 import pytest
 import pytest_asyncio
 
-from tests.unified.config import TEST_USERS
-from tests.unified.test_harness import UnifiedTestHarness
-from .helpers.thread_management_helpers import (
+from netra_backend.tests.unified.config import TEST_USERS
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.helpers.thread_management_helpers import ThreadWebSocketManager, ThreadStateValidator, create_thread_test_data, create_message_test_data, measure_thread_operation_timing, validate_thread_websocket_flow
     ThreadWebSocketManager,
     ThreadStateValidator,
     create_thread_test_data,
@@ -25,7 +25,7 @@ from .helpers.thread_management_helpers import (
     measure_thread_operation_timing,
     validate_thread_websocket_flow
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

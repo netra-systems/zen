@@ -12,9 +12,9 @@ except ImportError:
     ServiceDiscovery = None
     HAS_DEV_LAUNCHER = False
 
-from .auth_client import AuthTestClient
-from .backend_client import BackendTestClient
-from .websocket_client import WebSocketTestClient
+from tests.unified.clients.auth_client import AuthTestClient
+from tests.unified.clients.backend_client import BackendTestClient
+from tests.unified.clients.websocket_client import WebSocketTestClient
 
 logger = logging.getLogger(__name__)
 

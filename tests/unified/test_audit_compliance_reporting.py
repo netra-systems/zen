@@ -13,7 +13,7 @@ import pytest
 from datetime import datetime, timezone
 from typing import Dict, List, Any
 
-from app.security.audit_compliance import (
+from netra_backend.app.security.audit_compliance import (
     AuthenticationAuditor, ApiSecurityAuditor,
     SessionManagementAuditor, ConfigurationAuditor
 )

@@ -19,9 +19,37 @@
     </retrieval-protocol>
 
     <categories>
-        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session">
+        <category name="Authentication/OAuth" path="SPEC/learnings/auth.xml" keywords="JWT, Login, Session, OAuth, Token">
             <critical-takeaway>MANDATORY: All services must integrate with the shared auth service (SPEC/shared_auth_integration.xml).</critical-takeaway>
             <critical-takeaway>Ensure consistent JWT secret configuration across services (jwt-secret-mismatch).</critical-takeaway>
+            <critical-takeaway>OAuth redirect URIs must point to auth service (auth.staging.netrasystems.ai), not frontend (oauth_redirect_configuration.xml).</critical-takeaway>
+            <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
+            <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">
+            <critical-takeaway>Auth service is OAuth-first with NO /register endpoint - use OAuth or dev login.</critical-takeaway>
+            <critical-takeaway>Dev login endpoint (/auth/dev/login) creates fixed dev@example.com user automatically.</critical-takeaway>
+            <critical-takeaway>Auth service maintains separate auth_users table but syncs IDs with main database.</critical-takeaway>
+            <critical-takeaway>Token validation via POST /auth/validate, not a TokenValidator class.</critical-takeaway>
+            <critical-takeaway>Redis sessions optional in dev/staging - service healthy without Redis.</critical-takeaway>
+        </category>
+
+        <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
+            <critical-takeaway>THE canonical structure: netra_backend/app/ for production, netra_backend/tests/ for tests. This is PERMANENT.</critical-takeaway>
+            <critical-takeaway>All imports MUST use netra_backend.app.* prefix. Fix imports, NOT the structure.</critical-takeaway>
+            <critical-takeaway>Cross-service imports are FORBIDDEN. Use API clients for service communication.</critical-takeaway>
+            <critical-takeaway>When imports fail, update them to match structure. NEVER move files to accommodate old patterns.</critical-takeaway>
+            <critical-takeaway>Test runner uses netra_backend/tests/, dev launcher uses netra_backend.app.main:app.</critical-takeaway>
+        </category>
+        
+        <category name="AI-Native Path Management" path="SPEC/learnings/ai_native_path_management.xml" keywords="AI-Native, Path Migration, Refactoring, Service Creation, Batch Operations, Import Management">
+            <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
+            <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
+            <critical-takeaway>Use multi-agent coordination for large migrations: Principal (strategy), Implementation (execution), QA (verification), DevOps (deployment).</critical-takeaway>
+            <critical-takeaway>New services must follow standard scaffold: {service_name}/{service_name}_core/ structure with health endpoints from start.</critical-takeaway>
+            <critical-takeaway>Validate import hierarchy: Core->Models->Services->Routes->Main, never reverse imports.</critical-takeaway>
+            <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
         </category>
 
         <category name="WebSocket" path="SPEC/learnings/websocket_message_paradox.xml" keywords="Realtime, Coroutine, Async">
@@ -33,6 +61,22 @@
         <category name="Configuration/Secrets" path="SPEC/learnings/configuration_secrets.xml" keywords="Env Vars, .env">
             <critical-takeaway>All configuration MUST utilize the unified config system. Direct `os.environ.get()` is forbidden outside the config module.</critical-takeaway>
         </category>
+        
+        <category name="Unified Configuration" path="SPEC/learnings/unified_configuration.xml" keywords="Config, Hot Reload, ConfigManager, Configuration, Secrets, GCP">
+            <critical-takeaway>Configuration MUST use single source of truth at netra_backend.app.config. 110+ duplicate config files have been REMOVED.</critical-takeaway>
+            <critical-takeaway>NEVER import removed files: config_environment.py, config_loader.py, config_manager.py, config_envvars.py - they're DELETED.</critical-takeaway>
+            <critical-takeaway>Hot reload enables zero-downtime updates via CONFIG_HOT_RELOAD=true and reload_config().</critical-takeaway>
+            <critical-takeaway>All configuration access uses: from netra_backend.app.config import get_config.</critical-takeaway>
+            <critical-takeaway>Configuration validation is MANDATORY: validate_configuration() must pass before deployment.</critical-takeaway>
+            <critical-takeaway>Secrets use unified SecretManager with GCP Secret Manager (staging/production) or local files (dev).</critical-takeaway>
+        </category>
+        
+        <category name="Secret Manager Interface" path="SPEC/learnings/secret_manager_interface.xml" keywords="SecretManager, load_all_secrets, Interface Contract, UnifiedSecretManager">
+            <critical-takeaway>SecretManager MUST provide public load_all_secrets() method for UnifiedSecretManager compatibility.</critical-takeaway>
+            <critical-takeaway>Never access private methods (_method) from external components - use public interfaces.</critical-takeaway>
+            <critical-takeaway>Secret loading failures should log warnings but NOT crash the application.</critical-takeaway>
+            <critical-takeaway>Always write interface contract tests when creating component dependencies.</critical-takeaway>
+        </category>
 
         <category name="CORS/Dynamic Ports" path="SPEC/learnings/cors_dynamic_ports.xml" keywords="CORS, Dynamic Ports, Localhost, Development">
             <critical-takeaway>CRITICAL: CORS configuration MUST support dynamic ports in development. Pattern matching for localhost with ANY port must be checked FIRST.</critical-takeaway>
@@ -43,13 +87,34 @@
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
         </category>
+        
+        <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
+            <critical-takeaway>All imports MUST use absolute imports with netra_backend namespace (e.g., from netra_backend.app.db import models).</critical-takeaway>
+            <critical-takeaway>Auth service endpoints use /auth prefix, NOT /api/v1/auth.</critical-takeaway>
+            <critical-takeaway>Use /auth/dev/login for testing (no registration endpoint exists).</critical-takeaway>
+            <critical-takeaway>Test files use netra_backend.tests.* namespace for test imports.</critical-takeaway>
+        </category>
+        
+        <category name="Test Environment" path="SPEC/learnings/test_environment_fixes.xml" keywords="Windows, PYTHONPATH, Pytest, Environment">
+            <critical-takeaway>Set PYTHONPATH explicitly on Windows: set PYTHONPATH=C:\path\to\app</critical-takeaway>
+            <critical-takeaway>Run tests from app directory for proper import resolution.</critical-takeaway>
+            <critical-takeaway>Use -m "not real_services" to skip external API calls in tests.</critical-takeaway>
+            <critical-takeaway>Test size limits: 300 lines per file, 8 lines per function (many violations exist).</critical-takeaway>
+        </category>
+        
+        <category name="Test Import Standardization" path="SPEC/test_import_standardization.xml" keywords="Test Setup, sys.path, Imports, DRY, setup_test_path">
+            <critical-takeaway>NEVER write manual sys.path manipulation in test files - use setup_test_path() from netra_backend.tests.test_utils</critical-takeaway>
+            <critical-takeaway>500+ test files contain duplicate path setup code - ALL must use centralized function</critical-takeaway>
+            <critical-takeaway>Import order: stdlib -> third-party -> setup_test_path() -> project imports</critical-takeaway>
+            <critical-takeaway>Manual PROJECT_ROOT manipulation is FORBIDDEN - violates SSOT principle</critical-takeaway>
+        </category>
 
         <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript">
             <critical-takeaway context="Zustand">Use individual selectors to prevent infinite loops. See SPEC/conventions.xml#zustand-selectors.</critical-takeaway>
         </category>
 
         <category name="Microservice Independence" path="SPEC/independent_services.xml" keywords="Microservice, Docker, Service">
-            <critical-takeaway>CRITICAL: Microservices MUST be 100% independent. NO imports from the main `app/` module. Do not name internal modules 'app'.</critical-takeaway>
+            <critical-takeaway>CRITICAL: Microservices MUST be 100% independent. NO imports from the main `netra_backend/app/` module. Do not name internal modules 'app'.</critical-takeaway>
         </category>
 
         <category name="Health Checks" path="SPEC/learnings/health_checks.xml" keywords="Health, Ready, Readiness, Liveness">
@@ -68,6 +133,13 @@
             <critical-takeaway>Use 'async with' for @asynccontextmanager functions, NOT 'async for' (context managers != iterators).</critical-takeaway>
             <critical-takeaway>Context managers implement __aenter__/__aexit__, iterators implement __aiter__/__anext__.</critical-takeaway>
         </category>
+        
+        <category name="Import Management" path="SPEC/learnings/import_management.xml" keywords="Imports, ImportError, ModuleNotFoundError, CostOptimizer">
+            <critical-takeaway>Always use absolute imports starting from netra_backend, never relative imports</critical-takeaway>
+            <critical-takeaway>When renaming classes, create backwards compatibility aliases (e.g., CostOptimizer = LLMCostOptimizer)</critical-takeaway>
+            <critical-takeaway>Missing Enum import is common - always check for standard library imports</critical-takeaway>
+            <critical-takeaway>Use import_management.py for comprehensive import checking and fixing</critical-takeaway>
+        </category>
 
         <category name="Database/Migration" path="SPEC/learnings/alembic_asyncpg_greenlet.xml" keywords="Alembic, Migration, AsyncPG, Greenlet, SQLAlchemy">
             <critical-takeaway>Alembic requires synchronous database URL - remove asyncpg driver for migrations.</critical-takeaway>
@@ -80,8 +152,13 @@
             <critical-takeaway>Extended timeouts required: Backend/Auth 30s, Frontend 60s, Overall 120s.</critical-takeaway>
         </category>
 
-        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging">
+        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
+            <critical-takeaway>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
+            <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL (e.g., https://api.staging.netrasystems.ai) for proxy rewrites to work.</critical-takeaway>
+            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check DATABASE_URL and SSL settings.</critical-takeaway>
+            <critical-takeaway>OAuth flow requires auth service at separate domain (e.g., auth.staging.netrasystems.ai) with proper CORS and callback URL configuration.</critical-takeaway>
+            <critical-takeaway>CRITICAL: USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service, even if OAUTH_PROXY_URL is correctly set.</critical-takeaway>
         </category>
 
         <category name="GitHub Actions" path="SPEC/learnings/github_actions.xml" keywords="CI/CD, Pipeline, Workflow">
@@ -98,6 +175,13 @@
 
         <category name="Type Safety" path="SPEC/learnings/type_safety.xml" keywords="Types, Pydantic, TypeScript">
             <critical-takeaway>Maintain single source of truth for types. Avoid circular imports.</critical-takeaway>
+        </category>
+        
+        <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
+            <critical-takeaway>Standard import tests miss indirect circular imports through 4+ modules.</critical-takeaway>
+            <critical-takeaway>Use lazy imports (inside methods) for WebSocket manager in job/task managers.</critical-takeaway>
+            <critical-takeaway>Use TYPE_CHECKING guards for type hints in circular-prone modules.</critical-takeaway>
+            <critical-takeaway>Import tests MUST track full import chains, not just direct imports.</critical-takeaway>
         </category>
 
         <category name="E2E Testing" path="SPEC/learnings/e2e_testing.xml" keywords="End-to-End, Integration, Circuit Breaker">
@@ -158,8 +242,42 @@
         <category name="GCP Database Connection Failures" path="SPEC/learnings/gcp_database_connection_failures.xml" keywords="GCP, Database, Connection, sslmode, asyncpg, Cloud SQL, Authentication">
             <critical-takeaway>Backend health checks must convert sslmode= to ssl= for asyncpg connections</critical-takeaway>
             <critical-takeaway>Use Unix socket format for Cloud SQL proxy connections: postgresql://user:pass@/db?host=/cloudsql/instance</critical-takeaway>
+            <critical-takeaway>Cloud SQL connections MUST include sslmode=require even with Unix sockets in staging/production</critical-takeaway>
             <critical-takeaway>Both backend and auth services must have Cloud SQL proxy configured</critical-takeaway>
             <critical-takeaway>Verify database credentials match actual Cloud SQL users and passwords</critical-takeaway>
+        </category>
+        
+        <category name="FIXME Audit Resolution" path="SPEC/learnings/fixme_audit_resolution.xml" keywords="FIXME, Import Management, Automated Tooling, Dependency Resolution, 5 Whys, Root Cause Analysis">
+            <critical-takeaway>Automated import fixing scripts must verify target classes exist before commenting out imports</critical-takeaway>
+            <critical-takeaway>Large refactoring must maintain working intermediate states - never comment out entire classes</critical-takeaway>
+            <critical-takeaway>Double FIXME patterns (# FIXME: # FIXME:) indicate scripts running multiple times - make scripts idempotent</critical-takeaway>
+            <critical-takeaway>Import validation needs retry mechanisms for transient failures during development</critical-takeaway>
+            <critical-takeaway>Build dependency graphs before refactoring to understand impact radius</critical-takeaway>
+            <critical-takeaway>Automated changes must pass tests before being committed</critical-takeaway>
+        </category>
+        
+        <category name="Pragmatic Rigor/Resilience" path="SPEC/learnings/pragmatic_rigor.xml" keywords="Pragmatic, Rigor, Resilience, Postel, Duck Typing, Validation, Fallback, Progressive">
+            <critical-takeaway>Focus on minimum constraints necessary for correctness, not maximum constraints for purity (pragmatic-rigor-over-rigid-purity).</critical-takeaway>
+            <critical-takeaway>Default to resilience with relaxed configuration - systems should default to functional, permissive states (default-to-resilience).</critical-takeaway>
+            <critical-takeaway>Apply Postel's Law: "Be conservative in what you send, liberal in what you accept" for interface design (postels-law-adherence).</critical-takeaway>
+            <critical-takeaway>Use progressive validation modes (WARN, ENFORCE_CRITICAL, ENFORCE_ALL) instead of binary strict/permissive (progressive-validation-modes).</critical-takeaway>
+            <critical-takeaway>Implement fallback behaviors and graceful degradation rather than hard failures (fallback-behaviors).</critical-takeaway>
+            <critical-takeaway>Prefer duck typing over strict isinstance() checks - focus on behavior over inheritance (duck-typing-over-isinstance).</critical-takeaway>
+        </category>
+        
+        <category name="Backend Startup" path="SPEC/learnings/backend_startup.xml" keywords="Backend, Startup, run_server, Path, Configuration">
+            <critical-takeaway>Backend app directory is at netra_backend/app, NOT project_root/app (backend-app-path).</critical-takeaway>
+            <critical-takeaway>Uvicorn must use "netra_backend.app.main:app" import path, NOT "app.main:app".</critical-takeaway>
+            <critical-takeaway>Always verify startup scripts check correct paths relative to actual project structure.</critical-takeaway>
+            <critical-takeaway>Test startup scripts with --help flag to ensure basic initialization works.</critical-takeaway>
+        </category>
+
+        <category name="Import Structure" path="SPEC/learnings/import_structure.xml" keywords="Import, Module, StartupChecker, Refactoring, Import Errors">
+            <critical-takeaway>StartupChecker lives in netra_backend.app.startup_checks.checker, NOT app.checker (startup-checker-import-path).</critical-takeaway>
+            <critical-takeaway>All startup check modules are in app.startup_checks directory - import from there consistently.</critical-takeaway>
+            <critical-takeaway>When refactoring module structure, grep for ALL imports globally and update systematically.</critical-takeaway>
+            <critical-takeaway>Avoid similar class names in different modules (SystemChecker vs StartupChecker confusion).</critical-takeaway>
+            <critical-takeaway>Create comprehensive import tests that validate module locations and catch import errors early.</critical-takeaway>
         </category>
     </categories>
 </specification>

@@ -21,10 +21,10 @@ from typing import Dict, Any, Optional
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from ..config import TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
-from ..network_failure_simulator import NetworkFailureSimulator
-from ..real_client_types import ClientConfig, ConnectionState
+from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.network_failure_simulator import NetworkFailureSimulator
+from tests.unified.real_client_types import ClientConfig, ConnectionState
 
 
 class WebSocketResilienceTestCore:

@@ -17,10 +17,10 @@ import logging
 import gc
 from typing import Dict, Any
 
-from tests.e2e.test_helpers.resource_monitoring import (
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
     ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
 )
-from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
 
 logger = logging.getLogger(__name__)
 

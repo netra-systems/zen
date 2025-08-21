@@ -1,0 +1,116 @@
+# Netra AI Platform - Test Report
+
+**Generated:** 2025-08-21T11:53:10.039474  
+**Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
+
+## 1. Test Summary
+
+[FAILED] **OVERALL STATUS**
+
+### Test Counts (Extracted from pytest output)
+- **Total Tests:** 0
+- **Passed:** 0 
+- **Failed:** 0
+- **Skipped:** 0
+- **Errors:** 0
+
+### Component Breakdown
+
+| Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
+|-----------|-------|--------|--------|---------|--------|----------|--------|
+| Backend   | 0 | 0 | 0 | 0 | 0 | 8.20s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 25.80s | [FAILED] |
+
+## 3. Environment and Configuration
+
+- **Test Level:** integration
+- **Description:** Integration tests for component interaction (3-5 minutes)
+- **Purpose:** Feature validation, API testing
+- **Timeout:** 300s
+- **Coverage Enabled:** Yes
+- **Total Duration:** 34.00s
+- **Exit Code:** 15
+
+### Backend Configuration
+```
+--category integration -v --coverage --fail-fast --parallel=4 --markers not real_services
+```
+
+### Frontend Configuration
+```
+--category integration
+```
+
+## 4. Test Output
+
+### Backend Output
+```
+Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.test
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: integration
+  Parallel: 4
+  Coverage: disabled
+  Fail Fast: enabled
+  Environment: test
+
+Running command:
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+================================================================================
+================================================================================
+[FAIL] TESTS FAILED with exit code 4 after 7.21s
+================================================================================
+
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+2025-08-21 11:52:41.519 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
+netra_backend\tests\conftest.py:59: in <module>
+    from netra_backend.app.main import app
+netra_backend\app\main.py:93: in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+netra_backend\app\core\app_factory.py:127: in create_app
+    _configure_app_routes(app)
+netra_backend\app\core\app_factory.py:140: in _configure_app_routes
+    register_api_routes(app)
+netra_backend\app\core\app_factory.py:97: in register_api_routes
+    _import_and_register_routes(app)
+netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
+    route_modules = import_all_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:124: in import_all_route_modules
+    factory_routers = import_factory_routers()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:99: in import_factory_routers
+    status_routers = _import_factory_status_routers()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_status_routers
+    from netra_backend.app.routes.factory_status import router as factory_status_router
+netra_backend\app\routes\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.routes.factory_status.router import router
+netra_backend\app\routes\factory_status\router.py:9: in <module>
+    from netra_backend.app.routes.factory_status.report_routes import (
+netra_backend\app\routes\factory_status\report_routes.py:10: in <module>
+    from netra_backend.app.services.audit.utils import (
+E   ImportError: cannot import name 'filter_reports_by_date_range' from 'netra_backend.app.services.audit.utils' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\audit\utils.py)
+
+```
+
+### Frontend Output
+```
+
+> netra-frontend-apex-v1@0.1.0 test
+> node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
+
+
+
+```
+
+---
+*Generated by Netra AI Unified Test Runner v3.0*  
+*Report structure follows SPEC/testing.xml requirements*

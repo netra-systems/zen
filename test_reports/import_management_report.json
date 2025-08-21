@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-21T19:13:18.891387",
+  "statistics": {
+    "total_errors": 146,
+    "errors_fixed": 0,
+    "files_checked": 0,
+    "files_modified": 0,
+    "tools_run": []
+  },
+  "tools_available": [
+    "fix_all",
+    "fix_comprehensive",
+    "unified_manager",
+    "check_netra",
+    "align_tests"
+  ],
+  "recommendations": [
+    "High number of import errors. Run 'python scripts/import_management.py fix-all'"
+  ]
+}

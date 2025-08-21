@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="import_structure">
+  <learning id="startup-checker-import-path" date="2025-08-21" priority="high">
+    <title>Correct Import Paths for Startup Checker Components</title>
+    <problem>
+      StartupChecker and related checker modules were incorrectly imported from 
+      netra_backend.app.checker instead of their actual location in 
+      netra_backend.app.startup_checks.
+    </problem>
+    <root_cause>
+      Module reorganization moved StartupChecker from app.checker to 
+      app.startup_checks.checker but imports were not updated systematically.
+      This created confusion between SystemChecker (in app.checker) and 
+      StartupChecker (in app.startup_checks.checker).
+    </root_cause>
+    <solution>
+      All startup check related modules are located in the app.startup_checks 
+      directory and should be imported from there:
+      - StartupChecker: netra_backend.app.startup_checks.checker
+      - EnvironmentChecker: netra_backend.app.startup_checks.environment_checks
+      - DatabaseChecker: netra_backend.app.startup_checks.database_checks
+      - ServiceChecker: netra_backend.app.startup_checks.service_checks
+      - SystemChecker (for startup): netra_backend.app.startup_checks.system_checks
+      - SystemChecker (general): netra_backend.app.checker
+    </solution>
+    <prevention>
+      1. Use comprehensive import tests that validate module locations
+      2. When refactoring module structure, grep for all imports globally
+      3. Maintain clear distinction between similar class names (SystemChecker vs StartupChecker)
+      4. Keep related modules in the same directory to minimize import complexity
+    </prevention>
+    <files_affected>
+      <file>netra_backend/app/startup_checks/__init__.py</file>
+      <file>netra_backend/app/startup_checks/utils.py</file>
+      <file>netra_backend/app/startup_checks/checker.py</file>
+      <file>netra_backend/tests/critical/test_staging_integration_flow.py</file>
+    </files_affected>
+    <tests_added>
+      <test>netra_backend/tests/critical/test_import_structure_failures.py</test>
+    </tests_added>
+  </learning>
+
+  <learning id="module-naming-collision" date="2025-08-21" priority="medium">
+    <title>Avoid Similar Names for Different Modules</title>
+    <problem>
+      Having both SystemChecker in app.checker and SystemChecker imports in 
+      startup_checks created naming confusion and import ambiguity.
+    </problem>
+    <solution>
+      Use distinct, descriptive names for different checker types:
+      - app.checker.SystemChecker: General system health monitoring
+      - app.startup_checks.system_checks.SystemChecker: Startup-specific system checks
+      These should ideally have different class names to avoid confusion.
+    </solution>
+    <best_practice>
+      When creating similar functionality in different contexts, use prefixes 
+      or suffixes to distinguish them clearly (e.g., GeneralSystemChecker vs 
+      StartupSystemChecker).
+    </best_practice>
+  </learning>
+
+  <learning id="import-testing-strategy" date="2025-08-21" priority="high">
+    <title>Comprehensive Import Testing Strategy</title>
+    <insight>
+      Import errors can cascade through the system and break multiple components.
+      They are particularly dangerous because they fail at module load time,
+      preventing any functionality from working.
+    </insight>
+    <testing_approach>
+      1. Create explicit import tests that validate module locations
+      2. Test both positive cases (correct imports work) and negative cases 
+         (incorrect imports fail with clear errors)
+      3. Test import chains to ensure dependencies are correctly resolved
+      4. Validate that similar-named modules don't create conflicts
+      5. Test that type hints and annotations using imported classes work
+    </testing_approach>
+    <test_patterns>
+      - test_module_import_from_correct_location()
+      - test_module_import_from_incorrect_location_fails()
+      - test_import_chain_resolution()
+      - test_namespace_collision_handling()
+      - test_circular_import_prevention()
+    </test_patterns>
+  </learning>
+
+  <learning id="refactoring-import-updates" date="2025-08-21" priority="high">
+    <title>Systematic Import Updates During Refactoring</title>
+    <problem>
+      When modules are moved or renamed, imports throughout the codebase
+      must be updated systematically to prevent breakage.
+    </problem>
+    <process>
+      1. Before moving a module, grep for all imports of that module
+      2. Create a migration plan listing all files that need updates
+      3. Update imports in dependency order (deepest dependencies first)
+      4. Run import tests after each batch of updates
+      5. Use IDE refactoring tools when available for consistency
+    </process>
+    <checklist>
+      - [ ] Identify all import locations using grep/ripgrep
+      - [ ] Update direct imports in application code
+      - [ ] Update imports in test files
+      - [ ] Update imports in __init__.py files
+      - [ ] Update any dynamic imports or importlib usage
+      - [ ] Update documentation and type hints
+      - [ ] Run comprehensive test suite
+    </checklist>
+  </learning>
+</learnings>

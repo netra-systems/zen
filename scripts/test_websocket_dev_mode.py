@@ -23,7 +23,7 @@ from contextlib import asynccontextmanager
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -144,7 +144,7 @@ class WebSocketDevModeTest:
     async def test_cors_validation(self) -> bool:
         """Test CORS validation."""
         try:
-            from app.core.websocket_cors import get_websocket_cors_handler
+            from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
             
             cors_handler = get_websocket_cors_handler()
             

@@ -1,400 +1,362 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>WebSocket Error Handling Learnings</name>
-        <type>learnings</type>
-        <version>1.0</version>
-        <last_updated>2025-08-16</last_updated>
-    </metadata>
-    
-    <learnings>
-        <learning>
-            <id>websocket-connection-state-error</id>
-            <date>2025-08-16</date>
-            <category>WebSocket/Error Handling</category>
-            <severity>high</severity>
-            <title>WebSocket Connection State Error: "Need to call accept first"</title>
-            
-            <problem>
-                <description>Error occurs when trying to disconnect or perform operations on unaccepted WebSocket</description>
-                <error_message>WebSocket is not connected. Need to call "accept" first</error_message>
-                <symptoms>
-                    <symptom>Error logged in _handle_general_exception at line 115</symptom>
-                    <symptom>Occurs during authentication failures before WebSocket accept</symptom>
-                    <symptom>Happens when error handler tries to disconnect non-connected WebSocket</symptom>
-                </symptoms>
-                <root_cause>Error handling code attempts to disconnect WebSocket that was never properly connected or accepted</root_cause>
-                <impact>Error logging becomes noisy with secondary errors masking the real issue</impact>
-            </problem>
-            
-            <solution>
-                <description>Check WebSocket state before attempting disconnect operations</description>
-                <implementation>
-                    <step>Modified _close_websocket_safely in connection.py to check both client_state and application_state</step>
-                    <step>Updated _handle_websocket_error to only disconnect if WebSocket is CONNECTED</step>
-                    <step>Added comprehensive state checking with hasattr for safety</step>
-                </implementation>
-                <code_changes>
-                    <file>app/websocket/connection.py</file>
-                    <change>Added state checks in _close_websocket_safely method</change>
-                    <file>app/routes/websockets.py</file>
-                    <change>Added WebSocketState.CONNECTED check before disconnect_user call</change>
-                </code_changes>
-            </solution>
-            
-            <prevention>
-                <recommendation>Always check WebSocket state before operations</recommendation>
-                <recommendation>Use hasattr to safely check for state attributes</recommendation>
-                <recommendation>Only attempt close/disconnect on CONNECTED WebSockets</recommendation>
-                <pattern>
-                    <name>Safe WebSocket Disconnect Pattern</name>
-                    <code><![CDATA[
+  <metadata>
+    <name>WebSocket Error Handling Learnings</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <last_updated>2025-08-16</last_updated>
+    <last_edited>2025-08-21T08:47:29.944089</last_edited>
+  </metadata>
+  <learnings>
+    <learning>
+      <id>websocket-connection-state-error</id>
+      <date>2025-08-16</date>
+      <category>WebSocket/Error Handling</category>
+      <severity>high</severity>
+      <title>WebSocket Connection State Error: "Need to call accept first"</title>
+      <problem>
+        <description>Error occurs when trying to disconnect or perform operations on unaccepted WebSocket</description>
+        <error_message>WebSocket is not connected. Need to call "accept" first</error_message>
+        <symptoms>
+          <symptom>Error logged in _handle_general_exception at line 115</symptom>
+          <symptom>Occurs during authentication failures before WebSocket accept</symptom>
+          <symptom>Happens when error handler tries to disconnect non-connected WebSocket</symptom>
+        </symptoms>
+        <root_cause>Error handling code attempts to disconnect WebSocket that was never properly connected or accepted</root_cause>
+        <impact>Error logging becomes noisy with secondary errors masking the real issue</impact>
+      </problem>
+      <solution>
+        <description>Check WebSocket state before attempting disconnect operations</description>
+        <implementation>
+          <step>Modified _close_websocket_safely in connection.py to check both client_state and application_state</step>
+          <step>Updated _handle_websocket_error to only disconnect if WebSocket is CONNECTED</step>
+          <step>Added comprehensive state checking with hasattr for safety</step>
+        </implementation>
+        <code_changes>
+          <file>netra_backend/app/websocket/connection.py</file>
+          <change>Added state checks in _close_websocket_safely method</change>
+          <file>netra_backend/app/routes/websockets.py</file>
+          <change>Added WebSocketState.CONNECTED check before disconnect_user call</change>
+        </code_changes>
+      </solution>
+      <prevention>
+        <recommendation>Always check WebSocket state before operations</recommendation>
+        <recommendation>Use hasattr to safely check for state attributes</recommendation>
+        <recommendation>Only attempt close/disconnect on CONNECTED WebSockets</recommendation>
+        <pattern>
+          <name>Safe WebSocket Disconnect Pattern</name>
+          <code>
 if (hasattr(websocket, 'application_state') and 
     websocket.application_state == WebSocketState.CONNECTED):
     await manager.disconnect_user(user_id, websocket, code=1011, reason="Error")
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>app/tests/unit/test_websocket_error_handling.py</test_file>
-                <test_cases>
-                    <test>test_close_websocket_safely_with_unconnected_socket</test>
-                    <test>test_close_websocket_safely_with_connected_socket</test>
-                    <test>test_handle_websocket_error_with_unconnected_socket</test>
-                    <test>test_websocket_state_transitions</test>
-                </test_cases>
-            </testing>
-            
-            <affected_files>
-                <file>app/websocket/connection.py</file>
-                <file>app/routes/websockets.py</file>
-            </affected_files>
-            
-            <related_patterns>
-                <pattern>WebSocket lifecycle management</pattern>
-                <pattern>Error handling in async contexts</pattern>
-                <pattern>State machine transitions for WebSockets</pattern>
-            </related_patterns>
-            
-            <business_impact>
-                <impact>Improves system reliability during connection failures</impact>
-                <impact>Reduces noise in error logs for better debugging</impact>
-                <impact>Prevents cascading errors during authentication failures</impact>
-            </business_impact>
-        </learning>
-        
-        <learning>
-            <id>websocket-state-attributes</id>
-            <date>2025-08-16</date>
-            <category>WebSocket/Implementation Details</category>
-            <severity>medium</severity>
-            <title>WebSocket State Attributes in Starlette</title>
-            
-            <discovery>
-                <description>WebSocket objects have client_state and application_state attributes</description>
-                <details>
-                    <detail>client_state tracks the client-side connection state</detail>
-                    <detail>application_state tracks the server-side application state</detail>
-                    <detail>Both initialized to CONNECTING in WebSocket.__init__</detail>
-                    <detail>States: CONNECTING, CONNECTED, DISCONNECTED, RESPONSE</detail>
-                </details>
-            </discovery>
-            
-            <best_practices>
-                <practice>Check both client_state and application_state for comprehensive state validation</practice>
-                <practice>Use WebSocketState enum from starlette.websockets for comparisons</practice>
-                <practice>Handle missing attributes gracefully with hasattr checks</practice>
-            </best_practices>
-        </learning>
-        
-        <learning>
-            <id>websocket-send-after-close-error</id>
-            <date>2025-08-16</date>
-            <category>WebSocket/Race Conditions</category>
-            <severity>high</severity>
-            <title>WebSocket Send After Close: "Cannot call send once a close message has been sent"</title>
-            
-            <problem>
-                <description>Race condition where broadcast attempts to send to a WebSocket that has begun closing</description>
-                <error_message>Cannot call "send" once a close message has been sent</error_message>
-                <symptoms>
-                    <symptom>DEBUG error logged in broadcast_core at line 268</symptom>
-                    <symptom>Occurs during concurrent broadcast and disconnect operations</symptom>
-                    <symptom>Happens when WebSocket starts closing while broadcast is in progress</symptom>
-                </symptoms>
-                <root_cause>No mechanism to prevent sends to connections that have started their closing handshake</root_cause>
-                <impact>Failed message delivery and error noise in logs during normal disconnection</impact>
-            </problem>
-            
-            <solution>
-                <description>Implement is_closing flag and comprehensive state checking</description>
-                <implementation>
-                    <step>Added is_closing flag to ConnectionInfo dataclass</step>
-                    <step>Enhanced _is_connection_ready to check is_closing flag and both WebSocket states</step>
-                    <step>Set is_closing flag immediately when disconnection starts</step>
-                    <step>Updated error handling to treat send-after-close as DEBUG not ERROR</step>
-                </implementation>
-                <code_changes>
-                    <file>app/websocket/connection.py</file>
-                    <change>Added is_closing flag to ConnectionInfo</change>
-                    <change>Set is_closing in _execute_disconnection</change>
-                    <file>app/websocket/broadcast_core.py</file>
-                    <change>Check is_closing flag in _is_connection_ready</change>
-                    <change>Check both client_state and application_state</change>
-                    <change>Mark connections as closing during cleanup</change>
-                </code_changes>
-            </solution>
-            
-            <prevention>
-                <recommendation>Always set is_closing flag before starting disconnection</recommendation>
-                <recommendation>Check multiple state indicators before sending</recommendation>
-                <recommendation>Handle send-after-close gracefully as expected behavior</recommendation>
-                <pattern>
-                    <name>Safe WebSocket Send Pattern</name>
-                    <code><![CDATA[
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>netra_backend/tests/unit/test_websocket_error_handling.py</test_file>
+        <test_cases>
+          <test>test_close_websocket_safely_with_unconnected_socket</test>
+          <test>test_close_websocket_safely_with_connected_socket</test>
+          <test>test_handle_websocket_error_with_unconnected_socket</test>
+          <test>test_websocket_state_transitions</test>
+        </test_cases>
+      </testing>
+      <affected_files>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/routes/websockets.py</file>
+      </affected_files>
+      <related_patterns>
+        <pattern>WebSocket lifecycle management</pattern>
+        <pattern>Error handling in async contexts</pattern>
+        <pattern>State machine transitions for WebSockets</pattern>
+      </related_patterns>
+      <business_impact>
+        <impact>Improves system reliability during connection failures</impact>
+        <impact>Reduces noise in error logs for better debugging</impact>
+        <impact>Prevents cascading errors during authentication failures</impact>
+      </business_impact>
+    </learning>
+    <learning>
+      <id>websocket-state-attributes</id>
+      <date>2025-08-16</date>
+      <category>WebSocket/Implementation Details</category>
+      <severity>medium</severity>
+      <title>WebSocket State Attributes in Starlette</title>
+      <discovery>
+        <description>WebSocket objects have client_state and application_state attributes</description>
+        <details>
+          <detail>client_state tracks the client-side connection state</detail>
+          <detail>application_state tracks the server-side application state</detail>
+          <detail>Both initialized to CONNECTING in WebSocket.__init__</detail>
+          <detail>States: CONNECTING, CONNECTED, DISCONNECTED, RESPONSE</detail>
+        </details>
+      </discovery>
+      <best_practices>
+        <practice>Check both client_state and application_state for comprehensive state validation</practice>
+        <practice>Use WebSocketState enum from starlette.websockets for comparisons</practice>
+        <practice>Handle missing attributes gracefully with hasattr checks</practice>
+      </best_practices>
+    </learning>
+    <learning>
+      <id>websocket-send-after-close-error</id>
+      <date>2025-08-16</date>
+      <category>WebSocket/Race Conditions</category>
+      <severity>high</severity>
+      <title>WebSocket Send After Close: "Cannot call send once a close message has been sent"</title>
+      <problem>
+        <description>Race condition where broadcast attempts to send to a WebSocket that has begun closing</description>
+        <error_message>Cannot call "send" once a close message has been sent</error_message>
+        <symptoms>
+          <symptom>DEBUG error logged in broadcast_core at line 268</symptom>
+          <symptom>Occurs during concurrent broadcast and disconnect operations</symptom>
+          <symptom>Happens when WebSocket starts closing while broadcast is in progress</symptom>
+        </symptoms>
+        <root_cause>No mechanism to prevent sends to connections that have started their closing handshake</root_cause>
+        <impact>Failed message delivery and error noise in logs during normal disconnection</impact>
+      </problem>
+      <solution>
+        <description>Implement is_closing flag and comprehensive state checking</description>
+        <implementation>
+          <step>Added is_closing flag to ConnectionInfo dataclass</step>
+          <step>Enhanced _is_connection_ready to check is_closing flag and both WebSocket states</step>
+          <step>Set is_closing flag immediately when disconnection starts</step>
+          <step>Updated error handling to treat send-after-close as DEBUG not ERROR</step>
+        </implementation>
+        <code_changes>
+          <file>netra_backend/app/websocket/connection.py</file>
+          <change>Added is_closing flag to ConnectionInfo</change>
+          <change>Set is_closing in _execute_disconnection</change>
+          <file>netra_backend/app/websocket/broadcast_core.py</file>
+          <change>Check is_closing flag in _is_connection_ready</change>
+          <change>Check both client_state and application_state</change>
+          <change>Mark connections as closing during cleanup</change>
+        </code_changes>
+      </solution>
+      <prevention>
+        <recommendation>Always set is_closing flag before starting disconnection</recommendation>
+        <recommendation>Check multiple state indicators before sending</recommendation>
+        <recommendation>Handle send-after-close gracefully as expected behavior</recommendation>
+        <pattern>
+          <name>Safe WebSocket Send Pattern</name>
+          <code>
 if (not conn_info.is_closing and
     conn_info.websocket.client_state == WebSocketState.CONNECTED and
     conn_info.websocket.application_state == WebSocketState.CONNECTED):
     await conn_info.websocket.send_json(message)
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>app/tests/unit/websocket/test_websocket_closing_state.py</test_file>
-                <test_cases>
-                    <test>test_is_closing_flag_prevents_send</test>
-                    <test>test_disconnect_sets_is_closing_flag</test>
-                    <test>test_error_handling_for_send_after_close</test>
-                    <test>test_concurrent_send_and_close_race_condition</test>
-                    <test>test_broadcast_to_closing_connection_skipped</test>
-                </test_cases>
-            </testing>
-            
-            <affected_files>
-                <file>app/websocket/connection.py</file>
-                <file>app/websocket/broadcast_core.py</file>
-            </affected_files>
-            
-            <related_patterns>
-                <pattern>Race condition prevention</pattern>
-                <pattern>State machine with transitional flags</pattern>
-                <pattern>Concurrent operation coordination</pattern>
-            </related_patterns>
-            
-            <business_impact>
-                <impact>Prevents interruption of real-time agent communications</impact>
-                <impact>Improves reliability for all customer segments</impact>
-                <impact>Reduces support tickets from connection errors</impact>
-            </business_impact>
-        </learning>
-    </learnings>
-    
-    <learnings>
-        <learning>
-            <id>websocket-metrics-async-coroutine-error</id>
-            <date>2025-08-18</date>
-            <category>WebSocket/Metrics Collection</category>
-            <severity>high</severity>
-            <title>WebSocket Metrics Collection: Coroutine Not Awaited Error</title>
-            
-            <problem>
-                <description>Metrics collector fails when gathering WebSocket stats due to missing await</description>
-                <error_message>'coroutine' object has no attribute 'get'</error_message>
-                <symptoms>
-                    <symptom>ERROR logged in metrics_collector at line 294</symptom>
-                    <symptom>Occurs during periodic WebSocket metrics collection</symptom>
-                    <symptom>Metrics collection silently fails every interval</symptom>
-                </symptoms>
-                <root_cause>connection_manager.get_stats() is an async method but was called without await</root_cause>
-                <impact>WebSocket metrics not collected, preventing monitoring and alerting</impact>
-            </problem>
-            
-            <solution>
-                <description>Make metrics gathering method async and properly await async calls</description>
-                <implementation>
-                    <step>Changed _gather_websocket_metrics from sync to async method</step>
-                    <step>Added await when calling connection_manager.get_stats()</step>
-                    <step>Updated _collect_single_websocket_metrics_cycle to await the gather method</step>
-                </implementation>
-                <code_changes>
-                    <file>app/monitoring/metrics_collector.py</file>
-                    <change>Changed _gather_websocket_metrics to async method</change>
-                    <change>Added await for connection_manager.get_stats() call</change>
-                    <change>Added await when calling _gather_websocket_metrics</change>
-                </code_changes>
-            </solution>
-            
-            <prevention>
-                <recommendation>Always check if methods return coroutines and need await</recommendation>
-                <recommendation>Use type hints to clarify async vs sync methods</recommendation>
-                <recommendation>Enable asyncio warnings during development</recommendation>
-                <pattern>
-                    <name>Async Metrics Collection Pattern</name>
-                    <code><![CDATA[
-async def _gather_websocket_metrics(self) -> WebSocketMetrics:
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>netra_backend/tests/unit/websocket/test_websocket_closing_state.py</test_file>
+        <test_cases>
+          <test>test_is_closing_flag_prevents_send</test>
+          <test>test_disconnect_sets_is_closing_flag</test>
+          <test>test_error_handling_for_send_after_close</test>
+          <test>test_concurrent_send_and_close_race_condition</test>
+          <test>test_broadcast_to_closing_connection_skipped</test>
+        </test_cases>
+      </testing>
+      <affected_files>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/broadcast_core.py</file>
+      </affected_files>
+      <related_patterns>
+        <pattern>Race condition prevention</pattern>
+        <pattern>State machine with transitional flags</pattern>
+        <pattern>Concurrent operation coordination</pattern>
+      </related_patterns>
+      <business_impact>
+        <impact>Prevents interruption of real-time agent communications</impact>
+        <impact>Improves reliability for all customer segments</impact>
+        <impact>Reduces support tickets from connection errors</impact>
+      </business_impact>
+    </learning>
+  </learnings>
+  <learnings>
+    <learning>
+      <id>websocket-metrics-async-coroutine-error</id>
+      <date>2025-08-18</date>
+      <category>WebSocket/Metrics Collection</category>
+      <severity>high</severity>
+      <title>WebSocket Metrics Collection: Coroutine Not Awaited Error</title>
+      <problem>
+        <description>Metrics collector fails when gathering WebSocket stats due to missing await</description>
+        <error_message>'coroutine' object has no attribute 'get'</error_message>
+        <symptoms>
+          <symptom>ERROR logged in metrics_collector at line 294</symptom>
+          <symptom>Occurs during periodic WebSocket metrics collection</symptom>
+          <symptom>Metrics collection silently fails every interval</symptom>
+        </symptoms>
+        <root_cause>connection_manager.get_stats() is an async method but was called without await</root_cause>
+        <impact>WebSocket metrics not collected, preventing monitoring and alerting</impact>
+      </problem>
+      <solution>
+        <description>Make metrics gathering method async and properly await async calls</description>
+        <implementation>
+          <step>Changed _gather_websocket_metrics from sync to async method</step>
+          <step>Added await when calling connection_manager.get_stats()</step>
+          <step>Updated _collect_single_websocket_metrics_cycle to await the gather method</step>
+        </implementation>
+        <code_changes>
+          <file>netra_backend/app/monitoring/metrics_collector.py</file>
+          <change>Changed _gather_websocket_metrics to async method</change>
+          <change>Added await for connection_manager.get_stats() call</change>
+          <change>Added await when calling _gather_websocket_metrics</change>
+        </code_changes>
+      </solution>
+      <prevention>
+        <recommendation>Always check if methods return coroutines and need await</recommendation>
+        <recommendation>Use type hints to clarify async vs sync methods</recommendation>
+        <recommendation>Enable asyncio warnings during development</recommendation>
+        <pattern>
+          <name>Async Metrics Collection Pattern</name>
+          <code>
+async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
     """Gather WebSocket metrics from connection manager."""
-    from app.websocket.connection import connection_manager
+    from netra_backend.app.websocket.connection import connection_manager
     conn_stats = await connection_manager.get_stats()  # Note the await!
     return self._build_websocket_metrics(conn_stats)
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>app/tests/unit/monitoring/test_metrics_collector.py</test_file>
-                <test_cases>
-                    <test>test_websocket_metrics_collection_async</test>
-                    <test>test_gather_websocket_metrics_awaits_stats</test>
-                    <test>test_metrics_collection_handles_async_errors</test>
-                </test_cases>
-            </testing>
-            
-            <affected_files>
-                <file>app/monitoring/metrics_collector.py</file>
-                <file>app/websocket/connection.py</file>
-                <file>app/websocket/connection_manager.py</file>
-            </affected_files>
-            
-            <related_patterns>
-                <pattern>Async/await patterns in monitoring</pattern>
-                <pattern>Coroutine handling in periodic tasks</pattern>
-                <pattern>Type safety for async methods</pattern>
-            </related_patterns>
-            
-            <business_impact>
-                <impact>Restores WebSocket monitoring for production reliability</impact>
-                <impact>Enables performance tracking for customer segments</impact>
-                <impact>Critical for detecting connection issues affecting revenue</impact>
-            </business_impact>
-        </learning>
-        
-        <learning>
-            <id>websocket-connection-manager-initialization-error</id>
-            <date>2025-08-18</date>
-            <category>WebSocket/Initialization</category>
-            <severity>critical</severity>
-            <title>WebSocket Connection Manager: NoneType Error During Metrics Collection</title>
-            
-            <problem>
-                <description>Metrics collector and health checkers fail with NoneType error when accessing connection_manager</description>
-                <error_message>'NoneType' object has no attribute 'get_stats'</error_message>
-                <symptoms>
-                    <symptom>ERROR logged in metrics_collector at line 294</symptom>
-                    <symptom>Occurs during metrics collection startup</symptom>
-                    <symptom>Health checks fail with similar NoneType errors</symptom>
-                </symptoms>
-                <root_cause>connection_manager singleton is initialized as None and not properly accessed via lazy initialization</root_cause>
-                <impact>Complete failure of WebSocket monitoring and health checks at startup</impact>
-            </problem>
-            
-            <solution>
-                <description>Use get_connection_manager() lazy initialization instead of direct import</description>
-                <implementation>
-                    <step>Changed metrics_collector.py to import get_connection_manager instead of connection_manager</step>
-                    <step>Updated health_checkers.py to use get_connection_manager() for lazy initialization</step>
-                    <step>Fixed connection.py to initialize connection_manager using get_connection_manager()</step>
-                    <step>Made _get_websocket_stats_and_score async to properly await async calls</step>
-                </implementation>
-                <code_changes>
-                    <file>app/monitoring/metrics_collector.py</file>
-                    <change>Import get_connection_manager instead of connection_manager</change>
-                    <change>Call get_connection_manager() to get initialized instance</change>
-                    <file>app/core/health_checkers.py</file>
-                    <change>Changed to use get_connection_manager() for lazy initialization</change>
-                    <change>Made _get_websocket_stats_and_score async and await its calls</change>
-                    <file>app/websocket/connection.py</file>
-                    <change>Initialize connection_manager using get_connection_manager()</change>
-                </code_changes>
-            </solution>
-            
-            <prevention>
-                <recommendation>Always use get_connection_manager() for singleton access</recommendation>
-                <recommendation>Never import connection_manager directly from connection_manager.py</recommendation>
-                <recommendation>Document singleton pattern usage in module docstrings</recommendation>
-                <pattern>
-                    <name>Safe Connection Manager Access Pattern</name>
-                    <code><![CDATA[
-from app.websocket.connection_manager import get_connection_manager
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>netra_backend/tests/unit/monitoring/test_metrics_collector.py</test_file>
+        <test_cases>
+          <test>test_websocket_metrics_collection_async</test>
+          <test>test_gather_websocket_metrics_awaits_stats</test>
+          <test>test_metrics_collection_handles_async_errors</test>
+        </test_cases>
+      </testing>
+      <affected_files>
+        <file>netra_backend/app/monitoring/metrics_collector.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/connection_manager.py</file>
+      </affected_files>
+      <related_patterns>
+        <pattern>Async/await patterns in monitoring</pattern>
+        <pattern>Coroutine handling in periodic tasks</pattern>
+        <pattern>Type safety for async methods</pattern>
+      </related_patterns>
+      <business_impact>
+        <impact>Restores WebSocket monitoring for production reliability</impact>
+        <impact>Enables performance tracking for customer segments</impact>
+        <impact>Critical for detecting connection issues affecting revenue</impact>
+      </business_impact>
+    </learning>
+    <learning>
+      <id>websocket-connection-manager-initialization-error</id>
+      <date>2025-08-18</date>
+      <category>WebSocket/Initialization</category>
+      <severity>critical</severity>
+      <title>WebSocket Connection Manager: NoneType Error During Metrics Collection</title>
+      <problem>
+        <description>Metrics collector and health checkers fail with NoneType error when accessing connection_manager</description>
+        <error_message>'NoneType' object has no attribute 'get_stats'</error_message>
+        <symptoms>
+          <symptom>ERROR logged in metrics_collector at line 294</symptom>
+          <symptom>Occurs during metrics collection startup</symptom>
+          <symptom>Health checks fail with similar NoneType errors</symptom>
+        </symptoms>
+        <root_cause>connection_manager singleton is initialized as None and not properly accessed via lazy initialization</root_cause>
+        <impact>Complete failure of WebSocket monitoring and health checks at startup</impact>
+      </problem>
+      <solution>
+        <description>Use get_connection_manager() lazy initialization instead of direct import</description>
+        <implementation>
+          <step>Changed metrics_collector.py to import get_connection_manager instead of connection_manager</step>
+          <step>Updated health_checkers.py to use get_connection_manager() for lazy initialization</step>
+          <step>Fixed connection.py to initialize connection_manager using get_connection_manager()</step>
+          <step>Made _get_websocket_stats_and_score async to properly await async calls</step>
+        </implementation>
+        <code_changes>
+          <file>netra_backend/app/monitoring/metrics_collector.py</file>
+          <change>Import get_connection_manager instead of connection_manager</change>
+          <change>Call get_connection_manager() to get initialized instance</change>
+          <file>netra_backend/app/core/health_checkers.py</file>
+          <change>Changed to use get_connection_manager() for lazy initialization</change>
+          <change>Made _get_websocket_stats_and_score async and await its calls</change>
+          <file>netra_backend/app/websocket/connection.py</file>
+          <change>Initialize connection_manager using get_connection_manager()</change>
+        </code_changes>
+      </solution>
+      <prevention>
+        <recommendation>Always use get_connection_manager() for singleton access</recommendation>
+        <recommendation>Never import connection_manager directly from connection_manager.py</recommendation>
+        <recommendation>Document singleton pattern usage in module docstrings</recommendation>
+        <pattern>
+          <name>Safe Connection Manager Access Pattern</name>
+          <code>
+from netra_backend.app.websocket.connection_manager import get_connection_manager
 
 async def use_connection_manager():
     conn_manager = get_connection_manager()  # Ensures initialization
     stats = await conn_manager.get_stats()
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>test_websocket_metrics_fix.py</test_file>
-                <test_cases>
-                    <test>Connection manager properly initialized via get_connection_manager()</test>
-                    <test>Metrics collection works without NoneType errors</test>
-                    <test>Health checks function correctly with lazy initialization</test>
-                </test_cases>
-            </testing>
-            
-            <affected_files>
-                <file>app/monitoring/metrics_collector.py</file>
-                <file>app/core/health_checkers.py</file>
-                <file>app/websocket/connection.py</file>
-                <file>app/websocket/connection_manager.py</file>
-            </affected_files>
-            
-            <related_patterns>
-                <pattern>Singleton pattern with lazy initialization</pattern>
-                <pattern>Module-level variable initialization</pattern>
-                <pattern>Async service initialization</pattern>
-            </related_patterns>
-            
-            <business_impact>
-                <impact>Restores critical WebSocket monitoring at startup</impact>
-                <impact>Enables health checks for production readiness</impact>
-                <impact>Prevents revenue loss from undetected connection failures</impact>
-            </business_impact>
-        </learning>
-        
-        <learning>
-            <id>websocket-connection-circular-import</id>
-            <date>2025-08-18</date>
-            <category>WebSocket/Import</category>
-            <severity>critical</severity>
-            <title>Circular Import Between Connection Modules</title>
-            
-            <problem>
-                <description>Circular import dependency between connection.py, connection_executor.py, and connection_manager.py</description>
-                <error_message>ImportError: cannot import name 'get_connection_manager' from partially initialized module</error_message>
-                <symptoms>
-                    <symptom>Module fails to import at startup</symptom>
-                    <symptom>WebSocket connections cannot be established</symptom>
-                    <symptom>Service fails to start completely</symptom>
-                </symptoms>
-                <root_cause>connection.py was initializing connection_manager at module level, creating circular dependency</root_cause>
-                <impact>100% WebSocket connection failure, service completely non-functional</impact>
-            </problem>
-            
-            <solution>
-                <description>Implement lazy initialization for connection_manager</description>
-                <implementation>
-                    <step>Changed connection_manager from immediate initialization to None</step>
-                    <step>Created get_connection_manager_instance() function for lazy loading</step>
-                    <step>Updated exports to include the lazy getter function</step>
-                </implementation>
-                <code_changes>
-                    <file>app/websocket/connection.py</file>
-                    <change>Line 17: Changed from immediate get_connection_manager() to None</change>
-                    <change>Lines 19-24: Added get_connection_manager_instance() lazy getter</change>
-                    <change>Line 112: Added get_connection_manager_instance to __all__ exports</change>
-                </code_changes>
-            </solution>
-            
-            <prevention>
-                <recommendation>Never initialize shared resources at module import time</recommendation>
-                <recommendation>Always use lazy initialization for singleton patterns</recommendation>
-                <recommendation>Test import order independence in critical tests</recommendation>
-                <pattern>
-                    <name>Lazy Singleton Pattern</name>
-                    <code><![CDATA[
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>test_websocket_metrics_fix.py</test_file>
+        <test_cases>
+          <test>Connection manager properly initialized via get_connection_manager()</test>
+          <test>Metrics collection works without NoneType errors</test>
+          <test>Health checks function correctly with lazy initialization</test>
+        </test_cases>
+      </testing>
+      <affected_files>
+        <file>netra_backend/app/monitoring/metrics_collector.py</file>
+        <file>netra_backend/app/core/health_checkers.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/connection_manager.py</file>
+      </affected_files>
+      <related_patterns>
+        <pattern>Singleton pattern with lazy initialization</pattern>
+        <pattern>Module-level variable initialization</pattern>
+        <pattern>Async service initialization</pattern>
+      </related_patterns>
+      <business_impact>
+        <impact>Restores critical WebSocket monitoring at startup</impact>
+        <impact>Enables health checks for production readiness</impact>
+        <impact>Prevents revenue loss from undetected connection failures</impact>
+      </business_impact>
+    </learning>
+    <learning>
+      <id>websocket-connection-circular-import</id>
+      <date>2025-08-18</date>
+      <category>WebSocket/Import</category>
+      <severity>critical</severity>
+      <title>Circular Import Between Connection Modules</title>
+      <problem>
+        <description>Circular import dependency between connection.py, connection_executor.py, and connection_manager.py</description>
+        <error_message>ImportError: cannot import name 'get_connection_manager' from partially initialized module</error_message>
+        <symptoms>
+          <symptom>Module fails to import at startup</symptom>
+          <symptom>WebSocket connections cannot be established</symptom>
+          <symptom>Service fails to start completely</symptom>
+        </symptoms>
+        <root_cause>connection.py was initializing connection_manager at module level, creating circular dependency</root_cause>
+        <impact>100% WebSocket connection failure, service completely non-functional</impact>
+      </problem>
+      <solution>
+        <description>Implement lazy initialization for connection_manager</description>
+        <implementation>
+          <step>Changed connection_manager from immediate initialization to None</step>
+          <step>Created get_connection_manager_instance() function for lazy loading</step>
+          <step>Updated exports to include the lazy getter function</step>
+        </implementation>
+        <code_changes>
+          <file>netra_backend/app/websocket/connection.py</file>
+          <change>Line 17: Changed from immediate get_connection_manager() to None</change>
+          <change>Lines 19-24: Added get_connection_manager_instance() lazy getter</change>
+          <change>Line 112: Added get_connection_manager_instance to __all__ exports</change>
+        </code_changes>
+      </solution>
+      <prevention>
+        <recommendation>Never initialize shared resources at module import time</recommendation>
+        <recommendation>Always use lazy initialization for singleton patterns</recommendation>
+        <recommendation>Test import order independence in critical tests</recommendation>
+        <pattern>
+          <name>Lazy Singleton Pattern</name>
+          <code>
 # Module level - lazy initialization
 connection_manager = None
 
@@ -404,38 +366,35 @@ def get_connection_manager_instance():
     if connection_manager is None:
         connection_manager = get_connection_manager()
     return connection_manager
-                    ]]></code>
-                </pattern>
-            </prevention>
-            
-            <testing>
-                <test_file>app/tests/critical/test_websocket_circular_import_regression.py</test_file>
-                <test_class>TestConnectionModuleCircularImportPrevention</test_class>
-                <tests>
-                    <test>test_connection_manager_lazy_initialization - Verifies lazy init behavior</test>
-                    <test>test_connection_modules_import_independently - Tests isolated imports</test>
-                    <test>test_connection_backward_compatibility - Ensures all exports available</test>
-                </tests>
-            </testing>
-            
-            <business_impact>
-                <metric>Prevents 100% WebSocket connection failures</metric>
-                <metric>Protects $50K+ MRR from service disruption</metric>
-                <metric>Ensures zero downtime from import errors</metric>
-            </business_impact>
-        </learning>
-    </learnings>
-    
-    <summary>
-        <total_learnings>6</total_learnings>
-        <categories>
-            <category>WebSocket/Error Handling</category>
-            <category>WebSocket/Implementation Details</category>
-            <category>WebSocket/Race Conditions</category>
-            <category>WebSocket/Metrics Collection</category>
-            <category>WebSocket/Initialization</category>
-            <category>WebSocket/Import</category>
-        </categories>
-        <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, ensure async methods are properly awaited in monitoring systems, use proper singleton initialization patterns for connection managers, and implement lazy initialization to prevent circular import dependencies</key_takeaway>
-    </summary>
+                    </code>
+        </pattern>
+      </prevention>
+      <testing>
+        <test_file>netra_backend/tests/critical/test_websocket_circular_import_regression.py</test_file>
+        <test_class>TestConnectionModuleCircularImportPrevention</test_class>
+        <tests>
+          <test>test_connection_manager_lazy_initialization - Verifies lazy init behavior</test>
+          <test>test_connection_modules_import_independently - Tests isolated imports</test>
+          <test>test_connection_backward_compatibility - Ensures all exports available</test>
+        </tests>
+      </testing>
+      <business_impact>
+        <metric>Prevents 100% WebSocket connection failures</metric>
+        <metric>Protects $50K+ MRR from service disruption</metric>
+        <metric>Ensures zero downtime from import errors</metric>
+      </business_impact>
+    </learning>
+  </learnings>
+  <summary>
+    <total_learnings>6</total_learnings>
+    <categories>
+      <category>WebSocket/Error Handling</category>
+      <category>WebSocket/Implementation Details</category>
+      <category>WebSocket/Race Conditions</category>
+      <category>WebSocket/Metrics Collection</category>
+      <category>WebSocket/Initialization</category>
+      <category>WebSocket/Import</category>
+    </categories>
+    <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, ensure async methods are properly awaited in monitoring systems, use proper singleton initialization patterns for connection managers, and implement lazy initialization to prevent circular import dependencies</key_takeaway>
+  </summary>
 </specification>

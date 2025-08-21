@@ -30,7 +30,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["LOG_LEVEL"] = "INFO"
 os.environ["ENABLE_JSON_LOGGING"] = "true"
 
-from .config import create_unified_config, TestDataFactory
+from tests.unified.config import create_unified_config, TestDataFactory
 
 
 class ObservabilityTestHarness:
@@ -53,19 +53,19 @@ class ObservabilityTestHarness:
     
     async def _setup_logging_collector(self):
         """Setup log aggregation system"""
-        from app.core.unified_logging import UnifiedLogger
+        from netra_backend.app.core.unified_logging import UnifiedLogger
         self.logger = UnifiedLogger()
         self.logger._config['enable_json_logging'] = True
     
     async def _setup_metrics_collector(self):
         """Setup metrics collection system"""
-        from app.monitoring.metrics_collector import MetricsCollector
+        from netra_backend.app.monitoring.metrics_collector import MetricsCollector
         self.metrics = MetricsCollector()
         await self.metrics.start_collection()
     
     async def _setup_alert_manager(self):
         """Setup alerting system"""
-        from app.db.observability_alerts import ConnectionAlertChecker
+        from netra_backend.app.db.observability_alerts import ConnectionAlertChecker
         self.alert_checker = ConnectionAlertChecker()
     
     async def _setup_trace_collector(self):

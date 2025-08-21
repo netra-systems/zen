@@ -38,8 +38,10 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 ## 🚀 Developer Guidelines
 
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
-📚 **[LLM_MASTER_INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation index
+🔧 **[TOOLING INDEX](TOOLING_INDEX.md)** - AI Native centric tools
+📚 **[LLM INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
+🏭 **[AI Native Meta Process](SPEC/ai_native_meta_process.md)** - AI factory methodology for 99.99% correctness
 
 **Core Development Principles:**
 - **Business Value Justification (BVJ):** Every feature must demonstrate ROI
@@ -123,6 +125,7 @@ python scripts/dev_launcher.py --help
 - ✅ Performance optimization
 
 **Launches:**
+Ports may be dynamic.
 - Backend API: http://localhost:8000
 - Frontend UI: http://localhost:3000
 - WebSocket: ws://localhost:8000/ws
@@ -327,66 +330,6 @@ netra-core-generation-1/
 └── organized_root/            # Deployment configurations
     └── deployment_configs/    # Staging/production deploy scripts
 ```
-
-
-## 📚 API Documentation
-
-### REST API Endpoints
-
-**Authentication & Authorization:**
-- `POST /api/auth/login` - Email/password login
-- `GET /api/auth/google/authorize` - Google OAuth flow
-- `POST /api/auth/refresh` - Refresh JWT token
-- `POST /api/auth/logout` - Invalidate session
-
-**Thread Management:**
-- `GET /api/threads` - List user threads
-- `POST /api/threads` - Create new thread
-- `GET /api/threads/{thread_id}` - Get thread details
-- `DELETE /api/threads/{thread_id}` - Delete thread
-- `PUT /api/threads/{thread_id}` - Update thread
-
-**Optimization & Analysis:**
-- `POST /api/optimize/analyze` - Start optimization analysis
-- `GET /api/optimize/status/{job_id}` - Check job status
-- `GET /api/optimize/results/{job_id}` - Get optimization results
-
-**Metrics & Reporting:**
-- `GET /api/metrics/savings/{user_id}` - Cost savings metrics
-- `GET /api/metrics/roi` - ROI calculations
-- `GET /api/metrics/usage` - Usage analytics
-- `POST /api/reports/generate` - Generate custom report
-
-**Health & Monitoring:**
-- `GET /health/ready` - Readiness probe
-- `GET /health/live` - Liveness probe
-- `GET /health/dependencies` - Service dependencies status
-
-### WebSocket Protocol
-
-**Connection:**
-```javascript
-ws://localhost:8000/ws?token={jwt_token}
-```
-
-**Message Types:**
-```typescript
-interface WSMessage {
-  type: 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
-        'tool_call' | 'tool_result' | 'error' | 'heartbeat';
-  data: any;
-  timestamp: string;
-  correlation_id?: string;
-}
-```
-
-**Event Flow:**
-1. Client connects with JWT token
-2. Server validates and establishes session
-3. Client sends optimization request
-4. Server streams real-time updates
-5. Final results delivered
-6. Connection maintained for follow-up
 
 ## 🧪 Testing Strategy
 

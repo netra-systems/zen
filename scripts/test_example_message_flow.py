@@ -18,7 +18,7 @@ import asyncio
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -206,10 +206,10 @@ class ExampleMessageFlowTestRunner:
         """Validate that all required imports work"""
         
         try:
-            from app.handlers.example_message_handler import ExampleMessageHandler
-            from app.agents.example_message_processor import ExampleMessageProcessor
-            from app.formatters.example_response_formatter import ExampleResponseFormatter
-            from app.error_handling.example_message_errors import ExampleMessageErrorHandler
+            from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+            from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor
+            from netra_backend.app.formatters.example_response_formatter import ExampleResponseFormatter
+            from netra_backend.app.error_handling.example_message_errors import ExampleMessageErrorHandler
             
             print("     ✅ All imports successful")
             return True
@@ -223,7 +223,7 @@ class ExampleMessageFlowTestRunner:
         
         try:
             # Check that WebSocket manager can be initialized
-            from app.ws_manager import get_manager
+            from netra_backend.app.ws_manager import get_manager
             ws_manager = get_manager()
             
             if ws_manager is None:
@@ -241,8 +241,8 @@ class ExampleMessageFlowTestRunner:
         """Test that handlers can be initialized"""
         
         try:
-            from app.handlers.example_message_handler import ExampleMessageHandler
-            from app.agents.example_message_processor import ExampleMessageSupervisor
+            from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+            from netra_backend.app.agents.example_message_processor import ExampleMessageSupervisor
             
             handler = ExampleMessageHandler()
             supervisor = ExampleMessageSupervisor()
@@ -262,7 +262,7 @@ class ExampleMessageFlowTestRunner:
         """Test message validation functionality"""
         
         try:
-            from app.handlers.example_message_handler import ExampleMessageRequest
+            from netra_backend.app.handlers.example_message_handler import ExampleMessageRequest
             
             # Test valid message
             valid_message = {
@@ -361,10 +361,10 @@ def run_quick_validation():
     try:
         # Test imports
         print("Checking imports...")
-        from app.handlers.example_message_handler import ExampleMessageHandler
-        from app.agents.example_message_processor import ExampleMessageProcessor
-        from app.formatters.example_response_formatter import ExampleResponseFormatter
-        from app.error_handling.example_message_errors import ExampleMessageErrorHandler
+        from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+        from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor
+        from netra_backend.app.formatters.example_response_formatter import ExampleResponseFormatter
+        from netra_backend.app.error_handling.example_message_errors import ExampleMessageErrorHandler
         print("✅ Imports successful")
         
         # Test initialization
@@ -375,7 +375,7 @@ def run_quick_validation():
         
         # Test basic functionality
         print("Testing message validation...")
-        from app.handlers.example_message_handler import ExampleMessageRequest
+        from netra_backend.app.handlers.example_message_handler import ExampleMessageRequest
         
         test_message = {
             "content": "Quick validation test",

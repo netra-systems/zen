@@ -6,13 +6,13 @@ Modular design: <300 lines, 25-line functions max
 """
 
 # Import core components from split modules
-from .session_persistence_core import (
+from tests.unified.e2e.session_persistence_core import SessionPersistenceManager, ServiceRestartSimulator, PerformanceTracker
     SessionPersistenceManager,
     ServiceRestartSimulator, 
     PerformanceTracker
 )
 
-from .session_persistence_validators import (
+from tests.unified.e2e.session_persistence_validators import SessionPersistenceTestValidator, ChatContinuityValidator
     SessionPersistenceTestValidator,
     ChatContinuityValidator
 )

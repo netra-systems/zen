@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
-from tests.e2e.fixtures.rapid_message_fixtures import MessageBurstResult, MessageSequenceEntry
+from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import MessageBurstResult, MessageSequenceEntry
 
 logger = logging.getLogger(__name__)
 

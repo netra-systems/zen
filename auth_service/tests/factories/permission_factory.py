@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
-from auth_core.models.auth_models import UserPermission
+from auth_service.auth_core.models.auth_models import UserPermission
 
 
 class PermissionFactory:

@@ -1,37 +1,39 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-20T12:12:59.395638  
+**Generated:** 2025-08-21T12:24:22.895553  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 
-## Test Summary
+## 1. Test Summary
 
-**Total Tests:** 0  
-**Passed:** 0  
-**Failed:** 0  
-**Skipped:** 0  
-**Errors:** 0  
-**Overall Status:** [FAILED]
+[FAILED] **OVERALL STATUS**
+
+### Test Counts (Extracted from pytest output)
+- **Total Tests:** 0
+- **Passed:** 0 
+- **Failed:** 0
+- **Skipped:** 0
+- **Errors:** 0
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.33s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 10.74s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
-## Environment and Configuration
+## 3. Environment and Configuration
 
 - **Test Level:** smoke
 - **Description:** Quick smoke tests for basic functionality (< 30 seconds)
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
-- **Coverage Enabled:** No
-- **Total Duration:** 7.33s
+- **Coverage Enabled:** Yes
+- **Total Duration:** 10.74s
 - **Exit Code:** 4
 
 ### Backend Configuration
 ```
---category smoke --fail-fast --markers not real_services
+--category smoke --fail-fast --coverage --markers not real_services
 ```
 
 ### Frontend Configuration
@@ -39,7 +41,7 @@
 
 ```
 
-## Test Output
+## 4. Test Output
 
 ### Backend Output
 ```
@@ -55,35 +57,22 @@ Test Configuration:
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\pytest.ini app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt app/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/routes/test_health_route.py netra_backend/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error netra_backend/tests/core/test_config_manager.py::TestConfigManager::test_initialization netra_backend/tests/services/test_security_service.py::test_encrypt_and_decrypt netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'langsmith': '0.4.14', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.14, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-[1mcollecting ... [0mcollected 3 items
-
-[33m============================ [33mno tests ran[0m[33m in 0.38s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.34s
+[FAIL] TESTS FAILED with exit code 4 after 9.11s
 ================================================================================
 
-ERROR: not found: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\e2e\test_system_startup.py::TestSystemStartup::test_configuration_loading
-(no match in any of [<Class TestSystemStartup>])
-
---- Logging error in Loguru Handler #11 ---
-Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=435264), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=44328, name='MainProcess'), 'thread': (id=29900, name='MainThread'), 'time': datetime(2025, 8, 20, 12, 12, 58, 708206, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
-Traceback (most recent call last):
-  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\loguru\_handler.py", line 315, in _queued_writer
-    self._sink.write(message)
-  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\loguru\_simple_sinks.py", line 16, in write
-    self._stream.write(message)
-ValueError: I/O operation on closed file.
---- End of logging error ---
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\e2e\conftest.py'.
+netra_backend\tests\e2e\conftest.py:26: in <module>
+    from netra_backend.tests.e2e.infrastructure import (
+netra_backend\tests\e2e\infrastructure\__init__.py:7: in <module>
+    from netra_backend.tests.llm_test_manager import (
+E   ModuleNotFoundError: No module named 'netra_backend.tests.llm_test_manager'
 
 ```
 
@@ -91,5 +80,7 @@ ValueError: I/O operation on closed file.
 ```
 
 ```
+
 ---
-*Generated by Netra AI Unified Test Runner v3.0*
+*Generated by Netra AI Unified Test Runner v3.0*  
+*Report structure follows SPEC/testing.xml requirements*

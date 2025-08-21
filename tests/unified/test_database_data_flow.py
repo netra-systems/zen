@@ -23,8 +23,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-from database_test_connections import DatabaseConnectionManager
-from database_test_operations import (
+from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.unified.database_test_operations import (
     UserDataOperations, 
     ChatMessageOperations, 
     SessionCacheOperations

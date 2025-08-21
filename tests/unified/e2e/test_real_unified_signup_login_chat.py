@@ -39,8 +39,8 @@ from unittest.mock import MagicMock
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from ..test_harness import UnifiedTestHarness
-from ..database_test_connections import DatabaseConnectionManager
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.database_test_connections import DatabaseConnectionManager
 from helpers.unified_flow_helpers import (
     ControlledSignupHelper,
     ControlledLoginHelper,
@@ -199,5 +199,4 @@ async def _execute_concurrent_journey(tester: RealUnifiedFlowTester, user_index:
 def _validate_concurrent_results(results_list: list) -> int:
     """Validate concurrent journey results and count successes."""
     return ConcurrentJourneyHelper.validate_concurrent_results(results_list)
-
 

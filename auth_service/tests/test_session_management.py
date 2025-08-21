@@ -12,9 +12,9 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_core.core.session_manager import SessionManager
-from auth_core.database.models import AuthSession, AuthUser
-from auth_core.database.connection import auth_db
+from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.database.models import AuthSession, AuthUser
+from auth_service.auth_core.database.connection import auth_db
 
 
 class TestSessionCreation:

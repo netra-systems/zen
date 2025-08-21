@@ -23,8 +23,8 @@ from typing import Dict, Any
 import pytest
 
 # Import test configuration and network simulator
-from .config import TEST_CONFIG, TestDataFactory
-from .network_failure_simulator import NetworkFailureSimulator
+from tests.unified.config import TEST_CONFIG, TestDataFactory
+from tests.unified.network_failure_simulator import NetworkFailureSimulator
 
 
 @pytest.fixture

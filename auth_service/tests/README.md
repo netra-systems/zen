@@ -55,8 +55,8 @@ auth_service/tests/
 ```python
 # Example unit test using the infrastructure
 import pytest
-from tests.base import AuthTestBase
-from tests.factories import UserFactory, TokenFactory
+from netra_backend.tests.base import AuthTestBase
+from netra_backend.tests.factories import UserFactory, TokenFactory
 
 class TestUserAuthentication(AuthTestBase):
     def test_create_user(self):
@@ -79,8 +79,8 @@ class TestUserAuthentication(AuthTestBase):
 
 ```python
 import pytest
-from tests.base import DatabaseTestBase
-from tests.utils import DatabaseTestUtils
+from netra_backend.tests.base import DatabaseTestBase
+from netra_backend.tests.utils import DatabaseTestUtils
 
 class TestUserDatabase(DatabaseTestBase):
     @pytest.mark.asyncio
@@ -103,7 +103,7 @@ class TestUserDatabase(DatabaseTestBase):
 ### Integration Testing
 
 ```python
-from tests.utils import AuthTestClient, AssertionHelpers
+from netra_backend.tests.utils import AuthTestClient, AssertionHelpers
 
 class TestAuthIntegration:
     def setup_method(self):
@@ -127,7 +127,7 @@ class TestAuthIntegration:
 ### User Factory
 
 ```python
-from tests.factories import UserFactory, AuthUserFactory
+from netra_backend.tests.factories import UserFactory, AuthUserFactory
 
 # Create user data structures
 user_data = UserFactory.create_local_user_data(
@@ -150,7 +150,7 @@ db_user = AuthUserFactory.create_local_user(
 ### Token Factory
 
 ```python
-from tests.factories import TokenFactory
+from netra_backend.tests.factories import TokenFactory
 
 # Create access token
 access_token = TokenFactory.create_access_token(
@@ -169,7 +169,7 @@ claims = TokenFactory.decode_token(access_token, verify=False)
 ### Session Factory
 
 ```python
-from tests.factories import SessionFactory, AuthSessionFactory
+from netra_backend.tests.factories import SessionFactory, AuthSessionFactory
 
 # Create session data
 session_data = SessionFactory.create_session_data(
@@ -187,7 +187,7 @@ db_session = AuthSessionFactory.create_session(
 ### Permission Factory
 
 ```python
-from tests.factories import PermissionFactory, RoleFactory
+from netra_backend.tests.factories import PermissionFactory, RoleFactory
 
 # Create custom permissions
 permissions = PermissionFactory.create_custom_permissions(
@@ -210,7 +210,7 @@ The test infrastructure automatically configures the environment:
 - **E2E Tests**: Production-like configuration with debugging
 
 ```python
-from tests.config import get_test_environment
+from netra_backend.tests.config import get_test_environment
 
 # Get environment for specific test type
 unit_env = get_test_environment("unit")
@@ -237,7 +237,7 @@ pytest --cov=auth_core --cov-report=html
 
 # Generate coverage analysis
 python -c "
-from tests.coverage import CoverageReporter
+from netra_backend.tests.coverage import CoverageReporter
 reporter = CoverageReporter()
 reporter.generate_coverage_report(summary, results)
 "
@@ -248,7 +248,7 @@ reporter.generate_coverage_report(summary, results)
 ### Custom Assertions
 
 ```python
-from tests.utils import AssertionHelpers
+from netra_backend.tests.utils import AssertionHelpers
 
 # Validate data structures
 AssertionHelpers.assert_valid_email("test@example.com")
@@ -266,7 +266,7 @@ await AssertionHelpers.assert_user_exists_in_db(
 ### Test Helpers
 
 ```python
-from tests.utils import AuthTestUtils
+from netra_backend.tests.utils import AuthTestUtils
 
 # Initialize with database session
 auth_utils = AuthTestUtils(db_session)
@@ -323,7 +323,7 @@ Available markers:
 The infrastructure includes security-focused testing utilities:
 
 ```python
-from tests.utils import AssertionHelpers
+from netra_backend.tests.utils import AssertionHelpers
 
 # Password strength validation
 AssertionHelpers.assert_password_strength("MySecureP@ssw0rd!")

@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 
 # Import from part 1
-from .test_harness import UnifiedTestHarness, ServiceConfig, DatabaseManager
+from tests.unified.test_harness import UnifiedTestHarness, ServiceConfig, DatabaseManager
 
 logger = logging.getLogger(__name__)
 
@@ -320,7 +320,6 @@ class HealthMonitor:
     async def _verify_service_health(self, config: ServiceConfig) -> bool:
         """Verify service health with additional checks."""
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=5.0) as client:
                 url = f"http://{config.host}:{config.port}{config.health_endpoint}"
                 response = await client.get(url)

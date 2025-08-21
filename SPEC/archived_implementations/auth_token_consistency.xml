@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
     <title>Authentication Token Consistency Specification</title>
     <version>1.0</version>
     <created>2025-08-11</created>
     <description>Specification for maintaining consistent authentication token storage and retrieval across the frontend application</description>
+    <last_edited>2025-08-21T08:47:28.725109</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.725109">
+      <reasons>
+        <reason>In archived/legacy folder</reason>
+      </reasons>
+    </legacy_status>
   </metadata>
-
   <problem_statement>
     <issue>401 Unauthorized errors occur when making API requests from frontend components</issue>
     <root_cause>Inconsistent token storage key names across different services</root_cause>
@@ -16,11 +21,9 @@
       <symptom>Token exists in localStorage but is not included in request headers</symptom>
     </symptoms>
   </problem_statement>
-
   <solution>
     <standard_token_key>jwt_token</standard_token_key>
     <description>All services must use 'jwt_token' as the localStorage key for authentication tokens and consistent database session dependencies</description>
-    
     <affected_files>
       <file path="frontend/services/apiClientWrapper.ts">
         <change>Update localStorage key from 'auth_token' to 'jwt_token'</change>
@@ -30,10 +33,9 @@
       </file>
       <file path="app/auth/auth_dependencies.py">
         <change>Update OAuth2PasswordBearer tokenUrl from '/auth/token' to '/api/auth/token'</change>
-        <change>Use get_db_session from app.dependencies instead of get_async_db</change>
+        <change>Use get_db_session from netra_backend.app.dependencies instead of get_async_db</change>
       </file>
     </affected_files>
-
     <correct_implementations>
       <file path="frontend/store/authStore.ts">Uses 'jwt_token' correctly</file>
       <file path="frontend/auth/service.ts">Uses 'jwt_token' correctly</file>
@@ -42,7 +44,6 @@
       <file path="frontend/app/auth/logout/page.tsx">Uses 'jwt_token' correctly</file>
     </correct_implementations>
   </solution>
-
   <token_flow>
     <step number="1">User logs in via OAuth or dev login</step>
     <step number="2">Backend returns JWT token in response</step>
@@ -52,7 +53,6 @@
     <step number="6">Token is included in Authorization header as 'Bearer {token}'</step>
     <step number="7">Backend validates token and authorizes request</step>
   </token_flow>
-
   <testing_checklist>
     <test>Verify token is saved to localStorage on login</test>
     <test>Verify token persists across page refreshes</test>
@@ -60,7 +60,6 @@
     <test>Verify ThreadSidebar loads threads without 401 errors</test>
     <test>Verify all API endpoints receive proper authentication</test>
   </testing_checklist>
-
   <backend_issues_fixed>
     <issue>
       <description>OAuth2PasswordBearer tokenUrl path mismatch</description>
@@ -70,10 +69,9 @@
     <issue>
       <description>Database session dependency inconsistency</description>
       <problem>auth_dependencies used get_async_db while other routes used get_db_session</problem>
-      <solution>Standardized to use get_db_session from app.dependencies</solution>
+      <solution>Standardized to use get_db_session from netra_backend.app.dependencies</solution>
     </issue>
   </backend_issues_fixed>
-
   <prevention>
     <guideline>Always use authService.getToken() or localStorage.getItem('jwt_token')</guideline>
     <guideline>Never hardcode alternative token key names</guideline>

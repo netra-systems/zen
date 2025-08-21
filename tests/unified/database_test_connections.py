@@ -12,7 +12,7 @@ from typing import Optional
 
 # Import test environment config for environment-aware configuration
 try:
-    from .test_environment_config import TestEnvironmentConfig
+    from tests.unified.test_environment_config import TestEnvironmentConfig
 except ImportError:
     TestEnvironmentConfig = None
 

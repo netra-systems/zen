@@ -24,8 +24,8 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .startup_sequence_validator import ServiceStartupSequenceValidator
-from .service_failure_tester import ServiceFailureScenarioTester
+from tests.unified.e2e.startup_sequence_validator import ServiceStartupSequenceValidator
+from tests.unified.e2e.service_failure_tester import ServiceFailureScenarioTester
 
 
 # PYTEST TEST IMPLEMENTATIONS

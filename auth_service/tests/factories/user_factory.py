@@ -10,8 +10,8 @@ from typing import Dict, Any, Optional
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from auth_core.database.models import AuthUser
-from auth_core.models.auth_models import AuthProvider
+from auth_service.auth_core.database.models import AuthUser
+from auth_service.auth_core.models.auth_models import AuthProvider
 
 # Password hasher instance
 ph = PasswordHasher()

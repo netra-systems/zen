@@ -27,10 +27,10 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .service_orchestrator import E2EServiceOrchestrator
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
-from ..config import TEST_USERS
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,6 @@ class ClickHouseFailureSimulator:
     
     async def _restore_clickhouse_connections(self) -> None:
         """Restore ClickHouse connections by removing override."""
-        import os
         if 'CLICKHOUSE_DISABLED' in os.environ:
             del os.environ['CLICKHOUSE_DISABLED']
         await asyncio.sleep(2)  # Allow service recovery time
@@ -161,7 +160,6 @@ class HealthCheckCascadeValidator:
     async def _check_health_endpoint(self, backend_url: str, endpoint: str) -> Dict[str, Any]:
         """Check individual health endpoint."""
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{backend_url}{endpoint}")
                 return {"status_code": response.status_code, "data": response.json()}
@@ -211,7 +209,6 @@ class RecoveryValidator:
         """Check health status after recovery."""
         backend_url = orchestrator.get_service_url("backend")
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(f"{backend_url}/health/system/comprehensive")
                 return {"status_code": response.status_code, "data": response.json()}

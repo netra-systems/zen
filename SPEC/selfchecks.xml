@@ -1,40 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>Self Checks</name>
-        <type>selfchecks</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <checks>
-        <check id="1">
-            <title>Configuration Validation</title>
-            <what>Implement a check to validate the application's configuration (app/config.py) on startup</what>
-            <why>This would ensure that all required settings are present and have valid values (e.g., checking if URLs are well-formed, or that required API keys are not empty). This can prevent runtime errors caused by misconfiguration</why>
-        </check>
-        
-        <check id="2">
-            <title>External Service Connectivity</title>
-            <what>Add checks to verify the connectivity to all external services the application depends on</what>
-            <why>Your application uses Redis, ClickHouse, and an external LLM provider. A startup check could attempt to connect to each of these services and report an error if any of them are unavailable. This would provide a clear and immediate signal that a dependency is down, rather than discovering it through a failed user request</why>
-        </check>
-        
-        <check id="3">
-            <title>API Key Validation</title>
-            <what>For services that require API keys (like the LLM provider), you could add a check to make a simple, inexpensive API call to validate that the keys are correct and have the necessary permissions</what>
-            <why>This would catch issues with invalid or expired API keys at startup, which is much better than failing in the middle of a user's workflow</why>
-        </check>
-        
-        <check id="4">
-            <title>File System Permissions</title>
-            <what>If your application needs to write to specific directories (e.g., for logs, file uploads, or temporary files), you could add a check to verify that these directories exist and that the application has the necessary write permissions</what>
-            <why>This would prevent runtime errors when the application tries to write a file to a location that doesn't exist or isn't writable</why>
-        </check>
-        
-        <check id="5">
-            <title>Tool and Agent Integrity Check</title>
-            <what>You could implement a check to verify the integrity of your agent's tools. This could involve checking if the tool's dependencies are met and if the tool's configuration is valid</what>
-            <why>As you add more tools to your agents, this check would ensure that a misconfigured or broken tool doesn't bring down the entire agent system</why>
-        </check>
-    </checks>
+  <metadata>
+    <name>Self Checks</name>
+    <type>selfchecks</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.569626</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.569626">
+      <reasons>
+        <reason>Likely outdated spec: selfchecks.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <checks>
+    <check id="1">
+      <title>Configuration Validation</title>
+      <what>Implement a check to validate the application's configuration (app/config.py) on startup</what>
+      <why>This would ensure that all required settings are present and have valid values (e.g., checking if URLs are well-formed, or that required API keys are not empty). This can prevent runtime errors caused by misconfiguration</why>
+    </check>
+    <check id="2">
+      <title>External Service Connectivity</title>
+      <what>Add checks to verify the connectivity to all external services the application depends on</what>
+      <why>Your application uses Redis, ClickHouse, and an external LLM provider. A startup check could attempt to connect to each of these services and report an error if any of them are unavailable. This would provide a clear and immediate signal that a dependency is down, rather than discovering it through a failed user request</why>
+    </check>
+    <check id="3">
+      <title>API Key Validation</title>
+      <what>For services that require API keys (like the LLM provider), you could add a check to make a simple, inexpensive API call to validate that the keys are correct and have the necessary permissions</what>
+      <why>This would catch issues with invalid or expired API keys at startup, which is much better than failing in the middle of a user's workflow</why>
+    </check>
+    <check id="4">
+      <title>File System Permissions</title>
+      <what>If your application needs to write to specific directories (e.g., for logs, file uploads, or temporary files), you could add a check to verify that these directories exist and that the application has the necessary write permissions</what>
+      <why>This would prevent runtime errors when the application tries to write a file to a location that doesn't exist or isn't writable</why>
+    </check>
+    <check id="5">
+      <title>Tool and Agent Integrity Check</title>
+      <what>You could implement a check to verify the integrity of your agent's tools. This could involve checking if the tool's dependencies are met and if the tool's configuration is valid</what>
+      <why>As you add more tools to your agents, this check would ensure that a misconfigured or broken tool doesn't bring down the entire agent system</why>
+    </check>
+  </checks>
 </specification>

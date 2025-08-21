@@ -27,7 +27,7 @@ from typing import Dict, List, Any
 import jwt
 from uuid import uuid4
 
-from .test_auth_jwt_generation import JWTGenerationTestManager, TokenSet
+from tests.unified.e2e.test_auth_jwt_generation import JWTGenerationTestManager, TokenSet
 
 logger = logging.getLogger(__name__)
 
@@ -198,8 +198,6 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
     
     def _create_none_algorithm_token(self) -> str:
         """Create malicious token with 'none' algorithm."""
-        import base64
-        import json
         
         header = {"typ": "JWT", "alg": "none"}
         payload = {

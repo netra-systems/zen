@@ -1,0 +1,204 @@
+"""PostgreSQL index optimization and management.
+
+Main PostgreSQL index optimizer with modular architecture.
+"""
+
+from typing import Dict, List, Any, Set
+from sqlalchemy import text
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db, async_engine
+from netra_backend.app.db.index_optimizer_core import (
+    IndexRecommendation,
+    DatabaseValidation,
+    IndexNameGenerator,
+    DatabaseErrorHandler
+)
+from netra_backend.app.db.postgres_index_creator import PostgreSQLIndexCreator
+from netra_backend.app.db.postgres_index_loader import PostgreSQLIndexLoader, PostgreSQLPerformanceAnalyzer
+from netra_backend.app.db.postgres_table_checker import PostgreSQLTableChecker
+
+logger = central_logger.get_logger(__name__)
+
+
+class PostgreSQLIndexOptimizer:
+    """PostgreSQL index optimization and management."""
+    
+    def __init__(self):
+        self.index_creator = PostgreSQLIndexCreator()
+        self.index_loader = PostgreSQLIndexLoader()
+        self.performance_analyzer = PostgreSQLPerformanceAnalyzer()
+        self.table_checker = PostgreSQLTableChecker()
+        self._setup_performance_indexes()
+    
+    def _get_user_table_indexes(self) -> List[tuple]:
+        """Get user table index definitions."""
+        return [
+            ("userbase", ["email"], "btree", "Unique email lookups"),
+            ("userbase", ["created_at"], "btree", "User creation time queries"),
+            ("userbase", ["plan_tier", "is_active"], "btree", "Plan filtering"),
+            ("userbase", ["role", "is_developer"], "btree", "Role access control"),
+        ]
+    
+    def _get_audit_log_indexes(self) -> List[tuple]:
+        """Get audit log index definitions."""
+        # Note: corpus_audit_logs table doesn't exist yet
+        # These will be created when the table is added
+        return []
+    
+    def _get_secret_management_indexes(self) -> List[tuple]:
+        """Get secret management index definitions."""
+        return [
+            ("secrets", ["user_id"], "btree", "User secret lookups"),
+        ]
+    
+    def _get_agent_state_indexes(self) -> List[tuple]:
+        """Get agent state index definitions."""
+        # Note: agent_states table doesn't exist yet
+        # These will be created when the table is added
+        return []
+    
+    def _get_message_indexes(self) -> List[tuple]:
+        """Get message table index definitions."""
+        return [
+            ("messages", ["thread_id", "created_at"], "btree", "Thread messages"),
+            ("messages", ["role"], "btree", "Message role filtering"),
+            ("messages", ["assistant_id"], "btree", "Assistant messages"),
+        ]
+    
+    def _get_thread_indexes(self) -> List[tuple]:
+        """Get thread table index definitions."""
+        return [
+            ("threads", ["created_at"], "btree", "Thread creation time"),
+            ("threads", ["id", "created_at"], "btree", "Thread lookup"),
+        ]
+    
+    def _setup_performance_indexes(self):
+        """Setup predefined performance indexes."""
+        indexes = []
+        indexes.extend(self._get_user_table_indexes())
+        indexes.extend(self._get_audit_log_indexes())
+        indexes.extend(self._get_secret_management_indexes())
+        indexes.extend(self._get_agent_state_indexes())
+        # Add indexes for existing tables
+        indexes.extend(self._get_message_indexes())
+        indexes.extend(self._get_thread_indexes())
+        self._performance_indexes = indexes
+    
+    async def _load_and_register_existing_indexes(self, session) -> None:
+        """Load existing indexes and register them."""
+        existing = await self.index_loader.load_existing_indexes(session)
+        for index_name in existing:
+            self.index_creator.index_checker.add_existing_index(index_name)
+    
+    async def _create_single_performance_index(self, table_name: str, columns: List[str], 
+                                             index_type: str, reason: str) -> tuple:
+        """Create single performance index and return result."""
+        index_name = IndexNameGenerator.generate_index_name(table_name, columns)
+        result = await self.index_creator.create_single_index(table_name, columns, index_name, index_type)
+        return index_name, result
+    
+    async def _log_index_creation_result(self, result, index_name: str, table_name: str, 
+                                       columns: List[str], reason: str) -> None:
+        """Log index creation result."""
+        if result.success and not result.already_exists:
+            DatabaseErrorHandler.log_index_creation_success(index_name, table_name, columns, reason)
+        elif not result.success:
+            logger.warning(f"Failed to create index {index_name}: {result.error_message}")
+    
+    async def _create_all_performance_indexes(self, session) -> Dict[str, bool]:
+        """Create all performance indexes."""
+        results = {}
+        for table_name, columns, index_type, reason in self._performance_indexes:
+            if not self.table_checker.table_exists(table_name):
+                logger.info(f"Skipping index creation for non-existent table: {table_name}")
+                continue
+            index_name, result = await self._create_single_performance_index(table_name, columns, index_type, reason)
+            results[index_name] = result.success
+            await self._log_index_creation_result(result, index_name, table_name, columns, reason)
+        return results
+    
+    async def create_performance_indexes(self) -> Dict[str, bool]:
+        """Create recommended performance indexes."""
+        if not DatabaseValidation.validate_async_engine(async_engine):
+            DatabaseValidation.log_engine_unavailable("index creation")
+            return {}
+        
+        async with get_async_db() as session:
+            await self.table_checker.load_existing_tables(session)
+            await self._load_and_register_existing_indexes(session)
+            return await self._create_all_performance_indexes(session)
+    
+    async def _analyze_slow_queries(self, session) -> List[IndexRecommendation]:
+        """Analyze slow queries and generate recommendations."""
+        recommendations = []
+        slow_queries = await self.performance_analyzer.get_slow_queries(session)
+        
+        for query_data in slow_queries:
+            query_recommendations = self.performance_analyzer.analyze_query_for_recommendations(query_data)
+            recommendations.extend(query_recommendations)
+        return recommendations
+    
+    async def _get_fallback_recommendations(self, recommendations: List[IndexRecommendation]) -> List[IndexRecommendation]:
+        """Get fallback recommendations if no slow queries found."""
+        if not recommendations:
+            recommendations.extend(self.performance_analyzer.recommendation_provider.get_all_recommendations())
+        return recommendations
+    
+    async def analyze_query_performance(self) -> List[IndexRecommendation]:
+        """Analyze query performance and recommend indexes."""
+        if not DatabaseValidation.validate_async_engine(async_engine):
+            return self._get_general_recommendations()
+        
+        async with get_async_db() as session:
+            recommendations = await self._analyze_slow_queries(session)
+            return await self._get_fallback_recommendations(recommendations)
+    
+    def _get_general_recommendations(self) -> List[IndexRecommendation]:
+        """Get general index recommendations."""
+        return self.performance_analyzer.recommendation_provider.get_general_recommendations()
+    
+    async def _build_usage_stats_query(self) -> str:
+        """Build index usage statistics query."""
+        select_fields = self._get_usage_stats_select_fields()
+        from_clause = "FROM pg_stat_user_indexes"
+        order_clause = "ORDER BY idx_scan DESC"
+        return f"SELECT {select_fields} {from_clause} {order_clause}"
+    
+    def _get_usage_stats_select_fields(self) -> str:
+        """Get SELECT fields for usage stats query."""
+        return (
+            "indexrelname as index_name, relname as table_name, "
+            "idx_scan as times_used, idx_tup_read as tuples_read, "
+            "idx_tup_fetch as tuples_fetched"
+        )
+    
+    async def _parse_usage_stats_result(self, result) -> List[Dict[str, Any]]:
+        """Parse index usage statistics result."""
+        stats = []
+        for row in result.fetchall():
+            stats.append({
+                "index_name": row[0], "table_name": row[1], 
+                "times_used": row[2], "tuples_read": row[3], "tuples_fetched": row[4]
+            })
+        return stats
+    
+    async def _execute_usage_stats_query(self, session) -> Dict[str, Any]:
+        """Execute usage statistics query."""
+        query_text = await self._build_usage_stats_query()
+        query = text(query_text)
+        result = await session.execute(query)
+        stats = await self._parse_usage_stats_result(result)
+        return {"index_usage": stats}
+    
+    async def get_index_usage_stats(self) -> Dict[str, Any]:
+        """Get index usage statistics."""
+        if not DatabaseValidation.validate_async_engine(async_engine):
+            return {}
+        
+        async with get_async_db() as session:
+            try:
+                return await self._execute_usage_stats_query(session)
+            except Exception as e:
+                logger.error(f"Error getting index usage stats: {e}")
+                return {}

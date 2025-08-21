@@ -76,7 +76,7 @@ class TestSystemStartup:
     def test_backend_import(self):
         """Test that backend can be imported without errors."""
         result = subprocess.run(
-            ["python", "-c", "from app.main import app; print('Backend imported successfully')"],
+            ["python", "-c", "from netra_backend.app.main import app; print('Backend imported successfully')"],
             capture_output=True,
             text=True,
             cwd=self.root_dir
@@ -114,7 +114,7 @@ class TestSystemStartup:
         """Test database initialization."""
         result = subprocess.run(
             ["python", "-c",
-             "from app.db.postgres import initialize_postgres; "
+             "from netra_backend.app.db.postgres import initialize_postgres; "
              "sf = initialize_postgres(); "
              "print('Database initialized' if sf else 'Database initialization failed')"],
             capture_output=True,

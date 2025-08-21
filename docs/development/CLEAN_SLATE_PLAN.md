@@ -22,7 +22,7 @@ Complete reset and cleanup of Netra Apex project to establish a pristine baselin
 ### 2.1 PostgreSQL Reset
 ```bash
 # Drop all tables and recreate
-python -c "from app.db.postgres import drop_all_tables; drop_all_tables()"
+python -c "from netra_backend.app.db.postgres import drop_all_tables; drop_all_tables()"
 alembic downgrade base
 alembic upgrade head
 ```
@@ -30,7 +30,7 @@ alembic upgrade head
 ### 2.2 ClickHouse Reset
 ```bash
 # Drop and recreate ClickHouse tables
-python -c "from app.db.clickhouse import reset_clickhouse_schema; reset_clickhouse_schema()"
+python -c "from netra_backend.app.db.clickhouse import reset_clickhouse_schema; reset_clickhouse_schema()"
 ```
 
 ### 2.3 Seed Data Creation

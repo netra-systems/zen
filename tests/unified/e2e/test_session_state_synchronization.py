@@ -17,9 +17,9 @@ import json
 from typing import Dict, Any, List
 import pytest_asyncio
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from .helpers.session_test_helpers import (
+from netra_backend.tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.e2e.helpers.session_test_helpers import SessionPersistenceManager, CrossServiceSessionValidator, MultiTabSessionManager, create_test_session_data, validate_session_timeout_behavior, create_session_test_scenarios
     SessionPersistenceManager,
     CrossServiceSessionValidator,
     MultiTabSessionManager,
@@ -27,7 +27,7 @@ from .helpers.session_test_helpers import (
     validate_session_timeout_behavior,
     create_session_test_scenarios
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

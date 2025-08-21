@@ -22,14 +22,14 @@ import asyncio
 from typing import Dict, Any
 import pytest
 
-from .reconnection_test_fixtures import reconnection_fixture
-from .reconnection_test_helpers import ReconnectionTestHelpers
-from .reconnection_test_methods import TokenExpiryTestMethods, StabilityTestMethods, MessageIntegrityTestMethods
+from tests.unified.reconnection_test_fixtures import reconnection_fixture
+from tests.unified.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.unified.reconnection_test_methods import TokenExpiryTestMethods, StabilityTestMethods, MessageIntegrityTestMethods
 
 # Import utilities with fallbacks
 try:
-    from app.tests.test_utilities.auth_test_helpers import create_test_token
-    from app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+    from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
+    from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"

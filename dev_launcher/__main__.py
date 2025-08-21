@@ -315,11 +315,6 @@ QUICK SHORTCUTS:
         action="store_true",
         help="Show detailed performance metrics and timing"
     )
-    perf_group.add_argument(
-        "--legacy",
-        action="store_true",
-        help="Use legacy startup behavior (no optimizations)"
-    )
     
     return parser
 

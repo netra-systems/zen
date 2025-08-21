@@ -28,8 +28,8 @@ from datetime import datetime, timezone
 import pytest
 
 # Test infrastructure
-from .config import TEST_CONFIG, TestTier, get_test_user
-from .harness_complete import UnifiedTestHarnessComplete, TestHarnessContext
+from tests.unified.config import TEST_CONFIG, TestTier, get_test_user
+from tests.unified.harness_complete import UnifiedTestHarnessComplete, TestHarnessContext
 
 
 @dataclass

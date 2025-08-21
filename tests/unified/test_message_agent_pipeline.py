@@ -14,11 +14,11 @@ from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import AsyncMock, patch, Mock
 import pytest
 
-from tests.unified.config import UnifiedTestConfig, TestDataFactory, TEST_CONFIG
-from tests.unified.harness_complete import TestHarnessContext
-from tests.unified.message_flow_validators import MessageFlowValidator
-from app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
-from app.logging_config import central_logger
+from netra_backend.tests.unified.config import UnifiedTestConfig, TestDataFactory, TEST_CONFIG
+from netra_backend.tests.unified.harness_complete import TestHarnessContext
+from netra_backend.tests.unified.message_flow_validators import MessageFlowValidator
+from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

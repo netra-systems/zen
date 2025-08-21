@@ -143,7 +143,7 @@ class TestCategories:
         """Check for primary test categories"""
         if "real_" in path_str or "_real" in path_str:
             return "real_e2e"
-        elif "unit" in path_str or "app/tests/core" in path_str:
+        elif "unit" in path_str or "netra_backend/tests/core" in path_str:
             return "unit"
         elif "integration" in path_str:
             return "integration"

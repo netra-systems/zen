@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>History</name>
-        <type>history</type>
-        <version>1.0</version>
-    </metadata>
-    
-    <content>
-        <!-- Empty or minimal content file -->
+  <metadata>
+    <name>History</name>
+    <type>history</type>
+    <version>1.0</version>
+    <last_edited>2025-08-21T08:47:28.488654</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.488654">
+      <reasons>
+        <reason>Likely outdated spec: history.xml</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <content>
+        
     </content>
 </specification>

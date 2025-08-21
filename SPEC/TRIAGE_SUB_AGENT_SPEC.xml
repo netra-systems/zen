@@ -1,292 +1,279 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <specification>
-    <metadata>
-        <name>TriageSubAgent Enhancement Specification</name>
-        <type>subagent-enhancement</type>
-        <version>2.0</version>
-        <created>2025-08-10</created>
-        <author>AI Agent System</author>
-        <priority>high</priority>
-        <scope>app/agents/triage_sub_agent.py</scope>
-    </metadata>
-    
-    <overview>
-        <purpose>
+  <metadata>
+    <name>TriageSubAgent Enhancement Specification</name>
+    <type>subagent-enhancement</type>
+    <version>2.0</version>
+    <created>2025-08-10</created>
+    <author>AI Agent System</author>
+    <priority>high</priority>
+    <scope>app/agents/triage_sub_agent.py</scope>
+    <last_edited>2025-08-21T08:47:28.662782</last_edited>
+    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.662782">
+      <reasons>
+        <reason>Content contains: LEGACY</reason>
+        <reason>Content contains: old</reason>
+        <reason>Content contains: legacy</reason>
+      </reasons>
+    </legacy_status>
+  </metadata>
+  <overview>
+    <purpose>
             The TriageSubAgent is the first line of defense in the multi-agent system, responsible for 
             understanding, categorizing, and routing user requests to appropriate downstream agents.
             This specification defines comprehensive enhancements to improve accuracy, performance, 
             error handling, and observability.
         </purpose>
-        
-        <goals>
-            <goal priority="critical">Achieve 99% accurate categorization of user requests</goal>
-            <goal priority="high">Reduce average triage time to under 500ms</goal>
-            <goal priority="high">Provide rich context extraction for downstream agents</goal>
-            <goal priority="medium">Implement caching for repeated request patterns</goal>
-            <goal priority="medium">Add comprehensive error recovery and fallback strategies</goal>
-        </goals>
-    </overview>
-    
-    <enhancements>
-        <enhancement id="E001">
-            <title>Advanced JSON Extraction and Validation</title>
-            <description>
+    <goals>
+      <goal priority="critical">Achieve 99% accurate categorization of user requests</goal>
+      <goal priority="high">Reduce average triage time to under 500ms</goal>
+      <goal priority="high">Provide rich context extraction for downstream agents</goal>
+      <goal priority="medium">Implement caching for repeated request patterns</goal>
+      <goal priority="medium">Add comprehensive error recovery and fallback strategies</goal>
+    </goals>
+  </overview>
+  <enhancements>
+    <enhancement id="E001">
+      <title>Advanced JSON Extraction and Validation</title>
+      <description>
                 Implement robust JSON extraction with schema validation, multiple extraction strategies,
                 and automatic repair of malformed JSON responses.
             </description>
-            <implementation>
-                <step>Add Pydantic model for triage output validation</step>
-                <step>Implement multiple JSON extraction strategies (regex, AST, token-based)</step>
-                <step>Add JSON repair functionality for common formatting issues</step>
-                <step>Validate against expected schema with detailed error messages</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E002">
-            <title>Request Pattern Caching</title>
-            <description>
+      <implementation>
+        <step>Add Pydantic model for triage output validation</step>
+        <step>Implement multiple JSON extraction strategies (regex, AST, token-based)</step>
+        <step>Add JSON repair functionality for common formatting issues</step>
+        <step>Validate against expected schema with detailed error messages</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E002">
+      <title>Request Pattern Caching</title>
+      <description>
                 Cache triage results for similar requests to improve performance and reduce LLM calls.
             </description>
-            <implementation>
-                <step>Implement request fingerprinting using semantic hashing</step>
-                <step>Add Redis-based cache with TTL configuration</step>
-                <step>Track cache hit rates and performance metrics</step>
-                <step>Implement cache invalidation strategies</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E003">
-            <title>Enhanced Prompt Engineering</title>
-            <description>
+      <implementation>
+        <step>Implement request fingerprinting using semantic hashing</step>
+        <step>Add Redis-based cache with TTL configuration</step>
+        <step>Track cache hit rates and performance metrics</step>
+        <step>Implement cache invalidation strategies</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E003">
+      <title>Enhanced Prompt Engineering</title>
+      <description>
                 Improve prompt template with better structure, examples, and chain-of-thought reasoning.
             </description>
-            <implementation>
-                <step>Add few-shot examples for each category</step>
-                <step>Include chain-of-thought reasoning in prompt</step>
-                <step>Add context about available tools and downstream agents</step>
-                <step>Implement dynamic prompt adjustment based on request complexity</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E004">
-            <title>Multi-Level Categorization</title>
-            <description>
+      <implementation>
+        <step>Add few-shot examples for each category</step>
+        <step>Include chain-of-thought reasoning in prompt</step>
+        <step>Add context about available tools and downstream agents</step>
+        <step>Implement dynamic prompt adjustment based on request complexity</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E004">
+      <title>Multi-Level Categorization</title>
+      <description>
                 Implement hierarchical categorization with primary, secondary, and tertiary categories.
             </description>
-            <implementation>
-                <step>Define category taxonomy with parent-child relationships</step>
-                <step>Implement confidence scoring for each category level</step>
-                <step>Add category disambiguation logic</step>
-                <step>Support multiple applicable categories with weights</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E005">
-            <title>Entity and Intent Extraction</title>
-            <description>
+      <implementation>
+        <step>Define category taxonomy with parent-child relationships</step>
+        <step>Implement confidence scoring for each category level</step>
+        <step>Add category disambiguation logic</step>
+        <step>Support multiple applicable categories with weights</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E005">
+      <title>Entity and Intent Extraction</title>
+      <description>
                 Extract key entities, intents, and parameters from user requests for richer context.
             </description>
-            <implementation>
-                <step>Extract model names, metrics, time ranges, and constraints</step>
-                <step>Identify user intent (analyze, optimize, configure, report, etc.)</step>
-                <step>Parse numerical values, thresholds, and targets</step>
-                <step>Detect urgency and priority indicators</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E006">
-            <title>Tool Recommendation Engine</title>
-            <description>
+      <implementation>
+        <step>Extract model names, metrics, time ranges, and constraints</step>
+        <step>Identify user intent (analyze, optimize, configure, report, etc.)</step>
+        <step>Parse numerical values, thresholds, and targets</step>
+        <step>Detect urgency and priority indicators</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E006">
+      <title>Tool Recommendation Engine</title>
+      <description>
                 Intelligently recommend specific tools from the tool registry based on request analysis.
             </description>
-            <implementation>
-                <step>Map categories to relevant tools in tool_dispatcher</step>
-                <step>Score tool relevance based on request parameters</step>
-                <step>Suggest tool execution order and dependencies</step>
-                <step>Include fallback tool suggestions</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E007">
-            <title>Error Handling and Recovery</title>
-            <description>
+      <implementation>
+        <step>Map categories to relevant tools in tool_dispatcher</step>
+        <step>Score tool relevance based on request parameters</step>
+        <step>Suggest tool execution order and dependencies</step>
+        <step>Include fallback tool suggestions</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E007">
+      <title>Error Handling and Recovery</title>
+      <description>
                 Implement comprehensive error handling with graceful degradation and recovery strategies.
             </description>
-            <implementation>
-                <step>Add retry logic with exponential backoff</step>
-                <step>Implement fallback to simpler categorization on LLM failure</step>
-                <step>Add circuit breaker pattern for repeated failures</step>
-                <step>Log detailed error context for debugging</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E008">
-            <title>Performance Monitoring</title>
-            <description>
+      <implementation>
+        <step>Add retry logic with exponential backoff</step>
+        <step>Implement fallback to simpler categorization on LLM failure</step>
+        <step>Add circuit breaker pattern for repeated failures</step>
+        <step>Log detailed error context for debugging</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E008">
+      <title>Performance Monitoring</title>
+      <description>
                 Add detailed performance metrics and monitoring capabilities.
             </description>
-            <implementation>
-                <step>Track triage latency percentiles (p50, p95, p99)</step>
-                <step>Monitor categorization accuracy with feedback loop</step>
-                <step>Add custom metrics for cache performance</step>
-                <step>Implement performance regression detection</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E009">
-            <title>Request Validation and Sanitization</title>
-            <description>
+      <implementation>
+        <step>Track triage latency percentiles (p50, p95, p99)</step>
+        <step>Monitor categorization accuracy with feedback loop</step>
+        <step>Add custom metrics for cache performance</step>
+        <step>Implement performance regression detection</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E009">
+      <title>Request Validation and Sanitization</title>
+      <description>
                 Validate and sanitize user requests before processing.
             </description>
-            <implementation>
-                <step>Check request length and complexity limits</step>
-                <step>Sanitize potential injection attempts</step>
-                <step>Validate request language and encoding</step>
-                <step>Detect and handle duplicate requests</step>
-            </implementation>
-        </enhancement>
-        
-        <enhancement id="E010">
-            <title>Contextual Awareness</title>
-            <description>
+      <implementation>
+        <step>Check request length and complexity limits</step>
+        <step>Sanitize potential injection attempts</step>
+        <step>Validate request language and encoding</step>
+        <step>Detect and handle duplicate requests</step>
+      </implementation>
+    </enhancement>
+    <enhancement id="E010">
+      <title>Contextual Awareness</title>
+      <description>
                 Leverage thread history and user context for better categorization.
             </description>
-            <implementation>
-                <step>Access previous messages in thread for context</step>
-                <step>Consider user's historical request patterns</step>
-                <step>Maintain conversation state for multi-turn interactions</step>
-                <step>Detect follow-up questions and references</step>
-            </implementation>
-        </enhancement>
-    </enhancements>
-    
-    <output-schema>
-        <field name="category" type="string" required="true">
+      <implementation>
+        <step>Access previous messages in thread for context</step>
+        <step>Consider user's historical request patterns</step>
+        <step>Maintain conversation state for multi-turn interactions</step>
+        <step>Detect follow-up questions and references</step>
+      </implementation>
+    </enhancement>
+  </enhancements>
+  <output-schema>
+    <field name="category" type="string" required="true">
             Primary category from predefined list
         </field>
-        <field name="secondary_categories" type="array[string]" required="true">
+    <field name="secondary_categories" type="array[string]" required="true">
             Additional relevant categories
         </field>
-        <field name="confidence_score" type="float" required="true">
+    <field name="confidence_score" type="float" required="true">
             Confidence in categorization (0.0-1.0)
         </field>
-        <field name="priority" type="enum" required="true">
+    <field name="priority" type="enum" required="true">
             Values: critical, high, medium, low
         </field>
-        <field name="complexity" type="enum" required="true">
+    <field name="complexity" type="enum" required="true">
             Values: simple, moderate, complex, expert
         </field>
-        <field name="key_parameters" type="object" required="true">
-            <subfield name="workload_type" type="string"/>
-            <subfield name="optimization_focus" type="string"/>
-            <subfield name="time_sensitivity" type="string"/>
-            <subfield name="scope" type="string"/>
-            <subfield name="constraints" type="array[string]"/>
-        </field>
-        <field name="extracted_entities" type="object" required="true">
-            <subfield name="models_mentioned" type="array[string]"/>
-            <subfield name="metrics_mentioned" type="array[string]"/>
-            <subfield name="time_ranges" type="array[object]"/>
-            <subfield name="thresholds" type="array[object]"/>
-            <subfield name="targets" type="array[object]"/>
-        </field>
-        <field name="user_intent" type="object" required="true">
-            <subfield name="primary_intent" type="string"/>
-            <subfield name="secondary_intents" type="array[string]"/>
-            <subfield name="action_required" type="boolean"/>
-        </field>
-        <field name="suggested_workflow" type="object" required="true">
-            <subfield name="next_agent" type="string"/>
-            <subfield name="required_data_sources" type="array[string]"/>
-            <subfield name="estimated_duration_ms" type="integer"/>
-        </field>
-        <field name="tool_recommendations" type="array[object]" required="true">
+    <field name="key_parameters" type="object" required="true">
+      <subfield name="workload_type" type="string" />
+      <subfield name="optimization_focus" type="string" />
+      <subfield name="time_sensitivity" type="string" />
+      <subfield name="scope" type="string" />
+      <subfield name="constraints" type="array[string]" />
+    </field>
+    <field name="extracted_entities" type="object" required="true">
+      <subfield name="models_mentioned" type="array[string]" />
+      <subfield name="metrics_mentioned" type="array[string]" />
+      <subfield name="time_ranges" type="array[object]" />
+      <subfield name="thresholds" type="array[object]" />
+      <subfield name="targets" type="array[object]" />
+    </field>
+    <field name="user_intent" type="object" required="true">
+      <subfield name="primary_intent" type="string" />
+      <subfield name="secondary_intents" type="array[string]" />
+      <subfield name="action_required" type="boolean" />
+    </field>
+    <field name="suggested_workflow" type="object" required="true">
+      <subfield name="next_agent" type="string" />
+      <subfield name="required_data_sources" type="array[string]" />
+      <subfield name="estimated_duration_ms" type="integer" />
+    </field>
+    <field name="tool_recommendations" type="array[object]" required="true">
             Array of recommended tools with relevance scores
         </field>
-        <field name="validation_status" type="object" required="true">
-            <subfield name="is_valid" type="boolean"/>
-            <subfield name="validation_errors" type="array[string]"/>
-            <subfield name="warnings" type="array[string]"/>
-        </field>
-        <field name="metadata" type="object" required="true">
-            <subfield name="triage_duration_ms" type="integer"/>
-            <subfield name="llm_tokens_used" type="integer"/>
-            <subfield name="cache_hit" type="boolean"/>
-            <subfield name="fallback_used" type="boolean"/>
-            <subfield name="retry_count" type="integer"/>
-        </field>
-    </output-schema>
-    
-    <testing-requirements>
-        <test-category name="Unit Tests">
-            <test>Test JSON extraction with various response formats</test>
-            <test>Test schema validation with valid and invalid data</test>
-            <test>Test cache operations (hit, miss, invalidation)</test>
-            <test>Test error handling and retry logic</test>
-            <test>Test request validation and sanitization</test>
-        </test-category>
-        
-        <test-category name="Integration Tests">
-            <test>Test end-to-end triage with real LLM responses</test>
-            <test>Test WebSocket update streaming</test>
-            <test>Test interaction with tool dispatcher</test>
-            <test>Test context retrieval from thread history</test>
-        </test-category>
-        
-        <test-category name="Performance Tests">
-            <test>Benchmark triage latency under load</test>
-            <test>Test cache performance with high hit rate</test>
-            <test>Measure memory usage with large request volumes</test>
-        </test-category>
-        
-        <test-category name="Edge Cases">
-            <test>Handle empty or null requests</test>
-            <test>Process extremely long requests</test>
-            <test>Handle multilingual requests</test>
-            <test>Manage concurrent triage operations</test>
-        </test-category>
-    </testing-requirements>
-    
-    <metrics>
-        <metric name="categorization_accuracy" target="99%" measurement="percentage"/>
-        <metric name="average_triage_latency" target="500ms" measurement="milliseconds"/>
-        <metric name="cache_hit_rate" target="40%" measurement="percentage"/>
-        <metric name="error_rate" target="&lt;0.1%" measurement="percentage"/>
-        <metric name="p99_latency" target="2000ms" measurement="milliseconds"/>
-    </metrics>
-    
-    <implementation-checklist>
-        <task status="pending">Create Pydantic models for input/output validation</task>
-        <task status="pending">Implement enhanced JSON extraction utilities</task>
-        <task status="pending">Add Redis caching layer with semantic hashing</task>
-        <task status="pending">Enhance prompt template with examples and reasoning</task>
-        <task status="pending">Implement multi-level categorization logic</task>
-        <task status="pending">Add entity and intent extraction</task>
-        <task status="pending">Create tool recommendation engine</task>
-        <task status="pending">Implement comprehensive error handling</task>
-        <task status="pending">Add performance monitoring and metrics</task>
-        <task status="pending">Create request validation and sanitization</task>
-        <task status="pending">Implement contextual awareness features</task>
-        <task status="pending">Write comprehensive test suite</task>
-        <task status="pending">Update documentation and examples</task>
-        <task status="pending">Add logging and observability</task>
-        <task status="pending">Perform load testing and optimization</task>
-    </implementation-checklist>
-    
-    <backwards-compatibility>
-        <requirement>Maintain existing API interface for supervisor compatibility</requirement>
-        <requirement>Support legacy output format with adapter pattern</requirement>
-        <requirement>Preserve existing WebSocket message formats</requirement>
-        <requirement>Ensure smooth migration path for existing deployments</requirement>
-    </backwards-compatibility>
-    
-    <dependencies>
-        <dependency>app.llm.llm_manager.LLMManager</dependency>
-        <dependency>app.agents.base.BaseSubAgent</dependency>
-        <dependency>app.agents.tool_dispatcher.ToolDispatcher</dependency>
-        <dependency>app.agents.state.DeepAgentState</dependency>
-        <dependency>app.redis_manager.RedisManager</dependency>
-        <dependency>pydantic for validation</dependency>
-        <dependency>app.logging_config.central_logger</dependency>
-    </dependencies>
+    <field name="validation_status" type="object" required="true">
+      <subfield name="is_valid" type="boolean" />
+      <subfield name="validation_errors" type="array[string]" />
+      <subfield name="warnings" type="array[string]" />
+    </field>
+    <field name="metadata" type="object" required="true">
+      <subfield name="triage_duration_ms" type="integer" />
+      <subfield name="llm_tokens_used" type="integer" />
+      <subfield name="cache_hit" type="boolean" />
+      <subfield name="fallback_used" type="boolean" />
+      <subfield name="retry_count" type="integer" />
+    </field>
+  </output-schema>
+  <testing-requirements>
+    <test-category name="Unit Tests">
+      <test>Test JSON extraction with various response formats</test>
+      <test>Test schema validation with valid and invalid data</test>
+      <test>Test cache operations (hit, miss, invalidation)</test>
+      <test>Test error handling and retry logic</test>
+      <test>Test request validation and sanitization</test>
+    </test-category>
+    <test-category name="Integration Tests">
+      <test>Test end-to-end triage with real LLM responses</test>
+      <test>Test WebSocket update streaming</test>
+      <test>Test interaction with tool dispatcher</test>
+      <test>Test context retrieval from thread history</test>
+    </test-category>
+    <test-category name="Performance Tests">
+      <test>Benchmark triage latency under load</test>
+      <test>Test cache performance with high hit rate</test>
+      <test>Measure memory usage with large request volumes</test>
+    </test-category>
+    <test-category name="Edge Cases">
+      <test>Handle empty or null requests</test>
+      <test>Process extremely long requests</test>
+      <test>Handle multilingual requests</test>
+      <test>Manage concurrent triage operations</test>
+    </test-category>
+  </testing-requirements>
+  <metrics>
+    <metric name="categorization_accuracy" target="99%" measurement="percentage" />
+    <metric name="average_triage_latency" target="500ms" measurement="milliseconds" />
+    <metric name="cache_hit_rate" target="40%" measurement="percentage" />
+    <metric name="error_rate" target="&lt;0.1%" measurement="percentage" />
+    <metric name="p99_latency" target="2000ms" measurement="milliseconds" />
+  </metrics>
+  <implementation-checklist>
+    <task status="pending">Create Pydantic models for input/output validation</task>
+    <task status="pending">Implement enhanced JSON extraction utilities</task>
+    <task status="pending">Add Redis caching layer with semantic hashing</task>
+    <task status="pending">Enhance prompt template with examples and reasoning</task>
+    <task status="pending">Implement multi-level categorization logic</task>
+    <task status="pending">Add entity and intent extraction</task>
+    <task status="pending">Create tool recommendation engine</task>
+    <task status="pending">Implement comprehensive error handling</task>
+    <task status="pending">Add performance monitoring and metrics</task>
+    <task status="pending">Create request validation and sanitization</task>
+    <task status="pending">Implement contextual awareness features</task>
+    <task status="pending">Write comprehensive test suite</task>
+    <task status="pending">Update documentation and examples</task>
+    <task status="pending">Add logging and observability</task>
+    <task status="pending">Perform load testing and optimization</task>
+  </implementation-checklist>
+  <backwards-compatibility>
+    <requirement>Maintain existing API interface for supervisor compatibility</requirement>
+    <requirement>Support legacy output format with adapter pattern</requirement>
+    <requirement>Preserve existing WebSocket message formats</requirement>
+    <requirement>Ensure smooth migration path for existing deployments</requirement>
+  </backwards-compatibility>
+  <dependencies>
+    <dependency>app.llm.llm_manager.LLMManager</dependency>
+    <dependency>app.agents.base.BaseSubAgent</dependency>
+    <dependency>app.agents.tool_dispatcher.ToolDispatcher</dependency>
+    <dependency>app.agents.state.DeepAgentState</dependency>
+    <dependency>app.redis_manager.RedisManager</dependency>
+    <dependency>pydantic for validation</dependency>
+    <dependency>app.logging_config.central_logger</dependency>
+  </dependencies>
 </specification>

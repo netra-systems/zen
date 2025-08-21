@@ -33,15 +33,15 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
-from .cost_tracking_helpers import (
+from tests.unified.e2e.cost_tracking_helpers import CostTrackingTestCore, AIOperationSimulator, CostCalculationValidator, BillingAccuracyValidator, FrontendCostDisplayValidator
     CostTrackingTestCore,
     AIOperationSimulator,
     CostCalculationValidator,
     BillingAccuracyValidator,
     FrontendCostDisplayValidator
 )
-from app.schemas.UserPlan import PlanTier
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 @pytest.mark.asyncio

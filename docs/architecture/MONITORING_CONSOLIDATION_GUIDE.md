@@ -26,7 +26,7 @@ Instead of consolidating valid domain-specific implementations, we created **can
 
 ### Alert Types
 ```python
-from app.schemas.monitoring import (
+from netra_backend.app.schemas.monitoring import (
     AlertSeverity,           # Standard severity levels
     BaseAlert,               # Base alert schema
     ThresholdAlert,          # Threshold violation alerts
@@ -38,7 +38,7 @@ from app.schemas.monitoring import (
 
 ### Circuit Breaker Types
 ```python
-from app.schemas.monitoring import (
+from netra_backend.app.schemas.monitoring import (
     CircuitState,            # Circuit breaker states
     CircuitConfig,           # Configuration schema
     CircuitMetrics,          # Metrics schema
@@ -49,7 +49,7 @@ from app.schemas.monitoring import (
 
 ### Performance Monitoring
 ```python
-from app.schemas.monitoring import (
+from netra_backend.app.schemas.monitoring import (
     PerformanceThresholds,   # Threshold configuration
     PerformanceMetric,       # Individual metrics
     PerformanceSummary,      # Summary information
@@ -59,7 +59,7 @@ from app.schemas.monitoring import (
 
 ### Database Metrics
 ```python
-from app.schemas.monitoring import (
+from netra_backend.app.schemas.monitoring import (
     DatabaseConnectionMetrics,
     DatabaseQueryMetrics,
     DatabaseCacheMetrics,
@@ -80,7 +80,7 @@ health_alert = SystemAlert(component="db", message="Database down")
 
 **After** (canonical):
 ```python
-from app.schemas.monitoring import create_threshold_alert, AlertSeverity
+from netra_backend.app.schemas.monitoring import create_threshold_alert, AlertSeverity
 
 # Consistent alert structure
 websocket_alert = create_threshold_alert(
@@ -111,7 +111,7 @@ if circuit.should_allow_request():  # Legacy interface
 
 **After** (canonical protocol):
 ```python
-from app.schemas.monitoring import CircuitBreakerProtocol
+from netra_backend.app.schemas.monitoring import CircuitBreakerProtocol
 
 def use_circuit_breaker(circuit: CircuitBreakerProtocol):
     if circuit.can_execute():  # Standard protocol
@@ -141,6 +141,6 @@ def use_circuit_breaker(circuit: CircuitBreakerProtocol):
 
 - **Canonical Schemas**: `app/schemas/monitoring.py`
 - **Domain-Specific Implementations**: Preserved in their current locations
-- **Import Path**: `from app.schemas.monitoring import ...`
+- **Import Path**: `from netra_backend.app.schemas.monitoring import ...`
 
 This approach provides the benefits of consolidation while preserving the value of domain-specific implementations.
