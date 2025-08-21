@@ -103,7 +103,7 @@
     </improvement>
   </architectural_improvements>
   <test_coverage>
-    <test_file>netra_backend/app/tests/unit/test_agent_forward_references.py</test_file>
+    <test_file>netra_backend/tests/unit/test_agent_forward_references.py</test_file>
     <test_cases>
       - test_agent_completed_model_rebuild: Verifies AgentCompleted can be instantiated
       - test_deep_agent_state_with_triage_result: Tests DeepAgentState with TriageResult

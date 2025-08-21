@@ -113,22 +113,22 @@
     <result category="Agent Initialization">
       <status>FIXED</status>
       <description>Agents now initialize properly without circular import errors</description>
-      <test_evidence>netra_backend/app/tests/agents/test_data_sub_agent_reliability.py: 6/7 tests passing</test_evidence>
+      <test_evidence>netra_backend/tests/agents/test_data_sub_agent_reliability.py: 6/7 tests passing</test_evidence>
     </result>
     <result category="Database Connectivity">
       <status>FIXED</status>
       <description>Database queries execute successfully without coroutine errors</description>
-      <test_evidence>netra_backend/app/tests/routes/test_reference_management.py: All reference tests passing</test_evidence>
+      <test_evidence>netra_backend/tests/routes/test_reference_management.py: All reference tests passing</test_evidence>
     </result>
     <result category="Service Integration">
       <status>FIXED</status>
       <description>Service imports and method calls work correctly</description>
-      <test_evidence>netra_backend/app/tests/routes/test_supply_research.py: Supply chain tests passing</test_evidence>
+      <test_evidence>netra_backend/tests/routes/test_supply_research.py: Supply chain tests passing</test_evidence>
     </result>
     <result category="WebSocket Connectivity">
       <status>PARTIALLY_FIXED</status>
       <description>WebSocket connections establish successfully, some message processing issues remain</description>
-      <test_evidence>netra_backend/app/tests/integration/test_websocket_end_to_end.py: 6/13 tests passing (connection tests pass)</test_evidence>
+      <test_evidence>netra_backend/tests/integration/test_websocket_end_to_end.py: 6/13 tests passing (connection tests pass)</test_evidence>
     </result>
   </testing_results>
   <remaining_issues>

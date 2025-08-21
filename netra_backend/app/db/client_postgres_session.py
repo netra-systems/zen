@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError, OperationalError, TimeoutError
 from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
 from netra_backend.app.db.postgres import get_async_db, async_session_factory
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.client_config import CircuitBreakerManager
+from netra_backend.app.db.client_config import CircuitBreakerManager
 
 logger = central_logger.get_logger(__name__)
 
