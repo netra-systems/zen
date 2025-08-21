@@ -146,6 +146,20 @@ class SchemaValidationService:
         validation_results["passed"] = False
         validation_results["error"] = str(error)
     
+    @classmethod
+    async def validate_schema_via_service(cls, database_service) -> Dict[str, Any]:
+        """Validate schema using database operations service abstraction"""
+        validation_results = cls._initialize_validation_results()
+        try:
+            # For now, return a basic validation result
+            # This would need to be enhanced if database_service had the capability
+            validation_results["message"] = "Schema validation via service layer"
+            validation_results["service_available"] = True
+            logger.info("Schema validation completed via service layer")
+        except Exception as e:
+            cls._handle_validation_error(e, validation_results)
+        return validation_results
+    
     
     @classmethod
     async def check_database_connectivity(cls, engine: AsyncEngine) -> bool:

@@ -15,13 +15,22 @@ from datetime import datetime, timezone
 from netra_backend.app.core.configuration.base import config_manager
 
 # Use JSON instead of ARRAY for SQLite compatibility during testing
-config = config_manager.get_config()
-if getattr(config, 'testing', False):
-    # For SQLite testing, use JSON instead of ARRAY
-    ArrayType = JSON
-else:
-    # For PostgreSQL production, use ARRAY
-    ArrayType = lambda t: ARRAY(t)
+def _get_array_type(column_type):
+    """Get appropriate array type based on configuration."""
+    try:
+        config = config_manager.get_config()
+        if getattr(config, 'testing', False):
+            # For SQLite testing, use JSON instead of ARRAY
+            return JSON
+        else:
+            # For PostgreSQL production, use ARRAY
+            return ARRAY(column_type)
+    except Exception:
+        # Fallback to ARRAY if config not available during import
+        return ARRAY(column_type)
+
+# Lazy evaluation - only call config when creating actual columns
+ArrayType = _get_array_type
 
 
 class CorpusAuditLog(Base):

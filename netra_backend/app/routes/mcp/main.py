@@ -11,10 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.dependencies import DbDep
 from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
-from netra_backend.app.routes.unified_tools.schemas import UserInDB
+from netra_backend.app.db.models_postgres import User as UserInDB
 from netra_backend.app.services.mcp_models import MCPClient
 
-from netra_backend.app.services.apex_optimizer_agent.models import (
+from netra_backend.app.routes.mcp.models import (
     MCPClientCreateRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,

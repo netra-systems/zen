@@ -27,7 +27,7 @@ from fastapi.security import HTTPBearer
 from starlette.websockets import WebSocketState
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.dependencies import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import check_websocket_cors, get_websocket_cors_handler

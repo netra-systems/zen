@@ -84,6 +84,11 @@ def _create_mcp_client_service():
     return MCPClientService()
 
 
+def get_mcp_service():
+    """Get MCP service instance for dependency injection."""
+    return _create_mcp_service()
+
+
 def get_service_factories() -> Dict[str, callable]:
     """Get all available service factories."""
     return {

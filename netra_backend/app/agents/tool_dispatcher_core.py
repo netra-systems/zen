@@ -2,7 +2,7 @@
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
-from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
+from netra_backend.app.schemas.Tool import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.tool_dispatcher_registry import ToolRegistry

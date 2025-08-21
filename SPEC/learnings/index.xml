@@ -94,6 +94,13 @@
             <critical-takeaway>Use -m "not real_services" to skip external API calls in tests.</critical-takeaway>
             <critical-takeaway>Test size limits: 300 lines per file, 8 lines per function (many violations exist).</critical-takeaway>
         </category>
+        
+        <category name="Test Import Standardization" path="SPEC/test_import_standardization.xml" keywords="Test Setup, sys.path, Imports, DRY, setup_test_path">
+            <critical-takeaway>NEVER write manual sys.path manipulation in test files - use setup_test_path() from netra_backend.tests.test_utils</critical-takeaway>
+            <critical-takeaway>500+ test files contain duplicate path setup code - ALL must use centralized function</critical-takeaway>
+            <critical-takeaway>Import order: stdlib -> third-party -> setup_test_path() -> project imports</critical-takeaway>
+            <critical-takeaway>Manual PROJECT_ROOT manipulation is FORBIDDEN - violates SSOT principle</critical-takeaway>
+        </category>
 
         <category name="Frontend" path="SPEC/learnings/frontend.xml" keywords="Zustand, React, TypeScript">
             <critical-takeaway context="Zustand">Use individual selectors to prevent infinite loops. See SPEC/conventions.xml#zustand-selectors.</critical-takeaway>
@@ -154,6 +161,13 @@
 
         <category name="Type Safety" path="SPEC/learnings/type_safety.xml" keywords="Types, Pydantic, TypeScript">
             <critical-takeaway>Maintain single source of truth for types. Avoid circular imports.</critical-takeaway>
+        </category>
+        
+        <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
+            <critical-takeaway>Standard import tests miss indirect circular imports through 4+ modules.</critical-takeaway>
+            <critical-takeaway>Use lazy imports (inside methods) for WebSocket manager in job/task managers.</critical-takeaway>
+            <critical-takeaway>Use TYPE_CHECKING guards for type hints in circular-prone modules.</critical-takeaway>
+            <critical-takeaway>Import tests MUST track full import chains, not just direct imports.</critical-takeaway>
         </category>
 
         <category name="E2E Testing" path="SPEC/learnings/e2e_testing.xml" keywords="End-to-End, Integration, Circuit Breaker">

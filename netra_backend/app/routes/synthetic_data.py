@@ -14,7 +14,7 @@ from netra_backend.app.services.synthetic_data_service import synthetic_data_ser
 from netra_backend.app.dependencies import get_db_session, get_db_dependency, DbDep
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.schemas.shared_types import BaseAgentConfig
-from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.user_auth_service import user_auth_service
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.core.configuration.services import synthetic_data_service as sds
@@ -106,9 +106,14 @@ async def _process_generation_request(
 async def generate_synthetic_data(
     request: GenerationRequest,
     db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
     """Initiate synthetic data generation job"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     return await _process_generation_request(request, db, current_user.id)
 
 
@@ -130,9 +135,15 @@ async def _execute_generation(
 @router.get("/status/{job_id}", response_model=JobStatusResponse)
 async def get_generation_status(
     job_id: str,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Get generation job status"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     job_status = await fetch_and_validate_job_status(job_id, current_user.id)
     return _build_status_response(job_id, job_status)
 
@@ -157,9 +168,15 @@ async def _execute_job_cancellation(job_id: str, user_id: int) -> Dict:
 @router.post("/cancel/{job_id}")
 async def cancel_generation(
     job_id: str,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Cancel running generation job"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     return await _execute_job_cancellation(job_id, current_user.id)
 
 
@@ -184,9 +201,15 @@ async def preview_synthetic_data(
     corpus_id: Optional[str] = Query(None),
     workload_type: str = Query(...),
     sample_size: int = Query(10, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Preview sample generated data"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     return await _generate_preview_data(corpus_id, workload_type, sample_size)
 
 
@@ -222,9 +245,15 @@ async def _fetch_templates(db: AsyncSession) -> Dict:
 @router.post("/export")
 async def export_synthetic_data(
     export_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Export synthetic data"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.export_data(export_request)
         return result
@@ -236,9 +265,15 @@ async def export_synthetic_data(
 @router.post("/analyze")
 async def analyze_synthetic_data_quality(
     analysis_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Analyze synthetic data quality"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.analyze_quality(analysis_request)
         return result
@@ -250,9 +285,15 @@ async def analyze_synthetic_data_quality(
 @router.post("/cleanup")
 async def cleanup_synthetic_data(
     cleanup_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Clean up synthetic data jobs"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.cleanup_jobs(cleanup_request)
         return result
@@ -264,9 +305,15 @@ async def cleanup_synthetic_data(
 @router.post("/convert")
 async def convert_synthetic_data_format(
     conversion_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Convert synthetic data format"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.convert_format(conversion_request)
         return result
@@ -278,9 +325,15 @@ async def convert_synthetic_data_format(
 @router.post("/compare")
 async def compare_synthetic_with_real_data(
     comparison_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Compare synthetic with real data"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.compare_with_real_data(comparison_request)
         return result
@@ -292,9 +345,15 @@ async def compare_synthetic_with_real_data(
 @router.post("/version")
 async def create_synthetic_data_version(
     versioning_request: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Create synthetic data version"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.create_version(versioning_request)
         return result
@@ -306,9 +365,15 @@ async def create_synthetic_data_version(
 @router.post("/auto-refresh")
 async def setup_auto_refresh(
     refresh_config: dict,
-    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+    current_user = Depends(get_current_user),
 ):
     """Setup automated synthetic data refresh"""
+    # Validate user through service layer
+    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
+    if not user or not user_auth_service.validate_user_active(user):
+        raise HTTPException(status_code=401, detail="User not authorized")
+    
     try:
         result = await sds.setup_auto_refresh(refresh_config)
         return result

@@ -293,3 +293,158 @@ class TestConnectionModuleCircularImportPrevention:
         # Verify __all__ matches
         assert set(connection.__all__) == set(required_exports), \
             "__all__ exports don't match required exports"
+
+
+class TestIndirectCircularImportPrevention:
+    """Test for indirect circular imports that manifest at runtime.
+    
+    REGRESSION HISTORY:
+    - Date: 2025-08-21
+    - Issue: Indirect circular import: ws_manager → synthetic_data.error_handler → 
+             synthetic_data → job_manager → ws_manager
+    - Impact: Tests couldn't detect the circular dependency because it manifested 
+              only during runtime initialization
+    - Fix: Use lazy imports in job_manager.py for WebSocket manager references
+    """
+    
+    def test_no_websocket_manager_import_in_synthetic_data_modules(self):
+        """Synthetic data modules should use lazy imports for WebSocket manager.
+        
+        Business Value: Prevents $50K+ MRR loss from service initialization failures.
+        """
+        import ast
+        import os
+        
+        # Modules that commonly create circular dependencies
+        synthetic_data_modules = [
+            'app/services/synthetic_data/job_manager.py',
+            'app/services/synthetic_data/job_operations.py',
+            'app/services/synthetic_data/analytics_reporter.py',
+        ]
+        
+        for module_path in synthetic_data_modules:
+            full_path = os.path.join(
+                os.path.dirname(__file__), '..', '..', module_path
+            )
+            
+            if not os.path.exists(full_path):
+                continue
+                
+            with open(full_path, 'r') as f:
+                content = f.read()
+                
+            # Parse the AST to check for top-level ws_manager imports
+            tree = ast.parse(content)
+            
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    # Check for direct import of ws_manager at module level
+                    if (node.module and 'ws_manager' in node.module and 
+                        node.col_offset == 0):  # col_offset 0 = module level
+                        
+                        # Allow TYPE_CHECKING imports
+                        is_type_checking = False
+                        for parent in ast.walk(tree):
+                            if (isinstance(parent, ast.If) and 
+                                isinstance(parent.test, ast.Name) and
+                                parent.test.id == 'TYPE_CHECKING'):
+                                if node in ast.walk(parent):
+                                    is_type_checking = True
+                                    break
+                        
+                        if not is_type_checking:
+                            pytest.fail(
+                                f"{module_path} has module-level import of ws_manager. "
+                                f"Use lazy imports inside methods or TYPE_CHECKING guard!"
+                            )
+    
+    def test_websocket_to_synthetic_data_import_chain(self):
+        """Test that WebSocket → Synthetic Data import chain doesn't create cycles.
+        
+        Business Value: Ensures microservice independence per SPEC requirements.
+        """
+        import importlib
+        import sys
+        
+        # Clear module cache for clean test
+        modules_to_clear = [
+            'app.services.websocket.ws_manager',
+            'app.services.synthetic_data.error_handler', 
+            'app.services.synthetic_data.job_manager',
+            'app.services.synthetic_data_service',
+        ]
+        
+        for module in modules_to_clear:
+            if module in sys.modules:
+                del sys.modules[module]
+        
+        # Track import order to detect cycles
+        import_tracker = []
+        original_import = __builtins__.__import__
+        
+        def tracking_import(name, *args, **kwargs):
+            if 'netra_backend.app' in name:
+                import_tracker.append(name)
+                
+                # Check for cycles
+                if name in import_tracker[:-1]:
+                    cycle_start = import_tracker.index(name)
+                    cycle = import_tracker[cycle_start:]
+                    pytest.fail(
+                        f"Circular import detected: {' → '.join(cycle)}"
+                    )
+            
+            return original_import(name, *args, **kwargs)
+        
+        # Temporarily replace import to track calls
+        __builtins__.__import__ = tracking_import
+        
+        try:
+            # Import in the problematic order
+            from netra_backend.app.services.websocket import ws_manager
+            from netra_backend.app.services import synthetic_data_service
+            
+            # If we get here, no circular import was detected
+            assert True, "No circular import detected"
+            
+        finally:
+            # Restore original import
+            __builtins__.__import__ = original_import
+    
+    def test_job_manager_lazy_imports(self):
+        """Verify job_manager uses lazy imports for WebSocket manager.
+        
+        Business Value: Prevents service startup failures worth $100K+ annual revenue.
+        """
+        import os
+        
+        job_manager_path = os.path.join(
+            os.path.dirname(__file__), 
+            '..', '..', 
+            'app/services/synthetic_data/job_manager.py'
+        )
+        
+        with open(job_manager_path, 'r') as f:
+            content = f.read()
+        
+        # Check that ws_manager import is either:
+        # 1. Inside TYPE_CHECKING block
+        # 2. Inside method definitions (lazy)
+        
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if 'from netra_backend.app.services.websocket.ws_manager import' in line:
+                # Check indentation to ensure it's not at module level
+                if line.startswith('from'):  # No indentation = module level
+                    # Check if it's in TYPE_CHECKING block
+                    found_type_checking = False
+                    for j in range(max(0, i-5), i):
+                        if 'TYPE_CHECKING' in lines[j]:
+                            found_type_checking = True
+                            break
+                    
+                    if not found_type_checking:
+                        pytest.fail(
+                            f"job_manager.py line {i+1}: Module-level import of ws_manager "
+                            f"found outside TYPE_CHECKING. Use lazy imports!"
+                        )

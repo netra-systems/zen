@@ -1,6 +1,7 @@
 
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 """Simple health test without complex imports"""

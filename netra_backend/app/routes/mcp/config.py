@@ -6,7 +6,7 @@ Maintains 25-line function limit and single responsibility.
 """
 
 from typing import Dict, Any, Optional
-from netra_backend.app.routes.unified_tools.schemas import UserInDB
+from netra_backend.app.db.models_postgres import User as UserInDB
 from netra_backend.app.core.configuration import unified_config_manager
 
 

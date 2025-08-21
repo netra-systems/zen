@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, status, Depends
 
 from netra_backend.app.services.generation_service import run_content_generation_job, run_log_generation_job, run_synthetic_data_generation_job, run_data_ingestion_job
 from netra_backend.app.services.job_store import job_store
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.services.clickhouse_service import clickhouse_service
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.unified_tools.schemas import (LogGenParams, SyntheticDataGenParams, ContentGenParams, 
                          DataIngestionParams, ContentCorpusGenParams)
@@ -176,41 +176,13 @@ def _get_clickhouse_logger():
     logger.info("Attempting to list ClickHouse tables.")
     return logger
 
-async def _get_validated_clickhouse_client(logger):
-    """Get and validate ClickHouse client."""
-    client = await get_clickhouse_client().__aenter__()
-    if client is None:
-        logger.error("Failed to get ClickHouse client.")
-        raise HTTPException(status_code=500, detail="Failed to get ClickHouse client.")
-    logger.info("Successfully acquired ClickHouse client.")
-    return client
-
-async def _execute_show_tables_query(client, logger):
-    """Execute SHOW TABLES query."""
-    result = await client.execute_query("SHOW TABLES")
-    logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
-    return result
-
-def _process_tables_result(result, logger) -> List[str]:
-    """Process tables query result."""
-    if result:
-        table_names = [row[0] for row in result]
-        logger.info(f"Returning table names: {table_names}")
-        return table_names
-    logger.info("No tables found in ClickHouse.")
-    return []
-
-async def _handle_clickhouse_query_error(e: Exception, logger):
-    """Handle ClickHouse query errors."""
-    logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
-    raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")
-
 async def _execute_clickhouse_tables_query(logger):
-    """Execute ClickHouse tables query with client."""
-    async with get_clickhouse_client() as client:
-        validated_client = await _get_validated_clickhouse_client(logger)
-        result = await _execute_show_tables_query(validated_client, logger)
-        return _process_tables_result(result, logger)
+    """Execute ClickHouse tables query using service layer."""
+    try:
+        return await clickhouse_service.list_all_tables()
+    except Exception as e:
+        logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")
 
 @router.get("/clickhouse_tables")
 async def list_clickhouse_tables() -> List[str]:

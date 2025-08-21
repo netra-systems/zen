@@ -84,7 +84,7 @@ from netra_backend.app.schemas.auth_types import (
 )
 
 # Validation utilities
-from netra_backend.app.services.synthetic_data.validators import (
+from netra_backend.app.auth_integration.validators import (
     validate_email_format,
     validate_password_strength,
     validate_token_format,
@@ -94,7 +94,7 @@ from netra_backend.app.services.synthetic_data.validators import (
 )
 
 # Type-safe interfaces
-from netra_backend.app.agents.interfaces import (
+from netra_backend.app.auth_integration.interfaces import (
     AuthClientProtocol,
     AuthServiceProtocol,
     SessionManagerProtocol,

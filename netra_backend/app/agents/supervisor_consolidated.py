@@ -25,10 +25,11 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
-from netra_backend.app.routes.unified_tools.schemas import (
-    SubAgentLifecycle, WebSocketMessage, AgentStarted, 
-    SubAgentUpdate, AgentCompleted, SubAgentState
+from netra_backend.app.schemas.Agent import (
+    SubAgentLifecycle, SubAgentState, 
+    AgentStarted, SubAgentUpdate, AgentCompleted
 )
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.registry import AgentResult
 from netra_backend.app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession

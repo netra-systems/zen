@@ -1,6 +1,6 @@
 """MCP server handlers."""
 from typing import Dict, Any, Optional
-from netra_backend.app.routes.unified_tools.schemas import UserInDB
+from netra_backend.app.db.models_postgres import User as UserInDB
 from netra_backend.app.services.mcp_service import MCPService
 from netra_backend.app.routes.mcp.utils import handle_server_info_error
 

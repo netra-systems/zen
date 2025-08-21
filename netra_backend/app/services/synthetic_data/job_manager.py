@@ -3,16 +3,20 @@ Job Management Module - Handles job lifecycle and status tracking
 """
 
 from datetime import datetime, UTC
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
 from netra_backend.app.db import models_postgres as models
-from netra_backend.app.services.websocket.ws_manager import manager
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.services.synthetic_data.enums import GenerationStatus
 from netra_backend.app.services.synthetic_data.metrics import calculate_generation_rate
+
+# Lazy import to avoid circular dependency
+# WebSocket manager → synthetic_data.error_handler → synthetic_data → job_manager → WebSocket manager
+if TYPE_CHECKING:
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 
 class JobManager:
@@ -62,6 +66,9 @@ class JobManager:
 
     async def _send_started_notification(self, job_id: str, job_data: Dict) -> None:
         """Send job started notification"""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.services.websocket.ws_manager import manager
+        
         payload = self._build_started_payload(job_id, job_data)
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_started",
@@ -110,6 +117,9 @@ class JobManager:
 
     async def _send_progress_message(self, payload: Dict) -> None:
         """Send progress message via broadcasting"""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.services.websocket.ws_manager import manager
+        
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_progress",
             "payload": payload
@@ -204,6 +214,9 @@ class JobManager:
 
     async def _send_completion_notification(self, job_id: str, active_jobs: Dict) -> None:
         """Send job completion notification"""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.services.websocket.ws_manager import manager
+        
         payload = self._build_completion_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_complete",
@@ -304,6 +317,9 @@ class JobManager:
 
     async def _send_cancellation_notification(self, job_id: str, active_jobs: Dict) -> None:
         """Send job cancellation notification"""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.services.websocket.ws_manager import manager
+        
         payload = self._build_cancellation_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_cancelled",
@@ -345,6 +361,9 @@ class JobManager:
 
     async def send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
+        # Lazy import to avoid circular dependency
+        from netra_backend.app.services.websocket.ws_manager import manager
+        
         payload = self._build_error_payload(job_id, error)
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_error",

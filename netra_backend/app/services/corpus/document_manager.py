@@ -16,7 +16,7 @@ def get_clickhouse_client():
     import netra_backend.app.services.corpus_service as corpus_service_module
     return corpus_service_module.get_clickhouse_client()
 from netra_backend.app.ws_manager import manager
-from netra_backend.app.db.base import CorpusNotAvailableError, ClickHouseOperationError
+from netra_backend.app.services.corpus.base import CorpusNotAvailableError, ClickHouseOperationError
 from netra_backend.app.services.corpus.validation import ValidationManager
 from netra_backend.app.logging_config import central_logger
 

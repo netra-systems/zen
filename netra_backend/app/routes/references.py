@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.dependencies import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy import func, or_
-from netra_backend.app.db.models_content import Reference
+from netra_backend.app.services.database_operations_service import database_operations_service
 from netra_backend.app.routes.unified_tools.schemas import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
 from typing import Optional
 
@@ -11,14 +9,11 @@ router = APIRouter()
 
 async def _get_total_references_count(session: AsyncSession) -> int:
     """Get total count of references."""
-    count_result = await session.execute(select(func.count(Reference.id)))
-    return count_result.scalar()
+    return await database_operations_service.get_references_count(session)
 
 async def _get_paginated_references(session: AsyncSession, offset: int, limit: int):
     """Get paginated references."""
-    query = select(Reference).offset(offset).limit(limit)
-    result = await session.execute(query)
-    return result.scalars().all()
+    return await database_operations_service.get_paginated_references(session, offset, limit)
 
 def _build_references_response(references, total: int, offset: int, limit: int) -> ReferenceGetResponse:
     """Build paginated references response."""
@@ -33,28 +28,14 @@ async def get_references(
     references = await _get_paginated_references(db, offset, limit)
     return _build_references_response(references, total, offset, limit)
 
-def _build_search_filter(query: str):
-    """Build search filter for references."""
-    return or_(Reference.name.ilike(f"%{query}%"), Reference.description.ilike(f"%{query}%"))
-
-def _build_search_query(query: Optional[str]):
-    """Build search query with optional filter."""
-    base_query = select(Reference)
-    if query:
-        base_query = base_query.filter(_build_search_filter(query))
-    return base_query
-
 @router.get("/references/search")
 async def search_references(query: Optional[str] = Query(None), db: AsyncSession = Depends(get_db_session)):
     """Search references by name or description."""
-    search_query = _build_search_query(query)
-    result = await db.execute(search_query)
-    return result.scalars().all()
+    return await database_operations_service.search_references(db, query)
 
 async def _get_reference_safe(reference_id: str, session: AsyncSession) -> ReferenceItem:
     """Get reference with validation."""
-    result = await session.execute(select(Reference).filter(Reference.id == reference_id))
-    reference = result.scalars().first()
+    reference = await database_operations_service.get_reference_by_id(session, reference_id)
     if not reference:
         raise HTTPException(status_code=404, detail="Reference not found")
     return reference
@@ -66,26 +47,21 @@ async def get_reference(reference_id: str, db: AsyncSession = Depends(get_db_ses
 
 async def _create_reference_in_db(reference: ReferenceCreateRequest, session: AsyncSession) -> ReferenceItem:
     """Create reference in database."""
-    db_reference = Reference(**reference.model_dump())
-    session.add(db_reference)
-    await session.commit()
-    await session.refresh(db_reference)
-    return db_reference
+    return await database_operations_service.create_reference(session, reference.model_dump())
 
 @router.post("/references", response_model=ReferenceItem, status_code=201)
 async def create_reference(reference: ReferenceCreateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Creates a new @reference item."""
     return await _create_reference_in_db(reference, db)
 
-async def _get_reference_by_id(session: AsyncSession, reference_id: str) -> Reference:
+async def _get_reference_by_id(session: AsyncSession, reference_id: str):
     """Get reference by ID or raise 404."""
-    result = await session.execute(select(Reference).filter(Reference.id == reference_id))
-    db_reference = result.scalars().first()
+    db_reference = await database_operations_service.get_reference_by_id(session, reference_id)
     if not db_reference:
         raise HTTPException(status_code=404, detail="Reference not found")
     return db_reference
 
-def _update_reference_fields(db_reference: Reference, reference: ReferenceUpdateRequest) -> None:
+def _update_reference_fields(db_reference, reference: ReferenceUpdateRequest) -> None:
     """Update reference fields from request."""
     for key, value in reference.model_dump(exclude_unset=True).items():
         setattr(db_reference, key, value)
@@ -93,20 +69,17 @@ def _update_reference_fields(db_reference: Reference, reference: ReferenceUpdate
 async def _update_reference_in_db(reference_id: str, reference: ReferenceUpdateRequest, session: AsyncSession) -> ReferenceItem:
     """Update reference in database."""
     db_reference = await _get_reference_by_id(session, reference_id)
-    _update_reference_fields(db_reference, reference)
-    await session.commit()
-    await session.refresh(db_reference)
-    return db_reference
+    update_data = reference.model_dump(exclude_unset=True)
+    return await database_operations_service.update_reference(session, db_reference, update_data)
 
 @router.put("/references/{reference_id}", response_model=ReferenceItem)
 async def update_reference(reference_id: str, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Updates a specific @reference item."""
     return await _update_reference_in_db(reference_id, reference, db)
 
-async def _get_reference_or_404(session: AsyncSession, reference_id: str) -> Reference:
+async def _get_reference_or_404(session: AsyncSession, reference_id: str):
     """Get reference or raise 404 error."""
-    result = await session.execute(select(Reference).filter(Reference.id == reference_id))
-    db_reference = result.scalar_one_or_none()
+    db_reference = await database_operations_service.get_reference_by_id(session, reference_id)
     if not db_reference:
         raise HTTPException(status_code=404, detail="Reference not found")
     return db_reference
@@ -114,21 +87,17 @@ async def _get_reference_or_404(session: AsyncSession, reference_id: str) -> Ref
 async def _patch_reference_in_db(reference_id: str, reference: ReferenceUpdateRequest, session: AsyncSession) -> ReferenceItem:
     """Patch reference in database."""
     db_reference = await _get_reference_or_404(session, reference_id)
-    _update_reference_fields(db_reference, reference)
-    await session.commit()
-    await session.refresh(db_reference)
-    return db_reference
+    update_data = reference.model_dump(exclude_unset=True)
+    return await database_operations_service.update_reference(session, db_reference, update_data)
 
 @router.patch("/references/{reference_id}", response_model=ReferenceItem)
 async def patch_reference(reference_id: str, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Partially update a reference."""
     return await _patch_reference_in_db(reference_id, reference, db)
 
-async def _delete_reference_from_db(session: AsyncSession, db_reference: Reference) -> dict:
+async def _delete_reference_from_db(session: AsyncSession, db_reference) -> dict:
     """Delete reference from database."""
-    await session.delete(db_reference)
-    await session.commit()
-    return {"status": "deleted"}
+    return await database_operations_service.delete_reference(session, db_reference)
 
 @router.delete("/references/{reference_id}", status_code=204)
 async def delete_reference(reference_id: str, db: AsyncSession = Depends(get_db_session)):

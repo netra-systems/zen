@@ -305,6 +305,26 @@ COMPONENT_MAPPINGS = {
     "websocket": {
         "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
         "exclude": []
+    },
+    "frontend": {
+        "paths": ["frontend/__tests__"],
+        "exclude": []
+    },
+    "auth": {
+        "paths": ["netra_backend/tests/auth_integration", "auth_service/tests"],
+        "exclude": []
+    },
+    "agents": {
+        "paths": ["netra_backend/tests/agents"],
+        "exclude": []
+    },
+    "database": {
+        "paths": ["netra_backend/tests/database", "netra_backend/tests/clickhouse"],
+        "exclude": []
+    },
+    "websocket": {
+        "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
+        "exclude": []
     }
 }
 

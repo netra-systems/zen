@@ -13,7 +13,7 @@ from netra_backend.app.db import models_postgres as models
 from netra_backend.app import schemas
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode
-from netra_backend.app.db.base import ContentSource, CorpusStatus
+from netra_backend.app.services.corpus.base import ContentSource, CorpusStatus
 from netra_backend.app.services.corpus.base_service import BaseCorpusService
 
 

@@ -41,8 +41,8 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _initialize_execution_engine(self):
         """Initialize execution engine."""
-        from netra_backend.app.agents.base.executor import BaseExecutionEngine
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        # Defer BaseExecutionEngine import to avoid circular dependency
+        self.execution_engine = None  # Will be initialized when needed
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute connection operation core logic."""

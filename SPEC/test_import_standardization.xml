@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>Testing.StandardizedImportSetup</name>
+    <priority>CRITICAL</priority>
+    <description>Mandate for using centralized test setup utilities to prevent duplicate sys.path manipulation code across test files.</description>
+    <last_edited>2025-08-21</last_edited>
+    <category>Testing</category>
+    <business_value>
+      <segment>Platform/Internal</segment>
+      <goal>Development Velocity</goal>
+      <impact>Reduces technical debt and maintenance overhead by eliminating 500+ duplicate code blocks</impact>
+    </business_value>
+  </metadata>
+
+  <problem_statement>
+    <title>Duplicate Test Setup Code Proliferation</title>
+    <description>Over 500 test files contain identical sys.path manipulation code, violating DRY principle and creating maintenance burden.</description>
+    <duplicate_pattern>
+```python
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+```
+    </duplicate_pattern>
+    <impact>
+      <item>Code duplication across 500+ files</item>
+      <item>Maintenance overhead when path logic needs updates</item>
+      <item>Violates Single Source of Truth (SSOT) principle</item>
+      <item>Increases risk of import errors from inconsistent implementations</item>
+    </impact>
+  </problem_statement>
+
+  <solution>
+    <title>Centralized Test Setup Utility</title>
+    <description>All test files MUST use the centralized setup_test_path() function from netra_backend.tests.test_utils</description>
+    <location>netra_backend/tests/test_utils.py</location>
+    <implementation>
+```python
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+```
+    </implementation>
+  </solution>
+
+  <directives>
+    <directive id="TIS-001" priority="CRITICAL">
+      <title>Mandatory Use of Centralized Setup</title>
+      <instruction>ALL test files MUST import and call setup_test_path() instead of manually manipulating sys.path</instruction>
+      <instruction>This applies to ALL test files in netra_backend/tests/ and auth_service/tests/</instruction>
+      <ai-directive>When creating or modifying test files, ALWAYS use the centralized setup function. NEVER write manual sys.path manipulation code.</ai-directive>
+    </directive>
+
+    <directive id="TIS-002" priority="HIGH">
+      <title>Import Order Requirements</title>
+      <instruction>The setup_test_path() call MUST be placed at the top of the file, immediately after standard library imports</instruction>
+      <instruction>The setup MUST occur BEFORE any project-specific imports</instruction>
+      <correct_order>
+1. Standard library imports (sys, os, pathlib, etc.)
+2. Third-party imports (pytest, mock, etc.)
+3. setup_test_path() call
+4. Project imports (netra_backend modules)
+      </correct_order>
+    </directive>
+
+    <directive id="TIS-003" priority="HIGH">
+      <title>No Alternative Implementations</title>
+      <instruction>Do NOT create alternative path setup functions in individual test files</instruction>
+      <instruction>Do NOT copy the setup_test_path() implementation inline</instruction>
+      <instruction>Do NOT use relative imports as a workaround</instruction>
+    </directive>
+  </directives>
+
+  <forbidden_patterns>
+    <pattern id="TIS-FP-001">
+      <title>Manual sys.path Manipulation</title>
+      <description>Direct sys.path manipulation in test files is FORBIDDEN</description>
+      <violation_example language="python">
+# VIOLATION - Do not write this
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+      </violation_example>
+      <correct_example language="python">
+# CORRECT - Use centralized function
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+      </correct_example>
+    </pattern>
+
+    <pattern id="TIS-FP-002">
+      <title>Inline Path Setup Logic</title>
+      <description>Copying setup logic inline instead of importing is FORBIDDEN</description>
+      <violation_example language="python">
+# VIOLATION - Do not copy implementation
+def setup_path():
+    project_root = Path(__file__).parent.parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+setup_path()
+      </violation_example>
+    </pattern>
+
+    <pattern id="TIS-FP-003">
+      <title>Alternative Import Mechanisms</title>
+      <description>Using alternative methods to avoid proper setup is FORBIDDEN</description>
+      <violation_example language="python">
+# VIOLATION - Do not use relative imports as workaround
+from ...app.agents import supervisor
+      </violation_example>
+    </pattern>
+  </forbidden_patterns>
+
+  <migration_strategy>
+    <title>Automated Migration Process</title>
+    <phase id="1">
+      <description>Detection Phase</description>
+      <action>Run detection script to identify all files with duplicate pattern</action>
+      <command>python scripts/detect_duplicate_test_setup.py</command>
+    </phase>
+    <phase id="2">
+      <description>Automated Replacement</description>
+      <action>Run migration script to replace all instances</action>
+      <command>python scripts/migrate_test_imports.py</command>
+    </phase>
+    <phase id="3">
+      <description>Verification</description>
+      <action>Run test suite to ensure no breakage</action>
+      <command>python -m test_framework.test_runner --level integration</command>
+    </phase>
+  </migration_strategy>
+
+  <detection_rules>
+    <rule id="DETECT-TIS-001">
+      <description>Detect manual sys.path manipulation</description>
+      <regex>PROJECT_ROOT\s*=\s*Path\(__file__\)\.parent\.parent\.parent</regex>
+      <action>Flag for replacement with setup_test_path()</action>
+    </rule>
+    <rule id="DETECT-TIS-002">
+      <description>Detect sys.path.insert patterns</description>
+      <regex>sys\.path\.insert\(0,\s*str\(PROJECT_ROOT\)\)</regex>
+      <action>Flag for replacement with setup_test_path()</action>
+    </rule>
+  </detection_rules>
+
+  <compliance_verification>
+    <check id="CV-001">
+      <description>Verify no duplicate patterns exist</description>
+      <command>grep -r "sys.path.insert(0.*PROJECT_ROOT" netra_backend/tests/</command>
+      <expected_result>No matches found</expected_result>
+    </check>
+    <check id="CV-002">
+      <description>Verify setup_test_path usage</description>
+      <command>grep -r "setup_test_path()" netra_backend/tests/ | wc -l</command>
+      <expected_result>Count matches number of test files</expected_result>
+    </check>
+  </compliance_verification>
+
+  <exceptions>
+    <exception id="EX-001">
+      <description>The test_utils.py file itself</description>
+      <reason>Contains the implementation of setup_test_path()</reason>
+    </exception>
+    <exception id="EX-002">
+      <description>Special test harness files</description>
+      <reason>May require custom path setup for test infrastructure</reason>
+      <requires_approval>true</requires_approval>
+    </exception>
+  </exceptions>
+
+  <learnings>
+    <learning id="L-001">
+      <description>Centralized utilities prevent maintenance burden</description>
+      <impact>Reduces time spent on repetitive fixes across hundreds of files</impact>
+    </learning>
+    <learning id="L-002">
+      <description>SSOT principle applies to test infrastructure</description>
+      <impact>Test setup code should follow same DRY principles as production code</impact>
+    </learning>
+    <learning id="L-003">
+      <description>Automated migration reduces human error</description>
+      <impact>Script-based replacement ensures consistency across all files</impact>
+    </learning>
+  </learnings>
+
+  <ai_agent_instructions>
+    <instruction priority="CRITICAL">
+      <text>NEVER write manual sys.path manipulation in test files</text>
+      <text>ALWAYS use: from netra_backend.tests.test_utils import setup_test_path</text>
+      <text>ALWAYS call: setup_test_path() before project imports</text>
+    </instruction>
+    <instruction priority="HIGH">
+      <text>When reviewing test files, flag any manual path manipulation as a violation</text>
+      <text>Suggest immediate replacement with centralized setup function</text>
+    </instruction>
+    <instruction priority="MEDIUM">
+      <text>When creating new test files, use the standard template that includes setup_test_path()</text>
+    </instruction>
+  </ai_agent_instructions>
+
+  <references>
+    <reference>SPEC/type_safety.xml - Single Source of Truth principle</reference>
+    <reference>SPEC/conventions.xml - Code quality standards</reference>
+    <reference>netra_backend/tests/test_utils.py - Implementation location</reference>
+    <reference>CLAUDE.md Section 2.2 - Complexity Management and SRP</reference>
+  </references>
+</specification>

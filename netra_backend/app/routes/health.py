@@ -68,9 +68,8 @@ async def _check_clickhouse_connection() -> None:
 async def _perform_clickhouse_check() -> None:
     """Perform the actual ClickHouse connection check."""
     try:
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
-        async with get_clickhouse_client() as client:
-            await client.execute("SELECT 1")
+        from netra_backend.app.services.clickhouse_service import clickhouse_service
+        await clickhouse_service.execute_health_check()
     except Exception as e:
         await _handle_clickhouse_error(e)
 
@@ -132,6 +131,8 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
+        # Initialize postgres through service pattern
+        from netra_backend.app.services.database_operations_service import database_operations_service
         from netra_backend.app.db.postgres import initialize_postgres
         from netra_backend.app.db.postgres_core import async_engine
         

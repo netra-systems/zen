@@ -5,19 +5,25 @@ Contains all Pydantic models for configuration validation.
 
 **MIGRATION NOTE**: Some configuration classes in this module still use
 direct os.environ access during initialization. For new code, prefer
-using the unified configuration system from:
-from netra_backend.app.core.configuration import unified_config_manager
+using the unified configuration system from the core.configuration module.
 """
 
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
-from netra_backend.app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
-from netra_backend.app.schemas.registry import User
-from netra_backend.app.schemas.llm_types import LLMProvider
+from enum import Enum
 from netra_backend.app.core.environment_constants import (
-    Environment, EnvironmentVariables, get_current_project_id, get_current_environment
+    Environment, EnvironmentVariables, get_current_environment
 )
+
+
+class LLMProvider(str, Enum):
+    """LLM provider enum for configuration schemas (local to avoid circular imports)."""
+    OPENAI = "openai"
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    COHERE = "cohere"
+    MOCK = "mock"
 
 
 class ClickHouseCredentials(BaseModel):
@@ -28,11 +34,35 @@ class ClickHouseCredentials(BaseModel):
     database: str
 
 
+def _safe_get_project_id() -> str:
+    """Get project ID without causing circular imports during bootstrap.
+    
+    This is a bootstrap-safe version that doesn't trigger the unified config manager.
+    """
+    # Direct environment check to avoid circular imports during config bootstrap
+    env = os.environ.get(EnvironmentVariables.ENVIRONMENT, "development").lower()
+    
+    # Check for explicit project ID override first
+    explicit_project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    if explicit_project:
+        return explicit_project
+    
+    # Environment-specific project IDs (hardcoded to avoid circular imports)
+    project_ids = {
+        "staging": "701982941522",
+        "production": "304612253870",
+        "development": "304612253870",
+        "testing": "304612253870"
+    }
+    
+    return project_ids.get(env, "304612253870")
+
+
 class SecretReference(BaseModel):
     name: str
     target_field: str
     target_models: Optional[List[str]] = None
-    project_id: str = Field(default_factory=get_current_project_id)
+    project_id: str = Field(default_factory=_safe_get_project_id)
     version: str = "latest"
 
 
@@ -164,7 +194,7 @@ class AppConfig(BaseModel):
     log_secrets: bool = False
     log_async_checkout: bool = False  # Control async connection checkout debug logging
     frontend_url: str = "http://localhost:3010"
-    redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
+    redis: RedisConfig = Field(default_factory=RedisConfig)
     
     # LLM Cache Settings
     llm_cache_enabled: bool = True

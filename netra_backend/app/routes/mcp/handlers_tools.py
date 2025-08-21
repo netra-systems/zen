@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.routes.unified_tools.schemas import UserInDB
+from netra_backend.app.db.models_postgres import User as UserInDB
 from netra_backend.app.services.mcp_service import MCPService
 from netra_backend.app.routes.mcp.models import MCPToolCallRequest
 from netra_backend.app.routes.mcp.helpers import (
