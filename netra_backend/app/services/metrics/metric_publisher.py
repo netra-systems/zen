@@ -6,7 +6,7 @@ Handles publishing operations with 25-line function limit.
 from typing import Dict
 from collections import deque
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agent_metrics_models import AgentOperationRecord, AgentMetrics
 
 logger = central_logger.get_logger(__name__)

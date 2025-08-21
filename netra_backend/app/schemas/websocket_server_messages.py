@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.websocket_server_messages import AgentStartedMessage, AgentCompletedMessage
+    from netra_backend.app.schemas.websocket_server_messages import AgentStartedMessage, AgentCompletedMessage
 """
 
 from typing import Any, Dict, Optional, Union, Literal
@@ -19,8 +19,8 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 # Import WebSocket base types from registry to avoid circular imports
-from app.schemas.registry import WebSocketMessage
-from app.schemas.core_enums import WebSocketMessageType, AgentStatus
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.core_enums import WebSocketMessageType, AgentStatus
 
 
 # Base class for server messages

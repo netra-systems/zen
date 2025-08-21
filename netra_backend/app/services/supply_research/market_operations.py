@@ -6,11 +6,11 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import AISupplyItem
+from netra_backend.app.db.models_postgres import AISupplyItem
 from netra_backend.app.supply_item_operations import SupplyItemOperations
 from netra_backend.app.price_analysis_operations import PriceAnalysisOperations
 from netra_backend.app.research_session_operations import ResearchSessionOperations
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class MarketOperations:

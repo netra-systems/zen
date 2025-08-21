@@ -15,34 +15,34 @@ import time
 from typing import Dict, Any, Optional, Protocol, List
 from dataclasses import dataclass
 
-from app.logging_config import central_logger
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
 
 # Modern Base Components
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, 
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
 
 # Synthetic Data Components (preserved from legacy)
-from app.agents.synthetic_data_presets import WorkloadProfile, find_preset_by_name
-from app.agents.synthetic_data_profile_parser import create_profile_parser
-from app.agents.synthetic_data_generator import SyntheticDataGenerator, SyntheticDataResult
-from app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
-from app.agents.synthetic_data_approval_handler import SyntheticDataApprovalHandler
-from app.agents.synthetic_data_generation_flow import GenerationFlowFactory
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile, find_preset_by_name
+from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
+from netra_backend.app.agents.synthetic_data_generator import SyntheticDataGenerator, SyntheticDataResult
+from netra_backend.app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
+from netra_backend.app.agents.synthetic_data_approval_handler import SyntheticDataApprovalHandler
+from netra_backend.app.agents.synthetic_data_generation_flow import GenerationFlowFactory
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 # Validation and Workflow Modules
-from app.agents.synthetic_data_sub_agent_validation import SyntheticDataValidator
-from app.agents.synthetic_data_sub_agent_workflow import SyntheticDataWorkflowOrchestrator, SyntheticDataContext
+from netra_backend.app.agents.synthetic_data_sub_agent_validation import SyntheticDataValidator
+from netra_backend.app.agents.synthetic_data_sub_agent_workflow import SyntheticDataWorkflowOrchestrator, SyntheticDataContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -225,7 +225,7 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
 
     def _create_default_workload_profile(self) -> 'WorkloadProfile':
         """Create default workload profile for error cases."""
-        from app.agents.synthetic_data_presets import WorkloadType
+        from netra_backend.app.agents.synthetic_data_presets import WorkloadType
         return WorkloadProfile(
             workload_type=WorkloadType.GENERAL_ANALYTICS, 
             volume=1000,

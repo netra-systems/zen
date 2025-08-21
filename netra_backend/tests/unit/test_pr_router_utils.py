@@ -9,7 +9,7 @@ import pytest
 from unittest.mock import Mock, patch
 from fastapi import HTTPException
 
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     build_pr_redirect_url,
     handle_pr_routing_error,
     get_pr_environment_status,
@@ -18,7 +18,7 @@ from app.auth_integration.auth import (
     route_pr_authentication,
     PR_STATE_TTL
 )
-from app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.core.exceptions_auth import AuthenticationError
 
 
 class TestBuildPrRedirectUrl:

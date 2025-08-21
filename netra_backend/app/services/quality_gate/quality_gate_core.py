@@ -6,8 +6,8 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, UTC
 from collections import defaultdict
 
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
 
 from netra_backend.app.quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
 from netra_backend.app.quality_gate_patterns import QualityPatterns

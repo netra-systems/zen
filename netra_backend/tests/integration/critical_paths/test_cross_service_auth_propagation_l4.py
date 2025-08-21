@@ -26,11 +26,11 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from app.services.auth_service import AuthService
+from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
-from app.services.api_gateway import APIGateway
+from netra_backend.app.services.api_gateway import APIGateway
 from netra_backend.app.utils.service_mesh import ServiceMesh
-from app.core.config import settings
+from netra_backend.app.core.config import settings
 
 
 @dataclass

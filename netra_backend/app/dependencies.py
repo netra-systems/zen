@@ -2,16 +2,16 @@ from typing import Annotated, TYPE_CHECKING, AsyncGenerator
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db as _get_async_db
-from app.llm.llm_manager import LLMManager
-from app.services.security_service import SecurityService
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db as _get_async_db
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-    from app.services.agent_service import AgentService
-    from app.services.thread_service import ThreadService
-    from app.services.corpus_service import CorpusService
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+    from netra_backend.app.services.agent_service import AgentService
+    from netra_backend.app.services.thread_service import ThreadService
+    from netra_backend.app.services.corpus_service import CorpusService
 
 logger = central_logger.get_logger(__name__)
 

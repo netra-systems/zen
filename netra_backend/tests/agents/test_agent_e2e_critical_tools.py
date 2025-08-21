@@ -10,7 +10,7 @@ from unittest.mock import patch, AsyncMock
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
-from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 
 class TestAgentE2ECriticalTools(AgentE2ETestBase):
@@ -44,7 +44,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         tool_dispatcher.dispatch_tool = AsyncMock(side_effect=tool_results)
         
         # Execute a sub-agent that uses tools
-        from app.agents.data_sub_agent.agent import DataSubAgent
+        from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         state = DeepAgentState(user_request="Analyze GPU metrics")
         

@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 import json
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.circuit_breaker import CircuitConfig
 from netra_backend.app.retry_manager import RetryConfig, RetryPresets
 from netra_backend.app.fallback import FallbackConfig, FallbackPresets

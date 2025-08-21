@@ -9,8 +9,8 @@ import time
 from typing import Dict, Any, Union
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
 
 logger = central_logger.get_logger(__name__)
 

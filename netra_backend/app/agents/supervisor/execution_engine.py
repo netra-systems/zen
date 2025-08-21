@@ -5,18 +5,18 @@ import time
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
-    from app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult, PipelineStep
 )
-from app.agents.supervisor.agent_execution_core import AgentExecutionCore
-from app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from app.agents.supervisor.fallback_manager import FallbackManager
-from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
+from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
+from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,8 +7,8 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from app.core.error_recovery import RecoveryContext, ErrorRecoveryManager
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext, ErrorRecoveryManager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agent_recovery_types import AgentRecoveryConfig
 
 logger = central_logger.get_logger(__name__)

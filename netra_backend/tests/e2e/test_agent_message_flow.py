@@ -119,8 +119,8 @@ def websocket_capture():
 @pytest.fixture
 async def real_thread_service():
     """Fixture providing real thread service."""
-    from app.config import get_config
-    from app.database_manager import get_database_manager
+    from netra_backend.app.config import get_config
+    from netra_backend.app.database_manager import get_database_manager
     
     # Use real components with test configuration
     config = get_config()
@@ -131,8 +131,8 @@ async def real_thread_service():
 @pytest.fixture
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
     """Fixture providing real supervisor agent with real components."""
-    from app.llm.llm_manager import LLMManager
-    from app.config import get_config
+    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.config import get_config
     
     try:
         # Try to create real LLM manager

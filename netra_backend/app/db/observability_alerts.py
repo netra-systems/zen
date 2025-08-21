@@ -6,8 +6,8 @@ Alert checking and handling for database monitoring.
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.db.postgres import async_engine
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.observability_metrics import DatabaseMetrics, AlertThresholds
 
 logger = central_logger.get_logger(__name__)

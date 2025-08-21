@@ -14,7 +14,7 @@ These tests validate Tests 9 and 10 from the critical conversion paths.
 import pytest
 from datetime import datetime, timezone
 
-from app.tests.e2e.conftest import *
+from netra_backend.app.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 

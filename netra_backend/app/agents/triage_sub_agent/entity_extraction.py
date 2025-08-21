@@ -12,7 +12,7 @@
 
 import re
 from typing import List, Dict, Any
-from app.agents.triage_sub_agent.models import ExtractedEntities
+from netra_backend.app.agents.triage_sub_agent.models import ExtractedEntities
 
 
 def get_model_patterns() -> List[str]:

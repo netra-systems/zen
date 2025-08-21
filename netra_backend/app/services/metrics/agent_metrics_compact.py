@@ -6,8 +6,8 @@ Main interface for agent metrics collection and reporting.
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Optional, Any
 
-from app.logging_config import central_logger
-from app.schemas.Metrics import TimeSeriesPoint
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import TimeSeriesPoint
 from netra_backend.app.agent_metrics_models import (
     AgentOperationRecord, AgentMetrics, FailureType, AgentMetricType
 )

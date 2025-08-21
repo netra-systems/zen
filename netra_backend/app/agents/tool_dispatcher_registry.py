@@ -1,9 +1,9 @@
 """Tool registration and management for the dispatcher."""
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
-from app.schemas.Tool import ToolRegistryInterface
-from app.agents.production_tool import ProductionTool
-from app.logging_config import central_logger
+from netra_backend.app.schemas.Tool import ToolRegistryInterface
+from netra_backend.app.agents.production_tool import ProductionTool
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

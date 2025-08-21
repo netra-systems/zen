@@ -154,7 +154,7 @@ class AuthServiceClient:
     
     async def _build_logout_headers(self, token: str) -> Dict[str, str]:
         """Build logout request headers."""
-        from app.core.auth_constants import HeaderConstants
+        from netra_backend.app.core.auth_constants import HeaderConstants
         return {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
     
     async def _build_logout_payload(self, session_id: Optional[str]) -> Dict:
@@ -296,7 +296,7 @@ class AuthServiceClient:
         if not self.settings.enabled:
             # Fallback for development
             logger.warning("Auth service disabled, using fallback token")
-            from app.core.auth_constants import JWTConstants
+            from netra_backend.app.core.auth_constants import JWTConstants
             return {JWTConstants.ACCESS_TOKEN: f"dev_token_{token_data.get('user_id')}"}
         
         try:

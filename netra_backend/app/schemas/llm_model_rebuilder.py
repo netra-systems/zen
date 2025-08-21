@@ -23,7 +23,7 @@ def _execute_base_model_rebuild():
 
 def _import_base_models():
     """Import all base model classes."""
-    from app.schemas.llm_types import (
+    from netra_backend.app.schemas.llm_types import (
         LLMMessage, LLMMetrics, LLMProviderStatus, LLMError,
         LLMHealthCheck, LLMConfigInfo, LLMManagerStats
     )
@@ -31,7 +31,7 @@ def _import_base_models():
 
 def _create_base_model_list():
     """Create list of base model classes."""
-    from app.schemas.llm_types import LLMMessage, LLMMetrics, LLMProviderStatus, LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
+    from netra_backend.app.schemas.llm_types import LLMMessage, LLMMetrics, LLMProviderStatus, LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
     return [LLMMessage, LLMMetrics, LLMProviderStatus, LLMError, 
             LLMHealthCheck, LLMConfigInfo, LLMManagerStats]
 
@@ -64,13 +64,13 @@ def _import_response_components():
 
 def _import_response_modules():
     """Import response-related modules."""
-    import app.schemas.llm_types as llm_types
-    import app.schemas.llm_request_types as request_types
+    import netra_backend.app.schemas.llm_types as llm_types
+    import netra_backend.app.schemas.llm_request_types as request_types
     return (llm_types, request_types)
 
 def _import_response_models():
     """Import response model classes."""
-    from app.schemas.llm_response_types import (
+    from netra_backend.app.schemas.llm_response_types import (
         LLMResponse, LLMStreamChunk, LLMCache, BatchLLMResponse
     )
     return [LLMResponse, LLMStreamChunk, LLMCache, BatchLLMResponse]
@@ -104,13 +104,13 @@ def _execute_request_model_rebuild():
 
 def _import_request_components():
     """Import request model modules and classes."""
-    import app.schemas.llm_types as llm_types
+    import netra_backend.app.schemas.llm_types as llm_types
     request_models = _get_request_model_list()
     return llm_types, request_models
 
 def _get_request_model_list():
     """Get list of request model classes."""
-    from app.schemas.llm_request_types import LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool
+    from netra_backend.app.schemas.llm_request_types import LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool
     return [LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool]
 
 
@@ -136,8 +136,8 @@ def _execute_config_model_rebuild():
 
 def _import_config_components():
     """Import config model modules and classes."""
-    import app.schemas.llm_types as llm_types
-    from app.schemas.llm_config_types import LLMConfig, LLMManagerConfig
+    import netra_backend.app.schemas.llm_types as llm_types
+    from netra_backend.app.schemas.llm_config_types import LLMConfig, LLMManagerConfig
     return llm_types, [LLMConfig, LLMManagerConfig]
 
 

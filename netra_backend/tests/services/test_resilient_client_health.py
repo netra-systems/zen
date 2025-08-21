@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from tests.services.external_api_client_utils import (
+from netra_backend.tests.services.external_api_client_utils import (
     create_healthy_circuit_mock,
     verify_successful_health_check,
     verify_error_health_check
@@ -47,7 +47,7 @@ class TestResilientHTTPClientHealth:
     
     def _setup_successful_connectivity_test(self):
         """Setup mock for successful connectivity test."""
-        from app.tests.services.external_api_client_utils import MockAsyncContextManager
+        from netra_backend.app.tests.services.external_api_client_utils import MockAsyncContextManager
         
         class MockResponse:
             def __init__(self, status):

@@ -1,0 +1,94 @@
+================================================================================
+NETRA BACKEND IMPORT FIX REPORT
+================================================================================
+
+SUMMARY
+----------------------------------------
+Files fixed: 1712
+Total imports fixed: 5416
+
+FIXES BY TYPE
+----------------------------------------
+
+Legacy app import: 5125 fixes
+------------------------------
+  netra_backend\app\auth_dependencies.py (Line 9):
+    - from app.db.postgres import get_async_db as _get_async_db
+    + from netra_backend.app.db.postgres import get_async_db as _get_async_db
+  netra_backend\app\auth_dependencies.py (Line 10):
+    - from app.services.security_service import SecurityService
+    + from netra_backend.app.services.security_service import SecurityService
+  netra_backend\app\auth_dependencies.py (Line 11):
+    - from app.logging_config import central_logger
+    + from netra_backend.app.logging_config import central_logger
+  netra_backend\app\background.py (Line 3):
+    - from app.logging_config import central_logger
+    + from netra_backend.app.logging_config import central_logger
+  netra_backend\app\cloud_environment_detector.py (Line 5):
+    - from app.config import get_config
+    + from netra_backend.app.config import get_config
+  ... and 5120 more
+
+Legacy app module import: 8 fixes
+------------------------------
+  netra_backend\app\schemas\llm_model_rebuilder.py (Line 67):
+    - import app.schemas.llm_types as llm_types
+    + import netra_backend.app.schemas.llm_types as llm_types
+  netra_backend\app\schemas\llm_model_rebuilder.py (Line 68):
+    - import app.schemas.llm_request_types as request_types
+    + import netra_backend.app.schemas.llm_request_types as request_types
+  netra_backend\app\schemas\llm_model_rebuilder.py (Line 107):
+    - import app.schemas.llm_types as llm_types
+    + import netra_backend.app.schemas.llm_types as llm_types
+  netra_backend\app\schemas\llm_model_rebuilder.py (Line 139):
+    - import app.schemas.llm_types as llm_types
+    + import netra_backend.app.schemas.llm_types as llm_types
+  netra_backend\app\services\corpus\document_manager.py (Line 16):
+    - import app.services.corpus_service as corpus_service_module
+    + import netra_backend.app.services.corpus_service as corpus_service_module
+  ... and 3 more
+
+Legacy tests import: 259 fixes
+------------------------------
+  netra_backend\tests\test_business_value_advanced.py (Line 11):
+    - from tests.test_business_value_fixtures import BusinessValueFixtures
+    + from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
+  netra_backend\tests\test_business_value_core.py (Line 11):
+    - from tests.test_business_value_fixtures import BusinessValueFixtures
+    + from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
+  netra_backend\tests\test_websocket_production_realistic.py (Line 20):
+    - from tests.websocket.test_concurrent_connections import (
+    + from netra_backend.tests.websocket.test_concurrent_connections import (
+  netra_backend\tests\test_websocket_production_realistic.py (Line 26):
+    - from tests.websocket.test_message_ordering import (
+    + from netra_backend.tests.websocket.test_message_ordering import (
+  netra_backend\tests\test_websocket_production_realistic.py (Line 32):
+    - from tests.websocket.test_compression_auth import (
+    + from netra_backend.tests.websocket.test_compression_auth import (
+  ... and 254 more
+
+Unknown import fix: 24 fixes
+------------------------------
+  netra_backend\app\routes\admin.py (Line 4):
+    - from app import schemas
+    + from netra_backend.app import schemas
+  netra_backend\app\routes\config.py (Line 3):
+    - from app import schemas
+    + from netra_backend.app import schemas
+  netra_backend\app\routes\corpus.py (Line 4):
+    - from app import schemas
+    + from netra_backend.app import schemas
+  netra_backend\app\routes\supply.py (Line 8):
+    - from app import schemas
+    + from netra_backend.app import schemas
+  netra_backend\app\routes\synthetic_data.py (Line 12):
+    - from app import schemas
+    + from netra_backend.app import schemas
+  ... and 19 more
+
+========================================
+[SUCCESS] All import issues have been fixed!
+Next steps:
+  1. Run tests to ensure everything still works
+  2. Review the changes with git diff
+  3. Commit the changes if everything looks good

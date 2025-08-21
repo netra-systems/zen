@@ -5,7 +5,7 @@ Provides unified access to all error handling components.
 Business Value: Reduces error-related customer impact by 80%.
 """
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import all error handling components for unified access
 from netra_backend.app.agent_errors import (

@@ -9,9 +9,9 @@ import os
 import time
 import asyncio
 from typing import List
-from app.config import settings
-from app.logging_config import central_logger as logger
-from app.schemas.llm_types import LLMProvider
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.llm_types import LLMProvider
 from netra_backend.app.models import StartupCheckResult
 
 
@@ -81,7 +81,7 @@ class ServiceChecker:
     
     async def _check_clickhouse_tables(self) -> List[str]:
         """Check ClickHouse tables"""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             client.ping()

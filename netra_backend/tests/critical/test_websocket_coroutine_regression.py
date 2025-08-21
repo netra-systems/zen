@@ -164,7 +164,7 @@ class TestAsyncAwaitChain:
     @pytest.mark.asyncio
     async def test_full_message_processing_chain(self):
         """Verify entire message processing chain awaits properly."""
-        from app.routes.websockets import _process_single_message
+        from netra_backend.app.routes.websockets import _process_single_message
         
         websocket = Mock(spec=WebSocket)
         websocket.receive_text = AsyncMock(return_value='{"type": "test"}')
@@ -304,7 +304,7 @@ class TestRegressionPrevention:
         """Verify all async functions are properly awaited."""
         # This test checks that common async functions are awaited
         import inspect
-        from app.routes import websockets
+        from netra_backend.app.routes import websockets
         
         # Get the source of _process_single_message
         source = inspect.getsource(websockets._process_single_message)

@@ -8,7 +8,7 @@ import pytest
 import uuid
 from typing import Dict
 
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     create_agent_instances, build_multi_constraint_setup
 )
 

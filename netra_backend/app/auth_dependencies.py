@@ -6,9 +6,9 @@ from typing import AsyncGenerator
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db as _get_async_db
-from app.services.security_service import SecurityService
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db as _get_async_db
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

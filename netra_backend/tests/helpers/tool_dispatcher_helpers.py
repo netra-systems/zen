@@ -3,11 +3,11 @@
 from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Any
 
-from app.agents.tool_dispatcher import (
+from netra_backend.app.agents.tool_dispatcher import (
     ToolDispatcher, ToolDispatchResponse, ProductionTool
 )
-from app.agents.state import DeepAgentState
-from app.schemas import ToolResult, ToolStatus, ToolInput
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput
 
 
 class MockBaseTool:

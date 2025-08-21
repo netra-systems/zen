@@ -8,25 +8,25 @@ import time
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.agents.synthetic_data_profile_parser import create_profile_parser
-from app.agents.synthetic_data_generator import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
+from netra_backend.app.agents.synthetic_data_generator import (
     SyntheticDataGenerator, SyntheticDataResult, GenerationStatus
 )
-from app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
-from app.agents.synthetic_data_approval_handler import (
+from netra_backend.app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
+from netra_backend.app.agents.synthetic_data_approval_handler import (
     SyntheticDataApprovalHandler, ApprovalFlowOrchestrator,
     ApprovalValidationHelper, ApprovalMessageBuilder
 )
-from app.agents.synthetic_data_generation_flow import GenerationFlowFactory
-from app.logging_config import central_logger
-from app.core.synthetic_data_llm_handler import SyntheticDataLLMHandler
+from netra_backend.app.agents.synthetic_data_generation_flow import GenerationFlowFactory
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.synthetic_data_llm_handler import SyntheticDataLLMHandler
 
 logger = central_logger.get_logger(__name__)
 

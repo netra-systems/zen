@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )

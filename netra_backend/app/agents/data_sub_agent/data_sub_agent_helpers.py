@@ -10,9 +10,9 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 import time
 
-from app.logging_config import central_logger as logger
-from app.agents.state import DeepAgentState
-from app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 # Import existing modular components for delegation
 from netra_backend.app.agent_cache import CacheManager

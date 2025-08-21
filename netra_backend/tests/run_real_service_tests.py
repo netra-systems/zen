@@ -22,7 +22,7 @@ from datetime import datetime
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app.tests.test_categories import (
+from netra_backend.app.tests.test_categories import (
     TEST_CATEGORIES,
     get_runnable_categories,
     categorize_test_files,

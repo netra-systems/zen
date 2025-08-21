@@ -2,8 +2,8 @@
 from fastapi import BackgroundTasks
 from typing import Dict, Any
 
-from app.services.demo_service import DemoService
-from app.schemas.demo_schemas import ROICalculationRequest, ROICalculationResponse
+from netra_backend.app.services.demo_service import DemoService
+from netra_backend.app.schemas.demo_schemas import ROICalculationRequest, ROICalculationResponse
 
 
 async def handle_roi_calculation(
@@ -53,7 +53,7 @@ async def execute_roi_with_error_handling(
 
 def handle_roi_error(e: Exception) -> None:
     """Handle ROI calculation error."""
-    from app.routes.demo_handlers_utils import log_and_raise_error
+    from netra_backend.app.routes.demo_handlers_utils import log_and_raise_error
     log_and_raise_error("ROI calculation failed", e)
 
 

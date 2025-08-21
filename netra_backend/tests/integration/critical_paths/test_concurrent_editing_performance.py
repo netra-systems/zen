@@ -14,7 +14,7 @@ import pytest
 import asyncio
 import time
 import uuid
-from tests.integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     TeamCollaborationManager, TeamRole, PermissionType, 
     assert_performance_benchmark, validate_audit_trail
 )

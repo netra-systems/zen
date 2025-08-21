@@ -9,8 +9,8 @@ import time
 from typing import Dict, Any, List, Callable, Optional
 from collections import defaultdict
 
-from app.core.exceptions_base import NetraException
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.message_handler import BaseMessageHandler
 
 logger = central_logger.get_logger(__name__)

@@ -10,14 +10,14 @@ from typing import Dict, Any, TYPE_CHECKING
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from app.agents.triage_sub_agent.agent import TriageSubAgent
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
-from app.agents.prompts import triage_prompt_template
-from app.agents.config import agent_config
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext
-from app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
-from app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.prompts import triage_prompt_template
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
 from netra_backend.app.processing_monitoring import (
     TriageProcessingMonitor, TriageWebSocketMonitor, TriageProcessingErrorHelper
 )

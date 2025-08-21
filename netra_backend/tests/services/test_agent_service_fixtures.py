@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from app import schemas
+from netra_backend.app import schemas
 
 from netra_backend.tests.test_agent_service_mock_classes import (
     AgentState,

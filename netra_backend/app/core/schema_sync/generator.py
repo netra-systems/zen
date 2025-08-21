@@ -7,8 +7,8 @@ Maintains 25-line function limit and modular design.
 
 from typing import Dict, Any, List
 from datetime import datetime, UTC
-from app.core.exceptions_service import ServiceError
-from app.core.error_context import ErrorContext
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.core.error_context import ErrorContext
 from netra_backend.app.models import SchemaValidationLevel
 
 

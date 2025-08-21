@@ -24,7 +24,7 @@ class TestThreadMessaging:
     
     def test_thread_pagination(self, basic_test_client):
         """Test thread list pagination."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         with patch.object(ThreadService, 'get_thread_messages') as mock_get:
             mock_get.return_value = [

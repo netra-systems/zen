@@ -17,9 +17,9 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from collections import deque, defaultdict
 
-from app.logging_config import central_logger
-from app.core.performance_optimization_manager import performance_manager
-from app.db.observability_metrics import DatabaseMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.performance_optimization_manager import performance_manager
+from netra_backend.app.db.observability_metrics import DatabaseMetrics
 
 logger = central_logger.get_logger(__name__)
 
@@ -219,7 +219,7 @@ class MetricsCollector:
 
     def _collect_database_stats(self) -> Dict[str, Any]:
         """Collect raw database statistics."""
-        from app.db.postgres import get_pool_status
+        from netra_backend.app.db.postgres import get_pool_status
         pool_status = get_pool_status()
         perf_stats = performance_manager.get_performance_stats()
         return self._build_db_stats_dict(pool_status, perf_stats)
@@ -296,7 +296,7 @@ class MetricsCollector:
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         try:
-            from app.websocket.connection_manager import get_connection_manager
+            from netra_backend.app.websocket.connection_manager import get_connection_manager
             conn_manager = get_connection_manager()
             if conn_manager is None:
                 return self._build_empty_websocket_metrics()

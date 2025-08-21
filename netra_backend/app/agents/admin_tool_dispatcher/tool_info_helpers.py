@@ -7,7 +7,7 @@ Split from dispatcher_core.py to maintain 450-line limit.
 Business Value: Provides comprehensive tool information for admin operations.
 """
 from typing import List, Dict, Any
-from app.schemas.admin_tool_types import AdminToolType, AdminToolInfo
+from netra_backend.app.schemas.admin_tool_types import AdminToolType, AdminToolInfo
 
 
 def list_all_tools(dispatcher) -> List[AdminToolInfo]:

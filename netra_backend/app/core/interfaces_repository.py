@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.exceptions import ServiceError, RecordNotFoundError
-from app.schemas.shared_types import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.interfaces_service import (
     BaseServiceInterface, 
     ServiceHealth,

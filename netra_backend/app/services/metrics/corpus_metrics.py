@@ -8,9 +8,9 @@ from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Optional, Any, Union
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
-from app.schemas.Metrics import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas.Metrics import (
     MetricsSnapshot, ExportFormat, QualityMetrics,
     ResourceUsage, OperationMetrics, TimeSeriesPoint,
     CorpusMetric, MetricType

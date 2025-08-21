@@ -11,7 +11,7 @@ from typing import Dict, Optional, Any, List
 from enum import Enum
 from sqlalchemy.orm import Session
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -122,7 +122,7 @@ class CoreClickHouseOperations:
     
     async def _execute_schema_query(self, table_name: str) -> Dict[str, Any]:
         """Execute schema query safely."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = "DESCRIBE TABLE {}"
@@ -146,8 +146,8 @@ class CoreClickHouseOperations:
     
     async def _execute_data_query(self, query: str) -> List[Dict[str, Any]]:
         """Execute data query and return formatted results."""
-        from app.db.clickhouse import get_clickhouse_client
-        from app.db.clickhouse_init import create_workload_events_table_if_missing
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
         
         await create_workload_events_table_if_missing()
         
@@ -198,21 +198,21 @@ class CoreClickHouseOperations:
     
     async def _execute_table_creation(self, table_name: str, query: str):
         """Execute table creation in ClickHouse."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(query)
     
     async def _execute_table_deletion(self, table_name: str):
         """Execute table deletion in ClickHouse."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(f"DROP TABLE IF EXISTS {table_name}")
     
     async def _execute_table_exists_check(self, table_name: str) -> bool:
         """Execute table existence check."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = f"EXISTS TABLE {table_name}"
@@ -221,14 +221,14 @@ class CoreClickHouseOperations:
     
     async def _execute_table_optimization(self, table_name: str):
         """Execute table optimization."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(f"OPTIMIZE TABLE {table_name}")
     
     async def _execute_table_size_query(self, table_name: str) -> Dict:
         """Execute table size query."""
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = f"""
@@ -261,7 +261,7 @@ class CoreClickHouseOperations:
     
     def _update_corpus_status(self, corpus_id: str, status: CorpusStatus, db: Session):
         """Update corpus status in PostgreSQL."""
-        from app.db import models_postgres as models
+        from netra_backend.app.db import models_postgres as models
         
         db.query(models.Corpus).filter(
             models.Corpus.id == corpus_id
@@ -272,7 +272,7 @@ class CoreClickHouseOperations:
                                        event_type: str, error: Optional[str] = None):
         """Send WebSocket notification for corpus events."""
         try:
-            from app.ws_manager import manager
+            from netra_backend.app.ws_manager import manager
             
             if event_type == "created":
                 payload = {

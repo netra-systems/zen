@@ -11,7 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.configuration import get_configuration
+from netra_backend.app.core.configuration import get_configuration
 import logging
 
 logger = logging.getLogger(__name__)
@@ -456,7 +456,7 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
 
 def setup_session_middleware(app: FastAPI) -> None:
     """Setup session middleware."""
-    from app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client import auth_client
     current_environment = auth_client.detect_environment()
     session_config = _determine_session_config(current_environment)
     _log_session_config(session_config, current_environment)

@@ -7,7 +7,7 @@ model support, caching, and intelligent fallback mechanisms.
 import pytest
 import os
 from unittest.mock import AsyncMock, patch
-from app.tests.e2e.infrastructure import (
+from netra_backend.app.tests.e2e.infrastructure import (
     LLMTestManager,
     LLMTestModel,
     LLMTestConfig,

@@ -42,15 +42,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     get_current_user, get_current_user_optional, require_admin,
     require_developer, require_permission, get_password_hash,
     verify_password, create_access_token, validate_token_jwt,
     _validate_user_permission, _check_password_rehash_needed
 )
-from app.db.models_user import User, Secret, ToolUsageLog
-from app.clients.auth_client import auth_client
-from app.schemas.auth_types import (
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.schemas.auth_types import (
     LoginRequest, LoginResponse, TokenData, TokenResponse,
     AuthProvider, UserPermission, SessionInfo, AuditLog
 )

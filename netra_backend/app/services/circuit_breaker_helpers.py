@@ -3,8 +3,8 @@
 from typing import Dict, List, Any, Optional
 from datetime import datetime, UTC, timedelta
 from dataclasses import dataclass
-from app.core.circuit_breaker import CircuitState
-from app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker import CircuitState
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

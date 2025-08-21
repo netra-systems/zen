@@ -7,7 +7,7 @@ from typing import List, Optional
 from enum import Enum
 from dataclasses import dataclass
 
-from app.services.quality_gate_service import ContentType, QualityMetrics
+from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 
 
 class FailureReason(Enum):

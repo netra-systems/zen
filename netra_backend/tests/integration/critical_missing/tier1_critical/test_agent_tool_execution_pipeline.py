@@ -15,13 +15,13 @@ import pytest
 import time
 from typing import Dict, Any
 
-from app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
-from app.services.agent_service_core import AgentService
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.db.models_agent import Run, Step
-from app.schemas.Request import RequestModel
-from app.core.database_recovery_core import ConnectionPoolRefreshStrategy
-from app.core.exceptions_base import NetraException
+from netra_backend.app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.db.models_agent import Run, Step
+from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Define test-specific exceptions
 class AgentTimeoutError(NetraException):

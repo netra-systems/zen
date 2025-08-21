@@ -207,7 +207,7 @@ class TestBasicSystemColdStartup:
             # Startup should catch and log the error
             try:
                 # Simulate startup
-                from app.db.postgres import init_db
+                from netra_backend.app.db.postgres import init_db
                 await init_db()
             except Exception as e:
                 # Should get meaningful error

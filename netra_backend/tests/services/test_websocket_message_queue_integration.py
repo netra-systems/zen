@@ -6,7 +6,7 @@ Tests for integration with message queue system.
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.websocket.message_queue import QueuedMessage, MessagePriority
+from netra_backend.app.services.websocket.message_queue import QueuedMessage, MessagePriority
 
 
 class TestMessageQueueIntegration:

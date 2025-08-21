@@ -1,8 +1,8 @@
 """Agent route helper functions - Supporting utilities for agent routes."""
 from typing import Dict, Any, Optional, AsyncGenerator, Union, List
 from fastapi import HTTPException, WebSocket
-from app.services.agent_service import AgentService
-from app.schemas import RequestModel
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.schemas import RequestModel
 from pydantic import BaseModel
 import json
 
@@ -31,7 +31,7 @@ def format_chunk_output(chunk) -> str:
 
 async def stream_with_fallback_service(message: str, thread_id: Optional[str]) -> AsyncGenerator[str, None]:
     """Stream using fallback service for backward compatibility."""
-    from app.services.agent_service import generate_stream
+    from netra_backend.app.services.agent_service import generate_stream
     async for chunk in generate_stream(message, thread_id):
         yield format_chunk_output(chunk)
     yield json.dumps({"type": "complete", "status": "finished"})

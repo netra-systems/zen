@@ -8,13 +8,13 @@ import pytest_asyncio
 import asyncio
 from typing import Dict, Any
 
-from tests.agents.test_example_prompts_base import (
+from netra_backend.tests.agents.test_example_prompts_base import (
     EXAMPLE_PROMPTS, 
     setup_real_infrastructure,
     ExamplePromptsTestBase
 )
-from tests.agents.test_example_prompts_contexts import ContextGenerator
-from tests.agents.test_example_prompts_runner import TestRunner
+from netra_backend.tests.agents.test_example_prompts_contexts import ContextGenerator
+from netra_backend.tests.agents.test_example_prompts_runner import TestRunner
 from netra_backend.app.services.quality_gate_service import ContentType
 
 

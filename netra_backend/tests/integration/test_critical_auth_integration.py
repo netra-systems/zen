@@ -18,7 +18,7 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.integration.helpers.user_flow_helpers import MockAuthService
+from netra_backend.tests.integration.helpers.user_flow_helpers import MockAuthService
 
 class TestCriticalAuthIntegration:
     """Test critical authentication integration scenarios"""

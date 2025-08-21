@@ -6,12 +6,12 @@ including logging, tracking, and response management.
 """
 
 from typing import Optional
-from app.llm.llm_manager import LLMManager
-from app.llm.observability import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.observability import (
     generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat,
     log_agent_input, log_agent_output
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

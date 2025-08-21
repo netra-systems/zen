@@ -7,7 +7,7 @@ BVJ: Growth & Enterprise | Data Analytics | +15% operational efficiency
 import asyncio
 import time
 from typing import Dict, List, Optional, Any
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class DataProcessingOperations:

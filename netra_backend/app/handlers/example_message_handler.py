@@ -15,12 +15,12 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, ValidationError
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.agents.example_message_processor import get_example_message_supervisor
-from app.ws_manager import get_manager
-from app.db.postgres import get_async_db
-from app.error_handling import handle_example_message_error, ErrorContext, ErrorCategory
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.agents.example_message_processor import get_example_message_supervisor
+from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.error_handling import handle_example_message_error, ErrorContext, ErrorCategory
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,13 +7,13 @@ for single source of truth compliance.
 """
 
 # Re-export from the canonical circuit breaker implementation
-from app.core.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
     CircuitConfig as CircuitBreakerConfig, 
     CircuitState as CircuitBreakerState,
     CircuitMetrics as ReliabilityMetrics
 )
-from app.schemas.core_models import CircuitBreakerConfig, ReliabilityMetrics
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig, ReliabilityMetrics
 
 # Export main classes for backwards compatibility
 __all__ = [

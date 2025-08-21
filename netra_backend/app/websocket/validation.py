@@ -6,22 +6,22 @@ Composed of performance-optimized micro-validators (≤8 lines each).
 
 from typing import Dict, Any, Union
 
-from app.logging_config import central_logger
-from app.schemas.websocket_message_types import WebSocketValidationError
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
 # Import micro-validators
-from app.websocket.validation_core import (
+from netra_backend.app.websocket.validation_core import (
     DateTimeEncoder, validate_message_is_dict, validate_type_field_exists,
     validate_message_type_enum, validate_with_pydantic_model,
     validate_message_size, check_message_type_supported
 )
-from app.websocket.validation_security import (
+from netra_backend.app.websocket.validation_security import (
     validate_payload_security, check_text_length_limit
 )
-from app.websocket.validation_sanitization import (
+from netra_backend.app.websocket.validation_sanitization import (
     sanitize_message_content
 )
-from app.websocket.validation_errors import (
+from netra_backend.app.websocket.validation_errors import (
     handle_validation_exception, create_unknown_message_fallback,
     create_graceful_validation_result, log_validation_warning
 )

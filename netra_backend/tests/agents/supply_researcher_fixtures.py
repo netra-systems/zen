@@ -9,10 +9,10 @@ from unittest.mock import Mock, AsyncMock
 from datetime import datetime
 from decimal import Decimal
 
-from app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.supply_research_service import SupplyResearchService
 
 
 @pytest.fixture
@@ -200,7 +200,7 @@ def research_query_test_cases():
 
 def _get_query_test_cases():
     """Get query test case data (≤8 lines)"""
-    from app.agents.supply_researcher_sub_agent import ResearchType
+    from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return [
         _get_pricing_test_case(),
         _get_capabilities_test_case(),
@@ -210,7 +210,7 @@ def _get_query_test_cases():
 
 def _get_pricing_test_case():
     """Get pricing query test case (≤8 lines)"""
-    from app.agents.supply_researcher_sub_agent import ResearchType
+    from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
             "research_type": ResearchType.PRICING,
@@ -224,7 +224,7 @@ def _get_pricing_test_case():
 
 def _get_capabilities_test_case():
     """Get capabilities query test case (≤8 lines)"""
-    from app.agents.supply_researcher_sub_agent import ResearchType
+    from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
             "research_type": ResearchType.CAPABILITIES,
@@ -238,7 +238,7 @@ def _get_capabilities_test_case():
 
 def _get_availability_test_case():
     """Get availability query test case (≤8 lines)"""
-    from app.agents.supply_researcher_sub_agent import ResearchType
+    from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
             "research_type": ResearchType.AVAILABILITY,

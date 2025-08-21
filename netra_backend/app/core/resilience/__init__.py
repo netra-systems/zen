@@ -15,7 +15,7 @@ Business Value:
 - Operational efficiency: Single point of resilience management
 
 Usage:
-    from app.core.resilience import with_resilience, register_api_service
+    from netra_backend.app.core.resilience import with_resilience, register_api_service
     
     # Register service
     register_api_service("user_api", EnvironmentType.PRODUCTION)

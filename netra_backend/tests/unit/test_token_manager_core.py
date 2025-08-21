@@ -7,8 +7,8 @@ Tests for basic JWT manager setup and utility functions.
 import pytest
 from unittest.mock import Mock, patch
 
-from app.auth_integration.auth import JWTTokenManager
-from app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.auth_integration.auth import JWTTokenManager
+from netra_backend.app.core.exceptions_auth import AuthenticationError
 
 
 # Test fixtures

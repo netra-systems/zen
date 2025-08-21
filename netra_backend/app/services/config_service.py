@@ -13,9 +13,9 @@ from typing import Dict, Any, Optional
 from uuid import uuid4
 from pathlib import Path
 
-from app.config import get_config
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.config import get_config
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

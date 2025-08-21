@@ -9,14 +9,14 @@ from typing import Union, Dict, Any, Optional, AsyncGenerator
 from starlette.websockets import WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.logging_config import central_logger
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from app import schemas
-from app.ws_manager import manager
-from app.services.thread_service import ThreadService
-from app.services.message_handlers import MessageHandlerService
-from app.services.service_interfaces import IAgentService
-from app.services.streaming_service import TextStreamProcessor, get_streaming_service
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from netra_backend.app import schemas
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.services.service_interfaces import IAgentService
+from netra_backend.app.services.streaming_service import TextStreamProcessor, get_streaming_service
 
 logger = central_logger.get_logger(__name__)
 

@@ -3,7 +3,7 @@
 Circuit breaker configurations and client settings for database operations.
 """
 
-from app.core.circuit_breaker import CircuitConfig
+from netra_backend.app.core.circuit_breaker import CircuitConfig
 
 
 class DatabaseClientConfig:
@@ -76,7 +76,7 @@ class CircuitBreakerManager:
     @staticmethod
     async def get_postgres_circuit():
         """Get PostgreSQL circuit breaker."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         return circuit_registry.get_breaker(
             "postgres", DatabaseClientConfig.POSTGRES_CONFIG
         )
@@ -84,7 +84,7 @@ class CircuitBreakerManager:
     @staticmethod
     async def get_read_circuit():
         """Get read operations circuit breaker."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         return circuit_registry.get_breaker(
             "db_read", DatabaseClientConfig.READ_CONFIG
         )
@@ -92,7 +92,7 @@ class CircuitBreakerManager:
     @staticmethod
     async def get_write_circuit():
         """Get write operations circuit breaker."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         return circuit_registry.get_breaker(
             "db_write", DatabaseClientConfig.WRITE_CONFIG
         )
@@ -100,7 +100,7 @@ class CircuitBreakerManager:
     @staticmethod
     async def get_clickhouse_circuit():
         """Get ClickHouse circuit breaker."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         return circuit_registry.get_breaker(
             "clickhouse", DatabaseClientConfig.CLICKHOUSE_CONFIG
         )

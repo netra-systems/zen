@@ -11,7 +11,7 @@
 """Intent detection utilities - compliant with 25-line limit."""
 
 from typing import Dict, List
-from app.agents.triage_sub_agent.models import UserIntent
+from netra_backend.app.agents.triage_sub_agent.models import UserIntent
 
 
 def get_intent_keywords() -> Dict[str, List[str]]:

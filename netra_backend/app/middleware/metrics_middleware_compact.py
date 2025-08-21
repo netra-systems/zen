@@ -9,8 +9,8 @@ from typing import Dict, Any, Optional, Callable
 from functools import wraps
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
-from app.services.metrics.agent_metrics_compact import agent_metrics_collector
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.metrics.agent_metrics_compact import agent_metrics_collector
 from netra_backend.app.metrics_middleware_core import MetricsMiddlewareCore
 
 logger = central_logger.get_logger(__name__)

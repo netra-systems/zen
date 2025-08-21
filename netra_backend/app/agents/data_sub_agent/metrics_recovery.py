@@ -4,9 +4,9 @@ Handles metrics calculation failures with simplified algorithms and approximatio
 """
 
 from typing import Any, Dict, Optional, List
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_types import MetricsCalculationError
-from app.agents.error_handler import ErrorContext
+from netra_backend.app.agents.error_handler import ErrorContext
 
 logger = central_logger.get_logger(__name__)
 

@@ -10,13 +10,13 @@ import asyncio
 import time
 from typing import Dict, Any, Callable, Awaitable, Optional
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
-from app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 
@@ -60,7 +60,7 @@ class ConnectionReliabilityManager:
         
     def _create_execution_context(self, connection_id: str) -> ExecutionContext:
         """Create execution context for connection operation."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         
         state = DeepAgentState()
         return ExecutionContext(
@@ -196,7 +196,7 @@ class ConnectionCloseReliability:
         
     def _should_attempt_close(self, conn_info: ConnectionInfo) -> bool:
         """Check if close should be attempted."""
-        from app.websocket.connection_info import ConnectionValidator
+        from netra_backend.app.websocket.connection_info import ConnectionValidator
         return ConnectionValidator.should_attempt_close(conn_info.websocket)
         
     async def _perform_websocket_close(self, websocket, code: int, reason: str) -> None:
@@ -244,7 +244,7 @@ class ConnectionEstablishmentReliability:
             
     def _create_connection_info(self, user_id: str, websocket) -> ConnectionInfo:
         """Create connection info instance."""
-        from app.websocket.connection_info import ConnectionInfoBuilder
+        from netra_backend.app.websocket.connection_info import ConnectionInfoBuilder
         
         return (ConnectionInfoBuilder()
                 .with_user_id(user_id)

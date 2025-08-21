@@ -10,8 +10,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from app.core.error_codes import ErrorSeverity
-from app.core.resilience.monitor import AlertSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.resilience.monitor import AlertSeverity
 
 
 class AggregationLevel(Enum):

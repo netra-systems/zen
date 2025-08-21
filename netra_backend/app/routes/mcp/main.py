@@ -9,10 +9,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import DbDep
-from app.auth_integration.auth import get_current_user, get_current_user_optional
-from app.schemas import UserInDB
-from app.services.mcp_models import MCPClient
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_models import MCPClient
 
 from netra_backend.app.models import (
     MCPClientCreateRequest,
@@ -174,7 +174,7 @@ async def handle_mcp_message(
     mcp_service = Depends(get_mcp_service)
 ):
     """Handle MCP JSON-RPC message"""
-    from app.services.mcp_request_handler import handle_request
+    from netra_backend.app.services.mcp_request_handler import handle_request
     from fastapi import HTTPException
     
     result = await handle_request(request)

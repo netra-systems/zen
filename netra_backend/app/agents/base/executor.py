@@ -15,15 +15,15 @@ import time
 from typing import Dict, Any, Optional, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.agents.base.interface import BaseExecutionInterface
+    from netra_backend.app.agents.base.interface import BaseExecutionInterface
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability import ReliabilityManager
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability import ReliabilityManager
 
 logger = central_logger.get_logger(__name__)
 

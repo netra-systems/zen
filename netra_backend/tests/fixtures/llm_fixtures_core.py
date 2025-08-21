@@ -10,7 +10,7 @@ from typing import Dict, Any, Type, AsyncIterator
 from unittest.mock import Mock, AsyncMock
 from pydantic import BaseModel
 
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 
 # Type alias
 MockResponse = Dict[str, Any]

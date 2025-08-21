@@ -3,20 +3,20 @@
 from typing import Dict, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.llm.llm_manager import LLMManager
-    from app.agents.tool_dispatcher import ToolDispatcher
-    from app.ws_manager import WebSocketManager
-from app.agents.base import BaseSubAgent
-from app.logging_config import central_logger
+    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.logging_config import central_logger
 
 # Import all sub-agents
-from app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 # DataSubAgent is imported later to avoid circular dependency
-from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.agents.reporting_sub_agent import ReportingSubAgent
-from app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-from app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
+from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
 
 logger = central_logger.get_logger(__name__)
 
@@ -38,7 +38,7 @@ class AgentRegistry:
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
         # Import DataSubAgent here to avoid circular dependency
-        from app.agents.data_sub_agent.agent import DataSubAgent
+        from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
         
         self._register_workflow_agents(DataSubAgent)
     

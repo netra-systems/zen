@@ -6,8 +6,8 @@ to enable proper transaction rollback.
 
 from typing import Dict, Optional, Callable, Awaitable
 
-from app.core.error_recovery import OperationType
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.types import Operation, OperationState
 
 logger = central_logger.get_logger(__name__)

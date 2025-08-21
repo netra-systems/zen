@@ -6,16 +6,16 @@ Handles thread CRUD operations and thread history.
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from app.dependencies import DbDep
-from app.logging_config import central_logger
-from app.auth_integration.auth import get_current_active_user
-from app.routes.utils.thread_helpers import (
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.auth_integration.auth import get_current_active_user
+from netra_backend.app.routes.utils.thread_helpers import (
     handle_list_threads_request, handle_create_thread_request, handle_get_thread_request,
     handle_update_thread_request, handle_delete_thread_request, handle_get_messages_request,
     handle_auto_rename_request, handle_route_with_error_logging
 )
 from pydantic import BaseModel
-from app.services import thread_service, thread_analytics
+from netra_backend.app.services import thread_service, thread_analytics
 import time
 
 logger = central_logger.get_logger(__name__)

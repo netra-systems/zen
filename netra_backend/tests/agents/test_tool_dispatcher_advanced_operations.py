@@ -4,14 +4,14 @@ import pytest
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from tests.helpers.tool_dispatcher_helpers import (
+from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
     create_test_state,
     verify_dispatch_response_success,
     verify_dispatch_response_error,
     verify_metadata
 )
-from tests.helpers.tool_dispatcher_assertions import (
+from netra_backend.tests.helpers.tool_dispatcher_assertions import (
     assert_execution_error_response
 )
 

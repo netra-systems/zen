@@ -23,16 +23,16 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from app.core.config import Settings
-from app.services.config_service import ConfigService
-from app.services.redis_service import RedisService
-from app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.core.config import Settings
+from netra_backend.app.services.config_service import ConfigService
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 # from agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 SupervisorAgent = AsyncMock
-from app.services.health_check_service import HealthCheckService
-from app.services.secret_manager import SecretManager
-from tests.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.app.services.health_check_service import HealthCheckService
+from netra_backend.app.services.secret_manager import SecretManager
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
 

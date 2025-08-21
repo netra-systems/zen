@@ -4,8 +4,8 @@ Contains functions for detecting quality issues and suggesting improvements - de
 """
 
 from typing import Dict, List
-from app.core.interfaces_quality import QualityValidator as CoreQualityValidator
-from app.core.quality_types import ContentType, QualityLevel, QualityMetrics
+from netra_backend.app.core.interfaces_quality import QualityValidator as CoreQualityValidator
+from netra_backend.app.core.quality_types import ContentType, QualityLevel, QualityMetrics
 
 
 class QualityValidators:

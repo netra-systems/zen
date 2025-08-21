@@ -4,10 +4,10 @@ Provides comprehensive monitoring of database connection pools.
 """
 
 from typing import Dict, Any
-from app.logging_config import central_logger
-from app.core.exceptions_database import DatabaseError
-from app.services.database.pool_metrics import ConnectionPoolMetrics
-from app.services.database.health_checker import ConnectionHealthChecker
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_database import DatabaseError
+from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
+from netra_backend.app.services.database.health_checker import ConnectionHealthChecker
 
 logger = central_logger.get_logger(__name__)
 

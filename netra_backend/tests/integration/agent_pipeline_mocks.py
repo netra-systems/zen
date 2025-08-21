@@ -17,9 +17,9 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock
 
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
-from app.redis_manager import RedisManager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.redis_manager import RedisManager
 from fastapi import WebSocket
 
 

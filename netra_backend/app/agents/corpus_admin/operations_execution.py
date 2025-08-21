@@ -7,9 +7,9 @@ Maintains 25-line function limit per method.
 """
 
 from typing import Dict, Any
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import CorpusOperationRequest, CorpusOperationResult
 
 logger = central_logger.get_logger(__name__)

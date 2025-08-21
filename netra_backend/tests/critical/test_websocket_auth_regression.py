@@ -149,7 +149,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):
         """Test that malformed JSON is logged and error sent to client."""
-        from app.routes.utils.websocket_helpers import parse_json_message
+        from netra_backend.app.routes.utils.websocket_helpers import parse_json_message
         
         manager = Mock()
         manager.send_error = AsyncMock()
@@ -162,7 +162,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio  
     async def test_message_timeout_closes_stale_connections(self):
         """Test that message timeouts close stale connections."""
-        from app.routes.utils.websocket_helpers import check_connection_alive
+        from netra_backend.app.routes.utils.websocket_helpers import check_connection_alive
         
         conn_info = Mock()
         conn_info.last_activity = 0  # Very old timestamp
@@ -178,7 +178,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_handler_exceptions_logged_with_context(self):
         """Test that message handler exceptions include full context."""
-        from app.routes.websockets import _handle_validated_message
+        from netra_backend.app.routes.websockets import _handle_validated_message
         
         websocket = Mock(spec=WebSocket)
         websocket.application_state = WebSocketState.CONNECTED

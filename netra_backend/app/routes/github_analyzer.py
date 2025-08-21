@@ -8,20 +8,20 @@ from datetime import datetime
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 
-from app.auth_integration.auth import get_current_user
-from app.schemas.github_analyzer import (
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.schemas.github_analyzer import (
     AnalysisRequest,
     AnalysisResponse,
     AnalysisStatus,
     AIOperationsMap
 )
-from app.schemas.core_models import User
-from app.agents.github_analyzer import GitHubAnalyzerService
-from app.agents.supervisor.agent_execution_core import AgentExecutionCore
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.logging_config import central_logger as logger
-from app.db.session import get_db_session
+from netra_backend.app.schemas.core_models import User
+from netra_backend.app.agents.github_analyzer import GitHubAnalyzerService
+from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.db.session import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -171,7 +171,7 @@ async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerSer
 
 async def _setup_analysis_environment(request: AnalysisRequest) -> tuple:
     """Setup analysis state and context."""
-    from app.agents.state import DeepAgentState
+    from netra_backend.app.agents.state import DeepAgentState
     state = DeepAgentState()
     context = _build_analysis_context(request)
     return state, context

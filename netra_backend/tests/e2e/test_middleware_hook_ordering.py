@@ -279,7 +279,7 @@ class TestMetricsMiddlewareIntegration:
     
     def test_metrics_context_manager(self):
         """Test metrics context manager functionality."""
-        from app.middleware.metrics_middleware import AgentMetricsContextManager
+        from netra_backend.app.middleware.metrics_middleware import AgentMetricsContextManager
         
         context_manager = AgentMetricsContextManager(
             "TestAgent", "test_operation"

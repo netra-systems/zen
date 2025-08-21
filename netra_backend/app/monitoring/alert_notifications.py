@@ -9,7 +9,7 @@ from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Any, Callable, Optional
 
 from netra_backend.app.alert_types import Alert, NotificationChannel, NotificationConfig, AlertLevel
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -221,7 +221,7 @@ class NotificationSender:
 
     async def _store_alert_safely(self, alert: Alert) -> None:
         """Store alert in database with session management."""
-        from app.db.postgres import get_db_session
+        from netra_backend.app.db.postgres import get_db_session
         async with get_db_session() as session:
             await self._store_alert_in_db(session, alert)
             await session.commit()

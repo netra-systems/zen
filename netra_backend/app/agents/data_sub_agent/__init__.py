@@ -9,7 +9,7 @@ Business Value: Critical for identifying 15-30% cost savings opportunities.
 from typing import TYPE_CHECKING
 
 # Import shared models from central location
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 
 # CONSOLIDATED IMPLEMENTATION - Primary export
 from netra_backend.app.data_sub_agent import DataSubAgent
@@ -22,8 +22,8 @@ from netra_backend.app.cost_optimizer import CostOptimizer
 from netra_backend.app.data_validator import DataValidator
 
 # Import ClickHouse initialization function and client
-from app.db.clickhouse_init import create_workload_events_table_if_missing
-from app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 # LEGACY IMPORTS - Deprecated, will be removed in next phase
 # Kept temporarily for backward compatibility during migration

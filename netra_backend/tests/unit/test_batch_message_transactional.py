@@ -10,14 +10,14 @@ import time
 from unittest.mock import Mock, AsyncMock, patch
 from typing import List
 
-from app.websocket.batch_message_core import MessageBatcher
-from app.websocket.batch_message_types import (
+from netra_backend.app.websocket.batch_message_core import MessageBatcher
+from netra_backend.app.websocket.batch_message_types import (
     BatchConfig, PendingMessage, MessageState, BatchingStrategy
 )
-from app.websocket.batch_message_transactional import (
+from netra_backend.app.websocket.batch_message_transactional import (
     TransactionalBatchProcessor, RetryManager, MessageStateManager
 )
-from app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 
 
 class TestTransactionalBatchProcessor:

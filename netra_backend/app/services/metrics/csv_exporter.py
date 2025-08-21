@@ -7,7 +7,7 @@ import csv
 import io
 from typing import List, Any
 from datetime import datetime, UTC
-from app.schemas.Metrics import MetricsSnapshot, CorpusMetric
+from netra_backend.app.schemas.Metrics import MetricsSnapshot, CorpusMetric
 
 
 class CSVExporter:

@@ -4,7 +4,7 @@ import asyncio
 import pytest
 from datetime import datetime, timedelta
 
-from app.llm.resource_manager import (
+from netra_backend.app.llm.resource_manager import (
     RequestPool, RequestBatcher, CacheManager, ResourceMonitor
 )
 

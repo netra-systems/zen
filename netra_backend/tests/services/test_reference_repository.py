@@ -6,7 +6,7 @@ reference-specific data access patterns work correctly.
 """
 
 import pytest
-from tests.helpers.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     create_test_message, create_test_reference, assert_reference_created_correctly
 )
 

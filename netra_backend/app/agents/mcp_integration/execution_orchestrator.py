@@ -14,22 +14,22 @@ import asyncio
 import time
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
-from app.agents.mcp_integration.base_mcp_agent import (
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
+from netra_backend.app.agents.mcp_integration.base_mcp_agent import (
     BaseMCPAgent, MCPExecutionConfig, MCPExecutionResult
 )
-from app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector, MCPIntent
-from app.agents.mcp_integration.context_manager import MCPContextManager, MCPAgentContext
-from app.schemas.shared_types import RetryConfig
-from app.core.exceptions_service import ServiceError
-from app.services.mcp_client_service import MCPClientService
+from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector, MCPIntent
+from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager, MCPAgentContext
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.services.mcp_client_service import MCPClientService
 
 logger = central_logger.get_logger(__name__)
 

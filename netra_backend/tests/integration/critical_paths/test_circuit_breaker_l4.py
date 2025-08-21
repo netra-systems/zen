@@ -23,9 +23,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 
-from app.services.circuit_breaker.circuit_breaker_manager import CircuitBreakerManager
-from app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor
-from app.services.circuit_breaker.failure_detector import FailureDetector
+from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import CircuitBreakerManager
+from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor
+from netra_backend.app.services.circuit_breaker.failure_detector import FailureDetector
 from monitoring.metrics_collector import MetricsCollector
 # from app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock

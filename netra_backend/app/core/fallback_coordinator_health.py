@@ -5,7 +5,7 @@ Health monitoring and status management for fallback coordination.
 from typing import Dict, Any, List
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.fallback_coordinator_models import (
     SystemHealthLevel, AgentFallbackStatus, SystemFallbackStatus
 )

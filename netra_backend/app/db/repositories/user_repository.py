@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.logging_config import central_logger
-from app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 from netra_backend.app.base_repository import BaseRepository
 
 logger = central_logger.get_logger(__name__)

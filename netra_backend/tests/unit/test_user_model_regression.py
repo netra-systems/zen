@@ -8,7 +8,7 @@ Tests to prevent:
 import pytest
 from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 
 
 @pytest.mark.asyncio
@@ -48,7 +48,7 @@ async def test_user_creation_with_defaults():
 async def test_user_creation_datetime_defaults():
     """Test that datetime defaults are properly callable."""
     # Test that the defaults are lambdas
-    from app.db.models_user import User as UserModel
+    from netra_backend.app.db.models_user import User as UserModel
     assert callable(UserModel.created_at.default.arg)
     assert callable(UserModel.updated_at.default.arg)
     assert callable(UserModel.plan_started_at.default.arg)
@@ -66,7 +66,7 @@ async def test_user_creation_datetime_defaults():
 @pytest.mark.asyncio 
 async def test_tool_usage_log_datetime_defaults():
     """Test that ToolUsageLog datetime defaults are properly callable."""
-    from app.db.models_user import ToolUsageLog as LogModel
+    from netra_backend.app.db.models_user import ToolUsageLog as LogModel
     assert callable(LogModel.created_at.default.arg)
     
     log = ToolUsageLog(
@@ -83,7 +83,7 @@ async def test_tool_usage_log_datetime_defaults():
 @pytest.mark.asyncio
 async def test_secret_datetime_defaults():
     """Test that Secret datetime defaults are properly callable."""
-    from app.db.models_user import Secret as SecretModel
+    from netra_backend.app.db.models_user import Secret as SecretModel
     assert callable(SecretModel.created_at.default.arg)
     assert callable(SecretModel.updated_at.default.arg)
     

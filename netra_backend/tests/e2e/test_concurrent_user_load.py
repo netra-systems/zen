@@ -5,10 +5,10 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 # Import all test modules to ensure they're discovered by pytest
-from tests.e2e.test_concurrent_load_core import TestConcurrentLoadCore
-from tests.e2e.test_resource_exhaustion import TestResourceExhaustion
-from tests.e2e.test_fair_queuing import TestFairQueuing
-from tests.e2e.test_websocket_limits import TestWebSocketLimits
+from netra_backend.tests.e2e.test_concurrent_load_core import TestConcurrentLoadCore
+from netra_backend.tests.e2e.test_resource_exhaustion import TestResourceExhaustion
+from netra_backend.tests.e2e.test_fair_queuing import TestFairQueuing
+from netra_backend.tests.e2e.test_websocket_limits import TestWebSocketLimits
 
 # Legacy alias for backward compatibility
 TestConcurrentUserLoad = TestConcurrentLoadCore

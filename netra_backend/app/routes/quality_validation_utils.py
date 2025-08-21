@@ -6,8 +6,8 @@ Each function is ≤8 lines as per architectural requirements.
 
 from typing import Dict, Any
 from datetime import datetime, UTC
-from app.services.quality_gate_service import ContentType
-from app.schemas.quality_types import QualityAlert, User
+from netra_backend.app.services.quality_gate_service import ContentType
+from netra_backend.app.schemas.quality_types import QualityAlert, User
 
 
 def _get_content_mapping_part1() -> Dict[str, ContentType]:

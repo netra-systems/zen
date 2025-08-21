@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 import redis.asyncio as aioredis
 
-from tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

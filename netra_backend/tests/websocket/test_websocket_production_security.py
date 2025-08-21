@@ -13,7 +13,7 @@ import pytest
 import re
 from unittest.mock import patch, MagicMock
 
-from app.core.websocket_cors import (
+from netra_backend.app.core.websocket_cors import (
     WebSocketCORSHandler, 
     SECURITY_CONFIG, 
     SUSPICIOUS_PATTERNS,

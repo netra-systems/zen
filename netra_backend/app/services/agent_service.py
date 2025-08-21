@@ -27,13 +27,13 @@ async def process_multimodal(multimodal_data: dict) -> dict:
 def get_primary_agent():
     """Get primary agent instance."""
     from .agent_service_core import AgentService
-    from app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     return AgentService(SupervisorAgent())
 
 def get_fallback_agent():
     """Get fallback agent instance."""
     from .agent_service_core import AgentService
-    from app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
     return AgentService(SupervisorAgent())
 
 __all__ = [

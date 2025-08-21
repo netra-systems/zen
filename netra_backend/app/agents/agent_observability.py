@@ -5,8 +5,8 @@ Handles agent logging, metrics, and observability functionality.
 
 import time
 from typing import Any
-from app.llm.observability import log_agent_communication, log_agent_input, log_agent_output
-from app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
+from netra_backend.app.llm.observability import log_agent_communication, log_agent_input, log_agent_output
+from netra_backend.app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
 
 
 class AgentObservabilityMixin:

@@ -23,19 +23,19 @@ from typing import Dict, Any, Optional, List
 import time
 
 # Modern execution interface imports
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
 
 # Legacy compatibility imports
-from app.llm.llm_manager import LLMManager
-from app.schemas.shared_types import RetryConfig
-from app.logging_config import central_logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -125,7 +125,7 @@ class DemoOptimizationService(BaseExecutionInterface):
     def _create_legacy_execution_context(self, message: str, 
                                        context: Optional[Dict[str, Any]]) -> ExecutionContext:
         """Create execution context from legacy parameters."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         
         state = DeepAgentState()
         state.message = message

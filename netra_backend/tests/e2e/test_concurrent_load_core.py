@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 import asyncio
-from tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
+from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
 class TestConcurrentLoadCore:
     """Core concurrent user load tests"""
     

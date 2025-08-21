@@ -10,9 +10,9 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from enum import Enum
 
-from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.websocket.message_queue import QueuedMessage, MessagePriority
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket.message_queue import QueuedMessage, MessagePriority
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class MessageType(Enum):

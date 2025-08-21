@@ -4,10 +4,10 @@ from typing import Dict, List, Optional, Any, Union, Literal
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from enum import Enum
-from app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
+from netra_backend.app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
 
 # Import shared models to avoid duplication
-from app.schemas.shared_types import (
+from netra_backend.app.schemas.shared_types import (
     DataAnalysisResponse, AnomalyDetectionResponse, AnomalySeverity,
     AnomalyDetail, PerformanceMetrics, CorrelationAnalysis,
     UsagePattern, DataQualityMetrics

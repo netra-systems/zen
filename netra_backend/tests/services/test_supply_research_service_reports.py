@@ -8,8 +8,8 @@ from datetime import datetime, UTC
 from typing import Dict, Any, List
 from unittest.mock import MagicMock, patch
 
-from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import ResearchSession
+from netra_backend.app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.db.models_postgres import ResearchSession
 
 
 @pytest.fixture

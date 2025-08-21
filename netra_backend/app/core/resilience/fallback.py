@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T')

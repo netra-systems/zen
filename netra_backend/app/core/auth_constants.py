@@ -9,7 +9,7 @@ All authentication-related constants are defined here to prevent duplication
 and ensure consistency across the entire codebase.
 
 Usage:
-    from app.core.auth_constants import AuthConstants, JWTConstants, HeaderConstants
+    from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants, HeaderConstants
     
     # Use constants instead of hardcoded strings
     headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}

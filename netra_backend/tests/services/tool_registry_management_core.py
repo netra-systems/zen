@@ -6,7 +6,7 @@ All functions ≤8 lines per requirements.
 from datetime import datetime, UTC
 from typing import Dict, List, Any
 from langchain_core.tools import BaseTool
-from app.services.tool_registry import ToolRegistry
+from netra_backend.app.services.tool_registry import ToolRegistry
 
 
 class UnifiedToolRegistry:

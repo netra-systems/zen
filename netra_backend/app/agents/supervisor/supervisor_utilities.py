@@ -1,8 +1,8 @@
 """Supervisor utility functions for hooks and statistics."""
 
 from typing import Dict, List, Any
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
 
 logger = central_logger.get_logger(__name__)
 

@@ -1,8 +1,8 @@
 """Pipeline building logic for supervisor agent."""
 
 from typing import List
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
 class PipelineBuilder:

@@ -7,10 +7,10 @@ import asyncio
 import time
 from typing import Optional
 
-from app.logging_config import central_logger
-from app.websocket.connection import ConnectionInfo
-from app.websocket.error_types import WebSocketErrorInfo
-from app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.error_types import WebSocketErrorInfo
+from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
 
 logger = central_logger.get_logger(__name__)
 

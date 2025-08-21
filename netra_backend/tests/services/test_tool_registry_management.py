@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from enum import Enum
 
 from langchain_core.tools import BaseTool
-from app.services.tool_registry import ToolRegistry
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.tool_registry import ToolRegistry
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class ToolStatus(Enum):

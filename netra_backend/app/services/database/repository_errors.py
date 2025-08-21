@@ -5,8 +5,8 @@ Centralized error handling for database repository operations.
 
 from typing import Dict, Any, List
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from app.logging_config import central_logger
-from app.core.exceptions import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions import (
     DatabaseError, RecordNotFoundError, ConstraintViolationError
 )
 

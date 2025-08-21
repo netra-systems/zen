@@ -128,7 +128,7 @@ class TestLoggingBehavior:
     
     def test_safe_json_parse_logs_parse_errors(self):
         """Test that safe_json_parse logs parse errors."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = safe_json_parse('invalid json {')
@@ -138,7 +138,7 @@ class TestLoggingBehavior:
     
     def test_parse_dict_field_logs_type_errors(self):
         """Test that parse_dict_field logs type errors."""
-        from app.core.json_parsing_utils import parse_dict_field
+        from netra_backend.app.core.json_parsing_utils import parse_dict_field
         
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = parse_dict_field([1, 2, 3])  # List instead of dict
@@ -148,7 +148,7 @@ class TestLoggingBehavior:
     
     def test_parse_list_field_logs_type_errors(self):
         """Test that parse_list_field logs type errors."""
-        from app.core.json_parsing_utils import parse_list_field
+        from netra_backend.app.core.json_parsing_utils import parse_list_field
         
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = parse_list_field({"key": "value"})  # Dict instead of list
@@ -158,7 +158,7 @@ class TestLoggingBehavior:
     
     def test_comprehensive_json_fix_logs_fixes(self):
         """Test that comprehensive_json_fix logs when fixes are applied."""
-        from app.core.json_parsing_utils import comprehensive_json_fix
+        from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix
         
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             data = {
@@ -176,7 +176,7 @@ class TestEdgeCases:
     
     def test_very_large_json_string(self):
         """Test parsing very large JSON strings."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         # Create large JSON string
         large_dict = {f"key_{i}": f"value_{i}" for i in range(10000)}
@@ -188,7 +188,7 @@ class TestEdgeCases:
     
     def test_deeply_nested_json_structures(self):
         """Test parsing deeply nested JSON structures."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         # Create deeply nested structure
         nested = {"level": 1}
@@ -202,7 +202,7 @@ class TestEdgeCases:
     
     def test_unicode_and_special_characters(self):
         """Test handling unicode and special characters."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         unicode_json = '{"message": "Hello 世界", "emoji": "😀🎉", "special": "\\n\\t\\r"}'
         result = safe_json_parse(unicode_json)
@@ -213,7 +213,7 @@ class TestEdgeCases:
     
     def test_memory_efficiency_with_large_data(self):
         """Test memory efficiency with large data structures."""
-        from app.core.json_parsing_utils import parse_string_list_field
+        from netra_backend.app.core.json_parsing_utils import parse_string_list_field
         
         large_list = self._create_large_mixed_list(10000)
         result = parse_string_list_field(large_list)
@@ -238,7 +238,7 @@ class TestEdgeCases:
     
     def test_circular_reference_handling(self):
         """Test handling of circular references."""
-        from app.core.json_parsing_utils import parse_dict_field
+        from netra_backend.app.core.json_parsing_utils import parse_dict_field
         
         # Create object with circular reference
         circular_dict = {"key": "value"}
@@ -250,7 +250,7 @@ class TestEdgeCases:
     
     def test_malformed_json_recovery(self):
         """Test recovery from various malformed JSON."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         malformed_cases = self._get_malformed_json_cases()
         
@@ -270,7 +270,7 @@ class TestEdgeCases:
     
     def test_empty_and_whitespace_inputs(self):
         """Test handling of empty and whitespace inputs."""
-        from app.core.json_parsing_utils import (
+        from netra_backend.app.core.json_parsing_utils import (
             safe_json_parse, parse_dict_field, parse_list_field
         )
         
@@ -298,7 +298,7 @@ class TestEdgeCases:
     
     def test_extreme_nesting_limits(self):
         """Test behavior at extreme nesting limits."""
-        from app.core.json_parsing_utils import safe_json_parse
+        from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
         nested = self._create_extremely_nested_structure(500)
         

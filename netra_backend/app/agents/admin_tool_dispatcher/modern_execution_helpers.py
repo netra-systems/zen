@@ -10,8 +10,8 @@ from typing import Dict, Any
 from datetime import datetime, UTC
 import uuid
 
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.admin_tool_types import (
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse, 
     ToolStatus as AdminToolStatus
 )

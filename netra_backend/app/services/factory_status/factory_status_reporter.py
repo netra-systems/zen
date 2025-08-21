@@ -4,13 +4,13 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 
-from app.services.factory_status.spec_compliance_scorer import (
+from netra_backend.app.services.factory_status.spec_compliance_scorer import (
     ComplianceScore,
     SpecViolation
 )
-from app.services.factory_status.violation_analyzer import ViolationAnalyzer
-from app.services.factory_status.report_analyzer import ReportAnalyzer
-from app.core.exceptions_base import ValidationError as ValidationException
+from netra_backend.app.services.factory_status.violation_analyzer import ViolationAnalyzer
+from netra_backend.app.services.factory_status.report_analyzer import ReportAnalyzer
+from netra_backend.app.core.exceptions_base import ValidationError as ValidationException
 
 
 class FactoryStatusReporter:
@@ -36,7 +36,7 @@ class FactoryStatusReporter:
     
     def _create_scorer(self):
         """Create spec compliance scorer."""
-        from app.services.factory_status.spec_compliance_scorer import SpecComplianceScorer
+        from netra_backend.app.services.factory_status.spec_compliance_scorer import SpecComplianceScorer
         return SpecComplianceScorer(self.spec_dir)
 
     async def generate_compliance_report(self) -> Dict[str, Any]:

@@ -10,7 +10,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ConfigurationExtractor:

@@ -13,9 +13,9 @@ import pytest
 from unittest.mock import patch, MagicMock
 from contextlib import asynccontextmanager
 
-from app.services.security_service import SecurityService
-from app.services.key_manager import KeyManager
-from app.config import settings
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.key_manager import KeyManager
+from netra_backend.app.config import settings
 from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     TEST_DOCUMENT_DATA
@@ -28,7 +28,7 @@ class TestCorpusRoute:
     @pytest.fixture
     def client(self):
         """Corpus-specific test client with required app state."""
-        from app.main import app
+        from netra_backend.app.main import app
         from fastapi.testclient import TestClient
         
         # Mock the db_session_factory to prevent state errors
@@ -69,8 +69,8 @@ class TestCorpusRoute:
     
     async def test_corpus_search(self):
         """Test corpus search functionality."""
-        from app.routes.corpus import search_corpus
-        from app.db.models_postgres import User
+        from netra_backend.app.routes.corpus import search_corpus
+        from netra_backend.app.db.models_postgres import User
         
         # Mock the corpus service search method
         with patch('app.services.corpus_service.corpus_service_instance.search_with_fallback') as mock_search:
@@ -99,7 +99,7 @@ class TestCorpusRoute:
     
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
-        from app.routes.corpus import bulk_index_documents, BulkIndexRequest
+        from netra_backend.app.routes.corpus import bulk_index_documents, BulkIndexRequest
         
         documents = [
             {"title": f"Doc {i}", "content": f"Content {i}"}

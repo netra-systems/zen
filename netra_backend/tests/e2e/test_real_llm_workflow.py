@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
-from tests.e2e.infrastructure.llm_test_manager import LLMTestManager, LLMTestRequest, LLMTestModel
+from netra_backend.tests.e2e.infrastructure.llm_test_manager import LLMTestManager, LLMTestRequest, LLMTestModel
 
 
 @pytest.fixture

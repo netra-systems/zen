@@ -10,10 +10,10 @@ from functools import wraps
 from datetime import datetime, UTC
 import traceback
 
-from app.logging_config import central_logger
-from app.services.metrics.agent_metrics_compact import AgentMetricsCollector
-from app.services.metrics.agent_metrics_models import FailureType
-from app.middleware.metrics_helpers import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.metrics.agent_metrics_compact import AgentMetricsCollector
+from netra_backend.app.services.metrics.agent_metrics_models import FailureType
+from netra_backend.app.middleware.metrics_helpers import (
     AgentNameExtractor, OperationTypeDetector, FailureClassifier,
     PerformanceUtils, ErrorHandler, OperationMetadataBuilder, TimeoutHandler
 )

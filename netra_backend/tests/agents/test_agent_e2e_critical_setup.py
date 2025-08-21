@@ -63,7 +63,7 @@ class AgentE2ETestBase:
 
     def _get_mock_triage_result(self):
         """Get mock triage result for structured LLM calls"""
-        from app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage_sub_agent import (
             TriageResult, Priority, Complexity, UserIntent, 
             ExtractedEntities, TriageMetadata
         )

@@ -26,8 +26,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
 from sqlalchemy.exc import SQLAlchemyError, DisconnectionError
 
-from app.logging_config import central_logger
-from app.config import settings
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.config import settings
 
 logger = central_logger.get_logger(__name__)
 

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, UTC
 
 from netra_backend.app.exceptions import ServiceError
 from netra_backend.app.error_context import ErrorContext
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ResourceTracker:

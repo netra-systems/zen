@@ -114,7 +114,7 @@ class TestSupplyResearcherCore:
 
     def _test_redis_capability(self, agent, state):
         """Test Redis capability configuration (≤8 lines)"""
-        from app.redis_manager import RedisManager
+        from netra_backend.app.redis_manager import RedisManager
         redis_manager = RedisManager()
         assert redis_manager is not None
         assert state.user_request == "Resume research"

@@ -73,7 +73,7 @@ async def ready(db: AsyncSession = Depends(get_db_dependency)):
     <incorrect_pattern>
       <code>
 # In database_checks.py
-from app.db.postgres import get_async_db  # This is @asynccontextmanager
+from netra_backend.app.db.postgres import get_async_db  # This is @asynccontextmanager
 
 async def _perform_assistant_check(self):
     # ERROR: async for with context manager
@@ -84,7 +84,7 @@ async def _perform_assistant_check(self):
     <correct_pattern>
       <code>
 # In database_checks.py
-from app.db.postgres import get_async_db  # This is @asynccontextmanager
+from netra_backend.app.db.postgres import get_async_db  # This is @asynccontextmanager
 
 async def _perform_assistant_check(self):
     # CORRECT: async with for context manager

@@ -29,15 +29,15 @@ from argon2 import PasswordHasher
 import jwt
 
 # Import REAL implementations
-from app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash, verify_password
-from app.db.session import get_db_session, session_manager
-from app.db.models_postgres import User, Secret, ToolUsageLog
-from app.schemas.registry import UserCreate
-from app.services.user_service import user_service
-from app.services.cost_calculator import CostCalculatorService, CostTier
-from app.websocket.rate_limiter import RateLimiter
-from app.websocket.connection import ConnectionInfo
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash, verify_password
+from netra_backend.app.db.session import get_db_session, session_manager
+from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.services.user_service import user_service
+from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
+from netra_backend.app.websocket.rate_limiter import RateLimiter
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 class TestFirstTimeUserRealCritical:

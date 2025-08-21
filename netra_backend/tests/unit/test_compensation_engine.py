@@ -13,12 +13,12 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
-from app.services.compensation_engine_core import CompensationEngine
-from app.services.compensation_models import (
+from netra_backend.app.services.compensation_engine_core import CompensationEngine
+from netra_backend.app.services.compensation_models import (
     CompensationAction, CompensationState, BaseCompensationHandler
 )
-from app.core.error_recovery import RecoveryContext, OperationType
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.core.error_recovery import RecoveryContext, OperationType
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 
 class TestCompensationEngine:

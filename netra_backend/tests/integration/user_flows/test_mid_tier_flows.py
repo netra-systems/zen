@@ -21,8 +21,8 @@ import httpx
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.team import Team
-from app.services.user_service import UserService as UsageService
+from netra_backend.app.models.team import Team
+from netra_backend.app.services.user_service import UserService as UsageService
 
 from netra_backend.tests..test_helpers.user_flow_base import UserFlowTestBase
 from netra_backend.tests..fixtures.user_journey_data import BillingTestData

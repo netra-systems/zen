@@ -3,7 +3,7 @@ Main compliance rule factory.
 Coordinates OWASP and standard compliance rule creation through focused modules.
 """
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compliance_checks import ComplianceCheckManager
 from netra_backend.app.owasp_rules import OwaspRuleFactory
 from netra_backend.app.standard_rules import StandardRuleFactory

@@ -2,11 +2,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.models import MCPClientCreateRequest
-from app.routes.mcp.helpers import check_admin_access
-from app.routes.mcp.utils import handle_client_registration_error
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.models import MCPClientCreateRequest
+from netra_backend.app.routes.mcp.helpers import check_admin_access
+from netra_backend.app.routes.mcp.utils import handle_client_registration_error
 
 
 async def handle_client_registration(

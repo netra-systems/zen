@@ -7,8 +7,8 @@ from datetime import datetime, timedelta, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import desc
 
-from app.db.models_postgres import ResearchSession, SupplyUpdateLog
-from app.logging_config import central_logger as logger
+from netra_backend.app.db.models_postgres import ResearchSession, SupplyUpdateLog
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ResearchSessionOperations:

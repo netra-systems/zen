@@ -14,9 +14,9 @@ import aiohttp
 from datetime import datetime, timedelta
 from unittest.mock import patch, AsyncMock
 
-from app.db.models_postgres import User
-from app.auth_integration.auth import JWTTokenManager
-from app.redis_manager import RedisManager
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.auth_integration.auth import JWTTokenManager
+from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.mark.L3

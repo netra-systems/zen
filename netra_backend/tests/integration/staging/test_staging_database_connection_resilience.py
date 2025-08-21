@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Individual test methods will use @pytest.mark.asyncio decorator
 
 from test_framework.mock_utils import mock_justified
-from app.tests.fixtures.database_test_fixtures import (
+from netra_backend.app.tests.fixtures.database_test_fixtures import (
     async_session_mock, transaction_session_mock, connection_pool,
     DatabaseErrorSimulator, MockConnectionPool
 )

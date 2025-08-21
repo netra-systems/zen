@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from typing import Any, Dict
-from app.services.context import ToolContext
+from netra_backend.app.services.context import ToolContext
 
 @tool
 async def code_analyzer(context: ToolContext, request: Dict[str, Any]) -> str:

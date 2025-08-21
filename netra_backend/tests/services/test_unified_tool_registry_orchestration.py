@@ -4,7 +4,7 @@ All functions ≤8 lines per requirements.
 """
 
 import pytest
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.tool_registry_test_mocks import MockAdvancedTool, assert_tool_called
 from netra_backend.tests.tool_registry_management_core import ToolOrchestrator
 

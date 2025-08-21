@@ -16,7 +16,7 @@ class AdvancedGenerators(CoreServiceBase):
         sample_size: int = 10
     ) -> List[Dict]:
         """Generate preview samples"""
-        from app import schemas
+        from netra_backend.app import schemas
         config = schemas.LogGenParams(
             num_logs=sample_size,
             corpus_id=corpus_id or "preview"

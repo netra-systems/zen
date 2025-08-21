@@ -10,9 +10,9 @@ import hashlib
 from typing import Dict, Any, Optional, List, Union
 from pydantic import BaseModel, Field
 from enum import Enum
-from app.schemas.llm_config_types import LLMConfig
-from app.schemas.llm_response_types import LLMResponse
-from app.core.exceptions_base import NetraException
+from netra_backend.app.schemas.llm_config_types import LLMConfig
+from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class LLMTestModel(str, Enum):

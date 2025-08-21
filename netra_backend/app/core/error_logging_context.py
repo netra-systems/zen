@@ -7,16 +7,16 @@ import traceback
 from contextlib import contextmanager
 from typing import Optional, List
 
-from app.core.error_logging_types import (
+from netra_backend.app.core.error_logging_types import (
     DetailedErrorContext, 
     ErrorCategory, 
     ErrorSeverity,
     LogLevel
 )
-from app.core.error_codes import ErrorCode
-from app.core.error_recovery import OperationType, RecoveryContext
-from app.schemas.shared_types import ErrorContext
-from app.logging_config import central_logger
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
+from netra_backend.app.schemas.shared_types import ErrorContext
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

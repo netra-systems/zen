@@ -3,7 +3,7 @@
 This module re-exports the refactored demo service components.
 """
 
-from app.services.demo import (
+from netra_backend.app.services.demo import (
     DemoService,
     get_demo_service,
     INDUSTRY_FACTORS

@@ -5,7 +5,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityMetrics
 )
-from tests.helpers.quality_gate_comprehensive_helpers import (
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
     create_multiple_impossible_claims_content,
     create_claims_with_evidence_content,
     create_context_with_data_source,

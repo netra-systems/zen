@@ -5,7 +5,7 @@ Contains the implementation methods for handling tool execution requests.
 Split into separate modules for better maintainability.
 """
 from typing import Dict, Any, TYPE_CHECKING
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
     from .registry import UnifiedToolRegistry
@@ -16,7 +16,7 @@ class BasicToolHandlers:
     
     async def _create_thread_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for create_thread tool"""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_service = ThreadService(self.db)
         
@@ -36,7 +36,7 @@ class BasicToolHandlers:
     
     async def _get_thread_history_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for get_thread_history tool"""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_service = ThreadService(self.db)
         
@@ -55,7 +55,7 @@ class BasicToolHandlers:
     
     async def _list_agents_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for list_agents tool"""
-        from app.agents.supervisor import SupervisorAgent
+        from netra_backend.app.agents.supervisor import SupervisorAgent
         
         supervisor = SupervisorAgent(self.db)
         agents = supervisor.get_registered_agents()
@@ -80,7 +80,7 @@ class AnalyticsToolHandlers:
     
     async def _analyze_workload_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for analyze_workload tool"""
-        from app.services.apex_optimizer_service import ApexOptimizerService
+        from netra_backend.app.services.apex_optimizer_service import ApexOptimizerService
         
         optimizer = ApexOptimizerService(self.db)
         
@@ -101,7 +101,7 @@ class AnalyticsToolHandlers:
     
     async def _query_corpus_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for query_corpus tool"""
-        from app.services.corpus_service import CorpusService
+        from netra_backend.app.services.corpus_service import CorpusService
         
         corpus_service = CorpusService(self.db)
         

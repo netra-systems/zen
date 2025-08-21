@@ -4,11 +4,11 @@ import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult
 )
 

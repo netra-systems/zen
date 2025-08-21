@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Set, Optional, Callable, Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.error_types import ErrorSeverity
 from netra_backend.app.sync_types import SyncState, StateCheckpoint

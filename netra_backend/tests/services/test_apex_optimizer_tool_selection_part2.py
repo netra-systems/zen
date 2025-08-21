@@ -50,7 +50,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Improve response time and reduce latency for our AI system",
@@ -61,7 +61,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,
@@ -85,7 +85,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_789",
             query="Audit and optimize our KV cache configuration",
@@ -96,7 +96,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,
@@ -120,7 +120,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_analysis",
             query="Analyze effectiveness of new models for our use case",
@@ -131,7 +131,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,
@@ -155,7 +155,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_multi",
             query="Optimize for both cost reduction and latency improvement",
@@ -166,7 +166,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,
@@ -190,7 +190,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_empty",
             query="",
@@ -201,7 +201,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,
@@ -224,8 +224,8 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_llm_failure(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection when LLM fails"""
         # Create sample agent state
-        from app.schemas import Workload, DataSource, TimeRange
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",
@@ -257,8 +257,8 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_invalid_json_response(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection with invalid JSON response from LLM"""
         # Create sample agent state
-        from app.schemas import Workload, DataSource, TimeRange
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",
@@ -290,7 +290,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Custom optimization requirements",
@@ -301,7 +301,7 @@ class TestApexOptimizerAdvancedToolSelection:
                 time_range=TimeRange(start_time="2025-01-01", end_time="2025-01-31")
             )]
         )
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         message = BaseMessage(
             type="human",
             content=request.query,

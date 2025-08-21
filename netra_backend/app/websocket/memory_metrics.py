@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any
 from dataclasses import dataclass, field
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

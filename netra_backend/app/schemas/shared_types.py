@@ -9,16 +9,16 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, UTC
 from enum import Enum
 import asyncio
-from app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
+from netra_backend.app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
 
 # Avoid circular imports by using TYPE_CHECKING
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.agents.state import DeepAgentState
-    from app.llm.llm_manager import LLMManager
-    from app.agents.base import BaseSubAgent
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.agents.base import BaseSubAgent
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Type aliases for common patterns to replace Any usage
 PrimitiveType = Union[str, int, float, bool, None]

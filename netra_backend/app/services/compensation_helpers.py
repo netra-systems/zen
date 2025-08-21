@@ -4,7 +4,7 @@ Decomposes large compensation functions into 25-line focused helpers.
 """
 
 from typing import Dict, Any, List
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compensation_models import CompensationAction, CompensationState
 
 logger = central_logger.get_logger(__name__)

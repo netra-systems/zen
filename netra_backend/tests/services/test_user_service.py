@@ -8,10 +8,10 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
 
-from app.services.user_service import CRUDUser, user_service, pwd_context
-from app.db.models_postgres import User
-from app.schemas.registry import UserCreate
-from app.schemas.User import UserUpdate
+from netra_backend.app.services.user_service import CRUDUser, user_service, pwd_context
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.schemas.User import UserUpdate
 
 
 class TestUserService:

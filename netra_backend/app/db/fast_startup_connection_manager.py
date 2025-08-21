@@ -21,9 +21,9 @@ from typing import Dict, Optional, Any, Callable, List
 from dataclasses import dataclass
 from enum import Enum
 
-from app.logging_config import central_logger
-from app.core.async_retry_logic import with_retry, AsyncCircuitBreaker
-from app.db.postgres_config import DatabaseConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.async_retry_logic import with_retry, AsyncCircuitBreaker
+from netra_backend.app.db.postgres_config import DatabaseConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -144,7 +144,7 @@ class FastStartupConnectionManager:
         for delay in retry_delays:
             await asyncio.sleep(delay)
             try:
-                from app.config import settings
+                from netra_backend.app.config import settings
                 db_url = self._get_async_db_url(settings.database_url)
                 if await self._attempt_fast_connection(db_url):
                     logger.info(f"Background connection retry succeeded for {self.db_name}")
@@ -262,7 +262,7 @@ class DatabaseConnectionRegistry:
     
     async def initialize_all_databases(self) -> Dict[str, bool]:
         """Initialize all registered databases concurrently."""
-        from app.config import settings
+        from netra_backend.app.config import settings
         
         initialization_tasks = {}
         for db_name, manager in self.managers.items():

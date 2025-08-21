@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.reconnection_types import ReconnectionConfig, ReconnectionAttempt
 
 logger = central_logger.get_logger(__name__)

@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.exc import OperationalError, DatabaseError, DisconnectionError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.client_config import DatabaseClientConfig
 
 logger = central_logger.get_logger(__name__)

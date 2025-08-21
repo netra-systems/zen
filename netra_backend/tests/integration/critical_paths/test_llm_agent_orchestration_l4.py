@@ -24,7 +24,7 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase, CriticalPathMetrics
 )
 # # # from agents.supervisor_agent_modern import ModernSupervisorAgent
@@ -42,14 +42,14 @@ ExecutionContext = dict  # Use dict as placeholder
 ExecutionResult = dict   # Use dict as placeholder
 # # from llm.llm_manager import LLMManager
 LLMManager = AsyncMock
-from app.core.configuration.base import get_unified_config
+from netra_backend.app.core.configuration.base import get_unified_config
 # # # from agents.tool_dispatcher import ToolDispatcher
 from unittest.mock import AsyncMock
 ToolDispatcher = AsyncMock
 ToolDispatcher = AsyncMock
 # # from app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -251,7 +251,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             
             # Initialize supervisor agent with real dependencies
             from sqlalchemy.ext.asyncio import AsyncSession
-            from app.database.connection_manager import get_db_session
+            from netra_backend.app.database.connection_manager import get_db_session
             
             db_session = await get_db_session()
             

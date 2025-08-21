@@ -11,9 +11,9 @@ from typing import Dict, Any, Optional, Protocol, runtime_checkable
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.agents.state import DeepAgentState
-from app.schemas.core_enums import ExecutionStatus
-from app.schemas.agent_result_types import TypedAgentResult
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 
 @dataclass

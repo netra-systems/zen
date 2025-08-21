@@ -7,16 +7,16 @@ Follows strict 25-line function design and 450-line limit.
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
-    from app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
-from app.agents.supervisor.execution_engine import ExecutionEngine
-from app.agents.mcp_integration.context_manager import MCPContextManager
-from app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector
-from app.services.agent_mcp_bridge import AgentMCPBridge
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
+from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector
+from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
 
 logger = central_logger.get_logger(__name__)
 

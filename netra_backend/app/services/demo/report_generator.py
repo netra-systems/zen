@@ -5,8 +5,8 @@ import uuid
 from datetime import datetime, UTC
 from typing import Dict, Any, List, Optional
 
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 

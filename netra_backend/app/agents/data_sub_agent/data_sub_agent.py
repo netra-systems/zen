@@ -12,17 +12,17 @@ import time
 import asyncio
 from datetime import datetime
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.agents.base.interface import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.schemas.strict_types import TypedAgentResult
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
-from app.core.type_validators import agent_type_safe
+from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.type_validators import agent_type_safe
 
 # Import focused helper modules
 from netra_backend.app.clickhouse_client import ClickHouseClient

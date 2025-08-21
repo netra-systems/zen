@@ -6,7 +6,7 @@ Implements NIST, authentication, data protection, API, and infrastructure checks
 from typing import List
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compliance_checks import (
     ComplianceCheck, ComplianceCheckManager, ComplianceStandard, ComplianceStatus
 )

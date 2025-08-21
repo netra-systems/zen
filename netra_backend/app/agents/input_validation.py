@@ -2,9 +2,9 @@
 
 from typing import Dict, Any, Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
-from app.agents.state import DeepAgentState
-from app.schemas.shared_types import ValidationResult
-from app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.shared_types import ValidationResult
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

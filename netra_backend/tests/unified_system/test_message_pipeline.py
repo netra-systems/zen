@@ -18,12 +18,12 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
-from app.services.agent_service_core import AgentService
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.schemas import AppConfig
-from app.ws_manager import manager
-from app.db.postgres import get_async_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas import AppConfig
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.db.postgres import get_async_db
 
 logger = central_logger.get_logger(__name__)
 

@@ -1,6 +1,6 @@
 
 import pytest
-from app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from langchain_core.tools import tool
 
 @tool

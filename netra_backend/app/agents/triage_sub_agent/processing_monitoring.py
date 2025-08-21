@@ -6,8 +6,8 @@ Contains metrics tracking, performance monitoring, and WebSocket enhancements.
 
 import time
 from typing import Dict, Any
-from app.logging_config import central_logger
-from app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
 
 logger = central_logger.get_logger(__name__)
 

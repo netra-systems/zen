@@ -240,7 +240,7 @@ def _create_e2e_supervisor(infrastructure):
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
-        from app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
         
@@ -256,7 +256,7 @@ def _create_e2e_supervisor(infrastructure):
 
 def _configure_e2e_pipeline(supervisor):
     """Configure supervisor pipeline for E2E testing"""
-    from app.agents.supervisor.execution_context import AgentExecutionResult
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
         AgentExecutionResult(success=True, state=None),
         AgentExecutionResult(success=True, state=None),

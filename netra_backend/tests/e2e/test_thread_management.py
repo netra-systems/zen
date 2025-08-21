@@ -15,7 +15,7 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.db.models_postgres import Thread, Message
 from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
 from ws_manager import manager
-from tests.helpers.thread_test_helpers import (
+from netra_backend.tests.helpers.thread_test_helpers import (
     create_mock_thread, setup_thread_repo_mock, setup_ws_manager_mock
 )
 

@@ -11,7 +11,7 @@ from enum import Enum
 
 
 # Import ErrorSeverity from single source of truth
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 @dataclass

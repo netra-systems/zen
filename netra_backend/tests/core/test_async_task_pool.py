@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 
 from netra_backend.app.core.async_resource_manager import AsyncTaskPool
 from netra_backend.app.core.exceptions_service import ServiceError
-from tests.helpers.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     assert_task_pool_state,
     create_quick_operation,
     measure_timing,

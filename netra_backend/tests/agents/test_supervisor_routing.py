@@ -22,14 +22,14 @@ from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentU
 from llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-from tests.helpers.supervisor_test_helpers import (
+from netra_backend.tests.helpers.supervisor_test_helpers import (
     create_supervisor_mocks, create_supervisor_agent, create_execution_context,
     create_agent_state, setup_triage_agent_mock, setup_optimization_agent_mock,
     setup_data_agent_mock, assert_agent_called, create_pipeline_config,
     execute_pipeline, setup_failing_agent_mock, setup_retry_agent_mock,
     setup_circuit_breaker
 )
-from tests.helpers.supervisor_extensions import install_supervisor_extensions
+from netra_backend.tests.helpers.supervisor_extensions import install_supervisor_extensions
 
 # Install extension methods for testing
 install_supervisor_extensions()

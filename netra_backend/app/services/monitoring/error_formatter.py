@@ -16,7 +16,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Any, Tuple
 from loguru import logger
 
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.schemas.monitoring_schemas import (
     GCPError, GCPErrorEvent, ErrorContext, ErrorStatus,
     ErrorSeverity as GCPErrorSeverity
 )

@@ -78,7 +78,7 @@ def _setup_persistence_methods(mock_persistence):
 
 def _create_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     return dispatcher
@@ -93,7 +93,7 @@ def _setup_supervisor_ids(supervisor):
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from app.agents.supervisor.execution_context import AgentExecutionResult
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
         AgentExecutionResult(success=True, state=None),
         AgentExecutionResult(success=True, state=None),
@@ -151,7 +151,7 @@ def create_concurrent_tasks(supervisors):
 
 def verify_concurrent_results(results, expected_count):
     """Verify concurrent execution results"""
-    from app.agents.state import DeepAgentState
+    from netra_backend.app.agents.state import DeepAgentState
     assert len(results) == expected_count
     for result in results:
         if not isinstance(result, Exception):
@@ -173,7 +173,7 @@ def setup_mock_llm_with_retry():
 
 def create_tool_execution_mocks():
     """Create mocks for tool execution testing"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
     

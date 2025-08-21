@@ -3,8 +3,8 @@
 Ensures proper separation between development, testing, and production databases.
 """
 
-from app.config import settings
-from app.logging_config import central_logger
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger
 import os
 
 logger = central_logger.get_logger(__name__)

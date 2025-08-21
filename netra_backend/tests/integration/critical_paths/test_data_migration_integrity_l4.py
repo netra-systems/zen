@@ -26,16 +26,16 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
-from app.db.clickhouse import ClickHouseDatabase
-from app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
 # from app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 RedisSessionManager = AsyncMock
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

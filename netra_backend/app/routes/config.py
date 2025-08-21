@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from app.config import settings
-from app import schemas
+from netra_backend.app.config import settings
+from netra_backend.app import schemas
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
-from app.auth_integration.auth import get_current_user, require_admin
+from netra_backend.app.auth_integration.auth import get_current_user, require_admin
 
 router = APIRouter()
 
@@ -93,7 +93,7 @@ def verify_admin_token(token: str) -> bool:
 
 async def backup_config() -> Dict[str, Any]:
     """Create configuration backup with ID and timestamp."""
-    from app.services.config_service import create_backup
+    from netra_backend.app.services.config_service import create_backup
     try:
         result = await create_backup()
         return result
@@ -102,7 +102,7 @@ async def backup_config() -> Dict[str, Any]:
 
 async def restore_config(backup_id: str) -> Dict[str, Any]:
     """Restore configuration from backup ID."""
-    from app.services.config_service import restore_from_backup
+    from netra_backend.app.services.config_service import restore_from_backup
     try:
         result = await restore_from_backup(backup_id)
         return result

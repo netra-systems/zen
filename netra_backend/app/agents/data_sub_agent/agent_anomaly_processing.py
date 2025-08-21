@@ -3,8 +3,8 @@
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime, UTC
 
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse, AnomalySeverity
-from app.logging_config import central_logger as logger
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse, AnomalySeverity
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class AnomalyProcessor:
@@ -31,7 +31,7 @@ class AnomalyProcessor:
     
     def _create_anomaly_detail(self, item: dict) -> 'AnomalyDetail':
         """Create AnomalyDetail from LLM response."""
-        from app.schemas.shared_types import AnomalyDetail
+        from netra_backend.app.schemas.shared_types import AnomalyDetail
         timestamp = self._extract_timestamp(item)
         fields = self._extract_anomaly_fields(item)
         severity = self._map_severity(item, self._get_severity_mapping())
@@ -39,7 +39,7 @@ class AnomalyProcessor:
     
     def _build_anomaly_detail(self, timestamp, fields: dict, severity) -> 'AnomalyDetail':
         """Build AnomalyDetail object from components."""
-        from app.schemas.shared_types import AnomalyDetail
+        from netra_backend.app.schemas.shared_types import AnomalyDetail
         core_params = self._create_anomaly_core_params(timestamp, fields, severity)
         return AnomalyDetail(**core_params)
     

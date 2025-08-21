@@ -8,12 +8,12 @@ Business Value: Standardizes admin tool execution patterns across all tools.
 """
 from typing import Optional, Dict, Any, Union
 from datetime import datetime, UTC
-from app.schemas.admin_tool_types import ToolResponse, ToolSuccessResponse, ToolFailureResponse
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.errors import ExecutionErrorHandler
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.state import DeepAgentState
+from netra_backend.app.schemas.admin_tool_types import ToolResponse, ToolSuccessResponse, ToolFailureResponse
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.state import DeepAgentState
 
 
 def get_current_utc_time() -> datetime:
@@ -151,7 +151,7 @@ def create_execution_metadata(context: ExecutionContext, action: str) -> Dict[st
 
 def _log_execution_completion(context: ExecutionContext, result: ExecutionResult) -> None:
     """Log execution completion with result details"""
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     status = "SUCCESS" if result.success else "FAILED"
     central_logger.info(f"Tool {context.agent_name} {status} (run_id: {context.run_id})")
 
@@ -171,5 +171,5 @@ def start_execution_monitoring(context: ExecutionContext,
 
 def _log_execution_start(context: ExecutionContext) -> None:
     """Log execution start details"""
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     central_logger.debug(f"Starting {context.agent_name} execution (run_id: {context.run_id})")

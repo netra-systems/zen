@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
-    from app.schemas.agent_models import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
 
 class ToolStatus(str, enum.Enum):
     SUCCESS = "success"

@@ -32,16 +32,16 @@ from enum import Enum
 import httpx
 import jwt
 
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     Token, LoginRequest, LoginResponse,
     UserProfile, Permission, Role, ResourceAccess,
     # AuditEvent, AuthorizationResult  # Class may not exist, commented out
 )
-from app.core.config import get_settings
-from app.db.postgres import get_async_db
-from app.db.redis_manager import get_redis_manager
-from app.clients.auth_client import auth_client
-from app.core.monitoring import metrics_collector
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.redis_manager import get_redis_manager
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.monitoring import metrics_collector
 
 
 class PermissionLevel(Enum):

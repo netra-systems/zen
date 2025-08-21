@@ -7,7 +7,7 @@ import time
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_codes import ErrorSeverity
 from netra_backend.app.agent_reliability_types import AgentError
 

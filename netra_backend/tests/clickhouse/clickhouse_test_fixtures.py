@@ -10,16 +10,16 @@ import random
 from datetime import datetime, timedelta, UTC
 from typing import List, Dict, Any
 
-from app.db.clickhouse import get_clickhouse_client
-from app.db.clickhouse_base import ClickHouseDatabase
-from app.db.clickhouse_init import (
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_init import (
     initialize_clickhouse_tables,
     verify_workload_events_table,
     create_workload_events_table_if_missing
 )
-from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from app.config import settings
-from app.logging_config import central_logger as logger
+from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def get_clickhouse_config():

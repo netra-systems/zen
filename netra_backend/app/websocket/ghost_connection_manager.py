@@ -11,8 +11,8 @@ import asyncio
 from typing import List, Dict, Any
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
-from app.websocket.connection_info import ConnectionInfo, ConnectionState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 
 logger = central_logger.get_logger(__name__)
 

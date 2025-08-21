@@ -8,7 +8,7 @@ import uuid
 from unittest.mock import AsyncMock, patch
 from typing import Dict, List
 
-from tests.test_business_value_fixtures import BusinessValueFixtures
+from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 
 
 class TestBusinessValueAdvanced(BusinessValueFixtures):

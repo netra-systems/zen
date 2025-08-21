@@ -5,8 +5,8 @@ Tests fundamental validation functionality
 
 import pytest
 from netra_backend.app.services.quality_gate_service import ContentType
-from tests.helpers.quality_gate_fixtures import redis_mock, quality_service
-from tests.helpers.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
+from netra_backend.tests.helpers.quality_gate_content import (
     get_high_quality_optimization_content,
     get_low_quality_generic_content,
     get_circular_reasoning_content,
@@ -14,7 +14,7 @@ from tests.helpers.quality_gate_content import (
     get_optimization_context,
     get_relevant_context
 )
-from tests.helpers.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_validation_passed,
     assert_validation_failed,
     assert_high_quality_metrics,
@@ -25,7 +25,7 @@ from tests.helpers.quality_gate_helpers import (
     assert_quality_level_classification,
     assert_error_handling_result
 )
-from tests.helpers.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     setup_quality_level_test_cases,
     setup_validation_error_mock
 )

@@ -5,7 +5,7 @@ This module ensures ALL queries use correct array syntax before execution.
 
 import re
 from typing import Optional
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def validate_and_fix_query(query: str) -> str:

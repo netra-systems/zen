@@ -11,9 +11,9 @@ import asyncio
 from typing import Optional, Dict, Any
 
 from pydantic import ValidationError
-from app.agents.utils import extract_json_from_response
-from app.agents.config import agent_config
-from app.logging_config import central_logger
+from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.models import TriageResult, TriageMetadata, Priority, Complexity
 from netra_backend.app.entity_extractor import EntityExtractor

@@ -20,7 +20,7 @@ Target Segments: Growth & Enterprise (improved admin operations).
 from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 
 # Core utility functions for tool handlers
@@ -43,7 +43,7 @@ def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, An
 # Helper functions for corpus operations
 async def _execute_corpus_creation(params: Dict[str, Any], db: AsyncSession) -> Any:
     """Execute corpus creation with service"""
-    from app.services import corpus_service
+    from netra_backend.app.services import corpus_service
     return await corpus_service.create_corpus(**params, db=db)
 
 
@@ -56,7 +56,7 @@ def _create_corpus_response(result: Any) -> Dict[str, Any]:
 # Helper functions for synthetic operations
 def _create_synthetic_service(db: AsyncSession):
     """Create synthetic data service instance"""
-    from app.services.synthetic_data_service import SyntheticDataService
+    from netra_backend.app.services.synthetic_data_service import SyntheticDataService
     return SyntheticDataService(db)
 
 
@@ -77,7 +77,7 @@ def _prepare_user_create_params(kwargs: Dict[str, Any], db: AsyncSession) -> Dic
 
 async def _execute_user_creation(params: Dict[str, Any]) -> Any:
     """Execute user creation with service"""
-    from app.services import user_service
+    from netra_backend.app.services import user_service
     return await user_service.create_user(**params)
 
 
@@ -97,7 +97,7 @@ def _extract_permission_params(kwargs: Dict[str, Any]) -> tuple:
 
 async def _grant_user_permission(user_email: str, permission: str, db: AsyncSession) -> bool:
     """Grant user permission via service"""
-    from app.services.permission_service import PermissionService
+    from netra_backend.app.services.permission_service import PermissionService
     return await PermissionService.grant_permission(user_email, permission, db)
 
 
@@ -110,7 +110,7 @@ def _create_permission_response(success: bool) -> Dict[str, Any]:
 # Helper functions for log analysis operations
 async def _execute_debug_analysis(db: AsyncSession, user: User) -> dict:
     """Execute debug analysis with service"""
-    from app.services.debug_service import DebugService
+    from netra_backend.app.services.debug_service import DebugService
     from .tool_handler_helpers import build_debug_service_params
     service = DebugService(db)
     service_params = build_debug_service_params(user)

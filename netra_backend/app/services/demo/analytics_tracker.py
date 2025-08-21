@@ -4,8 +4,8 @@ import json
 from datetime import datetime, timedelta, UTC
 from typing import Dict, Any
 
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 

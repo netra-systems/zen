@@ -6,8 +6,8 @@ Provides comprehensive error reporting and analysis capabilities.
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from app.core.error_logging_types import ErrorAggregation
-from app.core.error_logger_core import ErrorLogger
+from netra_backend.app.core.error_logging_types import ErrorAggregation
+from netra_backend.app.core.error_logger_core import ErrorLogger
 
 
 class ErrorReportGenerator:
@@ -207,5 +207,5 @@ class ErrorReportGenerator:
 
 
 # Global error report generator instance  
-from app.core.error_logger_core import error_logger
+from netra_backend.app.core.error_logger_core import error_logger
 error_report_generator = ErrorReportGenerator(error_logger)

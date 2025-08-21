@@ -19,13 +19,13 @@ when quality validation fails. All functions are ≤8 lines.
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from app.agents.supervisor.execution_context import AgentExecutionContext
-from app.agents.state import DeepAgentState
-from app.services.fallback_response_service import (
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.fallback_response_service import (
     FallbackResponseService, FallbackContext, FailureReason
 )
-from app.services.quality_gate_service import ValidationResult, ContentType
-from app.logging_config import central_logger
+from netra_backend.app.services.quality_gate_service import ValidationResult, ContentType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

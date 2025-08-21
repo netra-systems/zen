@@ -331,7 +331,7 @@ class TestOptimizedStartupChecker:
         # Mock successful database checks
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
             with patch.object(startup_checker, '_quick_clickhouse_check') as mock_clickhouse:
-                from app.startup_checks.models import StartupCheckResult
+                from netra_backend.app.startup_checks.models import StartupCheckResult
                 
                 mock_postgres.return_value = StartupCheckResult(
                     name="postgres_quick_connect", success=True, critical=True,
@@ -355,7 +355,7 @@ class TestOptimizedStartupChecker:
         mock_app = Mock()
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
-            from app.startup_checks.models import StartupCheckResult
+            from netra_backend.app.startup_checks.models import StartupCheckResult
             
             mock_postgres.return_value = StartupCheckResult(
                 name="postgres_quick_connect", success=False, critical=True,
@@ -373,7 +373,7 @@ class TestOptimizedStartupChecker:
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
             with patch.object(startup_checker, '_quick_clickhouse_check') as mock_clickhouse:
-                from app.startup_checks.models import StartupCheckResult
+                from netra_backend.app.startup_checks.models import StartupCheckResult
                 
                 mock_postgres.return_value = StartupCheckResult(
                     name="postgres_quick_connect", success=True, critical=True,

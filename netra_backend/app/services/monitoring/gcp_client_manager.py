@@ -17,9 +17,9 @@ from google.cloud import error_reporting
 from google.oauth2 import service_account
 from google.auth import default
 
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode
-from app.schemas.monitoring_schemas import GCPErrorServiceConfig
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.schemas.monitoring_schemas import GCPErrorServiceConfig
 
 
 class GCPClientManager:

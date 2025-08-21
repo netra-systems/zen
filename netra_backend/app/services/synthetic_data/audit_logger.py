@@ -7,11 +7,11 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.registry import (
+from netra_backend.app.schemas.registry import (
     CorpusAuditAction, CorpusAuditStatus, CorpusAuditSearchFilter,
     CorpusAuditMetadata
 )
-from app.services.audit import create_audit_logger
+from netra_backend.app.services.audit import create_audit_logger
 
 
 class SyntheticDataAuditLogger:

@@ -7,8 +7,8 @@ Handles transaction management and SQL generation for rollbacks.
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
-from app.db.postgres import get_postgres_session
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.rollback_manager_core import RollbackOperation, RollbackState
 
 logger = central_logger.get_logger(__name__)

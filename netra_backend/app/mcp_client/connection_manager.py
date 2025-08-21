@@ -27,7 +27,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from app.core.exceptions import NetraException
+from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.models import ConnectionStatus
 
 

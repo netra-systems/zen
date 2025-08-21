@@ -15,10 +15,10 @@ from datetime import datetime
 from netra_backend.app.validator_framework import (
     BaseValidator, ValidationResult, ValidationStatus, ValidationSeverity
 )
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     LoginRequest, LoginResponse, TokenRequest, TokenResponse, AuthConfigResponse
 )
-from app.schemas.websocket_message_types import (
+from netra_backend.app.schemas.websocket_message_types import (
     ClientMessageUnion, ServerMessageUnion, WebSocketMessage
 )
 

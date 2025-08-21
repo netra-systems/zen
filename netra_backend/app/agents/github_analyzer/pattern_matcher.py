@@ -7,7 +7,7 @@ Includes regex matching, result merging, and summary generation.
 import re
 from typing import Dict, List, Any, Tuple
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class GitHubAnalyzerPatternMatcher:

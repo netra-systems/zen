@@ -6,7 +6,7 @@ Refactored into modular components for better maintainability and adherence to 4
 
 from typing import TypeVar, Generic, Optional, List, Dict, Any, Type
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database.base_crud import BaseCRUD
+from netra_backend.app.services.database.base_crud import BaseCRUD
 
 T = TypeVar('T')
 

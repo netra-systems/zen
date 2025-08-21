@@ -8,23 +8,23 @@ from typing import Dict, Optional, Any
 import time
 import asyncio
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.schemas.strict_types import TypedAgentResult
-from app.core.type_validators import agent_type_safe
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.agents.input_validation import validate_agent_input
-from app.logging_config import central_logger as logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.core.type_validators import agent_type_safe
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.logging_config import central_logger as logger
 
 # Modern Base Components
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 
 # Modular Data Sub Agent Components
 from netra_backend.app.data_sub_agent_core import DataSubAgentCore
@@ -84,8 +84,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             return self.core.create_reliability_manager()
         except Exception:
             # Return a minimal fallback reliability manager
-            from app.agents.base.circuit_breaker import CircuitBreakerConfig
-            from app.schemas.shared_types import RetryConfig
+            from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+            from netra_backend.app.schemas.shared_types import RetryConfig
             circuit_config = CircuitBreakerConfig("DataSubAgent", 3, 30)
             retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=5.0)
             return ReliabilityManager(circuit_config, retry_config)

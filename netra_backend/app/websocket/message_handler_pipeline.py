@@ -6,9 +6,9 @@ Core message processing pipeline with validation and error handling.
 import json
 from typing import Dict, Any, Optional, Callable, Awaitable
 
-from app.logging_config import central_logger
-from app.websocket.connection import ConnectionInfo
-from app.websocket.message_handler_config import MessageHandlerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.message_handler_config import MessageHandlerConfig
 
 logger = central_logger.get_logger(__name__)
 

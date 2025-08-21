@@ -10,22 +10,22 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, Optional, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, desc
-from app.db.models_agent_state import (
+from netra_backend.app.db.models_agent_state import (
     AgentStateSnapshot, AgentStateTransaction
 )
-from app.schemas.agent_state import (
+from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest, StateRecoveryRequest,
     CheckpointType, SerializationFormat, RecoveryType
 )
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.core.exceptions import NetraException
-from app.services.state_serialization import (
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.services.state_serialization import (
     DateTimeEncoder, StateSerializer, StateValidator
 )
-from app.services.state_recovery_manager import state_recovery_manager
-from app.services.state_cache_manager import state_cache_manager
+from netra_backend.app.services.state_recovery_manager import state_recovery_manager
+from netra_backend.app.services.state_cache_manager import state_cache_manager
 
 logger = central_logger.get_logger(__name__)
 

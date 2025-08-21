@@ -17,12 +17,12 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 
 # Project imports
-from app.services.redis_service import redis_service
-from app.core.interfaces_cache import CacheManager, resource_monitor
-from app.db.cache_storage import CacheStorage, CacheMetricsBuilder
-from app.db.cache_strategies import EvictionStrategyFactory, CacheTaskManager
-from app.db.cache_config import CacheStrategy, CacheMetrics, QueryCacheConfig
-from app.logging_config import central_logger
+from netra_backend.app.services.redis_service import redis_service
+from netra_backend.app.core.interfaces_cache import CacheManager, resource_monitor
+from netra_backend.app.db.cache_storage import CacheStorage, CacheMetricsBuilder
+from netra_backend.app.db.cache_strategies import EvictionStrategyFactory, CacheTaskManager
+from netra_backend.app.db.cache_config import CacheStrategy, CacheMetrics, QueryCacheConfig
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

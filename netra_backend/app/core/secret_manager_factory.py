@@ -4,8 +4,8 @@ Provides factory functions for creating secret managers based on environment.
 """
 
 import os
-from app.schemas.config_types import EnvironmentType
-from app.core.secret_manager_core import EnhancedSecretManager
+from netra_backend.app.schemas.config_types import EnvironmentType
+from netra_backend.app.core.secret_manager_core import EnhancedSecretManager
 
 
 def create_secret_manager() -> EnhancedSecretManager:

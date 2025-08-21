@@ -6,7 +6,7 @@ with 25-line function compliance.
 
 from typing import Dict, List, Tuple
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 from netra_backend.app.models import FailureReason
 
 

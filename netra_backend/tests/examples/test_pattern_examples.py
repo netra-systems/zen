@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 import asyncio
 
-from tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 from netra_backend.app.services.agent_service import AgentService
 
 
@@ -66,7 +66,7 @@ class TestAgentServiceUnit:
         }
         
         # Act: Call the service method
-        from app.services.agent_service import AgentService
+        from netra_backend.app.services.agent_service import AgentService
         service = AgentService(**mock_dependencies)
         result = await service.process_request(
             user_id='user123',
@@ -105,7 +105,7 @@ class TestAgentServiceIntegration:
         This fixture uses a REAL database for integration testing.
         It's cleaned up after each test to ensure isolation.
         """
-        from app.db import create_test_database
+        from netra_backend.app.db import create_test_database
         
         # Setup: Create test database
         db = await create_test_database()

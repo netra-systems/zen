@@ -9,9 +9,9 @@ from typing import Optional, Dict, List, Any
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth_integration.auth import get_current_user
-from app.dependencies import DbDep
-from app.logging_config import central_logger
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/users", tags=["users"])

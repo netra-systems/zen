@@ -4,7 +4,7 @@ Data Management Tool Handlers
 Contains handlers for data management, corpus management, and synthetic data tools.
 """
 from typing import Dict, Any, TYPE_CHECKING
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
     from .registry import UnifiedToolRegistry
@@ -15,7 +15,7 @@ class DataManagementHandlers:
     
     async def _generate_synthetic_data_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for generate_synthetic_data tool"""
-        from app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
         
         synthetic_service = SyntheticDataService(self.db)
         
@@ -34,7 +34,7 @@ class DataManagementHandlers:
     
     async def _corpus_manager_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for corpus_manager tool"""
-        from app.services.corpus_service import CorpusService
+        from netra_backend.app.services.corpus_service import CorpusService
         
         corpus_service = CorpusService(self.db)
         action = arguments['action']

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import Enum
 import asyncio
 import json
-from app.services.factory_status.mock_data_generator import MockDataGenerator
+from netra_backend.app.services.factory_status.mock_data_generator import MockDataGenerator
 
 
 class CommitType(Enum):

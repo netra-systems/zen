@@ -7,7 +7,7 @@ from datetime import datetime, UTC
 from enum import Enum
 from typing import Dict, List, Any
 from langchain_core.tools import BaseTool
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class ToolStatus(Enum):

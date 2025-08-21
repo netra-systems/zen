@@ -5,8 +5,8 @@ Tests individual metric calculation methods
 
 import pytest
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
-from tests.helpers.quality_gate_fixtures import redis_mock, quality_service
-from tests.helpers.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
+from netra_backend.tests.helpers.quality_gate_content import (
     get_high_specificity_content,
     get_low_specificity_content,
     get_high_actionability_content,
@@ -25,7 +25,7 @@ from tests.helpers.quality_gate_content import (
     get_high_hallucination_risk_content,
     get_low_hallucination_risk_content
 )
-from tests.helpers.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_specificity_score_range,
     assert_actionability_score_range,
     assert_quantification_score_range,
@@ -35,7 +35,7 @@ from tests.helpers.quality_gate_helpers import (
     assert_redundancy_algorithm_behavior,
     assert_hallucination_risk_range
 )
-from tests.helpers.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     setup_novelty_mocks_fresh,
     setup_novelty_mocks_duplicate
 )

@@ -27,12 +27,12 @@ from fastapi.security import HTTPBearer
 from starlette.websockets import WebSocketState
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db
-from app.logging_config import central_logger
-from app.clients.auth_client import auth_client
-from app.core.websocket_cors import check_websocket_cors, get_websocket_cors_handler
-from app.schemas.registry import WebSocketMessage, ServerMessage
-from app.schemas.websocket_message_types import WebSocketValidationError
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.websocket_cors import check_websocket_cors, get_websocket_cors_handler
+from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
@@ -89,7 +89,7 @@ class SecureWebSocketManager:
     def _init_agent_response_integration(self) -> None:
         """Initialize integration with WebSocket manager for agent responses."""
         # Register this manager as the response handler for agent messages
-        from app.ws_manager import manager as ws_manager
+        from netra_backend.app.ws_manager import manager as ws_manager
         
         # Override the send_message method to route through secure connections
         original_send_message = ws_manager.send_message_to_user
@@ -203,7 +203,7 @@ class SecureWebSocketManager:
     async def validate_user_exists(self, user_id: str) -> bool:
         """Validate user exists in database using injected session."""
         try:
-            from app.services.security_service import SecurityService
+            from netra_backend.app.services.security_service import SecurityService
             security_service = SecurityService()
             
             user = await security_service.get_user_by_id(self.db_session, user_id)
@@ -361,9 +361,9 @@ class SecureWebSocketManager:
             # Update connection state to processing
             await self._update_connection_state(user_id, "processing", "Processing message...")
             
-            from app.services.agent_service_factory import _create_supervisor_agent
-            from app.services.agent_service_core import AgentService
-            from app.llm.llm_manager import LLMManager
+            from netra_backend.app.services.agent_service_factory import _create_supervisor_agent
+            from netra_backend.app.services.agent_service_core import AgentService
+            from netra_backend.app.llm.llm_manager import LLMManager
             
             # Create properly configured agent service
             llm_manager = LLMManager()

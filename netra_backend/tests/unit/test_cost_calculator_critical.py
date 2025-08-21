@@ -10,10 +10,10 @@ import pytest
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, List, Tuple
 
-from app.services.cost_calculator import (
+from netra_backend.app.services.cost_calculator import (
     CostCalculatorService, CostTier, ModelCostInfo
 )
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 class TestCriticalPricingAccuracy:

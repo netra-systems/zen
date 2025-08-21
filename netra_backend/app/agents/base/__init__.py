@@ -12,7 +12,7 @@ Business Value: +$15K MRR from improved agent performance consistency.
 """
 
 # Backward compatibility: Import original BaseSubAgent from base_agent.py
-from app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 
 # New base execution interface components
 from netra_backend.app.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult

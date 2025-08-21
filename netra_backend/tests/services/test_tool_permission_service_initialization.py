@@ -4,10 +4,10 @@ Functions refactored to ≤8 lines each using helper functions
 """
 
 import pytest
-from app.services.tool_permission_service import ToolPermissionService
-from app.schemas.ToolPermission import PermissionLevel
-from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
-from app.tests.helpers.tool_permission_helpers import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import PermissionLevel
+from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     assert_service_initialization,
     assert_permission_definition_properties,

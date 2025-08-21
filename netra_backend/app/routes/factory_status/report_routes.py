@@ -4,7 +4,7 @@ Factory Status Report Routes
 from datetime import datetime
 from typing import List, Dict
 from fastapi import HTTPException, Query, Depends
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.models import ReportResponse, GenerateReportRequest
 from netra_backend.app.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
 from netra_backend.app.utils import (

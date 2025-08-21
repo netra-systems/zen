@@ -9,49 +9,49 @@ from contextlib import asynccontextmanager
 from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
 import asyncio
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
-from app.agents.base import BaseSubAgent
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base import BaseSubAgent
 # Modern execution pattern imports
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, 
     ExecutionStatus, WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.errors import ExecutionErrorHandler, ValidationError
-from app.schemas import (
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
+from netra_backend.app.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
-from app.schemas.registry import AgentResult
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.registry import AgentResult
+from netra_backend.app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.services.state_persistence import state_persistence_service
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.state_persistence import state_persistence_service
 from starlette.websockets import WebSocketDisconnect
 from langchain_core.messages import SystemMessage
 
 # Import modular components
-from app.agents.supervisor.execution_context import PipelineStep
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.supervisor.execution_engine import ExecutionEngine
-from app.agents.supervisor.pipeline_executor import PipelineExecutor
-from app.agents.supervisor.state_manager import StateManager
-from app.agents.supervisor.pipeline_builder import PipelineBuilder
-from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
-from app.agents.supervisor.supervisor_utilities import SupervisorUtilities
-from app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
-from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
-from app.agents.supervisor.agent_routing import SupervisorAgentRouter
-from app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
-from app.agents.supervisor.initialization_helpers import SupervisorInitializationHelpers
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
+from netra_backend.app.agents.supervisor.state_manager import StateManager
+from netra_backend.app.agents.supervisor.pipeline_builder import PipelineBuilder
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
+from netra_backend.app.agents.supervisor.supervisor_utilities import SupervisorUtilities
+from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
+from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+from netra_backend.app.agents.supervisor.agent_routing import SupervisorAgentRouter
+from netra_backend.app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
+from netra_backend.app.agents.supervisor.initialization_helpers import SupervisorInitializationHelpers
 logger = central_logger.get_logger(__name__)
 class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     """Refactored Supervisor agent with modular design."""

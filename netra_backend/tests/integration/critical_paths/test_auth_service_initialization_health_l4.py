@@ -24,12 +24,12 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from app.services.auth_service import AuthService
-from app.clients.auth_client import AuthClient
-from app.core.health_checkers import HealthChecker
-from app.db.postgres import AsyncSessionLocal
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.clients.auth_client import AuthClient
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.postgres import AsyncSessionLocal
 from cache.redis_manager import RedisManager
-from app.core.config import settings
+from netra_backend.app.core.config import settings
 
 
 @dataclass

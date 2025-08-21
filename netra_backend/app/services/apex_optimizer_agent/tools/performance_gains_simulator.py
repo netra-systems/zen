@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from typing import List, Any
-from app.schemas.Policy import LearnedPolicy
+from netra_backend.app.schemas.Policy import LearnedPolicy
 
 @tool
 async def performance_gains_simulator(learned_policies: List[LearnedPolicy], db_session: Any, llm_manager: Any, policy_simulator: any) -> str:

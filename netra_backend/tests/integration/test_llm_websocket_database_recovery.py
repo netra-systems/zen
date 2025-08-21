@@ -20,7 +20,7 @@ class TestLLMManagerInit:
     
     async def test_connection_pool_creation(self):
         """Test LLM connection pool initializes properly."""
-        from app.services.llm_manager import LLMManager
+        from netra_backend.app.services.llm_manager import LLMManager
         
         llm_manager = Mock(spec=LLMManager)
         llm_manager.initialize_pool = AsyncMock(return_value={
@@ -55,7 +55,7 @@ class TestLLMManagerInit:
     
     async def test_connection_pool_warmup(self):
         """Test connection pool warmup reduces first-call latency."""
-        from app.services.llm_manager import LLMManager
+        from netra_backend.app.services.llm_manager import LLMManager
         
         llm_manager = Mock(spec=LLMManager)
         
@@ -80,7 +80,7 @@ class TestWebSocketRecovery:
     
     async def test_state_preservation_on_disconnect(self):
         """Test state is preserved when WebSocket disconnects."""
-        from app.ws_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         

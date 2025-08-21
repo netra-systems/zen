@@ -18,12 +18,12 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from app.core.exceptions import (
+from netra_backend.app.core.exceptions import (
     NetraException,
     ErrorCode,
     ErrorSeverity
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.types import ErrorResponse, ErrorContext
 
 logger = central_logger.get_logger(__name__)

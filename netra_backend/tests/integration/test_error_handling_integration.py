@@ -14,7 +14,7 @@ import uuid
 from typing import Dict, Any, List
 import pytest
 
-from tests.integration.helpers.critical_integration_helpers import (
+from netra_backend.tests.integration.helpers.critical_integration_helpers import (
     AuthenticationTestHelpers, WebSocketTestHelpers, AgentTestHelpers
 )
 from test_framework.mock_utils import mock_justified

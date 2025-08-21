@@ -7,7 +7,7 @@ import asyncio
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.observability_metrics import (
     DatabaseMetrics, AlertThresholds, MetricsStorage, 
     MetricsSummaryBuilder
@@ -150,8 +150,8 @@ async def get_database_dashboard() -> Dict[str, Any]:
     alerts = database_observability.get_alerts(hours=1)
     
     # Import here to avoid circular imports
-    from app.db.query_cache import query_cache
-    from app.db.transaction_manager import transaction_manager
+    from netra_backend.app.db.query_cache import query_cache
+    from netra_backend.app.db.transaction_manager import transaction_manager
     
     return MetricsSummaryBuilder.build_dashboard_data(
         current_metrics,

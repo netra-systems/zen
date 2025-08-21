@@ -10,8 +10,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
-from app.config import settings
-from app.logging_config import central_logger
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.postgres_config import DatabaseConfig
 from netra_backend.app.postgres_events import setup_async_engine_events, setup_sync_engine_events
 

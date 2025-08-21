@@ -477,8 +477,8 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_decode_access_token_coroutine_await(self):
         """Critical: Verify decode_access_token coroutine is properly awaited."""
-        from app.routes.utils.websocket_helpers import decode_token_payload
-        from app.services.security_service import SecurityService
+        from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
+        from netra_backend.app.services.security_service import SecurityService
         
         mock_service = AsyncMock(spec=SecurityService)
         test_payload = {"sub": "user123", "email": "test@example.com"}
@@ -500,8 +500,8 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_auth_flow_no_coroutine_attribute_error(self):
         """Verify auth flow doesn't cause 'coroutine has no attribute' error."""
-        from app.routes.utils.websocket_helpers import authenticate_websocket_user
-        from app.services.security_service import SecurityService
+        from netra_backend.app.routes.utils.websocket_helpers import authenticate_websocket_user
+        from netra_backend.app.services.security_service import SecurityService
         
         mock_websocket = Mock()
         mock_service = AsyncMock(spec=SecurityService)
@@ -531,7 +531,7 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_websocket_error_handler_with_coroutine_error(self):
         """Test error handler properly logs coroutine-related errors."""
-        from app.routes.websockets import _handle_general_exception
+        from netra_backend.app.routes.websockets import _handle_general_exception
         
         mock_websocket = Mock()
         error = RuntimeError("'coroutine' object has no attribute 'get'")
@@ -546,8 +546,8 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_security_service_validate_token_awaits_decode(self):
         """Test EnhancedSecurityService validate_token properly awaits decode."""
-        from app.tests.services.security_service_test_mocks import EnhancedSecurityService
-        from app.services.key_manager import KeyManager
+        from netra_backend.app.tests.services.security_service_test_mocks import EnhancedSecurityService
+        from netra_backend.app.services.key_manager import KeyManager
         
         mock_key_manager = Mock(spec=KeyManager)
         service = EnhancedSecurityService(mock_key_manager)

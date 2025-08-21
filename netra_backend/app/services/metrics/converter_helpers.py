@@ -4,7 +4,7 @@ Used for JSON export functionality
 """
 
 from typing import Dict, List, Any
-from app.schemas.Metrics import (
+from netra_backend.app.schemas.Metrics import (
     CorpusMetric, TimeSeriesPoint, ResourceUsage, QualityMetrics
 )
 

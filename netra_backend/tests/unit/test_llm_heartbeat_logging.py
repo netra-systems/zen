@@ -7,8 +7,8 @@ import asyncio
 import pytest
 import time
 from unittest.mock import patch, MagicMock
-from app.llm.observability import HeartbeatLogger, generate_llm_correlation_id, get_heartbeat_logger
-from app.schemas.Config import AppConfig
+from netra_backend.app.llm.observability import HeartbeatLogger, generate_llm_correlation_id, get_heartbeat_logger
+from netra_backend.app.schemas.Config import AppConfig
 
 
 class TestHeartbeatLogger:
@@ -99,7 +99,7 @@ class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
     async def test_heartbeat_with_app_config(self):
         """Test heartbeat logger with app configuration."""
-        from app.config import get_config
+        from netra_backend.app.config import get_config
         config = get_config()
         
         # Verify configuration has heartbeat settings
@@ -135,8 +135,8 @@ class TestHeartbeatIntegration:
 
     def test_heartbeat_configuration_integration(self):
         """Test heartbeat configuration is properly integrated."""
-        from app.llm.llm_core_operations import LLMCoreOperations
-        from app.config import get_config
+        from netra_backend.app.llm.llm_core_operations import LLMCoreOperations
+        from netra_backend.app.config import get_config
         
         config = get_config()
         operations = LLMCoreOperations(config)

@@ -6,12 +6,12 @@ from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from cryptography.fernet import Fernet
 
-from app.db import models_postgres
-from app import schemas
-from app.services.key_manager import KeyManager
-from app.config import settings
-from app.logging_config import central_logger as logger
-from app.clients.auth_client import auth_client
+from netra_backend.app.db import models_postgres
+from netra_backend.app import schemas
+from netra_backend.app.services.key_manager import KeyManager
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.clients.auth_client import auth_client
 
 class SecurityService:
     def __init__(self, key_manager: Optional[KeyManager] = None):
@@ -21,7 +21,7 @@ class SecurityService:
     def _initialize_key_manager(self, key_manager: Optional[KeyManager]) -> KeyManager:
         """Initialize key manager from provided instance or settings."""
         if key_manager is None:
-            from app.services.key_manager import KeyManager
+            from netra_backend.app.services.key_manager import KeyManager
             return KeyManager.load_from_settings(settings)
         return key_manager
 

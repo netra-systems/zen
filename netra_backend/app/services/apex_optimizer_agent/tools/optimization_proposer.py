@@ -1,8 +1,8 @@
 from langchain_core.tools import tool
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
-from app.services.context import ToolContext
-from app.schemas import DiscoveredPattern
+from netra_backend.app.services.context import ToolContext
+from netra_backend.app.schemas import DiscoveredPattern
 
 @tool
 async def optimization_proposer(context: ToolContext, discovered_patterns: List[DiscoveredPattern], span_map: Dict[str, Any]) -> str:

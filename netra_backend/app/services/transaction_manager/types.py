@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from app.core.error_recovery import OperationType
+from netra_backend.app.core.error_recovery import OperationType
 
 
 class TransactionState(Enum):

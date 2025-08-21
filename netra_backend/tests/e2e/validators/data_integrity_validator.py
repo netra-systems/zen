@@ -7,10 +7,10 @@ Maximum 300 lines, functions ≤8 lines.
 from typing import Dict, List, Any, Optional, Union, Set
 from pydantic import BaseModel, Field
 from datetime import datetime, UTC
-from app.agents.state import DeepAgentState
-from app.agents.triage_sub_agent.models import TriageResult
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from app.tests.e2e.state_validation_utils import StateIntegrityChecker
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.tests.e2e.state_validation_utils import StateIntegrityChecker
 
 
 class TypeSafetyResult(BaseModel):

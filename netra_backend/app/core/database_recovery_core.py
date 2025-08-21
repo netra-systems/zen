@@ -8,7 +8,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, List
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.database_types import DatabaseConfig, PoolHealth, PoolMetrics
 
 logger = central_logger.get_logger(__name__)
@@ -175,7 +175,7 @@ class DatabaseFailoverStrategy(DatabaseRecoveryStrategy):
             f"{backup_config.host}:{backup_config.port}"
         )
         try:
-            from app.db.postgres import update_connection_config
+            from netra_backend.app.db.postgres import update_connection_config
             await update_connection_config(backup_config)
             logger.info(f"Successfully failed over to backup database")
             return True

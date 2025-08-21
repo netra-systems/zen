@@ -8,9 +8,9 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer
 
-from app.services.service_locator import get_service
-from app.services.service_interfaces import IMCPClientService
-from app.schemas.mcp_client import (
+from netra_backend.app.services.service_locator import get_service
+from netra_backend.app.services.service_interfaces import IMCPClientService
+from netra_backend.app.schemas.mcp_client import (
     RegisterServerRequest, RegisterServerResponse,
     ConnectServerRequest, ConnectServerResponse,
     ListServersResponse, DiscoverToolsResponse,
@@ -18,8 +18,8 @@ from app.schemas.mcp_client import (
     GetResourcesResponse, FetchResourceRequest, FetchResourceResponse,
     ClearCacheRequest, ClearCacheResponse
 )
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 security = HTTPBearer()

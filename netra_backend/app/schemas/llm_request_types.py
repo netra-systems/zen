@@ -5,8 +5,8 @@ Following Netra conventions with strong typing.
 
 from typing import Dict, Any, Optional, List, Union, Literal, ForwardRef
 from pydantic import BaseModel, Field, field_validator
-from app.core.json_parsing_utils import parse_dict_field
-from app.schemas.llm_base_types import LLMMessage
+from netra_backend.app.core.json_parsing_utils import parse_dict_field
+from netra_backend.app.schemas.llm_base_types import LLMMessage
 
 # Forward reference for LLMConfig to avoid circular imports
 LLMConfig = ForwardRef('LLMConfig')

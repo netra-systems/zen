@@ -13,7 +13,7 @@ import asyncio
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 from dataclasses import dataclass
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.circuit_breaker import UnifiedCircuitBreaker, CircuitBreakerOpenError
 from netra_backend.app.retry_manager import UnifiedRetryManager, RetryExhaustedException
 from netra_backend.app.fallback import UnifiedFallbackChain, fallback_manager

@@ -29,15 +29,15 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
-from app.db.postgres_core import async_engine, async_session_factory
-from app.db.clickhouse import get_clickhouse_client
-from app.services.redis_service import RedisService
-from app.core.configuration.database import DatabaseConfigManager
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres_core import async_engine, async_session_factory
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.core.configuration.database import DatabaseConfigManager
+from netra_backend.app.logging_config import central_logger
 import redis.asyncio as aioredis
 
 logger = central_logger.get_logger(__name__)

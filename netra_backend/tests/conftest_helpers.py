@@ -32,7 +32,7 @@ def _setup_websocket_test_mocks(manager):
 
 def _create_real_tool_dispatcher():
     """Create real tool dispatcher instance."""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     return ToolDispatcher()
 
 
@@ -59,15 +59,15 @@ def _import_agent_classes():
 
 def _import_base_agent_classes():
     """Import base agent classes."""
-    from app.agents.triage_sub_agent.agent import TriageSubAgent
-    from app.agents.data_sub_agent.agent import DataSubAgent
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     return {'triage': TriageSubAgent, 'data': DataSubAgent}
 
 
 def _import_additional_agent_classes():
     """Import additional agent classes."""
-    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     return {'optimization': OptimizationsCoreSubAgent, 'reporting': ReportingSubAgent}
 
 

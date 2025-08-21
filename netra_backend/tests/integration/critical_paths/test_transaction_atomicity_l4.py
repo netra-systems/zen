@@ -34,17 +34,17 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
-from app.services.transaction_manager.manager import TransactionManager
-from app.services.transaction_manager.types import (
+from netra_backend.app.services.transaction_manager.manager import TransactionManager
+from netra_backend.app.services.transaction_manager.types import (
     Transaction, Operation, TransactionState, OperationState
 )
-from app.services.saga_engine import SagaEngine
-from app.core.error_recovery import OperationType
-from app.logging_config import central_logger
+from netra_backend.app.services.saga_engine import SagaEngine
+from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

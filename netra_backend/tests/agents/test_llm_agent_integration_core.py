@@ -45,7 +45,7 @@ class LLMAgentIntegrationCoreTests:
         }))
         
         # Mock structured LLM for triage agent
-        from app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage_sub_agent import (
             TriageResult, Priority, Complexity, UserIntent,
             ExtractedEntities, TriageMetadata
         )
@@ -97,7 +97,7 @@ class LLMAgentIntegrationCoreTests:
 
     def mock_tool_dispatcher(self):
         """Create mock tool dispatcher"""
-        from app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch_tool = AsyncMock(return_value={
             "status": "success",

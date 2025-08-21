@@ -1,14 +1,14 @@
 """Tool execution engine for the dispatcher - delegates to core implementation."""
 from typing import Dict, Any, TYPE_CHECKING
-from app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
-from app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
-from app.core.interfaces_tools import ToolExecutionEngine as CoreToolExecutionEngine
-from app.agents.state import DeepAgentState
-from app.agents.production_tool import ProductionTool
-from app.logging_config import central_logger
+from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
+from netra_backend.app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
+from netra_backend.app.core.interfaces_tools import ToolExecutionEngine as CoreToolExecutionEngine
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.production_tool import ProductionTool
+from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from app.agents.tool_dispatcher_core import ToolDispatchResponse
+    from netra_backend.app.agents.tool_dispatcher_core import ToolDispatchResponse
 
 logger = central_logger.get_logger(__name__)
 
@@ -40,13 +40,13 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     
     def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> "ToolDispatchResponse":
         """Create successful tool execution response"""
-        from app.agents.tool_dispatcher_core import ToolDispatchResponse
+        from netra_backend.app.agents.tool_dispatcher_core import ToolDispatchResponse
         metadata = {"tool_name": tool_name, "run_id": run_id}
         return ToolDispatchResponse(success=True, result=result, metadata=metadata)
     
     def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> "ToolDispatchResponse":
         """Create error response for tool execution failure"""
-        from app.agents.tool_dispatcher_core import ToolDispatchResponse
+        from netra_backend.app.agents.tool_dispatcher_core import ToolDispatchResponse
         logger.error(f"Tool {tool_name} execution failed: {error}")
         return ToolDispatchResponse(
             success=False,

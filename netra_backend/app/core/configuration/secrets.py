@@ -16,9 +16,9 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 import json
 
-from app.schemas.Config import AppConfig
-from app.logging_config import central_logger as logger
-from app.core.exceptions_config import ConfigurationError
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_config import ConfigurationError
 
 
 class SecretManager:

@@ -12,23 +12,23 @@
 import time
 from typing import Optional, List
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.agents.synthetic_data_profile_parser import create_profile_parser
-from app.agents.synthetic_data_generator import SyntheticDataGenerator
-from app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
-from app.logging_config import central_logger
-from app.llm.observability import log_agent_communication
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.agents.synthetic_data_profile_parser import create_profile_parser
+from netra_backend.app.agents.synthetic_data_generator import SyntheticDataGenerator
+from netra_backend.app.agents.synthetic_data_metrics_handler import SyntheticDataMetricsHandler
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.observability import log_agent_communication
 
 # Import modular components
-from app.agents.synthetic_data.approval_flow import ApprovalWorkflow, ApprovalRequirements
-from app.agents.synthetic_data.llm_handler import SyntheticDataLLMExecutor
-from app.agents.synthetic_data.generation_workflow import GenerationExecutor, GenerationErrorHandler
-from app.agents.synthetic_data.validation import RequestValidator, MetricsValidator
-from app.agents.synthetic_data.messaging import CommunicationCoordinator
+from netra_backend.app.agents.synthetic_data.approval_flow import ApprovalWorkflow, ApprovalRequirements
+from netra_backend.app.agents.synthetic_data.llm_handler import SyntheticDataLLMExecutor
+from netra_backend.app.agents.synthetic_data.generation_workflow import GenerationExecutor, GenerationErrorHandler
+from netra_backend.app.agents.synthetic_data.validation import RequestValidator, MetricsValidator
+from netra_backend.app.agents.synthetic_data.messaging import CommunicationCoordinator
 
 logger = central_logger.get_logger(__name__)
 

@@ -24,10 +24,10 @@ from datetime import datetime, timedelta
 import httpx
 import random
 
-from app.services.service_mesh.discovery_service import ServiceDiscoveryService
-from app.services.service_mesh.load_balancer import LoadBalancerService
-from app.services.service_mesh.circuit_breaker import CircuitBreakerService
-from app.services.service_mesh.retry_policy import RetryPolicyService
+from netra_backend.app.services.service_mesh.discovery_service import ServiceDiscoveryService
+from netra_backend.app.services.service_mesh.load_balancer import LoadBalancerService
+from netra_backend.app.services.service_mesh.circuit_breaker import CircuitBreakerService
+from netra_backend.app.services.service_mesh.retry_policy import RetryPolicyService
 from config import get_config
 
 logger = logging.getLogger(__name__)

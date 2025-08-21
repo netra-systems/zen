@@ -8,33 +8,33 @@ import uuid
 from typing import Optional, Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
 
 # Modern execution pattern imports
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, 
     ExecutionStatus, WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.errors import ExecutionErrorHandler, ValidationError
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import from modular structure
-from app.agents.triage_sub_agent.core import TriageCore
-from app.agents.triage_sub_agent.executor import TriageExecutor
-from app.agents.triage_sub_agent.llm_processor import TriageLLMProcessor
-from app.agents.triage_sub_agent.result_processor import TriageResultProcessor
-from app.agents.triage_sub_agent.prompt_builder import TriagePromptBuilder
+from netra_backend.app.agents.triage_sub_agent.core import TriageCore
+from netra_backend.app.agents.triage_sub_agent.executor import TriageExecutor
+from netra_backend.app.agents.triage_sub_agent.llm_processor import TriageLLMProcessor
+from netra_backend.app.agents.triage_sub_agent.result_processor import TriageResultProcessor
+from netra_backend.app.agents.triage_sub_agent.prompt_builder import TriagePromptBuilder
 
 logger = central_logger.get_logger(__name__)
 

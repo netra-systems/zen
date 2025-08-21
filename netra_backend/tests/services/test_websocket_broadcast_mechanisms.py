@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from typing import Dict, Any, List
 
-from app.services.websocket.broadcast_manager import BroadcastManager
+from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
 
 
 class TestBroadcastMechanisms:

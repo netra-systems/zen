@@ -1,6 +1,6 @@
 """Corpus tool execution handlers."""
 from typing import Dict, Any, Optional
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -59,15 +59,15 @@ class CorpusToolExecutor:
     
     async def _create_corpus(self, corpus_name: str, parameters: Dict[str, Any], user_id: str) -> Any:
         """Create corpus using corpus service"""
-        from app.services.corpus import corpus_service
-        from app.schemas import CorpusCreate
+        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.schemas import CorpusCreate
         
         corpus_data = self._build_corpus_create_data(corpus_name, parameters)
         return await corpus_service.create_corpus(corpus_data, user_id)
     
     def _build_corpus_create_data(self, corpus_name: str, parameters: Dict[str, Any]):
         """Build CorpusCreate data object."""
-        from app.schemas import CorpusCreate
+        from netra_backend.app.schemas import CorpusCreate
         return CorpusCreate(
             name=corpus_name,
             description=parameters.get('description', f'Corpus {corpus_name}')
@@ -122,7 +122,7 @@ class CorpusToolExecutor:
     
     async def _search_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Search corpus using corpus service"""
-        from app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import corpus_service
         
         search_params = self._build_search_params(parameters)
         return await corpus_service.search_corpus_content(None, corpus_id, search_params)
@@ -184,15 +184,15 @@ class CorpusToolExecutor:
     
     async def _update_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Update corpus using corpus service"""
-        from app.services.corpus import corpus_service
-        from app.schemas import CorpusUpdate
+        from netra_backend.app.services.corpus import corpus_service
+        from netra_backend.app.schemas import CorpusUpdate
         
         update_data = self._build_corpus_update_data(parameters)
         return await corpus_service.update_corpus(None, corpus_id, update_data)
     
     def _build_corpus_update_data(self, parameters: Dict[str, Any]):
         """Build CorpusUpdate data object."""
-        from app.schemas import CorpusUpdate
+        from netra_backend.app.schemas import CorpusUpdate
         return CorpusUpdate(**{k: v for k, v in parameters.items() if k != 'corpus_id'})
     
     def _create_update_success_response(self, corpus_id: str) -> Dict[str, Any]:
@@ -226,7 +226,7 @@ class CorpusToolExecutor:
     
     async def _delete_corpus(self, corpus_id: str) -> None:
         """Delete corpus using corpus service"""
-        from app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import corpus_service
         await corpus_service.delete_corpus(None, corpus_id)
     
     def _create_delete_success_response(self, corpus_id: str) -> Dict[str, Any]:
@@ -260,7 +260,7 @@ class CorpusToolExecutor:
     
     async def _get_corpus_statistics(self, corpus_id: str) -> Any:
         """Get corpus statistics using corpus service"""
-        from app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import corpus_service
         return await corpus_service.get_corpus_statistics(None, corpus_id)
     
     def _create_analyze_success_response(self, stats: Any) -> Dict[str, Any]:
@@ -339,7 +339,7 @@ class CorpusToolExecutor:
     
     async def _get_corpus(self, corpus_id: str) -> Any:
         """Get corpus using corpus service"""
-        from app.services.corpus import corpus_service
+        from netra_backend.app.services.corpus import corpus_service
         return await corpus_service.get_corpus(None, corpus_id)
     
     def _create_validation_result(self, corpus: Any) -> Dict[str, Any]:

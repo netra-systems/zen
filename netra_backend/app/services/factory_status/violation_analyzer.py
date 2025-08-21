@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Any
 
-from app.services.factory_status.spec_compliance_scorer import ViolationSeverity
+from netra_backend.app.services.factory_status.spec_compliance_scorer import ViolationSeverity
 
 
 class ViolationAnalyzer:

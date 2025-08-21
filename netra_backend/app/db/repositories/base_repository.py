@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.logging_config import central_logger
-from app.core.exceptions_database import NetraException
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_database import NetraException
 
 logger = central_logger.get_logger(__name__)
 

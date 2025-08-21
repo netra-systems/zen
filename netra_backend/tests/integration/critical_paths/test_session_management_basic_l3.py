@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 import uuid
 
 from test_framework.test_patterns import L3IntegrationTest
-from app.core.redis_client import RedisManager
-from app.services.session_service import SessionService
+from netra_backend.app.core.redis_client import RedisManager
+from netra_backend.app.services.session_service import SessionService
 
 
 class TestSessionManagementBasic(L3IntegrationTest):

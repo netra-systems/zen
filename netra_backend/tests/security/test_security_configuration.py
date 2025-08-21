@@ -13,7 +13,7 @@ class TestSecurityConfiguration:
     
     def test_environment_specific_config(self):
         """Test environment-specific security configuration."""
-        from app.middleware.security_headers import SecurityHeadersConfig
+        from netra_backend.app.middleware.security_headers import SecurityHeadersConfig
         
         # Production config should be strictest
         prod_headers = SecurityHeadersConfig.get_headers("production")

@@ -21,8 +21,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
-from app.core.async_retry_logic import with_retry
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.async_retry_logic import with_retry
 
 logger = central_logger.get_logger(__name__)
 

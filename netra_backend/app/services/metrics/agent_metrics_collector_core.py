@@ -9,8 +9,8 @@ from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Optional, Any
 from collections import deque, defaultdict
 
-from app.logging_config import central_logger
-from app.schemas.Metrics import TimeSeriesPoint
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import TimeSeriesPoint
 from netra_backend.app.agent_metrics_models import (
     AgentOperationRecord, AgentMetrics, FailureType, AgentMetricType,
     create_operation_record, calculate_operation_metrics,

@@ -8,7 +8,7 @@ from typing import Dict, Optional, Tuple
 from decimal import Decimal, ROUND_HALF_UP
 from enum import Enum
 from pydantic import BaseModel
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 class CostTier(str, Enum):

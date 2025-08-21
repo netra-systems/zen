@@ -8,7 +8,7 @@ Implements Template Method pattern components for retry operations.
 import asyncio
 from typing import Tuple, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.fallback_strategies import RetryExecutor
 
 logger = central_logger.get_logger(__name__)

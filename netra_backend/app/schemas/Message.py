@@ -1,7 +1,7 @@
 """Message type definitions - imports from single source of truth in registry.py"""
 
 # Import all Message types from single source of truth  
-from app.schemas.registry import Message, MessageType, MessageMetadata
+from netra_backend.app.schemas.registry import Message, MessageType, MessageMetadata
 
 # For backward compatibility, also expose Thread types
-from app.schemas.registry import Thread, ThreadMetadata
+from netra_backend.app.schemas.registry import Thread, ThreadMetadata

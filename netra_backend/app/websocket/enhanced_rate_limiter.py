@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from collections import defaultdict, deque
 import hashlib
 
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
 
 logger = central_logger.get_logger(__name__)
 

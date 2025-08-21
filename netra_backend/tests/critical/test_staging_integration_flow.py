@@ -88,19 +88,19 @@ class TestStagingHealthEndpoints:
     @pytest.mark.asyncio
     async def test_health_endpoint_response(self, staging_environment):
         """Test /health endpoint returns correct status."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
     
     @pytest.mark.asyncio
     async def test_readiness_endpoint_response(self, staging_environment):
         """Test /ready endpoint for staging readiness."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
     
     @pytest.mark.asyncio
     async def test_liveness_endpoint_response(self, staging_environment):
         """Test /live endpoint for staging liveness."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
 
 

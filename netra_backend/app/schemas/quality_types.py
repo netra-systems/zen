@@ -6,7 +6,7 @@ from datetime import datetime, UTC
 from enum import Enum
 from abc import ABC, abstractmethod
 
-from app.core.resilience.monitor import AlertSeverity
+from netra_backend.app.core.resilience.monitor import AlertSeverity
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:

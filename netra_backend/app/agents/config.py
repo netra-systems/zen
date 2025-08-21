@@ -3,8 +3,8 @@
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-from app.schemas.shared_types import RetryConfig, BaseAgentConfig
-from app.config import get_config
+from netra_backend.app.schemas.shared_types import RetryConfig, BaseAgentConfig
+from netra_backend.app.config import get_config
 
 
 class AgentCacheConfig(BaseModel):

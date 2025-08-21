@@ -12,8 +12,8 @@ from rich.console import Console
 from rich.progress import Progress
 from dotenv import load_dotenv
 
-from app.llm.llm_manager import LLMManager
-from app.schemas import LLMConfig
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas import LLMConfig
 
 console = Console()
 

@@ -7,7 +7,7 @@ All functions strictly adhere to 25-line limit.
 import uuid
 from typing import Dict, List, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.compensation_models import Saga, SagaStep, SagaState
 

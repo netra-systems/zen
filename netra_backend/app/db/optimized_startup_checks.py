@@ -21,8 +21,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
 
-from app.logging_config import central_logger
-from app.startup_checks.models import StartupCheckResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.startup_checks.models import StartupCheckResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -313,7 +313,7 @@ class OptimizedStartupChecker:
         """Quick PostgreSQL connectivity check."""
         try:
             # Use fast startup connection manager if available
-            from app.db.fast_startup_connection_manager import connection_registry
+            from netra_backend.app.db.fast_startup_connection_manager import connection_registry
             manager = connection_registry.get_manager("postgres")
             
             if manager and manager.is_available():
@@ -325,7 +325,7 @@ class OptimizedStartupChecker:
                 )
             else:
                 # Fallback to regular connection test
-                from app.db.postgres import async_session_factory
+                from netra_backend.app.db.postgres import async_session_factory
                 if async_session_factory:
                     async with async_session_factory() as session:
                         result = await session.execute("SELECT 1")
@@ -343,7 +343,7 @@ class OptimizedStartupChecker:
     async def _quick_clickhouse_check(self, app, check_name: str) -> StartupCheckResult:
         """Quick ClickHouse connectivity check."""
         try:
-            from app.db.clickhouse_reliable_manager import reliable_clickhouse_service
+            from netra_backend.app.db.clickhouse_reliable_manager import reliable_clickhouse_service
             
             async with reliable_clickhouse_service.get_client() as client:
                 await client.execute("SELECT 1")
@@ -392,7 +392,7 @@ class OptimizedStartupChecker:
     async def _background_clickhouse_tables(self, app, check_name: str) -> StartupCheckResult:
         """Background ClickHouse table verification."""
         try:
-            from app.db.clickhouse_reliable_manager import reliable_clickhouse_service
+            from netra_backend.app.db.clickhouse_reliable_manager import reliable_clickhouse_service
             
             async with reliable_clickhouse_service.get_client() as client:
                 # Check if in mock mode

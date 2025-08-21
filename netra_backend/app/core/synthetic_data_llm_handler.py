@@ -25,14 +25,14 @@ Module follows CLAUDE.md constraints:
 
 from typing import Optional, TYPE_CHECKING
 
-from app.llm.observability import (
+from netra_backend.app.llm.observability import (
     start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
     log_agent_input, log_agent_output
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from app.llm.llm_manager import LLMManager
+    from netra_backend.app.llm.llm_manager import LLMManager
 
 logger = central_logger.get_logger(__name__)
 

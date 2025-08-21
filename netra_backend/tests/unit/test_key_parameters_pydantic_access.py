@@ -3,9 +3,9 @@
 from unittest.mock import MagicMock, AsyncMock
 import pytest
 
-from app.agents.data_sub_agent.execution_engine import ExecutionEngine
-from app.agents.triage_sub_agent.models import KeyParameters, TriageResult
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
+from netra_backend.app.agents.triage_sub_agent.models import KeyParameters, TriageResult
+from netra_backend.app.agents.state import DeepAgentState
 
 
 class TestKeyParametersAccess:
@@ -116,7 +116,7 @@ class TestKeyParametersAccess:
         )
         
         # Create TriageResult with KeyParameters (using actual fields)
-        from app.agents.triage_sub_agent.models import UserIntent
+        from netra_backend.app.agents.triage_sub_agent.models import UserIntent
         
         triage_result = TriageResult(
             key_parameters=KeyParameters(

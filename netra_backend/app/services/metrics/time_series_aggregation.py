@@ -9,8 +9,8 @@ import statistics
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Any, Optional
 from collections import defaultdict
-from app.schemas.Metrics import TimeSeriesPoint
-from app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import TimeSeriesPoint
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

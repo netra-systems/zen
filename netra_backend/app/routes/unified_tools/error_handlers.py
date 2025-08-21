@@ -2,7 +2,7 @@
 Error Handling Utilities for Unified Tools API
 """
 from fastapi import HTTPException
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 

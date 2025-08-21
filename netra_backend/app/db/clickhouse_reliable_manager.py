@@ -21,9 +21,9 @@ from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
 
-from app.logging_config import central_logger
-from app.core.async_retry_logic import with_retry, AsyncCircuitBreaker
-from app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.async_retry_logic import with_retry, AsyncCircuitBreaker
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 logger = central_logger.get_logger(__name__)
 
@@ -340,7 +340,7 @@ class ReliableClickHouseService:
     async def get_client(self):
         """Get ClickHouse client with automatic initialization."""
         if not self._initialized or not self.manager:
-            from app.config import get_config
+            from netra_backend.app.config import get_config
             config = get_config()
             ch_config = config.clickhouse_https
             
@@ -382,7 +382,7 @@ async def get_reliable_clickhouse_client():
 
 async def initialize_reliable_clickhouse() -> bool:
     """Initialize reliable ClickHouse with configuration from settings."""
-    from app.config import get_config
+    from netra_backend.app.config import get_config
     config = get_config()
     ch_config = config.clickhouse_https
     

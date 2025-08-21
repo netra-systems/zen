@@ -16,14 +16,14 @@ All classes have been moved to the demo_service/ module directory
 for better organization and compliance with the 450-line limit.
 
 New imports should use:
-from app.agents.demo_service import DemoService, DemoTriageService, etc.
+from netra_backend.app.agents.demo_service import DemoService, DemoTriageService, etc.
 """
 
 # Backward compatibility imports
-from app.agents.demo_service.core import DemoService
-from app.agents.demo_service.triage import DemoTriageService
-from app.agents.demo_service.optimization import DemoOptimizationService
-from app.agents.demo_service.reporting import DemoReportingService
+from netra_backend.app.agents.demo_service.core import DemoService
+from netra_backend.app.agents.demo_service.triage import DemoTriageService
+from netra_backend.app.agents.demo_service.optimization import DemoOptimizationService
+from netra_backend.app.agents.demo_service.reporting import DemoReportingService
 
 # Legacy class aliases for backward compatibility
 DemoAgent = DemoService

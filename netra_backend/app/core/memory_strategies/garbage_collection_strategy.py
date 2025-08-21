@@ -4,14 +4,14 @@ import gc
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Tuple
 
-from app.core.memory_recovery_base import (
+from netra_backend.app.core.memory_recovery_base import (
     MemoryPressureLevel,
     MemoryRecoveryStrategy,
     MemorySnapshot,
     RecoveryAction
 )
-from app.core.memory_recovery_utils import get_current_process_memory_mb
-from app.logging_config import central_logger
+from netra_backend.app.core.memory_recovery_utils import get_current_process_memory_mb
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

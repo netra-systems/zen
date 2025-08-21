@@ -9,7 +9,7 @@ import time
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app..health_types import HealthCheckResult
 from netra_backend.app..health_checkers import (
     check_postgres_health, check_clickhouse_health, 
@@ -21,7 +21,7 @@ logger = central_logger.get_logger(__name__)
 
 
 # Import DatabaseHealthChecker from canonical location - CONSOLIDATED
-from app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
+from netra_backend.app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
 
 class UnifiedDatabaseHealthChecker(BaseHealthChecker):
     """Unified database health checker supporting PostgreSQL and ClickHouse."""
@@ -189,7 +189,7 @@ class DependencyHealthChecker(BaseHealthChecker):
     async def _check_llm_connectivity(self) -> bool:
         """Check LLM service connectivity."""
         try:
-            from app.llm.llm_manager import llm_manager
+            from netra_backend.app.llm.llm_manager import llm_manager
             return llm_manager.is_healthy()
         except Exception:
             return False

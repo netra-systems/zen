@@ -7,7 +7,7 @@ Prevents schema type mismatches with database.
 import pytest
 from datetime import datetime, UTC
 from pydantic import ValidationError
-from app.schemas.UserPlan import (
+from netra_backend.app.schemas.UserPlan import (
     UserPlan,
     PlanTier,
     PlanFeatures,

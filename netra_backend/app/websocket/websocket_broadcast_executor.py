@@ -13,28 +13,28 @@ Business Value: Reduces WebSocket-related customer support by 25-30%.
 import asyncio
 from typing import Dict, List, Any, Union, Optional, Tuple
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
 # Delayed import to avoid circular dependency
 # BaseExecutionEngine will be imported when needed
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
-from app.schemas.websocket_message_types import BroadcastResult
-from app.websocket.connection import ConnectionInfo, ConnectionManager
-from app.websocket.room_manager import RoomManager
-from app.websocket.broadcast_executor import BroadcastExecutor
-from app.websocket.broadcast_context import (
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from netra_backend.app.schemas.websocket_message_types import BroadcastResult
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.room_manager import RoomManager
+from netra_backend.app.websocket.broadcast_executor import BroadcastExecutor
+from netra_backend.app.websocket.broadcast_context import (
     BroadcastContext, BroadcastOperation, BroadcastContextValidator, BroadcastResultFormatter
 )
-from app.websocket.broadcast_config import (
+from netra_backend.app.websocket.broadcast_config import (
     BroadcastConfigManager, BroadcastStatsManager, BroadcastHealthManager, 
     BroadcastExecutionContextManager
 )
-from app.websocket import broadcast_utils as utils
+from netra_backend.app.websocket import broadcast_utils as utils
 
 logger = central_logger.get_logger(__name__)
 
@@ -71,7 +71,7 @@ class WebSocketBroadcastExecutor(BaseExecutionInterface):
     def _init_modern_components(self, reliability_config: Optional[Dict[str, Any]]) -> None:
         """Initialize modern architecture components."""
         # Lazy import to avoid circular dependency
-        from app.agents.base.executor import BaseExecutionEngine
+        from netra_backend.app.agents.base.executor import BaseExecutionEngine
         
         self.reliability_manager = self._init_reliability_manager(reliability_config)
         self.monitor = ExecutionMonitor()

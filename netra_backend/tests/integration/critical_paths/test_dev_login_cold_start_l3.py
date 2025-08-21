@@ -190,7 +190,7 @@ class TestDevLoginColdStart:
     async def test_oauth_config_environment_specific(self):
         """Test 5: OAuth config should be environment-specific."""
         # Get configs for different environments
-        from app.clients.auth_client_config import OAuthConfigGenerator
+        from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator
         
         generator = OAuthConfigGenerator()
         

@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
-from tests.services.shared.transaction_test_helpers import (
+from netra_backend.tests.services.shared.transaction_test_helpers import (
     MockDatabaseModel, 
     MockRepository, 
     TransactionTestManager

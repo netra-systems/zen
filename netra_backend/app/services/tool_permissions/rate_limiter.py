@@ -3,14 +3,14 @@
 from typing import Dict, List, Any, Optional
 from datetime import datetime, UTC
 import redis
-from app.schemas.ToolPermission import ToolExecutionContext
-from app.logging_config import central_logger
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 
 
 # Import general RateLimiter from canonical location - CONSOLIDATED  
-from app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
+from netra_backend.app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
 
 class ToolPermissionRateLimiter:
     """Handles rate limiting functionality"""

@@ -1,7 +1,7 @@
 """Thread response builders."""
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.message_repository import MessageRepository
 
 
 def extract_thread_title(thread, title: Optional[str]) -> Optional[str]:
@@ -25,7 +25,7 @@ def _create_thread_response_fields(thread, message_count: int, title: Optional[s
 
 async def build_thread_response(thread, message_count: int, title: Optional[str] = None):
     """Build ThreadResponse object."""
-    from app.routes.threads_route import ThreadResponse
+    from netra_backend.app.routes.threads_route import ThreadResponse
     fields = _create_thread_response_fields(thread, message_count, title)
     return ThreadResponse(**fields)
 

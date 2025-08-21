@@ -16,9 +16,9 @@ import time
 from typing import Dict, Any, Union, List, Set, Optional
 from collections import defaultdict
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage, BroadcastResult
 
 logger = central_logger.get_logger(__name__)
 

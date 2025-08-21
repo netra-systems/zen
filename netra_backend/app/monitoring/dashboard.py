@@ -13,8 +13,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
-from app.core.performance_optimization_manager import performance_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.performance_optimization_manager import performance_manager
 
 logger = central_logger.get_logger(__name__)
 

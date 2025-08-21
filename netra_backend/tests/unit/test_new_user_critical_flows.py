@@ -23,11 +23,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash
-from app.db.models_postgres import User, Secret, ToolUsageLog
-from app.schemas.registry import UserCreate
-from app.services.user_service import user_service
-from app.clients.auth_client import auth_client
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash
+from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.services.user_service import user_service
+from netra_backend.app.clients.auth_client import auth_client
 
 
 class TestNewUserCriticalFlows:

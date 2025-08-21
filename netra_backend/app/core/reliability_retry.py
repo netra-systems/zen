@@ -9,8 +9,8 @@ import random
 from dataclasses import dataclass
 from typing import Callable, Awaitable, Any, Optional, Tuple
 
-from app.schemas.shared_types import RetryConfig
-from app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

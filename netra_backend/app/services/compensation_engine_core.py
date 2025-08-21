@@ -8,8 +8,8 @@ import uuid
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from app.core.error_recovery import RecoveryContext
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.compensation_models import (
     BaseCompensationHandler,

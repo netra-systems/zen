@@ -9,7 +9,7 @@ All network-related constants are defined here to prevent duplication
 and ensure consistency across the entire codebase.
 
 Usage:
-    from app.core.network_constants import ServicePorts, DatabaseConstants, HostConstants
+    from netra_backend.app.core.network_constants import ServicePorts, DatabaseConstants, HostConstants
     
     # Use constants instead of hardcoded strings
     database_url = f"postgresql://user:pass@{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}/db"

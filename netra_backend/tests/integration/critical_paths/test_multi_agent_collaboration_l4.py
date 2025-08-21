@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock
 DeepAgentState = AsyncMock
 # from llm.llm_manager import LLMManager
 LLMManager = AsyncMock
-from app.services.database.postgres_service import PostgresService
+from netra_backend.app.services.database.postgres_service import PostgresService
 # from app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
 # from ws_manager import WebSocketManager

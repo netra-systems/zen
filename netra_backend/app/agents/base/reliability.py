@@ -18,7 +18,7 @@ their respective focused modules:
 """
 
 # Import all classes from their respective modules for backward compatibility
-from app.agents.base.circuit_breaker import (
+from netra_backend.app.agents.base.circuit_breaker import (
     CircuitBreakerConfig,
     CircuitBreakerMetrics, 
     CircuitBreaker,
@@ -26,11 +26,11 @@ from app.agents.base.circuit_breaker import (
     CircuitBreakerState
 )
 
-from app.agents.base.retry_manager import RetryManager
+from netra_backend.app.agents.base.retry_manager import RetryManager
 
-from app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
-from app.agents.base.rate_limiter import RateLimiter
+from netra_backend.app.agents.base.rate_limiter import RateLimiter
 
 # Export all classes for backward compatibility
 __all__ = [

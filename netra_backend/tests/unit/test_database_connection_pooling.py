@@ -12,9 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 
-from app.dependencies import DbDep, get_db_dependency
-from app.services.database.thread_repository import ThreadRepository
-from app.db.postgres import get_async_db
+from netra_backend.app.dependencies import DbDep, get_db_dependency
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.db.postgres import get_async_db
 
 
 class TestDatabaseConnectionPooling:

@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.core_models import User, Message, Thread
+    from netra_backend.app.schemas.core_models import User, Message, Thread
 """
 
 from typing import Dict, List, Optional, Union, Any
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 import uuid
 
 # Import enums from the dedicated module
-from app.schemas.core_enums import MessageType, CircuitBreakerState
+from netra_backend.app.schemas.core_enums import MessageType, CircuitBreakerState
 
 
 class UserBase(BaseModel):

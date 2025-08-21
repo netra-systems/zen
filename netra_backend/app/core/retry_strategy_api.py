@@ -3,8 +3,8 @@ API-specific retry strategy implementation.
 Handles retry logic for API operations based on HTTP status codes and error types.
 """
 
-from app.core.error_recovery import RecoveryContext
-from app.core.retry_strategy_base import EnhancedRetryStrategy
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.core.retry_strategy_base import EnhancedRetryStrategy
 
 
 class ApiRetryStrategy(EnhancedRetryStrategy):

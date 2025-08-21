@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Composable generators
 
 Usage:
-    from app.tests.e2e.data import (
+    from netra_backend.app.tests.e2e.data import (
         ProductionMirrorGenerator,
         get_cost_optimization_plan,
         EdgeCaseGenerator,

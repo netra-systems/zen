@@ -32,8 +32,8 @@ from unittest.mock import patch
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from monitoring.metrics_collector import MetricsCollector
-from app.services.redis_service import RedisService
-from app.core.configuration.base import get_unified_config
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.core.configuration.base import get_unified_config
 
 logger = logging.getLogger(__name__)
 

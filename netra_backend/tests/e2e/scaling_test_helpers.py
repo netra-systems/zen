@@ -5,8 +5,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 import uuid
 from typing import Dict, List
-from app.agents.state import DeepAgentState
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas import SubAgentLifecycle
 
 
 def create_scaling_setup(agents: Dict, llm, ws) -> Dict:

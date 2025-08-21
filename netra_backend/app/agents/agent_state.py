@@ -4,7 +4,7 @@ Handles agent state transitions and validation.
 """
 
 from typing import Dict, List
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 
 class AgentStateMixin:

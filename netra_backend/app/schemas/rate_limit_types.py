@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.rate_limit_types import RateLimitConfig, RateLimiter, TokenBucket
+    from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, RateLimiter, TokenBucket
 
 Business Value Justification (BVJ):
 - Segment: All segments (prevents abuse across all user tiers)

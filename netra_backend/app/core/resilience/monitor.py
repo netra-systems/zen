@@ -16,7 +16,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

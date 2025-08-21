@@ -37,14 +37,14 @@ import psutil
 import logging
 
 # Import auth types
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     Token, TokenData, LoginRequest, LoginResponse,
     SessionInfo, HealthResponse, AuthError
 )
 
 # Test infrastructure
-from app.core.config import get_settings
-from app.clients.auth_client import auth_client
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.clients.auth_client import auth_client
 
 
 @dataclass

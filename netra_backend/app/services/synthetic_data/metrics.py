@@ -8,8 +8,8 @@ from datetime import datetime, UTC
 from typing import Dict, List, Any, Union, TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from app.schemas.Generation import SyntheticDataGenParams
-    from app.schemas.data_ingestion_types import IngestionConfig
+    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
 from collections import namedtuple
 
 def _calculate_validation_rate(records: List[Dict[str, Any]], validate_schema_fn: Callable[[Dict[str, Any]], bool]) -> float:

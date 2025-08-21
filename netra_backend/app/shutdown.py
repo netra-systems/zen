@@ -6,10 +6,10 @@ import asyncio
 import logging
 from fastapi import FastAPI
 
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
-from app.utils.multiprocessing_cleanup import cleanup_multiprocessing
-from app.ws_manager import manager as websocket_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
+from netra_backend.app.ws_manager import manager as websocket_manager
 
 
 def shutdown_cleanup(logger: logging.Logger) -> None:
@@ -47,7 +47,7 @@ async def stop_monitoring(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _stop_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     """Stop monitoring task and wait for completion."""
-    from app.services.database.connection_monitor import stop_connection_monitoring
+    from netra_backend.app.services.database.connection_monitor import stop_connection_monitoring
     stop_connection_monitoring()
     app.state.monitoring_task.cancel()
     await _wait_for_monitoring_shutdown(app.state.monitoring_task)

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
 from starlette.websockets import WebSocketDisconnect
-from tests.integration.test_unified_message_flow import MessageFlowTracker
-from tests.test_utilities.websocket_mocks import MockWebSocket
+from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
+from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket
 from netra_backend.app.core.exceptions_websocket import WebSocketError
 from logging_config import central_logger
 from routes.utils.websocket_helpers import accept_websocket_connection

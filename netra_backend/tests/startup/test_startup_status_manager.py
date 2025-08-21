@@ -12,14 +12,14 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
 
-from app.startup.status_manager import StartupStatusManager
-from app.schemas.startup_types import (
+from netra_backend.app.startup.status_manager import StartupStatusManager
+from netra_backend.app.schemas.startup_types import (
     StartupStatus, LastStartup, MigrationStatus, ServiceConfig,
     CrashEntry, HealthCheckHistory, ServiceType, Environment
 )
-from app.core.exceptions_base import NetraException
-from app.core.exceptions_file import FileError, DataParsingError
-from app.core.exceptions_file import FileNotFoundError as NetraFileNotFoundError
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_file import FileError, DataParsingError
+from netra_backend.app.core.exceptions_file import FileNotFoundError as NetraFileNotFoundError
 
 
 @pytest.fixture

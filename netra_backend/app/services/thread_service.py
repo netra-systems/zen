@@ -1,13 +1,13 @@
 from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
-from app.services.service_interfaces import IThreadService
-from app.core.exceptions_database import DatabaseError, RecordNotFoundError
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode, ErrorSeverity
-from app.db.models_postgres import Thread, Message, Assistant, Run
-from app.logging_config import central_logger
-from app.ws_manager import manager
+from netra_backend.app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
+from netra_backend.app.services.service_interfaces import IThreadService
+from netra_backend.app.core.exceptions_database import DatabaseError, RecordNotFoundError
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.db.models_postgres import Thread, Message, Assistant, Run
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import manager
 import uuid
 import time
 

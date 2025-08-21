@@ -7,7 +7,7 @@ Implements the mandatory pattern from websocket_reliability.xml.
 import asyncio
 import time
 from typing import List, Dict, Optional, Tuple
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.batch_message_types import PendingMessage, MessageState, BatchConfig
 

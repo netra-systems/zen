@@ -17,8 +17,8 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, Union, List
 from dataclasses import dataclass, field
 
-from app.core.exceptions_base import NetraException
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

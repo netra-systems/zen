@@ -6,8 +6,8 @@ Separated from the main configuration for clarity.
 
 import os
 from typing import Dict, Type
-from app.config.schemas import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
-from app.logging_config import central_logger as logger
+from netra_backend.app.config.schemas import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def detect_cloud_run_environment() -> str:

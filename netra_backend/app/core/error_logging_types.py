@@ -10,8 +10,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 from collections import deque
 
-from app.core.error_codes import ErrorCode, ErrorSeverity
-from app.core.error_recovery import OperationType
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.error_recovery import OperationType
 
 
 class LogLevel(Enum):

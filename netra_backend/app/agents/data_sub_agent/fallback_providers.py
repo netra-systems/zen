@@ -7,12 +7,12 @@ Business Value: Ensures 99.9% data availability through intelligent fallback pat
 """
 
 from typing import Any, Dict, List, Optional
-from app.logging_config import central_logger
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.fallback_helpers import FallbackDataHelpers, FallbackSystemIntegrations
 
 logger = central_logger.get_logger(__name__)
@@ -224,7 +224,7 @@ class ModernFallbackDataProvider(BaseExecutionInterface):
         
     def _create_execution_context(self, operation_type: str, run_id: str) -> ExecutionContext:
         """Create execution context for fallback operation."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         
         # Create minimal state for fallback operations
         state = DeepAgentState()

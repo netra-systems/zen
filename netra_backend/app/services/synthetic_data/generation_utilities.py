@@ -5,10 +5,10 @@ Generation Utilities - Utility methods for synthetic data generation
 from typing import Dict, List, Optional, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.schemas.Generation import SyntheticDataGenParams
-    from app.schemas.data_ingestion_types import IngestionConfig
+    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
 
-from app import schemas
+from netra_backend.app import schemas
 
 
 class GenerationUtilities:

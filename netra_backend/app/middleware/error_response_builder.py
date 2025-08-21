@@ -9,7 +9,7 @@ from datetime import datetime
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.core.error_recovery import RecoveryContext
+from netra_backend.app.core.error_recovery import RecoveryContext
 
 
 def create_circuit_breaker_response() -> JSONResponse:

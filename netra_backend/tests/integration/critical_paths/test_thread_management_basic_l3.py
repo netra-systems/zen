@@ -14,8 +14,8 @@ from datetime import datetime
 import uuid
 
 from test_framework.test_patterns import L3IntegrationTest
-from app.db.models_postgres import Thread, Message
-from app.core.redis_client import RedisManager
+from netra_backend.app.db.models_postgres import Thread, Message
+from netra_backend.app.core.redis_client import RedisManager
 
 
 class TestThreadManagementBasic(L3IntegrationTest):

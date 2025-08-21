@@ -1,4 +1,4 @@
-from app.schemas import (ClickHouseCredentials, ModelIdentifier, EventMetadata, 
+from netra_backend.app.schemas import (ClickHouseCredentials, ModelIdentifier, EventMetadata, 
                          TraceContext, Request, Response, Performance, FinOps, EnrichedMetrics, 
                          UnifiedLogEntry, DiscoveredPattern, PredictedOutcome, BaselineMetrics, 
                          LearnedPolicy, CostComparison, AnalysisResult)

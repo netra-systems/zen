@@ -65,7 +65,7 @@ class TestLLMCacheRoute:
     
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation by pattern."""
-        from app.routes.llm_cache import clear_cache_pattern
+        from netra_backend.app.routes.llm_cache import clear_cache_pattern
         
         with patch('app.services.llm_cache_service.llm_cache_service.clear_cache_pattern') as mock_clear:
             mock_clear.return_value = 10
@@ -131,7 +131,7 @@ class TestLLMCacheRoute:
     
     async def test_cache_warm_up(self):
         """Test cache warm-up functionality."""
-        from app.routes.llm_cache import warm_up_cache
+        from netra_backend.app.routes.llm_cache import warm_up_cache
         
         warm_up_config = {
             "patterns": ["common_queries_*", "frequent_agents_*"],
@@ -215,7 +215,7 @@ class TestLLMCacheRoute:
     
     async def test_cache_backup_restore(self):
         """Test cache backup and restore functionality."""
-        from app.routes.llm_cache import backup_cache, restore_cache
+        from netra_backend.app.routes.llm_cache import backup_cache, restore_cache
         
         # Test cache backup
         with patch('app.services.llm_cache_service.create_backup') as mock_backup:

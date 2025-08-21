@@ -3,8 +3,8 @@
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-from app.services.quality_gate_service import QualityGateService, QualityMetrics, ValidationResult
-from app.redis_manager import RedisManager
+from netra_backend.app.services.quality_gate_service import QualityGateService, QualityMetrics, ValidationResult
+from netra_backend.app.redis_manager import RedisManager
 
 
 def setup_redis_mock_with_error():

@@ -8,7 +8,7 @@ import asyncio
 from uuid import uuid4
 from typing import Any, Optional
 
-from app.schemas.shared_types import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.agent_error_handler import AgentErrorHandler
 from netra_backend.app.error_recovery_strategy import ErrorRecoveryStrategy
 

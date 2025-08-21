@@ -27,11 +27,11 @@ Coverage Target: 100% for all team collaboration features.
 
 # Import and run tests from refactored modules
 import pytest
-from tests.integration.critical_paths.test_team_creation_permissions import TestTeamCreationPermissions
-from tests.integration.critical_paths.test_user_invitation_flow import TestUserInvitationFlow
-from tests.integration.critical_paths.test_workspace_resource_sharing import TestWorkspaceResourceSharing
-from tests.integration.critical_paths.test_concurrent_editing_performance import TestConcurrentEditingPerformance
-from tests.integration.critical_paths.test_team_isolation_security import TestTeamIsolationSecurity
+from netra_backend.tests.integration.critical_paths.test_team_creation_permissions import TestTeamCreationPermissions
+from netra_backend.tests.integration.critical_paths.test_user_invitation_flow import TestUserInvitationFlow
+from netra_backend.tests.integration.critical_paths.test_workspace_resource_sharing import TestWorkspaceResourceSharing
+from netra_backend.tests.integration.critical_paths.test_concurrent_editing_performance import TestConcurrentEditingPerformance
+from netra_backend.tests.integration.critical_paths.test_team_isolation_security import TestTeamIsolationSecurity
 
 # All core classes and functionality moved to:
 # app/tests/integration/test_helpers/team_collaboration_base.py

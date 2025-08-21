@@ -2,7 +2,7 @@
 
 import os
 from typing import Dict, Any, Optional, List
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from google.cloud import secretmanager
 from tenacity import retry, stop_after_attempt, wait_fixed
 

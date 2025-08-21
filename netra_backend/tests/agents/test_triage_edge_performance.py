@@ -16,7 +16,7 @@ from netra_backend.app.agents.triage_sub_agent import (
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from tests.helpers.triage_test_helpers import (
+from netra_backend.tests.helpers.triage_test_helpers import (
     TriageMockHelpers,
     EdgeCaseHelpers,
     PerformanceHelpers,
@@ -194,7 +194,7 @@ class TestPydanticModelValidation:
     
     def _create_comprehensive_triage_result(self):
         """Create comprehensive triage result"""
-        from app.agents.triage_sub_agent.models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         key_params = self._create_test_key_parameters()
         metadata = TriageMetadata(triage_duration_ms=300, llm_tokens_used=100)
         return TriageResult(

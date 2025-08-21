@@ -5,7 +5,7 @@ Provides reusable test data, metadata objects, and mock configurations
 
 import pytest
 from typing import Dict, List, Tuple, Any
-from app.core.fallback_handler import FallbackHandler, FallbackMetadata
+from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
 
 
 @pytest.fixture

@@ -12,11 +12,11 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
-from app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
-from app.core.circuit_breaker_types import CircuitBreakerOpenError
-from app.core.shared_health_types import HealthChecker, HealthStatus
-from app.schemas.core_enums import CircuitBreakerState
-from app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
+from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
+from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
+from netra_backend.app.schemas.core_enums import CircuitBreakerState
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
 
 
 # Test fixtures for setup

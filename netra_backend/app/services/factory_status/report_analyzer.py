@@ -3,7 +3,7 @@
 from typing import Dict, List, Any
 from datetime import datetime
 
-from app.services.factory_status.spec_compliance_scorer import ComplianceScore
+from netra_backend.app.services.factory_status.spec_compliance_scorer import ComplianceScore
 
 
 class ReportAnalyzer:

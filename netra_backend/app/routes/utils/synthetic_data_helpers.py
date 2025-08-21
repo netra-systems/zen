@@ -1,9 +1,9 @@
 """Synthetic data route specific utilities."""
 
 from typing import Dict, Any, List, Optional
-from app import schemas
-from app.routes.utils.validators import validate_job_ownership
-from app.routes.utils.error_handlers import handle_validation_error
+from netra_backend.app import schemas
+from netra_backend.app.routes.utils.validators import validate_job_ownership
+from netra_backend.app.routes.utils.error_handlers import handle_validation_error
 
 
 def build_generation_config(request) -> schemas.LogGenParams:
@@ -18,7 +18,7 @@ async def execute_generation_safely(
     db, config: schemas.LogGenParams, user_id: int, corpus_id: Optional[str]
 ):
     """Execute generation with error handling."""
-    from app.services.synthetic_data_service import synthetic_data_service
+    from netra_backend.app.services.synthetic_data_service import synthetic_data_service
     return await synthetic_data_service.generate_synthetic_data(
         db=db, config=config, user_id=user_id, corpus_id=corpus_id
     )
@@ -54,7 +54,7 @@ def extract_result_fields(result: Dict, num_traces: int) -> Dict:
 
 async def fetch_and_validate_job_status(job_id: str, user_id: int) -> Dict:
     """Fetch and validate job status."""
-    from app.services.synthetic_data_service import synthetic_data_service
+    from netra_backend.app.services.synthetic_data_service import synthetic_data_service
     status = await synthetic_data_service.get_job_status(job_id)
     validate_job_ownership(status, user_id, job_id)
     return status
@@ -95,7 +95,7 @@ def extract_status_fields(status: Dict) -> Dict:
 
 async def cancel_job_safely(job_id: str) -> None:
     """Cancel job execution safely."""
-    from app.services.synthetic_data_service import synthetic_data_service
+    from netra_backend.app.services.synthetic_data_service import synthetic_data_service
     success = await synthetic_data_service.cancel_job(job_id)
     if not success:
         handle_validation_error("Failed to cancel job")
@@ -112,7 +112,7 @@ def build_cancel_response(job_id: str, status: Dict) -> Dict:
 
 async def _call_preview_service(corpus_id: Optional[str], workload_type: str, sample_size: int) -> List[Dict]:
     """Call preview service with parameters."""
-    from app.services.synthetic_data_service import synthetic_data_service
+    from netra_backend.app.services.synthetic_data_service import synthetic_data_service
     return await synthetic_data_service.get_preview(
         corpus_id=corpus_id,
         workload_type=workload_type,

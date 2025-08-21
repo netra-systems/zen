@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 def _get_enhanced_pool_status():
     """Get pool status from enhanced monitoring system."""
     try:
-        from app.services.database.connection_monitor import connection_metrics
+        from netra_backend.app.services.database.connection_monitor import connection_metrics
         return connection_metrics.get_pool_status()
     except ImportError:
         return None
@@ -34,7 +34,7 @@ def _get_sync_pool_status():
 
 def _get_async_pool_status():
     """Get asynchronous pool status if available."""
-    from app.db.postgres_core import async_engine
+    from netra_backend.app.db.postgres_core import async_engine
     if async_engine:
         return _extract_pool_metrics(async_engine.pool)
     return None
@@ -58,8 +58,8 @@ def get_pool_status() -> dict:
 
 async def close_async_db():
     """Close all async database connections."""
-    from app.db.postgres_core import async_engine
-    from app.logging_config import central_logger
+    from netra_backend.app.db.postgres_core import async_engine
+    from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
     if async_engine:

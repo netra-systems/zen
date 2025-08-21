@@ -21,8 +21,8 @@ from typing import Dict, Any, List, Optional, Set
 from datetime import datetime, timezone
 from dataclasses import dataclass, asdict
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage, WebSocketMessageType
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
 logger = central_logger.get_logger(__name__)
 

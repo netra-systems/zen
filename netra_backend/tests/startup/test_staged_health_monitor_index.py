@@ -5,7 +5,7 @@ COMPLIANCE: Modular split from 514-line monolith
 """
 
 # Import all test classes from focused modules
-from app.tests.startup.test_health_monitor_core import (
+from netra_backend.app.tests.startup.test_health_monitor_core import (
     TestHealthStage,
     TestServiceConfig,
     TestHealthCheckResult,
@@ -13,16 +13,16 @@ from app.tests.startup.test_health_monitor_core import (
     TestServiceState,
     TestStagedHealthMonitorInit
 )
-from app.tests.startup.test_health_monitor_lifecycle import (
+from netra_backend.app.tests.startup.test_health_monitor_lifecycle import (
     TestServiceRegistration,
     TestMonitoringLifecycle
 )
-from app.tests.startup.test_health_monitor_checks import (
+from netra_backend.app.tests.startup.test_health_monitor_checks import (
     TestHealthChecks,
     TestCheckResultProcessing,
     TestStageProgression
 )
-from app.tests.startup.test_health_monitor_adaptive import (
+from netra_backend.app.tests.startup.test_health_monitor_adaptive import (
     TestAdaptiveRules,
     TestServiceStatus,
     TestHealthCheckFactories

@@ -12,10 +12,10 @@ from datetime import datetime, timedelta
 from fastapi import Request, Response, HTTPException, status
 from fastapi.security import HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.logging_config import central_logger
-from app.core.exceptions_auth import NetraSecurityException
-from app.core.error_codes import ErrorCode
-from app.middleware.security_validation_helpers import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.middleware.security_validation_helpers import (
     SecurityValidators, RequestValidators, HeaderSanitizer, 
     IPValidators, RateLimitHelpers, AuthAttemptTracker
 )

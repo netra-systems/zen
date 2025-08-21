@@ -50,7 +50,7 @@ class TestSupervisorAdvancedFeatures:
         )
         
         # Mock triage agent to fail
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = AsyncMock(side_effect=Exception("Agent failed"))
         supervisor.agents["triage"] = mock_triage
@@ -110,7 +110,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for concurrent test
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -190,7 +190,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for metrics test
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -252,7 +252,7 @@ class TestSupervisorAdvancedFeatures:
 
     def _setup_circuit_breaker_agent(self, supervisor):
         """Setup mock triage agent for circuit breaker test"""
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = lambda state, run_id, stream_updates=True: self._mock_circuit_breaker_execute(supervisor, state, run_id, stream_updates)
         supervisor.agents["triage"] = mock_triage

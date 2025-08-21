@@ -10,7 +10,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.security_headers_config import SecurityHeadersConfig
 from netra_backend.app.nonce_generator import NonceGenerator
 

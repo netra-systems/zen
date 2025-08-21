@@ -1,4 +1,4 @@
-from app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 async def list_corpus_tables():
     async with get_clickhouse_client() as client:

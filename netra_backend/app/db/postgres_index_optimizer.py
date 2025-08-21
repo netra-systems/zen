@@ -6,9 +6,9 @@ Main PostgreSQL index optimizer with modular architecture.
 from typing import Dict, List, Any, Set
 from sqlalchemy import text
 
-from app.logging_config import central_logger
-from app.db.postgres import get_async_db, async_engine
-from app.db.index_optimizer_core import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db, async_engine
+from netra_backend.app.db.index_optimizer_core import (
     IndexRecommendation,
     DatabaseValidation,
     IndexNameGenerator,

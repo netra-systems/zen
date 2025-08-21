@@ -7,10 +7,10 @@ Contains all Pydantic models for configuration validation.
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
-from app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
-from app.schemas.registry import User
-from app.schemas.llm_types import LLMProvider
-from app.core.environment_constants import (
+from netra_backend.app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
+from netra_backend.app.schemas.registry import User
+from netra_backend.app.schemas.llm_types import LLMProvider
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_project_id, get_current_environment
 )
 

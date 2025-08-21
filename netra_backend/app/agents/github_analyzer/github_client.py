@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List
 from urllib.parse import urlparse
 
-from app.logging_config import central_logger as logger
-from app.core.exceptions import NetraException
-from app.core.configuration import get_configuration
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.core.configuration import get_configuration
 
 
 class GitHubAPIClient:

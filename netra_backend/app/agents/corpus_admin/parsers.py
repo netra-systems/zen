@@ -6,10 +6,10 @@ Maintains 25-line function limit and single responsibility.
 """
 
 from typing import Dict, Any
-from app.llm.llm_manager import LLMManager
-from app.agents.utils import extract_json_from_response
-from app.logging_config import central_logger
-from app.llm.observability import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.observability import (
     start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
     log_agent_input, log_agent_output
 )

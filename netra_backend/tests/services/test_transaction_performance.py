@@ -13,8 +13,8 @@ from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
-from app.services.database.base_repository import BaseRepository
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class MockDatabaseModel:

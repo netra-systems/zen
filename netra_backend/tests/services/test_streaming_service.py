@@ -6,7 +6,7 @@ import asyncio
 from typing import AsyncGenerator
 from unittest.mock import Mock, AsyncMock
 
-from app.services.streaming_service import (
+from netra_backend.app.services.streaming_service import (
     StreamingService,
     StreamChunk,
     StreamProtocol,

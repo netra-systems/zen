@@ -8,7 +8,7 @@ from typing import Dict, List, Any, Optional
 import re
 from collections import defaultdict
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class LLMCallMapper:

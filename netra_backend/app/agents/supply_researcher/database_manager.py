@@ -8,8 +8,8 @@ Maintains 25-line function limit and focused database logic.
 from typing import Dict, Any, List
 from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
-from app.logging_config import central_logger as logger
+from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class SupplyDatabaseManager:

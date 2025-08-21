@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock
 from collections import deque
 
-from app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
 
 
 class TestMetricsCollectorSummary:

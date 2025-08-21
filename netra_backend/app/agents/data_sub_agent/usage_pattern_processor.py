@@ -11,13 +11,13 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 import time
 
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
 )
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.core.exceptions import ProcessingError
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.core.exceptions import ProcessingError
 
 
 class UsagePatternProcessor(BaseExecutionInterface):

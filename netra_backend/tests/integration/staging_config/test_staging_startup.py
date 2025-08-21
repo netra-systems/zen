@@ -33,10 +33,10 @@ class TestStagingStartup(StagingConfigTestBase):
             os.environ.update(env_vars)
             
             # Import app modules
-            from app.main import app
-            from app.config import get_config
-            from app.db.session import get_db
-            from app.ws_manager import WebSocketManager
+            from netra_backend.app.main import app
+            from netra_backend.app.config import get_config
+            from netra_backend.app.db.session import get_db
+            from netra_backend.app.ws_manager import WebSocketManager
             
             # Initialize configuration
             config = get_config()
@@ -56,7 +56,7 @@ class TestStagingStartup(StagingConfigTestBase):
                 self.fail(f"Database connection failed: {e}")
                 
             # Test Redis connection
-            from app.cache import redis_client
+            from netra_backend.app.cache import redis_client
             if redis_client:
                 try:
                     await redis_client.ping()
@@ -254,7 +254,7 @@ class TestStagingStartup(StagingConfigTestBase):
             self.skipTest("Application startup failed")
             
         # Simulate shutdown
-        from app.main import shutdown_handlers
+        from netra_backend.app.main import shutdown_handlers
         
         shutdown_start = time.time()
         

@@ -13,7 +13,7 @@
 import json
 import re
 from typing import Any, Dict, Optional, List
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def remove_trailing_commas(json_str: str) -> str:

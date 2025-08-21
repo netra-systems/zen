@@ -3,14 +3,14 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     _validate_pr_inputs,
     _validate_pr_number_format,
     _validate_pr_with_github,
     _is_valid_url,
     _is_allowed_return_domain
 )
-from app.core.exceptions_auth import AuthenticationError, NetraSecurityException
+from netra_backend.app.core.exceptions_auth import AuthenticationError, NetraSecurityException
 
 
 # Tests for _validate_return_url functions

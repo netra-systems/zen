@@ -11,9 +11,9 @@ import asyncio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.session import ClientSession
-from app.services.database.mcp_client_repository import MCPResourceAccessRepository
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.services.database.mcp_client_repository import MCPResourceAccessRepository
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

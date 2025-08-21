@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from tests.services.external_api_client_utils import verify_new_circuit_creation
+from netra_backend.tests.services.external_api_client_utils import verify_new_circuit_creation
 
 
 class TestResilientHTTPClientCircuit:
@@ -55,7 +55,7 @@ class TestResilientHTTPClientCircuit:
             mock_circuit.call.assert_called_once()
     async def test_request_circuit_open(self, client):
         """Test request when circuit is open."""
-        from app.core.circuit_breaker import CircuitBreakerOpenError
+        from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
         
         mock_circuit = self._setup_open_circuit_mock()
         
@@ -66,12 +66,12 @@ class TestResilientHTTPClientCircuit:
     
     def _setup_open_circuit_mock(self):
         """Setup mock circuit that is open."""
-        from app.core.circuit_breaker import CircuitBreakerOpenError
+        from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
         mock_circuit = AsyncMock()
         mock_circuit.call.side_effect = CircuitBreakerOpenError("Circuit open")
         return mock_circuit
     
     def _verify_circuit_open_result(self, result, mock_logger):
         """Verify circuit open behavior."""
-        from app.tests.services.external_api_client_utils import verify_circuit_open_behavior
+        from netra_backend.app.tests.services.external_api_client_utils import verify_circuit_open_behavior
         verify_circuit_open_behavior(result, mock_logger)

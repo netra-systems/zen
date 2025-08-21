@@ -16,23 +16,23 @@ from typing import Dict, List, Any, Tuple, Optional, Protocol
 from datetime import datetime
 from dataclasses import dataclass
 
-from app.logging_config import central_logger as logger
-from app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.state import DeepAgentState
 
 # Modern Base Components
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Helper Modules
-from app.agents.data_sub_agent.performance_analysis_helpers import PerformanceAnalysisHelpers
-from app.agents.data_sub_agent.performance_analysis_validation import (
+from netra_backend.app.agents.data_sub_agent.performance_analysis_helpers import PerformanceAnalysisHelpers
+from netra_backend.app.agents.data_sub_agent.performance_analysis_validation import (
     PerformanceAnalysisValidator, PerformanceQueryBuilder, PerformanceErrorHandlers
 )
 

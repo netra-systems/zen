@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional, Callable, Awaitable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
 
 
 def _setup_temporal_config(config: 'SyntheticDataGenParams'):

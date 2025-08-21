@@ -22,12 +22,12 @@ from decimal import Decimal
 from dataclasses import dataclass
 import json
 
-from app.services.agent_service_core import AgentService
-from app.services.llm_cache_service import LLMCacheService
-from app.services.user_service import CRUDUser as UserService
-from app.services.metrics.billing_metrics import BillingMetricsCollector
-from app.services.audit_service import AuditService
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.services.llm_cache_service import LLMCacheService
+from netra_backend.app.services.user_service import CRUDUser as UserService
+from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
+from netra_backend.app.services.audit_service import AuditService
+from netra_backend.app.schemas.UserPlan import PlanTier
 # from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 from unittest.mock import AsyncMock, MagicMock

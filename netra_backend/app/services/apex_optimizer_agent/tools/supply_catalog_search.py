@@ -1,11 +1,11 @@
 from typing import Any, Dict, List
-from app.db.session import get_db_session
-from app.db.models_postgres import SupplyOption
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.db.models_postgres import SupplyOption
 from sqlmodel import select
-from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
-from app.services.supply_catalog_service import SupplyCatalogService
+from netra_backend.app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from netra_backend.app.services.apex_optimizer_agent.tools.context import ToolContext
 
 class SupplyCatalogSearch(BaseTool):
     metadata = ToolMetadata(

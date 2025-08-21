@@ -1,7 +1,7 @@
 import json
 from typing import Any
-from app.services.apex_optimizer_agent.models import AgentState
-from app.schemas import AppConfig
+from netra_backend.app.services.apex_optimizer_agent.models import AgentState
+from netra_backend.app.schemas import AppConfig
 
 class ApexToolSelector:
     def __init__(self, llm_connector: any, settings: AppConfig):

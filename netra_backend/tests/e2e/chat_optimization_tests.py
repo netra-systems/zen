@@ -5,8 +5,8 @@ Tests for real-time chat model optimization and latency/cost tradeoffs
 
 from typing import Dict, List
 
-from app.agents.state import DeepAgentState
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas import SubAgentLifecycle
 from netra_backend.tests.model_effectiveness_tests import _execute_model_selection_workflow
 
 

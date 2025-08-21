@@ -14,11 +14,11 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, Mock, patch
 
-from app.core.async_resource_manager import (
+from netra_backend.app.core.async_resource_manager import (
     AsyncResourceManager, AsyncTaskPool, get_global_resource_manager,
     get_global_task_pool, run_in_threadpool, shutdown_async_utils
 )
-from app.core.exceptions_service import ServiceError
+from netra_backend.app.core.exceptions_service import ServiceError
 
 
 # Test fixtures for setup
@@ -332,13 +332,13 @@ class TestThreadPoolExecution:
 
     def test_thread_pool_executor_creation(self):
         """Thread pool executor is created on demand."""
-        from app.core.async_resource_manager import _get_thread_pool_executor
+        from netra_backend.app.core.async_resource_manager import _get_thread_pool_executor
         executor = _get_thread_pool_executor()
         assert isinstance(executor, ThreadPoolExecutor)
 
     def test_thread_pool_executor_reuse(self):
         """Thread pool executor is reused."""
-        from app.core.async_resource_manager import _get_thread_pool_executor
+        from netra_backend.app.core.async_resource_manager import _get_thread_pool_executor
         executor1 = _get_thread_pool_executor()
         executor2 = _get_thread_pool_executor()
         assert executor1 is executor2

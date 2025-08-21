@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from tests.integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     generate_test_user_data, generate_test_thread_data,
     MockAuthService, MockWebSocketManager
 )

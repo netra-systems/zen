@@ -9,7 +9,7 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.database.unit_of_work import UnitOfWork
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
 
 
 class TestUnitOfWorkTransactions:

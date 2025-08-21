@@ -7,11 +7,11 @@ Focused on database interactions only. ≤300 lines, ≤8 lines per function.
 from typing import List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, desc, func
-from app.schemas.registry import CorpusAuditSearchFilter
-from app.db.models_postgres import CorpusAuditLog
-from app.services.database.base_repository import BaseRepository
-from app.logging_config import central_logger
-from app.core.exceptions_database import DatabaseError
+from netra_backend.app.schemas.registry import CorpusAuditSearchFilter
+from netra_backend.app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_database import DatabaseError
 
 logger = central_logger.get_logger(__name__)
 

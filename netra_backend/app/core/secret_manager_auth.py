@@ -7,8 +7,8 @@ import json
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone, timedelta
 
-from app.logging_config import central_logger
-from app.schemas.config_types import EnvironmentType
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.config_types import EnvironmentType
 
 logger = central_logger.get_logger(__name__)
 

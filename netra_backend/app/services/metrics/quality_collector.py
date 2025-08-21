@@ -8,8 +8,8 @@ from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any
 from collections import defaultdict, deque
 
-from app.logging_config import central_logger
-from app.schemas.Metrics import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import (
     QualityMetrics, CorpusMetric, MetricType, TimeSeriesPoint
 )
 from netra_backend.app.quality_trend_analyzer import QualityTrendAnalyzer

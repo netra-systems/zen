@@ -8,10 +8,10 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta, UTC
 from fastapi import HTTPException, BackgroundTasks
 
-from app.logging_config import central_logger
-from app.services.quality_gate_service import QualityGateService
-from app.services.quality_monitoring_service import QualityMonitoringService
-from app.schemas.quality_types import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.schemas.quality_types import (
     User, QualityValidationRequest, QualityDashboardData,
     QualityAlert, AlertAcknowledgement, QualityReportType,
     QualityReport, QualityStatistics, QualityServiceHealth

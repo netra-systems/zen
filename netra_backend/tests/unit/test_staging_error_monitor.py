@@ -30,7 +30,7 @@ from scripts.staging_error_monitor import (
     NotificationSender, ErrorThreshold, MonitorConfig, load_config_from_args,
     parse_deployment_time
 )
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.schemas.monitoring_schemas import (
     GCPError, ErrorSeverity, ErrorStatus, ErrorResponse, ErrorSummary
 )
 

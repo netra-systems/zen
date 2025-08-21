@@ -16,8 +16,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from collections import defaultdict, deque
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -311,7 +311,7 @@ class ExecutionMonitor:
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED
-from app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
 
 class MetricsCollector:
     """Agent-specific metrics collector with ExecutionMonitor aggregation."""

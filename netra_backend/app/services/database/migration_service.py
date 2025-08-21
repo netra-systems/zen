@@ -15,8 +15,8 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 
-from app.core.exceptions import NetraException
-from app.services.database.base_repository import BaseRepository
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.services.database.base_repository import BaseRepository
 
 logger = logging.getLogger(__name__)
 

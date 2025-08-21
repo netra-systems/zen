@@ -10,7 +10,7 @@ incidents and ensuring compliance with Enterprise requirements.
 import os
 from typing import Dict, Any, Optional, List
 from functools import lru_cache
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.secrets import SecretManager
 from netra_backend.app.environment import EnvironmentDetector
 

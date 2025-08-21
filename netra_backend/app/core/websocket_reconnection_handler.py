@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Optional, Callable, List
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_recovery_types import ReconnectionReason, ReconnectionConfig, MessageState
 
 logger = central_logger.get_logger(__name__)

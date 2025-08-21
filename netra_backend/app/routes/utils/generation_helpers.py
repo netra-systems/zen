@@ -4,7 +4,7 @@ import os
 import uuid
 from typing import Dict, List, Optional
 from fastapi import BackgroundTasks
-from app.services.job_store import job_store
+from netra_backend.app.services.job_store import job_store
 
 
 def _build_job_data(job_type: str, params: Dict) -> Dict:

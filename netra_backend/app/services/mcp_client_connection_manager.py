@@ -15,9 +15,9 @@ from mcp.client.stdio import stdio_client
 from mcp.client.sse import sse_client
 import httpx
 import websockets
-from app.schemas.core_enums import MCPServerStatus
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import MCPServerStatus
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

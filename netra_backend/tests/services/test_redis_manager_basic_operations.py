@@ -7,8 +7,8 @@ import pytest
 from unittest.mock import patch
 
 from redis_manager import RedisManager
-from tests.helpers.redis_test_fixtures import mock_redis_client, redis_manager
-from tests.helpers.redis_test_helpers import (
+from netra_backend.tests.helpers.redis_test_fixtures import mock_redis_client, redis_manager
+from netra_backend.tests.helpers.redis_test_helpers import (
     setup_redis_settings_mock, verify_redis_operation_basic,
     verify_redis_get_result, verify_redis_set_result, verify_redis_set_with_ttl,
     verify_redis_delete_result, verify_command_in_history, setup_test_data,
@@ -41,7 +41,7 @@ class TestRedisManagerOperations:
         manager.enabled = True
         
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            from app.tests.helpers.redis_test_fixtures import MockRedisClient
+            from netra_backend.app.tests.helpers.redis_test_fixtures import MockRedisClient
             mock_client = MockRedisClient()
             setup_failing_redis_client(mock_client, "connection")
             mock_redis_class.return_value = mock_client

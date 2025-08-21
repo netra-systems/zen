@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from tests.services.external_api_client_utils import (
+from netra_backend.tests.services.external_api_client_utils import (
     create_mock_session,
     verify_new_session_creation
 )

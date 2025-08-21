@@ -7,29 +7,29 @@ health, metrics, and state across the Netra platform.
 from typing import Dict, Any, List
 from fastapi import APIRouter, HTTPException, Query, Depends
 from datetime import datetime, UTC
-from app.auth_integration import get_current_user, require_admin
+from netra_backend.app.auth_integration import get_current_user, require_admin
 
-from app.services.circuit_breaker_monitor import (
+from netra_backend.app.services.circuit_breaker_monitor import (
     circuit_monitor, metrics_collector, get_circuit_health_dashboard
 )
-from app.core.circuit_breaker import circuit_registry
-from app.llm.client import ResilientLLMClient
-from app.db.client import db_client_manager
-from app.services.external_api_client import http_client_manager
-from app.logging_config import central_logger
-from app.routes.utils.service_delegates import (
+from netra_backend.app.core.circuit_breaker import circuit_registry
+from netra_backend.app.llm.client import ResilientLLMClient
+from netra_backend.app.db.client import db_client_manager
+from netra_backend.app.services.external_api_client import http_client_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.routes.utils.service_delegates import (
     delegate_circuit_dashboard, delegate_circuit_status, delegate_recent_events,
     delegate_recent_alerts, delegate_circuit_metrics, delegate_metrics_history
 )
-from app.routes.utils.response_builders import (
+from netra_backend.app.routes.utils.response_builders import (
     build_circuit_response, build_service_health_response, build_timestamped_response
 )
-from app.routes.utils.validators import validate_circuit_exists
-from app.routes.utils.circuit_helpers import (
+from netra_backend.app.routes.utils.validators import validate_circuit_exists
+from netra_backend.app.routes.utils.circuit_helpers import (
     filter_llm_circuits, filter_database_circuits, filter_api_circuits,
     categorize_circuits, build_service_summary
 )
-from app.routes.utils.error_handlers import handle_circuit_breaker_error
+from netra_backend.app.routes.utils.error_handlers import handle_circuit_breaker_error
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/circuit-breakers", tags=["Circuit Breaker Health"])

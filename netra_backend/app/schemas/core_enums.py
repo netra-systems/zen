@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.core_enums import MessageType, AgentStatus, WebSocketMessageType
+    from netra_backend.app.schemas.core_enums import MessageType, AgentStatus, WebSocketMessageType
 """
 
 from typing import Literal

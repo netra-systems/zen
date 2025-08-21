@@ -322,7 +322,7 @@ class TestConfigurationIntegration:
         # Use clear=True to ensure only our test env vars are set
         with patch.dict(os.environ, test_env, clear=True):
             # Create a new config manager to avoid cached config
-            from app.config_manager import ConfigManager
+            from netra_backend.app.config_manager import ConfigManager
             manager = ConfigManager()
             
             # Override the _load_secrets_into_config to apply our DATABASE_URL

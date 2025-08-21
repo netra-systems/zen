@@ -9,9 +9,9 @@ import time
 from typing import Dict, Any, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService, MCPToolExecution
-from app.logging_config import CentralLogger
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService, MCPToolExecution
+from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()
 

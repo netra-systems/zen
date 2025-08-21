@@ -11,11 +11,11 @@ from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 
-from app.services.cost_calculator import (
+from netra_backend.app.services.cost_calculator import (
     CostCalculatorService, CostTier, ModelCostInfo,
     calculate_cost_savings, create_cost_calculator
 )
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 class ROICalculatorService:

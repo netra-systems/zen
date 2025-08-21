@@ -16,10 +16,10 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher  
-from app.agents.base import BaseSubAgent
-from app.logging_config import central_logger as logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher  
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class InitializationStatus(Enum):

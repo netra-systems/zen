@@ -7,14 +7,14 @@ degradation across all registered services.
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from app.core.degradation_types import (
+from netra_backend.app.core.degradation_types import (
     DegradationLevel,
     DegradationPolicy,
     DegradationStrategy,
     ServiceStatus,
     ServiceTier
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -12,12 +12,12 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 import pickle
 
-from app.services.user_service import UserService
-from app.services.session_service import SessionService
-from app.services.redis_service import RedisService
-from app.services.database_service import DatabaseService
-from app.models.user import User, UserState, UserPreferences
-from app.core.config import settings
+from netra_backend.app.services.user_service import UserService
+from netra_backend.app.services.session_service import SessionService
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.services.database_service import DatabaseService
+from netra_backend.app.models.user import User, UserState, UserPreferences
+from netra_backend.app.core.config import settings
 
 
 class TestUserStatePersistenceCompleteL4:

@@ -32,7 +32,7 @@ import redis.asyncio as redis
 import asyncpg
 import httpx
 from unittest.mock import AsyncMock
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
@@ -51,7 +51,7 @@ RedisNamespaceManager = AsyncMock
 PerformanceTracker = AsyncMock
 EnterpriseRateLimiter = AsyncMock
 EnterpriseAccessController = AsyncMock
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

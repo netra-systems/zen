@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from typing import Optional, Callable
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_recovery_types import ConnectionMetrics
 
 logger = central_logger.get_logger(__name__)

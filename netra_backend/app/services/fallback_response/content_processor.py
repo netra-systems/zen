@@ -6,7 +6,7 @@ This module handles content processing, summarization, and quality feedback gene
 import re
 from typing import Dict, Any
 
-from app.services.quality_gate_service import QualityMetrics
+from netra_backend.app.services.quality_gate_service import QualityMetrics
 from netra_backend.app.models import FallbackContext
 
 

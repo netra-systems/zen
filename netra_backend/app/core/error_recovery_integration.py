@@ -10,20 +10,20 @@ from typing import Any, Dict, Optional, List
 from datetime import datetime
 
 # Core recovery components
-from app.core.error_recovery import RecoveryContext, OperationType
-from app.core.enhanced_retry_strategies import retry_manager
-from app.core.circuit_breaker_registry_adaptive import circuit_breaker_registry
-from app.core.graceful_degradation import degradation_manager
-from app.core.memory_recovery_strategies import memory_monitor
-from app.core.websocket_recovery_strategies import websocket_recovery_manager
-from app.core.database_recovery_strategies import database_recovery_registry
-from app.core.error_aggregation_service import error_aggregation_system
+from netra_backend.app.core.error_recovery import RecoveryContext, OperationType
+from netra_backend.app.core.enhanced_retry_strategies import retry_manager
+from netra_backend.app.core.circuit_breaker_registry_adaptive import circuit_breaker_registry
+from netra_backend.app.core.graceful_degradation import degradation_manager
+from netra_backend.app.core.memory_recovery_strategies import memory_monitor
+from netra_backend.app.core.websocket_recovery_strategies import websocket_recovery_manager
+from netra_backend.app.core.database_recovery_strategies import database_recovery_registry
+from netra_backend.app.core.error_aggregation_service import error_aggregation_system
 
 # Legacy components for compatibility
-from app.core.agent_recovery_strategies_main import agent_recovery_registry, AgentType
-from app.core.error_logging import error_logger
+from netra_backend.app.core.agent_recovery_strategies_main import agent_recovery_registry, AgentType
+from netra_backend.app.core.error_logging import error_logger
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -466,26 +466,26 @@ class EnhancedErrorRecoverySystem:
     
     def _determine_severity(self, error: Exception):
         """Determine error severity."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         severity_mapping = self._get_error_severity_mapping()
         error_type = type(error).__name__
         return severity_mapping.get(error_type, ErrorSeverity.MEDIUM)
     
     def _get_error_severity_mapping(self):
         """Get error type to severity mapping."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         return {'MemoryError': ErrorSeverity.CRITICAL, 'ConnectionError': ErrorSeverity.HIGH, 'TimeoutError': ErrorSeverity.MEDIUM, 'ValueError': ErrorSeverity.HIGH}
     
     def _determine_severity_from_status(self, status_code: Optional[int]):
         """Determine severity from HTTP status code."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         if not status_code:
             return ErrorSeverity.MEDIUM
         return self._map_status_code_to_severity(status_code)
     
     def _map_status_code_to_severity(self, status_code: int):
         """Map HTTP status code to error severity."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         if status_code >= 500:
             return ErrorSeverity.HIGH
         elif status_code >= 400:

@@ -9,9 +9,9 @@ from typing import Dict, List, Any
 from pydantic import BaseModel
 
 from schemas import AppConfig
-from tests.helpers.llm_manager_helpers import LLMProvider, count_provider_usage
-from tests.helpers.llm_mock_clients import MockLLMClient
-from tests.helpers.enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.helpers.llm_manager_helpers import LLMProvider, count_provider_usage
+from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
+from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 
 
 class OutputSchema(BaseModel):

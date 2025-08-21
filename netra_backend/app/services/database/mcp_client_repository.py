@@ -11,14 +11,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from sqlalchemy.exc import IntegrityError
 
-from app.services.database.base_repository import BaseRepository
-from app.db.models_mcp_client import MCPExternalServer, MCPToolExecution, MCPResourceAccess
-from app.schemas.mcp_client import MCPServerConfig, MCPServerInfo
-from app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus
-from app.core.exceptions_database import (
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.app.db.models_mcp_client import MCPExternalServer, MCPToolExecution, MCPResourceAccess
+from netra_backend.app.schemas.mcp_client import MCPServerConfig, MCPServerInfo
+from netra_backend.app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus
+from netra_backend.app.core.exceptions_database import (
     DatabaseError, DatabaseConstraintError, RecordNotFoundError
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

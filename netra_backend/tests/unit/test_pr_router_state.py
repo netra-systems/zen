@@ -4,7 +4,7 @@ import time
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     _build_pr_state_data,
     _encode_state_to_base64,
     _decode_state_from_base64,
@@ -13,7 +13,7 @@ from app.auth_integration.auth import (
     _store_csrf_token_in_redis,
     PR_STATE_TTL
 )
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 
 # Shared fixtures

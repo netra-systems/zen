@@ -2,9 +2,9 @@ from langchain_core.tools import tool
 from typing import Any, Dict, List, Union, Optional
 from pydantic import BaseModel, Field, field_validator
 import json
-from app.services.apex_optimizer_agent.models import ToolInvocation, ToolStatus
+from netra_backend.app.services.apex_optimizer_agent.models import ToolInvocation, ToolStatus
 import asyncio
-from app.services.context import ToolContext
+from netra_backend.app.services.context import ToolContext
 
 class Workload(BaseModel):
     time_range: Union[Dict[str, Any], str] = Field(..., description="The time range for the workload.")

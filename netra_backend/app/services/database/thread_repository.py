@@ -6,9 +6,9 @@ Handles all thread-related database operations.
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
-from app.services.database.base_repository import BaseRepository
-from app.db.models_postgres import Thread
-from app.logging_config import central_logger
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.app.db.models_postgres import Thread
+from netra_backend.app.logging_config import central_logger
 import time
 
 logger = central_logger.get_logger(__name__)

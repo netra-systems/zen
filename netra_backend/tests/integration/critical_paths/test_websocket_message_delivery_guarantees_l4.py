@@ -15,10 +15,10 @@ from collections import defaultdict
 # from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
-from app.services.message_queue_service import MessageQueueService
-from app.services.redis_service import RedisService
-from app.models.websocket_message import WebSocketMessage
-from app.core.config import settings
+from netra_backend.app.services.message_queue_service import MessageQueueService
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.models.websocket_message import WebSocketMessage
+from netra_backend.app.core.config import settings
 
 
 class TestWebSocketMessageDeliveryGuaranteesL4:

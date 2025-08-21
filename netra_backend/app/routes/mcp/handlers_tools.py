@@ -4,18 +4,18 @@ from typing import Dict, Any, Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.models import MCPToolCallRequest
-from app.routes.mcp.helpers import (
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.models import MCPToolCallRequest
+from netra_backend.app.routes.mcp.helpers import (
     extract_tools_from_app, get_tool_function,
     record_successful_execution, record_failed_execution
 )
-from app.routes.mcp.utils import (
+from netra_backend.app.routes.mcp.utils import (
     filter_by_category, build_list_response, handle_list_error,
     calculate_execution_time, build_tool_result
 )
-from app.logging_config import CentralLogger
+from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()
 

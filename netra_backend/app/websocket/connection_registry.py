@@ -10,8 +10,8 @@ monitoring, and resource management across all user segments.
 from typing import Dict, List, Optional
 import asyncio
 
-from app.logging_config import central_logger
-from app.websocket.connection_info import ConnectionInfo, ConnectionDurationCalculator
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionDurationCalculator
 from fastapi import WebSocket
 
 logger = central_logger.get_logger(__name__)

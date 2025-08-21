@@ -2,7 +2,7 @@
 
 import pytest
 from netra_backend.app.services.external_api_client import ResilientHTTPClient, HTTPError
-from tests.services.external_api_client_utils import (
+from netra_backend.tests.services.external_api_client_utils import (
     create_text_error_response_mock,
     create_text_success_response_mock,
     verify_error_response_processing

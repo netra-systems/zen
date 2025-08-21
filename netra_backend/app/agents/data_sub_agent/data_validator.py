@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Optional, Tuple
 import re
 from datetime import datetime
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class DataValidator:

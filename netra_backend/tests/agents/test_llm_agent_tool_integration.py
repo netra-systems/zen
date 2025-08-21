@@ -41,7 +41,7 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
@@ -109,7 +109,7 @@ async def test_real_llm_interaction():
 
 async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
     dispatcher = Mock(spec=ToolDispatcher)
     execution_log = []

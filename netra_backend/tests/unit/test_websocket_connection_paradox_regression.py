@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from app.ws_manager import WebSocketManager
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 
 class TestWebSocketConnectionParadoxPrevention:

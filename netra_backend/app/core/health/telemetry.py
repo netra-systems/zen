@@ -11,7 +11,7 @@ from datetime import datetime, UTC, timedelta
 from dataclasses import dataclass, field
 from enum import Enum
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app..health_types import HealthCheckResult, HealthStatus
 
 logger = central_logger.get_logger(__name__)

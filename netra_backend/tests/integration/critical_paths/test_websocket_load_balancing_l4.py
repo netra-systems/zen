@@ -32,7 +32,7 @@ get_staging_suite = AsyncMock
 from netra_backend.app.websocket.load_balanced_connection_manager import LoadBalancedConnectionManager
 from netra_backend.app.websocket.enhanced_rate_limiter import DistributedRateLimiter
 from redis_manager import RedisManager
-from app.core.health_checkers import HealthChecker
+from netra_backend.app.core.health_checkers import HealthChecker
 
 
 @dataclass

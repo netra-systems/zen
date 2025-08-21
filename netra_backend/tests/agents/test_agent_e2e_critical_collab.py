@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock
 from datetime import datetime
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
-from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 
 class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):

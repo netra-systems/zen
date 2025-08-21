@@ -75,12 +75,12 @@ def _setup_environment_files() -> None:
 _setup_environment_files()
 
 # Import unified logging first to ensure interceptor is set up
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Configure loggers after unified logging is initialized
 logging.getLogger("faker").setLevel(logging.WARNING)
 
-from app.core.app_factory import create_app
+from netra_backend.app.core.app_factory import create_app
 
 app = create_app()
 

@@ -27,7 +27,7 @@ from enum import Enum
 from dataclasses import dataclass
 import pytest
 
-from tests.integration.helpers.critical_integration_helpers import (
+from netra_backend.tests.integration.helpers.critical_integration_helpers import (
     DatabaseTestHelpers,
     RevenueTestHelpers,
     MiscTestHelpers

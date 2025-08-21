@@ -12,8 +12,8 @@ import asyncio
 from typing import Optional, Dict, Any, TypeVar, Type
 from pydantic import BaseModel
 
-from app.logging_config import central_logger
-from app.core.reliability import CircuitBreaker, CircuitBreakerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
 from netra_backend.app.fallback_strategies import CircuitFallbackStrategy, RetryExecutionStrategy, RetryExecutor
 from netra_backend.app.error_classification import ErrorClassificationChain, FailureType
 from netra_backend.app.fallback_config import FallbackConfig, RetryHistoryManager

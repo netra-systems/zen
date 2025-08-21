@@ -11,16 +11,16 @@ from typing import Optional, Dict, Any, List, Tuple
 from pydantic import ValidationError
 from datetime import datetime
 
-from app.schemas.Config import AppConfig
-from app.schemas.config_types import ConfigurationSummary, ConfigurationStatus, Environment
-from app.logging_config import central_logger as logger
-from app.core.config_validator import ConfigValidator
-from app.core.exceptions_config import ConfigurationError
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.config_types import ConfigurationSummary, ConfigurationStatus, Environment
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.config_validator import ConfigValidator
+from netra_backend.app.core.exceptions_config import ConfigurationError
 
 # Import modular components
-from app.config_environment import ConfigEnvironment
-from app.config_secrets_manager import ConfigSecretsManager
-from app.config_envvars import ConfigEnvVarsManager
+from netra_backend.app.config_environment import ConfigEnvironment
+from netra_backend.app.config_secrets_manager import ConfigSecretsManager
+from netra_backend.app.config_envvars import ConfigEnvVarsManager
 
 
 class ConfigManager:

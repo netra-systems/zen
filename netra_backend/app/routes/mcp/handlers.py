@@ -6,22 +6,22 @@ Maintains 25-line function limit and single responsibility.
 
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas import UserInDB
+from netra_backend.app.schemas import UserInDB
 
-from app.routes.mcp.handlers_server import handle_server_info
-from app.routes.mcp.handlers_client import handle_client_registration
-from app.routes.mcp.handlers_session import (
+from netra_backend.app.routes.mcp.handlers_server import handle_server_info
+from netra_backend.app.routes.mcp.handlers_client import handle_client_registration
+from netra_backend.app.routes.mcp.handlers_session import (
     handle_session_creation, handle_session_retrieval, handle_session_closure
 )
-from app.routes.mcp.handlers_tools import handle_tools_listing, handle_tool_call
-from app.routes.mcp.handlers_resources import handle_resources_listing, handle_resource_read
-from app.routes.mcp.handlers_prompts import handle_prompts_listing, handle_prompt_get
-from app.routes.mcp.models import (
+from netra_backend.app.routes.mcp.handlers_tools import handle_tools_listing, handle_tool_call
+from netra_backend.app.routes.mcp.handlers_resources import handle_resources_listing, handle_resource_read
+from netra_backend.app.routes.mcp.handlers_prompts import handle_prompts_listing, handle_prompt_get
+from netra_backend.app.routes.mcp.models import (
     MCPClientCreateRequest, MCPSessionCreateRequest, 
     MCPToolCallRequest, MCPResourceReadRequest, MCPPromptGetRequest
 )
-from app.routes.mcp.config import get_mcp_config
-from app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.config import get_mcp_config
+from netra_backend.app.services.mcp_service import MCPService
 
 
 class MCPHandlers:
@@ -135,7 +135,7 @@ class MCPHandlers:
 # Standalone tool execution function for direct use  
 async def execute_tool(tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
     """Execute MCP tool directly with given parameters"""
-    from app.services.mcp_service import MCPService
+    from netra_backend.app.services.mcp_service import MCPService
     # This is a simplified version for testing
     # In real implementation, would get service from dependency injection
     return {"result": "success", "tool": tool_name, "parameters": parameters}

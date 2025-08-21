@@ -5,31 +5,31 @@ All core functionality has been split into focused modules for maintainability.
 """
 
 # Import all core types and classes
-from app.core.error_logging_types import (
+from netra_backend.app.core.error_logging_types import (
     LogLevel,
     ErrorCategory,
     DetailedErrorContext,
     ErrorAggregation
 )
 
-from app.core.error_logging_context import (
+from netra_backend.app.core.error_logging_context import (
     ErrorContextManager,
     RecoveryLogger,
     error_context_manager,
     recovery_logger
 )
 
-from app.core.error_logger_core import (
+from netra_backend.app.core.error_logger_core import (
     ErrorLogger,
     error_logger
 )
 
-from app.core.error_report_generator import (
+from netra_backend.app.core.error_report_generator import (
     ErrorReportGenerator,
     error_report_generator
 )
 
-from app.core.error_logging_helpers import (
+from netra_backend.app.core.error_logging_helpers import (
     log_agent_error,
     log_database_error,
     log_api_error

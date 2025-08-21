@@ -7,9 +7,9 @@ across PostgreSQL and ClickHouse databases with proper error handling.
 from typing import Dict, List, Any
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.db.postgres_index_optimizer import PostgreSQLIndexOptimizer
-from app.db.clickhouse_index_optimizer import ClickHouseIndexOptimizer
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres_index_optimizer import PostgreSQLIndexOptimizer
+from netra_backend.app.db.clickhouse_index_optimizer import ClickHouseIndexOptimizer
 
 logger = central_logger.get_logger(__name__)
 

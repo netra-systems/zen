@@ -22,12 +22,12 @@ from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentU
 from llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-from tests.helpers.supervisor_test_helpers import (
+from netra_backend.tests.helpers.supervisor_test_helpers import (
     create_quality_supervisor_mocks, setup_quality_response_mock,
     create_quality_response_data, create_admin_dispatcher_mocks,
     create_admin_operation, setup_tool_dispatcher_mock
 )
-from tests.helpers.supervisor_test_classes import (
+from netra_backend.tests.helpers.supervisor_test_classes import (
     QualitySupervisor, MockAdminToolDispatcher, PermissionError
 )
 

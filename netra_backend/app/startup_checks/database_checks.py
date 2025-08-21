@@ -10,7 +10,7 @@ import time
 from typing import List
 from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import Assistant
+from netra_backend.app.db.models_postgres import Assistant
 from netra_backend.app.models import StartupCheckResult
 
 
@@ -47,7 +47,7 @@ class DatabaseChecker:
         """Perform actual assistant check and creation"""
         try:
             # First check if assistants table exists
-            from app.db.postgres import get_async_db
+            from netra_backend.app.db.postgres import get_async_db
             async with get_async_db() as db:
                 table_exists = await self._table_exists(db, 'assistants')
                 if not table_exists:
@@ -88,7 +88,7 @@ class DatabaseChecker:
     
     async def _find_assistant(self, db: AsyncSession) -> Assistant:
         """Find existing Netra assistant"""
-        from app.logging_config import central_logger
+        from netra_backend.app.logging_config import central_logger
         logger = central_logger.get_logger(__name__)
         
         logger.debug(f"_find_assistant called with db: {db}")
@@ -184,7 +184,7 @@ class DatabaseChecker:
     
     async def _handle_assistant_check(self) -> StartupCheckResult:
         """Handle assistant existence check and creation"""
-        from app.logging_config import central_logger
+        from netra_backend.app.logging_config import central_logger
         logger = central_logger.get_logger(__name__)
         
         logger.debug(f"Checking app.state for db_session_factory...")
@@ -202,7 +202,7 @@ class DatabaseChecker:
         logger.debug("Creating database session for assistant check...")
         try:
             # Check global engine state
-            from app.db.postgres_core import async_engine, async_session_factory as global_factory
+            from netra_backend.app.db.postgres_core import async_engine, async_session_factory as global_factory
             logger.debug(f"Global async_engine: {async_engine}")
             logger.debug(f"Global async_session_factory: {global_factory}")
             

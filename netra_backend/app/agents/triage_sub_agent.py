@@ -14,32 +14,32 @@ BVJ: ALL segments | Customer Experience | +25% reduction in triage failures
 import time
 from typing import Optional, Dict, Any
 
-from app.llm.llm_manager import LLMManager  
-from app.agents.base import BaseSubAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.schemas.registry import DeepAgentState
-from app.agents.config import agent_config
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger
-from app.core.reliability import get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
-from app.agents.input_validation import validate_agent_input
+from netra_backend.app.llm.llm_manager import LLMManager  
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.reliability import get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
+from netra_backend.app.agents.input_validation import validate_agent_input
 
 # Modern Base Components
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.schemas.shared_types import RetryConfig as ModernRetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
 
 # Import from modular structure  
-from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.triage_sub_agent.core import TriageCore
-from app.agents.triage_sub_agent.processing import TriageProcessor, WebSocketHandler
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.triage_sub_agent.core import TriageCore
+from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor, WebSocketHandler
 
 logger = central_logger.get_logger(__name__)
 

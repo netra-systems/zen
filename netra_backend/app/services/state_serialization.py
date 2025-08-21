@@ -10,7 +10,7 @@ import pickle
 from datetime import datetime
 from typing import Any, Dict, List
 from pydantic import BaseModel
-from app.schemas.agent_state import (
+from netra_backend.app.schemas.agent_state import (
     SerializationFormat, StateValidationResult
 )
 

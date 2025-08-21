@@ -4,7 +4,7 @@ import json
 from typing import Dict, Optional, Any, Tuple, List
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 # Test compatibility methods extracted from main agent
 

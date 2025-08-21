@@ -7,8 +7,8 @@ synthetic data generation operations.
 
 from typing import Dict, Any
 
-from app.schemas.Generation import GenerationStatus
-from app.logging_config import central_logger
+from netra_backend.app.schemas.Generation import GenerationStatus
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -40,7 +40,7 @@ class SyntheticDataProgressTracker:
     async def send_progress_update(self, run_id: str, status: GenerationStatus) -> None:
         """Send progress update via WebSocket manager"""
         try:
-            from app.ws_manager import manager as ws_manager
+            from netra_backend.app.ws_manager import manager as ws_manager
             await self._send_websocket_update(ws_manager, run_id, status)
         except ImportError:
             logger.debug("WebSocket manager not available, logging progress locally")

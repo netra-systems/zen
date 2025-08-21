@@ -7,8 +7,8 @@ for generating index recommendations based on query patterns.
 from typing import List, Dict, Any, Tuple
 from sqlalchemy import text
 
-from app.logging_config import central_logger
-from app.db.index_optimizer_core import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.index_optimizer_core import (
     IndexRecommendation,
     QueryAnalyzer,
     PerformanceMetrics

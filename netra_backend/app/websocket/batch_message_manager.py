@@ -8,10 +8,10 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional, Callable, Tuple
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.websocket.batch_message_config import BatchConfig, BatchMetrics
-from app.websocket.batch_message_batch import MessageBatch
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.websocket.batch_message_config import BatchConfig, BatchMetrics
+from netra_backend.app.websocket.batch_message_batch import MessageBatch
 
 logger = central_logger.get_logger(__name__)
 

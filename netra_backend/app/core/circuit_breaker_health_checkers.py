@@ -8,9 +8,9 @@ import asyncio
 from datetime import datetime
 from typing import Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.shared_health_types import HealthChecker, HealthStatus
-from app.schemas.core_models import HealthCheckResult
+from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)
 

@@ -6,9 +6,9 @@ Provides comprehensive input validation with threat detection.
 import urllib.parse
 from typing import Dict, List, Any, Optional
 
-from app.logging_config import central_logger
-from app.core.exceptions_auth import NetraSecurityException
-from app.schemas.shared_types import ValidationResult as BaseValidationResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.schemas.shared_types import ValidationResult as BaseValidationResult
 
 from netra_backend.app.validation_rules import (
     ValidationLevel, SecurityThreat, PatternCompiler, ValidationConstraints, ThreatDetector

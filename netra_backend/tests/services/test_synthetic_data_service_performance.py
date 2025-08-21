@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
 
 

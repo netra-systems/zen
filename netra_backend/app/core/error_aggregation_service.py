@@ -7,11 +7,11 @@ a unified interface. Provides the main entry point for error aggregation.
 import asyncio
 from typing import Any, Dict, Optional
 
-from app.core.error_aggregation_base import ErrorData
-from app.core.error_aggregation_core import ErrorAggregator
-from app.core.error_aggregation_metrics import AlertEngine, MetricsReporter
-from app.core.error_aggregation_patterns import ErrorTrendAnalyzer
-from app.logging_config import central_logger
+from netra_backend.app.core.error_aggregation_base import ErrorData
+from netra_backend.app.core.error_aggregation_core import ErrorAggregator
+from netra_backend.app.core.error_aggregation_metrics import AlertEngine, MetricsReporter
+from netra_backend.app.core.error_aggregation_patterns import ErrorTrendAnalyzer
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

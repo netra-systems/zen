@@ -12,10 +12,10 @@ Business Value: Handles transient failures gracefully, reducing false failures.
 import asyncio
 from typing import Dict, Any, Callable, Awaitable
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerOpenException
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerOpenException
 
 logger = central_logger.get_logger(__name__)
 
@@ -91,7 +91,7 @@ class RetryManager:
     def _is_retryable_exception(self, exception: Exception) -> bool:
         """Check if exception is retryable."""
         # Import here to avoid circular imports
-        from app.agents.base.errors import AgentExecutionError
+        from netra_backend.app.agents.base.errors import AgentExecutionError
         
         if isinstance(exception, AgentExecutionError):
             return exception.is_retryable

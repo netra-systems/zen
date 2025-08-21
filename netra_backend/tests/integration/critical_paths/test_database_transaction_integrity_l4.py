@@ -12,10 +12,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from decimal import Decimal
 import random
 
-from app.services.database_service import DatabaseService
-from app.services.transaction_manager import TransactionManager
-from app.services.user_service import UserService
-from app.core.config import settings
+from netra_backend.app.services.database_service import DatabaseService
+from netra_backend.app.services.transaction_manager import TransactionManager
+from netra_backend.app.services.user_service import UserService
+from netra_backend.app.core.config import settings
 
 
 class TestDatabaseTransactionIntegrityL4:

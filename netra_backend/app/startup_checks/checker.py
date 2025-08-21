@@ -9,7 +9,7 @@ import os
 import time
 from typing import Dict, Any, List
 from fastapi import FastAPI
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.models import StartupCheckResult
 from netra_backend.app.environment_checks import EnvironmentChecker
 from netra_backend.app.database_checks import DatabaseChecker

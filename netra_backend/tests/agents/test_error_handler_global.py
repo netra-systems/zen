@@ -26,7 +26,7 @@ class TestGlobalErrorHandler:
     
     def test_global_error_handler_singleton(self):
         """Test global error handler is singleton."""
-        from app.agents.error_handler import global_error_handler as global_handler_2
+        from netra_backend.app.agents.error_handler import global_error_handler as global_handler_2
         assert global_error_handler is global_handler_2
     
     def test_global_error_handler_shared_state(self):

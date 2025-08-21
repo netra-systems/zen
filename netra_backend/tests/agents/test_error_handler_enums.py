@@ -7,7 +7,7 @@ import pytest
 from netra_backend.app.agents.error_handler import ErrorCategory, ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
-from tests.helpers.shared_test_types import TestErrorContext as SharedTestErrorContext
+from netra_backend.tests.helpers.shared_test_types import TestErrorContext as SharedTestErrorContext
 
 
 class TestErrorEnums:

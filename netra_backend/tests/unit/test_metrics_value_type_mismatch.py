@@ -6,7 +6,7 @@ before being sent to ClickHouse.
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, ClickHouseQueryInterceptor
+from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, ClickHouseQueryInterceptor
 
 
 class TestMetricsValueTypeMismatch:

@@ -9,7 +9,7 @@ import socket
 from typing import List, Tuple
 from pathlib import Path
 import psutil
-from app.config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.models import StartupCheckResult
 
 

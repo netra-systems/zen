@@ -12,10 +12,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Callable, Awaitable
 
-from app.db.postgres import get_postgres_session
-from app.db.clickhouse import get_clickhouse_client
-from app.core.error_recovery import OperationType
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -1,32 +1,32 @@
 """Thread route specific utilities - Main exports."""
 
 # Import all functions from focused modules
-from app.routes.utils.thread_validators import (
+from netra_backend.app.routes.utils.thread_validators import (
     validate_thread_exists, validate_thread_access, 
     get_thread_with_validation, archive_thread_safely
 )
-from app.routes.utils.thread_builders import (
+from netra_backend.app.routes.utils.thread_builders import (
     extract_thread_title, extract_thread_updated_at, build_thread_response,
     convert_threads_to_responses, format_single_message, format_messages_list,
     build_messages_metadata, build_thread_messages_response
 )
-from app.routes.utils.thread_creators import (
+from netra_backend.app.routes.utils.thread_creators import (
     generate_thread_id, prepare_thread_metadata, create_thread_record,
     create_thread_repositories, get_user_threads
 )
-from app.routes.utils.thread_title_generator import (
+from netra_backend.app.routes.utils.thread_title_generator import (
     get_first_user_message_safely, build_title_generation_prompt,
     clean_generated_title, get_fallback_title, generate_title_with_llm,
     update_thread_with_title, send_thread_rename_notification,
     create_final_thread_response
 )
-from app.routes.utils.thread_handlers import (
+from netra_backend.app.routes.utils.thread_handlers import (
     handle_list_threads_request, handle_create_thread_request,
     handle_get_thread_request, update_thread_metadata_fields,
     handle_update_thread_request, handle_delete_thread_request,
     handle_get_messages_request, handle_auto_rename_request
 )
-from app.routes.utils.thread_error_handling import (
+from netra_backend.app.routes.utils.thread_error_handling import (
     get_context_mappings, check_thread_pattern, get_thread_pattern_mappings,
     apply_thread_pattern_mappings, clean_thread_specific_context,
     resolve_clean_context, should_log_exc_info, handle_route_with_error_logging

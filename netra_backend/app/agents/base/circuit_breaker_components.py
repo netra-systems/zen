@@ -8,8 +8,8 @@ from typing import Dict, Any, Optional, Callable, Awaitable
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
-from app.schemas.reliability_types import CircuitBreakerMetrics
+from netra_backend.app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+from netra_backend.app.schemas.reliability_types import CircuitBreakerMetrics
 
 
 @dataclass

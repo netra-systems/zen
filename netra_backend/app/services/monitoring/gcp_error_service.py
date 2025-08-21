@@ -17,9 +17,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 from loguru import logger
 
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.schemas.monitoring_schemas import (
     GCPError, GCPErrorEvent, ErrorQuery, ErrorResponse, ErrorSummary,
     ErrorDetailResponse, ErrorResolution, GCPErrorServiceConfig,
     ErrorStatus, ErrorSeverity as GCPErrorSeverity

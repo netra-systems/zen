@@ -6,13 +6,13 @@ pool status, and performance metrics.
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Dict, Any, List, Optional
-from app.services.database.connection_monitor import (
+from netra_backend.app.services.database.connection_monitor import (
     get_connection_status,
     connection_metrics,
     health_checker
 )
-from app.auth_integration.auth import get_current_user
-from app.logging_config import central_logger
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.logging_config import central_logger
 from pydantic import BaseModel, Field
 from datetime import datetime
 import time

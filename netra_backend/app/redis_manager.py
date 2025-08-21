@@ -1,6 +1,6 @@
 import redis.asyncio as redis
-from app.config import settings
-from app.logging_config import central_logger as logger
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class RedisManager:

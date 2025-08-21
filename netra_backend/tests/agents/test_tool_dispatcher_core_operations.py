@@ -4,7 +4,7 @@ import pytest
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from schemas import ToolInput
-from tests.helpers.tool_dispatcher_helpers import (
+from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
     create_tool_input,
     verify_tool_result_success,
@@ -100,7 +100,7 @@ class TestToolDispatcherCoreOperations:
     def _verify_execute_tool_success(self, result) -> None:
         """Verify execute tool success result."""
         verify_tool_result_success(result, "test_tool")
-        from app.tests.helpers.tool_dispatcher_assertions import assert_simple_tool_payload
+        from netra_backend.app.tests.helpers.tool_dispatcher_assertions import assert_simple_tool_payload
         assert_simple_tool_payload(result)
     
     def _setup_execute_tool_failure_test(self) -> tuple:

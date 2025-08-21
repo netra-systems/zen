@@ -8,8 +8,8 @@ Module follows 450-line limit with 25-line function limit.
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.metrics_collectors import (
     SystemMetricsCollector,
     GitMetricsCollector,

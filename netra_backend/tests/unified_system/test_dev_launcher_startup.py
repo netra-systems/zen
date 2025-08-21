@@ -42,7 +42,7 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.health_monitor import HealthMonitor
 
 # Test utilities
-from app.tests.helpers.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
+from netra_backend.app.tests.helpers.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
 
 
 class TestDevLauncherStartup:

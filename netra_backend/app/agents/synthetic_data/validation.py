@@ -5,8 +5,8 @@ Handles entry condition checks and request validation
 for synthetic data sub-agent operations.
 """
 
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, Mock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.services.thread_service import ThreadService
-from tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
+from netra_backend.tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
 
 
 class ThreadLoadTests:

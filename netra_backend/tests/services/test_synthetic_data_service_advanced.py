@@ -9,9 +9,9 @@ import uuid
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services.synthetic_data.generation_patterns import generate_with_anomalies
-from app.services.synthetic_data.metrics import detect_anomalies, calculate_correlation
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.synthetic_data.generation_patterns import generate_with_anomalies
+from netra_backend.app.services.synthetic_data.metrics import detect_anomalies, calculate_correlation
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
 
 
@@ -84,7 +84,7 @@ class TestAdvancedFeatures:
                 'status': 'success'
             }
         
-        from app.services.synthetic_data.generation_patterns import generate_with_correlations
+        from netra_backend.app.services.synthetic_data.generation_patterns import generate_with_correlations
         records = await generate_with_correlations(config, mock_generate_fn)
         
         # Verify correlations

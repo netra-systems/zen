@@ -8,7 +8,7 @@ from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Optional, Any
 from collections import deque
 
-from app.schemas.Metrics import QualityMetrics, TimeSeriesPoint
+from netra_backend.app.schemas.Metrics import QualityMetrics, TimeSeriesPoint
 
 
 class QualityStatisticsCalculator:

@@ -10,8 +10,8 @@ from collections import deque, defaultdict
 import time
 import uuid
 
-from app.logging_config import central_logger
-from app.schemas.Metrics import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import (
     CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
 )
 from netra_backend.app.core_collector_helpers import (

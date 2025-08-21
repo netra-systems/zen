@@ -9,8 +9,8 @@ UPDATED: Now uses canonical rate limit types from app.schemas.rate_limit_types
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-from app.logging_config import central_logger
-from app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
 from netra_backend.app.connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)

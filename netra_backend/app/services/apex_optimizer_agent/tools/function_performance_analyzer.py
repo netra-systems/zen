@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from typing import List, Any
-from app.services.context import ToolContext
+from netra_backend.app.services.context import ToolContext
 
 @tool
 async def function_performance_analyzer(context: ToolContext) -> str:

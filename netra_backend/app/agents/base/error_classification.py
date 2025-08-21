@@ -7,7 +7,7 @@ from typing import Dict, Type, Optional
 from enum import Enum
 from dataclasses import dataclass
 
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class ErrorCategory(Enum):

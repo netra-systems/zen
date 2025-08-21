@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from langchain_core.messages import BaseMessage
 
 # Import unified agent types from single source of truth
-from app.schemas.registry import AgentStatus, AgentResult, AgentMetadata, ToolResultData, DeepAgentState, AgentState
+from netra_backend.app.schemas.registry import AgentStatus, AgentResult, AgentMetadata, ToolResultData, DeepAgentState, AgentState
 
 class SubAgentLifecycle(str, enum.Enum):
     PENDING = "pending"

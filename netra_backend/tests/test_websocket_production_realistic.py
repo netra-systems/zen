@@ -17,24 +17,24 @@ Tests cover:
 import pytest
 
 # Import all test functions from specialized modules
-from tests.websocket.test_concurrent_connections import (
+from netra_backend.tests.websocket.test_concurrent_connections import (
     test_concurrent_connection_limit_1000_users,
     test_rapid_connect_disconnect_cycles,
     test_connection_pool_exhaustion_recovery
 )
 
-from tests.websocket.test_message_ordering import (
+from netra_backend.tests.websocket.test_message_ordering import (
     test_message_ordering_under_load,
     test_binary_data_transmission,
     test_protocol_version_mismatch
 )
 
-from tests.websocket.test_compression_auth import (
+from netra_backend.tests.websocket.test_compression_auth import (
     test_websocket_compression,
     test_authentication_expiry_during_connection
 )
 
-from tests.websocket.test_memory_monitoring import (
+from netra_backend.tests.websocket.test_memory_monitoring import (
     test_memory_leak_detection_long_connections
 )
 

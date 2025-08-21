@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable generators
 
 Usage:
-    from app.tests.e2e.data.seeded_data_generator import (
+    from netra_backend.app.tests.e2e.data.seeded_data_generator import (
         ProductionMirrorGenerator,
         StressTestGenerator,
         DomainSpecificGenerator
@@ -32,9 +32,9 @@ import numpy as np
 from faker import Faker
 from faker.providers import BaseProvider
 
-from app.schemas.core_models import User, Message, Thread
-from app.schemas.agent_models import AgentMetadata, ToolResultData
-from app.schemas.core_enums import MessageType
+from netra_backend.app.schemas.core_models import User, Message, Thread
+from netra_backend.app.schemas.agent_models import AgentMetadata, ToolResultData
+from netra_backend.app.schemas.core_enums import MessageType
 
 
 @dataclass

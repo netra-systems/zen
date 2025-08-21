@@ -18,7 +18,7 @@ class TestConfigValidator:
     
     @pytest.fixture
     def validator(self):
-        from app.core.config_validator import ConfigValidator
+        from netra_backend.app.core.config_validator import ConfigValidator
         return ConfigValidator()
     
     @pytest.fixture
@@ -45,7 +45,7 @@ class TestConfigValidator:
     
     def test_invalid_database_url_rejected(self, validator, mock_config):
         """Test that invalid database URL is rejected."""
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         
         mock_config.database_url = "mysql://user:pass@localhost/db"
         with pytest.raises(ConfigurationValidationError, match="Database URL must be a PostgreSQL"):
@@ -53,7 +53,7 @@ class TestConfigValidator:
     
     def test_missing_jwt_secret_rejected(self, validator, mock_config):
         """Test that missing JWT secret is rejected."""
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         
         mock_config.jwt_secret_key = None
         with pytest.raises(ConfigurationValidationError, match="JWT secret key is not configured"):
@@ -61,7 +61,7 @@ class TestConfigValidator:
     
     def test_weak_jwt_secret_in_production_rejected(self, validator, mock_config):
         """Test that weak JWT secret in production is rejected."""
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         
         mock_config.jwt_secret_key = "short"
         with pytest.raises(ConfigurationValidationError, match="JWT secret key must be at least 32"):
@@ -82,13 +82,13 @@ class TestConfigValidator:
         
         # Production requires stronger secrets
         mock_config.environment = "production"
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         with pytest.raises(ConfigurationValidationError):
             validator.validate_config(mock_config)
     
     def test_required_field_validation(self, validator, mock_config):
         """Test required fields are validated."""
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         
         # Remove required field
         delattr(mock_config, 'database_url')
@@ -102,7 +102,7 @@ class TestErrorContext:
     
     @pytest.fixture
     def error_context(self):
-        from app.core.error_context import ErrorContext
+        from netra_backend.app.core.error_context import ErrorContext
         return ErrorContext()
     
     def test_trace_id_management(self, error_context):
@@ -166,14 +166,14 @@ class TestCustomExceptions:
     
     def test_netra_exception_hierarchy(self):
         """Test NetraException hierarchy."""
-        from app.core.exceptions import NetraException, ValidationException, AuthenticationException
+        from netra_backend.app.core.exceptions import NetraException, ValidationException, AuthenticationException
         
         assert issubclass(ValidationException, NetraException)
         assert issubclass(AuthenticationException, NetraException)
     
     def test_exception_with_context(self):
         """Test exceptions with context data."""
-        from app.core.exceptions import NetraException
+        from netra_backend.app.core.exceptions import NetraException
         
         exc = NetraException("Test error", context={"user_id": "123"})
         assert str(exc) == "Test error"
@@ -181,7 +181,7 @@ class TestCustomExceptions:
     
     def test_exception_serialization(self):
         """Test exception can be serialized."""
-        from app.core.exceptions import ValidationException
+        from netra_backend.app.core.exceptions import ValidationException
         
         exc = ValidationException("Invalid input", field="email", value="invalid")
         exc_dict = exc.to_dict()
@@ -191,7 +191,7 @@ class TestCustomExceptions:
     
     def test_validation_exception_details(self):
         """Test validation exception includes detailed info."""
-        from app.core.exceptions import ValidationException
+        from netra_backend.app.core.exceptions import ValidationException
         
         exc = ValidationException(
             "Field validation failed",
@@ -208,7 +208,7 @@ class TestCustomExceptions:
     
     def test_authentication_exception_details(self):
         """Test authentication exception includes auth details."""
-        from app.core.exceptions import AuthenticationError
+        from netra_backend.app.core.exceptions import AuthenticationError
         
         exc = AuthenticationError(
             "Invalid credentials",
@@ -223,7 +223,7 @@ class TestCustomExceptions:
     
     def test_exception_chaining(self):
         """Test exception chaining for root cause analysis."""
-        from app.core.exceptions import NetraException, ValidationException
+        from netra_backend.app.core.exceptions import NetraException, ValidationException
         
         try:
             raise ValueError("Original error")
@@ -234,7 +234,7 @@ class TestCustomExceptions:
     
     def test_exception_severity_levels(self):
         """Test exception severity classification."""
-        from app.core.exceptions import NetraException
+        from netra_backend.app.core.exceptions import NetraException
         
         critical_exc = NetraException("Critical error", severity="critical")
         warning_exc = NetraException("Warning message", severity="warning")
@@ -283,7 +283,7 @@ class TestValidationUtilities:
     
     def test_input_sanitization(self):
         """Test input sanitization for security."""
-        from app.core.validation_utils import sanitize_input
+        from netra_backend.app.core.validation_utils import sanitize_input
         
         # SQL injection attempt
         malicious_input = "'; DROP TABLE users; --"
@@ -297,7 +297,7 @@ class TestValidationUtilities:
     
     def test_data_type_validation(self):
         """Test data type validation utilities."""
-        from app.core.validation_utils import validate_data_type
+        from netra_backend.app.core.validation_utils import validate_data_type
         
         assert validate_data_type(123, int) == True
         assert validate_data_type("123", int) == False

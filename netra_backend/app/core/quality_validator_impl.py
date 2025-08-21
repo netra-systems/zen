@@ -7,7 +7,7 @@ Part of the modular quality validation system.
 from typing import Dict, Optional, Any, List, Tuple
 import re
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.quality_metrics import QualityMetrics, ValidationResult, ContentType
 from netra_backend.app.quality_content_analysis import QualityContentAnalyzer
 

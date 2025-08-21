@@ -6,11 +6,11 @@ Handles the actual execution of broadcast operations to connections.
 import asyncio
 from typing import Dict, List, Any, Union, Tuple
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
-from app.websocket.connection import ConnectionInfo, ConnectionManager
-from app.websocket import broadcast_utils as utils
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket import broadcast_utils as utils
 
 logger = central_logger.get_logger(__name__)
 
@@ -69,7 +69,7 @@ class BroadcastExecutor:
     async def _send_to_single_connection(self, user_id: str, conn_info: ConnectionInfo, message) -> Tuple[bool, bool]:
         """Send message to single connection and determine if cleanup needed."""
         try:
-            from app.websocket.broadcast_sender import BroadcastSender
+            from netra_backend.app.websocket.broadcast_sender import BroadcastSender
             sender = BroadcastSender(self.connection_manager)
             success = await sender.send_to_connection(conn_info, message)
             return self._handle_connection_result(success, conn_info)
@@ -116,7 +116,7 @@ class BroadcastExecutor:
     async def _send_to_user_connection(self, conn_info: ConnectionInfo, message) -> Tuple[bool, bool]:
         """Send message to user connection with error handling."""
         try:
-            from app.websocket.broadcast_sender import BroadcastSender
+            from netra_backend.app.websocket.broadcast_sender import BroadcastSender
             sender = BroadcastSender(self.connection_manager)
             success = await sender.send_to_connection(conn_info, message)
             return self._handle_user_connection_result(success, conn_info)
@@ -171,7 +171,7 @@ class BroadcastExecutor:
     async def _execute_room_connection_send(self, room_id: str, conn_id: str, conn_info: ConnectionInfo, message) -> Tuple[bool, bool]:
         """Execute send to room connection with error handling."""
         try:
-            from app.websocket.broadcast_sender import BroadcastSender
+            from netra_backend.app.websocket.broadcast_sender import BroadcastSender
             sender = BroadcastSender(self.connection_manager)
             success = await sender.send_to_connection(conn_info, message)
             return self._handle_room_connection_result(success, conn_info)

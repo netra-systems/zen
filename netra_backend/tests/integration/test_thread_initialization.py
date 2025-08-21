@@ -51,8 +51,8 @@ class TestFirstMessageThreadInit:
     
     async def test_new_thread_creation_first_message(self, db_session, thread_data):
         """Test thread creation when user sends first message."""
-        from app.services.thread_service import ThreadService
-        from app.services.message_service import MessageService
+        from netra_backend.app.services.thread_service import ThreadService
+        from netra_backend.app.services.message_service import MessageService
         
         thread_service = Mock(spec=ThreadService)
         thread_service.create_thread = AsyncMock(return_value=thread_data)
@@ -95,7 +95,7 @@ class TestFirstMessageThreadInit:
     
     async def test_thread_persistence_to_database(self, db_session):
         """Test thread data persists correctly to database."""
-        from app.models import Thread
+        from netra_backend.app.models import Thread
         
         # Create thread model
         thread = Thread(
@@ -117,7 +117,7 @@ class TestFirstMessageThreadInit:
     
     async def test_thread_context_initialization(self, thread_data):
         """Test thread context properly initialized for agents."""
-        from app.services.context_service import ContextService
+        from netra_backend.app.services.context_service import ContextService
         
         context_service = Mock(spec=ContextService)
         context_service.initialize_context = AsyncMock(return_value={
@@ -142,7 +142,7 @@ class TestFirstMessageThreadInit:
     
     async def test_concurrent_thread_creation_race_condition(self, db_session):
         """Test handling of concurrent thread creation attempts."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_service = Mock(spec=ThreadService)
         creation_count = 0
@@ -172,7 +172,7 @@ class TestFirstMessageThreadInit:
     
     async def test_thread_title_generation_from_message(self):
         """Test automatic thread title generation from first message."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_service = Mock(spec=ThreadService)
         
@@ -191,7 +191,7 @@ class TestFirstMessageThreadInit:
     
     async def test_thread_metadata_includes_agent_routing(self, thread_data):
         """Test thread metadata includes agent routing information."""
-        from app.services.agent_router import AgentRouter
+        from netra_backend.app.services.agent_router import AgentRouter
         
         router = Mock(spec=AgentRouter)
         router.determine_agent = AsyncMock(return_value={
@@ -214,7 +214,7 @@ class TestFirstMessageThreadInit:
     
     async def test_websocket_notification_on_thread_creation(self, thread_data):
         """Test WebSocket notification sent when thread created."""
-        from app.ws_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.send_message = AsyncMock()

@@ -6,7 +6,7 @@ run-specific data access patterns work correctly.
 """
 
 import pytest
-from tests.helpers.database_repository_helpers import (
+from netra_backend.tests.helpers.database_repository_helpers import (
     create_test_thread, create_test_run, assert_run_created_correctly
 )
 

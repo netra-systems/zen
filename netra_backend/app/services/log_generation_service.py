@@ -14,15 +14,15 @@ import numpy as np
 import pandas as pd
 from faker import Faker
 
-from app.data.content_corpus import DEFAULT_CONTENT_CORPUS
-from app.services.generation_job_manager import (
+from netra_backend.app.data.content_corpus import DEFAULT_CONTENT_CORPUS
+from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     load_corpus_from_file,
     create_output_directory,
     save_job_result_to_file,
     finalize_job_completion
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

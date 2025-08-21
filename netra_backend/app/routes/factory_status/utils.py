@@ -3,7 +3,7 @@ Factory Status Utilities
 """
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
-from app.services.factory_status.report_builder import FactoryStatusReport
+from netra_backend.app.services.factory_status.report_builder import FactoryStatusReport
 from netra_backend.app.models import ReportResponse
 
 

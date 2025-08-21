@@ -235,7 +235,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_10_invalid_messages_not_forwarded(self, message_processor, connection_info):
         """Test 10: Invalid messages MUST NOT reach agent service."""
-        from app.websocket.unified.types import WebSocketValidationError
+        from netra_backend.app.websocket.unified.types import WebSocketValidationError
         
         # Make validation fail
         message_processor.handler.validate_message.return_value = WebSocketValidationError(

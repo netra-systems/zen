@@ -8,9 +8,9 @@ import time
 from typing import Optional, Any, Dict
 from pydantic import ValidationError
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.llm.observability import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.observability import (
     start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
     log_agent_input, log_agent_output
 )
@@ -76,7 +76,7 @@ class TriageLLMProcessor:
     
     def _log_agent_completion(self, run_id: str, status: str = "completed") -> None:
         """Log agent communication completion."""
-        from app.llm.observability import log_agent_communication
+        from netra_backend.app.llm.observability import log_agent_communication
         log_agent_communication("TriageSubAgent", "Supervisor", run_id, "execute_response")
     
     def _prepare_cached_result(self, cached_result: dict, start_time: float) -> dict:

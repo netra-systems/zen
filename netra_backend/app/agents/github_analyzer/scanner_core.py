@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional, Set
 import os
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class RepositoryScanner:

@@ -3,7 +3,7 @@
 import asyncio
 from typing import Dict, List, Optional, Any, Union
 from sqlalchemy.ext.asyncio import AsyncSession
-from app import schemas
+from netra_backend.app import schemas
 from netra_backend.app.generation_coordinator import GenerationCoordinator
 from netra_backend.app.job_operations import JobOperations
 from netra_backend.app.analytics_reporter import AnalyticsReporter

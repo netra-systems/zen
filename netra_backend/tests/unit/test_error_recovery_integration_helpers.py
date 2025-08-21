@@ -4,9 +4,9 @@ import asyncio
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
-from app.core.error_recovery import OperationType
-from app.core.error_codes import ErrorSeverity
-from app.core.agent_recovery_types import AgentType
+from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.agent_recovery_types import AgentType
 
 
 class ErrorRecoveryTestHelper:

@@ -5,13 +5,13 @@ following the pattern of other generation services.
 """
 
 from typing import Dict
-from app.schemas.Generation import SyntheticDataGenParams
-from app.services.synthetic_data_service import synthetic_data_service
-from app.services.generation_job_manager import (
+from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+from netra_backend.app.services.synthetic_data_service import synthetic_data_service
+from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     validate_job_params
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

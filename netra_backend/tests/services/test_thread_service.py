@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.services.thread_service import ThreadService
-from app.db.models_postgres import Thread, Message, Run
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.db.models_postgres import Thread, Message, Run
 import time
 
 

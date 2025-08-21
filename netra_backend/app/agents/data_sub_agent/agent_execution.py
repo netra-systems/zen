@@ -3,11 +3,11 @@
 from typing import Union
 import time
 
-from app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger as logger
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
+from netra_backend.app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
 
 from netra_backend.app.execution_engine import ExecutionEngine
 from netra_backend.app.data_operations import DataOperations

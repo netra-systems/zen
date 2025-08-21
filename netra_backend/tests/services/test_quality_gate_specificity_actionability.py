@@ -5,7 +5,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     ContentType
 )
-from tests.helpers.quality_gate_comprehensive_helpers import (
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
     setup_specificity_test_content,
     setup_actionability_test_content,
     setup_code_block_content

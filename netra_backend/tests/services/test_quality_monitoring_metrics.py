@@ -6,7 +6,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from tests.helpers.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     sample_quality_metrics,
     sla_targets,
     actual_metrics

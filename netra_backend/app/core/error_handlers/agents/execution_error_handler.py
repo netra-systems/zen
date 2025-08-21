@@ -7,9 +7,9 @@ support and fallback strategies.
 import time
 from typing import Dict, Any, Optional
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app..base_error_handler import BaseErrorHandler
 from netra_backend.app..error_classification import ErrorClassifier, ErrorClassification
 from netra_backend.app..error_recovery import RecoveryCoordinator

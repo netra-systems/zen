@@ -1,21 +1,21 @@
 """Pipeline execution logic for supervisor agent."""
 
 from typing import Dict, List, Any
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult, PipelineStep
 )
-from app.agents.supervisor.execution_engine import ExecutionEngine
-from app.services.state_persistence import state_persistence_service
-from app.schemas.agent_state import StatePersistenceRequest, CheckpointType
-from app.logging_config import central_logger
-from app.llm.observability import generate_llm_correlation_id
-from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.observability import generate_llm_correlation_id
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -209,13 +209,13 @@ class PipelineExecutor:
     
     def _create_completion_content(self, state: DeepAgentState, run_id: str):
         """Create agent completion content."""
-        from app.schemas import AgentCompleted, AgentResult
+        from netra_backend.app.schemas import AgentCompleted, AgentResult
         result = AgentResult(success=True, output=state.to_dict())
         return AgentCompleted(run_id=run_id, result=result, execution_time_ms=0.0)
     
     def _create_websocket_message(self, content) -> 'WebSocketMessage':
         """Create WebSocket message wrapper."""
-        from app.schemas import WebSocketMessage
+        from netra_backend.app.schemas import WebSocketMessage
         return WebSocketMessage(
             type="agent_completed", payload=content.model_dump()
         )

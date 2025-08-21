@@ -11,10 +11,10 @@ Business Value Justification (BVJ):
 
 from contextlib import asynccontextmanager
 from typing import List, Dict, Any, Optional
-from app.db.clickhouse_base import ClickHouseDatabase
-from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from app.core.configuration import get_configuration
-from app.logging_config import central_logger as logger
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
+from netra_backend.app.core.configuration import get_configuration
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class MockClickHouseDatabase:

@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import jwt
-from app.config import get_config
+from netra_backend.app.config import get_config
 
 
 class AuthTokenType(Enum):

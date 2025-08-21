@@ -2,7 +2,7 @@
 from typing import Any
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 
 def validate_thread_exists(thread) -> None:

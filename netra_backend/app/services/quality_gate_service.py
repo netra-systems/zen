@@ -5,7 +5,7 @@ The actual implementation has been split into multiple modules in the quality_ga
 """
 
 # Import from the new modular structure for backward compatibility
-from app.services.quality_gate import (
+from netra_backend.app.services.quality_gate import (
     QualityGateService,
     QualityLevel,
     ContentType,

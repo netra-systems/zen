@@ -6,8 +6,8 @@ degradation strategies with standard configurations.
 
 from typing import Dict, List
 
-from app.core.degradation_manager import GracefulDegradationManager
-from app.core.degradation_strategies import (
+from netra_backend.app.core.degradation_manager import GracefulDegradationManager
+from netra_backend.app.core.degradation_strategies import (
     DatabaseDegradationStrategy,
     LLMDegradationStrategy,
     WebSocketDegradationStrategy

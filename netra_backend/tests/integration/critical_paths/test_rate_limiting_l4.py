@@ -22,12 +22,12 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
-from app.services.rate_limiting.rate_limiter import RateLimiter
-from app.services.quota.quota_manager import QuotaManager
-from app.services.backpressure.backpressure_service import BackpressureService
-from app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
-from app.schemas.user import UserTier
-from tests.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
+from netra_backend.app.services.quota.quota_manager import QuotaManager
+from netra_backend.app.services.backpressure.backpressure_service import BackpressureService
+from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
+from netra_backend.app.schemas.user import UserTier
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
 

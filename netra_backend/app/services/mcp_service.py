@@ -14,18 +14,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 from fastmcp import FastMCP
 
-from app.logging_config import CentralLogger
-from app.core.exceptions_base import NetraException
-from app.services.service_interfaces import IMCPService
-from app.services.agent_service import AgentService
-from app.services.thread_service import ThreadService
-from app.services.corpus_service import CorpusService
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services.security_service import SecurityService
-from app.services.supply_catalog_service import SupplyCatalogService
-from app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
-from app.schemas import UserInDB
-from app.netra_mcp.netra_mcp_server import NetraMCPServer
+from netra_backend.app.logging_config import CentralLogger
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.services.service_interfaces import IMCPService
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
+from netra_backend.app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
 from netra_backend.app.mcp_models import MCPClient, MCPToolExecution
 
 logger = CentralLogger()

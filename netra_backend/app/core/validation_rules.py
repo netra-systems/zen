@@ -252,7 +252,7 @@ class ThreatDetector:
     def _check_threat_patterns(self, patterns: List[re.Pattern], normalized_input: str,
                               threat_type: SecurityThreat, input_value: str) -> bool:
         """Check if any pattern matches the normalized input."""
-        from app.logging_config import central_logger
+        from netra_backend.app.logging_config import central_logger
         logger = central_logger.get_logger(__name__)
         
         for pattern in patterns:

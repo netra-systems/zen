@@ -30,13 +30,13 @@ import httpx
 import websockets
 from concurrent.futures import ThreadPoolExecutor
 
-from app.core.configuration.base import get_unified_config
+from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger
-from app.services.health_check_service import HealthCheckService
+from netra_backend.app.services.health_check_service import HealthCheckService
 # from app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 RedisSessionManager = AsyncMock
-from app.services.database.postgres_service import PostgresService
+from netra_backend.app.services.database.postgres_service import PostgresService
 
 
 class DeploymentPhase(Enum):

@@ -6,7 +6,7 @@ The actual implementation has been split into multiple modules in the modules/ d
 """
 
 # Import from the new modular structure for backward compatibility
-from app.netra_mcp.modules import NetraMCPServer
+from netra_backend.app.netra_mcp.modules import NetraMCPServer
 
 # Maintain metadata for tracking
 __metadata__ = {

@@ -9,13 +9,13 @@ from typing import Dict, List, Any
 from decimal import Decimal
 import uuid
 
-from app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
-from app.schemas.Performance import Performance
-from app.schemas.FinOps import FinOps, CostComparison
-from app.schemas.Metrics import CorpusMetric, MetricType, ResourceUsage, ResourceType, QualityMetrics
-from app.schemas.Supply import SupplyOption, ModelIdentifier
-from app.schemas.Policy import LearnedPolicy, PredictedOutcome
-from app.schemas.llm_request_types import LLMRequest, LLMFunction, StructuredOutputSchema
+from netra_backend.app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
+from netra_backend.app.schemas.Performance import Performance
+from netra_backend.app.schemas.FinOps import FinOps, CostComparison
+from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType, ResourceUsage, ResourceType, QualityMetrics
+from netra_backend.app.schemas.Supply import SupplyOption, ModelIdentifier
+from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.llm_request_types import LLMRequest, LLMFunction, StructuredOutputSchema
 
 
 class SmallTestDatasets:

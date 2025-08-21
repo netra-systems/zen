@@ -13,7 +13,7 @@ import os
 # Add the app directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 async def test_initialization_manager():
@@ -21,7 +21,7 @@ async def test_initialization_manager():
     print("Testing AgentInitializationManager...")
     
     try:
-        from app.agents.initialization_manager import AgentInitializationManager, InitializationStatus
+        from netra_backend.app.agents.initialization_manager import AgentInitializationManager, InitializationStatus
         
         # Create mock dependencies
         mock_llm_manager = Mock()
@@ -83,7 +83,7 @@ async def test_data_agent_modular():
     print("\nTesting modular DataSubAgent...")
     
     try:
-        from app.agents.data_sub_agent.agent_core import DataSubAgent
+        from netra_backend.app.agents.data_sub_agent.agent_core import DataSubAgent
         
         # Create mock dependencies
         mock_llm_manager = Mock()
@@ -102,7 +102,7 @@ async def test_data_agent_modular():
         print(f"✓ Health status: {health}")
         
         # Test execution context creation
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         
         mock_state = Mock()
         mock_state.user_request = "test request"
@@ -124,7 +124,7 @@ async def test_enhanced_registry():
     print("\nTesting enhanced agent registry...")
     
     try:
-        from app.agents.supervisor.agent_registry_enhanced import EnhancedAgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry_enhanced import EnhancedAgentRegistry
         
         # Create mock dependencies
         mock_llm_manager = Mock()

@@ -6,8 +6,8 @@ Provides the foundation for all compensation handler implementations.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
-from app.core.error_recovery import RecoveryContext
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compensation_types import CompensationAction, CompensationState
 from netra_backend.app.compensation_helpers import (
     validate_required_keys,

@@ -5,8 +5,8 @@ Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 # Import all supervisor orchestration test modules
-from tests.agents.test_supervisor_basic import TestSupervisorOrchestration
-from tests.agents.test_supervisor_patterns import (
+from netra_backend.tests.agents.test_supervisor_basic import TestSupervisorOrchestration
+from netra_backend.tests.agents.test_supervisor_patterns import (
     TestWorkflowPatterns,
     TestResourceManagement
 )

@@ -6,7 +6,7 @@ All new code should import directly from app.schemas.auth_types.
 """
 
 # Import from canonical source
-from app.schemas.auth_types import Token, TokenPayload
+from netra_backend.app.schemas.auth_types import Token, TokenPayload
 
 # Re-export for backward compatibility
 __all__ = ["Token", "TokenPayload"]

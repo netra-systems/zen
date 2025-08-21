@@ -5,7 +5,7 @@ The actual tests have been split into focused modules for better maintainability
 """
 
 # Import all test modules to ensure they are discovered by pytest
-from tests.services.test_quality_monitoring_basic import *
-from tests.services.test_quality_monitoring_metrics import *
-from tests.services.test_quality_monitoring_alerts import *
-from tests.services.test_quality_monitoring_integration import *
+from netra_backend.tests.services.test_quality_monitoring_basic import *
+from netra_backend.tests.services.test_quality_monitoring_metrics import *
+from netra_backend.tests.services.test_quality_monitoring_alerts import *
+from netra_backend.tests.services.test_quality_monitoring_integration import *

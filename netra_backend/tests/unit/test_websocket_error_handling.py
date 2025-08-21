@@ -8,8 +8,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
-from app.websocket.connection import ConnectionManager
-from app.routes.websockets import (
+from netra_backend.app.websocket.connection import ConnectionManager
+from netra_backend.app.routes.websockets import (
     _handle_websocket_error, _handle_general_exception,
     _handle_websocket_exceptions
 )

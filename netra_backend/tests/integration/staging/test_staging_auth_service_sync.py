@@ -23,15 +23,15 @@ from unittest.mock import patch, Mock, AsyncMock
 import aiohttp
 import jwt
 
-from app.core.cross_service_auth import (
+from netra_backend.app.core.cross_service_auth import (
     CrossServiceAuthManager,
     AuthToken,
     AuthTokenType,
     ServiceRole,
     AuthContext
 )
-from app.clients.auth_client import AuthClient
-from app.auth_dependencies import get_security_service
+from netra_backend.app.clients.auth_client import AuthClient
+from netra_backend.app.auth_dependencies import get_security_service
 from test_framework.mock_utils import mock_justified
 
 

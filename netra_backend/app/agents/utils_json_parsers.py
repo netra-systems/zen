@@ -13,7 +13,7 @@
 import json
 import re
 from typing import Any, Dict, Optional, List, Union
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def try_direct_parse(json_str: str) -> Optional[Dict[str, Any]]:
@@ -71,7 +71,7 @@ def try_parse_complex_value(value_str: str) -> Union[Dict[str, Any], List[Any], 
     except json.JSONDecodeError:
         pass
     
-    from app.agents.utils_json_validators import fix_common_json_errors
+    from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
     try:
         return json.loads(fix_common_json_errors(value_str))
     except (json.JSONDecodeError, TypeError, ValueError):
@@ -101,7 +101,7 @@ def try_close_truncated_array(content: str) -> Optional[List[Any]]:
     if not array_str.rstrip().endswith(']'):
         array_str += ']'
     
-    from app.agents.utils_json_validators import fix_common_json_errors
+    from netra_backend.app.agents.utils_json_validators import fix_common_json_errors
     try:
         return json.loads(fix_common_json_errors(array_str))
     except (json.JSONDecodeError, TypeError, ValueError):

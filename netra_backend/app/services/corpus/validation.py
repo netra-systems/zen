@@ -3,7 +3,7 @@ Validation and preprocessing operations for corpus management
 """
 
 from typing import Dict, List
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class ValidationManager:

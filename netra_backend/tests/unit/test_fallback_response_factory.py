@@ -1,7 +1,7 @@
 """Test fallback response factory handles different response types correctly."""
 
 import pytest
-from app.llm.fallback_responses import FallbackResponseFactory
+from netra_backend.app.llm.fallback_responses import FallbackResponseFactory
 
 
 class TestFallbackResponseFactory:

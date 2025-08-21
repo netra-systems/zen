@@ -5,7 +5,7 @@ Emergency fallback responses and cascade prevention.
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

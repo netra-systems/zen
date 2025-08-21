@@ -10,8 +10,8 @@ import asyncio
 import json
 import uuid
 from enum import Enum
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -369,7 +369,7 @@ class MessageQueue:
     
     async def _send_failure_message(self, message: QueuedMessage) -> None:
         """Send failure message to user."""
-        from app.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         await manager.send_error(
             message.user_id,
             f"Message processing failed: {message.error}"

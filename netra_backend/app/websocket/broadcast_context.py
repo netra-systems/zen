@@ -10,8 +10,8 @@ from typing import Dict, List, Any, Union, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 
 class BroadcastOperation(Enum):
@@ -61,7 +61,7 @@ class BroadcastResultFormatter:
     def format_execution_result(result: Union["BroadcastResult", Dict[str, Any]], 
                                operation: BroadcastOperation) -> Dict[str, Any]:
         """Format execution result for standardized return."""
-        from app.schemas.websocket_message_types import BroadcastResult
+        from netra_backend.app.schemas.websocket_message_types import BroadcastResult
         return BroadcastResultFormatter._process_result(result, operation, BroadcastResult)
     
     @staticmethod

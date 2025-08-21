@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 import uuid
 
 # Import base types (no circular dependencies)
-from app.schemas.llm_base_types import (
+from netra_backend.app.schemas.llm_base_types import (
     LLMProvider, LLMModel, LLMRole, TokenUsage, LLMMessage, 
     LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
 )

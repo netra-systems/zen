@@ -9,16 +9,16 @@ from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update
-from app.db.models_agent_state import (
+from netra_backend.app.db.models_agent_state import (
     AgentStateSnapshot, AgentRecoveryLog
 )
-from app.schemas.agent_state import (
+from netra_backend.app.schemas.agent_state import (
     StateRecoveryRequest, StatePersistenceRequest, 
     CheckpointType, RecoveryType
 )
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
-from app.services.state_serialization import DateTimeEncoder
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.state_serialization import DateTimeEncoder
 
 logger = central_logger.get_logger(__name__)
 

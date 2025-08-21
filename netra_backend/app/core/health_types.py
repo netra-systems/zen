@@ -8,8 +8,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, UTC
 
 # Import shared types from their single sources of truth
-from app.core.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
-from app.schemas.core_models import HealthCheckResult
+from netra_backend.app.core.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
+from netra_backend.app.schemas.core_models import HealthCheckResult
 
 
 @dataclass

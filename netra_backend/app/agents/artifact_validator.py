@@ -7,10 +7,10 @@ ensuring data integrity and schema compliance between agent handoffs.
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime, UTC
 from pydantic import BaseModel, Field
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState, OptimizationsResult
-from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
 
 logger = central_logger.get_logger(__name__)
 

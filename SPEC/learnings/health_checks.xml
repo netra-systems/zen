@@ -19,14 +19,14 @@
             startup or after certain failures, async_engine could be None.
         </root-cause>
     <solution>
-            Modified _execute_postgres_query() in app/core/health_checkers.py to:
+            Modified _execute_postgres_query() in netra_backend/app/core/health_checkers.py to:
             1. Check if async_engine is None
             2. Call initialize_postgres() if needed
             3. Re-import async_engine after initialization
             4. Gracefully handle initialization failures
         </solution>
     <implementation>
-      <file>app/core/health_checkers.py</file>
+      <file>netra_backend/app/core/health_checkers.py</file>
       <pattern>
                 if async_engine is None:
                     initialize_postgres()
@@ -94,7 +94,7 @@
             staging but not development mode.
         </problem>
     <root-cause>
-            The _handle_clickhouse_error function in app/routes/health.py was only checking for
+            The _handle_clickhouse_error function in netra_backend/app/routes/health.py was only checking for
             staging environment, causing it to re-raise exceptions in development mode when
             ClickHouse wasn't ready yet during startup.
         </root-cause>
@@ -104,7 +104,7 @@
             even if ClickHouse isn't immediately available.
         </solution>
     <implementation>
-      <file>app/routes/health.py</file>
+      <file>netra_backend/app/routes/health.py</file>
       <pattern>
                 if settings.environment in ["staging", "development"]:
                     logger.info(f"Ignoring ClickHouse failure in {settings.environment} environment")
@@ -173,7 +173,7 @@
             4. Use the fresh reference for database operations
         </solution>
     <implementation>
-      <file>app/core/health_checkers.py</file>
+      <file>netra_backend/app/core/health_checkers.py</file>
       <pattern>
                 from app.db.postgres import initialize_postgres
                 from app.db.postgres_core import async_engine

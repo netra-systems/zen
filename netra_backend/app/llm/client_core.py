@@ -5,12 +5,12 @@ Handles simple, full, and structured LLM requests.
 """
 
 from typing import Type, TypeVar
-from app.core.circuit_breaker import CircuitBreaker, CircuitBreakerOpenError
-from app.llm.llm_manager import LLMManager
-from app.llm.resource_manager import resource_monitor
-from app.llm.client_circuit_breaker import LLMCircuitBreakerManager
-from app.schemas.llm_response_types import LLMResponse
-from app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitBreakerOpenError
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.resource_manager import resource_monitor
+from netra_backend.app.llm.client_circuit_breaker import LLMCircuitBreakerManager
+from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.logging_config import central_logger
 from pydantic import BaseModel
 
 logger = central_logger.get_logger(__name__)

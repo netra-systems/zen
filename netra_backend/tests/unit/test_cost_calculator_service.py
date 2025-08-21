@@ -15,12 +15,12 @@ import pytest
 from decimal import Decimal, ROUND_HALF_UP
 from unittest.mock import Mock, patch
 
-from app.services.cost_calculator import (
+from netra_backend.app.services.cost_calculator import (
     CostCalculatorService, BudgetManager, CostTier, ModelCostInfo,
     create_cost_calculator, create_budget_manager, optimize_model_selection,
     calculate_cost_savings
 )
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 
 # Global fixtures for token usage scenarios (shared across test classes)

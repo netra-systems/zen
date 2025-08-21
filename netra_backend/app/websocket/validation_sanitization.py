@@ -6,7 +6,7 @@ Each function ≤8 lines for performance-critical WebSocket sanitization path.
 
 from typing import Dict, Any, List
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -35,7 +35,7 @@ def sanitize_payload_content(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 def sanitize_text_content(text: str) -> str:
     """Sanitize text content for security."""
-    from app.websocket.validation_security import is_text_already_encoded
+    from netra_backend.app.websocket.validation_security import is_text_already_encoded
     if is_text_already_encoded(text):
         return text
     text = encode_html_entities(text)

@@ -23,18 +23,18 @@ Business Value: Customer-facing demo reliability and performance.
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from app.agents.base import BaseSubAgent
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.schemas.shared_types import RetryConfig
 
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
-from app.logging_config import central_logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -110,7 +110,7 @@ class DemoService(BaseSubAgent, BaseExecutionInterface):
         
     def _create_process_context(self, message: str, context: Optional[Dict[str, Any]]) -> ExecutionContext:
         """Create execution context for demo processing."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         exec_context = self._build_execution_context(state)
         exec_context.metadata = self._build_context_metadata(message, context)

@@ -10,14 +10,14 @@ from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.error_recovery import (
+from netra_backend.app.core.error_recovery import (
     RecoveryContext,
     OperationType,
     recovery_manager,
     recovery_executor
 )
-from app.services.transaction_manager import transaction_manager
-from app.logging_config import central_logger
+from netra_backend.app.services.transaction_manager import transaction_manager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_recovery_helpers import (
     determine_operation_type,
     determine_severity,

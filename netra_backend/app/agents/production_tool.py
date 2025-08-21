@@ -1,9 +1,9 @@
 """Production tool with real service integrations and error handling."""
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
-from app.core.reliability_utils import create_tool_reliability_wrapper, create_default_tool_result
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.reliability_utils import create_tool_reliability_wrapper, create_default_tool_result
 
 logger = central_logger.get_logger(__name__)
 
@@ -81,13 +81,13 @@ class ProductionTool:
     
     async def _try_synthetic_tools(self, parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Try to execute synthetic data tools."""
-        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
         executor = SyntheticToolExecutor(self.name)
         return await executor.execute(parameters)
     
     async def _try_corpus_tools(self, parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Try to execute corpus management tools."""
-        from app.agents.production_tool_corpus import CorpusToolExecutor
+        from netra_backend.app.agents.production_tool_corpus import CorpusToolExecutor
         executor = CorpusToolExecutor(self.name)
         return await executor.execute(parameters)
     
@@ -102,30 +102,30 @@ class ProductionTool:
     # Direct methods for test compatibility
     async def _execute_synthetic_data_batch(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data batch generation (test compatibility method)"""
-        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
         executor = SyntheticToolExecutor("generate_synthetic_data_batch")
         return await executor._execute_synthetic_data_batch(parameters)
     
     async def _execute_validate_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data validation (test compatibility method)"""
-        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
         executor = SyntheticToolExecutor("validate_synthetic_data")
         return await executor._execute_validate_synthetic_data(parameters)
     
     async def _execute_store_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data storage (test compatibility method)"""
-        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
         executor = SyntheticToolExecutor("store_synthetic_data")
         return await executor._execute_store_synthetic_data(parameters)
     
     async def _execute_create_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute corpus creation (test compatibility method)"""
-        from app.agents.production_tool_corpus import CorpusToolExecutor
+        from netra_backend.app.agents.production_tool_corpus import CorpusToolExecutor
         executor = CorpusToolExecutor("create_corpus")
         return await executor._execute_create_corpus(parameters)
     
     async def _execute_search_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute corpus search (test compatibility method)"""
-        from app.agents.production_tool_corpus import CorpusToolExecutor
+        from netra_backend.app.agents.production_tool_corpus import CorpusToolExecutor
         executor = CorpusToolExecutor("search_corpus")
         return await executor._execute_search_corpus(parameters)

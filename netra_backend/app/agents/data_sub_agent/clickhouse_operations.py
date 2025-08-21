@@ -16,17 +16,17 @@ import time
 from typing import Dict, Optional, Any, List, Protocol
 from dataclasses import dataclass
 
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult,
     ExecutionStatus, AgentExecutionMixin
 )
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
-from app.db.clickhouse import get_clickhouse_client
-from app.db.clickhouse_init import create_workload_events_table_if_missing
-from app.core.exceptions_database import DatabaseError, DatabaseConnectionError
-from app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
+from netra_backend.app.core.exceptions_database import DatabaseError, DatabaseConnectionError
+from netra_backend.app.logging_config import central_logger as logger
 
 
 @dataclass

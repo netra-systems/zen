@@ -7,13 +7,13 @@ modular helpers for specific calculations.
 from datetime import timedelta
 from typing import Optional
 
-from app.core.error_aggregation_base import (
+from netra_backend.app.core.error_aggregation_base import (
     ErrorPattern, ErrorTrend, PatternHistory, TimeWindows
 )
-from app.core.error_pattern_helpers import ErrorPatternHelpers
-from app.core.error_metric_calculator import ErrorMetricCalculator
-from app.core.error_pattern_detector import ErrorPatternDetector
-from app.logging_config import central_logger
+from netra_backend.app.core.error_pattern_helpers import ErrorPatternHelpers
+from netra_backend.app.core.error_metric_calculator import ErrorMetricCalculator
+from netra_backend.app.core.error_pattern_detector import ErrorPatternDetector
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

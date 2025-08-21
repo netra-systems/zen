@@ -12,11 +12,11 @@ from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 
-from app.services.api_gateway import APIGateway
-from app.services.rate_limiter import RateLimiter
-from app.services.request_validator import RequestValidator
-from app.services.middleware_chain import MiddlewareChain
-from app.core.config import settings
+from netra_backend.app.services.api_gateway import APIGateway
+from netra_backend.app.services.rate_limiter import RateLimiter
+from netra_backend.app.services.request_validator import RequestValidator
+from netra_backend.app.services.middleware_chain import MiddlewareChain
+from netra_backend.app.core.config import settings
 
 
 class TestAPIRequestLifecycleCompleteL4:

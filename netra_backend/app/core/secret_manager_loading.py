@@ -6,9 +6,9 @@ Handles loading secrets from various sources based on environment.
 import os
 from typing import Optional, Dict, List
 
-from app.logging_config import central_logger
-from app.schemas.config_types import EnvironmentType
-from app.core.secret_manager_types import SecretAccessLevel
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.config_types import EnvironmentType
+from netra_backend.app.core.secret_manager_types import SecretAccessLevel
 
 logger = central_logger.get_logger(__name__)
 

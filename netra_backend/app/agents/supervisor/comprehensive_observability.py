@@ -9,8 +9,8 @@ import json
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 
 logger = central_logger.get_logger(__name__)
 

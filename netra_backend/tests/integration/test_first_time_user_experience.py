@@ -53,7 +53,7 @@ class TestFirstTimeUserExperience:
 
     async def _simulate_approaching_limits(self, setup, user):
         """Simulate user approaching free tier limits"""
-        from app.db.models_user import ToolUsageLog
+        from netra_backend.app.db.models_user import ToolUsageLog
         
         for i in range(4):
             usage_log = ToolUsageLog(user_id=user.id, tool_name="basic_optimizer", category="optimization", execution_time_ms=3000, tokens_used=500, cost_cents=0, status="success", plan_tier="free")
@@ -66,7 +66,7 @@ class TestFirstTimeUserExperience:
 
     async def _trigger_limit_enforcement(self, setup, usage_tracking):
         """Trigger limit enforcement and upgrade prompts"""
-        from app.db.models_user import ToolUsageLog
+        from netra_backend.app.db.models_user import ToolUsageLog
         
         user = usage_tracking["user"]
         

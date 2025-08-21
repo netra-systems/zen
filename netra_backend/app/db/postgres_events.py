@@ -8,8 +8,8 @@ from sqlalchemy import event
 from sqlalchemy.engine import Connection
 from sqlalchemy.pool import ConnectionPoolEntry, _ConnectionFairy
 from sqlalchemy.ext.asyncio import AsyncEngine
-from app.config import settings
-from app.logging_config import central_logger
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.postgres_config import DatabaseConfig
 
 logger = central_logger.get_logger(__name__)

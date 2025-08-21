@@ -7,7 +7,7 @@ import asyncio
 from typing import Dict, List, Any, Optional
 from collections import defaultdict, deque
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.cache_config import CacheStrategy, CacheMetrics, QueryCacheConfig
 
 logger = central_logger.get_logger(__name__)

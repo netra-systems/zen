@@ -8,7 +8,7 @@ from typing import Dict
 from dataclasses import dataclass, field
 from enum import Enum
 
-from app.core.resilience.monitor import AlertSeverity
+from netra_backend.app.core.resilience.monitor import AlertSeverity
 
 
 class MetricType(str, Enum):

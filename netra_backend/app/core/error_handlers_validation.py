@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from pydantic import ValidationError
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.exceptions import ErrorCode
 from netra_backend.app.error_response import ErrorResponse
 

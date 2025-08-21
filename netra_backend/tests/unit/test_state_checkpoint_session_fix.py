@@ -8,12 +8,12 @@ import pytest
 from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from app.agents.supervisor.state_checkpoint_manager import StateCheckpointManager
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.state import DeepAgentState
-from app.schemas.agent_state import CheckpointType, AgentPhase
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.supervisor.state_checkpoint_manager import StateCheckpointManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_state import CheckpointType, AgentPhase
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
 class TestStateCheckpointSessionFix:

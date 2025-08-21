@@ -63,13 +63,13 @@ def _create_ep_009_state() -> DeepAgentState:
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
-    from app.tests.e2e.test_model_effectiveness_workflows import _execute_model_selection_workflow as execute_workflow
+    from netra_backend.app.tests.e2e.test_model_effectiveness_workflows import _execute_model_selection_workflow as execute_workflow
     return await execute_workflow(setup, state)
 
 
 async def _validate_ep_005_results(results: List[Dict], state: DeepAgentState, setup: Dict):
     """Validate EP-005 results with enhanced quality checks."""
-    from app.tests.e2e.test_model_effectiveness_workflows import _validate_model_effectiveness_results
+    from netra_backend.app.tests.e2e.test_model_effectiveness_workflows import _validate_model_effectiveness_results
     _validate_model_effectiveness_results(results, state)
     await _validate_response_quality_ep_005(results, setup)
 

@@ -1,14 +1,14 @@
 from typing import Dict, Optional, List, TYPE_CHECKING, TypedDict, Union, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
-from app.logging_config import central_logger
-from app.services.service_interfaces import IMessageHandlerService
-from app.db.models_postgres import Thread, Run
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.service_interfaces import IMessageHandlerService
+from netra_backend.app.db.models_postgres import Thread, Run
 
 if TYPE_CHECKING:
-    from app.agents.supervisor import SupervisorAgent
-from app.services.thread_service import ThreadService
-from app.schemas.registry import (
+    from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.schemas.registry import (
     UserMessagePayload,
     CreateThreadPayload,
     SwitchThreadPayload,
@@ -18,11 +18,11 @@ from app.schemas.registry import (
     AgentStoppedPayload,
     AgentResponseData
 )
-from app.ws_manager import manager
-from app.services.message_handler_utils import handle_thread_history as _handle_thread_history
-from app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
-from app.services.message_handler_base import MessageHandlerBase
-from app.services.message_processing import (
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.message_handler_utils import handle_thread_history as _handle_thread_history
+from netra_backend.app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
+from netra_backend.app.services.message_handler_base import MessageHandlerBase
+from netra_backend.app.services.message_processing import (
     process_user_message_with_notifications as _process_user_message,
     execute_and_persist as _execute_and_persist,
     persist_response as _persist_response,
@@ -482,7 +482,7 @@ class MessageHandlerService(IMessageHandlerService):
             
             # Import the example message handler with deferred import to avoid circular dependencies
             try:
-                from app.handlers.example_message_handler import handle_example_message
+                from netra_backend.app.handlers.example_message_handler import handle_example_message
             except ImportError as import_error:
                 logger.error(f"Failed to import example message handler: {import_error}")
                 await manager.send_error(user_id, "Example message handler not available")

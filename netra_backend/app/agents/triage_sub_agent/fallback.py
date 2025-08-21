@@ -11,12 +11,12 @@
 """Fallback categorization utilities - compliant with 25-line limit."""
 
 from typing import Dict
-from app.agents.triage_sub_agent.models import (
+from netra_backend.app.agents.triage_sub_agent.models import (
     TriageResult, Priority, Complexity, TriageMetadata
 )
-from app.agents.triage_sub_agent.entity_extraction import extract_entities_from_request
-from app.agents.triage_sub_agent.intent_detection import determine_intent
-from app.agents.triage_sub_agent.tool_recommendation import recommend_tools
+from netra_backend.app.agents.triage_sub_agent.entity_extraction import extract_entities_from_request
+from netra_backend.app.agents.triage_sub_agent.intent_detection import determine_intent
+from netra_backend.app.agents.triage_sub_agent.tool_recommendation import recommend_tools
 
 
 def get_fallback_categories() -> Dict[str, str]:

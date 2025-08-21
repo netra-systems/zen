@@ -4,11 +4,11 @@ from typing import Any, Dict, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 
 # Import ExecutionStrategy from the authoritative source for compatibility
-from app.core.interfaces_execution import ExecutionStrategy
+from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
 
 class AgentExecutionStrategy(Enum):

@@ -24,13 +24,13 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     get_current_user, get_current_user_optional, require_admin, 
     require_developer, require_permission, get_password_hash,
     verify_password, create_access_token, validate_token_jwt
 )
-from app.db.models_postgres import User
-from app.clients.auth_client import auth_client
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.clients.auth_client import auth_client
 
 
 class TestAuthIntegration:

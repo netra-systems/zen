@@ -4,12 +4,12 @@ OAuth Callback Processing Logic
 from fastapi import HTTPException, status, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.clients.auth_client import auth_client
-from app.services.security_service import SecurityService
-from app.services.user_service import user_service
-from app.schemas.registry import UserCreateOAuth
-from app.schemas.Token import TokenPayload
-from app.logging_config import central_logger
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.user_service import user_service
+from netra_backend.app.schemas.registry import UserCreateOAuth
+from netra_backend.app.schemas.Token import TokenPayload
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.token_management import build_callback_redirect, build_error_redirect
 
 logger = central_logger.get_logger(__name__)
@@ -71,7 +71,7 @@ async def get_or_create_user(db: AsyncSession, user_info: dict):
 
 async def _create_user_access_token(user) -> str:
     """Create access token for user through auth service."""
-    from app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client import auth_client
     token_data = {"user_id": str(user.id)}
     result = await auth_client.create_token(token_data)
     if not result or "access_token" not in result:

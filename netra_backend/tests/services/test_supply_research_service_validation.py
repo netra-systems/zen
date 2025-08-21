@@ -7,7 +7,7 @@ import pytest
 from typing import Dict, Any, List
 from unittest.mock import patch
 
-from app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.services.supply_research_service import SupplyResearchService
 
 
 @pytest.fixture

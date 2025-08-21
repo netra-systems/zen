@@ -10,14 +10,14 @@ from netra_backend.app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType
 )
-from tests.helpers.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     real_quality_monitoring_service,
     sample_quality_metrics,
     sample_quality_alert,
     poor_quality_metrics
 )
 from netra_backend.app.services.quality_gate_service import ContentType
-from tests.helpers.quality_monitoring_helpers import (
+from netra_backend.tests.helpers.quality_monitoring_helpers import (
     record_test_quality_event,
     assert_event_in_buffer,
     assert_event_properties,
@@ -95,7 +95,7 @@ class TestRealTimeMonitoring:
         
         dashboard_data = await real_quality_monitoring_service.get_dashboard_data()
         
-        from app.tests.helpers.quality_monitoring_helpers import assert_dashboard_data_structure
+        from netra_backend.app.tests.helpers.quality_monitoring_helpers import assert_dashboard_data_structure
         assert_dashboard_data_structure(dashboard_data)
 
 
@@ -167,7 +167,7 @@ class TestDataClasses:
     
     def test_quality_alert_creation(self):
         """Test QualityAlert dataclass"""
-        from app.services.quality_monitoring_service import QualityAlert
+        from netra_backend.app.services.quality_monitoring_service import QualityAlert
         
         alert = QualityAlert(
             id="test_alert",
@@ -189,7 +189,7 @@ class TestDataClasses:
         
     def test_quality_trend_creation(self):
         """Test QualityTrend dataclass"""
-        from app.services.quality_monitoring_service import QualityTrend
+        from netra_backend.app.services.quality_monitoring_service import QualityTrend
         
         trend = QualityTrend(
             metric_type=MetricType.QUALITY_SCORE,
@@ -210,8 +210,8 @@ class TestDataClasses:
         
     def test_agent_quality_profile_creation(self):
         """Test AgentQualityProfile dataclass"""
-        from app.services.quality_monitoring_service import AgentQualityProfile
-        from app.services.quality_gate_service import QualityLevel
+        from netra_backend.app.services.quality_monitoring_service import AgentQualityProfile
+        from netra_backend.app.services.quality_gate_service import QualityLevel
         
         profile = AgentQualityProfile(
             agent_name="test_agent",

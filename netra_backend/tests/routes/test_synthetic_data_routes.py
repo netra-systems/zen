@@ -75,7 +75,7 @@ class TestSyntheticDataRoute:
 
     async def test_synthetic_data_templates(self):
         """Test synthetic data template management."""
-        from app.routes.synthetic_data import _fetch_templates
+        from netra_backend.app.routes.synthetic_data import _fetch_templates
         
         # Mock database dependency
         mock_db = AsyncMock()

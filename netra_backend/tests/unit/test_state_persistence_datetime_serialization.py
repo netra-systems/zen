@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.state_persistence import StatePersistenceService
-from app.services.state_serialization import DateTimeEncoder
-from app.schemas.agent_state import (
+from netra_backend.app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.state_serialization import DateTimeEncoder
+from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest,
     CheckpointType,
     AgentPhase

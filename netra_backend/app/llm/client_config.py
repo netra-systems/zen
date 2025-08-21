@@ -4,7 +4,7 @@ Provides circuit breaker configurations for different LLM types.
 Each configuration is optimized for specific performance characteristics.
 """
 
-from app.schemas.core_models import CircuitBreakerConfig
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 
 
 class LLMClientConfig:

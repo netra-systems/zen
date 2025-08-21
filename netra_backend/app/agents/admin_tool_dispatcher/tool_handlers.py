@@ -20,9 +20,9 @@ Target Segments: Growth & Enterprise (improved admin operations).
 from typing import Dict, Any, Optional, Callable
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import User
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
 
 # Import modern tool handlers from core module
 from netra_backend.app.tool_handlers_core import (
@@ -126,7 +126,7 @@ async def handle_corpus_create(user: User, db: AsyncSession, **kwargs) -> Dict[s
 
 async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
     """Legacy function"""
-    from app.services import corpus_service
+    from netra_backend.app.services import corpus_service
     from .tool_handler_helpers import create_corpus_list_response
     corpora = await corpus_service.list_corpora(db)
     return create_corpus_list_response(corpora)

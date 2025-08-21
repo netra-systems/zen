@@ -290,7 +290,7 @@ class TestArtifactValidation:
     
     async def test_global_validator_instance(self):
         """Test global validator instance is available."""
-        from app.agents.artifact_validator import artifact_validator
+        from netra_backend.app.agents.artifact_validator import artifact_validator
         assert isinstance(artifact_validator, ArtifactValidator)
         assert artifact_validator.validation_history == []
     

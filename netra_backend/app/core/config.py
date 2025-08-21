@@ -15,8 +15,8 @@ import os
 from functools import lru_cache
 
 # Import from the actual unified configuration system
-from app.core.configuration.base import get_unified_config, config_manager as unified_config_manager
-from app.schemas.Config import AppConfig
+from netra_backend.app.core.configuration.base import get_unified_config, config_manager as unified_config_manager
+from netra_backend.app.schemas.Config import AppConfig
 
 
 @lru_cache(maxsize=1)
@@ -34,7 +34,7 @@ def get_settings() -> AppConfig:
         return get_unified_config()
     except Exception as e:
         # Fallback for test environments or when unified config fails
-        from app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.Config import AppConfig
         return AppConfig()
 
 
@@ -46,7 +46,7 @@ def get_config() -> AppConfig:
 def reload_config() -> None:
     """Reload configuration - compatibility layer."""
     try:
-        from app.core.configuration.base import reload_unified_config
+        from netra_backend.app.core.configuration.base import reload_unified_config
         reload_unified_config()
         # Clear the cache
         get_settings.cache_clear()

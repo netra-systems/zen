@@ -9,8 +9,8 @@ import time
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from app.tests.helpers.rate_retry_monitoring_test_helpers import MonitoringTestHelpers
-from app.tests.helpers.debug_migration_test_helpers import (
+from netra_backend.app.tests.helpers.rate_retry_monitoring_test_helpers import MonitoringTestHelpers
+from netra_backend.app.tests.helpers.debug_migration_test_helpers import (
     DebugTestHelpers, MigrationTestHelpers
 )
 
@@ -20,7 +20,7 @@ class TestMonitoringUtilsMetrics:
     """test_monitoring_utils_metrics - Test metric collection and aggregation"""
     
     async def test_metric_collection(self):
-        from app.utils.monitoring_utils import MonitoringUtils
+        from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
         
         MonitoringTestHelpers.record_test_metrics(utils)
@@ -30,7 +30,7 @@ class TestMonitoringUtilsMetrics:
         self._assert_histogram_metrics(utils)
     
     async def test_metric_aggregation(self):
-        from app.utils.monitoring_utils import MonitoringUtils
+        from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
         
         self._record_time_based_metrics(utils)
@@ -70,14 +70,14 @@ class TestDebugUtilsProfiling:
     """test_debug_utils_profiling - Test profiling utilities and performance metrics"""
     
     async def test_profiling_utilities(self):
-        from app.utils.debug_utils import DebugUtils
+        from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
         
         await self._test_function_profiling(utils)
         self._test_memory_profiling(utils)
     
     async def test_performance_metrics(self):
-        from app.utils.debug_utils import DebugUtils
+        from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
         
         await self._test_timing_context_manager(utils)
@@ -141,7 +141,7 @@ class TestMigrationUtilsScripts:
     """test_migration_utils_scripts - Test migration utilities and data transformation"""
     
     async def test_migration_utilities(self):
-        from app.utils.migration_utils import MigrationUtils
+        from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()
         
         old_schema = MigrationTestHelpers.create_old_schema()
@@ -152,7 +152,7 @@ class TestMigrationUtilsScripts:
         self._test_data_migration(utils, migration_plan)
     
     async def test_data_transformation(self):
-        from app.utils.migration_utils import MigrationUtils
+        from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()
         
         self._test_field_transformation(utils)

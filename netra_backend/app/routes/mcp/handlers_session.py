@@ -1,10 +1,10 @@
 """MCP session handlers."""
 from typing import Dict, Any
 
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.models import MCPSessionCreateRequest
-from app.routes.mcp.utils import (
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.models import MCPSessionCreateRequest
+from netra_backend.app.routes.mcp.utils import (
     build_session_response, handle_session_error, raise_session_not_found
 )
 

@@ -16,11 +16,11 @@ import time
 from typing import Dict, Any, List
 from contextlib import asynccontextmanager
 
-from app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
-from app.db.models_agent import Thread, Message, Run
-from app.db.models_user import User, ToolUsageLog
-from app.core.database_recovery_core import ConnectionPoolRefreshStrategy
-from app.core.exceptions_base import NetraException
+from netra_backend.app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
+from netra_backend.app.db.models_agent import Thread, Message, Run
+from netra_backend.app.db.models_user import User, ToolUsageLog
+from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Define test-specific exceptions
 class DatabaseTransactionError(NetraException):
@@ -255,7 +255,7 @@ class TestDatabaseTransactionRollback:
                 )
                 
                 # Simulate recovery scenario
-                from app.core.database_types import PoolMetrics, PoolHealth
+                from netra_backend.app.core.database_types import PoolMetrics, PoolHealth
                 metrics = PoolMetrics(health_status=PoolHealth.DEGRADED)
                 can_recover = await recovery_strategy.can_recover(metrics)
                 assert can_recover

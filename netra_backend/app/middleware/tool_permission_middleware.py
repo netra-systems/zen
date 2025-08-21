@@ -5,13 +5,13 @@ from typing import Callable, Optional
 from fastapi import Request, Response, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from app.db.models_postgres import User
-from app.db.postgres import get_db
-from app.services.tool_permission_service import ToolPermissionService
-from app.services.unified_tool_registry import UnifiedToolRegistry
-from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-from app.auth_integration.auth import get_current_user
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.postgres import get_db
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.logging_config import central_logger
 import json
 import time
 from datetime import datetime, UTC

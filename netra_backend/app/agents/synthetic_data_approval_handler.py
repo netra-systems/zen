@@ -11,12 +11,12 @@
 
 from typing import Optional, Any, Dict, Callable, Awaitable
 
-from app.agents.state import DeepAgentState
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.agents.synthetic_data_generator import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.agents.synthetic_data_generator import (
     SyntheticDataResult, GenerationStatus
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

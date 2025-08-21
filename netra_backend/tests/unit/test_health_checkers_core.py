@@ -10,11 +10,11 @@ that could result in enterprise contract penalties and customer churn.
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
-from app.core.health_checkers import (
+from netra_backend.app.core.health_checkers import (
     check_postgres_health, check_clickhouse_health, check_redis_health,
     check_websocket_health, check_system_resources
 )
-from app.schemas.core_models import HealthCheckResult
+from netra_backend.app.schemas.core_models import HealthCheckResult
 
 
 class TestHealthCheckersCore:

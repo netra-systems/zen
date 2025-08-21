@@ -4,7 +4,7 @@ This module provides backward compatibility for the refactored quality monitorin
 The actual implementation is now modularized in the quality_monitoring package.
 """
 
-from app.services.quality_monitoring import (
+from netra_backend.app.services.quality_monitoring import (
     QualityMonitoringService,
     AlertSeverity,
     MetricType,

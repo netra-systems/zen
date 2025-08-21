@@ -11,11 +11,11 @@ from datetime import datetime, UTC
 import inspect
 import traceback
 
-from app.logging_config import central_logger
-from app.services.metrics.agent_metrics import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.metrics.agent_metrics import (
     agent_metrics_collector, FailureType, AgentMetricsCollector
 )
-from app.middleware.metrics_helpers import (
+from netra_backend.app.middleware.metrics_helpers import (
     AgentNameExtractor, OperationTypeDetector, FailureClassifier,
     PerformanceUtils, ErrorHandler, BatchResultProcessor,
     OperationMetadataBuilder, TimeoutHandler, WrapperUtils

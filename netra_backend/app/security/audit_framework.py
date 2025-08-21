@@ -8,16 +8,16 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 
-from app.logging_config import central_logger
-from app.security.audit_findings import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.security.audit_findings import (
     SecurityFinding, SecurityAuditResult, SecuritySeverity, SecurityCategory,
     security_findings_manager
 )
-from app.security.audit_compliance import (
+from netra_backend.app.security.audit_compliance import (
     AuthenticationAuditor, ApiSecurityAuditor, SessionManagementAuditor,
     ConfigurationAuditor, SecurityAuditor
 )
-from app.security.audit_scoring import (
+from netra_backend.app.security.audit_scoring import (
     compliance_score_calculator, security_recommendation_engine
 )
 

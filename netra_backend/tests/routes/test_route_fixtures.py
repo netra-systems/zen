@@ -10,9 +10,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
-from app.services.security_service import SecurityService
-from app.services.key_manager import KeyManager  
-from app.config import settings
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.key_manager import KeyManager  
+from netra_backend.app.config import settings
 
 
 class MockDBSession:
@@ -33,15 +33,15 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from app.dependencies import get_llm_manager, get_db_dependency
-        from app.db.postgres import get_async_db, initialize_postgres
-        from app.db.session import get_db_session
+        from netra_backend.app.dependencies import get_llm_manager, get_db_dependency
+        from netra_backend.app.db.postgres import get_async_db, initialize_postgres
+        from netra_backend.app.db.session import get_db_session
         from unittest.mock import AsyncMock, MagicMock
         from sqlalchemy.ext.asyncio import AsyncSession
         
         # Ensure database is initialized first - but handle session factory properly
-        import app.db.session as session_module
-        import app.db.postgres as postgres_module
+        import netra_backend.app.db.session as session_module
+        import netra_backend.app.db.postgres as postgres_module
         
         # Mock the session factory to avoid the RuntimeError
         if postgres_module.async_session_factory is None:
@@ -96,8 +96,8 @@ class MockDependencyManager:
     @staticmethod
     def setup_auth_dependencies(app):
         """Set up authentication dependencies for testing."""
-        from app.auth_integration.auth import get_current_user, get_current_active_user
-        from app.db.models_postgres import User
+        from netra_backend.app.auth_integration.auth import get_current_user, get_current_active_user
+        from netra_backend.app.db.models_postgres import User
         
         async def mock_get_current_user():
             # Create a mock user for testing - bypass all auth logic
@@ -123,8 +123,8 @@ class MockDependencyManager:
     @staticmethod
     def setup_agent_dependencies(app):
         """Set up agent-specific dependencies for testing."""
-        from app.services.agent_service import get_agent_service
-        from app.services.agent_service_core import AgentService
+        from netra_backend.app.services.agent_service import get_agent_service
+        from netra_backend.app.services.agent_service_core import AgentService
         
         def mock_get_agent_service(db_session=None, llm_manager=None):
             # Return a properly mocked AgentService
@@ -184,7 +184,7 @@ class MockAppStateManager:
 @pytest.fixture
 def basic_test_client():
     """Basic FastAPI test client with minimal setup."""
-    from app.main import app
+    from netra_backend.app.main import app
     MockAppStateManager.setup_app_state(app)
     return TestClient(app)
 
@@ -192,7 +192,7 @@ def basic_test_client():
 @pytest.fixture
 def authenticated_test_client(ensure_db_initialized):
     """FastAPI test client with authentication mocked."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_auth_dependencies(app)
@@ -207,7 +207,7 @@ def authenticated_test_client(ensure_db_initialized):
 @pytest.fixture  
 def configured_test_client():
     """Test client with core dependencies mocked."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockAppStateManager.setup_app_state(app)
@@ -221,7 +221,7 @@ def configured_test_client():
 @pytest.fixture
 def agent_test_client():
     """Test client configured for agent route testing."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_agent_dependencies(app)

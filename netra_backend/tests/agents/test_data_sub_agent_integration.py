@@ -8,7 +8,7 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-from tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
+from netra_backend.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
 

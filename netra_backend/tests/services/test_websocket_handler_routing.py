@@ -8,8 +8,8 @@ import asyncio
 from datetime import datetime, UTC
 from typing import Dict, Any
 
-from app.services.websocket.message_handler import MessageRouter
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.websocket.message_handler import MessageRouter
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.websocket_test_utilities import MockMessageHandler
 
 

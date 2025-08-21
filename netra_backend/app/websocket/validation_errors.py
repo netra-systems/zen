@@ -7,8 +7,8 @@ Each function ≤8 lines for performance-critical WebSocket error path.
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
-from app.schemas.websocket_message_types import WebSocketValidationError
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
 logger = central_logger.get_logger(__name__)
 

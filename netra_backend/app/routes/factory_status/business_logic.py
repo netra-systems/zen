@@ -2,7 +2,7 @@
 Factory Status Business Logic
 """
 from typing import Dict, Optional, Any
-from app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
+from netra_backend.app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
 
 # In-memory cache for demo (replace with Redis in production)
 _report_cache: Dict[str, FactoryStatusReport] = {}

@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 
 # Import all types from canonical source
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     TokenType,
     AuthProvider,
     Token,

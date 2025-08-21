@@ -2,11 +2,11 @@
 
 from typing import Dict, Any, Optional, List
 from datetime import datetime
-from app.schemas.registry import (
+from netra_backend.app.schemas.registry import (
     CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus,
     CorpusAuditMetadata, CorpusAuditSearchFilter
 )
-from app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.db.models_postgres import CorpusAuditLog
 
 
 def prepare_audit_data_dict(action: CorpusAuditAction, resource_type: str, status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str], resource_id: Optional[str], operation_duration_ms: Optional[float], result_data: Optional[Dict[str, Any]]) -> Dict[str, Any]:

@@ -8,8 +8,8 @@ import asyncio
 import time
 import tracemalloc
 
-from tests.helpers.redis_test_fixtures import performance_redis_manager, RedisConnectionPool
-from tests.helpers.redis_test_helpers import (
+from netra_backend.tests.helpers.redis_test_fixtures import performance_redis_manager, RedisConnectionPool
+from netra_backend.tests.helpers.redis_test_helpers import (
     verify_performance_metrics, verify_memory_usage, verify_latency_metrics,
     verify_metrics_accuracy, calculate_hit_rate, verify_concurrent_safety,
     setup_large_dataset_tasks, measure_operation_latency, setup_batch_operations,

@@ -12,13 +12,13 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Callable
 from uuid import uuid4
 
-from app.agents.base_agent import BaseSubAgent
-from app.agents.interfaces import BaseAgentProtocol, AgentStateProtocol
-from app.logging_config import central_logger
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import get_manager
-from app.schemas import SubAgentLifecycle
-from app.schemas.agent_result_types import TypedAgentResult
+from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.interfaces import BaseAgentProtocol, AgentStateProtocol
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 logger = central_logger.get_logger(__name__)
 

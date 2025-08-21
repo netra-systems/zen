@@ -5,19 +5,19 @@ Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 # Import all config validator test modules
-from app.tests.startup.test_config_core import (
+from netra_backend.app.tests.startup.test_config_core import (
     TestConfigStatus,
     TestConfigValidationResult,
     TestValidationContext
 )
-from app.tests.startup.test_config_validation import (
+from netra_backend.app.tests.startup.test_config_validation import (
     TestServiceConfigValidatorInit,
     TestConfigFileChecking,
     TestConfigLoading,
     TestEndpointValidation,
     TestValidationWorkflow
 )
-from app.tests.startup.test_config_engine import (
+from netra_backend.app.tests.startup.test_config_engine import (
     TestConfigDecisionEngine,
     TestUtilityFunctions,
     TestMainValidationFunction

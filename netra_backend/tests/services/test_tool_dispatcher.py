@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
+from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
 
 # Mock class for testing
 class ToolDispatcher:

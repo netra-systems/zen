@@ -5,17 +5,17 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.clients.auth_client import auth_client
-from app.auth_dependencies import get_db_session, get_security_service
-from app.schemas.auth_types import AuthConfigResponse, DevLoginRequest
-from app.services.security_service import SecurityService
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.auth_dependencies import get_db_session, get_security_service
+from netra_backend.app.schemas.auth_types import AuthConfigResponse, DevLoginRequest
+from netra_backend.app.services.security_service import SecurityService
 
 from netra_backend.app.config_handler import build_auth_config_response
 from netra_backend.app.login_flow import handle_login_request
 from netra_backend.app.callback_processor import handle_callback_request
 from netra_backend.app.dev_login import handle_dev_login
 from netra_backend.app.token_management import validate_user_auth, create_token_response
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 
 router = APIRouter()
 
@@ -42,7 +42,7 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
 
 def _handle_auth_config_error(e: Exception) -> None:
     """Handle auth config error by logging and raising HTTP exception."""
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     from fastapi import HTTPException
     logger = central_logger.get_logger(__name__)
     logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)

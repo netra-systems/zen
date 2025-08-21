@@ -8,7 +8,7 @@ import pytest
 from typing import Dict, List
 from schemas import SubAgentLifecycle
 
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     create_agent_instances, build_multi_constraint_setup,
     execute_multi_constraint_workflow, create_impossible_constraints_state,
     create_minimal_constraint_state, validate_basic_workflow_execution,

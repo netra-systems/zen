@@ -39,9 +39,9 @@ import uuid
 # # #     ForensicAnalysis, IntegrityCheck  # Class may not exist, commented out  # Class may not exist, commented out
 # )
 # Note: These classes don't exist in auth_types, using generic dict structures instead
-from app.core.config import get_settings
-from app.db.postgres import get_async_db
-from app.clients.auth_client import auth_client
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.clients.auth_client import auth_client
 # from app.core.audit_logger import AuditLogger  # May not exist, commenting out
 # from app.core.monitoring import metrics_collector  # May not exist, commenting out
 

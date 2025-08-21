@@ -3,7 +3,7 @@ Context-Aware Fallback Handler for AI Slop Prevention
 Compatibility wrapper for refactored fallback handling module
 """
 
-from app.services.fallback_response.models import FallbackContext
+from netra_backend.app.services.fallback_response.models import FallbackContext
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 

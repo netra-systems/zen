@@ -6,7 +6,7 @@ and provides global connection monitoring and recovery operations.
 
 from typing import Dict, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_recovery_types import ConnectionState, ReconnectionConfig
 from netra_backend.app.websocket_connection_manager import WebSocketConnectionManager
 

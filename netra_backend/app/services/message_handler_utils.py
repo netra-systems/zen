@@ -1,8 +1,8 @@
 """Utility functions for message handling"""
 
 from typing import Dict, Any, Optional
-from app.logging_config import central_logger
-from app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

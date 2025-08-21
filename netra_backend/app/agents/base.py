@@ -4,7 +4,7 @@ Simplified interface that imports from modular components for backward compatibi
 """
 
 # Re-export the main class from the new modular structure
-from app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 
 # Maintain backward compatibility by re-exporting all the original functionality
 __all__ = ['BaseSubAgent']

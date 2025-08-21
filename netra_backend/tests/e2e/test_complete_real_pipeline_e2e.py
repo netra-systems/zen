@@ -12,7 +12,7 @@ from typing import Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
-from tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 
 @pytest.mark.skipif(

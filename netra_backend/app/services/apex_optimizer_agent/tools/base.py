@@ -11,8 +11,8 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any
 from abc import ABC, abstractmethod
-from app.services.context import ToolContext
-from app.logging_config import central_logger
+from netra_backend.app.services.context import ToolContext
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

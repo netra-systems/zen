@@ -24,7 +24,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from tests.integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     generate_test_user_data, MockAuthService, simulate_user_journey
 )
 

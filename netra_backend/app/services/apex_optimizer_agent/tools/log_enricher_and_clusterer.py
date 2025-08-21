@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from typing import Any, List
 from pydantic import BaseModel, Field
-from app.services.context import ToolContext
+from netra_backend.app.services.context import ToolContext
 
 class RawLog(BaseModel):
     response: Any = Field(..., description="The response from the LLM.")

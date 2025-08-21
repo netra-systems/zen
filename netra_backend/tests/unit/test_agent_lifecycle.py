@@ -14,9 +14,9 @@ import time
 from unittest.mock import AsyncMock, Mock, patch
 from starlette.websockets import WebSocketDisconnect
 
-from app.agents.agent_lifecycle import AgentLifecycleMixin
-from app.schemas import SubAgentLifecycle
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
+from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.agents.state import DeepAgentState
 
 
 # Test implementation of AgentLifecycleMixin

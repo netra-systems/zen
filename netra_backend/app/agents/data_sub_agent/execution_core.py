@@ -12,16 +12,16 @@ BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
 """
 
 from typing import Dict, Any, Callable, Optional
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 
 class ExecutionCore(BaseExecutionInterface):

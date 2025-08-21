@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 
-from tests.e2e.latency_optimization_helpers import (
+from netra_backend.tests.e2e.latency_optimization_helpers import (
     create_latency_optimization_setup, execute_latency_workflow,
     create_impossible_latency_state, create_already_optimized_state,
     create_3x_latency_state, create_caching_optimization_state,

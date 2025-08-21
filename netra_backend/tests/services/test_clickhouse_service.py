@@ -116,7 +116,7 @@ class TestClickHouseConnection:
         mock_client.fetch.return_value = mock_tables_response
         
         # Test the service function
-        from app.services.clickhouse_service import list_corpus_tables
+        from netra_backend.app.services.clickhouse_service import list_corpus_tables
         tables = await list_corpus_tables()
         
         # Verify results

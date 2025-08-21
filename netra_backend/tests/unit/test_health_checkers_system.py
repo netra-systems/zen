@@ -10,8 +10,8 @@ and performance optimization to maintain service quality.
 import pytest
 from unittest.mock import Mock, patch
 
-from app.core.health_checkers import check_system_resources
-from app.schemas.core_models import HealthCheckResult
+from netra_backend.app.core.health_checkers import check_system_resources
+from netra_backend.app.schemas.core_models import HealthCheckResult
 
 
 class TestHealthCheckersSystem:

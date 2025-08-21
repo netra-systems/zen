@@ -6,7 +6,7 @@ Prevents $10K MRR loss through proactive health monitoring and alerting.
 
 from typing import Dict, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app..health_types import HealthCheckResult
 from netra_backend.app.telemetry_core import EnterpriseHealthTelemetry
 

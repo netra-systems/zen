@@ -10,7 +10,7 @@ import json
 from dataclasses import dataclass
 from typing import Dict, Optional, Any, Callable
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.performance_cache import MemoryCache
 
 logger = central_logger.get_logger(__name__)

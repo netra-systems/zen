@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, Union
 from enum import Enum
 
-from app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 
 class BatchingStrategy(Enum):

@@ -8,9 +8,9 @@ from typing import Optional
 from abc import ABC, abstractmethod
 from starlette.websockets import WebSocketDisconnect
 
-from app.schemas import SubAgentLifecycle
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger
+from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
 
 
 class AgentLifecycleMixin(ABC):

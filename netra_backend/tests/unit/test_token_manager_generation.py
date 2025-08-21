@@ -11,9 +11,9 @@ from unittest.mock import AsyncMock, Mock, patch
 from freezegun import freeze_time
 from jose import jwt, JWTError
 
-from app.auth_integration.auth import JWTTokenManager, TokenClaims
-from app.core.exceptions_auth import AuthenticationError
-from app.core.exceptions_base import ValidationError
+from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
+from netra_backend.app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.core.exceptions_base import ValidationError
 
 
 # Test fixtures

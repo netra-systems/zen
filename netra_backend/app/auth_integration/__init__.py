@@ -18,7 +18,7 @@ This module provides:
 # Import from parent dependencies.py file for backward compatibility
 # NOTE: Conditional import to avoid circular dependency with schemas
 try:
-    from app.dependencies import DbDep, get_db_dependency, get_llm_manager
+    from netra_backend.app.dependencies import DbDep, get_db_dependency, get_llm_manager
 except ImportError:
     # Handle circular import during schema initialization
     DbDep = None

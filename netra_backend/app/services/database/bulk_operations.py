@@ -7,10 +7,10 @@ from typing import TypeVar, Generic, Type, List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from app.logging_config import central_logger
-from app.core.exceptions import NetraException
-from app.services.database.repository_errors import RepositoryErrorHandler
-from app.services.database.session_manager import SessionManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.services.database.repository_errors import RepositoryErrorHandler
+from netra_backend.app.services.database.session_manager import SessionManager
 import uuid
 
 logger = central_logger.get_logger(__name__)

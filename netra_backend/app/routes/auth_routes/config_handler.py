@@ -3,9 +3,9 @@ Auth Configuration Handler
 """
 from typing import Optional
 from fastapi import Request
-from app.config import get_config
-from app.clients.auth_client import auth_client
-from app.schemas.auth_types import AuthConfigResponse, AuthEndpoints
+from netra_backend.app.config import get_config
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.schemas.auth_types import AuthConfigResponse, AuthEndpoints
 
 
 def normalize_base_url(request: Request) -> str:
@@ -145,7 +145,7 @@ def create_fallback_response() -> AuthConfigResponse:
 
 def log_auth_config_error(error: Exception) -> None:
     """Log authentication configuration error."""
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     logger.error(f"Failed to build auth config response: {str(error)}", exc_info=True)
 

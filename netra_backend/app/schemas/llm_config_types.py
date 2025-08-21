@@ -5,7 +5,7 @@ Following Netra conventions with strong typing.
 
 from typing import Dict, Any, Optional, List, Union, Literal
 from pydantic import BaseModel, Field, ConfigDict
-from app.schemas.llm_base_types import LLMProvider, LLMModel
+from netra_backend.app.schemas.llm_base_types import LLMProvider, LLMModel
 
 
 class LLMConfig(BaseModel):

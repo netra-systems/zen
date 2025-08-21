@@ -9,10 +9,10 @@ from typing import Optional, Dict, List, Any
 from datetime import datetime, UTC, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.audit.corpus_audit import CorpusAuditLogger, create_audit_logger
-from app.services.audit.repository import CorpusAuditRepository
-from app.services.audit.utils import AuditTimer
-from app.schemas.registry import (
+from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger, create_audit_logger
+from netra_backend.app.services.audit.repository import CorpusAuditRepository
+from netra_backend.app.services.audit.utils import AuditTimer
+from netra_backend.app.schemas.registry import (
     CorpusAuditAction, CorpusAuditStatus, CorpusAuditMetadata,
     CorpusAuditSearchFilter
 )

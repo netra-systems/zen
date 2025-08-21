@@ -52,7 +52,7 @@ class TestConfigEndpoint:
     
     def test_update_config_authorized(self):
         """Test updating configuration with proper authorization"""
-        from app.auth_integration.auth import require_admin
+        from netra_backend.app.auth_integration.auth import require_admin
         
         update_data = {
             "features": {
@@ -88,7 +88,7 @@ class TestConfigEndpoint:
     
     def test_update_config_unauthorized(self):
         """Test config update rejection without authorization"""
-        from app.auth_integration.auth import require_admin
+        from netra_backend.app.auth_integration.auth import require_admin
         from fastapi import HTTPException, status
         
         update_data = {

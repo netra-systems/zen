@@ -7,19 +7,19 @@ Imports and orchestrates tests from focused modules.
 import pytest
 
 # Import from the focused modules
-from tests.websocket.test_websocket_type_safety_factory import (
+from netra_backend.tests.websocket.test_websocket_type_safety_factory import (
     WebSocketMessageFactory, 
     WebSocketTestDataFactory
 )
-from tests.websocket.test_websocket_client_to_server_types import (
+from netra_backend.tests.websocket.test_websocket_client_to_server_types import (
     TestClientToServerMessageTypes,
     TestClientMessageBatchValidation
 )
-from tests.websocket.test_websocket_server_to_client_types import (
+from netra_backend.tests.websocket.test_websocket_server_to_client_types import (
     TestServerToClientMessageTypes,
     TestServerMessageBatchValidation
 )
-from tests.websocket.test_websocket_bidirectional_types import (
+from netra_backend.tests.websocket.test_websocket_bidirectional_types import (
     TestBidirectionalTypeConsistency,
     TestWebSocketSendToThread,
     TestWebSocketMessageValidation

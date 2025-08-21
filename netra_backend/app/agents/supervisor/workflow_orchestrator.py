@@ -7,11 +7,11 @@ Business Value: Implements the 12-step workflow for AI optimization value creati
 import time
 from typing import List, Dict, Any, Optional
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 logger = central_logger.get_logger(__name__)
 

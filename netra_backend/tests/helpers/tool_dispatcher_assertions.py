@@ -3,8 +3,8 @@
 from typing import Any, Dict
 from unittest.mock import AsyncMock
 
-from app.agents.tool_dispatcher import ToolDispatchResponse, ProductionTool
-from app.schemas import ToolResult, ToolStatus, SimpleToolPayload
+from netra_backend.app.agents.tool_dispatcher import ToolDispatchResponse, ProductionTool
+from netra_backend.app.schemas import ToolResult, ToolStatus, SimpleToolPayload
 
 
 def assert_tool_execute_response_success(result: Dict[str, Any], expected_data: Any = None) -> None:

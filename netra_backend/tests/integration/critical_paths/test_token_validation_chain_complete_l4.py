@@ -13,11 +13,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 import secrets
 
-from app.services.token_service import TokenService
-from app.services.auth_service import AuthService
-from app.services.redis_service import RedisService
-from app.core.config import settings
-from app.core.exceptions import (
+from netra_backend.app.services.token_service import TokenService
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.core.config import settings
+from netra_backend.app.core.exceptions import (
     InvalidTokenError,
     TokenExpiredError,
     TokenRevokedError,

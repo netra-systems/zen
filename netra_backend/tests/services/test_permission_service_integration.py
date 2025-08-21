@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 # Import the module under test
 from netra_backend.app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
 from netra_backend.app.db.models_postgres import User
-from tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+from netra_backend.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):

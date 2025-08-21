@@ -9,15 +9,15 @@ from abc import ABC, abstractmethod
 from datetime import datetime, UTC
 import inspect
 
-from app.logging_config import central_logger
-from app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.tool_models import ToolExecutionResult, UnifiedTool
 
 if TYPE_CHECKING:
-    from app.db.models_postgres import User
-    from app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
-    from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-    from app.services.tool_permission_service import ToolPermissionService
+    from netra_backend.app.db.models_postgres import User
+    from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
+    from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+    from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
 logger = central_logger.get_logger(__name__)
 
@@ -75,7 +75,7 @@ class ToolExecutionEngine:
     async def _execute_by_tool_type(self, tool: Any, parameters: Dict[str, Any], 
                                    state: Any, run_id: str) -> Any:
         """Execute tool based on its type and interface."""
-        from app.agents.production_tool import ProductionTool
+        from netra_backend.app.agents.production_tool import ProductionTool
         
         if isinstance(tool, ProductionTool):
             return await tool.execute(parameters, state, run_id)
@@ -111,7 +111,7 @@ class ToolExecutionEngine:
     
     def _create_execution_context(self, tool: UnifiedTool, user: 'User') -> 'ToolExecutionContext':
         """Create execution context for tool validation."""
-        from app.schemas.ToolPermission import ToolExecutionContext
+        from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
         
         return ToolExecutionContext(
             user_id=str(user.id), tool_name=tool.name, requested_action="execute",
@@ -208,14 +208,14 @@ class ToolExecutionEngine:
     
     def _create_success_result(self, tool_input: 'ToolInput', result: Any) -> 'ToolResult':
         """Create successful tool result for simple interface."""
-        from app.schemas import ToolResult, ToolStatus, SimpleToolPayload
+        from netra_backend.app.schemas import ToolResult, ToolStatus, SimpleToolPayload
         
         payload = SimpleToolPayload(result=result)
         return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=payload)
     
     def _create_error_result(self, tool_input: 'ToolInput', message: str) -> 'ToolResult':
         """Create error result for simple interface."""
-        from app.schemas import ToolResult, ToolStatus
+        from netra_backend.app.schemas import ToolResult, ToolStatus
         
         return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=message)
     

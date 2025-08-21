@@ -6,16 +6,16 @@ Implements IMCPClientService interface with modular architecture compliance.
 
 from typing import Optional, List, Dict, Any
 
-from app.services.service_interfaces import IMCPClientService
-from app.services.database.mcp_client_repository import MCPClientRepository
-from app.services.mcp_client_connection_manager import MCPConnectionManager
-from app.services.mcp_client_tool_executor import MCPToolExecutor
-from app.services.mcp_client_resource_manager import MCPResourceManager
-from app.db.session import get_db_session
-from app.schemas.mcp_client import MCPServerConfig
-from app.schemas.core_enums import MCPServerStatus
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.services.service_interfaces import IMCPClientService
+from netra_backend.app.services.database.mcp_client_repository import MCPClientRepository
+from netra_backend.app.services.mcp_client_connection_manager import MCPConnectionManager
+from netra_backend.app.services.mcp_client_tool_executor import MCPToolExecutor
+from netra_backend.app.services.mcp_client_resource_manager import MCPResourceManager
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.schemas.mcp_client import MCPServerConfig
+from netra_backend.app.schemas.core_enums import MCPServerStatus
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

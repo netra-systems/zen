@@ -9,7 +9,7 @@ import random
 from typing import Any, Callable, Optional, Tuple, TypeVar
 from functools import wraps
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -209,8 +209,8 @@ class CircuitBreakerRetryStrategy:
     def __init__(self, retry_strategy: RetryStrategy):
         self.retry_strategy = retry_strategy
         # Use canonical circuit breaker implementation
-        from app.core.circuit_breaker_core import CircuitBreaker
-        from app.core.circuit_breaker_types import CircuitConfig
+        from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+        from netra_backend.app.core.circuit_breaker_types import CircuitConfig
         
         circuit_config = CircuitConfig(
             name="llm_retry_circuit",

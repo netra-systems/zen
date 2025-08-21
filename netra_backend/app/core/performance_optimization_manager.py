@@ -11,7 +11,7 @@ This module provides centralized performance optimization capabilities including
 import asyncio
 from typing import Dict, Optional, Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.performance_cache import MemoryCache
 from netra_backend.app.performance_query_optimizer import QueryOptimizer
 from netra_backend.app.performance_batch_processor import BatchProcessor

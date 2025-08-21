@@ -11,22 +11,22 @@ import json
 from typing import Any, List, Dict, Optional
 from datetime import datetime
 
-from app.llm.llm_manager import LLMManager
-from app.agents.base import BaseSubAgent
-from app.agents.base.interface import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol, AgentExecutionMixin
 )
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
-from app.agents.prompts import optimizations_core_prompt_template
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.agents.utils import extract_json_from_response
-from app.logging_config import central_logger as logger
-from app.schemas.shared_types import RetryConfig
-from app.llm.observability import (
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
+from netra_backend.app.agents.prompts import optimizations_core_prompt_template
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.llm.observability import (
     start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
     log_agent_communication, log_agent_input, log_agent_output
 )
@@ -217,7 +217,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
     
     def _create_optimizations_result(self, data: Dict[str, Any]) -> 'OptimizationsResult':
         """Convert dictionary to OptimizationsResult object."""
-        from app.agents.state import OptimizationsResult
+        from netra_backend.app.agents.state import OptimizationsResult
         
         recommendations = self._extract_recommendations(data)
         processed_recommendations = self._process_recommendations(recommendations)
@@ -249,7 +249,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
     
     def _build_optimizations_result(self, data: Dict[str, Any], recommendations: List[str]) -> 'OptimizationsResult':
         """Build OptimizationsResult from processed data."""
-        from app.agents.state import OptimizationsResult
+        from netra_backend.app.agents.state import OptimizationsResult
         result_params = self._build_optimization_result_params(data, recommendations)
         return OptimizationsResult(**result_params)
     

@@ -1,7 +1,7 @@
 """Database exceptions - compliant with 25-line function limit."""
 
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 
 class DatabaseError(NetraException):

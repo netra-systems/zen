@@ -9,10 +9,10 @@ from typing import Dict, Any
 from starlette.websockets import WebSocketDisconnect
 from langchain_core.messages import SystemMessage
 
-from app.schemas import SubAgentUpdate, SubAgentState
-from app.schemas.registry import WebSocketMessage, WebSocketMessageType
-from app.agents.error_handler import global_error_handler, ErrorContext, WebSocketError
-from app.logging_config import central_logger
+from netra_backend.app.schemas import SubAgentUpdate, SubAgentState
+from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
+from netra_backend.app.agents.error_handler import global_error_handler, ErrorContext, WebSocketError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock
 
 from netra_backend.app.core.async_resource_manager import AsyncResourceManager
-from tests.helpers.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     create_mock_resources,
     register_test_resources,
     create_failing_callback,

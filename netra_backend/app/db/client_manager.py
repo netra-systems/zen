@@ -6,7 +6,7 @@ Manages all database clients and provides unified interface.
 from contextlib import asynccontextmanager
 from typing import Any, Dict, AsyncGenerator
 
-from app.core.circuit_breaker import circuit_registry
+from netra_backend.app.core.circuit_breaker import circuit_registry
 from netra_backend.app.client_postgres import ResilientDatabaseClient
 from netra_backend.app.client_clickhouse import ClickHouseDatabaseClient
 

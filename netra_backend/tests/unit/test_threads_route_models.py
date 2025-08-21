@@ -1,7 +1,7 @@
 """Tests for router configuration and Pydantic models - split from test_threads_route.py"""
 
 import pytest
-from app.routes.threads_route import router, ThreadCreate, ThreadUpdate, ThreadResponse
+from netra_backend.app.routes.threads_route import router, ThreadCreate, ThreadUpdate, ThreadResponse
 
 
 class TestRouterConfiguration:

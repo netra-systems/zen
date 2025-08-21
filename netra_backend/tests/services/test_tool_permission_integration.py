@@ -6,10 +6,10 @@ Functions refactored to ≤8 lines each using helper functions
 import pytest
 from datetime import datetime, UTC
 from unittest.mock import patch
-from app.services.tool_permission_service import ToolPermissionService
-from app.schemas.ToolPermission import ToolExecutionContext, BusinessRequirement
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from app.tests.helpers.tool_permission_helpers import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, BusinessRequirement
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     create_user_plan,
     create_heavy_usage_context,
@@ -20,7 +20,7 @@ from app.tests.helpers.tool_permission_helpers import (
     assert_missing_permissions,
     assert_business_requirements_result
 )
-from app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+from netra_backend.app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 
 @pytest.fixture

@@ -21,27 +21,27 @@ focused modules under 300 lines each, meeting architectural requirements.
 """
 
 # Import all exception classes from their focused modules for backward compatibility
-from app.core.error_codes import ErrorCode, ErrorSeverity
-from app.core.exceptions_base import ErrorDetails, NetraException
-from app.core.exceptions_config import ConfigurationError, ValidationError
-from app.core.exceptions_auth import (
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
+from netra_backend.app.core.exceptions_config import ConfigurationError, ValidationError
+from netra_backend.app.core.exceptions_auth import (
     AuthenticationError, AuthorizationError, TokenExpiredError, TokenInvalidError, NetraSecurityException
 )
-from app.core.exceptions_database import (
+from netra_backend.app.core.exceptions_database import (
     DatabaseError, DatabaseConnectionError, RecordNotFoundError, 
     RecordAlreadyExistsError, DatabaseConstraintError as ConstraintViolationError
 )
-from app.core.exceptions_service import (
+from netra_backend.app.core.exceptions_service import (
     ServiceError, ServiceTimeoutError, ExternalServiceError, ProcessingError
 )
-from app.core.exceptions_agent import (
+from netra_backend.app.core.exceptions_agent import (
     AgentError, AgentExecutionError, AgentTimeoutError, LLMError,
     LLMRequestError, LLMRateLimitError, AgentCoordinationError, AgentConfigurationError
 )
-from app.core.exceptions_websocket import (
+from netra_backend.app.core.exceptions_websocket import (
     WebSocketError, WebSocketConnectionError, WebSocketMessageError, WebSocketAuthenticationError
 )
-from app.core.exceptions_file import (
+from netra_backend.app.core.exceptions_file import (
     FileError, FileNotFoundError, FileAccessDeniedError, DataParsingError, DataValidationError
 )
 

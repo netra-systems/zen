@@ -6,8 +6,8 @@ Loading existing indexes and analyzing query performance.
 from typing import Set, List, Tuple
 from sqlalchemy import text
 
-from app.logging_config import central_logger
-from app.db.index_optimizer_core import IndexRecommendation
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.index_optimizer_core import IndexRecommendation
 
 logger = central_logger.get_logger(__name__)
 
@@ -40,7 +40,7 @@ class PostgreSQLPerformanceAnalyzer:
     """Analyze PostgreSQL query performance."""
     
     def __init__(self):
-        from app.db.postgres_query_analyzer import (
+        from netra_backend.app.db.postgres_query_analyzer import (
             PostgreSQLSlowQueryAnalyzer,
             PostgreSQLRecommendationProvider
         )

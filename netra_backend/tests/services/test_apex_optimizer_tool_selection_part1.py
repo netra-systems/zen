@@ -198,8 +198,8 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        from app.schemas import Workload, DataSource, TimeRange
-        from app.services.apex_optimizer_agent.models import BaseMessage
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",

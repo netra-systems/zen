@@ -42,7 +42,7 @@ def mock_llm_manager():
         }))
         
         # Mock structured LLM for triage agent
-        from app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage_sub_agent import (
             TriageResult, Priority, Complexity, UserIntent,
             ExtractedEntities, TriageMetadata
         )
@@ -97,7 +97,7 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={
         "status": "success",

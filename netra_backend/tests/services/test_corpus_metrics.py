@@ -173,7 +173,7 @@ class TestCoreMetricsCollector:
     """Test core metrics collector individually"""
     async def test_operation_timing(self):
         """Test operation timing functionality"""
-        from app.services.metrics.core_collector import CoreMetricsCollector
+        from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
         
         collector = CoreMetricsCollector()
         corpus_id = "test_timing"
@@ -194,7 +194,7 @@ class TestQualityMetricsCollector:
     """Test quality metrics collector individually"""
     async def test_quality_trend_tracking(self):
         """Test quality trend tracking"""
-        from app.services.metrics.quality_collector import QualityMetricsCollector
+        from netra_backend.app.services.metrics.quality_collector import QualityMetricsCollector
         
         collector = QualityMetricsCollector()
         corpus_id = "test_quality_trends"
@@ -222,8 +222,8 @@ class TestMetricsExporter:
     """Test metrics exporter functionality"""
     async def test_json_export(self):
         """Test JSON export functionality"""
-        from app.services.metrics.exporter import MetricsExporter
-        from app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.services.metrics.exporter import MetricsExporter
+        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
         
         exporter = MetricsExporter()
         
@@ -247,8 +247,8 @@ class TestMetricsExporter:
         assert "generation_time" in json_export
     async def test_prometheus_export(self):
         """Test Prometheus export functionality"""
-        from app.services.metrics.exporter import MetricsExporter
-        from app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.services.metrics.exporter import MetricsExporter
+        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
         
         exporter = MetricsExporter()
         

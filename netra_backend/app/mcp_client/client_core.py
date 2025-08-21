@@ -21,8 +21,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
-from app.core.exceptions import NetraException, ServiceError
-from app.core.unified_logging import UnifiedLogger
+from netra_backend.app.core.exceptions import NetraException, ServiceError
+from netra_backend.app.core.unified_logging import UnifiedLogger
 
 from netra_backend.app.models import (
     ConnectionStatus,

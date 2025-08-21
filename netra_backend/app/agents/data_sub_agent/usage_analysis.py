@@ -1,7 +1,7 @@
 """Usage pattern analysis operations."""
 
 from typing import Dict, List, Any
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class UsageAnalysisOperations:

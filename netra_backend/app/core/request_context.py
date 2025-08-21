@@ -7,8 +7,8 @@ import logging
 from typing import Any, Callable, Optional, Tuple
 from fastapi import Request
 
-from app.core.error_context import AsyncErrorContext as ErrorContext
-from app.logging_config import central_logger
+from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.logging_config import central_logger
 
 
 def generate_context_ids(request: Request) -> Tuple[str, Optional[str]]:

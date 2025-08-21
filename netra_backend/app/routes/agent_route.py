@@ -1,24 +1,24 @@
 """Agent routes - Main agent endpoint handlers."""
 from fastapi import APIRouter, Depends, Request, WebSocket
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from app.schemas import RequestModel
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from netra_backend.app.schemas import RequestModel
 from typing import Dict, Any, Optional
-from app.services.state_persistence import state_persistence_service
-from app.services.agent_service import get_agent_service, AgentService
-from app.dependencies import get_llm_manager, DbDep
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.agent_service import get_agent_service, AgentService
+from netra_backend.app.dependencies import get_llm_manager, DbDep
+from netra_backend.app.llm.llm_manager import LLMManager
 from pydantic import BaseModel, Field
-from app.routes.agent_route_validators import (
+from netra_backend.app.routes.agent_route_validators import (
     validate_agent_state, validate_agent_state_exists, 
     build_agent_status_response, build_agent_state_response,
     build_thread_runs_response, handle_run_agent_error,
     handle_agent_message_error
 )
-from app.routes.agent_route_streaming import (
+from netra_backend.app.routes.agent_route_streaming import (
     get_agent_service_for_streaming, create_streaming_response,
     stream_agent_response
 )
-from app.routes.agent_route_processors import (
+from netra_backend.app.routes.agent_route_processors import (
     process_multimodal_message, process_with_context, 
     process_with_fallback, execute_message_processing
 )

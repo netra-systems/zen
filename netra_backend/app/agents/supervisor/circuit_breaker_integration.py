@@ -6,12 +6,12 @@ Business Value: Prevents cascade failures and ensures system stability.
 
 from typing import Dict, Any, Callable, Awaitable
 
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
-from app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 logger = central_logger.get_logger(__name__)
 

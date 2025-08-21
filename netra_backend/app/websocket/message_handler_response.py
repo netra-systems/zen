@@ -6,10 +6,10 @@ Handles error responses and status reporting for message handlers.
 from datetime import datetime, UTC
 from typing import Dict, Any
 
-from app.logging_config import central_logger
-from app.core.json_utils import prepare_websocket_message
-from app.websocket.connection import ConnectionInfo
-from app.websocket.message_handler_config import MessageHandlerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.json_utils import prepare_websocket_message
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.message_handler_config import MessageHandlerConfig
 
 logger = central_logger.get_logger(__name__)
 

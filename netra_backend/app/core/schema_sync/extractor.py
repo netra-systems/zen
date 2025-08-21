@@ -8,9 +8,9 @@ Maintains 25-line function limit and single responsibility.
 from typing import Any, Dict, List, Type
 from datetime import datetime, UTC
 from pydantic import BaseModel
-from app.core.exceptions_service import ServiceError
-from app.core.error_context import ErrorContext
-from app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class SchemaExtractor:

@@ -6,8 +6,8 @@ Handles cleanup of old error records and recovery tracking.
 from typing import List
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
-from app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
 
 logger = central_logger.get_logger(__name__)
 

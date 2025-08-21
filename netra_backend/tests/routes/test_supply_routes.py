@@ -55,7 +55,7 @@ class TestSupplyRoute:
 
     async def test_supply_validation(self):
         """Test supply chain validation."""
-        from app.routes.supply import validate_supply_chain
+        from netra_backend.app.routes.supply import validate_supply_chain
         
         chain_data = {
             "suppliers": ["sup1", "sup2"],

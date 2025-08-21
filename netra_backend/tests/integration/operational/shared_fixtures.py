@@ -19,14 +19,14 @@ from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
 
 # Operational imports
-from app.services.unified_tool_registry.registry import UnifiedToolRegistry
-from app.services.supply_research_scheduler import SupplyResearchScheduler
-from app.core.error_recovery import ErrorRecoveryManager
-from app.services.quality_monitoring.service import QualityMonitoringService
-from app.services.demo.session_manager import SessionManager
-from app.core.health.interface import HealthInterface
-from app.services.permission_service import PermissionService
-from app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.services.unified_tool_registry.registry import UnifiedToolRegistry
+from netra_backend.app.services.supply_research_scheduler import SupplyResearchScheduler
+from netra_backend.app.core.error_recovery import ErrorRecoveryManager
+from netra_backend.app.services.quality_monitoring.service import QualityMonitoringService
+from netra_backend.app.services.demo.session_manager import SessionManager
+from netra_backend.app.core.health.interface import HealthInterface
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
 
 
 class MockOperationalInfrastructure:

@@ -6,7 +6,7 @@ Handles issue categorization, tracking, and analysis
 from typing import Dict, List, Any
 from collections import defaultdict
 
-from app.schemas.Metrics import QualityMetrics
+from netra_backend.app.schemas.Metrics import QualityMetrics
 
 
 class QualityIssueAnalyzer:

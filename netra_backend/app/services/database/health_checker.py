@@ -6,8 +6,8 @@ Performs periodic health checks on database connections.
 from typing import Dict, Any
 from datetime import datetime, timezone
 from sqlalchemy import text
-from app.db.postgres import async_engine
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_engine
+from netra_backend.app.logging_config import central_logger
 import asyncio
 import time
 

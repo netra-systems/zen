@@ -4,15 +4,15 @@ import pytest
 import uuid
 from unittest.mock import Mock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
-from app.config import get_config
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.services.agent_service import AgentService
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services.quality_gate_service import QualityGateService
-from app.services.corpus_service import CorpusService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.config import get_config
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.corpus_service import CorpusService
 import json
 
 
@@ -44,7 +44,7 @@ async def _mock_ask_llm(*args, **kwargs):
 
 async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
     """Mock structured LLM call with TriageResult support."""
-    from app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
     if schema == TriageResult or hasattr(schema, '__name__') and 'TriageResult' in schema.__name__:
         return TriageResult(
             category="optimization", severity="medium",
@@ -122,7 +122,7 @@ def mock_dependencies():
 @pytest.fixture
 def agent(mock_dependencies):
     """Create DataSubAgent instance with mocked dependencies for test compatibility"""
-    from app.agents.data_sub_agent.agent import DataSubAgent
+    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     from unittest.mock import patch
     
     llm_manager, tool_dispatcher = mock_dependencies

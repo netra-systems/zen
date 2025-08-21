@@ -10,8 +10,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from app.logging_config import central_logger
-from app.schemas.core_models import HealthCheckResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)
 

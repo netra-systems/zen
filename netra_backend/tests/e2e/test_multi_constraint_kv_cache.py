@@ -9,7 +9,7 @@ import pytest_asyncio
 import asyncio
 from typing import Dict, List
 
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     create_test_llm_manager, create_test_websocket_manager, create_agent_instances,
     build_multi_constraint_setup, execute_multi_constraint_workflow,
     create_kv_cache_audit_state, create_comprehensive_cache_state,

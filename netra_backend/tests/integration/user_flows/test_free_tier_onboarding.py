@@ -29,12 +29,12 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from app.models.user import User, UserPlan
-from app.models.thread import Thread
-from app.models.message import Message
-from app.services.user_service import UserService as UsageService
-from app.services.websocket_service import WebSocketService as WebSocketManager
-from app.services.agent_service import AgentService as AgentDispatcher
+from netra_backend.app.models.user import User, UserPlan
+from netra_backend.app.models.thread import Thread
+from netra_backend.app.models.message import Message
+from netra_backend.app.services.user_service import UserService as UsageService
+from netra_backend.app.services.websocket_service import WebSocketService as WebSocketManager
+from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
 from netra_backend.tests..test_helpers.user_flow_base import (
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance

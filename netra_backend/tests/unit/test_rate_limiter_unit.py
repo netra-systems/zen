@@ -17,8 +17,8 @@ from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, UTC
 import redis
 
-from app.services.tool_permissions.rate_limiter import ToolPermissionRateLimiter
-from app.schemas.ToolPermission import ToolExecutionContext
+from netra_backend.app.services.tool_permissions.rate_limiter import ToolPermissionRateLimiter
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
 
 
 # Test fixtures for setup

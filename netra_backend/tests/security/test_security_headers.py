@@ -43,7 +43,7 @@ class TestSecurityHeaders:
     
     def test_csp_nonce_generation(self, security_headers_middleware):
         """Test CSP nonce generation and injection."""
-        from app.middleware.security_headers import NonceGenerator
+        from netra_backend.app.middleware.security_headers import NonceGenerator
         
         # Test nonce generation
         nonce1 = NonceGenerator.generate_nonce()

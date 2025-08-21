@@ -49,7 +49,7 @@ def _create_latency_cost_tradeoff_state() -> DeepAgentState:
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
-    from app.tests.e2e.test_model_effectiveness_workflows import _execute_model_selection_workflow as execute_workflow
+    from netra_backend.app.tests.e2e.test_model_effectiveness_workflows import _execute_model_selection_workflow as execute_workflow
     return await execute_workflow(setup, state)
 
 
@@ -107,13 +107,13 @@ class TestModelSelectionDataFlow:
 
 def _create_model_effectiveness_state() -> DeepAgentState:
     """Create state for model effectiveness analysis."""
-    from app.tests.e2e.test_model_effectiveness_workflows import _create_model_effectiveness_state as create_state
+    from netra_backend.app.tests.e2e.test_model_effectiveness_workflows import _create_model_effectiveness_state as create_state
     return create_state()
 
 
 def _create_gpt5_tool_selection_state() -> DeepAgentState:
     """Create state for GPT-5 tool selection."""
-    from app.tests.e2e.test_model_effectiveness_workflows import _create_gpt5_tool_selection_state as create_state
+    from netra_backend.app.tests.e2e.test_model_effectiveness_workflows import _create_gpt5_tool_selection_state as create_state
     return create_state()
 
 

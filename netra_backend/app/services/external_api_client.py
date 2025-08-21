@@ -12,11 +12,11 @@ from urllib.parse import urljoin
 import aiohttp
 from aiohttp import ClientSession, ClientTimeout, ClientError
 
-from app.core.circuit_breaker import (
+from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker, CircuitConfig, CircuitBreakerOpenError, circuit_registry
 )
-from app.core.async_retry_logic import with_retry
-from app.logging_config import central_logger
+from netra_backend.app.core.async_retry_logic import with_retry
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

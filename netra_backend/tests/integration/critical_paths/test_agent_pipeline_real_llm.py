@@ -35,8 +35,8 @@ from auth_integration.auth import get_current_user
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage, ServerMessage as WSResponse
 from netra_backend.app.schemas.llm_response_types import LLMResponse
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
-from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
+from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 
 logger = logging.getLogger(__name__)
 

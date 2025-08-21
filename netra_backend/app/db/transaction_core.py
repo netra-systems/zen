@@ -18,9 +18,9 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy import text
 
-from app.logging_config import central_logger
-from app.schemas.shared_types import RetryConfig
-from app.core.enhanced_retry_strategies import exponential_backoff_retry
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.core.enhanced_retry_strategies import exponential_backoff_retry
 from netra_backend.app.transaction_errors import classify_error, is_retryable_error
 from netra_backend.app.transaction_stats import TransactionMetrics, get_transaction_stats, generate_transaction_id
 

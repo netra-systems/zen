@@ -9,13 +9,13 @@ Business Value: Enables modern agent architecture compliance for admin tools.
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.schemas.admin_tool_types import (
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.schemas.admin_tool_types import (
     AdminToolType, AdminToolInfo, ToolStatus as AdminToolStatus
 )
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 
@@ -40,7 +40,7 @@ def check_user_and_db(dispatcher: "AdminToolDispatcher") -> bool:
 
 def enable_admin_tools(dispatcher: "AdminToolDispatcher") -> None:
     """Enable admin tools for authorized user with execution context"""
-    from app.services.permission_service import PermissionService
+    from netra_backend.app.services.permission_service import PermissionService
     if PermissionService.is_developer_or_higher(dispatcher.user):
         dispatcher.admin_tools_enabled = True
         _enable_with_monitoring(dispatcher)

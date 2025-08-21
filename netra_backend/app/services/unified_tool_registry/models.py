@@ -6,7 +6,7 @@ Contains the data models and schemas used by the tool registry system.
 from typing import Dict, List, Optional, Any, Callable
 from datetime import datetime, UTC
 from pydantic import BaseModel, Field
-from app.schemas.ToolPermission import PermissionCheckResult
+from netra_backend.app.schemas.ToolPermission import PermissionCheckResult
 
 
 class UnifiedTool(BaseModel):

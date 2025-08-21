@@ -20,7 +20,7 @@ import time
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import all the improved database components
 from netra_backend.app.fast_startup_connection_manager import (

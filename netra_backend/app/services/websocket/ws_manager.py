@@ -11,7 +11,7 @@ imports from app.services.websocket.ws_manager. The actual implementation is in 
 """
 
 # Import the actual WebSocket manager from its real location
-from app.ws_manager import (
+from netra_backend.app.ws_manager import (
     WebSocketManager,
     get_ws_manager,
     manager as ws_manager_instance

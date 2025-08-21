@@ -10,7 +10,7 @@ import hashlib
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
 from schemas import Corpus, CorpusCreate, CorpusUpdate
 from netra_backend.app.core.exceptions_base import NetraException
-from tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 @pytest.fixture

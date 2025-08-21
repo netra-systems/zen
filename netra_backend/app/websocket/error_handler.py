@@ -11,24 +11,24 @@ Business Value: Reduces WebSocket error recovery time by 60%.
 
 from typing import Dict, Any, Optional
 
-from app.websocket.connection import ConnectionInfo
-from app.websocket.error_types import WebSocketErrorInfo, ErrorSeverity
-from app.websocket.error_handler_config import ErrorHandlerConfig
-from app.websocket.error_handler_recovery import ErrorHandlerRecovery
-from app.websocket.error_handler_logging import ErrorHandlerLogger
-from app.websocket.error_handler_cleanup import ErrorHandlerCleanup
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.error_types import WebSocketErrorInfo, ErrorSeverity
+from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.websocket.error_handler_recovery import ErrorHandlerRecovery
+from netra_backend.app.websocket.error_handler_logging import ErrorHandlerLogger
+from netra_backend.app.websocket.error_handler_cleanup import ErrorHandlerCleanup
 
 # Modern agent architecture imports
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult,
     WebSocketManagerProtocol
 )
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 
 class ModernWebSocketErrorInterface(BaseExecutionInterface):
@@ -91,7 +91,7 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
         
     def _create_error_context(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> ExecutionContext:
         """Create execution context for error handling."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState(user_request="websocket_error_handling")
         state.websocket_error = error
         state.connection_info = conn_info

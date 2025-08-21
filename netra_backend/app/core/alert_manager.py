@@ -8,7 +8,7 @@ import time
 from typing import List, Dict, Any, Callable, Optional
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
 from netra_backend.app.health_types import AlertSeverity, RecoveryAction
 

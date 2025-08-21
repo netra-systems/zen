@@ -2,11 +2,11 @@
 
 from typing import Dict, List, Optional, Any
 import redis
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext, PermissionCheckResult
 )
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from app.logging_config import central_logger
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.permission_definitions import PermissionDefinitions
 from netra_backend.app.permission_checker import PermissionChecker
 from netra_backend.app.rate_limiter import RateLimiter
@@ -56,7 +56,7 @@ class ToolPermissionService:
 
     async def _get_user_plan(self, user_id: str) -> UserPlan:
         """Get user's current plan"""
-        from app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.UserPlan import PlanFeatures
         return UserPlan(
             user_id=user_id,
             tier=PlanTier.FREE,

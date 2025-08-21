@@ -8,9 +8,9 @@ from typing import Dict, Any
 from pydantic import ValidationError
 
 # Import both versions of DeepAgentState to test consistency
-from app.agents.state import DeepAgentState as AgentsDeepAgentState
-from app.schemas.agent_models import DeepAgentState as SchemaDeepAgentState
-from app.websocket.connection_executor import ConnectionOperationBuilder
+from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState as SchemaDeepAgentState
+from netra_backend.app.websocket.connection_executor import ConnectionOperationBuilder
 
 
 class TestDeepAgentStateRegression:
@@ -80,7 +80,7 @@ class TestAllStateModelsInit:
     
     def test_migration_state_init(self):
         """Test MigrationState initialization."""
-        from app.startup.migration_models import MigrationState
+        from netra_backend.app.startup.migration_models import MigrationState
         
         # Test with default initialization
         state = MigrationState()
@@ -90,7 +90,7 @@ class TestAllStateModelsInit:
         
     def test_langchain_agent_state_init(self):
         """Test LangChainAgentState initialization."""
-        from app.schemas.Agent import LangChainAgentState
+        from netra_backend.app.schemas.Agent import LangChainAgentState
         from langchain_core.messages import HumanMessage
         
         # Test with required fields
@@ -102,7 +102,7 @@ class TestAllStateModelsInit:
         
     def test_sub_agent_state_init(self):
         """Test SubAgentState initialization."""
-        from app.schemas.Agent import SubAgentState
+        from netra_backend.app.schemas.Agent import SubAgentState
         from langchain_core.messages import HumanMessage
         
         # Test with required fields
@@ -114,7 +114,7 @@ class TestAllStateModelsInit:
         
     def test_agent_state_from_apex_optimizer(self):
         """Test AgentState from apex_optimizer."""
-        from app.services.apex_optimizer_agent.models import AgentState
+        from netra_backend.app.services.apex_optimizer_agent.models import AgentState
         from langchain_core.messages import HumanMessage
         
         # Test with required fields
@@ -127,7 +127,7 @@ class TestAllStateModelsInit:
         
     def test_current_system_state_init(self):
         """Test CurrentSystemState initialization."""
-        from app.schemas.llm_config_types import CurrentSystemState
+        from netra_backend.app.schemas.llm_config_types import CurrentSystemState
         
         # Test with required fields
         state = CurrentSystemState(
@@ -141,7 +141,7 @@ class TestAllStateModelsInit:
         
     def test_system_state_diagnostic_init(self):
         """Test SystemState from diagnostics initialization."""
-        from app.schemas.diagnostic_types import SystemState
+        from netra_backend.app.schemas.diagnostic_types import SystemState
         
         # Should have sensible defaults
         state = SystemState()
@@ -155,7 +155,7 @@ class TestValidationErrorMessages:
     
     def test_missing_required_field_error_message(self):
         """Test error message when required field is missing."""
-        from app.schemas.Agent import LangChainAgentState
+        from netra_backend.app.schemas.Agent import LangChainAgentState
         
         with pytest.raises(ValidationError) as exc_info:
             # Missing required 'messages' field

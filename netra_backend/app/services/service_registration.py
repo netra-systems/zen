@@ -4,7 +4,7 @@ Provides functions to register services with the service locator.
 Follows 450-line limit with 25-line function limit.
 """
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.service_locator_core import ServiceLocator
 from netra_backend.app.service_interfaces import (
     IAgentService, IThreadService, IMessageHandlerService,
@@ -61,7 +61,7 @@ def _register_mcp_services(service_locator: ServiceLocator) -> None:
 
 def _register_thread_services(service_locator: ServiceLocator) -> None:
     """Register thread-related services."""
-    from app.services.thread_service import ThreadService
+    from netra_backend.app.services.thread_service import ThreadService
     
     service_locator.register(
         IThreadService,

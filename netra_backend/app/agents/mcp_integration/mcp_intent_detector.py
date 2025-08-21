@@ -9,11 +9,11 @@ from dataclasses import dataclass
 import re
 import time
 
-from app.logging_config import central_logger
-from app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 
 logger = central_logger.get_logger(__name__)
 
@@ -230,7 +230,7 @@ class MCPIntentDetector(AgentExecutionMixin):
     
     def _create_detection_context(self, request: str, run_id: str) -> ExecutionContext:
         """Create execution context for intent detection."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState(agent_name="MCPIntentDetector")
         state.current_request = request
         return self.create_execution_context(state, run_id)

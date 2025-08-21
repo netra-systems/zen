@@ -9,8 +9,8 @@ import warnings
 from typing import Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import schemas
-from app.logging_config import central_logger as logger
+from netra_backend.app import schemas
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.corpus import (
     CorpusService as ModularCorpusService,
     corpus_service,
@@ -37,7 +37,7 @@ from netra_backend.app.corpus_service_helpers import (
 
 def get_clickhouse_client():
     """Get ClickHouse client for database operations"""
-    from app.db.clickhouse import get_clickhouse_client as clickhouse_get_client
+    from netra_backend.app.db.clickhouse import get_clickhouse_client as clickhouse_get_client
     return clickhouse_get_client()
 
 

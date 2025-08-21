@@ -19,7 +19,7 @@ from netra_backend.app.services.quality_gate_service import (
 )
 from redis_manager import RedisManager
 from netra_backend.app.core.exceptions_base import NetraException
-from tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 class TestQualityMetricsDataclass:

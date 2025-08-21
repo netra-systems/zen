@@ -6,12 +6,12 @@ Manages database transactions and repositories in a single context.
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
-from app.logging_config import central_logger
-from app.db.postgres import async_session_factory, validate_session, get_session_validation_error
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.message_repository import MessageRepository
-from app.services.database.run_repository import RunRepository
-from app.services.database.reference_repository import ReferenceRepository
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_session_factory, validate_session, get_session_validation_error
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.run_repository import RunRepository
+from netra_backend.app.services.database.reference_repository import ReferenceRepository
 
 logger = central_logger.get_logger(__name__)
 

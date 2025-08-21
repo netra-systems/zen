@@ -6,10 +6,10 @@ import time
 from typing import Dict, Any, Optional, Tuple
 from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy import select, func
-from app.db.postgres import get_async_db
-from app.logging_config import central_logger
-from app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
-from app.clients.auth_client import auth_client
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
+from netra_backend.app.clients.auth_client import auth_client
 
 logger = central_logger.get_logger(__name__)
 
@@ -105,7 +105,7 @@ async def handle_legacy_email_lookup(security_service, db_session, user_id: str,
 
 async def log_empty_database_warning(db_session):
     """Log warning if database is empty."""
-    from app.db.models_postgres import User
+    from netra_backend.app.db.models_postgres import User
     user_count_result = await db_session.execute(select(func.count()).select_from(User))
     user_count = user_count_result.scalar()
     if user_count == 0:

@@ -5,8 +5,8 @@ Manages FastAPI application startup and shutdown lifecycle.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.startup_module import run_complete_startup
-from app.shutdown import run_complete_shutdown
+from netra_backend.app.startup_module import run_complete_startup
+from netra_backend.app.shutdown import run_complete_shutdown
 
 
 @asynccontextmanager

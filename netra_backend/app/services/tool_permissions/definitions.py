@@ -1,6 +1,6 @@
 # Tool Permission Definitions Module
 from typing import Dict
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     ToolPermission, PermissionLevel, BusinessRequirement, RateLimit
 )
 

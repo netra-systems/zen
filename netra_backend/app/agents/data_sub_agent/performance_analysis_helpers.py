@@ -9,7 +9,7 @@ Business Value: Modular performance analysis utilities.
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class PerformanceAnalysisHelpers:

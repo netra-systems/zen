@@ -21,13 +21,13 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
-from app.routes.websocket_enhanced import (
+from netra_backend.app.routes.websocket_enhanced import (
     DatabaseConnectionPool, 
     WebSocketConnectionManager, 
     db_pool
 )
-from app.websocket.unified.manager import UnifiedWebSocketManager
-from app.core.websocket_cors import WebSocketCORSHandler, SECURITY_CONFIG
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.core.websocket_cors import WebSocketCORSHandler, SECURITY_CONFIG
 
 
 class TestDatabaseConnectionPooling:

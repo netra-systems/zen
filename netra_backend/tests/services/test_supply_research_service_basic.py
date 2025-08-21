@@ -9,8 +9,8 @@ from decimal import Decimal
 from typing import List, Optional
 from unittest.mock import MagicMock, patch
 
-from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import AISupplyItem, ResearchSession
+from netra_backend.app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.db.models_postgres import AISupplyItem, ResearchSession
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ Each function must be ≤8 lines as per architecture requirements.
 import time
 import uuid
 from typing import Dict, List, Any, Optional
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.observability_flow_builders import FlowDataBuilder
 from netra_backend.app.observability_todo_tracker import TodoTracker
 

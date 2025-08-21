@@ -7,11 +7,11 @@ Business Value: Modular configuration for maintainability.
 """
 
 from typing import Dict, Any
-from app.agents.config import agent_config
-from app.core.reliability import CircuitBreakerConfig, RetryConfig
-from app.schemas.shared_types import RetryConfig as ModernRetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
-from app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.core.reliability import CircuitBreakerConfig, RetryConfig
+from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
 
 class DataSubAgentConfigurationManager:

@@ -6,8 +6,8 @@ Decomposes large functions into 25-line focused helpers.
 from typing import Dict, List, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import schemas
-from app.logging_config import central_logger as logger
+from netra_backend.app import schemas
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def validate_corpus_creation_params(db: AsyncSession, corpus_data: schemas.CorpusCreate, user_id: str) -> None:

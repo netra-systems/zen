@@ -6,11 +6,11 @@ Each function must be ≤8 lines as per architecture requirements.
 
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone
-from app.config import settings
-from app.services.llm_cache_core import LLMCacheCore
-from app.services.llm_cache_stats import LLMCacheStats
-from app.services.llm_cache_metrics import LLMCacheMetrics
-from app.logging_config import central_logger
+from netra_backend.app.config import settings
+from netra_backend.app.services.llm_cache_core import LLMCacheCore
+from netra_backend.app.services.llm_cache_stats import LLMCacheStats
+from netra_backend.app.services.llm_cache_metrics import LLMCacheMetrics
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

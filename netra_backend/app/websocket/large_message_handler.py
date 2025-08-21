@@ -26,8 +26,8 @@ from enum import Enum
 from typing import Dict, Any, List, Optional, Union, AsyncIterator, Callable
 import base64
 
-from app.logging_config import central_logger
-from app.core.network_constants import ServicePorts
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.network_constants import ServicePorts
 
 logger = central_logger.get_logger(__name__)
 

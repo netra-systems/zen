@@ -8,7 +8,7 @@ import asyncio
 from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.metrics_collector import MetricsCollector
 from netra_backend.app.performance_alerting import PerformanceAlertManager  
 from netra_backend.app.dashboard import PerformanceDashboard, OperationMeasurement, SystemOverview

@@ -69,7 +69,7 @@ class TokenUsage(BaseModel):
     
     def _create_cost_calculator(self):
         """Create cost calculator instance."""
-        from app.services.cost_calculator import create_cost_calculator
+        from netra_backend.app.services.cost_calculator import create_cost_calculator
         return create_cost_calculator()
     
     def _calculate_default_cost(self, calculator) -> float:

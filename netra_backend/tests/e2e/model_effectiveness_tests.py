@@ -6,8 +6,8 @@ Tests for model effectiveness analysis workflows
 import pytest
 from typing import Dict, List
 
-from app.agents.state import DeepAgentState, AgentMetadata
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
+from netra_backend.app.schemas import SubAgentLifecycle
 
 
 class TestModelEffectivenessAnalysis:

@@ -5,7 +5,7 @@ from typing import Dict, Any
 from datetime import datetime, UTC
 
 from netra_backend.app.exceptions import ServiceError
-from app.schemas.shared_types import ErrorContext
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.interfaces_service import (
     BaseServiceInterface, 
     ServiceHealth, 

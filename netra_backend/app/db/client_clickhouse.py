@@ -9,8 +9,8 @@ import hashlib
 import time
 from typing import Any, Dict, List, Optional, Union
 
-from app.core.circuit_breaker import CircuitBreakerOpenError
-from app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.client_config import CircuitBreakerManager, DatabaseClientConfig
 
 logger = central_logger.get_logger(__name__)
@@ -103,7 +103,7 @@ class ClickHouseQueryExecutor:
     async def create_clickhouse_query_executor(query: str, params: Optional[Dict[str, Any]]):
         """Create ClickHouse query executor function."""
         async def _execute_ch_query() -> List[Dict[str, Any]]:
-            from app.db.clickhouse import get_clickhouse_client
+            from netra_backend.app.db.clickhouse import get_clickhouse_client
             async with get_clickhouse_client() as ch_client:
                 return await ch_client.execute_query(query, params)
         return _execute_ch_query

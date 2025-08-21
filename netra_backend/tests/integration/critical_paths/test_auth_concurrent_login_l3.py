@@ -6,8 +6,8 @@ Tests handling of concurrent login attempts and session management
 import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
-from app.services.auth_service import AuthService
-from app.core.config import settings
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.core.config import settings
 import time
 
 

@@ -9,8 +9,8 @@ import uuid
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.services.corpus_service import CorpusStatus
-from app import schemas
+from netra_backend.app.services.corpus_service import CorpusStatus
+from netra_backend.app import schemas
 from netra_backend.tests.test_synthetic_data_service_fixtures import *
 
 

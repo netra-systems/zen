@@ -10,15 +10,15 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor.execution_context import (
     ExecutionStrategy,
     AgentExecutionContext,
     AgentExecutionResult
 )
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 
 def create_supervisor_mocks():
@@ -283,7 +283,7 @@ def assert_contains_error(error_message: str, expected_substring: str):
 
 def _create_triage_result(return_data: Dict[str, Any]):
     """Create triage result from return data."""
-    from app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
     triage_dict = return_data.get('triage_result', {'message_type': 'query'})
     if isinstance(triage_dict, dict):
         return _build_triage_result_from_dict(TriageResult, triage_dict)
@@ -308,7 +308,7 @@ def _create_triage_execute_func(triage_result):
 
 def _create_optimizations_result(return_data: Dict[str, Any]):
     """Create optimizations result from return data."""
-    from app.agents.state import OptimizationsResult
+    from netra_backend.app.agents.state import OptimizationsResult
     opt_dict = _prepare_optimizations_dict(return_data)
     return OptimizationsResult(**opt_dict)
 
@@ -333,7 +333,7 @@ def _create_optimization_execute_func(optimizations_result):
 
 def _create_data_result(return_data: Dict[str, Any]):
     """Create data result from return data."""
-    from app.schemas.shared_types import AnomalyDetectionResponse
+    from netra_backend.app.schemas.shared_types import AnomalyDetectionResponse
     data_dict = return_data.get('data_result', {'processed': True})
     if isinstance(data_dict, dict):
         confidence_score = _get_data_confidence_score(data_dict)
@@ -352,7 +352,7 @@ def _get_data_confidence_score(data_dict: Dict[str, Any]) -> float:
 
 def _create_anomaly_detection_response(data_dict: Dict[str, Any], confidence_score: float):
     """Create anomaly detection response."""
-    from app.schemas.shared_types import AnomalyDetectionResponse
+    from netra_backend.app.schemas.shared_types import AnomalyDetectionResponse
     summary = f"Analysis complete: {data_dict.get('analysis', {}).get('trends', 'processed')}"
     return AnomalyDetectionResponse(
         summary=summary,
@@ -387,7 +387,7 @@ def _create_success_state(agent_name: str, success_data: Dict[str, Any]):
 
 def _process_triage_success_data(success_data: Dict[str, Any]) -> Dict[str, Any]:
     """Process triage success data."""
-    from app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
     triage_dict = success_data['triage_result']
     if isinstance(triage_dict, dict):
         category = "success" if triage_dict.get('success') else triage_dict.get('message_type', 'query')

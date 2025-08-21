@@ -7,8 +7,8 @@ Handles immutable table constraints through compensation strategies.
 from datetime import datetime
 from typing import Dict
 
-from app.db.clickhouse import get_clickhouse_client
-from app.logging_config import central_logger
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.rollback_manager_core import RollbackOperation, RollbackState
 
 logger = central_logger.get_logger(__name__)

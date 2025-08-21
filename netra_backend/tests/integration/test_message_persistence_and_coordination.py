@@ -31,7 +31,7 @@ class TestMessagePersistence:
     
     async def test_message_saved_before_processing(self, db_session):
         """Ensure messages persist before agent processing."""
-        from app.services.message_service import MessageService
+        from netra_backend.app.services.message_service import MessageService
         
         message_service = Mock(spec=MessageService)
         message_service.save_message = AsyncMock(return_value={
@@ -72,7 +72,7 @@ class TestMessagePersistence:
     
     async def test_message_queue_durability(self):
         """Test message queue persists during processing."""
-        from app.services.queue_service import QueueService
+        from netra_backend.app.services.queue_service import QueueService
         
         queue = Mock(spec=QueueService)
         queue.enqueue = AsyncMock()
@@ -95,7 +95,7 @@ class TestMultiAgentCoordination:
     
     async def test_agent_orchestration_flow(self):
         """Test supervisor orchestrates multiple agents."""
-        from app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
         # Mock agents
         mock_agents = {
@@ -172,7 +172,7 @@ class TestSessionStateSync:
     
     async def test_session_sync_auth_to_backend(self):
         """Test session syncs from auth service to backend."""
-        from app.services.session_service import SessionService
+        from netra_backend.app.services.session_service import SessionService
         
         session_service = Mock(spec=SessionService)
         session_service.sync_session = AsyncMock(return_value=True)
@@ -196,7 +196,7 @@ class TestSessionStateSync:
     
     async def test_redis_session_consistency(self):
         """Test Redis maintains session consistency."""
-        from app.services.redis_manager import RedisManager
+        from netra_backend.app.services.redis_manager import RedisManager
         
         redis = Mock(spec=RedisManager)
         redis.set = AsyncMock(return_value=True)
@@ -220,7 +220,7 @@ class TestSessionStateSync:
     
     async def test_websocket_state_synchronization(self):
         """Test WebSocket connection state syncs across services."""
-        from app.ws_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.sync_connection_state = AsyncMock()

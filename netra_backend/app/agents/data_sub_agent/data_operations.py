@@ -14,13 +14,13 @@ import time
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.performance_analysis import PerformanceAnalysisOperations
 from netra_backend.app.anomaly_detection import AnomalyDetectionOperations
 from netra_backend.app.correlation_analysis import CorrelationAnalysisOperations

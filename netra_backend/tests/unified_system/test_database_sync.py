@@ -17,10 +17,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text, select
 
-from app.db.models_postgres import Thread, Message, User
-from app.ws_manager import WebSocketManager
-from app.schemas.websocket_message_types import ServerMessage
-from app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.db.models_postgres import Thread, Message, User
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.tests.fixtures import (
     test_user, test_database, clean_database_state
 )

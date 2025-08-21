@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Optional, Any
 
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse, UsagePattern
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse, UsagePattern
 
 
 class CorpusOperations:

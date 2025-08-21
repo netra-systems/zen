@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, Dict
 
-from app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.registry import WebSocketMessage
 
 
 class BatchStrategy(str, Enum):

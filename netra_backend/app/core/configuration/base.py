@@ -18,9 +18,9 @@ from functools import lru_cache
 from datetime import datetime
 from pydantic import ValidationError
 
-from app.schemas.Config import AppConfig
-from app.logging_config import central_logger as logger
-from app.core.exceptions_config import ConfigurationError
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_config import ConfigurationError
 
 from netra_backend.app.database import DatabaseConfigManager
 from netra_backend.app.services import ServiceConfigManager  
@@ -110,7 +110,7 @@ class UnifiedConfigManager:
     
     def _get_config_class_for_environment(self) -> type:
         """Get configuration class for current environment."""
-        from app.configuration.schemas import (
+        from netra_backend.app.configuration.schemas import (
             DevelopmentConfig, StagingConfig, 
             ProductionConfig, NetraTestingConfig
         )

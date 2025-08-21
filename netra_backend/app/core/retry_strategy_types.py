@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
 
-from app.core.error_recovery import RecoveryContext
-from app.schemas.shared_types import RetryConfig, BackoffStrategy, JitterType
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.schemas.shared_types import RetryConfig, BackoffStrategy, JitterType
 
 
 @dataclass

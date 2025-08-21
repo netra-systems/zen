@@ -25,17 +25,17 @@ import statistics
 import aiohttp
 import websockets
 
-from app.services.messaging.message_queue import MessageQueue
-from app.services.messaging.queue_manager import QueueManager
-from app.services.messaging.dead_letter_queue import DeadLetterQueue
-from app.services.websocket.ws_manager import WebSocketManager
-from app.services.websocket.message_router import MessageRouter
+from netra_backend.app.services.messaging.message_queue import MessageQueue
+from netra_backend.app.services.messaging.queue_manager import QueueManager
+from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQueue
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.message_router import MessageRouter
 # from agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 SupervisorAgent = AsyncMock
-from app.schemas.registry import WebSocketMessage, QueueMessage
-from app.tests.unified.config import TEST_CONFIG
-from app.tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from netra_backend.app.schemas.registry import WebSocketMessage, QueueMessage
+from netra_backend.app.tests.unified.config import TEST_CONFIG
+from netra_backend.app.tests.unified.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

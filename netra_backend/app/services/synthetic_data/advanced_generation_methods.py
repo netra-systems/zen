@@ -6,8 +6,8 @@ import uuid
 import random
 from datetime import datetime, UTC
 from typing import Dict, List
-from app.core.exceptions_base import ValidationError
-from app.core.error_codes import ErrorCode
+from netra_backend.app.core.exceptions_base import ValidationError
+from netra_backend.app.core.error_codes import ErrorCode
 
 
 class AdvancedGenerationMethods:

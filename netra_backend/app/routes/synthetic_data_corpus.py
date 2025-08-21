@@ -7,13 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
 
-from app.services.corpus_service import corpus_service, ContentSource
-from app.dependencies import get_db_session, get_db_dependency
-from app.auth_integration.auth import get_current_user
-from app.db.models_postgres import User
-from app import schemas
+from netra_backend.app.services.corpus_service import corpus_service, ContentSource
+from netra_backend.app.dependencies import get_db_session, get_db_dependency
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app import schemas
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 
 router = APIRouter(prefix="/api/synthetic/corpus", tags=["synthetic_corpus"])
 

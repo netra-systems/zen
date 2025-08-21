@@ -5,10 +5,10 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, UTC
 from dataclasses import asdict
 
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
-from app.db.clickhouse import ClickHouseDatabase
-from app.services.quality_gate_service import ContentType, QualityMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
+from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.models import QualityAlert, QualityTrend

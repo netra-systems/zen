@@ -8,11 +8,11 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import asyncio
 
-from app.services.mcp_client_service import MCPClientService
-from app.mcp_client import MCPTool, MCPToolResult
-from app.agents.mcp_integration.context_manager import MCPAgentContext
-from app.core.exceptions_service import ServiceError
-from app.logging_config import central_logger
+from netra_backend.app.services.mcp_client_service import MCPClientService
+from netra_backend.app.mcp_client import MCPTool, MCPToolResult
+from netra_backend.app.agents.mcp_integration.context_manager import MCPAgentContext
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

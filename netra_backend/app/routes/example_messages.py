@@ -11,11 +11,11 @@ from fastapi.responses import JSONResponse
 from typing import Dict, Any
 import json
 
-from app.logging_config import central_logger
-from app.ws_manager import get_manager
-from app.handlers.example_message_handler import handle_example_message, get_example_message_handler
-from app.auth_dependencies import get_current_user_from_websocket
-from app.schemas.websocket_message_types import WebSocketMessage
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.handlers.example_message_handler import handle_example_message, get_example_message_handler
+from netra_backend.app.auth_dependencies import get_current_user_from_websocket
+from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/v1/example-messages", tags=["example-messages"])

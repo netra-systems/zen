@@ -7,10 +7,10 @@ Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 """
 
 from typing import Dict, Any, List, Tuple
-from app.schemas.Config import AppConfig
-from app.core.secret_manager import SecretManager
-from app.config_secrets import get_all_secret_mappings
-from app.logging_config import central_logger as logger
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.core.secret_manager import SecretManager
+from netra_backend.app.config_secrets import get_all_secret_mappings
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ConfigSecretsManager:

@@ -13,10 +13,10 @@ from typing import Dict, Any, Optional, Callable, Awaitable
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
-from app.core.circuit_breaker_types import CircuitState
-from app.schemas.reliability_types import CircuitBreakerMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+from netra_backend.app.core.circuit_breaker_types import CircuitState
+from netra_backend.app.schemas.reliability_types import CircuitBreakerMetrics
 
 logger = central_logger.get_logger(__name__)
 

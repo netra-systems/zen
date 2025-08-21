@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict
 from unittest.mock import patch, AsyncMock
 
-from app.db.clickhouse_query_fixer import validate_clickhouse_query
+from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
 
 class TestRealisticLogIngestion:

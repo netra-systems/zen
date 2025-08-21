@@ -5,8 +5,8 @@ Tests validation for different content types and scenarios
 
 import pytest
 from netra_backend.app.services.quality_gate_service import ContentType
-from tests.helpers.quality_gate_fixtures import redis_mock, quality_service
-from tests.helpers.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
+from netra_backend.tests.helpers.quality_gate_content import (
     get_data_analysis_content,
     get_complete_action_plan_content,
     get_good_error_message_content,
@@ -16,7 +16,7 @@ from tests.helpers.quality_gate_content import (
     get_hallucination_risk_content,
     get_triage_content
 )
-from tests.helpers.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_quantification_metrics,
     assert_action_plan_completeness,
     assert_error_message_clarity,

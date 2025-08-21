@@ -19,9 +19,9 @@ from datetime import datetime, timezone
 
 from fastapi import WebSocket
 
-from app.logging_config import central_logger
-from app.websocket.connection import ConnectionInfo
-from app.websocket.enhanced_lifecycle_manager import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.enhanced_lifecycle_manager import (
     EnhancedLifecycleManager,
     HeartbeatConfig,
     ConnectionPool,

@@ -11,9 +11,9 @@ import logging
 from beartype import beartype
 from beartype.roar import BeartypeException
 
-from app.agents.triage_sub_agent.models import TriageResult
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from app.schemas.shared_types import AgentState
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.schemas.shared_types import AgentState
 
 T = TypeVar('T')
 F = TypeVar('F', bound=Callable[..., Any])

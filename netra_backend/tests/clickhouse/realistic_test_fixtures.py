@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
-from app.db.clickhouse_query_fixer import (
+from netra_backend.app.db.clickhouse_query_fixer import (
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
     ClickHouseQueryInterceptor

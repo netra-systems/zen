@@ -10,8 +10,8 @@ from datetime import datetime, timezone
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from app.logging_config import central_logger
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 

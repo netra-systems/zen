@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.db.base import Base
-from app.config import settings
+from netra_backend.app.db.base import Base
+from netra_backend.app.config import settings
 from netra_backend.tests.test_harness import UnifiedTestHarness
 from netra_backend.tests.mock_services import ServiceRegistry, MockOAuthProvider, MockLLMService, MockWebSocketServer
 

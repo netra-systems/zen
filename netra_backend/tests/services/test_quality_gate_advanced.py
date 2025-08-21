@@ -7,7 +7,7 @@ import pytest
 import hashlib
 from unittest.mock import patch
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
-from tests.helpers.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     redis_mock,
     quality_service,
     create_test_quality_metrics,
@@ -21,12 +21,12 @@ from tests.helpers.quality_gate_fixtures import (
     setup_domain_content_for_recognition,
     setup_content_type_test_cases
 )
-from tests.helpers.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
     get_brief_optimization_contents
 )
-from tests.helpers.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_cache_key_format,
     assert_caching_identical_results,
     assert_weighted_score_range,
@@ -87,7 +87,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_suggestions_for_issues(self, quality_service):
         """Test suggestion generation for various quality issues"""
-        from app.tests.helpers.quality_gate_fixtures import create_low_specificity_metrics
+        from netra_backend.app.tests.helpers.quality_gate_fixtures import create_low_specificity_metrics
         low_spec_metrics = create_low_specificity_metrics()
         
         suggestions = quality_service.validator.generate_suggestions(low_spec_metrics, ContentType.OPTIMIZATION)
@@ -95,7 +95,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_prompt_adjustments(self, quality_service):
         """Test prompt adjustment generation"""
-        from app.tests.helpers.quality_gate_fixtures import create_poor_metrics
+        from netra_backend.app.tests.helpers.quality_gate_fixtures import create_poor_metrics
         poor_metrics = create_poor_metrics()
         
         adjustments = quality_service.validator.generate_prompt_adjustments(poor_metrics)

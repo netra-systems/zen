@@ -13,12 +13,12 @@ from typing import Dict, List, Optional
 def get_clickhouse_client():
     """Get ClickHouse client - import wrapper for test patching compatibility"""
     # Import here to avoid circular imports while allowing test patching
-    import app.services.corpus_service as corpus_service_module
+    import netra_backend.app.services.corpus_service as corpus_service_module
     return corpus_service_module.get_clickhouse_client()
 from netra_backend.app...ws_manager import manager
 from netra_backend.app.base import CorpusNotAvailableError, ClickHouseOperationError
 from netra_backend.app.validation import ValidationManager
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class DocumentManager:

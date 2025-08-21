@@ -8,8 +8,8 @@ import time
 from unittest.mock import AsyncMock, Mock
 import uuid
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 
 def create_benchmark_supervisor(infrastructure, index):

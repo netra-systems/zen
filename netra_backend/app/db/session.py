@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator, Optional
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.postgres import async_session_factory, get_async_db
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_session_factory, get_async_db
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

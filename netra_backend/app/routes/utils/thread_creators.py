@@ -1,8 +1,8 @@
 """Thread creation utilities."""
 from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database.thread_repository import ThreadRepository
-from app.routes.utils.thread_builders import build_thread_response
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.routes.utils.thread_builders import build_thread_response
 import time
 import uuid
 
@@ -33,8 +33,8 @@ async def create_thread_record(db: AsyncSession, thread_id: str, metadata: Dict)
 
 async def create_thread_repositories():
     """Create thread and message repositories."""
-    from app.services.database.thread_repository import ThreadRepository
-    from app.services.database.message_repository import MessageRepository
+    from netra_backend.app.services.database.thread_repository import ThreadRepository
+    from netra_backend.app.services.database.message_repository import MessageRepository
     return ThreadRepository(), MessageRepository()
 
 

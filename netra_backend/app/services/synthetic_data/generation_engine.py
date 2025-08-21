@@ -8,11 +8,11 @@ from datetime import datetime, UTC
 from typing import Dict, List, Optional, AsyncGenerator, Union, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.schemas.Generation import SyntheticDataGenParams
-    from app.schemas.data_ingestion_types import IngestionConfig
+    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
+    from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
 
-from app import schemas
-from app.logging_config import central_logger
+from netra_backend.app import schemas
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.content_generator import (
     select_workload_type, generate_timestamp, select_agent_type,

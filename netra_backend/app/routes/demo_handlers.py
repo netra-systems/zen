@@ -1,32 +1,32 @@
 """Demo route handlers - Main exports."""
 
 # Import all functions from focused modules
-from app.routes.demo_handlers_chat import (
+from netra_backend.app.routes.demo_handlers_chat import (
     handle_demo_chat, execute_demo_chat_flow, get_or_create_session_id,
     execute_demo_chat_service, process_chat_request, create_chat_tracking_data,
     add_chat_tracking_task, track_chat_interaction, create_chat_response
 )
-from app.routes.demo_handlers_roi import (
+from netra_backend.app.routes.demo_handlers_roi import (
     handle_roi_calculation, execute_roi_calculation_flow, execute_roi_calculation,
     calculate_roi_metrics, create_roi_tracking_data, add_roi_tracking_task,
     track_roi_calculation
 )
-from app.routes.demo_handlers_templates import (
+from netra_backend.app.routes.demo_handlers_templates import (
     handle_industry_templates, generate_metrics_from_service,
     handle_synthetic_metrics, build_demo_metrics_response
 )
-from app.routes.demo_handlers_export import (
+from netra_backend.app.routes.demo_handlers_export import (
     handle_export_report, execute_export_flow, execute_report_generation,
     build_report_params, generate_demo_report, create_export_tracking_data,
     add_export_tracking_task, track_report_export, create_export_response
 )
-from app.routes.demo_handlers_session import (
+from netra_backend.app.routes.demo_handlers_session import (
     handle_session_status, handle_session_feedback
 )
-from app.routes.demo_handlers_analytics import (
+from netra_backend.app.routes.demo_handlers_analytics import (
     handle_demo_analytics, get_analytics_from_service
 )
-from app.routes.demo_handlers_utils import (
+from netra_backend.app.routes.demo_handlers_utils import (
     log_and_raise_error, raise_not_found_error, validate_admin_access,
     build_feedback_success_response, build_tracking_params
 )

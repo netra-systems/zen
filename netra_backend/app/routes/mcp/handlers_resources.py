@@ -2,11 +2,11 @@
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
 
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.models import MCPResourceReadRequest
-from app.routes.mcp.helpers import extract_resources_from_app, get_resource_function
-from app.routes.mcp.utils import (
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.models import MCPResourceReadRequest
+from netra_backend.app.routes.mcp.helpers import extract_resources_from_app, get_resource_function
+from netra_backend.app.routes.mcp.utils import (
     build_list_response, handle_list_error,
     build_resource_result, handle_resource_error
 )

@@ -8,10 +8,10 @@ from typing import Dict, List, Any, Optional, Tuple
 from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.app.schemas.core_enums import WebSocketMessageType, AgentStatus
 from logging_config import central_logger
-from tests.services.test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 import asyncio
 from routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect

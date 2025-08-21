@@ -8,7 +8,7 @@ Business Value: Modular helper functions for reliable fallback operations.
 
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -164,7 +164,7 @@ class FallbackSystemIntegrations:
     @staticmethod
     async def calculate_system_baseline_metrics() -> Dict[str, Any]:
         """Calculate baseline metrics from system monitoring."""
-        from app.core.system_health_monitor import system_health_monitor
+        from netra_backend.app.core.system_health_monitor import system_health_monitor
         system_stats = await system_health_monitor.get_current_stats()
         return FallbackSystemIntegrations._build_baseline_metrics(system_stats)
     
@@ -184,7 +184,7 @@ class FallbackSystemIntegrations:
     @staticmethod
     async def derive_patterns_from_system_metrics() -> Dict[str, Any]:
         """Derive patterns from system-level metrics."""
-        from app.core.system_health_monitor import system_health_monitor
+        from netra_backend.app.core.system_health_monitor import system_health_monitor
         system_usage = await system_health_monitor.get_usage_patterns()
         return FallbackSystemIntegrations._build_system_patterns(system_usage)
     
@@ -204,11 +204,11 @@ class FallbackSystemIntegrations:
     @staticmethod
     async def get_current_resource_usage() -> Dict[str, float]:
         """Get current resource usage for cost calculation."""
-        from app.core.system_health_monitor import system_health_monitor
+        from netra_backend.app.core.system_health_monitor import system_health_monitor
         return await system_health_monitor.get_resource_usage()
     
     @staticmethod
     async def get_recent_error_logs() -> List[Dict]:
         """Get recent error logs with proper error handling."""
-        from app.core.error_logging import error_logger
+        from netra_backend.app.core.error_logging import error_logger
         return await error_logger.get_recent_errors(hours=24)

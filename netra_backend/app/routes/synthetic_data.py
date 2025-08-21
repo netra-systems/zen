@@ -9,22 +9,22 @@ from typing import List, Optional, Dict, Tuple
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-from app import schemas
-from app.services.synthetic_data_service import synthetic_data_service
-from app.dependencies import get_db_session, get_db_dependency, DbDep
-from app.auth_integration.auth import get_current_user
-from app.schemas.shared_types import BaseAgentConfig
-from app.db.models_postgres import User
+from netra_backend.app import schemas
+from netra_backend.app.services.synthetic_data_service import synthetic_data_service
+from netra_backend.app.dependencies import get_db_session, get_db_dependency, DbDep
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.schemas.shared_types import BaseAgentConfig
+from netra_backend.app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services import synthetic_data_service as sds
-from app.routes.utils.synthetic_data_helpers import (
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services import synthetic_data_service as sds
+from netra_backend.app.routes.utils.synthetic_data_helpers import (
     build_generation_config, execute_generation_safely, extract_result_fields,
     fetch_and_validate_job_status, extract_status_fields, cancel_job_safely,
     build_cancel_response, get_preview_samples_safely, calculate_characteristics,
     generate_test_user_data
 )
-from app.routes.utils.error_handlers import handle_service_error
+from netra_backend.app.routes.utils.error_handlers import handle_service_error
 import logging
 
 logger = logging.getLogger(__name__)

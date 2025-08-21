@@ -10,7 +10,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 from typing import List
 
-from app.schemas.Config import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 
 
 class LLMValidator:

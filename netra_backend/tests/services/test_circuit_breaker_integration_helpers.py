@@ -28,7 +28,7 @@ class TestSyntaxFix:
     def setup_method(self):
         """Set up test LLM client."""
         # Clean up any existing circuit breakers to ensure test isolation
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
         
         self.mock_llm_manager = MagicMock()
@@ -36,33 +36,33 @@ class TestSyntaxFix:
 
     def teardown_method(self):
         """Clean up after test."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
 
     def setup_method(self):
         """Set up test database client."""
         # Clean up any existing circuit breakers to ensure test isolation
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
         
         self.db_client = ResilientDatabaseClient()
 
     def teardown_method(self):
         """Clean up after test."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
 
     def setup_method(self):
         """Set up test HTTP client."""
         # Clean up any existing circuit breakers to ensure test isolation
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
         
         self.http_client = ResilientHTTPClient(base_url="https://api.example.com")
 
     def teardown_method(self):
         """Clean up after test."""
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
 
     def setup_method(self):

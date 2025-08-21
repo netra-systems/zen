@@ -12,11 +12,11 @@
 import time
 from typing import Optional, Dict, Any
 
-from app.logging_config import central_logger
-from app.llm.observability import log_agent_communication
-from app.agents.synthetic_data_generator import SyntheticDataResult, GenerationStatus
-from app.agents.synthetic_data_presets import WorkloadProfile, DataGenerationType
-from app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.observability import log_agent_communication
+from netra_backend.app.agents.synthetic_data_generator import SyntheticDataResult, GenerationStatus
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile, DataGenerationType
+from netra_backend.app.agents.state import DeepAgentState
 
 logger = central_logger.get_logger(__name__)
 

@@ -5,7 +5,7 @@ This module provides recovery strategies and recovery attempt management.
 
 from typing import Dict, Any, Optional, Callable, Awaitable, List
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agent_reliability_types import AgentError
 
 logger = central_logger.get_logger(__name__)

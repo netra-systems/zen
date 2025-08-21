@@ -6,10 +6,10 @@ Functions refactored to ≤8 lines each using helper functions
 import pytest
 from datetime import datetime, UTC
 from unittest.mock import patch
-from app.services.tool_permission_service import ToolPermissionService
-from app.schemas.ToolPermission import ToolExecutionContext
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from app.tests.helpers.tool_permission_helpers import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     create_user_plan,
     setup_mock_user_plan,

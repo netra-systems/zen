@@ -5,7 +5,7 @@ Intercepts and fixes ClickHouse queries with incorrect array syntax
 
 import re
 from typing import Tuple, Any, Dict
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 
@@ -209,7 +209,7 @@ class ClickHouseQueryInterceptor:
     async def _apply_llm_fixes(self, query: str) -> Tuple[str, bool]:
         """Apply LLM-specific query fixes."""
         try:
-            from app.agents.data_sub_agent.llm_query_detector import LLMQueryDetector
+            from netra_backend.app.agents.data_sub_agent.llm_query_detector import LLMQueryDetector
             fixed_query, metadata = LLMQueryDetector.validate_and_fix(query)
             return self._process_llm_fix_result(fixed_query, metadata)
         except ImportError:

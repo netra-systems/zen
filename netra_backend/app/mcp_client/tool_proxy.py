@@ -11,9 +11,9 @@ import asyncio
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
 
-from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
-from app.core.async_retry_logic import _retry_with_backoff
-from app.mcp_client.models import MCPTool, MCPToolResult, MCPConnection
+from netra_backend.app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
+from netra_backend.app.core.async_retry_logic import _retry_with_backoff
+from netra_backend.app.mcp_client.models import MCPTool, MCPToolResult, MCPConnection
 
 
 class MCPToolProxy:

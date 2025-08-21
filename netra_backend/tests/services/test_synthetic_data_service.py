@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.services.synthetic_data_service import (
+from netra_backend.app.services.synthetic_data_service import (
     SyntheticDataService,
     WorkloadCategory,
     GenerationStatus

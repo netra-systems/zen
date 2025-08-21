@@ -10,15 +10,15 @@ import time
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.core.exceptions_base import NetraException, ValidationError
-from app.core.system_health_monitor import system_health_monitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.core.exceptions_base import NetraException, ValidationError
+from netra_backend.app.core.system_health_monitor import system_health_monitor
 
 
 class CorrelationAnalyzer(BaseExecutionInterface):
@@ -84,7 +84,7 @@ class CorrelationAnalyzer(BaseExecutionInterface):
     def _create_analysis_context(self, user_id: int, metrics: List[str],
                                 time_range: Tuple[datetime, datetime]) -> ExecutionContext:
         """Create execution context for analysis."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         state.set_parameters({
             "user_id": user_id, "metrics": metrics, "time_range": time_range

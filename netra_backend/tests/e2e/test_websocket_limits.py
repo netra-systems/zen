@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import pytest
 import asyncio
 import websockets
-from tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
+from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
 class TestWebSocketLimits:
     """Test WebSocket connection limits"""
     

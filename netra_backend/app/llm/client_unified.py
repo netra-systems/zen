@@ -5,12 +5,12 @@ that provides core operations, streaming, health monitoring, and retry functiona
 """
 
 from typing import AsyncIterator, Dict, Any, Type, TypeVar
-from app.llm.llm_manager import LLMManager
-from app.llm.client_core import LLMCoreClient
-from app.llm.client_streaming import LLMStreamingClient
-from app.llm.client_health import LLMHealthMonitor
-from app.llm.client_retry import RetryableLLMClient
-from app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.client_core import LLMCoreClient
+from netra_backend.app.llm.client_streaming import LLMStreamingClient
+from netra_backend.app.llm.client_health import LLMHealthMonitor
+from netra_backend.app.llm.client_retry import RetryableLLMClient
+from netra_backend.app.schemas.llm_response_types import LLMResponse
 from pydantic import BaseModel
 
 T = TypeVar('T', bound=BaseModel)

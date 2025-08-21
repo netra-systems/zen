@@ -5,12 +5,12 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, 
     ExecutionStatus, WebSocketManagerProtocol
 )
-from app.agents.state import DeepAgentState
-from app.logging_config import central_logger as logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger as logger
 
 
 @dataclass

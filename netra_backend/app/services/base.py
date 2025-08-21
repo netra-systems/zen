@@ -9,17 +9,17 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.db.base import Base
-from app.core.service_interfaces import (
+from netra_backend.app.db.base import Base
+from netra_backend.app.core.service_interfaces import (
     BaseService,
     CRUDService,
     DatabaseService,
     ServiceHealth
 )
-from app.core.exceptions_database import RecordNotFoundError
-from app.core.exceptions_service import ServiceError
-from app.core.error_context import AsyncErrorContext as ErrorContext
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_database import RecordNotFoundError
+from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

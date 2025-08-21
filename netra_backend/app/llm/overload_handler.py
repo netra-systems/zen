@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
 from enum import Enum
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

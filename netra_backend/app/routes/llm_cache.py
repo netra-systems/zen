@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, Optional, List
-from app.services.llm_cache_service import llm_cache_service
-from app.logging_config import central_logger
+from netra_backend.app.services.llm_cache_service import llm_cache_service
+from netra_backend.app.logging_config import central_logger
 
 router = APIRouter()
 logger = central_logger.get_logger(__name__)

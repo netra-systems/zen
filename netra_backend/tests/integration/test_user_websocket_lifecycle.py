@@ -18,7 +18,7 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     generate_test_user_data, MockWebSocketManager
 )
 

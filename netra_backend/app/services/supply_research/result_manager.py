@@ -6,8 +6,8 @@ Handles retrieval and management of research results
 import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC, timedelta
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger as logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.scheduler_models import ResearchSchedule
 
 

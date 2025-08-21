@@ -7,9 +7,9 @@ for improved reliability in LLM operations.
 import asyncio
 import random
 from typing import Type, TypeVar
-from app.core.async_retry_logic import with_retry
-from app.llm.client_core import LLMCoreClient
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.core.async_retry_logic import with_retry
+from netra_backend.app.llm.client_core import LLMCoreClient
+from netra_backend.app.llm.llm_manager import LLMManager
 from pydantic import BaseModel
 
 T = TypeVar('T', bound=BaseModel)

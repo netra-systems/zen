@@ -7,13 +7,13 @@ following the pattern of other generation services.
 import json
 import os
 from typing import Dict, List, Any
-from app.schemas.Generation import DataIngestionParams
-from app.db.clickhouse import get_clickhouse_client
-from app.services.generation_job_manager import (
+from netra_backend.app.schemas.Generation import DataIngestionParams
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     validate_job_params
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

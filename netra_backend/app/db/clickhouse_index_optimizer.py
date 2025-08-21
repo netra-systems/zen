@@ -6,8 +6,8 @@ with proper async/await handling and modular architecture.
 
 from typing import Dict, List, Tuple, Any
 
-from app.logging_config import central_logger
-from app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 logger = central_logger.get_logger(__name__)
 

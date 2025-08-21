@@ -76,7 +76,7 @@ class TestSchemaValidationService:
     def test_agent_message_schema(self):
         """Test agent message schema."""
         # AgentMessage is an alias for AgentUpdatePayload
-        from app.schemas.core_enums import AgentStatus
+        from netra_backend.app.schemas.core_enums import AgentStatus
         agent_msg = AgentMessage(
             run_id="run-123",
             agent_id="test-agent", 

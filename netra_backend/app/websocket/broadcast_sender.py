@@ -6,9 +6,9 @@ Handles the low-level message sending to individual connections.
 from typing import Union, Dict, Any
 from starlette.websockets import WebSocketState
 
-from app.logging_config import central_logger
-from app.core.json_utils import prepare_websocket_message
-from app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.json_utils import prepare_websocket_message
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 
 logger = central_logger.get_logger(__name__)
 

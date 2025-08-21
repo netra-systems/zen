@@ -2,13 +2,13 @@
 
 from typing import Dict, Any, List, Optional
 from netra_backend.app.error_handlers import handle_service_error, handle_circuit_breaker_error
-from app.services.circuit_breaker_monitor import circuit_monitor, metrics_collector
+from netra_backend.app.services.circuit_breaker_monitor import circuit_monitor, metrics_collector
 
 
 async def delegate_circuit_dashboard() -> Dict[str, Any]:
     """Delegate circuit breaker dashboard request."""
     try:
-        from app.services.circuit_breaker_monitor import get_circuit_health_dashboard
+        from netra_backend.app.services.circuit_breaker_monitor import get_circuit_health_dashboard
         return await get_circuit_health_dashboard()
     except Exception as e:
         handle_circuit_breaker_error(e, "dashboard")
@@ -17,7 +17,7 @@ async def delegate_circuit_dashboard() -> Dict[str, Any]:
 async def delegate_circuit_status() -> Dict[str, Dict[str, Any]]:
     """Delegate circuit status request."""
     try:
-        from app.core.circuit_breaker import circuit_registry
+        from netra_backend.app.core.circuit_breaker import circuit_registry
         return await circuit_registry.get_all_status()
     except Exception as e:
         handle_circuit_breaker_error(e, "status")

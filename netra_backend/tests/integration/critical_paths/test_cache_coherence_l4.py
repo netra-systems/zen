@@ -24,7 +24,7 @@ import statistics
 import redis.asyncio as aioredis
 
 # from app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
-from app.services.cache.cache_manager import LLMCacheManager as CacheManager
+from netra_backend.app.services.cache.cache_manager import LLMCacheManager as CacheManager
 # from app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
 # Session cache replaced with mock
 from unittest.mock import AsyncMock

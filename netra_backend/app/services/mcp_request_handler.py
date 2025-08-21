@@ -6,7 +6,7 @@ Separated from main service to maintain 450-line module limit.
 """
 
 from typing import Dict, Any
-from app.logging_config import CentralLogger
+from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()
 

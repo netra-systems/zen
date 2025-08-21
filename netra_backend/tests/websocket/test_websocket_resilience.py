@@ -9,12 +9,12 @@ import time
 from typing import Dict, List, Any
 from unittest.mock import Mock, patch, AsyncMock
 
-from app.routes.websocket_enhanced import (
+from netra_backend.app.routes.websocket_enhanced import (
     connection_manager,
     handle_websocket_message_enhanced,
     send_error_message
 )
-from app.core.websocket_cors import WebSocketCORSHandler
+from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 
 
 @pytest.mark.asyncio
@@ -443,7 +443,7 @@ class TestWebSocketCORSResilience:
         
     async def test_cors_enforcement_in_connection(self):
         """Test CORS enforcement during connection establishment."""
-        from app.core.websocket_cors import validate_websocket_origin
+        from netra_backend.app.core.websocket_cors import validate_websocket_origin
         
         cors_handler = WebSocketCORSHandler(["http://localhost:3000"])
         

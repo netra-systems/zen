@@ -2,8 +2,8 @@
 Auth service health check endpoint.
 """
 from fastapi import APIRouter
-from app.clients.auth_client import auth_client
-from app.logging_config import central_logger
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.logging_config import central_logger
 
 router = APIRouter()
 logger = central_logger.get_logger(__name__)

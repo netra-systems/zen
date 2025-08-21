@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
 
-from app.core.health_types import AlertSeverity
+from netra_backend.app.core.health_types import AlertSeverity
 
 
 

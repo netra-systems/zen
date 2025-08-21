@@ -7,7 +7,7 @@ for WebSocket connections and associated data structures.
 import asyncio
 from typing import Dict, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo
 from netra_backend.app.memory_tracker import ConnectionMemoryTracker
 from netra_backend.app.memory_metrics import MemoryMetricsCollector, MemoryHealthChecker, MemoryStatsCollector

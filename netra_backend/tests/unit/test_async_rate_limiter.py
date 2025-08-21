@@ -12,7 +12,7 @@ import pytest
 import time
 from unittest.mock import patch
 
-from app.core.async_rate_limiter import AsyncRateLimiter
+from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 
 
 # Test fixtures for setup

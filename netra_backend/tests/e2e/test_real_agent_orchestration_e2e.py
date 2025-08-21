@@ -13,7 +13,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
-from tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 
 class TestRealAgentOrchestration:

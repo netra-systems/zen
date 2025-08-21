@@ -7,14 +7,14 @@ Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 """
 
 from typing import Dict, Any, Optional, Tuple, Callable
-from app.schemas.Config import AppConfig
-from app.config import get_config
-from app.config_loader import (
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.config import get_config
+from netra_backend.app.config_loader import (
     load_env_var, set_clickhouse_host, set_clickhouse_port,
     set_clickhouse_password, set_clickhouse_user, set_gemini_api_key,
     get_critical_vars_mapping
 )
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ConfigEnvVarsManager:
@@ -107,7 +107,7 @@ class ConfigEnvVarsManager:
             
     def _get_oauth_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get OAuth environment mappings."""
-        from app.core.auth_constants import CredentialConstants
+        from netra_backend.app.core.auth_constants import CredentialConstants
         return {
             CredentialConstants.GOOGLE_CLIENT_ID: ("oauth_config", "client_id"),
             CredentialConstants.GOOGLE_CLIENT_SECRET: ("oauth_config", "client_secret"),
@@ -115,12 +115,12 @@ class ConfigEnvVarsManager:
         
     def _get_llm_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get LLM-related mappings."""
-        from app.core.auth_constants import CredentialConstants
+        from netra_backend.app.core.auth_constants import CredentialConstants
         return {CredentialConstants.GEMINI_API_KEY: ("llm_configs.default", "api_key")}
         
     def _get_security_mappings(self) -> Dict[str, Tuple[None, str]]:
         """Get security-related mappings."""
-        from app.core.auth_constants import JWTConstants, CredentialConstants
+        from netra_backend.app.core.auth_constants import JWTConstants, CredentialConstants
         return {
             JWTConstants.JWT_SECRET_KEY: (None, "jwt_secret_key"),
             JWTConstants.FERNET_KEY: (None, "fernet_key"),
@@ -175,7 +175,7 @@ class ConfigEnvVarsManager:
     
     def _get_unified_config_value(self, unified_config, env_var: str) -> Optional[str]:
         """Get value from unified config based on environment variable name."""
-        from app.core.auth_constants import CredentialConstants, JWTConstants
+        from netra_backend.app.core.auth_constants import CredentialConstants, JWTConstants
         mapping = {
             CredentialConstants.GOOGLE_CLIENT_ID: lambda: unified_config.oauth_config.client_id,
             CredentialConstants.GOOGLE_CLIENT_SECRET: lambda: unified_config.oauth_config.client_secret,

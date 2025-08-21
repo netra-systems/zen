@@ -20,14 +20,14 @@ Target Segments: Growth & Enterprise (improved admin reliability).
 from typing import Dict, Any, Optional, Callable
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import User
-from app.logging_config import central_logger
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, AgentExecutionMixin
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, AgentExecutionMixin
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 logger = central_logger
 
@@ -93,7 +93,7 @@ class CorpusManagerHandler(ModernToolHandler):
     
     async def _handle_corpus_list(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle corpus listing"""
-        from app.services import corpus_service
+        from netra_backend.app.services import corpus_service
         from .tool_handler_helpers import create_corpus_list_response
         corpora = await corpus_service.list_corpora(db)
         return create_corpus_list_response(corpora)
@@ -146,7 +146,7 @@ class SyntheticGeneratorHandler(ModernToolHandler):
     
     async def _handle_synthetic_list_presets(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle listing synthetic data presets"""
-        from app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
         from .tool_handler_helpers import create_presets_list_response
         synthetic_service = SyntheticDataService(db)
         presets = await synthetic_service.list_presets()

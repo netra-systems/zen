@@ -27,8 +27,8 @@ import math
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from app.db.client_clickhouse import ClickHouseClient
-from app.core.health_checkers import HealthChecker
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.core.health_checkers import HealthChecker
 
 
 # Mock metrics aggregation components for L4 testing

@@ -5,8 +5,8 @@ and multi-agent system coordination.
 """
 
 from typing import Optional, Union
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 
 class AgentError(NetraException):
@@ -46,13 +46,13 @@ class AgentError(NetraException):
     
     def _convert_string_to_severity_enum(self, severity_value: str):
         """Convert string severity to enum."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         enum_match = self._find_matching_severity_enum(severity_value)
         return enum_match if enum_match else ErrorSeverity.MEDIUM
     
     def _find_matching_severity_enum(self, severity_value: str):
         """Find matching severity enum for string value."""
-        from app.core.error_codes import ErrorSeverity
+        from netra_backend.app.core.error_codes import ErrorSeverity
         for severity_enum in ErrorSeverity:
             if severity_enum.value == severity_value:
                 return severity_enum
@@ -61,7 +61,7 @@ class AgentError(NetraException):
     @property
     def category(self):
         """Get error category - default to PROCESSING for agent errors."""
-        from app.schemas.core_enums import ErrorCategory
+        from netra_backend.app.schemas.core_enums import ErrorCategory
         return getattr(self, '_category', ErrorCategory.PROCESSING)
     
     @category.setter

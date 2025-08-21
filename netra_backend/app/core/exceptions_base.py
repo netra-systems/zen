@@ -3,7 +3,7 @@
 from typing import Any, Dict, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, ConfigDict
-from app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 
 class ErrorDetails(BaseModel):

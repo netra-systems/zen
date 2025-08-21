@@ -5,8 +5,8 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 
 from typing import Dict, Any, Optional
-from app.llm.observability import log_llm_input, log_llm_output
-from app.services.llm_cache_service import llm_cache_service
+from netra_backend.app.llm.observability import log_llm_input, log_llm_output
+from netra_backend.app.services.llm_cache_service import llm_cache_service
 
 
 class LLMUtils:

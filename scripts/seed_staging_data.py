@@ -20,16 +20,16 @@ from faker import Faker
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.db.database import get_db, engine
-from app.schemas.userbase import UserBase
-from app.schemas.thread import ThreadCreate
-from app.schemas.message import MessageCreate
-from app.schemas.optimization_request import OptimizationRequestCreate
-from app.services.database.user_repository import UserRepository
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.message_repository import MessageRepository
-from app.services.database.optimization_repository import OptimizationRepository
-from app.auth_integration.auth_utils import get_password_hash
+from netra_backend.app.db.database import get_db, engine
+from netra_backend.app.schemas.userbase import UserBase
+from netra_backend.app.schemas.thread import ThreadCreate
+from netra_backend.app.schemas.message import MessageCreate
+from netra_backend.app.schemas.optimization_request import OptimizationRequestCreate
+from netra_backend.app.services.database.user_repository import UserRepository
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.optimization_repository import OptimizationRepository
+from netra_backend.app.auth_integration.auth_utils import get_password_hash
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 

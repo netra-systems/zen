@@ -7,13 +7,13 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 # NOTE: Temporarily commented out - these modules need to be moved to auth_integration
 # from app.auth_integration.enhanced_auth_security import enhanced_auth_security
 # from app.auth_integration.api_key_manager import api_key_manager
 enhanced_auth_security = None  # Placeholder until consolidation complete
 api_key_manager = None  # Placeholder until consolidation complete
-from app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory
+from netra_backend.app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory
 
 logger = central_logger.get_logger(__name__)
 
@@ -227,7 +227,7 @@ class ConfigurationAuditor(SecurityAuditor):
     async def audit(self) -> List[SecurityFinding]:
         """Audit security configuration."""
         findings = []
-        from app.config import settings
+        from netra_backend.app.config import settings
         self._check_debug_mode(findings, settings)
         self._check_jwt_secret(findings, settings)
         return findings
@@ -269,4 +269,4 @@ class ConfigurationAuditor(SecurityAuditor):
 
 
 # Import scoring functionality from dedicated module
-from app.security.audit_scoring import compliance_score_calculator, security_recommendation_engine
+from netra_backend.app.security.audit_scoring import compliance_score_calculator, security_recommendation_engine

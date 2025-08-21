@@ -217,7 +217,7 @@ class TestAgentInitializationIntegration:
         recovery_strategy = mock_recovery_strategy()
         
         # Simulate agent failure
-        from app.core.error_recovery import RecoveryContext
+        from netra_backend.app.core.error_recovery import RecoveryContext
         failure_context = RecoveryContext("test_operation_123", "Mock failure for testing")
         
         # Test recovery assessment

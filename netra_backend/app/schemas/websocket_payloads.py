@@ -13,8 +13,8 @@ from typing import Optional, Dict, Any, List, Union
 from pydantic import Field
 from datetime import datetime
 
-from app.schemas.registry import BaseWebSocketPayload
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.schemas.registry import BaseWebSocketPayload
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class RenameThreadPayload(BaseWebSocketPayload):
@@ -151,7 +151,7 @@ class ConnectionEstablishedPayload(BaseWebSocketPayload):
 
 
 # Message wrapper classes for type safety
-from app.schemas.registry import WebSocketMessage, WebSocketMessageType
+from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
 
 class BaseWebSocketMessage(WebSocketMessage):

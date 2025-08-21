@@ -16,8 +16,8 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timezone
 
-from app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
-from app.db.models_postgres import User
+from netra_backend.app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
+from netra_backend.app.db.models_postgres import User
 
 
 # Test fixtures for setup

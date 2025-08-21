@@ -6,8 +6,8 @@ including progress updates, completion notifications, and error messages.
 """
 
 from typing import Dict, Any, Optional, Callable
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.logging_config import central_logger
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

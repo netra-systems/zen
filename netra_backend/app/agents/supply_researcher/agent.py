@@ -9,12 +9,12 @@ import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import ResearchSession
-from app.logging_config import central_logger as logger
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.db.models_postgres import ResearchSession
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.models import ResearchType
 from netra_backend.app.parsers import SupplyRequestParser
 from netra_backend.app.research_engine import SupplyResearchEngine

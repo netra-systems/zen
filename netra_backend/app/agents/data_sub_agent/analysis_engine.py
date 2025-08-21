@@ -16,15 +16,15 @@ from datetime import datetime
 import time
 import numpy as np
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol, AgentExecutionMixin
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
-from app.core.exceptions import NetraException
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.core.exceptions import NetraException
 
 # Import modular helpers
 from netra_backend.app.analysis_engine_helpers import (

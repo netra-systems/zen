@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.monitoring_types import MetricsCollector, MetricData, AlertConfig
+    from netra_backend.app.schemas.monitoring_types import MetricsCollector, MetricData, AlertConfig
 
 Business Value Justification (BVJ):
 - Segment: Enterprise & Growth

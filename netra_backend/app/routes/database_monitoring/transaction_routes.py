@@ -3,8 +3,8 @@ Database Transaction Management Routes
 """
 from typing import Dict, Any
 from fastapi import HTTPException
-from app.db.transaction_manager import transaction_manager
-from app.logging_config import central_logger
+from netra_backend.app.db.transaction_manager import transaction_manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

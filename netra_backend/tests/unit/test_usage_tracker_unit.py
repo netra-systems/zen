@@ -17,8 +17,8 @@ from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Dict, List, Any
 
-from app.db.models_postgres import User, ToolUsageLog
-from app.services.demo.analytics_tracker import AnalyticsTracker
+from netra_backend.app.db.models_postgres import User, ToolUsageLog
+from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
 
 
 # Mock UsageTracker class (would be implemented in real system)

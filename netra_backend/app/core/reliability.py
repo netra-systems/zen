@@ -9,7 +9,7 @@ import time
 from typing import Dict, Any, Optional, Callable, Awaitable, List
 from datetime import datetime, timedelta, UTC
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.circuit_breaker import CircuitBreaker, CircuitConfig as CircuitBreakerConfig, CircuitState as CircuitBreakerState, CircuitMetrics as ReliabilityMetrics
 from netra_backend.app.reliability_retry import RetryHandler, RetryConfig
 

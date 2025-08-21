@@ -7,10 +7,10 @@ Follows 450-line limit with 25-line function limit.
 import json
 import time
 from typing import Any, Dict, Optional
-from app.redis_manager import redis_manager
-from app.services.state_serialization import DateTimeEncoder
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.services.state_serialization import DateTimeEncoder
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
 
 logger = central_logger.get_logger(__name__)
 

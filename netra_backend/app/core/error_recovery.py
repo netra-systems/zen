@@ -12,9 +12,9 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 from datetime import datetime, timedelta
 
-from app.core.error_codes import ErrorCode, ErrorSeverity
-from app.core.exceptions_base import NetraException
-from app.logging_config import central_logger
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -167,8 +167,8 @@ class RetryStrategy:
 
 
 # Import CircuitBreaker from canonical location - CONSOLIDATED
-from app.core.circuit_breaker_core import CircuitBreaker as CoreCircuitBreaker
-from app.core.circuit_breaker_types import CircuitConfig
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker as CoreCircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitConfig
 
 class ErrorRecoveryCircuitBreaker(CoreCircuitBreaker):
     """Specialized circuit breaker for error recovery operations."""

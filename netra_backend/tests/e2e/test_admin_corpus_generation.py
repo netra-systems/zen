@@ -81,13 +81,13 @@ class TestAdminCorpusGeneration:
     
     async def _execute_real_corpus_discovery(self, setup: Dict, request):
         """Execute real corpus discovery with agent."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState(user_request=request.query)
         agent = setup["agent"]
         # Run the agent to get real results
         await agent.execute(state, f"run-{request.session_id}", stream_updates=True)
         # Validate the agent ran successfully
-        from app.schemas import SubAgentLifecycle
+        from netra_backend.app.schemas import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Agent should complete execution"
     
     async def test_configuration_suggestions(self, admin_corpus_setup):
@@ -130,14 +130,14 @@ class TestAdminCorpusGeneration:
     
     async def _execute_real_generation_workflow(self, setup: Dict, request):
         """Execute real corpus generation workflow with agent."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         user_request = f"Generate {request.domain} corpus with {request.parameters}"
         state = DeepAgentState(user_request=user_request)
         agent = setup["agent"]
         # Run the agent for corpus generation
         await agent.execute(state, f"gen-{request.session_id}", stream_updates=True)
         # Validate the agent completed successfully
-        from app.schemas import SubAgentLifecycle
+        from netra_backend.app.schemas import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Generation should complete"
     
     async def test_error_recovery(self, admin_corpus_setup):

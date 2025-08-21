@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 
 from netra_backend.app...db.clickhouse import get_clickhouse_client
 from netra_backend.app.base import ClickHouseOperationError, CorpusNotAvailableError
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class SearchOperations:

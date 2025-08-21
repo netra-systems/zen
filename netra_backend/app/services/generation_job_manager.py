@@ -13,14 +13,14 @@ from typing import Dict, Any
 
 import pandas as pd
 
-from app.config import settings
-from app.schemas import ContentCorpus
-from app.db.clickhouse_base import ClickHouseDatabase
-from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from app.db.models_clickhouse import get_content_corpus_schema
-from app.services.job_store import job_store
-from app.ws_manager import manager
-from app.logging_config import central_logger
+from netra_backend.app.config import settings
+from netra_backend.app.schemas import ContentCorpus
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
+from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
+from netra_backend.app.services.job_store import job_store
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

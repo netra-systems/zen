@@ -7,7 +7,7 @@ Maintains 25-line function limit and single responsibility.
 
 from typing import Dict, Any
 from fastapi import HTTPException, status
-from app.logging_config import CentralLogger
+from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()
 

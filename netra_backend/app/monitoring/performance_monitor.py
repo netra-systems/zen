@@ -16,7 +16,7 @@ from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.metrics_collector import MetricsCollector, PerformanceMetric
 from netra_backend.app.performance_alerting import PerformanceAlertManager
 from netra_backend.app.dashboard import PerformanceDashboard

@@ -22,7 +22,7 @@ from netra_backend.tests.shared_fixtures import (
     enterprise_security_infrastructure, data_access_helper,
     DataAccessAuditHelper
 )
-from app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
+from netra_backend.app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
 
 
 class TestDataAccessAudit:

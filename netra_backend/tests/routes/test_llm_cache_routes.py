@@ -42,7 +42,7 @@ class TestLLMCacheRoute:
 
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation."""
-        from app.routes.llm_cache import clear_cache_pattern
+        from netra_backend.app.routes.llm_cache import clear_cache_pattern
         
         with patch('app.services.llm_cache_service.llm_cache_service.clear_cache_pattern') as mock_clear:
             mock_clear.return_value = 10

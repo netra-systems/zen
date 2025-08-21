@@ -5,8 +5,8 @@ Implements different eviction algorithms for cache management
 
 from typing import List, Tuple
 from datetime import datetime, UTC
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.cache_models import CacheEntry, CacheStrategy
 
 logger = central_logger.get_logger(__name__)

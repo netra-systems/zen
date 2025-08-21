@@ -10,8 +10,8 @@ from typing import Dict, Any, List, Optional
 import asyncio
 from datetime import datetime, timedelta
 
-from app.logging_config import central_logger
-from app.config import get_config
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.config import get_config
 
 # ClickHouse client imports (assuming standard client available)
 try:

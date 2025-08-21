@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timezone
 from typing import Optional, Callable, Any, Dict, List
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.reconnection_types import (
     ReconnectionState, DisconnectReason, ReconnectionConfig,
     ReconnectionAttempt, ReconnectionMetrics, CallbackType

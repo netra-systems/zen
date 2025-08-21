@@ -13,11 +13,11 @@ Each function ≤8 lines, file ≤300 lines.
 
 import os
 from typing import Dict, List, Optional, Any
-from app.schemas.Config import AppConfig
-from app.schemas.llm_types import LLMProvider
-from app.logging_config import central_logger as logger
-from app.core.network_constants import ServicePorts, HostConstants, URLConstants, ServiceEndpoints
-from app.core.environment_constants import (
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.schemas.llm_types import LLMProvider
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants, URLConstants, ServiceEndpoints
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_environment
 )
 

@@ -15,7 +15,7 @@ async def test_apex_optimizer_agent(prompt: str):
     mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
     
     # Override the dependency
-    from app.routes.agent_route import get_agent_supervisor
+    from netra_backend.app.routes.agent_route import get_agent_supervisor
     app.dependency_overrides[get_agent_supervisor] = lambda: mock_supervisor
     
     # Create test client

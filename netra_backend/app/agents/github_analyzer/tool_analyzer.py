@@ -6,7 +6,7 @@ Maps tool definitions and usage patterns.
 
 from typing import Dict, Any
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.tool_patterns import ToolPatternDefinitions
 from netra_backend.app.tool_processing_core import ToolProcessingCore
 

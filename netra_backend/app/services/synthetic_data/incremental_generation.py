@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, UTC
 from typing import Dict, List, Optional, Callable
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class IncrementalGenerationHandler:

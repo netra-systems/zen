@@ -5,7 +5,7 @@ This module acts as a single import point for commonly used LLM schemas.
 """
 
 # Re-export request types
-from app.schemas.llm_request_types import (
+from netra_backend.app.schemas.llm_request_types import (
     LLMRequest,
     BatchLLMRequest,
     StructuredOutputSchema,
@@ -14,7 +14,7 @@ from app.schemas.llm_request_types import (
 )
 
 # Re-export response types  
-from app.schemas.llm_response_types import (
+from netra_backend.app.schemas.llm_response_types import (
     LLMResponse,
     LLMStreamChunk,
     BatchLLMResponse,
@@ -22,7 +22,7 @@ from app.schemas.llm_response_types import (
 )
 
 # Re-export core types
-from app.schemas.llm_types import (
+from netra_backend.app.schemas.llm_types import (
     LLMProvider,
     LLMModel,
     LLMRole,
@@ -38,7 +38,7 @@ from app.schemas.llm_types import (
 )
 
 # Re-export config types
-from app.schemas.llm_config_types import (
+from netra_backend.app.schemas.llm_config_types import (
     LLMConfig,
     LLMManagerConfig,
     CostMetrics,

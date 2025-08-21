@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import pytest
 from typing import Dict, List
 
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     create_agent_instances, build_multi_constraint_setup,
     execute_multi_constraint_workflow, create_kv_cache_audit_state,
     create_triple_constraint_state, validate_constraint_data_consistency,

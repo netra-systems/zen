@@ -10,13 +10,13 @@ BVJ: Growth & Enterprise | Performance Analytics | +15% optimization value captu
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 
 from netra_backend.app.metric_distribution_analyzer import MetricDistributionAnalyzer
 from netra_backend.app.metric_trend_analyzer import MetricTrendAnalyzer
@@ -88,8 +88,8 @@ class MetricsAnalyzer(BaseExecutionInterface):
         
     def _create_default_reliability_manager(self) -> ReliabilityManager:
         """Create default reliability manager configuration."""
-        from app.agents.base.circuit_breaker import CircuitBreakerConfig
-        from app.schemas.shared_types import RetryConfig
+        from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+        from netra_backend.app.schemas.shared_types import RetryConfig
         
         circuit_config = self._create_circuit_config()
         retry_config = self._create_retry_config()
@@ -97,7 +97,7 @@ class MetricsAnalyzer(BaseExecutionInterface):
         
     def _create_circuit_config(self) -> 'CircuitBreakerConfig':
         """Create circuit breaker configuration."""
-        from app.agents.base.circuit_breaker import CircuitBreakerConfig
+        from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
         return CircuitBreakerConfig(
             name="MetricsAnalyzer",
             failure_threshold=5,
@@ -106,7 +106,7 @@ class MetricsAnalyzer(BaseExecutionInterface):
         
     def _create_retry_config(self) -> 'RetryConfig':
         """Create retry configuration."""
-        from app.schemas.shared_types import RetryConfig
+        from netra_backend.app.schemas.shared_types import RetryConfig
         return RetryConfig(
             max_retries=3,
             base_delay=1.0,

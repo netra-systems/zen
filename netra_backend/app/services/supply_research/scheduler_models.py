@@ -7,7 +7,7 @@ from typing import List, Optional
 from datetime import datetime, timedelta, UTC
 from enum import Enum
 # Import ResearchType from canonical source to avoid circular import
-from app.agents.supply_researcher.models import ResearchType
+from netra_backend.app.agents.supply_researcher.models import ResearchType
 
 
 class ScheduleFrequency(Enum):

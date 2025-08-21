@@ -22,11 +22,11 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 
-from app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
-from app.websocket.reconnection_handler import get_reconnection_handler, ReconnectionContext
-from app.websocket.connection_info import ConnectionInfo, ConnectionState
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
+from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
+from netra_backend.app.websocket.reconnection_handler import get_reconnection_handler, ReconnectionContext
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

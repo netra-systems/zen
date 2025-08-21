@@ -2,8 +2,8 @@
 
 import json
 from typing import Dict, Any, List, Optional
-from app.logging_config import CentralLogger
-from app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import CentralLogger
+from netra_backend.app.core.exceptions_base import NetraException
 
 logger = CentralLogger()
 

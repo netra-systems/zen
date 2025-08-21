@@ -3,8 +3,8 @@ Database Cache Management Routes
 """
 from typing import Dict, Any
 from fastapi import HTTPException, Query
-from app.db.query_cache import query_cache
-from app.logging_config import central_logger
+from netra_backend.app.db.query_cache import query_cache
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

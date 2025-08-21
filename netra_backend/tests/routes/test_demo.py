@@ -30,7 +30,7 @@ class TestDemoRoutes:
         return {"id": 1, "email": "test@example.com", "is_admin": False}
     async def test_demo_chat_success(self, mock_demo_service, mock_current_user):
         """Test successful demo chat interaction."""
-        from app.routes.demo import demo_chat
+        from netra_backend.app.routes.demo import demo_chat
         
         # Setup mock response
         mock_demo_service.process_demo_chat.return_value = {
@@ -78,7 +78,7 @@ class TestDemoRoutes:
         background_tasks.add_task.assert_called_once()
     async def test_demo_chat_without_session_id(self, mock_demo_service):
         """Test demo chat creates session ID if not provided."""
-        from app.routes.demo import demo_chat
+        from netra_backend.app.routes.demo import demo_chat
         
         mock_demo_service.process_demo_chat.return_value = {
             "response": "Test response",
@@ -104,7 +104,7 @@ class TestDemoRoutes:
         assert len(response.session_id) > 0
     async def test_get_industry_templates_success(self, mock_demo_service):
         """Test getting industry templates."""
-        from app.routes.demo import get_industry_templates
+        from netra_backend.app.routes.demo import get_industry_templates
         
         # Setup mock templates
         mock_templates = [
@@ -132,7 +132,7 @@ class TestDemoRoutes:
         mock_demo_service.get_industry_templates.assert_called_once_with("healthcare")
     async def test_get_industry_templates_invalid_industry(self, mock_demo_service):
         """Test getting templates for invalid industry."""
-        from app.routes.demo import get_industry_templates
+        from netra_backend.app.routes.demo import get_industry_templates
         from fastapi import HTTPException
         
         mock_demo_service.get_industry_templates.side_effect = ValueError("Unknown industry: invalid")
@@ -147,7 +147,7 @@ class TestDemoRoutes:
         assert "Unknown industry" in str(exc_info.value.detail)
     async def test_calculate_roi_success(self, mock_demo_service):
         """Test ROI calculation."""
-        from app.routes.demo import calculate_roi
+        from netra_backend.app.routes.demo import calculate_roi
         
         # Setup mock ROI response
         mock_roi = {
@@ -195,7 +195,7 @@ class TestDemoRoutes:
         )
     async def test_get_synthetic_metrics_success(self, mock_demo_service):
         """Test synthetic metrics generation."""
-        from app.routes.demo import get_synthetic_metrics
+        from netra_backend.app.routes.demo import get_synthetic_metrics
         
         # Setup mock metrics
         mock_metrics = {
@@ -228,7 +228,7 @@ class TestDemoRoutes:
         )
     async def test_export_report_success(self, mock_demo_service, mock_current_user):
         """Test report export."""
-        from app.routes.demo import export_demo_report
+        from netra_backend.app.routes.demo import export_demo_report
         
         # Setup mock response
         mock_demo_service.generate_report.return_value = "/api/demo/reports/report-123.pdf"
@@ -263,7 +263,7 @@ class TestDemoRoutes:
         )
     async def test_export_report_session_not_found(self, mock_demo_service):
         """Test report export with invalid session."""
-        from app.routes.demo import export_demo_report
+        from netra_backend.app.routes.demo import export_demo_report
         from fastapi import HTTPException
         
         mock_demo_service.generate_report.side_effect = ValueError("Session not found")
@@ -285,7 +285,7 @@ class TestDemoRoutes:
         assert "Session not found" in str(exc_info.value.detail)
     async def test_get_session_status_success(self, mock_demo_service):
         """Test getting demo session status."""
-        from app.routes.demo import get_demo_session_status
+        from netra_backend.app.routes.demo import get_demo_session_status
         
         # Setup mock status
         mock_status = {
@@ -311,7 +311,7 @@ class TestDemoRoutes:
         assert status["status"] == "active"
     async def test_submit_feedback_success(self, mock_demo_service):
         """Test submitting demo feedback."""
-        from app.routes.demo import submit_demo_feedback
+        from netra_backend.app.routes.demo import submit_demo_feedback
         
         # Setup mock
         mock_demo_service.submit_feedback.return_value = None
@@ -335,7 +335,7 @@ class TestDemoRoutes:
         mock_demo_service.submit_feedback.assert_called_once_with("session-123", feedback)
     async def test_get_analytics_admin_only(self, mock_demo_service):
         """Test analytics endpoint requires admin access."""
-        from app.routes.demo import get_demo_analytics
+        from netra_backend.app.routes.demo import get_demo_analytics
         from fastapi import HTTPException
         
         # Non-admin user
@@ -352,7 +352,7 @@ class TestDemoRoutes:
         assert "Admin access required" in str(exc_info.value.detail)
     async def test_get_analytics_success(self, mock_demo_service):
         """Test getting demo analytics as admin."""
-        from app.routes.demo import get_demo_analytics
+        from netra_backend.app.routes.demo import get_demo_analytics
         
         # Admin user
         admin_user = {"id": 1, "email": "admin@example.com", "is_admin": True}
@@ -383,7 +383,7 @@ class TestDemoRoutes:
         mock_demo_service.get_analytics_summary.assert_called_once_with(days=30)
     async def test_demo_chat_error_handling(self, mock_demo_service):
         """Test demo chat error handling."""
-        from app.routes.demo import demo_chat
+        from netra_backend.app.routes.demo import demo_chat
         from fastapi import HTTPException
         
         # Setup service to raise error

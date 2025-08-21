@@ -22,10 +22,10 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.routes.websocket_enhanced import connection_manager
-from app.core.network_constants import ServicePorts, URLConstants, HostConstants
-from app.schemas.websocket_models import UserMessagePayload, AgentUpdatePayload
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.app.routes.websocket_enhanced import connection_manager
+from netra_backend.app.core.network_constants import ServicePorts, URLConstants, HostConstants
+from netra_backend.app.schemas.websocket_models import UserMessagePayload, AgentUpdatePayload
 
 
 class WebSocketE2EClient:
@@ -266,7 +266,7 @@ class TestServiceDiscovery:
     
     async def test_websocket_config_discovery(self):
         """Test backend provides WebSocket configuration."""
-        from app.routes.websocket_enhanced import get_websocket_service_discovery
+        from netra_backend.app.routes.websocket_enhanced import get_websocket_service_discovery
         
         config = await get_websocket_service_discovery()
         
@@ -401,7 +401,7 @@ class TestManualDatabaseSessions:
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
-        from app.routes.websocket_enhanced import authenticate_websocket_with_database
+        from netra_backend.app.routes.websocket_enhanced import authenticate_websocket_with_database
         
         session_info = {"user_id": "test_user", "email": "test@example.com"}
         

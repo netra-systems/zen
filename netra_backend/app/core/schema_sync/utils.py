@@ -9,8 +9,8 @@ import sys
 import argparse
 from typing import List
 from sqlalchemy import text
-from app.core.exceptions_config import ValidationError
-from app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_config import ValidationError
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.models import SchemaValidationLevel
 from netra_backend.app.synchronizer import SchemaSynchronizer
 

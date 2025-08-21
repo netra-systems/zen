@@ -66,7 +66,7 @@ def should_log_exc_info(error_context: str) -> bool:
 
 def _log_route_error(error_context: str, e: Exception) -> None:
     """Log route error with context."""
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     logger.error(f"Error {error_context}: {e}", exc_info=should_log_exc_info(error_context))
 

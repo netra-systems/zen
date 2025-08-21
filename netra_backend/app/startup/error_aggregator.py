@@ -24,11 +24,11 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timezone, timedelta
 
-from app.schemas.startup_types import (
+from netra_backend.app.schemas.startup_types import (
     StartupError, ErrorPattern, ErrorTrend, ErrorPhase, ErrorType
 )
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class ErrorAggregator:

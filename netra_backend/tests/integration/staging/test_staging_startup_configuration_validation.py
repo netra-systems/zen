@@ -16,10 +16,10 @@ import pytest
 from unittest.mock import patch, MagicMock
 from typing import Dict, Optional
 
-from app.core.configuration.database import DatabaseConfigManager
-from app.core.environment_constants import get_current_environment
-from app.core.exceptions_config import ConfigurationError
-from app.schemas.Config import AppConfig
+from netra_backend.app.core.configuration.database import DatabaseConfigManager
+from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.core.exceptions_config import ConfigurationError
+from netra_backend.app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
 
 

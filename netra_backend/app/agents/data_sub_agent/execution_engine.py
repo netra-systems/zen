@@ -28,20 +28,20 @@ from datetime import datetime, UTC
 import time
 
 if TYPE_CHECKING:
-    from app.agents.state import DeepAgentState
+    from netra_backend.app.agents.state import DeepAgentState
 
-from app.llm.llm_manager import LLMManager
-from app.logging_config import central_logger as logger
-from app.agents.base.interface import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.error_handler import ExecutionErrorHandler
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import existing modular components
 from netra_backend.app.execution_core import ExecutionCore

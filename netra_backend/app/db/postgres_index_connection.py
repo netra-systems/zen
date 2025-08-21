@@ -3,9 +3,9 @@
 Connection management for PostgreSQL index operations.
 """
 
-from app.logging_config import central_logger
-from app.db.postgres import async_engine
-from app.db.index_optimizer_core import DatabaseValidation
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_engine
+from netra_backend.app.db.index_optimizer_core import DatabaseValidation
 
 logger = central_logger.get_logger(__name__)
 

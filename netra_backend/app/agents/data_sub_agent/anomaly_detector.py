@@ -7,21 +7,21 @@ Provides consistent execution workflow for anomaly detection operations.
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext,
     ExecutionResult, ExecutionStatus
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.errors import (
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.errors import (
     ExecutionErrorHandler, ValidationError,
     AgentExecutionError
 )
-from app.schemas.shared_types import (
+from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse, AnomalyDetail, AnomalySeverity
 )
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class AnomalyDetector(BaseExecutionInterface):

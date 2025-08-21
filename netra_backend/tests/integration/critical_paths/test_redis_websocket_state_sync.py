@@ -26,7 +26,7 @@ from redis_manager import RedisManager
 from schemas import UserInDB
 from netra_backend.app.websocket.state_synchronization_manager import ApplicationState, StateUpdate
 from test_framework.mock_utils import mock_justified
-from tests.integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     MockWebSocketForRedis,
     create_test_message,

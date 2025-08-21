@@ -5,9 +5,9 @@ Handles data source failures with alternative time ranges and cached data.
 
 from typing import Any, Dict, Optional, List
 from datetime import datetime, timedelta
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_types import DataFetchingError
-from app.agents.error_handler import ErrorContext
+from netra_backend.app.agents.error_handler import ErrorContext
 
 logger = central_logger.get_logger(__name__)
 

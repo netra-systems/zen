@@ -14,7 +14,7 @@ import redis.asyncio as redis
 from typing import Optional, List, Any
 import logging
 import json
-from app.core.configuration import get_configuration
+from netra_backend.app.core.configuration import get_configuration
 
 logger = logging.getLogger(__name__)
 

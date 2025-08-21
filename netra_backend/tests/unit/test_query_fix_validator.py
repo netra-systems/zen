@@ -1,7 +1,7 @@
 """Tests for the query fix validator module."""
 
 import pytest
-from app.agents.data_sub_agent.query_fix_validator import (
+from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
     validate_and_fix_query,
     ensure_query_uses_arrayElement,
     fix_simplified_correlation_query

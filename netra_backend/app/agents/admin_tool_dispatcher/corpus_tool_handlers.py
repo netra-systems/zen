@@ -7,8 +7,8 @@ Business Value: Standardizes corpus management for $10K+ customers.
 """
 
 from typing import Dict, Any
-from app.services.corpus_service import CorpusService
-from app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.corpus_models import CorpusToolRequest, CorpusToolResponse, CorpusToolType
 from netra_backend.app.corpus_modern_handlers import (
     ModernCorpusCreateHandler, ModernCorpusSyntheticHandler,

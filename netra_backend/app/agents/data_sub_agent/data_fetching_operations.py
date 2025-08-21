@@ -19,7 +19,7 @@ Business Value: Structured data operations with validation and business logic.
 
 from typing import Dict, List, Optional, Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.data_fetching_core import DataFetchingCore
 
 logger = central_logger.get_logger(__name__)

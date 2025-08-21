@@ -5,8 +5,8 @@ in app.core.error_handlers. This file now provides backward compatibility.
 """
 
 # Import from consolidated error handlers for backward compatibility
-from app.core.error_handlers import ExecutionErrorHandler as ConsolidatedExecutionErrorHandler
-from app.core.error_handlers import global_execution_error_handler
+from netra_backend.app.core.error_handlers import ExecutionErrorHandler as ConsolidatedExecutionErrorHandler
+from netra_backend.app.core.error_handlers import global_execution_error_handler
 
 # Maintain the original interface
 ExecutionErrorHandler = ConsolidatedExecutionErrorHandler

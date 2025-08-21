@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Callable, Awaitable
 
-from app.core.error_recovery import RecoveryContext
+from netra_backend.app.core.error_recovery import RecoveryContext
 
 
 class CompensationState(Enum):

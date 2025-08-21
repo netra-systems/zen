@@ -11,10 +11,10 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.app.services.agent_service import AgentService
-from tests.helpers.test_agent_orchestration_pytest_fixtures import (
+from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import (
     mock_supervisor, agent_service, mock_message_handler
 )
-from tests.helpers.test_agent_orchestration_assertions import (
+from netra_backend.tests.helpers.test_agent_orchestration_assertions import (
     assert_agent_service_initialized, assert_agent_run_completed,
     assert_supervisor_called_correctly, assert_message_handler_called,
     assert_websocket_message_parsed, assert_concurrent_execution_successful,
@@ -144,7 +144,7 @@ class TestAgentServiceBasic:
     
     def _create_complex_request_model(self):
         """Create complex RequestModel for testing."""
-        from app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
         
         settings = Settings(debug_mode=True)
         workload = self._create_test_workload()
@@ -158,7 +158,7 @@ class TestAgentServiceBasic:
     
     def _create_test_workload(self):
         """Create test workload for RequestModel."""
-        from app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas import Workload, DataSource, TimeRange
         
         return Workload(
             run_id="test_run",

@@ -7,12 +7,12 @@ Business Value: Eliminates duplicate patterns across corpus handlers.
 """
 
 from typing import Dict, Any
-from app.agents.base.interface import ExecutionContext
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.executor import BaseExecutionEngine
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.corpus_models import CorpusToolRequest, CorpusToolResponse, CorpusToolType
 
 
@@ -41,7 +41,7 @@ class CorpusContextHelper:
     @staticmethod
     def _create_state_from_request(request: CorpusToolRequest):
         """Create agent state from request."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         return DeepAgentState(user_request=request.model_dump())
         
     @staticmethod

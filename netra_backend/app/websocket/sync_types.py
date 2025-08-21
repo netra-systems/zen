@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from enum import Enum
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class CriticalCallbackFailure(NetraException):

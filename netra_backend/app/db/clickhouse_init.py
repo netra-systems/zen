@@ -4,14 +4,14 @@ Creates required tables on application startup.
 """
 
 from typing import List, Tuple
-from app.db.clickhouse import get_clickhouse_client
-from app.db.models_clickhouse import (
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.models_clickhouse import (
     LOGS_TABLE_SCHEMA,
     SUPPLY_TABLE_SCHEMA,
     WORKLOAD_EVENTS_TABLE_SCHEMA
 )
-from app.config import settings
-from app.logging_config import central_logger as logger
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger as logger
 
 
 # List of table schemas to create on startup

@@ -18,10 +18,10 @@ All functions are ≤8 lines as per CLAUDE.md requirements.
 
 from typing import List, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.services.permission_service import PermissionService
-from app.schemas.admin_tool_types import AdminToolType, ToolPermissionCheck
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.schemas.admin_tool_types import AdminToolType, ToolPermissionCheck
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

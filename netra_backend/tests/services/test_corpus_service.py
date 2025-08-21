@@ -50,5 +50,5 @@ class TestCorpusService:
 
     async def test_corpus_service_import(self):
         """Test that corpus service can be imported."""
-        from app.services.corpus_service import CorpusStatus
+        from netra_backend.app.services.corpus_service import CorpusStatus
         assert CorpusStatus != None

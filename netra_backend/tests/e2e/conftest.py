@@ -23,7 +23,7 @@ import httpx
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import Mock, AsyncMock, patch
-from app.tests.e2e.infrastructure import (
+from netra_backend.app.tests.e2e.infrastructure import (
     LLMTestManager,
     LLMTestModel,
     LLMTestConfig,
@@ -64,8 +64,8 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 @pytest.fixture(scope="function")
 def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
-    from app.llm.llm_manager import LLMManager
-    from app.config import get_config
+    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.config import get_config
     
     # Try to create real LLM manager first
     try:
@@ -115,7 +115,7 @@ def real_websocket_manager():
 @pytest.fixture(scope="function")
 def real_tool_dispatcher():
     """Create real tool dispatcher for testing."""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     return ToolDispatcher()
 
 @pytest.fixture(scope="function")
@@ -429,7 +429,7 @@ def mock_websocket() -> MockWebSocket:
 @pytest.fixture(scope="function")
 def websocket_manager():
     """Create WebSocket manager for testing."""
-    from app.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
     return WebSocketManager()
 
 
@@ -452,14 +452,14 @@ def sample_websocket_message() -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 def agent_service():
     """Create agent service for testing."""
-    from app.services.agent_service import AgentService
+    from netra_backend.app.services.agent_service import AgentService
     return AgentService()
 
 
 @pytest.fixture(scope="function")
 def supervisor_agent():
     """Create supervisor agent for testing."""
-    from app.agents.supervisor.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor.supervisor_consolidated import SupervisorAgent
     return SupervisorAgent()
 
 
@@ -543,14 +543,14 @@ async def mock_database_clients():
 @pytest.fixture(scope="function")
 def user_service():
     """Create user service for testing."""
-    from app.services.user_service import UserService
+    from netra_backend.app.services.user_service import UserService
     return UserService()
 
 
 @pytest.fixture(scope="function")
 def thread_service():
     """Create thread service for testing."""
-    from app.services.thread_service import ThreadService
+    from netra_backend.app.services.thread_service import ThreadService
     return ThreadService()
 
 

@@ -1,8 +1,8 @@
 """Fallback handling for DataSubAgent execution."""
 
 from typing import Dict, Any, List, Callable
-from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
-from app.logging_config import central_logger as logger
+from netra_backend.app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class ExecutionFallbackHandler:

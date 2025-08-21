@@ -4,7 +4,7 @@ import random
 import numpy as np
 from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, List, Optional
-from app.services.demo.demo_constants import INDUSTRY_FACTORS, WORKLOAD_TEMPLATES
+from netra_backend.app.services.demo.demo_constants import INDUSTRY_FACTORS, WORKLOAD_TEMPLATES
 
 class DemoMetricsGenerator:
     """Generates realistic metrics for demo scenarios."""

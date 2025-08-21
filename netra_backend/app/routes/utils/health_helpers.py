@@ -5,8 +5,8 @@ from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from datetime import datetime, UTC
-from app.db.postgres import get_pool_status, async_engine
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_pool_status, async_engine
+from netra_backend.app.logging_config import central_logger
 
 
 logger = central_logger.get_logger(__name__)

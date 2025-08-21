@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any
 from collections import deque
 import uuid
 
-from app.schemas.Metrics import (
+from netra_backend.app.schemas.Metrics import (
     CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
 )
 

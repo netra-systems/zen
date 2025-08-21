@@ -3,8 +3,8 @@ Database Alert and Performance Routes
 """
 from typing import Dict, Any, List, Optional
 from fastapi import HTTPException
-from app.db.observability import database_observability
-from app.logging_config import central_logger
+from netra_backend.app.db.observability import database_observability
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

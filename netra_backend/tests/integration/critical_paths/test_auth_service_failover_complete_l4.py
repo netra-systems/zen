@@ -11,11 +11,11 @@ from typing import Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import random
 
-from app.services.auth_service import AuthService
-from app.services.auth_failover_service import AuthFailoverService
-from app.services.health_monitor import HealthMonitor
-from app.services.redis_service import RedisService
-from app.core.config import settings
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.auth_failover_service import AuthFailoverService
+from netra_backend.app.services.health_monitor import HealthMonitor
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.core.config import settings
 
 
 class TestAuthServiceFailoverCompleteL4:

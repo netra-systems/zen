@@ -3,9 +3,9 @@ User Plan Management for Unified Tools API
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas import UserPlanResponse
 from netra_backend.app.database_utils import get_daily_usage_count
 

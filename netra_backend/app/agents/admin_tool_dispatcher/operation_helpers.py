@@ -7,7 +7,7 @@ Split from dispatcher_core.py to maintain 450-line limit.
 Business Value: Enables secure admin operations with full audit trail.
 """
 from typing import Dict, Any
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 

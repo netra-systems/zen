@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 @pytest.mark.asyncio
 async def test_database_connectivity_check_success():
     """Test successful database connectivity check."""
-    from app.services.schema_validation_service import SchemaValidationService
+    from netra_backend.app.services.schema_validation_service import SchemaValidationService
     
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)
@@ -27,7 +27,7 @@ async def test_database_connectivity_check_success():
 @pytest.mark.asyncio
 async def test_database_connectivity_check_failure():
     """Test failed database connectivity check."""
-    from app.services.schema_validation_service import SchemaValidationService
+    from netra_backend.app.services.schema_validation_service import SchemaValidationService
     
     # Create mock engine that raises exception
     mock_engine = MagicMock(spec=AsyncEngine)
@@ -41,7 +41,7 @@ async def test_database_connectivity_check_failure():
 @pytest.mark.asyncio
 async def test_database_connectivity_with_none_engine():
     """Test database connectivity check with None engine."""
-    from app.services.schema_validation_service import SchemaValidationService
+    from netra_backend.app.services.schema_validation_service import SchemaValidationService
     
     # Test with None engine should raise AttributeError
     with pytest.raises(AttributeError):
@@ -52,7 +52,7 @@ async def test_database_connectivity_with_none_engine():
 async def test_startup_schema_validation_with_uninitialized_engine():
     """Test schema validation in startup module with uninitialized engine."""
     import logging
-    from app.startup_module import validate_schema
+    from netra_backend.app.startup_module import validate_schema
     
     logger = logging.getLogger(__name__)
     
@@ -66,7 +66,7 @@ async def test_startup_schema_validation_with_uninitialized_engine():
 @pytest.mark.asyncio
 async def test_comprehensive_validation_with_engine():
     """Test comprehensive validation with proper engine."""
-    from app.services.schema_validation_service import run_comprehensive_validation
+    from netra_backend.app.services.schema_validation_service import run_comprehensive_validation
     
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)

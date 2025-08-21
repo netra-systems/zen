@@ -9,12 +9,12 @@ from typing import Dict, Any, Union, Optional, List, Literal
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from app.logging_config import central_logger
-from app.schemas.websocket_message_types import WebSocketValidationError
-from app.core.json_utils import prepare_websocket_message
-from app.websocket.connection import ConnectionInfo
-from app.websocket.validation import MessageValidator
-from app.websocket.state_synchronization_manager import StateSynchronizationManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
+from netra_backend.app.core.json_utils import prepare_websocket_message
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.validation import MessageValidator
+from netra_backend.app.websocket.state_synchronization_manager import StateSynchronizationManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -265,7 +265,7 @@ class MessageProcessor:
             logger.info(f"[CRITICAL] Message payload: {message.get('payload')}")
             
             # Process through agent service (this will handle the message routing)
-            from app.db.postgres import get_async_db
+            from netra_backend.app.db.postgres import get_async_db
             async with get_async_db() as db_session:
                 logger.info(f"[CRITICAL] Calling agent_service.handle_websocket_message")
                 await agent_service.handle_websocket_message(user_id, message_str, db_session)

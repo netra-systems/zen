@@ -9,11 +9,11 @@ import asyncio
 from typing import Dict, Any, List
 from datetime import datetime
 
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
-from app.schemas.Generation import GenerationStatus
-from app.logging_config import central_logger
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.Generation import GenerationStatus
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -23,7 +23,7 @@ class SyntheticDataBatchProcessor:
     
     def __init__(self, tool_dispatcher: ToolDispatcher):
         self.tool_dispatcher = tool_dispatcher
-        from app.agents.synthetic_data_progress_tracker import SyntheticDataProgressTracker
+        from netra_backend.app.agents.synthetic_data_progress_tracker import SyntheticDataProgressTracker
         self.progress_tracker = SyntheticDataProgressTracker()
     
     async def process_all_batches(

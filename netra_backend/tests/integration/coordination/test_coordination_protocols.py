@@ -35,7 +35,7 @@ class TestCoordinationProtocols:
             "coordination_action": "heartbeat"
         }
         
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         
         result = await coordinator.execute(coordination_request, state)
@@ -99,7 +99,7 @@ class TestCoordinationProtocols:
             "peer_agent": agent_b
         }
         
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         
         result = await agent_a.execute(coordination_request, state)
@@ -123,7 +123,7 @@ class TestCoordinationProtocols:
             }
         }
         
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         
         result = await broadcaster.execute(coordination_request, state)
@@ -163,7 +163,7 @@ class TestCoordinationProtocols:
             "coordination_action": "invalid_action"
         }
         
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         state = DeepAgentState()
         
         result = await coordinator.execute(invalid_request, state)

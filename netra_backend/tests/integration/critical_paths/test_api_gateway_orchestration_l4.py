@@ -37,7 +37,7 @@ create_access_token = AsyncMock()
 # from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 validate_token_jwt = AsyncMock()
-from app.core.health_checkers import HealthChecker
+from netra_backend.app.core.health_checkers import HealthChecker
 
 
 # Mock API gateway components for L4 testing

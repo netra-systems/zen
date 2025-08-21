@@ -12,7 +12,7 @@ Coverage: Workspace management, sharing permissions, access isolation
 
 import pytest
 import uuid
-from tests.integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     TeamCollaborationManager, TeamRole, PermissionType, validate_audit_trail
 )
 

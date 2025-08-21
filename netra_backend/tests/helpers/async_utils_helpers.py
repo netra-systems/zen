@@ -8,11 +8,11 @@ import time
 from unittest.mock import Mock, AsyncMock
 import pytest
 
-from app.core.async_batch_processor import AsyncBatchProcessor
-from app.core.async_connection_pool import AsyncConnectionPool
-from app.core.async_rate_limiter import AsyncRateLimiter
-from app.core.async_retry_logic import AsyncLock, AsyncCircuitBreaker
-from app.core.async_resource_manager import (
+from netra_backend.app.core.async_batch_processor import AsyncBatchProcessor
+from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
+from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
+from netra_backend.app.core.async_retry_logic import AsyncLock, AsyncCircuitBreaker
+from netra_backend.app.core.async_resource_manager import (
     AsyncResourceManager,
     AsyncTaskPool,
 )

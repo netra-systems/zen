@@ -14,8 +14,8 @@ from typing import Dict, List, Optional
 
 import alembic.config
 
-from app.core.exceptions import NetraException
-from app.db.migration_utils import (
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.db.migration_utils import (
     create_alembic_config,
     get_current_revision,
     get_head_revision,

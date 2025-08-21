@@ -12,11 +12,11 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional, Tuple
 
-from app.startup.error_aggregator import ErrorAggregator
-from app.schemas.startup_types import (
+from netra_backend.app.startup.error_aggregator import ErrorAggregator
+from netra_backend.app.schemas.startup_types import (
     StartupError, ErrorPattern, ErrorTrend, ErrorPhase, ErrorType
 )
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 @pytest.fixture

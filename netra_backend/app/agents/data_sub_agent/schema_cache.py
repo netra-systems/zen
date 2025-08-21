@@ -11,7 +11,7 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 class SchemaCache:

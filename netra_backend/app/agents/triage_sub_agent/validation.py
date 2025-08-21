@@ -12,7 +12,7 @@
 
 import re
 from typing import List
-from app.agents.triage_sub_agent.models import ValidationStatus
+from netra_backend.app.agents.triage_sub_agent.models import ValidationStatus
 
 
 def check_request_length(request: str, validation: ValidationStatus) -> None:

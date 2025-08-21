@@ -12,10 +12,10 @@
 
 import json
 from typing import Any, Dict, Optional, List, Callable
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 # Import functions from specialized modules
-from app.agents.utils_json_parsers import (
+from netra_backend.app.agents.utils_json_parsers import (
     try_direct_parse,
     try_extract_object,
     try_extract_array,
@@ -26,7 +26,7 @@ from app.agents.utils_json_parsers import (
     extract_complex_field,
     extract_simple_fields
 )
-from app.agents.utils_json_validators import (
+from netra_backend.app.agents.utils_json_validators import (
     fix_common_json_errors,
     count_structure_balance,
     build_closing_sequence,

@@ -12,13 +12,13 @@ from typing import Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 
-from app.services.auth_service import AuthService
-from app.services.api_gateway_service import APIGatewayService
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.api_gateway_service import APIGatewayService
 # from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
-from app.services.backend_service import BackendService
-from app.core.config import settings
+from netra_backend.app.services.backend_service import BackendService
+from netra_backend.app.core.config import settings
 
 
 class TestCrossServiceAuthPropagationCompleteL4:

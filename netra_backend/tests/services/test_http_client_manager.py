@@ -147,5 +147,5 @@ class TestGlobalClientManager:
     
     def test_global_manager_singleton_behavior(self):
         """Test that importing returns the same instance."""
-        from app.services.external_api_client import http_client_manager as imported_manager
+        from netra_backend.app.services.external_api_client import http_client_manager as imported_manager
         assert imported_manager is http_client_manager

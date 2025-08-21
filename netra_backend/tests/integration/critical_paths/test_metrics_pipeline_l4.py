@@ -23,9 +23,9 @@ from unittest.mock import patch
 from datetime import datetime, timedelta
 import httpx
 
-from app.services.observability.metrics_collector import MetricsCollector
-from app.services.observability.prometheus_exporter import PrometheusExporter
-from app.services.observability.alert_manager import AlertManager
+from netra_backend.app.services.observability.metrics_collector import MetricsCollector
+from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter
+from netra_backend.app.services.observability.alert_manager import AlertManager
 from config import get_config
 
 logger = logging.getLogger(__name__)

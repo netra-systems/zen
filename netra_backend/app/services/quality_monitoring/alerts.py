@@ -5,9 +5,9 @@ from datetime import datetime, UTC
 from collections import deque
 import statistics
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import AlertSeverity, MetricType, QualityAlert
-from app.services.quality_gate_service import QualityMetrics
+from netra_backend.app.services.quality_gate_service import QualityMetrics
 
 logger = central_logger.get_logger(__name__)
 

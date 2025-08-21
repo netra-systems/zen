@@ -2,19 +2,19 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-from app.db.postgres import get_pool_status, async_engine
-from app.dependencies import get_db_dependency
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_pool_status, async_engine
+from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.logging_config import central_logger
 from typing import Dict, Any
 import psutil
 import asyncio
 from datetime import datetime, UTC
-from app.routes.utils.health_helpers import (
+from netra_backend.app.routes.utils.health_helpers import (
     test_database_connectivity, get_database_statistics, build_database_health_response,
     get_system_metrics, get_process_metrics, build_system_health_response,
     build_system_error_response, get_pool_configuration, calculate_pool_utilization
 )
-from app.routes.utils.error_handlers import handle_database_error
+from netra_backend.app.routes.utils.error_handlers import handle_database_error
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/health", tags=["health"])

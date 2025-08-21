@@ -6,7 +6,7 @@ projections for error pattern analysis.
 
 from typing import List, Optional
 
-from app.core.error_aggregation_base import TimeWindows
+from netra_backend.app.core.error_aggregation_base import TimeWindows
 
 
 class ErrorMetricCalculator:

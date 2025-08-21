@@ -19,8 +19,8 @@ from unittest.mock import Mock, AsyncMock
 from enum import Enum
 from pydantic import BaseModel
 
-from app.llm.llm_manager import LLMManager
-from app.core.exceptions_base import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Import specialized fixtures
 from netra_backend.tests.llm_fixtures_core import (

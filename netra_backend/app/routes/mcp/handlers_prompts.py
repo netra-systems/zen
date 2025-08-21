@@ -2,11 +2,11 @@
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
 
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.models import MCPPromptGetRequest
-from app.routes.mcp.helpers import extract_prompts_from_app, get_prompt_function
-from app.routes.mcp.utils import (
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.models import MCPPromptGetRequest
+from netra_backend.app.routes.mcp.helpers import extract_prompts_from_app, get_prompt_function
+from netra_backend.app.routes.mcp.utils import (
     filter_by_category, build_list_response, handle_list_error,
     build_prompt_result, handle_prompt_error
 )

@@ -13,7 +13,7 @@
 from typing import Any, Dict, Optional
 
 # Import all JSON extraction functions from refactored module
-from app.agents.utils_json_extraction import (
+from netra_backend.app.agents.utils_json_extraction import (
     preprocess_llm_response,
     extract_json_from_response,
     fix_common_json_errors,

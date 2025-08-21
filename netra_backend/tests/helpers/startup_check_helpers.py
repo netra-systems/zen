@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.startup_checks import StartupCheckResult
+from netra_backend.app.startup_checks import StartupCheckResult
 
 
 def create_mock_app():

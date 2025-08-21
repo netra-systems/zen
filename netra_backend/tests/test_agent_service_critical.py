@@ -11,9 +11,9 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
-from app.services.agent_service import AgentService
-from app.schemas.Request import StartAgentPayload
-from app.core.exceptions import NetraException
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.schemas.Request import StartAgentPayload
+from netra_backend.app.core.exceptions import NetraException
 from starlette.websockets import WebSocketDisconnect
 
 

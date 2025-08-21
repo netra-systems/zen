@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -8,23 +8,23 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from app.core.memory_recovery_base import (
+from netra_backend.app.core.memory_recovery_base import (
     MemoryPressureLevel,
     MemoryRecoveryStrategy,
     MemorySnapshot,
     MemoryThresholds
 )
-from app.core.memory_recovery_utils import (
+from netra_backend.app.core.memory_recovery_utils import (
     calculate_pressure_level,
     collect_all_memory_metrics,
     create_memory_snapshot
 )
-from app.core.memory_strategies import (
+from netra_backend.app.core.memory_strategies import (
     GarbageCollectionStrategy,
     CacheClearingStrategy,
     ConnectionPoolReductionStrategy
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

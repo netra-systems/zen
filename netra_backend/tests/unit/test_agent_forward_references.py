@@ -7,9 +7,9 @@ instantiated with all their forward references resolved.
 import pytest
 
 # Import all required types
-from app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
-from app.schemas import AgentCompleted, AgentResult, AgentState
-from app.schemas.agent_models import DeepAgentState, AgentMetadata
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
+from netra_backend.app.schemas import AgentCompleted, AgentResult, AgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 
 
 # Helper functions for 25-line compliance

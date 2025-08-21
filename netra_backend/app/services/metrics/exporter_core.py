@@ -7,8 +7,8 @@ import json
 from typing import Dict, List, Any, Union
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
-from app.schemas.Metrics import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Metrics import (
     MetricsSnapshot, ExportFormat, CorpusMetric, 
     TimeSeriesPoint, ResourceUsage, QualityMetrics
 )

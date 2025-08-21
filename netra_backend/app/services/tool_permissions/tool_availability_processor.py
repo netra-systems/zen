@@ -1,11 +1,11 @@
 """Tool Availability Processor Module - Processes tool availability for users"""
 
 from typing import Dict, List, Any
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext, ToolAvailability, PermissionCheckResult, RateLimit
 )
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from app.logging_config import central_logger
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 
@@ -28,7 +28,7 @@ class ToolAvailabilityProcessor:
 
     async def _get_user_plan(self, user_id: str) -> UserPlan:
         """Get user's current plan"""
-        from app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.UserPlan import PlanFeatures
         return UserPlan(
             user_id=user_id,
             tier=PlanTier.FREE,

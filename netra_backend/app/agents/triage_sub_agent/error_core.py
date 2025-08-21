@@ -3,8 +3,8 @@
 import asyncio
 from typing import Any, Dict, Optional
 
-from app.agents.error_handler import ErrorContext, global_error_handler
-from app.logging_config import central_logger
+from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.error_types import IntentDetectionError, EntityExtractionError, ToolRecommendationError
 from netra_backend.app.error_recovery import TriageErrorRecovery

@@ -3,8 +3,8 @@
 import os
 from typing import Dict, Any, Optional, List
 
-from app.config_exceptions import ConfigLoadError
-from app.logging_config import central_logger as logger
+from netra_backend.app.config_exceptions import ConfigLoadError
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def load_config_from_environment(

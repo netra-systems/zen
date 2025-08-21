@@ -2,7 +2,7 @@
 
 from typing import Dict, List, Any, Optional
 
-from app.services.factory_status.factory_status_reporter import FactoryStatusReporter
+from netra_backend.app.services.factory_status.factory_status_reporter import FactoryStatusReporter
 
 
 class ComplianceAPIHandler:

@@ -25,7 +25,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.core.exceptions_base import NetraException
-from app import schemas
+from netra_backend.app import schemas
 
 from netra_backend.tests.test_agent_service_fixtures import (
     mock_supervisor,
@@ -244,7 +244,7 @@ class TestAgentServiceBasic:
     
     def _create_full_request_model(self):
         """Create full RequestModel with all required fields."""
-        from app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
         
         settings = Settings(debug_mode=True)
         workload = Workload(

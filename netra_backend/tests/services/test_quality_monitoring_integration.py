@@ -11,11 +11,11 @@ from netra_backend.app.services.quality_monitoring_service import (
     MetricType
 )
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel, QualityMetrics
-from tests.helpers.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     service_with_mocks,
     minimal_quality_metrics
 )
-from tests.helpers.quality_monitoring_helpers import (
+from netra_backend.tests.helpers.quality_monitoring_helpers import (
     create_buffer_overflow_events,
     create_alert_history_overflow,
     assert_buffer_max_length,
@@ -36,7 +36,7 @@ class TestIntegrationWithOtherServices:
         assert service.trend_analyzer is not None
         
         # Test basic integration flow
-        from app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
+        from netra_backend.app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
         metrics = QualityMetrics(overall_score=0.8, quality_level=QualityLevel.GOOD)
         
         await service.record_quality_event("integration_agent", ContentType.GENERAL, metrics)
@@ -52,7 +52,7 @@ class TestIntegrationWithOtherServices:
         await service.start_monitoring(interval_seconds=0.01)
         
         # Add some data
-        from app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
+        from netra_backend.app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
         metrics = QualityMetrics(overall_score=0.6, quality_level=QualityLevel.ACCEPTABLE)
         
         await service.record_quality_event("cycle_agent", ContentType.OPTIMIZATION, metrics)

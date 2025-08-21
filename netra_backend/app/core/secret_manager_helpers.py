@@ -3,7 +3,7 @@
 from typing import Dict, Any, List, Optional, Tuple
 from google.cloud import secretmanager
 import os
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def detect_environment_config() -> Tuple[str, bool]:

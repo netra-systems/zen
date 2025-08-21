@@ -155,7 +155,7 @@ class TestOAuthJWTWebSocketFlowL3:
         async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         
         # Create tables
-        from app.database.models import Base
+        from netra_backend.app.database.models import Base
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         

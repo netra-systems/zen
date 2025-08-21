@@ -8,7 +8,7 @@ from typing import List, Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError, OperationalError
 
-from app.services.database.base_repository import BaseRepository
+from netra_backend.app.services.database.base_repository import BaseRepository
 from netra_backend.tests.database_transaction_test_helpers import MockDatabaseModel
 
 

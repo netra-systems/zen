@@ -3,9 +3,9 @@ Tool Execution Logic for Unified Tools API
 """
 from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.services.unified_tool_registry import ToolExecutionResult
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.unified_tool_registry import ToolExecutionResult
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas import ToolExecutionRequest
 
 logger = central_logger

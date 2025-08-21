@@ -3,8 +3,8 @@ from fastapi import BackgroundTasks
 from typing import Optional, Dict, Any
 from datetime import datetime, UTC
 
-from app.services.demo_service import DemoService
-from app.schemas.demo_schemas import ExportReportRequest
+from netra_backend.app.services.demo_service import DemoService
+from netra_backend.app.schemas.demo_schemas import ExportReportRequest
 
 
 async def handle_export_report(
@@ -72,13 +72,13 @@ async def handle_report_generation(
 
 def handle_report_value_error(e: ValueError) -> None:
     """Handle ValueError in report generation."""
-    from app.routes.demo_handlers_utils import raise_not_found_error
+    from netra_backend.app.routes.demo_handlers_utils import raise_not_found_error
     raise_not_found_error(str(e))
 
 
 def handle_report_general_error(e: Exception) -> None:
     """Handle general exception in report generation."""
-    from app.routes.demo_handlers_utils import log_and_raise_error
+    from netra_backend.app.routes.demo_handlers_utils import log_and_raise_error
     log_and_raise_error("Failed to export report", e)
 
 
@@ -92,7 +92,7 @@ def add_export_tracking_task(
     session_id: str, data: Dict[str, Any]
 ) -> None:
     """Add export tracking task."""
-    from app.routes.demo_handlers_utils import build_tracking_params
+    from netra_backend.app.routes.demo_handlers_utils import build_tracking_params
     params = build_tracking_params(session_id, "report_export", data)
     background_tasks.add_task(demo_service.track_demo_interaction, **params)
 

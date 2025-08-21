@@ -9,14 +9,14 @@ import asyncio
 from typing import Optional, Any, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.agents.triage_sub_agent.agent import TriageSubAgent
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler, ValidationError
-from app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
 
 logger = central_logger.get_logger(__name__)

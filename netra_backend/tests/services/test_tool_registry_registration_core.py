@@ -10,8 +10,8 @@ from unittest.mock import MagicMock, patch, call, AsyncMock
 from datetime import datetime, UTC
 
 from langchain_core.tools import BaseTool
-from app.services.tool_registry import ToolRegistry
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.tool_registry import ToolRegistry
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class MockTool(BaseTool):

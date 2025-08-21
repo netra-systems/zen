@@ -7,7 +7,7 @@ thread-specific data access patterns work correctly.
 
 import pytest
 from datetime import datetime, timedelta
-from app.tests.helpers.database_repository_helpers import (
+from netra_backend.app.tests.helpers.database_repository_helpers import (
     create_test_thread, create_test_threads
 )
 

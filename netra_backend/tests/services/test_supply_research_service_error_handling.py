@@ -9,9 +9,9 @@ from decimal import Decimal
 from typing import Dict, Any, List, Tuple
 from unittest.mock import MagicMock, patch
 
-from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
-from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+from netra_backend.app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 @pytest.fixture

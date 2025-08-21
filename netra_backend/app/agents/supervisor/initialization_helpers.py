@@ -6,7 +6,7 @@ Supports clean architecture and 25-line function compliance.
 
 from typing import Tuple, Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -17,9 +17,9 @@ class SupervisorInitializationHelpers:
     @staticmethod
     def create_reliability_manager():
         """Create reliability manager with circuit breaker and retry configs."""
-        from app.agents.base.reliability_manager import ReliabilityManager
-        from app.agents.base.circuit_breaker import CircuitBreakerConfig
-        from app.schemas.shared_types import RetryConfig
+        from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+        from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+        from netra_backend.app.schemas.shared_types import RetryConfig
         circuit_config = CircuitBreakerConfig(name="Supervisor", failure_threshold=5, recovery_timeout=60)
         retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=10.0)
         return ReliabilityManager(circuit_breaker_config=circuit_config, retry_config=retry_config)
@@ -27,7 +27,7 @@ class SupervisorInitializationHelpers:
     @staticmethod
     def init_utilities_for_supervisor(supervisor):
         """Initialize utilities with modern execution components."""
-        from app.agents.supervisor.supervisor_utilities import SupervisorUtilities
+        from netra_backend.app.agents.supervisor.supervisor_utilities import SupervisorUtilities
         return SupervisorUtilities(supervisor.hooks, supervisor.registry, supervisor.engine,
             supervisor.monitor, supervisor.reliability_manager, supervisor.execution_engine, 
             supervisor.error_handler)
@@ -35,9 +35,9 @@ class SupervisorInitializationHelpers:
     @staticmethod
     def init_helper_components(supervisor) -> Tuple[Any, Any, Any, Any]:
         """Initialize all helper components for supervisor."""
-        from app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
-        from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
-        from app.agents.supervisor.agent_routing import SupervisorAgentRouter
-        from app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
+        from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
+        from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+        from netra_backend.app.agents.supervisor.agent_routing import SupervisorAgentRouter
+        from netra_backend.app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
         return (SupervisorExecutionHelpers(supervisor), SupervisorWorkflowExecutor(supervisor),
                 SupervisorAgentRouter(supervisor), SupervisorCompletionHelpers(supervisor))

@@ -7,9 +7,9 @@ import os
 import shutil
 from typing import Optional
 
-from app.core.error_recovery import RecoveryContext, OperationType
-from app.services.database.rollback_manager import rollback_manager
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext, OperationType
+from netra_backend.app.services.database.rollback_manager import rollback_manager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compensation_base import BaseCompensationHandler
 from netra_backend.app.compensation_types import CompensationAction
 

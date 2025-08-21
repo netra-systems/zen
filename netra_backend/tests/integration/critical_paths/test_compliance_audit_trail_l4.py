@@ -31,14 +31,14 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from app.schemas.auth_types import AuditLog, AuthProvider, TokenType
-from app.schemas.registry import (
+from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
+from netra_backend.app.schemas.registry import (
     CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus, 
     CorpusAuditMetadata, CorpusAuditSearchFilter, CorpusAuditReport
 )
-from app.services.audit_service import get_recent_logs, log_admin_action, get_audit_summary
-from app.services.audit.corpus_audit import CorpusAuditLogger
-from app.core.exceptions_base import NetraException
+from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action, get_audit_summary
+from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 @dataclass

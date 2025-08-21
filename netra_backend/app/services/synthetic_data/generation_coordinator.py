@@ -3,8 +3,8 @@
 import asyncio
 from typing import Dict, List, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.clickhouse import get_clickhouse_client
-from app.logging_config import central_logger
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core_service_base import CoreServiceBase
 
 

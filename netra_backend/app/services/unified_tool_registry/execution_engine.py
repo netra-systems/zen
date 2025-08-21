@@ -8,14 +8,14 @@ from typing import Dict, Any
 from datetime import datetime, UTC
 import inspect
 
-from app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
-from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-from app.services.tool_permission_service import ToolPermissionService
-from app.db.models_postgres import User
-from app.logging_config import central_logger
-from app.core.exceptions_base import NetraException
-from app.core.interfaces_tools import ToolExecutionEngine as CoreToolExecutionEngine
-from app.core.tool_models import UnifiedTool, ToolExecutionResult
+from netra_backend.app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.interfaces_tools import ToolExecutionEngine as CoreToolExecutionEngine
+from netra_backend.app.core.tool_models import UnifiedTool, ToolExecutionResult
 
 logger = central_logger
 

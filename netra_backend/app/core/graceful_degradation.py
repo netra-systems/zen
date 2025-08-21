@@ -9,23 +9,23 @@ components from their single sources of truth for backward compatibility.
 
 from typing import Dict, List
 
-from app.core.degradation_types import (
+from netra_backend.app.core.degradation_types import (
     DegradationLevel,
     DegradationPolicy,
     DegradationStrategy,
     ServiceStatus,
     ServiceTier
 )
-from app.core.degradation_strategies import (
+from netra_backend.app.core.degradation_strategies import (
     DatabaseDegradationStrategy,
     LLMDegradationStrategy,
     WebSocketDegradationStrategy
 )
-from app.core.degradation_manager import (
+from netra_backend.app.core.degradation_manager import (
     GracefulDegradationManager,
     degradation_manager
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

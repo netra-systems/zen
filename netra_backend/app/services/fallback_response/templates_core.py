@@ -6,7 +6,7 @@ and modular architecture compliance.
 
 from typing import Dict, List, Tuple
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 from netra_backend.app.models import FailureReason
 from netra_backend.app.templates_optimization import OptimizationTemplates
 from netra_backend.app.templates_data import DataTemplates  

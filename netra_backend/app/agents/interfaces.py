@@ -4,9 +4,9 @@ from typing import Protocol, Dict, Optional, List, Union
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from app.agents.triage_sub_agent.models import TriageResult
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from app.schemas.strict_types import (
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.schemas.strict_types import (
     StrictParameterType, StrictReturnType, AgentExecutionContext,
     AgentExecutionMetrics, TypedAgentResult
 )

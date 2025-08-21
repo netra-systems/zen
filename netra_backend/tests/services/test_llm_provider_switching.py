@@ -9,12 +9,12 @@ import time
 from typing import Dict, List, Any
 
 from netra_backend.app.core.exceptions_base import NetraException
-from tests.helpers.llm_manager_helpers import (
+from netra_backend.tests.helpers.llm_manager_helpers import (
     create_mock_app_config, create_mock_providers, register_providers_with_manager,
     execute_concurrent_requests, make_providers_fail, count_provider_usage,
     assert_health_status, assert_failure_count, simulate_provider_usage_pattern
 )
-from tests.helpers.enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 
 
 class TestLLMManagerProviderSwitching:

@@ -6,10 +6,10 @@ from datetime import datetime, UTC
 from typing import Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import schemas
-from app.db import models_postgres as models
-from app.ws_manager import manager
-from app.logging_config import central_logger
+from netra_backend.app import schemas
+from netra_backend.app.db import models_postgres as models
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.enums import GenerationStatus
 from netra_backend.app.metrics import calculate_generation_rate

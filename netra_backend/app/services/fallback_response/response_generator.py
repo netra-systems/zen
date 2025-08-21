@@ -5,7 +5,7 @@ This module handles the core logic for generating context-aware fallback respons
 
 from typing import Dict, List, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import FallbackContext, FailureReason
 from netra_backend.app.templates import TemplateManager
 from netra_backend.app.diagnostics import DiagnosticsManager

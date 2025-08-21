@@ -4,7 +4,7 @@ Business Value: Structured error handling enables precise error tracking and rec
 """
 
 from typing import Optional, Dict, Any
-from app.core.exceptions_agent import AgentExecutionError as CoreAgentExecutionError
+from netra_backend.app.core.exceptions_agent import AgentExecutionError as CoreAgentExecutionError
 
 
 class AgentExecutionError(CoreAgentExecutionError):

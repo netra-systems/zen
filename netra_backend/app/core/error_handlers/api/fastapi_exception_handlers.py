@@ -12,7 +12,7 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from app.core.exceptions import NetraException, ErrorCode
+from netra_backend.app.core.exceptions import NetraException, ErrorCode
 from netra_backend.app.api_error_handler import handle_exception, get_http_status_code
 
 

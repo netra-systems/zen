@@ -3,7 +3,7 @@
 import asyncio
 from typing import Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo
 from netra_backend.app.error_types import ErrorSeverity
 

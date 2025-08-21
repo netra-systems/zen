@@ -10,12 +10,12 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.ws_manager import WebSocketManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.ws_manager import WebSocketManager
 
 
 # The 9 example prompts from EXAMPLE_PROMPTS list

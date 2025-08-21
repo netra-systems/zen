@@ -15,11 +15,11 @@ import asyncio
 from typing import Dict, Any, Union, Optional, List, Literal
 from fastapi import WebSocket
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import ServerMessage
-from app.websocket.connection import ConnectionInfo
-from app.websocket.large_message_handler import get_large_message_handler, CompressionAlgorithm
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.large_message_handler import get_large_message_handler, CompressionAlgorithm
 from netra_backend.app.message_queue import MessageQueue
 from netra_backend.app.message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 

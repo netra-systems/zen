@@ -2,8 +2,8 @@
 
 from typing import Dict, Any, List, Optional
 
-from app.logging_config import central_logger
-from app.services.agent_service import AgentService
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.agent_service import AgentService
 
 from netra_backend.app.session_manager import SessionManager
 from netra_backend.app.analytics_tracker import AnalyticsTracker
@@ -98,7 +98,7 @@ def get_demo_service() -> DemoService:
     """Factory function to create DemoService instance for dependency injection."""
     agent_service = None
     try:
-        from app.services.agent_service import get_agent_service
+        from netra_backend.app.services.agent_service import get_agent_service
         agent_service = None
     except ImportError:
         agent_service = None

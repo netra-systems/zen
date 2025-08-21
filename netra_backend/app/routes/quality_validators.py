@@ -6,8 +6,8 @@ Each function is ≤8 lines as per architectural requirements.
 
 from typing import Dict, Any, List
 from datetime import datetime, UTC
-from app.services.quality_gate_service import ContentType
-from app.schemas.quality_types import (
+from netra_backend.app.services.quality_gate_service import ContentType
+from netra_backend.app.schemas.quality_types import (
     QualityValidationResponse, QualityAlert, QualityDashboardData,
     QualityStatistics, AlertAcknowledgementResponse, QualityReport,
     QualityServiceHealth, User

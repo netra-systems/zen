@@ -2,8 +2,8 @@
 
 from typing import Optional, Dict, Any, List
 import asyncio
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.cache_models import CacheStrategy, CacheEntry
 from netra_backend.app.cache_statistics import CacheStatistics
 from netra_backend.app.cache_eviction import CacheEvictionManager

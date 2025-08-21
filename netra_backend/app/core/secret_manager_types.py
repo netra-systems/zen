@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Set
 from datetime import datetime, timezone
 
-from app.schemas.config_types import EnvironmentType
+from netra_backend.app.schemas.config_types import EnvironmentType
 
 
 class SecretAccessLevel(str, Enum):

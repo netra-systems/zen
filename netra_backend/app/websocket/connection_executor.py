@@ -9,14 +9,14 @@ Business Value: Standardizes connection operations with monitoring and reliabili
 import asyncio
 from typing import Dict, Any, List, Optional
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.websocket.connection_info import ConnectionInfo, ConnectionMetrics
-from app.websocket.connection_reliability import ConnectionReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionMetrics
+from netra_backend.app.websocket.connection_reliability import ConnectionReliabilityManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -41,7 +41,7 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _initialize_execution_engine(self):
         """Initialize execution engine."""
-        from app.agents.base.executor import BaseExecutionEngine
+        from netra_backend.app.agents.base.executor import BaseExecutionEngine
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
@@ -112,7 +112,7 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _create_establishment_reliability_handler(self):
         """Create connection establishment reliability handler."""
-        from app.websocket.connection_reliability import ConnectionEstablishmentReliability
+        from netra_backend.app.websocket.connection_reliability import ConnectionEstablishmentReliability
         return ConnectionEstablishmentReliability(self.reliability_manager)
         
     def _handle_establishment_result(self, conn_info) -> Dict[str, Any]:
@@ -135,7 +135,7 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _create_close_reliability_handler(self):
         """Create connection close reliability handler."""
-        from app.websocket.connection_reliability import ConnectionCloseReliability
+        from netra_backend.app.websocket.connection_reliability import ConnectionCloseReliability
         return ConnectionCloseReliability(self.reliability_manager)
         
     def _handle_close_result(self, success: bool, conn_info) -> Dict[str, Any]:
@@ -186,7 +186,7 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _is_connection_alive(self, conn_info: ConnectionInfo) -> bool:
         """Check if connection is alive."""
-        from app.websocket.connection_info import ConnectionValidator
+        from netra_backend.app.websocket.connection_info import ConnectionValidator
         return ConnectionValidator.is_websocket_connected(conn_info.websocket)
         
     async def _cleanup_single_connection(self, conn_info: ConnectionInfo) -> None:
@@ -249,7 +249,7 @@ class ConnectionOperationBuilder:
             
     def _create_agent_state(self):
         """Create agent state."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         # Extract user_request from operation_data or use operation-specific default
         user_request = self._operation_data.get('user_request', 
                                                 f"websocket_{self._operation_type or 'operation'}")

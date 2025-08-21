@@ -7,7 +7,7 @@ import time
 import json
 from typing import Any, Dict, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.cache_config import (
     CacheEntry, CacheMetrics, QueryCacheConfig, CacheKeyGenerator,
     QueryPatternAnalyzer

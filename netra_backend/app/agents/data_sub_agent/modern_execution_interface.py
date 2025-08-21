@@ -7,9 +7,9 @@ Business Value: Modular modern execution patterns for data analysis.
 """
 
 from typing import Dict, Any, Optional
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext
-from app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 logger = central_logger.get_logger(__name__)
 

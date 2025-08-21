@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Set, Optional, Callable
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_recovery_types import MessageState
 
 logger = central_logger.get_logger(__name__)

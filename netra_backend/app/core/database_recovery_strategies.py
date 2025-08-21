@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import consolidated types
 from netra_backend.app.database_types import DatabaseType, PoolHealth, DatabaseConfig, PoolMetrics
@@ -222,7 +222,7 @@ class DatabaseFailoverStrategy(DatabaseRecoveryStrategy):
     async def _perform_failover(self, backup_config: DatabaseConfig) -> bool:
         """Perform the actual failover operation."""
         try:
-            from app.db.postgres import update_connection_config
+            from netra_backend.app.db.postgres import update_connection_config
             await update_connection_config(backup_config)
             return self._log_failover_success()
         except Exception as failover_error:

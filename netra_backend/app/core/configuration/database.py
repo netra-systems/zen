@@ -15,10 +15,10 @@ import os
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
-from app.schemas.Config import AppConfig
-from app.logging_config import central_logger as logger
-from app.core.exceptions_config import ConfigurationError
-from app.core.environment_constants import get_current_environment
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_config import ConfigurationError
+from netra_backend.app.core.environment_constants import get_current_environment
 
 
 class DatabaseConfigManager:

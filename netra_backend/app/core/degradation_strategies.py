@@ -6,11 +6,11 @@ for database, LLM, and WebSocket services.
 
 from typing import Any, Dict, List, Set
 
-from app.core.degradation_types import (
+from netra_backend.app.core.degradation_types import (
     DegradationLevel,
     DegradationStrategy
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -48,7 +48,7 @@ class DatabaseDegradationStrategy(DegradationStrategy):
     
     async def _test_database_connection(self) -> bool:
         """Test primary database connection."""
-        from app.db.postgres import get_postgres_client
+        from netra_backend.app.db.postgres import get_postgres_client
         db_client = await get_postgres_client()
         if db_client:
             await db_client.execute("SELECT 1")
@@ -132,7 +132,7 @@ class LLMDegradationStrategy(DegradationStrategy):
     
     async def _test_llm_connection(self) -> bool:
         """Test primary LLM connection."""
-        from app.llm.llm_manager import llm_manager
+        from netra_backend.app.llm.llm_manager import llm_manager
         if llm_manager and llm_manager.enabled:
             response = await llm_manager.complete("test", max_tokens=1)
             return response is not None
@@ -221,7 +221,7 @@ class WebSocketDegradationStrategy(DegradationStrategy):
     
     async def _test_websocket_health(self) -> bool:
         """Test WebSocket manager health."""
-        from app.ws_manager import manager as ws_manager
+        from netra_backend.app.ws_manager import manager as ws_manager
         if ws_manager and hasattr(ws_manager, 'core'):
             stats = ws_manager.get_stats()
             return stats.total_errors < 10  # Configurable threshold

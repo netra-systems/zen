@@ -2,7 +2,7 @@
 
 from typing import Dict, Any, List, Optional, Callable
 
-from app.config_exceptions import ConfigLoadError
+from netra_backend.app.config_exceptions import ConfigLoadError
 
 
 def validate_required_config(

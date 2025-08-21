@@ -6,8 +6,8 @@ Tracks and analyzes connection pool performance metrics.
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from sqlalchemy.pool import Pool
-from app.db.postgres import async_engine, Database
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import async_engine, Database
+from netra_backend.app.logging_config import central_logger
 import time
 
 logger = central_logger.get_logger(__name__)

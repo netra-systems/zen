@@ -7,7 +7,7 @@ Coordinates AI map building, metrics calculation, and output formatting.
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.ai_map_builder import AIMapBuilder
 from netra_backend.app.metrics_calculator import GitHubAnalyzerMetricsCalculator
 from netra_backend.app.recommendation_generator import RecommendationGenerator

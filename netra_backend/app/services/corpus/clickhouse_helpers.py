@@ -4,7 +4,7 @@ Decomposes large ClickHouse functions into 25-line focused helpers.
 """
 
 from typing import Dict, Any, Optional, Tuple
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.base import ClickHouseOperationError
 
 logger = central_logger

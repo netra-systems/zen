@@ -5,11 +5,11 @@ Supply Research Service - Business logic for AI supply research operations
 from typing import Dict, List, Optional, Any, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions_base import NetraException
-from app.redis_manager import RedisManager
-from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog, User
-from app.services.permission_service import PermissionService
-from app.logging_config import central_logger as logger
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog, User
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.logging_config import central_logger as logger
 
 # Import modular operations
 from netra_backend.app.supply_research.supply_item_operations import SupplyItemOperations

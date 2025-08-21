@@ -6,8 +6,8 @@ Includes specialized functions for different config types.
 
 import os
 from typing import Dict, Any, Optional, Tuple, Callable
-from app.config.schemas import AppConfig
-from app.logging_config import central_logger as logger
+from netra_backend.app.config.schemas import AppConfig
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def load_env_var(env_var: str, config: AppConfig, field_name: str) -> bool:

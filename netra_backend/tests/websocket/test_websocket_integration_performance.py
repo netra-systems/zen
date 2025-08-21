@@ -9,11 +9,11 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import AsyncMock
 
-from app.websocket.memory_manager import WebSocketMemoryManager
-from app.websocket.message_batcher import WebSocketMessageBatcher
-from app.websocket.compression import WebSocketCompressor
-from app.websocket.performance_monitor import PerformanceMonitor
-from app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.websocket.memory_manager import WebSocketMemoryManager
+from netra_backend.app.websocket.message_batcher import WebSocketMessageBatcher
+from netra_backend.app.websocket.compression import WebSocketCompressor
+from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
 class WebSocketIntegrationTestHelper:

@@ -8,7 +8,7 @@ import pytest
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-from tests.e2e.scaling_test_helpers import (
+from netra_backend.tests.e2e.scaling_test_helpers import (
     create_scaling_setup, execute_scaling_workflow,
     create_extreme_usage_state, create_declining_usage_state,
     validate_extreme_usage_handling, validate_declining_usage_handling

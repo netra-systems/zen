@@ -6,7 +6,7 @@ time-based analysis windows for trend detection.
 
 from datetime import datetime, timedelta
 
-from app.core.error_aggregation_base import (
+from netra_backend.app.core.error_aggregation_base import (
     ErrorData, ErrorPattern, ErrorSignature, PatternHistory, TimeWindows
 )
 

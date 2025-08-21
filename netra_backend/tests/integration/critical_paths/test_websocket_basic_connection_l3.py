@@ -15,8 +15,8 @@ from datetime import datetime
 import uuid
 
 from test_framework.test_patterns import L3IntegrationTest
-from app.core.redis_client import RedisManager
-from app.websocket.manager import WebSocketManager
+from netra_backend.app.core.redis_client import RedisManager
+from netra_backend.app.websocket.manager import WebSocketManager
 
 
 class TestWebSocketBasicConnection(L3IntegrationTest):

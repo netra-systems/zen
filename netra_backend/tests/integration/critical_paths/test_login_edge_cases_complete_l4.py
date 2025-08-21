@@ -12,13 +12,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.auth_service import AuthService
-from app.services.user_service import UserService
-from app.services.rate_limit_service import RateLimitService
-from app.services.session_service import SessionService
-from app.models.user import User, UserStatus
-from app.core.config import settings
-from app.core.exceptions import (
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_service import UserService
+from netra_backend.app.services.rate_limit_service import RateLimitService
+from netra_backend.app.services.session_service import SessionService
+from netra_backend.app.models.user import User, UserStatus
+from netra_backend.app.core.config import settings
+from netra_backend.app.core.exceptions import (
     AuthenticationError,
     RateLimitExceeded,
     AccountLocked,

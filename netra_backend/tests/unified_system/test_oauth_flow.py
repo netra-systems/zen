@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 
 # Import main app with error handling
 try:
-    from app.main import app
+    from netra_backend.app.main import app
 except ImportError:
     # Create a minimal FastAPI app for testing if import fails
     from fastapi import FastAPI
@@ -22,17 +22,17 @@ except ImportError:
 
 # Import with error handling
 try:
-    from app.services.security_service import SecurityService
+    from netra_backend.app.services.security_service import SecurityService
 except ImportError:
     SecurityService = Mock
 
 try:
-    from app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client import auth_client
 except ImportError:
     auth_client = Mock()
 
 try:
-    from app.schemas.auth_types import DevLoginRequest
+    from netra_backend.app.schemas.auth_types import DevLoginRequest
 except ImportError:
     from pydantic import BaseModel
     class DevLoginRequest(BaseModel):
@@ -40,7 +40,7 @@ except ImportError:
         name: str = "Development User"
 
 try:
-    from app.auth_integration.auth import get_current_user
+    from netra_backend.app.auth_integration.auth import get_current_user
 except ImportError:
     get_current_user = Mock()
 

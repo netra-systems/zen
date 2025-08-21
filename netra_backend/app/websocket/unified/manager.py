@@ -20,18 +20,18 @@ from datetime import datetime, timezone
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage, ServerMessage
-from app.schemas.websocket_models import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.schemas.websocket_models import (
     WebSocketValidationError,
     WebSocketStats,
     RateLimitInfo,
     BroadcastResult
 )
-from app.websocket.connection import ConnectionInfo, ConnectionManager
-from app.websocket.rate_limiter import RateLimiter
-from app.websocket.error_handler import WebSocketErrorHandler
-from app.websocket.room_manager import RoomManager
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.rate_limiter import RateLimiter
+from netra_backend.app.websocket.error_handler import WebSocketErrorHandler
+from netra_backend.app.websocket.room_manager import RoomManager
 
 # Import unified modules
 from netra_backend.app.messaging import UnifiedMessagingManager
@@ -39,7 +39,7 @@ from netra_backend.app.broadcasting import UnifiedBroadcastingManager
 from netra_backend.app.state import UnifiedStateManager
 from netra_backend.app.circuit_breaker import CircuitBreaker
 from netra_backend.app.telemetry_manager import TelemetryManager
-from netra_backend.app..lifecycle_integration import get_lifecycle_integrator
+from netra_backend.app.lifecycle_integration import get_lifecycle_integrator
 
 logger = central_logger.get_logger(__name__)
 

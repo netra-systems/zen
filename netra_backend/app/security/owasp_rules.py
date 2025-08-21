@@ -6,7 +6,7 @@ Focused module for OWASP security checks with 25-line function limit.
 from typing import List
 from datetime import datetime, timezone
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compliance_checks import (
     ComplianceCheck, ComplianceCheckManager, ComplianceStandard, ComplianceStatus
 )

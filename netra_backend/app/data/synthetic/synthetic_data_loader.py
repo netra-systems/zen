@@ -9,8 +9,8 @@ import yaml
 import asyncio
 from rich.console import Console
 
-from app.db.clickhouse import get_clickhouse_client
-from app.db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.models_clickhouse import CONTENT_CORPUS_TABLE_NAME
 from netra_backend.app.default_synthetic_config import DEFAULT_CONFIG
 from netra_backend.app..content_corpus import DEFAULT_CONTENT_CORPUS
 

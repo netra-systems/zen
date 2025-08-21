@@ -1,7 +1,7 @@
 """Synthetic data tool execution handlers."""
 from typing import Dict, Any, Optional
-from app.logging_config import central_logger
-from app.core.reliability_utils import create_default_tool_result
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.reliability_utils import create_default_tool_result
 
 logger = central_logger.get_logger(__name__)
 
@@ -38,7 +38,7 @@ class SyntheticToolExecutor:
     
     async def _generate_batch(self, config: Any, batch_size: int) -> Any:
         """Generate batch using synthetic data service"""
-        from app.services.synthetic_data import synthetic_data_service
+        from netra_backend.app.services.synthetic_data import synthetic_data_service
         return await synthetic_data_service.generate_batch(config, batch_size)
     
     def _create_batch_success_response(self, batch: Any, batch_size: int) -> Dict[str, Any]:
@@ -69,7 +69,7 @@ class SyntheticToolExecutor:
     
     async def _validate_data(self, data: list) -> Any:
         """Validate data using synthetic data service"""
-        from app.services.synthetic_data import validate_data
+        from netra_backend.app.services.synthetic_data import validate_data
         return validate_data(data)
     
     def _create_validation_success_response(self, validation: Any) -> Dict[str, Any]:
@@ -98,7 +98,7 @@ class SyntheticToolExecutor:
     
     async def _store_data(self, data: list, table_name: str) -> Any:
         """Store data using synthetic data service"""
-        from app.services.synthetic_data import synthetic_data_service
+        from netra_backend.app.services.synthetic_data import synthetic_data_service
         return await synthetic_data_service.ingest_batch(data, table_name)
     
     def _create_store_success_response(self, result: Any) -> Dict[str, Any]:

@@ -8,8 +8,8 @@ import time
 from typing import Dict, List, Optional, Set
 from datetime import datetime, timedelta
 from fastapi import Request, HTTPException, status
-from app.logging_config import central_logger
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 logger = central_logger.get_logger(__name__)
 

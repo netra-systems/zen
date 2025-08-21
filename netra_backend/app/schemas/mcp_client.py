@@ -7,7 +7,7 @@ Adheres to single source of truth and strong typing principles.
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
-from app.schemas.core_enums import (
+from netra_backend.app.schemas.core_enums import (
     MCPTransport, MCPServerStatus, MCPAuthType, MCPToolExecutionStatus
 )
 

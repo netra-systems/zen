@@ -26,10 +26,10 @@ from typing import Optional, Annotated, Dict, Any
 from datetime import timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.clients.auth_client import auth_client
-from app.db.models_postgres import User
-from app.db.session import get_db_session
-from app.dependencies import get_db_dependency as get_db
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.dependencies import get_db_dependency as get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Create auth-specific logger
@@ -75,10 +75,10 @@ async def get_current_user(
         
         if not user:
             # In development mode, create and persist a dev user
-            from app.config import get_config
+            from netra_backend.app.config import get_config
             config = get_config()
             if config.environment == "development":
-                from app.services.user_service import user_service
+                from netra_backend.app.services.user_service import user_service
                 
                 # Use centralized dev user creation
                 email = validation_result.get("email", "dev@example.com")

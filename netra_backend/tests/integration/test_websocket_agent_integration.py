@@ -23,9 +23,9 @@ class TestWebSocketAgentIntegration:
     
     async def test_end_to_end_message_flow(self):
         """Test complete flow: WebSocket message → Agent → Response."""
-        from app.services.agent_service_core import AgentService
-        from app.agents.supervisor_consolidated import SupervisorAgent
-        from app.schemas import AppConfig
+        from netra_backend.app.services.agent_service_core import AgentService
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.schemas import AppConfig
         
         # Setup mocks
         config = AppConfig()
@@ -76,7 +76,7 @@ class TestWebSocketAgentIntegration:
     
     async def test_agent_registration_during_startup(self):
         """Test that agents are properly registered during startup."""
-        from app.startup_module import _create_agent_supervisor
+        from netra_backend.app.startup_module import _create_agent_supervisor
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -98,8 +98,8 @@ class TestWebSocketAgentIntegration:
     
     async def test_thread_context_preservation(self):
         """Test that thread context is preserved across messages."""
-        from app.services.message_handlers import MessageHandlerService
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.message_handlers import MessageHandlerService
+        from netra_backend.app.services.thread_service import ThreadService
         
         # Setup mocks
         mock_supervisor = AsyncMock()
@@ -142,7 +142,7 @@ class TestWebSocketAgentIntegration:
     
     async def test_error_handling_in_message_flow(self):
         """Test error handling when agent execution fails."""
-        from app.services.agent_service_core import AgentService
+        from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mock that raises error
         mock_supervisor = AsyncMock()
@@ -176,7 +176,7 @@ class TestWebSocketAgentIntegration:
     
     async def test_concurrent_message_handling(self):
         """Test handling multiple concurrent WebSocket messages."""
-        from app.services.agent_service_core import AgentService
+        from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mock with delay to simulate processing
         mock_supervisor = AsyncMock()

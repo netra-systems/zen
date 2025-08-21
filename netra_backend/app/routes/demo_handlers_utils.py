@@ -1,7 +1,7 @@
 """Demo handlers utilities."""
 from fastapi import HTTPException
 from typing import Dict, Any
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 def log_and_raise_error(message: str, error: Exception) -> None:

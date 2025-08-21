@@ -8,8 +8,8 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from app.core.error_codes import ErrorSeverity
-from app.logging_config import central_logger
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_aggregation_utils import ErrorPattern, ErrorSignatureExtractor
 from netra_backend.app.error_aggregation_trend import ErrorTrendAnalyzer
 from netra_backend.app.error_aggregation_alerts import AlertEngine

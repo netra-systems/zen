@@ -29,9 +29,9 @@ import hashlib
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 logger = central_logger.get_logger(__name__)
 

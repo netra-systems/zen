@@ -5,9 +5,9 @@ Integrates with the secret manager for secure configuration.
 """
 
 from typing import Dict, Any, List, Tuple
-from app.config.schemas import AppConfig, SECRET_CONFIG
-from app.core.secret_manager import SecretManager
-from app.logging_config import central_logger as logger
+from netra_backend.app.config.schemas import AppConfig, SECRET_CONFIG
+from netra_backend.app.core.secret_manager import SecretManager
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def get_all_secret_mappings() -> Dict[str, Dict[str, Any]]:

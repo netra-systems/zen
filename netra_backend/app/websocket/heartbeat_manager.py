@@ -7,7 +7,7 @@ and maintain connection health.
 import asyncio
 from typing import Dict, Optional, Any
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.error_handler import WebSocketErrorHandler
 from netra_backend.app.heartbeat_config import HeartbeatConfig

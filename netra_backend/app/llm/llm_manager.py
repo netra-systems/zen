@@ -5,15 +5,15 @@ Each function must be ≤8 lines as per CLAUDE.md requirements.
 """
 from typing import Any, Type, TypeVar, Optional, AsyncIterator
 from pydantic import BaseModel
-from app.schemas import AppConfig
-from app.schemas.llm_config_types import LLMConfig as GenerationConfig
-from app.schemas.llm_response_types import LLMResponse
-from app.schemas.llm_base_types import LLMConfigInfo, LLMManagerStats, LLMHealthCheck
-from app.llm.llm_core_operations import LLMCoreOperations
-from app.llm.llm_structured_operations import LLMStructuredOperations
-from app.llm.llm_management_utilities import LLMManagementUtilities
-from app.llm.llm_response_processing import parse_nested_json_recursive
-from app.logging_config import central_logger
+from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.schemas.llm_base_types import LLMConfigInfo, LLMManagerStats, LLMHealthCheck
+from netra_backend.app.llm.llm_core_operations import LLMCoreOperations
+from netra_backend.app.llm.llm_structured_operations import LLMStructuredOperations
+from netra_backend.app.llm.llm_management_utilities import LLMManagementUtilities
+from netra_backend.app.llm.llm_response_processing import parse_nested_json_recursive
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T', bound=BaseModel)

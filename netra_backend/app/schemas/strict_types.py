@@ -9,13 +9,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime, UTC
 from pydantic import BaseModel, Field
 
-from app.agents.triage_sub_agent.models import TriageResult
-from app.schemas.shared_types import (
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.schemas.shared_types import (
     DataAnalysisResponse, AnomalyDetectionResponse, PerformanceMetrics
 )
-from app.schemas.websocket_message_types import WebSocketMessage
-from app.schemas.core_enums import ExecutionStatus
-from app.schemas.agent_result_types import (
+from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.schemas.agent_result_types import (
     TypedAgentResult, JsonCompatibleDict, ExecutionResult, AgentExecutionResult
 )
 

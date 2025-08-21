@@ -5,10 +5,10 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 
 from typing import Dict, Any
-from app.schemas import AppConfig
-from app.core.exceptions_service import ServiceUnavailableError
-from app.llm.observability import get_heartbeat_logger, get_data_logger
-from app.logging_config import central_logger
+from netra_backend.app.schemas import AppConfig
+from netra_backend.app.core.exceptions_service import ServiceUnavailableError
+from netra_backend.app.llm.observability import get_heartbeat_logger, get_data_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -80,7 +80,7 @@ class LLMConfigManager:
     def _create_mock_llm(self) -> Any:
         """Create mock LLM for development environment."""
         try:
-            from app.tests.helpers.llm_mocks import MockLLM
+            from netra_backend.app.tests.helpers.llm_mocks import MockLLM
             return MockLLM("mock-dev-model")
         except ImportError:
             logger.warning("MockLLM not available - using None")

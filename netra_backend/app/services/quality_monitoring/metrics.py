@@ -5,10 +5,10 @@ from datetime import datetime, timedelta, UTC
 from collections import defaultdict, deque
 import json
 
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
-from app.db.clickhouse import ClickHouseDatabase
-from app.services.quality_gate_service import ContentType, QualityMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
+from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -16,7 +16,7 @@ logger = central_logger.get_logger(__name__)
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED
-from app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
 
 class QualityMetricsCollector:
     """Collects and stores quality metrics"""
@@ -128,7 +128,7 @@ class QualityMetricsCollector:
         if not self.db_session:
             return
         try:
-            from app.db.models import AgentRun
+            from netra_backend.app.db.models import AgentRun
             stmt = select(AgentRun).where(
                 AgentRun.created_at > datetime.now(UTC) - timedelta(hours=1)
             ).limit(100)

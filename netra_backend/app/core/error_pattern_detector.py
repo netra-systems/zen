@@ -6,7 +6,7 @@ sustained error conditions for alerting and monitoring.
 
 from typing import List
 
-from app.core.error_aggregation_base import TimeWindows
+from netra_backend.app.core.error_aggregation_base import TimeWindows
 
 
 class ErrorPatternDetector:

@@ -10,16 +10,16 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, List, Any
 
-from app.services.supply_research_scheduler import (
+from netra_backend.app.services.supply_research_scheduler import (
     SupplyResearchScheduler,
     ResearchSchedule,
     ScheduleFrequency
 )
-from app.agents.supply_researcher.models import ResearchType
-from app.background import BackgroundTaskManager
-from app.llm.llm_manager import LLMManager
-from app.redis_manager import RedisManager
-from app.core.exceptions_base import NetraException
+from netra_backend.app.agents.supply_researcher.models import ResearchType
+from netra_backend.app.background import BackgroundTaskManager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class TestSupplyResearchSchedulerJobs:

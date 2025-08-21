@@ -9,11 +9,11 @@ BVJ: Growth & Enterprise | Process Efficiency | +25% throughput improvement
 
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
-from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext
-from app.agents.state import DeepAgentState
-from app.agents.synthetic_data_presets import WorkloadProfile
-from app.agents.synthetic_data_generator import SyntheticDataResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+from netra_backend.app.agents.synthetic_data_generator import SyntheticDataResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -103,7 +103,7 @@ class SyntheticDataWorkflowOrchestrator:
     
     def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
         """Create result indicating approval required."""
-        from app.agents.synthetic_data_generator import GenerationStatus
+        from netra_backend.app.agents.synthetic_data_generator import GenerationStatus
         return SyntheticDataResult(
             success=False,
             workload_profile=profile,

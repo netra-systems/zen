@@ -3,8 +3,8 @@ from fastapi import BackgroundTasks
 from typing import Optional, Dict, Any
 import uuid
 
-from app.services.demo_service import DemoService
-from app.schemas.demo_schemas import DemoChatRequest, DemoChatResponse
+from netra_backend.app.services.demo_service import DemoService
+from netra_backend.app.schemas.demo_schemas import DemoChatRequest, DemoChatResponse
 
 
 async def handle_demo_chat(
@@ -83,7 +83,7 @@ async def execute_chat_with_error_handling(
 
 def handle_chat_error(e: Exception) -> None:
     """Handle chat processing error."""
-    from app.routes.demo_handlers_utils import log_and_raise_error
+    from netra_backend.app.routes.demo_handlers_utils import log_and_raise_error
     log_and_raise_error("Demo chat processing failed", e)
 
 

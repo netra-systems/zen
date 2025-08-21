@@ -6,7 +6,7 @@ Maintains single responsibility and 25-line function limit.
 """
 
 from typing import Dict, Any
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.models import CorpusOperation, CorpusOperationRequest
 
 

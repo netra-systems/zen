@@ -12,8 +12,8 @@ from datetime import datetime
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
 
-from app.startup.migration_tracker import MigrationTracker, MigrationState, FailedMigration
-from app.core.exceptions import NetraException
+from netra_backend.app.startup.migration_tracker import MigrationTracker, MigrationState, FailedMigration
+from netra_backend.app.core.exceptions import NetraException
 
 
 @pytest.fixture

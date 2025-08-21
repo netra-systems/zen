@@ -48,7 +48,7 @@ def test_enterprise_sso_when_enabled():
     """
     # This test would normally be skipped because enterprise_sso is disabled
     # But with environment override, it can be enabled for specific test runs
-    from app.auth_integration.auth import validate_enterprise_token
+    from netra_backend.app.auth_integration.auth import validate_enterprise_token
     
     token = "enterprise_test_token"
     result = validate_enterprise_token(token)

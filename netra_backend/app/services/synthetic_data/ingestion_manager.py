@@ -5,8 +5,8 @@ Ingestion Manager Module - Handles data ingestion to ClickHouse
 import os
 import uuid
 from typing import Dict, List, Optional
-from app.db.clickhouse import get_clickhouse_client
-from app.logging_config import central_logger
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.ingestion import create_destination_table, ingest_batch_to_clickhouse
 
 

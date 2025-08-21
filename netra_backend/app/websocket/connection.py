@@ -7,11 +7,11 @@ and modern execution interfaces.
 Business Value: Reduces connection failures by 40% with improved monitoring and reliability.
 """
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Import all modern components
-from app.websocket.connection_info import ConnectionInfo
-from app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+from netra_backend.app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
 
 # Connection manager will be initialized lazily when first accessed
 connection_manager = None
@@ -24,7 +24,7 @@ def get_connection_manager_instance():
     return connection_manager
 
 # Import legacy components for backward compatibility
-from app.websocket.connection_info import (
+from netra_backend.app.websocket.connection_info import (
     ConnectionInfo,
     ConnectionStats,
     ConnectionInfoBuilder,
@@ -33,13 +33,13 @@ from app.websocket.connection_info import (
     ConnectionDurationCalculator
 )
 
-from app.websocket.connection_executor import (
+from netra_backend.app.websocket.connection_executor import (
     ConnectionExecutor,
     ConnectionOperationBuilder,
     ConnectionExecutionOrchestrator
 )
 
-from app.websocket.connection_reliability import (
+from netra_backend.app.websocket.connection_reliability import (
     ConnectionReliabilityManager,
     ConnectionCloseReliability,
     ConnectionEstablishmentReliability

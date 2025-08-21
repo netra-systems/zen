@@ -20,7 +20,7 @@ import asyncio
 import time
 from datetime import datetime, timezone, timedelta
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.shared_fixtures import (
     MetricEvent, MockMetricsAggregator, MockUserActionTracker,
     metrics_aggregator, user_action_tracker, metrics_collector

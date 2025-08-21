@@ -22,9 +22,9 @@ from netra_backend.app.core.exceptions import NetraException
 @pytest.fixture
 def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for model selection testing."""
-    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-    from app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     agents = _create_agent_dictionary(real_llm_manager, real_tool_dispatcher)
     return _build_model_setup(agents, real_llm_manager, real_websocket_manager)
@@ -32,9 +32,9 @@ def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_di
 
 def _create_agent_dictionary(llm_manager, tool_dispatcher):
     """Create dictionary of agents"""
-    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-    from app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     return {
         'triage': TriageSubAgent(llm_manager, tool_dispatcher, None),

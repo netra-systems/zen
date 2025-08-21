@@ -18,13 +18,13 @@ from datetime import datetime, timezone
 import websockets
 from dataclasses import dataclass
 
-from app.logging_config import central_logger
-from app.websocket.error_recovery_handler import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.error_recovery_handler import (
     WebSocketErrorRecoveryHandler, ErrorType, ErrorContext
 )
-from app.core.error_handlers import handle_exception, get_http_status_code
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.core.error_handlers import handle_exception, get_http_status_code
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.tests.fixtures import TestUser, WebSocketClient, unified_services
 from netra_backend.tests.mock_services import MockOAuthProvider, MockLLMService, ServiceRegistry
 

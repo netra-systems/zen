@@ -13,25 +13,25 @@ from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas import ToolResult, ToolStatus, ToolInput
-from app.schemas.admin_tool_types import (
+from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput
+from netra_backend.app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
     AdminToolType, AdminToolInfo,
     ToolStatus as AdminToolStatus
 )
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
 
-from app.db.models_postgres import User
-from app.services.permission_service import PermissionService
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.logging_config import central_logger
 from datetime import datetime, UTC
 
 logger = central_logger

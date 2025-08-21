@@ -25,9 +25,9 @@ from netra_backend.app.services.quality_gate_service import QualityGateService, 
 def cost_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for cost optimization testing."""
     # Import additional agents to avoid circular dependencies
-    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-    from app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     agents = {
         'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),

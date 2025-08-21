@@ -13,10 +13,10 @@ from datetime import datetime
 import time
 from typing import Dict, Any
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.services.agent_service import AgentService
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -57,7 +57,7 @@ def _get_optimization_response() -> Dict[str, Any]:
 
 def _setup_triage_agent_responses(llm_manager: Mock) -> None:
     """Setup triage agent structured LLM responses."""
-    from app.agents.triage_sub_agent import (
+    from netra_backend.app.agents.triage_sub_agent import (
         TriageResult, Priority, Complexity, UserIntent,
         ExtractedEntities, TriageMetadata
     )
@@ -66,7 +66,7 @@ def _setup_triage_agent_responses(llm_manager: Mock) -> None:
 
 def _create_triage_result() -> 'TriageResult':
     """Create mock triage result."""
-    from app.agents.triage_sub_agent import (
+    from netra_backend.app.agents.triage_sub_agent import (
         TriageResult, Priority, Complexity, UserIntent,
         ExtractedEntities, TriageMetadata
     )
@@ -85,7 +85,7 @@ def _create_triage_result() -> 'TriageResult':
 
 def _create_extracted_entities() -> 'ExtractedEntities':
     """Create mock extracted entities."""
-    from app.agents.triage_sub_agent import ExtractedEntities
+    from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
     return ExtractedEntities(
         models_mentioned=["GPT-4", "Claude"],
         metrics_mentioned=["latency", "throughput"],
@@ -95,7 +95,7 @@ def _create_extracted_entities() -> 'ExtractedEntities':
 
 def _create_user_intent() -> 'UserIntent':
     """Create mock user intent."""
-    from app.agents.triage_sub_agent import UserIntent
+    from netra_backend.app.agents.triage_sub_agent import UserIntent
     return UserIntent(
         primary_intent="optimize",
         secondary_intents=["analyze", "monitor"]
@@ -104,7 +104,7 @@ def _create_user_intent() -> 'UserIntent':
 
 def _create_triage_metadata() -> 'TriageMetadata':
     """Create mock triage metadata."""
-    from app.agents.triage_sub_agent import TriageMetadata
+    from netra_backend.app.agents.triage_sub_agent import TriageMetadata
     return TriageMetadata(
         triage_duration_ms=150,
         cache_hit=False,
@@ -146,7 +146,7 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={
         "status": "success",
@@ -235,8 +235,8 @@ def setup_websocket_manager(ws_manager):
 
 def create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence):
     """Create supervisor with all mocked dependencies"""
-    from app.agents.tool_dispatcher import ToolDispatcher
-    from app.agents.supervisor.execution_context import AgentExecutionResult
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, dispatcher)

@@ -51,7 +51,7 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_dev_user_123_exists_in_database(self):
         """Test that dev-user-123 is created in the database."""
-        from app.db.postgres import get_async_db
+        from netra_backend.app.db.postgres import get_async_db
         
         async with get_async_db() as db:
             # Query for dev user
@@ -69,7 +69,7 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_oauth_creates_real_database_user(self):
         """Test that OAuth flow creates users in the database."""
-        from app.db.postgres import get_async_db
+        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
         
         # Simulate OAuth user info
@@ -116,10 +116,10 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_token_user_id_matches_database_user_id(self):
         """Test that JWT token user_id matches the database user.id."""
-        from app.services.security_service import SecurityService
-        from app.services.key_manager import KeyManager
-        from app.config import settings
-        from app.db.postgres import get_async_db
+        from netra_backend.app.services.security_service import SecurityService
+        from netra_backend.app.services.key_manager import KeyManager
+        from netra_backend.app.config import settings
+        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
         
         # Setup security service
@@ -187,7 +187,7 @@ class TestAuthUserPersistenceRegression:
     async def test_auth_service_database_sync(self):
         """Test that auth service syncs users to main database."""
         from sqlalchemy import select
-        from app.db.postgres import get_async_db
+        from netra_backend.app.db.postgres import get_async_db
         
         # Test user data
         test_user = {
@@ -241,7 +241,7 @@ class TestAuthUserPersistenceRegression:
             }
         ]
         
-        from app.db.postgres import get_async_db
+        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
         
         async with get_async_db() as db:
@@ -300,7 +300,7 @@ class TestAuthServiceIntegration:
     @pytest.mark.asyncio 
     async def test_user_persistence_across_services(self):
         """Test that users persist across auth service and main app."""
-        from app.db.postgres import get_async_db
+        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
         
         # User created by auth service
@@ -332,9 +332,9 @@ class TestAuthServiceIntegration:
             assert app_user.email == auth_user["email"]
             
             # Verify WebSocket auth would find this user
-            from app.services.security_service import SecurityService
-            from app.services.key_manager import KeyManager
-            from app.config import settings
+            from netra_backend.app.services.security_service import SecurityService
+            from netra_backend.app.services.key_manager import KeyManager
+            from netra_backend.app.config import settings
             
             key_manager = KeyManager.load_from_settings(settings)
             security_service = SecurityService(key_manager)

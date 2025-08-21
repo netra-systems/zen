@@ -28,11 +28,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from app.db.postgres import AsyncSessionLocal, get_async_session
-from app.db.client_clickhouse import ClickHouseClient
-from app.db.models_user import User, UserPlan
-from app.db.models_content import Thread, Message
-from app.core.health_checkers import HealthChecker
+from netra_backend.app.db.postgres import AsyncSessionLocal, get_async_session
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.models_user import User, UserPlan
+from netra_backend.app.db.models_content import Thread, Message
+from netra_backend.app.core.health_checkers import HealthChecker
 
 
 # Mock sharding components for L4 testing

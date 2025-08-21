@@ -4,9 +4,9 @@ import json
 import uuid
 from datetime import datetime, UTC
 from typing import Dict, Any, Optional
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
-from app.services.demo.demo_constants import DEMO_SESSION_TTL, MAX_DEMO_SESSIONS
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.services.demo.demo_constants import DEMO_SESSION_TTL, MAX_DEMO_SESSIONS
 
 logger = central_logger.get_logger(__name__)
 

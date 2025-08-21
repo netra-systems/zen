@@ -22,12 +22,12 @@ from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentU
 from llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-from tests.helpers.supervisor_test_helpers import (
+from netra_backend.tests.helpers.supervisor_test_helpers import (
     create_corpus_admin_mocks, create_test_documents, setup_vector_store_mock,
     create_supply_researcher_mocks, create_supply_data, create_supplier_data,
     create_demo_service_mocks, create_demo_data, create_timestamp_data
 )
-from tests.helpers.supervisor_test_classes import (
+from netra_backend.tests.helpers.supervisor_test_classes import (
     CorpusAdminSubAgent, SupplyResearcherSubAgent, DemoService
 )
 

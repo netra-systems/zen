@@ -9,8 +9,8 @@ from decimal import Decimal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, or_, desc
 
-from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
-from app.logging_config import central_logger as logger
+from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class PriceAnalysisOperations:

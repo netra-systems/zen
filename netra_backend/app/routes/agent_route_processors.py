@@ -1,7 +1,7 @@
 """Agent route processing functions."""
 from typing import Dict, Any, Optional, Union, List
-from app.services.agent_service import AgentService
-from app.routes.agent_route_helpers import MultimodalInput, AttachmentData
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.routes.agent_route_helpers import MultimodalInput, AttachmentData
 
 
 async def process_message_with_agent_service(
@@ -29,7 +29,7 @@ async def process_multimodal_attachments(attachments: List[AttachmentData]) -> D
 
 async def execute_multimodal_processing(multimodal_input: MultimodalInput) -> Dict[str, Any]:
     """Execute multimodal message processing with attachments."""
-    from app.services.agent_service import process_multimodal
+    from netra_backend.app.services.agent_service import process_multimodal
     attachment_data = await process_multimodal_attachments(multimodal_input.attachments)
     result = await process_multimodal(multimodal_input.model_dump())
     return {**result, **attachment_data}
@@ -56,14 +56,14 @@ async def process_with_context(message: str, thread_id: str, agent_service: Agen
 
 async def attempt_primary_processing(message: str) -> Dict[str, Any]:
     """Attempt processing with primary agent."""
-    from app.services.agent_service import get_primary_agent
+    from netra_backend.app.services.agent_service import get_primary_agent
     primary_agent = get_primary_agent()
     return await primary_agent.process_message(message)
 
 
 async def attempt_fallback_processing(message: str) -> Dict[str, Any]:
     """Attempt processing with fallback agent."""
-    from app.services.agent_service import get_fallback_agent
+    from netra_backend.app.services.agent_service import get_fallback_agent
     fallback_agent = get_fallback_agent()
     result = await fallback_agent.process_message(message)
     return {**result, "agent": "fallback", "status": "recovered"}

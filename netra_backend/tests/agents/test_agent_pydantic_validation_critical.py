@@ -37,7 +37,7 @@ class TestPydanticValidationCritical:
     @pytest.fixture
     def mock_tool_dispatcher(self):
         """Create mock tool dispatcher"""
-        from app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         return Mock(spec=ToolDispatcher)
     async def test_triage_malformed_parameters_fallback_handling(self):
         """Test production fallback behavior for malformed tool parameters"""
@@ -201,7 +201,7 @@ class TestPydanticValidationCritical:
             "errors": "error1,error2,error3"  # String instead of list
         }
         with pytest.raises(ValidationError) as exc_info:
-            from app.agents.data_sub_agent.models import BatchProcessingResult
+            from netra_backend.app.agents.data_sub_agent.models import BatchProcessingResult
             BatchProcessingResult(**invalid_batch)
         assert "Input should be a valid list" in str(exc_info.value)
     async def test_data_analysis_nested_validation_error(self):
@@ -263,7 +263,7 @@ class TestPydanticValidationCritical:
         mock_llm_manager.ask_llm = AsyncMock(return_value='{"category": "General Inquiry"}')
         
         # Should retry and succeed on second attempt
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         agent = TriageSubAgent(mock_llm_manager, Mock())
         state = DeepAgentState(user_request="test")
         

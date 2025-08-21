@@ -12,7 +12,7 @@ def test_basic_import():
     
     # Try basic import
     try:
-        from app import __version__
+        from netra_backend.app import __version__
         # Verify that version was imported and has a value
         assert __version__ is not None
         assert isinstance(__version__, str)
@@ -34,7 +34,7 @@ def test_health_endpoint_direct():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from app.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")
@@ -52,7 +52,7 @@ def test_live_endpoint():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from app.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")

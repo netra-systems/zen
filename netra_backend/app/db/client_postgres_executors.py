@@ -7,8 +7,8 @@ from typing import Any, Dict, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from app.core.circuit_breaker import CircuitBreakerOpenError
-from app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.client_config import CircuitBreakerManager
 from netra_backend.app.client_postgres_session import TransactionHandler
 

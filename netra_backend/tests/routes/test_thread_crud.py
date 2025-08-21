@@ -24,7 +24,7 @@ class TestThreadCRUD:
     
     def test_thread_creation(self, basic_test_client):
         """Test thread creation endpoint."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_data = {
             "title": "New Thread",
@@ -61,7 +61,7 @@ class TestThreadCRUD:
     
     async def test_thread_archival(self):
         """Test thread archival functionality."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_id = "thread123"
         user_id = "user1"

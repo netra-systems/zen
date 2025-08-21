@@ -17,10 +17,10 @@ All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
 from typing import Dict, Any
-from app.schemas.shared_types import ToolResult
+from netra_backend.app.schemas.shared_types import ToolResult
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -53,7 +53,7 @@ class AdminToolExecutors:
     
     async def _create_corpus(self, **kwargs) -> ToolResult:
         """Create new corpus"""
-        from app.services import corpus_service
+        from netra_backend.app.services import corpus_service
         
         corpus_params = self._extract_corpus_params(**kwargs)
         result = await self._call_corpus_service(corpus_service, corpus_params)
@@ -74,7 +74,7 @@ class AdminToolExecutors:
     
     async def _list_corpora(self) -> ToolResult:
         """List all available corpora"""
-        from app.services import corpus_service
+        from netra_backend.app.services import corpus_service
         
         corpora = await corpus_service.list_corpora(self.db)
         return {"status": "success", "corpora": corpora}
@@ -99,7 +99,7 @@ class AdminToolExecutors:
     
     async def _generate_synthetic_data(self, **kwargs) -> Dict[str, Any]:
         """Generate synthetic data"""
-        from app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
         
         synthetic_service = SyntheticDataService(self.db)
         generation_params = self._extract_synthetic_params(**kwargs)
@@ -121,7 +121,7 @@ class AdminToolExecutors:
     
     async def _list_synthetic_presets(self) -> Dict[str, Any]:
         """List available synthetic data presets"""
-        from app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
         
         synthetic_service = SyntheticDataService(self.db)
         presets = await synthetic_service.list_presets()
@@ -146,7 +146,7 @@ class AdminToolExecutors:
     
     async def _create_user_with_service(self, email: str, role: str) -> Dict[str, Any]:
         """Create user using service"""
-        from app.services import user_service
+        from netra_backend.app.services import user_service
         result = await user_service.create_user(email=email, role=role, db=self.db)
         return {"status": "success", "user": result}
     
@@ -179,7 +179,7 @@ class AdminToolExecutors:
     
     async def _grant_permission_with_service(self, user_email: str, permission: str) -> Dict[str, Any]:
         """Grant permission using service"""
-        from app.services.permission_service import PermissionService
+        from netra_backend.app.services.permission_service import PermissionService
         success = await PermissionService.grant_permission(user_email, permission, self.db)
         return {"status": "success" if success else "error", "granted": success}
     
@@ -241,7 +241,7 @@ class AdminToolExecutors:
     
     async def _get_system_settings(self) -> Dict[str, Any]:
         """Get current system settings"""
-        from app.core.config import get_settings
+        from netra_backend.app.core.config import get_settings
         
         settings = get_settings()
         safe_settings = self._build_safe_settings(settings)
@@ -278,7 +278,7 @@ class AdminToolExecutors:
     
     async def _get_debug_service_logs(self) -> Dict[str, Any]:
         """Get logs from debug service"""
-        from app.services.debug_service import DebugService
+        from netra_backend.app.services.debug_service import DebugService
         debug_service = DebugService(self.db)
         return await debug_service.get_debug_info(
             component='logs', include_logs=True, user_id=self.user.id

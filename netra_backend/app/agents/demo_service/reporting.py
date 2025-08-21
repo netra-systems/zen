@@ -13,13 +13,13 @@
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from app.agents.base import BaseSubAgent, BaseExecutionInterface, ExecutionContext, ExecutionResult
-from app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
-from app.logging_config import central_logger
+from netra_backend.app.agents.base import BaseSubAgent, BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

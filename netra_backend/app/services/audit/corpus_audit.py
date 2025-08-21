@@ -8,14 +8,14 @@ Follows 450-line limit and 25-line function rule.
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.registry import (
+from netra_backend.app.schemas.registry import (
     CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus,
     CorpusAuditMetadata, CorpusAuditSearchFilter, CorpusAuditReport
 )
-from app.db.models_postgres import CorpusAuditLog
-from app.services.audit.repository import CorpusAuditRepository
-from app.logging_config import central_logger
-from app.core.exceptions_base import NetraException
+from netra_backend.app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.services.audit.repository import CorpusAuditRepository
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions_base import NetraException
 
 logger = central_logger.get_logger(__name__)
 

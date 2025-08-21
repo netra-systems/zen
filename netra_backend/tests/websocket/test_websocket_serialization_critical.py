@@ -13,17 +13,17 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, Mock, patch
 
-from app.schemas.registry import (
+from netra_backend.app.schemas.registry import (
     WebSocketMessage, WebSocketMessageType, MessageType,
     User, Message, Thread, DeepAgentState
 )
-from app.schemas.websocket_message_types import (
+from netra_backend.app.schemas.websocket_message_types import (
     StartAgentMessage, UserMessage, AgentStartedMessage,
     AgentCompletedMessage, ConnectionInfo, BroadcastResult
 )
-from app.services.state_persistence import DateTimeEncoder
-from app.websocket.validation import MessageValidator
-from app.websocket.broadcast import BroadcastManager
+from netra_backend.app.services.state_persistence import DateTimeEncoder
+from netra_backend.app.websocket.validation import MessageValidator
+from netra_backend.app.websocket.broadcast import BroadcastManager
 
 
 class TestWebSocketSerializationCritical:

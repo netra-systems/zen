@@ -5,9 +5,9 @@ Keeps functions under 8 lines and module under 300 lines.
 """
 
 from typing import Any, Dict
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import TriageResult, ExtractedEntities
-from app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
+from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
 
 logger = central_logger.get_logger(__name__)
 

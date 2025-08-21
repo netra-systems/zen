@@ -28,21 +28,21 @@ from fastapi import WebSocket
 from fastapi.testclient import TestClient
 import websockets
 
-from app.main import app
-from app.routes.websocket_enhanced import (
+from netra_backend.app.main import app
+from netra_backend.app.routes.websocket_enhanced import (
     enhanced_websocket_endpoint,
     get_websocket_service_discovery,
     validate_websocket_token_enhanced,
     authenticate_websocket_with_database,
     connection_manager
 )
-from app.core.websocket_cors import (
+from netra_backend.app.core.websocket_cors import (
     WebSocketCORSHandler,
     validate_websocket_origin,
     get_environment_origins
 )
-from app.db.postgres import get_async_db
-from tests.conftest import create_test_user, get_test_token
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.tests.conftest import create_test_user, get_test_token
 
 
 class WebSocketTestClient:

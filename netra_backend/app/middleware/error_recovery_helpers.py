@@ -9,10 +9,10 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from fastapi import Request
 
-from app.core.error_recovery import RecoveryContext, OperationType
-from app.core.error_codes import ErrorSeverity
-from app.core.exceptions_base import NetraException
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext, OperationType
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

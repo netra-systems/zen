@@ -6,7 +6,7 @@ Each function ≤8 lines for performance-critical WebSocket security path.
 
 from typing import Dict, Any, Union, List
 
-from app.schemas.websocket_message_types import WebSocketValidationError
+from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
 
 def has_valid_payload_structure(message: Dict[str, Any]) -> bool:

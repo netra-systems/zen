@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.startup_types import StartupStatus, LastStartup, MigrationStatus
+    from netra_backend.app.schemas.startup_types import StartupStatus, LastStartup, MigrationStatus
 """
 
 from typing import Dict, List, Optional, Union, Any

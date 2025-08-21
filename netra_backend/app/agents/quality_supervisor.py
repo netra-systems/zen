@@ -20,16 +20,16 @@ from typing import Dict, Any
 from datetime import datetime, UTC
 import asyncio
 
-from app.logging_config import central_logger
-from app.agents.supervisor.execution_context import AgentExecutionContext
-from app.agents.state import DeepAgentState
-from app.services.quality_gate_service import QualityGateService
-from app.services.fallback_response_service import FallbackResponseService
-from app.services.quality_monitoring_service import QualityMonitoringService
-from app.llm.llm_manager import LLMManager
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.quality_hooks import QualityHooksManager
-from app.agents.quality_fallback import QualityFallbackManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.fallback_response_service import FallbackResponseService
+from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.quality_hooks import QualityHooksManager
+from netra_backend.app.agents.quality_fallback import QualityFallbackManager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)

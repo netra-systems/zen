@@ -16,14 +16,14 @@ from config import settings
 @pytest.fixture
 def base_client():
     """Base FastAPI test client with minimal setup."""
-    from app.main import app
+    from netra_backend.app.main import app
     return TestClient(app)
 
 
 @pytest.fixture  
 def secured_client():
     """Test client with security service configured."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     # Mock db session factory
     @asynccontextmanager
@@ -54,9 +54,9 @@ def create_admin_user(user_id: str = "admin1") -> Dict[str, Any]:
 
 def setup_agent_mocks(app):
     """Set up agent service mocks for testing."""
-    from app.services.agent_service import get_agent_service
-    from app.dependencies import get_llm_manager
-    from app.db.postgres import get_async_db
+    from netra_backend.app.services.agent_service import get_agent_service
+    from netra_backend.app.dependencies import get_llm_manager
+    from netra_backend.app.db.postgres import get_async_db
     
     def mock_get_async_db():
         return Mock()

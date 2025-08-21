@@ -3,10 +3,10 @@ Memory-aware retry strategy implementation.
 Handles retry logic with consideration for system memory pressure.
 """
 
-from app.core.error_recovery import RecoveryContext
-from app.core.error_codes import ErrorSeverity
-from app.core.retry_strategy_base import EnhancedRetryStrategy
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.retry_strategy_base import EnhancedRetryStrategy
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

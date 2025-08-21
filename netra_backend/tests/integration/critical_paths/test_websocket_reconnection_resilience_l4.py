@@ -16,9 +16,9 @@ from collections import deque
 # from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
-from app.services.session_service import SessionService
-from app.services.message_queue_service import MessageQueueService
-from app.core.config import settings
+from netra_backend.app.services.session_service import SessionService
+from netra_backend.app.services.message_queue_service import MessageQueueService
+from netra_backend.app.core.config import settings
 
 
 class TestWebSocketReconnectionResilienceL4:

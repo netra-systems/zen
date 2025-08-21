@@ -27,7 +27,7 @@ from datetime import datetime, timezone, timedelta
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from redis_manager import RedisManager
 from logging_config import central_logger
-from tests.unified.config import TestTier
+from netra_backend.tests.unified.config import TestTier
 
 logger = central_logger.get_logger(__name__)
 

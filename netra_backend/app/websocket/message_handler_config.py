@@ -5,11 +5,11 @@ Configuration classes and initialization for the message handler.
 
 from typing import Dict, Optional, Any
 
-from app.core.reliability import (
+from netra_backend.app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
-from app.websocket.validation import MessageValidator, default_message_validator
-from app.websocket.error_handler import WebSocketErrorHandler, default_error_handler
+from netra_backend.app.websocket.validation import MessageValidator, default_message_validator
+from netra_backend.app.websocket.error_handler import WebSocketErrorHandler, default_error_handler
 
 
 class MessageHandlerConfig:

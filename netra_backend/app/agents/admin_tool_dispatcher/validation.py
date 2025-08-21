@@ -19,12 +19,12 @@ Business Value: Enables standardized validation across 40+ admin tools.
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 
-from app.db.models_postgres import User
-from app.services.permission_service import PermissionService
-from app.agents.base.interface import ExecutionContext, BaseExecutionInterface
-from app.agents.base.errors import ValidationError, ExecutionErrorHandler
-from app.agents.base.monitoring import ExecutionMonitor
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.agents.base.interface import ExecutionContext, BaseExecutionInterface
+from netra_backend.app.agents.base.errors import ValidationError, ExecutionErrorHandler
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.validation_helpers import ValidationHelpers, PermissionHelpers
 
 logger = central_logger.get_logger(__name__)

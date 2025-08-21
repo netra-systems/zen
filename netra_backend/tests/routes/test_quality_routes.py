@@ -72,8 +72,8 @@ class TestQualityRoute:
     
     async def test_quality_alerts(self):
         """Test quality threshold alerts."""
-        from app.routes.quality_handlers import handle_alerts_request
-        from app.schemas.quality_types import QualityAlert, AlertSeverity, MetricType
+        from netra_backend.app.routes.quality_handlers import handle_alerts_request
+        from netra_backend.app.schemas.quality_types import QualityAlert, AlertSeverity, MetricType
         
         # Create proper QualityAlert objects
         test_alert = QualityAlert(
@@ -212,7 +212,7 @@ class TestQualityRoute:
     
     async def test_quality_real_time_monitoring(self):
         """Test real-time quality monitoring."""
-        from app.routes.quality import start_monitoring, stop_monitoring
+        from netra_backend.app.routes.quality import start_monitoring, stop_monitoring
         
         monitoring_config = {
             "interval_seconds": 30,
@@ -247,7 +247,7 @@ class TestQualityRoute:
         """Test quality report generation."""
         
         with patch('app.routes.quality_handlers.handle_report_generation') as mock_report:
-            from app.schemas.quality_types import QualityReport, QualityReportType
+            from netra_backend.app.schemas.quality_types import QualityReport, QualityReportType
             
             mock_report.return_value = QualityReport(
                 report_type=QualityReportType.SUMMARY,

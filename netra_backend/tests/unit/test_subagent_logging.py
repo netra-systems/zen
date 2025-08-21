@@ -1,9 +1,9 @@
 """Test subagent logging functionality."""
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.llm.observability import SubAgentLogger, get_subagent_logger
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.observability import SubAgentLogger, get_subagent_logger
 
 
 class MockSubAgent(BaseSubAgent):

@@ -8,7 +8,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.performance_monitor_types import PerformanceThresholds, AlertSeverity
 from netra_backend.app.performance_monitor_collector import MetricCollector
 from netra_backend.app.performance_monitor_alerts import PerformanceAlertManager

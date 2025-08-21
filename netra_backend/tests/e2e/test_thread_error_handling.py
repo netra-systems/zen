@@ -121,7 +121,7 @@ class ThreadStateErrorTests:
             
             # Attempt to save state
             try:
-                from app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+                from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
                 request = StatePersistenceRequest(
                     run_id=f"run_{thread.id}",
                     thread_id=thread.id,

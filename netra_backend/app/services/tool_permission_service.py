@@ -13,11 +13,11 @@ from netra_backend.app.tool_permissions.permission_definitions import Permission
 from netra_backend.app.tool_permissions.permission_checker import PermissionChecker
 from netra_backend.app.tool_permissions.rate_limiter import RateLimiter
 from netra_backend.app.tool_permissions.tool_availability_processor import ToolAvailabilityProcessor
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     ToolPermission, ToolExecutionContext, PermissionCheckResult, 
     ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
 )
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 
 
 # Re-export classes and functions for backward compatibility

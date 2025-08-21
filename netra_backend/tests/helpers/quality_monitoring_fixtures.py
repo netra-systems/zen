@@ -4,8 +4,8 @@ import pytest
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.quality_gate_service import QualityLevel, ContentType, QualityMetrics
-from app.services.quality_monitoring_service import (
+from netra_backend.app.services.quality_gate_service import QualityLevel, ContentType, QualityMetrics
+from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
     AlertSeverity,
     MetricType,

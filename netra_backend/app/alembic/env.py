@@ -24,8 +24,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from app.db.base import Base
-from app.db.models_postgres import *
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_postgres import *
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -73,7 +73,7 @@ def _ensure_sync_database_url(url: str) -> str:
 
 def _get_configuration() -> dict:
     """Get database configuration from environment."""
-    from app.config import get_config
+    from netra_backend.app.config import get_config
     app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
     if app_config.database_url:

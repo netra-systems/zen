@@ -11,23 +11,23 @@ from pathlib import Path
 from typing import Tuple, Optional
 from fastapi import FastAPI
 
-from app.logging_config import central_logger
-from app.utils.multiprocessing_cleanup import setup_multiprocessing
-from app.config import settings, get_config
-from app.services.key_manager import KeyManager
-from app.services.security_service import SecurityService
-from app.llm.llm_manager import LLMManager
-from app.background import BackgroundTaskManager
-from app.redis_manager import redis_manager
-from app.db.postgres import initialize_postgres
-from app.db.migration_utils import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
+from netra_backend.app.config import settings, get_config
+from netra_backend.app.services.key_manager import KeyManager
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.background import BackgroundTaskManager
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.db.postgres import initialize_postgres
+from netra_backend.app.db.migration_utils import (
     get_sync_database_url, get_current_revision, get_head_revision,
     create_alembic_config, needs_migration, execute_migration,
     log_migration_status, should_continue_on_error, validate_database_url
 )
-from app.core.performance_optimization_manager import performance_manager
-from app.monitoring import performance_monitor
-from app.db.index_optimizer import index_manager
+from netra_backend.app.core.performance_optimization_manager import performance_manager
+from netra_backend.app.monitoring import performance_monitor
+from netra_backend.app.db.index_optimizer import index_manager
 
 
 async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Logger) -> None:
@@ -96,7 +96,7 @@ def validate_database_environment(logger: logging.Logger) -> None:
 
 def _perform_database_validation(logger: logging.Logger) -> None:
     """Perform database environment validation."""
-    from app.services.database_env_service import validate_database_environment
+    from netra_backend.app.services.database_env_service import validate_database_environment
     try:
         validate_database_environment()
     except ValueError as e:
@@ -240,7 +240,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> None:
 
 async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
     """Setup ClickHouse tables."""
-    from app.db.clickhouse_init import initialize_clickhouse_tables
+    from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
     try:
         _log_clickhouse_start(logger, mode)
         await initialize_clickhouse_tables()
@@ -270,13 +270,13 @@ def register_websocket_handlers(app: FastAPI) -> None:
 
 def _create_tool_registry(app: FastAPI):
     """Create tool registry instance."""
-    from app.services.tool_registry import ToolRegistry
+    from netra_backend.app.services.tool_registry import ToolRegistry
     return ToolRegistry(app.state.db_session_factory)
 
 
 def _create_tool_dispatcher(tool_registry):
     """Create tool dispatcher instance."""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     return ToolDispatcher(tool_registry.get_tools([]))
 
 
@@ -288,8 +288,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
-    from app.agents.supervisor_consolidated import SupervisorAgent
-    from app.ws_manager import manager as websocket_manager
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.ws_manager import manager as websocket_manager
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 
@@ -300,7 +300,7 @@ def _build_supervisor_agent(app: FastAPI):
 
 def _setup_agent_state(app: FastAPI, supervisor) -> None:
     """Setup agent state in app."""
-    from app.services.agent_service import AgentService
+    from netra_backend.app.services.agent_service import AgentService
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
 
@@ -311,7 +311,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     try:
-        from app.websocket.large_message_handler import get_large_message_handler
+        from netra_backend.app.websocket.large_message_handler import get_large_message_handler
         handler = get_large_message_handler()
         await handler.initialize()
         logger.info("WebSocket components initialized")
@@ -335,7 +335,7 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
         return
     
     logger.info("Starting comprehensive startup health checks...")
-    from app.startup_checks import run_startup_checks
+    from netra_backend.app.startup_checks import run_startup_checks
     try:
         logger.debug("Calling run_startup_checks...")
         results = await run_startup_checks(app)
@@ -368,7 +368,7 @@ async def _handle_startup_failure(logger: logging.Logger, error: Exception) -> N
 
 async def _emergency_cleanup(logger: logging.Logger) -> None:
     """Perform emergency cleanup on startup failure."""
-    from app.utils.multiprocessing_cleanup import cleanup_multiprocessing
+    from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
     try:
         await _cleanup_connections()
         cleanup_multiprocessing()
@@ -384,9 +384,9 @@ async def _cleanup_connections() -> None:
 
 async def validate_schema(logger: logging.Logger) -> None:
     """Perform comprehensive schema validation."""
-    from app.services.schema_validation_service import run_comprehensive_validation
-    from app.db.postgres import initialize_postgres
-    from app.db.postgres_core import async_engine
+    from netra_backend.app.services.schema_validation_service import run_comprehensive_validation
+    from netra_backend.app.db.postgres import initialize_postgres
+    from netra_backend.app.db.postgres_core import async_engine
     if "pytest" not in sys.modules:
         # Ensure database is initialized before validation
         initialize_postgres()
@@ -433,7 +433,7 @@ async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _start_connection_monitoring(app: FastAPI) -> None:
     """Start database connection monitoring."""
-    from app.services.database.connection_monitor import start_connection_monitoring
+    from netra_backend.app.services.database.connection_monitor import start_connection_monitoring
     await start_connection_monitoring()
     # Monitoring task is now created internally in health_checker
 

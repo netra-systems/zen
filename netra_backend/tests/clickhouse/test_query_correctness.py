@@ -15,7 +15,7 @@ from netra_backend.app.db.models_clickhouse import (
     get_llm_events_table_schema,
     WORKLOAD_EVENTS_TABLE_SCHEMA
 )
-from tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 
 class TestCorpusQueries:
@@ -308,7 +308,7 @@ class TestGenerationServiceQueries:
     """Test generation service queries"""
     async def test_get_corpus_from_clickhouse_query(self):
         """Test 14: Verify corpus loading query from generation service"""
-        from app.services.generation_service import get_corpus_from_clickhouse
+        from netra_backend.app.services.generation_service import get_corpus_from_clickhouse
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = AsyncMock()
@@ -328,7 +328,7 @@ class TestGenerationServiceQueries:
             }
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
-        from app.services.generation_service import save_corpus_to_clickhouse
+        from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = AsyncMock()
@@ -355,7 +355,7 @@ class TestTableInitializationQueries:
     """Test table initialization queries"""
     async def test_initialize_clickhouse_tables(self):
         """Test 16: Verify all tables are created on initialization"""
-        from app.db.clickhouse_init import initialize_clickhouse_tables
+        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
             mock_instance = AsyncMock()
@@ -379,7 +379,7 @@ class TestTableInitializationQueries:
                 mock_instance.execute_query.assert_called_with("SHOW TABLES")
     async def test_verify_workload_events_table(self):
         """Test 17: Verify workload_events table verification"""
-        from app.db.clickhouse_init import verify_workload_events_table
+        from netra_backend.app.db.clickhouse_init import verify_workload_events_table
         
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
             mock_instance = AsyncMock()

@@ -7,8 +7,8 @@ from typing import Dict, Any, List, Optional, Callable, Tuple
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from app.logging_config import central_logger
-from app.core.exceptions import NetraException
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions import NetraException
 
 logger = central_logger.get_logger(__name__)
 

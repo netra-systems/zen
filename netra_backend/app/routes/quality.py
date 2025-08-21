@@ -7,11 +7,11 @@ Refactored to comply with 450-line architectural limit.
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from typing import Dict, Any, Optional, List
 
-from app.auth_integration.auth import get_current_user
-from app.services.quality_gate_service import QualityGateService
-from app.services.quality_monitoring_service import QualityMonitoringService
-from app.services.fallback_response_service import FallbackResponseService
-from app.schemas.quality_types import (
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.services.fallback_response_service import FallbackResponseService
+from netra_backend.app.schemas.quality_types import (
     User, QualityValidationRequest, QualityValidationResponse,
     QualityAlert, AlertAcknowledgement, AlertAcknowledgementResponse,
     QualityDashboardData, QualityReport, QualityReportType,

@@ -138,7 +138,7 @@ class TestExecutionContextHashableRegression:
     @pytest.mark.asyncio
     async def test_websocket_connection_executor_context_handling(self):
         """Test WebSocket connection executor handles context correctly."""
-        from app.websocket.connection_executor import ConnectionExecutor
+        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
         
         executor = ConnectionExecutor()
         
@@ -161,7 +161,7 @@ class TestExecutionContextHashableRegression:
     def test_mcp_context_manager_storage(self):
         """Test MCP context manager doesn't use ExecutionContext as key."""
         try:
-            from app.agents.mcp_integration.context_manager import MCPContextManager
+            from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
             
             # Mock dependencies
             mock_service = Mock()

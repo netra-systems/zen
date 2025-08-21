@@ -9,12 +9,12 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from typing import Dict, List, Any, Set
 
-from app.services.tool_permission_service import ToolPermissionService
-from app.schemas.ToolPermission import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import (
     ToolPermission, ToolExecutionContext, PermissionCheckResult,
     ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
 )
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 
 
 class MockRedisClient:

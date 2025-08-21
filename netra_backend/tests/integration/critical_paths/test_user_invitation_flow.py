@@ -13,7 +13,7 @@ Coverage: Invitation workflow, permission validation, edge cases
 import pytest
 import uuid
 from datetime import datetime, timezone, timedelta
-from tests.integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     TeamCollaborationManager, TeamRole, PermissionType, validate_audit_trail
 )
 

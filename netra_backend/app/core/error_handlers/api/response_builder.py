@@ -6,8 +6,8 @@ Builds standardized error responses for different exception types.
 from typing import Dict, Any, Optional, Union
 from datetime import datetime, timezone
 
-from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
-from app.core.error_response import ErrorResponse
+from netra_backend.app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
+from netra_backend.app.core.error_response import ErrorResponse
 
 
 class ErrorResponseBuilder:

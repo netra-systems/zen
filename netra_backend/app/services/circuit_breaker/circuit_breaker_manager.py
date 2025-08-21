@@ -15,8 +15,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 # Import from the core circuit breaker implementation
-from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker
-from app.core.circuit_breaker_types import CircuitBreakerState
+from netra_backend.app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitBreakerState
 
 
 @dataclass

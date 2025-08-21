@@ -8,10 +8,10 @@ Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 
 import os
 from typing import Dict, Type
-from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
-from app.config_loader import detect_cloud_run_environment
-from app.logging_config import central_logger as logger
-from app.core.environment_constants import (
+from netra_backend.app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
+from netra_backend.app.config_loader import detect_cloud_run_environment
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_environment
 )
 

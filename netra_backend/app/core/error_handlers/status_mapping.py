@@ -16,7 +16,7 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from app.core.exceptions import ErrorCode
+from netra_backend.app.core.exceptions import ErrorCode
 
 
 class StatusMapper:

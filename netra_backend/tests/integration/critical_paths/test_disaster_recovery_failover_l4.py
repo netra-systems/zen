@@ -42,13 +42,13 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
-from app.core.health_checkers import check_postgres_health, check_clickhouse_health
-from app.core.cross_service_validators.data_consistency_validators import CrossServiceDataValidator
-from app.logging_config import central_logger
+from netra_backend.app.core.health_checkers import check_postgres_health, check_clickhouse_health
+from netra_backend.app.core.cross_service_validators.data_consistency_validators import CrossServiceDataValidator
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

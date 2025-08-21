@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from collections import defaultdict, deque
 
-from app.monitoring.metrics_collector import (
+from netra_backend.app.monitoring.metrics_collector import (
     MetricsCollector, PerformanceMetric, SystemResourceMetrics,
     WebSocketMetrics, DatabaseMetrics
 )

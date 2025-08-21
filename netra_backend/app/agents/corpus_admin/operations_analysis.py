@@ -7,8 +7,8 @@ Maintains 25-line function limit per operation.
 
 import time
 from typing import Dict, Any
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.logging_config import central_logger
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import CorpusOperationRequest, CorpusOperationResult
 from netra_backend.app.operations_execution import CorpusExecutionHelper
 

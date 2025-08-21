@@ -2,10 +2,10 @@
 
 from typing import Any, List, Optional, Tuple
 from pydantic import ValidationError
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 try:
-    from app.schemas.Config import AppConfig
+    from netra_backend.app.schemas.Config import AppConfig
 except ImportError:
     from schemas.Config import AppConfig
 

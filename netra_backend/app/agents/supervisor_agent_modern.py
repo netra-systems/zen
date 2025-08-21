@@ -8,23 +8,23 @@ import asyncio
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.agents.base import BaseSubAgent
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult
 )
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Import modular components
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.supervisor.lifecycle_manager import SupervisorLifecycleManager
-from app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from app.agents.supervisor.circuit_breaker_integration import SupervisorCircuitBreakerIntegration
-from app.agents.supervisor.comprehensive_observability import SupervisorObservability
-from app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.lifecycle_manager import SupervisorLifecycleManager
+from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
+from netra_backend.app.agents.supervisor.circuit_breaker_integration import SupervisorCircuitBreakerIntegration
+from netra_backend.app.agents.supervisor.comprehensive_observability import SupervisorObservability
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 
 logger = central_logger.get_logger(__name__)
 

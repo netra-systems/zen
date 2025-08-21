@@ -36,7 +36,7 @@
         <approach>Separate sync and async database URLs</approach>
         <steps>
           <step order="1">
-            <file>app/alembic/env.py</file>
+            <file>netra_backend/app/alembic/env.py</file>
             <action>Create function to ensure synchronous database URL</action>
             <code>
 def _ensure_sync_database_url(url: str) -&gt; str:
@@ -59,12 +59,12 @@ def _ensure_sync_database_url(url: str) -&gt; str:
                         </code>
           </step>
           <step order="2">
-            <file>app/alembic/env.py</file>
+            <file>netra_backend/app/alembic/env.py</file>
             <action>Apply sync URL conversion in _get_configuration()</action>
             <code>
 def _get_configuration() -&gt; dict:
     """Get database configuration from environment."""
-    from app.config import get_config
+    from netra_backend.app.config import get_config
     app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
     if app_config.database_url:
@@ -75,7 +75,7 @@ def _get_configuration() -&gt; dict:
                         </code>
           </step>
           <step order="3">
-            <file>app/core/configuration/database.py</file>
+            <file>netra_backend/app/core/configuration/database.py</file>
             <action>Add method to get sync database URL</action>
             <code>
 def get_sync_database_url(self) -&gt; Optional[str]:
@@ -158,9 +158,9 @@ def get_sync_database_url(self) -&gt; Optional[str]:
     </testing>
   </learning>
   <references>
-    <reference>app/alembic/env.py</reference>
-    <reference>app/db/postgres_core.py</reference>
-    <reference>app/core/configuration/database.py</reference>
+    <reference>netra_backend/app/alembic/env.py</reference>
+    <reference>netra_backend/app/db/postgres_core.py</reference>
+    <reference>netra_backend/app/core/configuration/database.py</reference>
     <reference>SPEC/learnings/database_asyncio.xml</reference>
     <reference>SPEC/learnings/startup.xml</reference>
   </references>

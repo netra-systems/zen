@@ -6,10 +6,10 @@ Follows 450-line limit with 25-line function limit.
 
 from typing import Dict, Any
 from datetime import datetime, UTC
-from app.logging_config import central_logger
-from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.quality_monitoring_service import QualityMonitoringService
-from app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -6,8 +6,8 @@ Main QueryCache class for coordinating query caching operations.
 from typing import Any, Dict, List, Optional, Set
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.cache_config import QueryCacheConfig, CacheMetrics
 from netra_backend.app.cache_strategies import CacheTaskManager, EvictionStrategyFactory, QueryPatternTracker
 from netra_backend.app.cache_retrieval import CacheRetrieval, CacheInvalidation

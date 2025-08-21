@@ -10,8 +10,8 @@ from enum import Enum
 import asyncio
 import json
 from contextlib import asynccontextmanager
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)

@@ -6,7 +6,7 @@ Contains core types and enums used across quality validation system.
 from typing import Dict, List, Any
 from enum import Enum
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

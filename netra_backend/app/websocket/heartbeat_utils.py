@@ -7,8 +7,8 @@ import time
 from typing import Dict, Any
 from datetime import datetime, timezone
 
-from app.core.json_utils import prepare_websocket_message
-from app.logging_config import central_logger
+from netra_backend.app.core.json_utils import prepare_websocket_message
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

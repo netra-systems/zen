@@ -5,8 +5,8 @@ Manages PostgreSQL database operations within distributed transactions.
 
 from typing import Dict, Any
 
-from app.db.postgres import get_postgres_session
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

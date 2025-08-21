@@ -1,8 +1,8 @@
 """Enhanced state management logic for supervisor agent."""
 
 from typing import Optional, Tuple
-from app.agents.state import DeepAgentState
-from app.schemas.agent_state import CheckpointType, AgentPhase
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_state import CheckpointType, AgentPhase
 from netra_backend.app.state_manager_core import StateManagerCore
 
 

@@ -9,11 +9,11 @@ Business Value: Centralized configuration management for maintainable broadcast 
 import time
 from typing import Dict, Any, Optional
 
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.interface import ExecutionContext
-from app.websocket.broadcast_context import BroadcastContext
-from app.websocket import broadcast_utils as utils
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.websocket.broadcast_context import BroadcastContext
+from netra_backend.app.websocket import broadcast_utils as utils
 
 
 class BroadcastConfigManager:
@@ -148,7 +148,7 @@ class BroadcastExecutionContextManager:
     @staticmethod
     def _prepare_context_data(run_id: str) -> Dict[str, Any]:
         """Prepare context data for execution context creation."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         return {
             "state": DeepAgentState(),
             "context_run_id": BroadcastExecutionContextManager._generate_run_id(run_id)

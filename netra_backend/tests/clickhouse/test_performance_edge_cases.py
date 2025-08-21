@@ -341,7 +341,7 @@ class TestConnectionHandling:
     """Test database connection handling"""
     async def test_connection_cleanup_on_error(self):
         """Test 20: Verify connections are cleaned up on errors"""
-        from app.services.generation_service import get_corpus_from_clickhouse
+        from netra_backend.app.services.generation_service import get_corpus_from_clickhouse
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = MagicMock()

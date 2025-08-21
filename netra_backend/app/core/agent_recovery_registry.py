@@ -5,8 +5,8 @@ Manages registration and execution of agent recovery strategies.
 
 from typing import Dict, Optional, Any
 
-from app.core.error_recovery import RecoveryContext
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import RecoveryContext
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agent_recovery_types import AgentType, AgentRecoveryConfig, create_all_default_configs
 from netra_backend.app.agent_recovery_base import BaseAgentRecoveryStrategy
 from netra_backend.app.agent_recovery_strategies import (

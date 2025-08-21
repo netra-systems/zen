@@ -1,11 +1,11 @@
 """Permission Checker Module - Core permission checking logic"""
 
 from typing import Dict, List, Set, Optional, Any
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     ToolExecutionContext, PermissionCheckResult, BusinessRequirement
 )
-from app.schemas.UserPlan import UserPlan, PlanTier
-from app.logging_config import central_logger
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 

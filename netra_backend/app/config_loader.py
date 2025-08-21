@@ -8,18 +8,18 @@ import os
 from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.config import Settings
-from app.logging_config import central_logger as logger
+    from netra_backend.app.config import Settings
+from netra_backend.app.logging_config import central_logger as logger
 
 # Import from modular components to maintain backward compatibility
-from app.config_exceptions import ConfigLoadError
-from app.cloud_environment_detector import (
+from netra_backend.app.config_exceptions import ConfigLoadError
+from netra_backend.app.cloud_environment_detector import (
     detect_cloud_run_environment, 
     detect_app_engine_environment, 
     CloudEnvironmentDetector
 )
-from app.config_environment_loader import load_config_from_environment
-from app.config_validation import validate_required_config
+from netra_backend.app.config_environment_loader import load_config_from_environment
+from netra_backend.app.config_validation import validate_required_config
 
 
 def load_env_var(env_var: str, config: 'Settings', field_name: str) -> bool:

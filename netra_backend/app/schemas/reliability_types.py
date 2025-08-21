@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.reliability_types import CircuitBreaker, RetryConfig, RateLimiter
+    from netra_backend.app.schemas.reliability_types import CircuitBreaker, RetryConfig, RateLimiter
 """
 
 import time
@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
-from app.core.exceptions_service import ServiceError
+from netra_backend.app.core.exceptions_service import ServiceError
 
 T = TypeVar('T')
 

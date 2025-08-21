@@ -9,7 +9,7 @@ import os
 from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
-from app.config import settings
+from netra_backend.app.config import settings
 
 
 # Removed session-scoped event_loop fixture to prevent conflicts with pytest-asyncio

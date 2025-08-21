@@ -5,11 +5,11 @@ Uses message queue system for better scalability and error handling.
 
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.logging_config import central_logger
-from app.services.database.unit_of_work import get_unit_of_work
-from app.db.postgres import get_async_db
-from app.services.websocket.message_queue import message_queue, QueuedMessage, MessagePriority
-from app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.unit_of_work import get_unit_of_work
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.services.websocket.message_queue import message_queue, QueuedMessage, MessagePriority
+from netra_backend.app.ws_manager import manager
 from abc import ABC, abstractmethod
 import json
 

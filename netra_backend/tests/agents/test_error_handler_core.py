@@ -89,7 +89,7 @@ class TestErrorHandler:
 
     def _create_websocket_error_for_handling_test(self):
         """Create WebSocket error for handling test"""
-        from app.core.exceptions_websocket import WebSocketError
+        from netra_backend.app.core.exceptions_websocket import WebSocketError
         return WebSocketError("WebSocket connection lost")
 
     async def test_handle_websocket_error(self, error_handler, sample_context):

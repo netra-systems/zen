@@ -2,7 +2,7 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 # Import WorkloadProfile directly to avoid forward reference issues
-from app.schemas.FinOps import WorkloadProfile
+from netra_backend.app.schemas.FinOps import WorkloadProfile
 
 class ContentGenParams(BaseModel):
     samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")

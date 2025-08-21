@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.auth_types import Token, TokenData, AuthEndpoints
+    from netra_backend.app.schemas.auth_types import Token, TokenData, AuthEndpoints
     
 Business Value Justification (BVJ):
 - Segment: ALL (Free → Enterprise)

@@ -4,7 +4,7 @@ This module contains the specific migration classes for each version transition.
 """
 
 from typing import Dict, Any, Optional
-from app.services.state_migration_core import StateMigration
+from netra_backend.app.services.state_migration_core import StateMigration
 
 
 class Migration_1_0_to_1_1(StateMigration):

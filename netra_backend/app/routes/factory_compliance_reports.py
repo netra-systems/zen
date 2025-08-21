@@ -2,7 +2,7 @@
 from typing import Dict, Any
 from pathlib import Path
 
-from app.services.factory_status.factory_status_integration import ComplianceAPIHandler
+from netra_backend.app.services.factory_status.factory_status_integration import ComplianceAPIHandler
 
 
 async def handle_full_compliance_report(
@@ -15,7 +15,7 @@ async def handle_full_compliance_report(
 
 async def _validate_and_score_module(handler: ComplianceAPIHandler, module_name: str, module_path: Path):
     """Validate and score module."""
-    from app.routes.factory_compliance_validators import validate_module_path
+    from netra_backend.app.routes.factory_compliance_validators import validate_module_path
     validate_module_path(module_name, module_path)
     return await handler.reporter.scorer.score_module(module_path)
 

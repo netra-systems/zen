@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
+    from netra_backend.app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
 """
 
 from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
@@ -22,19 +22,19 @@ import uuid
 # Import forward-referenced types - these are needed for model rebuild
 # Using try/except to handle missing types gracefully
 try:
-    from app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 except ImportError:
     TriageResult = None  # type: ignore
 
 try:
-    from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+    from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 except ImportError:
     DataAnalysisResponse = None  # type: ignore
     AnomalyDetectionResponse = None  # type: ignore
 
 try:
-    from app.schemas.FinOps import WorkloadProfile
-    from app.schemas.Generation import SyntheticDataResult
+    from netra_backend.app.schemas.FinOps import WorkloadProfile
+    from netra_backend.app.schemas.Generation import SyntheticDataResult
 except ImportError:
     WorkloadProfile = None  # type: ignore
     SyntheticDataResult = None  # type: ignore

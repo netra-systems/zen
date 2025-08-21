@@ -1,6 +1,6 @@
 
 import asyncio
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from typing import Coroutine
 
 logger = central_logger.get_logger(__name__)

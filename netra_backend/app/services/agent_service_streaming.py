@@ -4,7 +4,7 @@ Provides streaming functionality for agent responses with chunk processing
 and content extraction capabilities.
 """
 
-from app.services.streaming_service import TextStreamProcessor
+from netra_backend.app.services.streaming_service import TextStreamProcessor
 
 
 class AgentResponseProcessor:

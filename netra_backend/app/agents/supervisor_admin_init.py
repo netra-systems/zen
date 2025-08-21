@@ -16,13 +16,13 @@ with admin tool support using the unified supervisor architecture.
 """
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
-from app.agents.admin_tool_dispatcher import AdminToolDispatcher
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
-from app.services.permission_service import PermissionService
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
+from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.logging_config import central_logger
 from langchain_core.tools import BaseTool
 from typing import List
 

@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from typing import Any, Dict, List
 from pydantic import BaseModel, Field
-from app.services.context import ToolContext
+from netra_backend.app.services.context import ToolContext
 
 class Pattern(BaseModel):
     pattern_id: str = Field(..., description="The ID of the pattern.")

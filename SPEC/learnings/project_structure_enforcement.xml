@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Project Structure Enforcement - THE Canonical Structure</title>
+    <category>architecture</category>
+    <subcategory>project_structure</subcategory>
+    <priority>CRITICAL</priority>
+    <created>2025-08-21</created>
+    <business_impact>Platform Stability, Development Velocity</business_impact>
+    <enforcement_level>MANDATORY</enforcement_level>
+  </metadata>
+
+  <problem_statement>
+    The project underwent a major restructuring to establish clear separation between application code and tests.
+    This structure is now THE canonical structure and all imports MUST conform to it.
+    Any import issues must be resolved within this structure - the structure itself must NOT be changed.
+  </problem_statement>
+
+  <canonical_structure>
+    <principle>This is the ONLY accepted project structure. Do NOT modify it.</principle>
+    
+    <backend_structure>
+      <root>netra_backend/</root>
+      <components>
+        <component>
+          <path>netra_backend/app/</path>
+          <description>Production application code (System Under Test)</description>
+          <import_pattern>from netra_backend.app.* import ...</import_pattern>
+        </component>
+        <component>
+          <path>netra_backend/tests/</path>
+          <description>Test code for the application</description>
+          <import_pattern>from netra_backend.tests.* import ...</import_pattern>
+        </component>
+      </components>
+    </backend_structure>
+
+    <other_services>
+      <service>
+        <path>auth_service/</path>
+        <description>Authentication microservice (independent)</description>
+        <import_pattern>from auth_service.* import ...</import_pattern>
+      </service>
+      <service>
+        <path>frontend/</path>
+        <description>Frontend application (independent)</description>
+      </service>
+    </other_services>
+
+    <shared_infrastructure>
+      <component>
+        <path>test_framework/</path>
+        <description>Test runner and test configuration</description>
+        <import_pattern>from test_framework.* import ...</import_pattern>
+      </component>
+      <component>
+        <path>dev_launcher/</path>
+        <description>Development environment launcher</description>
+        <import_pattern>from dev_launcher.* import ...</import_pattern>
+      </component>
+      <component>
+        <path>scripts/</path>
+        <description>Utility scripts</description>
+      </component>
+      <component>
+        <path>SPEC/</path>
+        <description>Specifications and learnings</description>
+      </component>
+    </shared_infrastructure>
+  </canonical_structure>
+
+  <import_rules>
+    <rule>
+      <id>IMPORT_01</id>
+      <severity>CRITICAL</severity>
+      <description>All backend imports MUST use netra_backend.app.* prefix</description>
+      <example>
+        <correct>from netra_backend.app.agents.base import BaseAgent</correct>
+        <incorrect>from app.agents.base import BaseAgent</incorrect>
+        <incorrect>from agents.base import BaseAgent</incorrect>
+      </example>
+    </rule>
+    
+    <rule>
+      <id>IMPORT_02</id>
+      <severity>CRITICAL</severity>
+      <description>Test imports MUST use netra_backend.tests.* prefix when importing test utilities</description>
+      <example>
+        <correct>from netra_backend.tests.conftest import test_client</correct>
+        <incorrect>from tests.conftest import test_client</incorrect>
+      </example>
+    </rule>
+    
+    <rule>
+      <id>IMPORT_03</id>
+      <severity>CRITICAL</severity>
+      <description>Cross-service imports are FORBIDDEN (except through defined APIs)</description>
+      <example>
+        <incorrect>from auth_service.models import User  # in netra_backend</incorrect>
+        <correct>from netra_backend.app.clients.auth_client import AuthClient</correct>
+      </example>
+    </rule>
+    
+    <rule>
+      <id>IMPORT_04</id>
+      <severity>HIGH</severity>
+      <description>Relative imports should be avoided in favor of absolute imports</description>
+      <example>
+        <correct>from netra_backend.app.core.exceptions import NetraError</correct>
+        <discouraged>from ..core.exceptions import NetraError</discouraged>
+      </example>
+    </rule>
+  </import_rules>
+
+  <enforcement_strategy>
+    <principle>Fix imports, NOT the structure</principle>
+    
+    <when_import_fails>
+      <step>1. Verify the module exists in the correct location under netra_backend/app/</step>
+      <step>2. Update the import to use full path: netra_backend.app.module.submodule</step>
+      <step>3. If module doesn't exist, CREATE it in the proper location</step>
+      <step>4. NEVER move files to accommodate old import patterns</step>
+    </when_import_fails>
+
+    <automated_fixes>
+      <script>scripts/fix_imports.py</script>
+      <description>Automatically updates imports to match canonical structure</description>
+      <usage>python scripts/fix_imports.py --check  # Check for issues
+python scripts/fix_imports.py --fix    # Apply fixes</usage>
+    </automated_fixes>
+
+    <validation>
+      <command>python scripts/check_architecture_compliance.py</command>
+      <description>Validates all imports conform to canonical structure</description>
+    </validation>
+  </enforcement_strategy>
+
+  <configuration_updates>
+    <update>
+      <file>pytest.ini</file>
+      <change>pythonpath = . netra_backend</change>
+      <reason>Ensures pytest can resolve netra_backend imports</reason>
+    </update>
+    
+    <update>
+      <file>Dockerfile.backend</file>
+      <change>CMD ["uvicorn", "netra_backend.app.main:app", ...]</change>
+      <reason>Updated entry point for new structure</reason>
+    </update>
+    
+    <update>
+      <file>dev_launcher/backend_starter.py</file>
+      <change>netra_backend.app.main:app</change>
+      <reason>Updated uvicorn launch path</reason>
+    </update>
+    
+    <update>
+      <file>test_framework/test_config.py</file>
+      <change>Updated test paths to use netra_backend/tests/</change>
+      <reason>Tests now located under netra_backend/tests/</reason>
+    </update>
+  </configuration_updates>
+
+  <migration_completed>
+    <date>2025-08-21</date>
+    <commit>737fc792</commit>
+    <message>move to netra_backend.app and netrabackend.test structure</message>
+    <status>COMPLETE</status>
+  </migration_completed>
+
+  <prohibited_actions>
+    <action>
+      <description>Moving files outside of netra_backend/app/</description>
+      <severity>FORBIDDEN</severity>
+      <rationale>The structure is fixed and canonical</rationale>
+    </action>
+    
+    <action>
+      <description>Creating duplicate modules to avoid import fixes</description>
+      <severity>FORBIDDEN</severity>
+      <rationale>Fix the imports, not the structure</rationale>
+    </action>
+    
+    <action>
+      <description>Using sys.path hacks to make old imports work</description>
+      <severity>FORBIDDEN</severity>
+      <rationale>Properly update imports to match structure</rationale>
+    </action>
+    
+    <action>
+      <description>Reverting to old app/ structure</description>
+      <severity>FORBIDDEN</severity>
+      <rationale>The new structure is permanent</rationale>
+    </action>
+  </prohibited_actions>
+
+  <benefits>
+    <benefit>Clear separation between application and test code</benefit>
+    <benefit>Consistent import patterns across entire codebase</benefit>
+    <benefit>Better IDE support and autocomplete</benefit>
+    <benefit>Simplified deployment packaging</benefit>
+    <benefit>Reduced import conflicts and circular dependencies</benefit>
+  </benefits>
+
+  <troubleshooting>
+    <issue>
+      <symptom>ModuleNotFoundError: No module named 'app'</symptom>
+      <solution>Update import to: from netra_backend.app.* import ...</solution>
+    </issue>
+    
+    <issue>
+      <symptom>ImportError: cannot import name X from 'netra_backend'</symptom>
+      <solution>Ensure full path: from netra_backend.app.module.X import ...</solution>
+    </issue>
+    
+    <issue>
+      <symptom>Tests can't find netra_backend module</symptom>
+      <solution>Ensure PYTHONPATH includes project root and pytest.ini is configured</solution>
+    </issue>
+  </troubleshooting>
+
+  <final_mandate>
+    THIS STRUCTURE IS PERMANENT AND CANONICAL.
+    
+    When encountering import issues:
+    1. FIX THE IMPORTS to match the structure
+    2. DO NOT modify the structure to match old imports
+    3. DO NOT create workarounds or hacks
+    4. DO NOT revert to old patterns
+    
+    The structure is:
+    - netra_backend/app/ - ALL production code
+    - netra_backend/tests/ - ALL test code
+    
+    This is non-negotiable.
+  </final_mandate>
+</learning>

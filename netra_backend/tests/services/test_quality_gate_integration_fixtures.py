@@ -5,7 +5,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from redis_manager import RedisManager
-from tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+from netra_backend.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 
 class TestSyntaxFix:

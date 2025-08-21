@@ -8,7 +8,7 @@ import json
 import base64
 from typing import Dict, Any, Optional, Tuple, Union
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compression_config import (
     CompressionConfig, CompressionResult, CompressionAlgorithm, CompressionStatsManager
 )

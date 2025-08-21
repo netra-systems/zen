@@ -2,11 +2,11 @@
 
 from typing import Dict, Optional, Tuple
 from datetime import datetime, timezone
-from app.agents.state import DeepAgentState
-from app.schemas.agent_state import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_state import (
     CheckpointType, AgentPhase
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.state_checkpoint_manager import StateCheckpointManager
 from netra_backend.app.state_recovery_manager import AgentStateRecoveryManager
 

@@ -20,7 +20,7 @@ from scripts.startup_diagnostics import (
     fix_dependencies, fix_migrations, diagnose_startup, generate_recommendations,
     main
 )
-from app.schemas.diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticResult, DiagnosticError, DiagnosticSeverity, FixResult,
     ServiceType, StartupPhase
 )

@@ -13,7 +13,7 @@ class RedisSessionManager:
         """Initialize session manager with Redis client."""
         # Import redis service if available
         try:
-            from app.services.redis_service import redis_service
+            from netra_backend.app.services.redis_service import redis_service
             self.redis = redis_client or redis_service
         except ImportError:
             # Fallback to in-memory storage for tests

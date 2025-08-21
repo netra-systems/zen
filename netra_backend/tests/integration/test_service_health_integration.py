@@ -325,7 +325,7 @@ class TestServiceHealthIntegration:
 
     async def test_health_monitoring_in_startup_integration(self):
         """Test integration between health monitoring and startup checks."""
-        from app.core.app_factory import create_app
+        from netra_backend.app.core.app_factory import create_app
         app = create_app()
         startup_checker = StartupChecker(app)
         

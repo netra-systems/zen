@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 @pytest.mark.asyncio
 async def test_clickhouse_configuration():
     """Test ClickHouse is properly configured"""
-    from app.db.clickhouse import use_mock_clickhouse, get_clickhouse_config
+    from netra_backend.app.db.clickhouse import use_mock_clickhouse, get_clickhouse_config
     
     # In testing environment, should use mock
     if os.getenv("ENVIRONMENT") == "testing":
@@ -42,7 +42,7 @@ async def test_clickhouse_configuration():
 @pytest.mark.asyncio
 async def test_clickhouse_service_initialization():
     """Test ClickHouse service can initialize"""
-    from app.db.clickhouse import ClickHouseService
+    from netra_backend.app.db.clickhouse import ClickHouseService
     
     service = ClickHouseService(force_mock=True)  # Use mock for quick test
     
@@ -123,7 +123,7 @@ async def test_environment_variables():
 async def test_websocket_types_exist():
     """Test WebSocket types are properly defined"""
     try:
-        from app.schemas.websocket_types import (
+        from netra_backend.app.schemas.websocket_types import (
             WebSocketMessage,
             WebSocketMessageType,
             AgentStartedPayload,
@@ -144,7 +144,7 @@ async def test_websocket_types_exist():
 async def test_startup_module_loads():
     """Test startup module can be imported"""
     try:
-        from app.startup_module import StartupModule
+        from netra_backend.app.startup_module import StartupModule
         
         # Module should have critical methods
         assert hasattr(StartupModule, 'initialize')

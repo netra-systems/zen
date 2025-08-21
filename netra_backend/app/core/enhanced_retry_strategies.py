@@ -18,15 +18,15 @@ This file maintains backward compatibility by re-exporting the main classes and 
 """
 
 # Re-export main classes and functions for backward compatibility
-from app.core.retry_strategy_types import EnhancedRetryConfig, RetryStrategyInterface
-from app.core.retry_strategy_base import EnhancedRetryStrategy
-from app.core.retry_strategy_database import DatabaseRetryStrategy
-from app.core.retry_strategy_api import ApiRetryStrategy
-from app.core.retry_strategy_memory import MemoryAwareRetryStrategy
-from app.core.retry_strategy_adaptive import AdaptiveRetryStrategy
-from app.core.retry_strategy_factory import RetryStrategyFactory, DEFAULT_RETRY_CONFIGS
-from app.core.retry_strategy_manager import RetryManager, retry_manager
-from app.core.retry_strategy_executor import exponential_backoff_retry
+from netra_backend.app.core.retry_strategy_types import EnhancedRetryConfig, RetryStrategyInterface
+from netra_backend.app.core.retry_strategy_base import EnhancedRetryStrategy
+from netra_backend.app.core.retry_strategy_database import DatabaseRetryStrategy
+from netra_backend.app.core.retry_strategy_api import ApiRetryStrategy
+from netra_backend.app.core.retry_strategy_memory import MemoryAwareRetryStrategy
+from netra_backend.app.core.retry_strategy_adaptive import AdaptiveRetryStrategy
+from netra_backend.app.core.retry_strategy_factory import RetryStrategyFactory, DEFAULT_RETRY_CONFIGS
+from netra_backend.app.core.retry_strategy_manager import RetryManager, retry_manager
+from netra_backend.app.core.retry_strategy_executor import exponential_backoff_retry
 
 # Expose the main API
 __all__ = [

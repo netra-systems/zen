@@ -3,10 +3,10 @@ Development Login Logic
 """
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.user_service import user_service
-from app.services.security_service import SecurityService
-from app.schemas.registry import UserCreate
-from app.schemas.auth_types import DevLoginRequest
+from netra_backend.app.services.user_service import user_service
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.schemas.auth_types import DevLoginRequest
 import httpx
 import os
 
@@ -32,7 +32,7 @@ async def handle_dev_login(dev_login_request: DevLoginRequest, oauth_config, db:
     user = await get_or_create_dev_user(db, dev_login_request.email)
     
     # Use auth client's configured base URL
-    from app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client import auth_client
     auth_service_url = auth_client.settings.base_url
     
     async with httpx.AsyncClient() as client:

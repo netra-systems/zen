@@ -1,8 +1,8 @@
 """MCP server handlers."""
 from typing import Dict, Any, Optional
-from app.schemas import UserInDB
-from app.services.mcp_service import MCPService
-from app.routes.mcp.utils import handle_server_info_error
+from netra_backend.app.schemas import UserInDB
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.routes.mcp.utils import handle_server_info_error
 
 
 async def handle_server_info(

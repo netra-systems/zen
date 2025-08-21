@@ -25,8 +25,8 @@ class TestAgentRoute:
     
     def test_agent_message_processing(self, agent_test_client):
         """Test agent message processing endpoint."""
-        from app.main import app
-        from app.services.agent_service import get_agent_service
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
         mock_agent_service = MockServiceFactory.create_mock_agent_service()
@@ -54,8 +54,8 @@ class TestAgentRoute:
     
     async def test_agent_streaming_response(self):
         """Test agent streaming response capability."""
-        from app.routes.agent_route import stream_agent_response
-        from app.services.agent_service import AgentService
+        from netra_backend.app.routes.agent_route import stream_agent_response
+        from netra_backend.app.services.agent_service import AgentService
         import json
         
         # Create a mock agent service with streaming capability
@@ -83,7 +83,7 @@ class TestAgentRoute:
     
     async def _collect_stream_chunks(self, message: str, agent_service):
         """Helper to collect streaming chunks into a list."""
-        from app.routes.agent_route import stream_agent_response
+        from netra_backend.app.routes.agent_route import stream_agent_response
         chunks = []
         async for chunk in stream_agent_response(message, agent_service=agent_service):
             chunks.append(chunk)
@@ -91,8 +91,8 @@ class TestAgentRoute:
     
     def test_agent_error_handling(self, agent_test_client):
         """Test agent error handling."""
-        from app.main import app
-        from app.services.agent_service import get_agent_service, AgentService
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import get_agent_service, AgentService
         
         # Create a mock AgentService that raises an exception
         mock_agent_service = Mock(spec=AgentService)
@@ -115,8 +115,8 @@ class TestAgentRoute:
     
     def test_agent_message_validation(self, agent_test_client):
         """Test agent message input validation."""
-        from app.main import app
-        from app.services.agent_service import get_agent_service
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
         mock_agent_service = MockServiceFactory.create_mock_agent_service()
@@ -152,8 +152,8 @@ class TestAgentRoute:
     
     async def test_agent_context_management(self):
         """Test agent context and thread management."""
-        from app.routes.agent_route import process_with_context
-        from app.services.agent_service import AgentService
+        from netra_backend.app.routes.agent_route import process_with_context
+        from netra_backend.app.services.agent_service import AgentService
         
         mock_agent_service = Mock(spec=AgentService)
         mock_agent_service.process_message = AsyncMock(return_value={
@@ -174,8 +174,8 @@ class TestAgentRoute:
     
     def test_agent_rate_limiting(self, agent_test_client):
         """Test agent endpoint rate limiting."""
-        from app.main import app
-        from app.services.agent_service import get_agent_service
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
         mock_agent_service = MockServiceFactory.create_mock_agent_service()
@@ -207,7 +207,7 @@ class TestAgentRoute:
     
     async def test_agent_multi_modal_input(self):
         """Test agent handling of multi-modal input."""
-        from app.routes.agent_route import process_multimodal_message
+        from netra_backend.app.routes.agent_route import process_multimodal_message
         
         multimodal_input = {
             "text": "Analyze this data",
@@ -228,8 +228,8 @@ class TestAgentRoute:
     
     def test_agent_performance_metrics(self, agent_test_client):
         """Test agent performance metric collection."""
-        from app.main import app
-        from app.services.agent_service import get_agent_service
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import get_agent_service
         
         # Mock agent service with performance metrics
         mock_agent_service = Mock()
@@ -262,7 +262,7 @@ class TestAgentRoute:
     
     async def test_agent_fallback_mechanisms(self):
         """Test agent fallback and recovery mechanisms."""
-        from app.routes.agent_route import process_with_fallback
+        from netra_backend.app.routes.agent_route import process_with_fallback
         
         # Mock primary agent failure
         primary_agent = Mock()

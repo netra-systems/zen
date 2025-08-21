@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime, timedelta
 from collections import deque
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

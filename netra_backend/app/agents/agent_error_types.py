@@ -6,10 +6,10 @@ Includes validation, network, and other agent-specific errors.
 
 from typing import Optional
 
-from app.core.error_codes import ErrorSeverity
-from app.schemas.core_enums import ErrorCategory
-from app.schemas.shared_types import ErrorContext
-from app.core.exceptions_agent import AgentError
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.schemas.core_enums import ErrorCategory
+from netra_backend.app.schemas.shared_types import ErrorContext
+from netra_backend.app.core.exceptions_agent import AgentError
 
 
 class AgentValidationError(AgentError):

@@ -9,8 +9,8 @@
 # Review: Pending | Score: 85
 # ================================
 from typing import List, Any
-from app.services.context import ToolContext
-from app.logging_config import central_logger
+from netra_backend.app.services.context import ToolContext
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

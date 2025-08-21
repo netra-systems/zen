@@ -1,14 +1,14 @@
 from sqlalchemy import text
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.logging_config import central_logger
-from app.services.database_env_service import DatabaseEnvironmentValidator
-from app.services.schema_validation_service import SchemaValidationService
-from app.config import settings
-from app.dependencies import get_db_dependency
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
+from netra_backend.app.services.schema_validation_service import SchemaValidationService
+from netra_backend.app.config import settings
+from netra_backend.app.dependencies import get_db_dependency
 
 # Unified Health System imports
-from app.core.health import (
+from netra_backend.app.core.health import (
     HealthInterface, HealthLevel, DatabaseHealthChecker, 
     DependencyHealthChecker, HealthResponseBuilder
 )
@@ -67,7 +67,7 @@ async def _check_clickhouse_connection() -> None:
 async def _perform_clickhouse_check() -> None:
     """Perform the actual ClickHouse connection check."""
     try:
-        from app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse import get_clickhouse_client
         async with get_clickhouse_client() as client:
             await client.execute("SELECT 1")
     except Exception as e:
@@ -130,14 +130,14 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
-        from app.db.postgres import initialize_postgres
-        from app.db.postgres_core import async_engine
+        from netra_backend.app.db.postgres import initialize_postgres
+        from netra_backend.app.db.postgres_core import async_engine
         
         # Always get fresh reference to engine after ensuring initialization
         if async_engine is None:
             initialize_postgres()
             # Get fresh reference after initialization
-            from app.db.postgres_core import async_engine as engine_ref
+            from netra_backend.app.db.postgres_core import async_engine as engine_ref
             if engine_ref is None:
                 raise RuntimeError("Database engine not initialized after initialization")
             engine = engine_ref
@@ -158,17 +158,17 @@ async def schema_validation() -> Dict[str, Any]:
 # Agent monitoring imports (lazy loading)
 def get_agent_metrics_collector():
     """Lazy import for agent metrics collector."""
-    from app.services.metrics.agent_metrics import agent_metrics_collector
+    from netra_backend.app.services.metrics.agent_metrics import agent_metrics_collector
     return agent_metrics_collector
 
 def get_enhanced_health_monitor():
     """Lazy import for enhanced health monitor."""
-    from app.core.system_health_monitor import system_health_monitor
+    from netra_backend.app.core.system_health_monitor import system_health_monitor
     return system_health_monitor
 
 def get_alert_manager():
     """Lazy import for alert manager."""
-    from app.monitoring.alert_manager import alert_manager
+    from netra_backend.app.monitoring.alert_manager import alert_manager
     return alert_manager
 
 

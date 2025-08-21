@@ -3,9 +3,9 @@
 from typing import Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
-from app.logging_config import central_logger
-from app.db.models_postgres import Thread, Run
-from app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import Thread, Run
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -80,7 +80,7 @@ async def mark_run_completed(run: Run, db_session: AsyncSession, thread_service)
 
 async def send_response_safely(user_id: str, response: Any) -> None:
     """Send response to user with error handling"""
-    from app.services.message_handler_base import MessageHandlerBase
+    from netra_backend.app.services.message_handler_base import MessageHandlerBase
     response_data = MessageHandlerBase.convert_response_to_dict(response)
     try:
         await manager.send_message(

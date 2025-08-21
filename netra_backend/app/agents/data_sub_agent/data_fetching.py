@@ -24,15 +24,15 @@ Business Value: Eliminates duplicate patterns, improves data reliability.
 from typing import Dict, Any, Optional, TYPE_CHECKING
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
-from app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import modular components
 from netra_backend.app.data_fetching_validation import DataFetchingValidation
@@ -149,7 +149,7 @@ class DataFetching(DataFetchingValidation):
 
     async def execute_with_modern_patterns(self, operation: str, **kwargs) -> Dict[str, Any]:
         """Execute operation using modern execution patterns."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         
         # Create execution context for modern patterns
         state = DeepAgentState()

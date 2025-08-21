@@ -16,7 +16,7 @@ import uuid
 import base64
 
 from test_framework.test_patterns import L3IntegrationTest
-from app.core.redis_client import RedisManager
+from netra_backend.app.core.redis_client import RedisManager
 
 
 class TestWebSocketMessageHandling(L3IntegrationTest):

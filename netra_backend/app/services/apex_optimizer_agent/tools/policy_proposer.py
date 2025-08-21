@@ -1,12 +1,12 @@
 import asyncio
 from typing import List, Dict, Any, Tuple
-from app.db.models_postgres import SupplyOption
-from app.schemas import LearnedPolicy, PredictedOutcome, DiscoveredPattern
-from app.db.models_clickhouse import UnifiedLogEntry
+from netra_backend.app.db.models_postgres import SupplyOption
+from netra_backend.app.schemas import LearnedPolicy, PredictedOutcome, DiscoveredPattern
+from netra_backend.app.db.models_clickhouse import UnifiedLogEntry
 from sqlalchemy.future import select
-from app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
+from netra_backend.app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 
-from app.services.apex_optimizer_agent.tools.context import ToolContext
+from netra_backend.app.services.apex_optimizer_agent.tools.context import ToolContext
 
 class PolicyProposer(BaseTool):
     metadata = ToolMetadata(

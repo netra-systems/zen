@@ -23,13 +23,13 @@ from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import AsyncMock, patch, Mock, MagicMock
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-from app.websocket.unified.manager import UnifiedWebSocketManager
-from app.websocket.connection import ConnectionInfo
-from app.websocket.reconnection_manager import WebSocketReconnectionManager
-from app.websocket.reconnection_types import ReconnectionConfig, ReconnectionState, DisconnectReason
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_models import WebSocketValidationError
-from app.logging_config import central_logger
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.reconnection_manager import WebSocketReconnectionManager
+from netra_backend.app.websocket.reconnection_types import ReconnectionConfig, ReconnectionState, DisconnectReason
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_models import WebSocketValidationError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

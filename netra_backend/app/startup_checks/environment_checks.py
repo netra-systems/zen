@@ -7,7 +7,7 @@ Maintains 25-line function limit and focused responsibility.
 
 import os
 from typing import List
-from app.config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.models import StartupCheckResult
 
 

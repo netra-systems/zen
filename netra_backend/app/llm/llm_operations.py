@@ -6,13 +6,13 @@ Each function must be ≤8 lines as per architecture requirements.
 
 import time
 from typing import Any, AsyncIterator, Optional, Tuple
-from app.schemas import AppConfig
-from app.schemas.llm_response_types import LLMResponse
-from app.llm.llm_provider_manager import LLMProviderManager
-from app.llm.llm_utils import LLMUtils
-from app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
-from app.llm.observability import generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat
-from app.services.llm_cache_service import llm_cache_service
+from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.llm.llm_provider_manager import LLMProviderManager
+from netra_backend.app.llm.llm_utils import LLMUtils
+from netra_backend.app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
+from netra_backend.app.llm.observability import generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat
+from netra_backend.app.services.llm_cache_service import llm_cache_service
 
 
 class LLMOperations:

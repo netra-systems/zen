@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from enum import Enum
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.health_types import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)
@@ -49,15 +49,15 @@ async def check_postgres_health() -> HealthCheckResult:
 
 async def _execute_postgres_query() -> None:
     """Execute test query on PostgreSQL database."""
-    from app.db.postgres import initialize_postgres
-    from app.db.postgres_core import async_engine
+    from netra_backend.app.db.postgres import initialize_postgres
+    from netra_backend.app.db.postgres_core import async_engine
     from sqlalchemy import text
     
     # Always get fresh reference to engine after ensuring initialization
     if async_engine is None:
         initialize_postgres()
         # Get fresh reference after initialization
-        from app.db.postgres_core import async_engine as engine_ref
+        from netra_backend.app.db.postgres_core import async_engine as engine_ref
         if engine_ref is None:
             raise RuntimeError("Database engine not initialized after initialization")
         engine = engine_ref
@@ -94,7 +94,7 @@ def _check_clickhouse_disabled_status() -> Optional[HealthCheckResult]:
 
 async def _execute_clickhouse_query() -> None:
     """Execute test query on ClickHouse database."""
-    from app.db.clickhouse import get_clickhouse_client
+    from netra_backend.app.db.clickhouse import get_clickhouse_client
     async with get_clickhouse_client() as client:
         await client.execute("SELECT 1")
 
@@ -124,7 +124,7 @@ async def _execute_redis_ping() -> None:
 
 async def _get_redis_client_or_fail():
     """Get Redis client or raise appropriate exception."""
-    from app.redis_manager import redis_manager
+    from netra_backend.app.redis_manager import redis_manager
     if not redis_manager.enabled:
         raise RuntimeError("Redis disabled in development")
     client = await redis_manager.get_client()
@@ -146,7 +146,7 @@ async def check_websocket_health() -> HealthCheckResult:
 
 async def _get_websocket_stats_and_score() -> tuple[Dict[str, Any], float]:
     """Get WebSocket connection stats and calculate health score."""
-    from app.websocket.connection_manager import get_connection_manager
+    from netra_backend.app.websocket.connection_manager import get_connection_manager
     conn_manager = get_connection_manager()
     stats = await conn_manager.get_stats()
     health_score = _calculate_websocket_health_score(stats)

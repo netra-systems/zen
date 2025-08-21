@@ -1,8 +1,8 @@
 """Input/output validation for tool dispatcher."""
 from typing import Dict, Any, Optional, Union, List
 from pydantic import BaseModel, Field, ValidationError
-from app.schemas.shared_types import ValidationResult
-from app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import ValidationResult
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

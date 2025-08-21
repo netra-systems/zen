@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock
 import uuid
 
-from app.tests.e2e.conftest import *
+from netra_backend.app.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 

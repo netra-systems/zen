@@ -8,8 +8,8 @@ import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from app.tests.helpers.network_pagination_test_helpers import PaginationTestHelpers
-from app.tests.helpers.rate_retry_monitoring_test_helpers import (
+from netra_backend.app.tests.helpers.network_pagination_test_helpers import PaginationTestHelpers
+from netra_backend.app.tests.helpers.rate_retry_monitoring_test_helpers import (
     RateLimiterTestHelpers, RetryTestHelpers
 )
 
@@ -19,7 +19,7 @@ class TestPaginationUtilsCursors:
     """test_pagination_utils_cursors - Test cursor pagination and edge cases"""
     
     async def test_cursor_pagination(self):
-        from app.utils.pagination_utils import PaginationUtils
+        from netra_backend.app.utils.pagination_utils import PaginationUtils
         utils = PaginationUtils()
         
         cursor_data = PaginationTestHelpers.create_cursor_data()
@@ -30,7 +30,7 @@ class TestPaginationUtilsCursors:
         self._assert_pagination_metadata(utils)
     
     async def test_edge_cases(self):
-        from app.utils.pagination_utils import PaginationUtils
+        from netra_backend.app.utils.pagination_utils import PaginationUtils
         utils = PaginationUtils()
         
         self._assert_empty_result_set(utils)
@@ -75,7 +75,7 @@ class TestRateLimiterThrottling:
     """test_rate_limiter_throttling - Test rate limiting and bucket algorithms"""
     
     async def test_rate_limiting(self):
-        from app.utils.rate_limiter import RateLimiter
+        from netra_backend.app.utils.rate_limiter import RateLimiter
         limiter = RateLimiter(rate=5, per=1.0)  # 5 requests per second
         
         await RateLimiterTestHelpers.assert_burst_allowed(limiter, 5)
@@ -85,7 +85,7 @@ class TestRateLimiterThrottling:
         assert await limiter.allow_request() == True
     
     async def test_bucket_algorithms(self):
-        from app.utils.rate_limiter import RateLimiter
+        from netra_backend.app.utils.rate_limiter import RateLimiter
         
         await self._test_sliding_window_algorithm()
         await self._test_leaky_bucket_algorithm()
@@ -110,7 +110,7 @@ class TestRetryUtilsBackoff:
     """test_retry_utils_backoff - Test retry strategies and exponential backoff"""
     
     async def test_exponential_backoff(self):
-        from app.utils.retry_utils import RetryUtils
+        from netra_backend.app.utils.retry_utils import RetryUtils
         utils = RetryUtils()
         
         self._assert_backoff_calculation(utils)
@@ -118,7 +118,7 @@ class TestRetryUtilsBackoff:
         self._assert_max_backoff_limit(utils)
     
     async def test_retry_strategies(self):
-        from app.utils.retry_utils import RetryUtils
+        from netra_backend.app.utils.retry_utils import RetryUtils
         utils = RetryUtils()
         
         await self._assert_retry_with_success(utils)

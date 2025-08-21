@@ -11,17 +11,17 @@ from typing import Dict, Any, Union, List, Optional, Literal
 
 from fastapi import WebSocket
 
-from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import (
     WebSocketValidationError,
     ServerMessage,
     BroadcastResult
 )
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 # Import unified WebSocket system
-from app.websocket.unified import get_unified_manager, UnifiedWebSocketManager
+from netra_backend.app.websocket.unified import get_unified_manager, UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

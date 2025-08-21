@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import AppConfig
-from app.auth_integration.auth import ActiveUserDep, DeveloperDep, AdminDep, require_permission
-from app import schemas
-from app.config import settings
-from app.services.permission_service import PermissionService
+from netra_backend.app.schemas import AppConfig
+from netra_backend.app.auth_integration.auth import ActiveUserDep, DeveloperDep, AdminDep, require_permission
+from netra_backend.app import schemas
+from netra_backend.app.config import settings
+from netra_backend.app.services.permission_service import PermissionService
 from typing import List, Dict, Any
 
 router = APIRouter()
@@ -14,17 +14,17 @@ def verify_admin_role(user: Dict[str, Any]) -> bool:
 
 async def get_all_users() -> List[Dict[str, Any]]:
     """Get all users from the system."""
-    from app.services import user_service
+    from netra_backend.app.services import user_service
     return await user_service.get_all_users()
 
 async def update_user_role(user_id: str, role: str) -> Dict[str, Any]:
     """Update user role in the system."""
-    from app.services import user_service
+    from netra_backend.app.services import user_service
     return await user_service.update_user_role(user_id, role)
 
 async def get_audit_logs(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
     """Get recent audit logs with pagination."""
-    from app.services import audit_service
+    from netra_backend.app.services import audit_service
     return await audit_service.get_recent_logs(limit, offset)
 
 @router.get("/settings", response_model=AppConfig)

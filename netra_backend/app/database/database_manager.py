@@ -14,8 +14,8 @@ from typing import Optional, Any, Dict
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from app.db.session import SessionLocal, get_db
-from app.db.postgres_core import PostgresCore
+from netra_backend.app.db.session import SessionLocal, get_db
+from netra_backend.app.db.postgres_core import PostgresCore
 
 logger = logging.getLogger(__name__)
 

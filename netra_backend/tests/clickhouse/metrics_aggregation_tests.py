@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import List, Dict
 
-from app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, validate_clickhouse_query
+from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, validate_clickhouse_query
 
 
 class TestLLMMetricsAggregation:

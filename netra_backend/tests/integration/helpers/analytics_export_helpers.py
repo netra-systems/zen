@@ -21,7 +21,7 @@ import uuid
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 
-from app.db.clickhouse import ClickHouseService
+from netra_backend.app.db.clickhouse import ClickHouseService
 
 
 class AdvancedAnalyticsExportInfrastructure:

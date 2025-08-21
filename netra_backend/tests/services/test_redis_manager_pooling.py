@@ -6,10 +6,10 @@ Tests connection pool creation, management, and concurrent usage
 import pytest
 import asyncio
 
-from tests.helpers.redis_test_fixtures import (
+from netra_backend.tests.helpers.redis_test_fixtures import (
     enhanced_redis_manager, connection_pool, MockRedisClient
 )
-from tests.helpers.redis_test_helpers import (
+from netra_backend.tests.helpers.redis_test_helpers import (
     verify_connection_pool_state, create_concurrent_tasks, verify_concurrent_results,
     verify_pool_cleanup
 )

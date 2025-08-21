@@ -7,7 +7,7 @@ to maintain the 450-line limit per CLAUDE.md requirements.
 from typing import Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.schemas.ToolPermission import PermissionCheckResult
+    from netra_backend.app.schemas.ToolPermission import PermissionCheckResult
 
 class ToolExecutionResult:
     """Result of tool execution with comprehensive tracking."""

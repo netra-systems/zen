@@ -8,7 +8,7 @@ import asyncio
 from typing import Dict, List, Any, Optional, Set
 from pathlib import Path
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.ai_pattern_definitions import AIPatternDefinitions
 from netra_backend.app.pattern_matcher import GitHubAnalyzerPatternMatcher
 

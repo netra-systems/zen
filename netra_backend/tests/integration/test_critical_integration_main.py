@@ -24,7 +24,7 @@ import time
 from typing import Dict, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.integration.helpers.critical_integration_helpers import (
+from netra_backend.tests.integration.helpers.critical_integration_helpers import (
     setup_test_infrastructure, teardown_test_infrastructure
 )
 

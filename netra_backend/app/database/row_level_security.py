@@ -3,7 +3,7 @@
 Re-exports from the actual tenant service for backward compatibility.
 """
 
-from app.services.database.tenant_service import RowLevelSecurityManager
+from netra_backend.app.services.database.tenant_service import RowLevelSecurityManager
 
 __all__ = [
     'RowLevelSecurityManager'

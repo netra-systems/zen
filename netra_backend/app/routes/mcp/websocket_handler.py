@@ -7,8 +7,8 @@ Maintains single responsibility under 450-line limit.
 
 from typing import Optional
 from fastapi import WebSocket
-from app.services.mcp_service import MCPService
-from app.logging_config import CentralLogger
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()
 

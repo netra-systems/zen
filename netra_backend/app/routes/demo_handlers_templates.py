@@ -2,7 +2,7 @@
 
 from fastapi import HTTPException
 from typing import Dict, Any, List
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 
 async def handle_industry_templates(industry: str, demo_service) -> List[Dict[str, Any]]:

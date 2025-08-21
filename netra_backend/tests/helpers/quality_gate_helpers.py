@@ -2,14 +2,14 @@
 
 import hashlib
 from unittest.mock import Mock, AsyncMock
-from app.services.quality_gate_service import (
+from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
     ContentType,
     QualityMetrics,
     ValidationResult
 )
-from app.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 
 def create_redis_mock():

@@ -3,7 +3,7 @@
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
-from app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.performance_analyzer import PerformanceAnalyzer
 from netra_backend.app.anomaly_detector import AnomalyDetector
 from netra_backend.app.correlation_analyzer import CorrelationAnalyzer

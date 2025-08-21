@@ -11,7 +11,7 @@ from typing import Dict, List, Any
 from unittest.mock import Mock, AsyncMock
 from enum import Enum
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.llm_fixtures_core import create_basic_llm_manager
 
 # Type aliases

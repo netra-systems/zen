@@ -8,8 +8,8 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
-from app.auth_integration.auth import JWTTokenManager, TokenClaims
-from app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
+from netra_backend.app.core.exceptions_auth import AuthenticationError
 
 
 # Test fixtures

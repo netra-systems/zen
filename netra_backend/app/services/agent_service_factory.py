@@ -7,9 +7,9 @@ with proper dependency injection and configuration.
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.llm.llm_manager import LLMManager
-from app.dependencies import get_llm_manager, DbDep
-from app.ws_manager import manager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.dependencies import get_llm_manager, DbDep
+from netra_backend.app.ws_manager import manager
 from netra_backend.app.agent_service_core import AgentService
 
 
@@ -24,7 +24,7 @@ def get_agent_service(
 
 def _create_supervisor_agent(db_session: AsyncSession, llm_manager: LLMManager):
     """Create configured supervisor agent."""
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     tool_dispatcher = ToolDispatcher(db_session)
     return Supervisor(db_session, llm_manager, manager, tool_dispatcher)

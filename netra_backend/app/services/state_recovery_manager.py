@@ -10,10 +10,10 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update
 
-from app.schemas.agent_state import StateRecoveryRequest, RecoveryType
-from app.db.models_agent_state import AgentStateTransaction
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
+from netra_backend.app.schemas.agent_state import StateRecoveryRequest, RecoveryType
+from netra_backend.app.db.models_agent_state import AgentStateTransaction
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -75,7 +75,7 @@ class ServiceStateRecoveryManager:
     async def perform_resume_recovery(self, request: StateRecoveryRequest, 
                                     db_session: AsyncSession) -> bool:
         """Perform resume recovery by loading last valid state."""
-        from app.services.state_persistence import state_persistence_service
+        from netra_backend.app.services.state_persistence import state_persistence_service
         state = await state_persistence_service.load_agent_state(request.run_id, None, db_session)
         return state is not None
     
@@ -83,7 +83,7 @@ class ServiceStateRecoveryManager:
                                       db_session: AsyncSession) -> bool:
         """Perform rollback recovery to specific snapshot."""
         if request.target_snapshot_id:
-            from app.services.state_persistence import state_persistence_service
+            from netra_backend.app.services.state_persistence import state_persistence_service
             state = await state_persistence_service.load_agent_state(
                 request.run_id, request.target_snapshot_id, db_session)
             return state is not None

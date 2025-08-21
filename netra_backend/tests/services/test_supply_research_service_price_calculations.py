@@ -10,8 +10,8 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import MagicMock, patch
 import asyncio
 
-from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
+from netra_backend.app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
 
 @pytest.fixture

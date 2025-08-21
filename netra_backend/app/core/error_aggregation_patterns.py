@@ -6,7 +6,7 @@ optimized component modules underneath.
 """
 
 # Re-export the main analyzer from the new modular structure
-from app.core.error_trend_analyzer import ErrorTrendAnalyzer
+from netra_backend.app.core.error_trend_analyzer import ErrorTrendAnalyzer
 
 # Maintain backward compatibility
 __all__ = ['ErrorTrendAnalyzer']

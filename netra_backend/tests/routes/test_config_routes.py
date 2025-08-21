@@ -46,7 +46,7 @@ class TestConfigRoute:
     
     async def test_config_persistence(self):
         """Test configuration persistence."""
-        from app.routes.config import update_config
+        from netra_backend.app.routes.config import update_config
         
         new_config = {
             "log_level": "DEBUG",
@@ -135,7 +135,7 @@ class TestConfigRoute:
     
     async def test_config_backup_and_restore(self):
         """Test configuration backup and restore functionality."""
-        from app.routes.config import backup_config, restore_config
+        from netra_backend.app.routes.config import backup_config, restore_config
         
         # Mock config backup
         with patch('app.services.config_service.create_backup') as mock_backup:

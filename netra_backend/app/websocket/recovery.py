@@ -10,9 +10,9 @@ import time
 from enum import Enum
 from dataclasses import dataclass, field
 
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.schemas.registry import WebSocketMessage
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.connection import ConnectionInfo
 from netra_backend.app.error_types import WebSocketErrorInfo as WebSocketError, ErrorSeverity
 

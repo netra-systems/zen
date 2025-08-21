@@ -9,8 +9,8 @@ import traceback
 from typing import Dict, Any, Optional, Callable, List, Union
 from datetime import datetime, UTC
 
-from app.logging_config import central_logger
-from app.services.metrics.agent_metrics_models import FailureType
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.metrics.agent_metrics_models import FailureType
 
 logger = central_logger.get_logger(__name__)
 

@@ -3,11 +3,11 @@ Unified Tools API Router - Route definitions only
 """
 from fastapi import APIRouter, Depends, Query
 from typing import List, Dict, Any, Optional
-from app.dependencies import DbDep
-from app.db.models_postgres import User
-from app.auth_integration.auth import get_current_user
-from app.services.unified_tool_registry import UnifiedToolRegistry
-from app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
 import redis
 import os
 

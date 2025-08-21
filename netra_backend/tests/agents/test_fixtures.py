@@ -35,7 +35,7 @@ def _create_structured_llm_responses():
 
 def _create_triage_entities():
     """Create triage extracted entities"""
-    from app.agents.triage_sub_agent import ExtractedEntities
+    from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
     return ExtractedEntities(
         models_mentioned=["GPT-4", "Claude"],
         metrics_mentioned=["latency", "throughput"],
@@ -45,7 +45,7 @@ def _create_triage_entities():
 
 def _create_triage_intent():
     """Create triage user intent"""
-    from app.agents.triage_sub_agent import UserIntent
+    from netra_backend.app.agents.triage_sub_agent import UserIntent
     return UserIntent(
         primary_intent="optimize",
         secondary_intents=["analyze", "monitor"]
@@ -54,7 +54,7 @@ def _create_triage_intent():
 
 def _create_triage_metadata():
     """Create triage metadata"""
-    from app.agents.triage_sub_agent import TriageMetadata
+    from netra_backend.app.agents.triage_sub_agent import TriageMetadata
     return TriageMetadata(
         triage_duration_ms=150,
         cache_hit=False,
@@ -65,7 +65,7 @@ def _create_triage_metadata():
 
 def _create_triage_result():
     """Create complete triage result"""
-    from app.agents.triage_sub_agent import (
+    from netra_backend.app.agents.triage_sub_agent import (
         TriageResult, Priority, Complexity
     )
     return TriageResult(
@@ -136,7 +136,7 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={
         "status": "success",

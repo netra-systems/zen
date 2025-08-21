@@ -15,7 +15,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as 
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.core.exceptions_base import NetraException
-from app import schemas
+from netra_backend.app import schemas
 
 
 class AgentState(Enum):

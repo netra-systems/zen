@@ -19,21 +19,21 @@ import json
 import time
 
 # Modern execution patterns
-from app.agents.base.interface import (
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability_manager import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
 
 # Legacy compatibility
-from app.agents.base import BaseSubAgent
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
-from app.logging_config import central_logger
-from app.schemas.shared_types import RetryConfig
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -188,7 +188,7 @@ class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
         
     def _create_execution_context(self, message: str, context: Optional[Dict[str, Any]]) -> ExecutionContext:
         """Create execution context from legacy parameters."""
-        from app.agents.state import DeepAgentState
+        from netra_backend.app.agents.state import DeepAgentState
         import uuid
         
         state = DeepAgentState(message=message, context=context or {})

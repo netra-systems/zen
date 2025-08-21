@@ -1,14 +1,14 @@
 """Agent route streaming functions."""
 from typing import Dict, Any, Optional, AsyncGenerator
 from fastapi.responses import StreamingResponse
-from app.services.agent_service import AgentService
-from app.schemas import RequestModel
-from app.routes.agent_route_helpers import delegate_streaming
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.schemas import RequestModel
+from netra_backend.app.routes.agent_route_helpers import delegate_streaming
 
 
 def get_agent_service_for_streaming(db_session, llm_manager) -> AgentService:
     """Get agent service for streaming."""
-    from app.services.agent_service import get_agent_service
+    from netra_backend.app.services.agent_service import get_agent_service
     return get_agent_service(db_session, llm_manager)
 
 

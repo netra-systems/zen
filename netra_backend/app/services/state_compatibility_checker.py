@@ -4,7 +4,7 @@ This module provides compatibility checking for state data across versions.
 """
 
 from typing import Dict, Any, List, Tuple
-from app.services.state_migration_core import StateVersionManager
+from netra_backend.app.services.state_migration_core import StateVersionManager
 
 
 class StateCompatibilityChecker:

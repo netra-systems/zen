@@ -17,12 +17,12 @@ Single responsibility: Profile parsing and workload type determination.
 """
 
 from typing import Optional, Dict, Any, List
-from app.llm.llm_manager import LLMManager
-from app.agents.synthetic_data_presets import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.synthetic_data_presets import (
     WorkloadProfile, DataGenerationType, get_all_presets
 )
-from app.agents.utils import extract_json_from_response
-from app.logging_config import central_logger
+from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

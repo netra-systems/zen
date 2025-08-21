@@ -16,7 +16,7 @@ from netra_backend.app.core.async_resource_manager import (
     AsyncTaskPool,
     AsyncBatchProcessor,
 )
-from tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+from netra_backend.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):

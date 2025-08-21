@@ -1,7 +1,7 @@
 """Demo session management handlers."""
 from typing import Dict, Any
 
-from app.services.demo_service import DemoService
+from netra_backend.app.services.demo_service import DemoService
 
 
 async def handle_session_status(
@@ -32,13 +32,13 @@ async def handle_session_status_logic(
 
 def handle_session_value_error(e: ValueError) -> None:
     """Handle ValueError in session operations."""
-    from app.routes.demo_handlers_utils import raise_not_found_error
+    from netra_backend.app.routes.demo_handlers_utils import raise_not_found_error
     raise_not_found_error(str(e))
 
 
 def handle_session_general_error(message: str, e: Exception) -> None:
     """Handle general exception in session operations."""
-    from app.routes.demo_handlers_utils import log_and_raise_error
+    from netra_backend.app.routes.demo_handlers_utils import log_and_raise_error
     log_and_raise_error(message, e)
 
 
@@ -69,5 +69,5 @@ async def handle_feedback_submission(
 
 def build_success_response() -> Dict[str, str]:
     """Build feedback success response."""
-    from app.routes.demo_handlers_utils import build_feedback_success_response
+    from netra_backend.app.routes.demo_handlers_utils import build_feedback_success_response
     return build_feedback_success_response()

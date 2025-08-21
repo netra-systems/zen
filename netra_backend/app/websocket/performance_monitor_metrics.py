@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Any
 from collections import deque, defaultdict
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.performance_monitor_collector import MetricCollector
 
 logger = central_logger.get_logger(__name__)

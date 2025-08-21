@@ -5,14 +5,14 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Any, Type, TypeVar, Optional
 from pydantic import BaseModel
-from app.llm.llm_response_processing import (
+from netra_backend.app.llm.llm_response_processing import (
     parse_nested_json_recursive, attempt_json_fallback_parse,
     create_structured_cache_key, get_cached_structured_response,
     cache_structured_response, should_cache_structured_response
 )
-from app.core.json_parsing_utils import ensure_agent_response_is_json
-from app.schemas.llm_config_types import LLMConfig as GenerationConfig
-from app.logging_config import central_logger
+from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json
+from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T', bound=BaseModel)

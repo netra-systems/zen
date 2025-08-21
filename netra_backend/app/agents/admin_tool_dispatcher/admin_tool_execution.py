@@ -12,21 +12,21 @@
 from typing import TYPE_CHECKING, Optional, Dict, Any
 from datetime import datetime, UTC
 
-from app.schemas import ToolInput
-from app.schemas.admin_tool_types import (
+from netra_backend.app.schemas import ToolInput
+from netra_backend.app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
     ToolStatus
 )
-from app.schemas.shared_types import RetryConfig
-from app.logging_config import central_logger
-from app.agents.base.interface import (
+from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.executor import BaseExecutionEngine
-from app.agents.base.reliability import ReliabilityManager
-from app.agents.base.monitoring import ExecutionMonitor
-from app.agents.base.errors import ExecutionErrorHandler
-from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.reliability import ReliabilityManager
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 if TYPE_CHECKING:
     from .dispatcher_core import AdminToolDispatcher
@@ -127,7 +127,7 @@ async def dispatch_admin_tool(dispatcher, tool_name: str, tool_input, **kwargs):
 
 def _create_execution_context(dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
     """Create execution context for modern interface."""
-    from app.agents.state import DeepAgentState
+    from netra_backend.app.agents.state import DeepAgentState
     state = DeepAgentState(user_id=getattr(dispatcher.user, 'id', 'unknown'))
     metadata = _build_context_metadata(tool_name, kwargs, dispatcher)
     run_id = _generate_run_id(tool_name)

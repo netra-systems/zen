@@ -4,9 +4,9 @@ Provides WebSocket functionality through the IWebSocketService interface.
 """
 
 from typing import Dict, Any, List, Optional
-from app.services.service_locator import IWebSocketService
-from app.ws_manager import manager
-from app.logging_config import central_logger
+from netra_backend.app.services.service_locator import IWebSocketService
+from netra_backend.app.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

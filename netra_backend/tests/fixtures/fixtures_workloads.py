@@ -10,7 +10,7 @@ from typing import Dict, List, Any
 
 import pytest
 
-from app.services.realistic_test_data_service import RealisticTestDataService
+from netra_backend.app.services.realistic_test_data_service import RealisticTestDataService
 
 
 class WorkloadFixtures:

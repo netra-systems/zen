@@ -2,12 +2,12 @@
 from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
-from app.core.json_parsing_utils import parse_string_list_field
+from netra_backend.app.core.json_parsing_utils import parse_string_list_field
 
 # Import actual types needed at runtime
-from app.agents.triage_sub_agent.models import TriageResult
-from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from app.schemas.agent_models import AgentMetadata
+from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.schemas.agent_models import AgentMetadata
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:

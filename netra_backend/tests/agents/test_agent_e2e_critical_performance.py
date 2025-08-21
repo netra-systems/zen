@@ -10,7 +10,7 @@ from unittest.mock import patch, AsyncMock
 from datetime import datetime
 
 from netra_backend.app.services.state_persistence import state_persistence_service
-from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 
 class TestAgentE2ECriticalPerformance(AgentE2ETestBase):

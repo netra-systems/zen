@@ -6,7 +6,7 @@ from collections import defaultdict
 from dataclasses import asdict
 import statistics
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.models import QualityTrend, MetricType, AgentQualityProfile
 
 logger = central_logger.get_logger(__name__)

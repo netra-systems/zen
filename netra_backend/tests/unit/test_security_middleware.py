@@ -24,11 +24,11 @@ from fastapi import Request, Response, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.datastructures import Headers, URL
 
-from app.middleware.security_middleware import (
+from netra_backend.app.middleware.security_middleware import (
     SecurityMiddleware, SecurityConfig, RateLimitTracker,
     InputValidator, create_security_middleware
 )
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 
 class TestSecurityConfig:

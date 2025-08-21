@@ -1,12 +1,12 @@
 """Recovery management functionality for supervisor state."""
 
 from typing import Dict, Optional, Tuple
-from app.agents.state import DeepAgentState
-from app.services.state_persistence import state_persistence_service
-from app.schemas.agent_state import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.schemas.agent_state import (
     StateRecoveryRequest, RecoveryType
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

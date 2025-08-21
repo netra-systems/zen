@@ -27,11 +27,11 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from app.main import app
-from app.db.models_postgres import User
-from app.services.auth_service import AuthService
-from app.services.session_service import SessionService
-from app.core.config import settings
+from netra_backend.app.main import app
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.session_service import SessionService
+from netra_backend.app.core.config import settings
 
 
 class TestExistingUserLoginFlow:

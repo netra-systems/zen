@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-from app.core.exceptions_base import ValidationError as ValidationException
+from netra_backend.app.core.exceptions_base import ValidationError as ValidationException
 
 
 class ViolationSeverity(Enum):

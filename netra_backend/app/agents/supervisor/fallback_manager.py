@@ -5,19 +5,19 @@ from typing import Dict, TYPE_CHECKING
 from datetime import datetime, timezone
 
 if TYPE_CHECKING:
-    from app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 
-from app.config import get_config
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.config import get_config
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult
 )
-from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
-from app.agents.supervisor_circuit_breaker import CircuitBreaker
-from app.schemas.core_models import CircuitBreakerConfig
-from app.core.circuit_breaker import circuit_registry
-from app.schemas.core_enums import CircuitBreakerState
+from netra_backend.app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from netra_backend.app.agents.supervisor_circuit_breaker import CircuitBreaker
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig
+from netra_backend.app.core.circuit_breaker import circuit_registry
+from netra_backend.app.schemas.core_enums import CircuitBreakerState
 
 logger = central_logger.get_logger(__name__)
 

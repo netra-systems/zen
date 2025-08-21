@@ -7,7 +7,7 @@ the 450-line limit per CLAUDE.md requirements.
 import re
 from typing import Dict
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.quality_types import ContentType, QualityMetrics
 
 logger = central_logger.get_logger(__name__)

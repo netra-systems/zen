@@ -12,7 +12,7 @@ Coverage: Team ownership, role-based permissions, permission inheritance
 
 import pytest
 import uuid
-from tests.integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     TeamCollaborationManager, TeamRole, PermissionType, TeamPermissionMatrix,
     assert_permission_matrix
 )

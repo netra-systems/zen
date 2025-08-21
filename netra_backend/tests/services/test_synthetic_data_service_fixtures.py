@@ -8,9 +8,9 @@ import uuid
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services.corpus_service import CorpusService
-from app.ws_manager import manager as ws_manager
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.ws_manager import manager as ws_manager
 
 
 # ==================== Mock Classes ====================

@@ -4,7 +4,7 @@ System Management Tool Handlers
 Contains handlers for system configuration, user administration, and logging tools.
 """
 from typing import Dict, Any, TYPE_CHECKING
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
     from .registry import UnifiedToolRegistry
@@ -15,7 +15,7 @@ class SystemManagementHandlers:
     
     async def _system_configurator_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for system_configurator tool"""
-        from app.services.configuration_service import ConfigurationService
+        from netra_backend.app.services.configuration_service import ConfigurationService
         config_service = ConfigurationService(self.db)
         action = arguments['action']
         return await self._execute_configuration_action(config_service, action, arguments, user)
@@ -52,7 +52,7 @@ class SystemManagementHandlers:
     
     async def _user_admin_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for user_admin tool"""
-        from app.services.user_service import UserService
+        from netra_backend.app.services.user_service import UserService
         if not user.is_admin:
             return _create_permission_error_response()
         user_service = UserService(self.db)
@@ -132,14 +132,14 @@ def _create_unknown_action_response(action: str) -> Dict[str, Any]:
     
     async def _log_analyzer_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for log_analyzer tool"""
-        from app.services.log_analysis_service import LogAnalysisService
+        from netra_backend.app.services.log_analysis_service import LogAnalysisService
         log_service = LogAnalysisService(self.db)
         analysis = await _perform_log_analysis(log_service, arguments, user)
         return _create_log_analysis_response(analysis)
     
     async def _debug_panel_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for debug_panel tool"""
-        from app.services.debug_service import DebugService
+        from netra_backend.app.services.debug_service import DebugService
         debug_service = DebugService(self.db)
         component = arguments.get('component', 'system')
         debug_info = await _get_component_debug_info(debug_service, component, arguments, user)

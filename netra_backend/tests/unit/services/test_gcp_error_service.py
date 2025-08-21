@@ -20,14 +20,14 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, List, Any, Optional
 
-from app.services.monitoring.gcp_error_service import GCPErrorService
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
+from netra_backend.app.schemas.monitoring_schemas import (
     GCPErrorServiceConfig, GCPCredentialsConfig, ErrorQuery, ErrorResponse,
     GCPError, ErrorSeverity, ErrorStatus, ErrorSummary, ErrorDetailResponse,
     ErrorResolution, GCPErrorEvent
 )
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode
 
 
 class TestGCPErrorService:

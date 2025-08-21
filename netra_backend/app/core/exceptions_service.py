@@ -1,7 +1,7 @@
 """Service and agent exceptions - compliant with 25-line function limit."""
 
-from app.core.exceptions_base import NetraException
-from app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 
 class ServiceError(NetraException):
@@ -55,7 +55,7 @@ class ExternalServiceError(ServiceError):
 
 
 # Import AgentExecutionError from canonical location - CONSOLIDATED
-from app.core.exceptions_agent import AgentExecutionError
+from netra_backend.app.core.exceptions_agent import AgentExecutionError
 
 
 class AgentTimeoutError(AgentExecutionError):

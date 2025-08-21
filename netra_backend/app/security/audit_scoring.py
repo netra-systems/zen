@@ -4,7 +4,7 @@ Calculates compliance scores and generates security recommendations.
 """
 
 from typing import Dict, List
-from app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory
+from netra_backend.app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory
 
 
 class ComplianceScoreCalculator:

@@ -11,7 +11,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Maximum file size: 300 lines (currently under limit)
 
 Usage:
-    from app.schemas.audit_models import CorpusAuditRecord, CorpusAuditMetadata
+    from netra_backend.app.schemas.audit_models import CorpusAuditRecord, CorpusAuditMetadata
 """
 
 from typing import Dict, List, Optional, Any
@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
 # Import enums from the dedicated module
-from app.schemas.core_enums import CorpusAuditAction, CorpusAuditStatus
+from netra_backend.app.schemas.core_enums import CorpusAuditAction, CorpusAuditStatus
 
 
 class CorpusAuditMetadata(BaseModel):

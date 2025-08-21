@@ -14,12 +14,12 @@ import pytest
 from typing import Dict, Any
 from datetime import datetime, timezone, timedelta
 
-from app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
-from app.services.tool_permissions.tool_permission_service_main import ToolPermissionService
-from app.db.models_user import User
-from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from app.core.exceptions_base import NetraException
+from netra_backend.app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
+from netra_backend.app.services.tool_permissions.tool_permission_service_main import ToolPermissionService
+from netra_backend.app.db.models_user import User
+from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Define test-specific exception
 class AuthorizationError(NetraException):

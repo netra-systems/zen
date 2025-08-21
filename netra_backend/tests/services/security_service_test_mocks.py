@@ -5,9 +5,9 @@ All functions ≤8 lines per requirements.
 
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Any, Optional
-from app.schemas import TokenPayload
-from app.services.security_service import SecurityService
-from app.services.key_manager import KeyManager
+from netra_backend.app.schemas import TokenPayload
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.key_manager import KeyManager
 
 
 class MockUser:
@@ -98,7 +98,7 @@ class EnhancedSecurityService(SecurityService):
             if expires_delta:
                 expire = current_time + expires_delta
             else:
-                from app.config import settings
+                from netra_backend.app.config import settings
                 expire = current_time + timedelta(minutes=settings.access_token_expire_minutes)
             to_encode['exp'] = expire
         

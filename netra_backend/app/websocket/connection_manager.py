@@ -12,18 +12,18 @@ import time
 
 from fastapi import WebSocket
 
-from app.logging_config import central_logger
-from app.websocket.connection_info import (
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection_info import (
     ConnectionInfo, ConnectionMetrics, ConnectionDurationCalculator, ConnectionState
 )
-from app.websocket.connection_executor import ConnectionExecutionOrchestrator
-from app.websocket.ghost_connection_manager import (
+from netra_backend.app.websocket.connection_executor import ConnectionExecutionOrchestrator
+from netra_backend.app.websocket.ghost_connection_manager import (
     GhostConnectionManager, AtomicConnectionCloser, ConnectionStateMonitor
 )
-from app.websocket.connection_registry import (
+from netra_backend.app.websocket.connection_registry import (
     ConnectionRegistry, ConnectionInfoProvider, ConnectionCleanupManager
 )
-from app.websocket.reconnection_handler import get_reconnection_handler
+from netra_backend.app.websocket.reconnection_handler import get_reconnection_handler
 
 logger = central_logger.get_logger(__name__)
 
@@ -221,7 +221,7 @@ class ModernConnectionManager:
         
     def is_connection_alive(self, conn_info: ConnectionInfo) -> bool:
         """Check if a connection is still alive."""
-        from app.websocket.connection_info import ConnectionValidator
+        from netra_backend.app.websocket.connection_info import ConnectionValidator
         return ConnectionValidator.is_websocket_connected(conn_info.websocket)
         
     async def find_connection(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:

@@ -13,9 +13,9 @@ from typing import Dict, Any, Optional, List, Union, Callable
 from enum import Enum
 from dataclasses import dataclass, field
 
-from app.logging_config import central_logger
-from app.ws_manager import get_manager
-from app.schemas.registry import WebSocketMessage
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.schemas.registry import WebSocketMessage
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,9 +7,9 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.websocket.state_synchronizer import ConnectionStateSynchronizer
-from app.websocket.sync_types import CriticalCallbackFailure
-from app.websocket.connection import ConnectionManager, ConnectionInfo
+from netra_backend.app.websocket.state_synchronizer import ConnectionStateSynchronizer
+from netra_backend.app.websocket.sync_types import CriticalCallbackFailure
+from netra_backend.app.websocket.connection import ConnectionManager, ConnectionInfo
 
 
 class TestStateSynchronizerExceptionHandling:
@@ -157,7 +157,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_explicit_exception_inspection(self):
         """Test explicit exception inspection per specification."""
-        from app.websocket.callback_handler import CallbackHandler
+        from netra_backend.app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         
@@ -178,7 +178,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_no_exceptions_in_results(self):
         """Test behavior when no exceptions are in results."""
-        from app.websocket.callback_handler import CallbackHandler
+        from netra_backend.app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         
@@ -189,7 +189,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_only_non_critical_exceptions(self):
         """Test behavior with only non-critical exceptions."""
-        from app.websocket.callback_handler import CallbackHandler
+        from netra_backend.app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         

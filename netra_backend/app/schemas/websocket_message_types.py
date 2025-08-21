@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 
 # Import WebSocketMessage and WebSocketMessageType from single source of truth
-from app.schemas.registry import WebSocketMessage, WebSocketMessageType
+from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
 # WebSocketMessageType is imported from registry.py - using that as single source
 
@@ -94,7 +94,7 @@ class PongMessage(ClientMessage):
 
 
 # Import server-to-client message types from dedicated module
-from app.schemas.websocket_server_messages import (
+from netra_backend.app.schemas.websocket_server_messages import (
     AgentStartedMessage, AgentCompletedMessage, AgentStoppedMessage, AgentErrorMessage,
     AgentUpdateMessage, AgentLogMessage, AgentThinkingMessage, ToolStartedMessage,
     ToolCompletedMessage, ToolCallMessage, ToolResultMessage, ToolExecutingMessage,

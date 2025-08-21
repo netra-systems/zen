@@ -7,11 +7,11 @@ Business Value: Standardizes corpus operations for $10K+ customers.
 """
 
 from typing import Dict, Any, List
-from app.logging_config import central_logger
-from app.schemas.Corpus import CorpusCreate
-from app.services.corpus_service import CorpusService
-from app.services.synthetic_data_service import SyntheticDataService
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Corpus import CorpusCreate
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
 from netra_backend.app.corpus_models import CorpusToolType
 from netra_backend.app.corpus_handlers_base import CorpusHandlerBase
 

@@ -11,8 +11,8 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from fastapi import WebSocket
 
-from app.websocket.connection_manager import ModernConnectionManager
-from app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.websocket.connection_manager import ModernConnectionManager
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 
 class TestWebSocketConnectionManager:

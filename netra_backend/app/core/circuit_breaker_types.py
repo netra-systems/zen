@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 
-from app.core.exceptions_service import ServiceError
+from netra_backend.app.core.exceptions_service import ServiceError
 
 
 class CircuitState(Enum):

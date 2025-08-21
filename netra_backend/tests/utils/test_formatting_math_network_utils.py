@@ -10,8 +10,8 @@ from datetime import datetime
 from decimal import Decimal
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from app.tests.helpers.validation_formatting_test_helpers import FormattingTestHelpers
-from app.tests.helpers.network_pagination_test_helpers import NetworkTestHelpers
+from netra_backend.app.tests.helpers.validation_formatting_test_helpers import FormattingTestHelpers
+from netra_backend.app.tests.helpers.network_pagination_test_helpers import NetworkTestHelpers
 
 
 # Test 92: Formatting utils display
@@ -19,7 +19,7 @@ class TestFormattingUtilsDisplay:
     """test_formatting_utils_display - Test data formatting and localization"""
     
     async def test_data_formatting(self):
-        from app.utils.formatting_utils import FormattingUtils
+        from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils = FormattingUtils()
         
         self._assert_number_formatting(utils)
@@ -28,7 +28,7 @@ class TestFormattingUtilsDisplay:
         self._assert_file_size_formatting(utils)
     
     async def test_localization(self):
-        from app.utils.formatting_utils import FormattingUtils
+        from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils_us = FormattingUtils(locale="en_US")
         utils_de = FormattingUtils(locale="de_DE")
         
@@ -81,7 +81,7 @@ class TestMathUtilsCalculations:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
     
     async def test_mathematical_operations(self):
-        from app.utils.math_utils import MathUtils
+        from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
         data = [1, 2, 3, 4, 5]
         
@@ -90,7 +90,7 @@ class TestMathUtilsCalculations:
         self._assert_moving_average(utils, data)
     
     async def test_precision_handling(self):
-        from app.utils.math_utils import MathUtils
+        from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
         
         self._assert_decimal_precision(utils)
@@ -135,7 +135,7 @@ class TestNetworkUtilsRequests:
     """test_network_utils_requests - Test network utilities and retry logic"""
     
     async def test_network_utilities(self):
-        from app.utils.network_utils import NetworkUtils
+        from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()
         
         self._assert_url_validation(utils)
@@ -143,7 +143,7 @@ class TestNetworkUtilsRequests:
         await self._assert_port_checking(utils)
     
     async def test_retry_logic(self):
-        from app.utils.network_utils import NetworkUtils
+        from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()
         
         await self._assert_successful_request(utils)

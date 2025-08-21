@@ -9,9 +9,9 @@ graceful degradation of the entire system.
 from typing import Dict, Optional, Any, Callable
 from datetime import datetime
 
-from app.logging_config import central_logger
-from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
-from app.core.reliability import CircuitBreaker, CircuitBreakerConfig
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
 from netra_backend.app.fallback_coordinator_models import AgentFallbackStatus
 from netra_backend.app.fallback_coordinator_health import HealthMonitor
 from netra_backend.app.fallback_coordinator_emergency import EmergencyFallbackManager

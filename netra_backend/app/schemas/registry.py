@@ -18,7 +18,7 @@ The registry now imports from focused modules to maintain the 450-line limit:
 - audit_models.py: Corpus audit models
 
 Usage:
-    from app.schemas.registry import User, Message, AgentState, WebSocketMessage
+    from netra_backend.app.schemas.registry import User, Message, AgentState, WebSocketMessage
 """
 
 from typing import Dict, List, Optional, Union, Any, Literal, TypedDict
@@ -29,24 +29,24 @@ from datetime import datetime
 # ============================================================================
 
 # Import all enums from the dedicated module
-from app.schemas.core_enums import (
+from netra_backend.app.schemas.core_enums import (
     MessageType, AgentStatus, WebSocketMessageType, WebSocketConnectionState,
     CorpusAuditAction, CorpusAuditStatus, TaskPriority, MessageTypeLiteral
 )
 
 # Import all core models from the dedicated module
-from app.schemas.core_models import (
+from netra_backend.app.schemas.core_models import (
     UserBase, UserCreate, UserCreateOAuth, User, Message, Thread,
     MessageMetadata, ThreadMetadata
 )
 
 # Import all agent models from the dedicated module
-from app.schemas.agent_models import (
+from netra_backend.app.schemas.agent_models import (
     ToolResultData, AgentMetadata, AgentResult, DeepAgentState, AgentState
 )
 
 # Import all WebSocket models from the dedicated module
-from app.schemas.websocket_models import (
+from netra_backend.app.schemas.websocket_models import (
     BaseWebSocketPayload, StartAgentPayload, CreateThreadPayload,
     SwitchThreadPayload, DeleteThreadPayload, UserMessagePayload,
     AgentUpdatePayload, StopAgentPayload, AgentUpdate, AgentLog,
@@ -60,13 +60,13 @@ from app.schemas.websocket_models import (
 )
 
 # Import all audit models from the dedicated module
-from app.schemas.audit_models import (
+from netra_backend.app.schemas.audit_models import (
     CorpusAuditMetadata, CorpusAuditRecord, CorpusAuditSearchFilter,
     CorpusAuditReport
 )
 
 # Import additional WebSocket message types from websocket_payloads
-from app.schemas.websocket_payloads import (
+from netra_backend.app.schemas.websocket_payloads import (
     BaseWebSocketMessage, ClientToServerMessage, ServerToClientMessage
 )
 

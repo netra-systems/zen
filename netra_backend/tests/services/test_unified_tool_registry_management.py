@@ -5,7 +5,7 @@ All functions ≤8 lines per requirements.
 
 import pytest
 from unittest.mock import MagicMock
-from app.services.tool_registry import ToolRegistry
+from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.tool_registry_test_mocks import MockAdvancedTool, create_test_tools, assert_tool_status, ToolStatus
 from netra_backend.tests.tool_registry_management_core import (
     UnifiedToolRegistry, ToolOrchestrator, ToolLifecycleManager, 

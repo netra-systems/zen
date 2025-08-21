@@ -5,7 +5,7 @@ from uuid import uuid4
 from datetime import datetime, timezone
 from fastapi import Request
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.error_response_models import ErrorResponse
 from netra_backend.app.exceptions import NetraException, ErrorSeverity
 from netra_backend.app.error_handlers_netra import NetraExceptionHandler

@@ -7,7 +7,7 @@ import pytest
 import json
 import time
 from unittest.mock import patch, MagicMock
-from app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
+from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
 
 
 class TestSupervisorFlowLogger:

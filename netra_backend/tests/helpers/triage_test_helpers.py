@@ -8,13 +8,13 @@ from datetime import datetime
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock
 
-from app.agents.triage_sub_agent import (
+from netra_backend.app.agents.triage_sub_agent import (
     ExtractedEntities,
     UserIntent,
     Priority,
     Complexity
 )
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 
 class TriageMockHelpers:
@@ -91,7 +91,7 @@ class MockLLMManager:
     async def _get_structured_response(self):
         """Convert JSON response to TriageResult object asynchronously"""
         import json
-        from app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
         
         # Use the same response without incrementing the call count twice
         if self._should_fail():

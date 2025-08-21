@@ -1,6 +1,6 @@
 import os
 import sys
-from app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
@@ -55,12 +55,12 @@ else:
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from app.db.base import Base
-from app.main import app
+from netra_backend.app.db.base import Base
+from netra_backend.app.main import app
 from fastapi.testclient import TestClient
-from app.db.session import get_db_session
-from app.config import settings
-from app.tests.conftest_helpers import (
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.config import settings
+from netra_backend.app.tests.conftest_helpers import (
     _setup_basic_llm_mocks, _setup_performance_llm_mocks,
     _setup_websocket_interface_compatibility, _setup_websocket_test_mocks,
     _create_real_tool_dispatcher, _create_mock_tool_dispatcher,
@@ -68,13 +68,13 @@ from app.tests.conftest_helpers import (
 )
 
 # Import all models to ensure they are registered with Base before creating tables
-from app.db.models_user import User, Secret, ToolUsageLog
-from app.db.models_postgres import *  # Import all postgres models
-from app.db.models_content import *  # Import all content models
-from app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.db.models_postgres import *  # Import all postgres models
+from netra_backend.app.db.models_content import *  # Import all content models
+from netra_backend.app.db.models_agent_state import *  # Import all agent state models
 
 # Initialize database on import to ensure async_session_factory is available
-from app.db.postgres import initialize_postgres
+from netra_backend.app.db.postgres import initialize_postgres
 try:
     initialize_postgres()
 except Exception as e:
@@ -93,7 +93,7 @@ except Exception as e:
 @pytest.fixture(scope="function")
 def ensure_db_initialized():
     """Ensure database is initialized for tests that need it."""
-    from app.db.postgres import async_session_factory, initialize_postgres
+    from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
     if async_session_factory is None:
         try:
@@ -137,8 +137,8 @@ def client(db_session):
 def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from app.llm.llm_manager import LLMManager
-        from app.config import settings
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.config import settings
         return LLMManager(settings)
     else:
         return _create_mock_llm_manager()
@@ -156,7 +156,7 @@ def _create_mock_llm_manager():
 @pytest.fixture(scope="function") 
 def real_websocket_manager():
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from app.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
     manager = WebSocketManager()
     _setup_websocket_interface_compatibility(manager)
     _setup_websocket_test_mocks(manager)

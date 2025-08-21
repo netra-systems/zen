@@ -14,8 +14,8 @@ import uuid
 import hashlib
 
 from test_framework.test_patterns import L3IntegrationTest
-from app.core.redis_client import RedisManager
-from app.auth_integration.auth import JWTTokenManager
+from netra_backend.app.core.redis_client import RedisManager
+from netra_backend.app.auth_integration.auth import JWTTokenManager
 
 
 class TestAuthPasswordResetFlow(L3IntegrationTest):

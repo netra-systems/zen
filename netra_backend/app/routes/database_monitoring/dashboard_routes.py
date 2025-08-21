@@ -3,9 +3,9 @@ Database Monitoring Dashboard Routes
 """
 from typing import Dict, Any, List
 from fastapi import HTTPException, Query, Depends
-from app.db.observability import database_observability, get_database_dashboard
-from app.services.database.connection_monitor import get_connection_status
-from app.logging_config import central_logger
+from netra_backend.app.db.observability import database_observability, get_database_dashboard
+from netra_backend.app.services.database.connection_monitor import get_connection_status
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

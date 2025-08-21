@@ -17,8 +17,8 @@ class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
     
     async def test_thread_crud_operations(self):
-        from app.services.database.thread_repository import ThreadRepository
-        from app.schemas.registry import Thread
+        from netra_backend.app.services.database.thread_repository import ThreadRepository
+        from netra_backend.app.schemas.registry import Thread
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -62,8 +62,8 @@ class TestThreadRepositoryOperations:
         assert result == True
     
     async def test_soft_delete_functionality(self):
-        from app.services.database.thread_repository import ThreadRepository
-        from app.schemas.registry import Thread
+        from netra_backend.app.services.database.thread_repository import ThreadRepository
+        from netra_backend.app.schemas.registry import Thread
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -100,8 +100,8 @@ class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
     
     async def test_message_pagination(self):
-        from app.services.database.message_repository import MessageRepository
-        from app.schemas.registry import Message
+        from netra_backend.app.services.database.message_repository import MessageRepository
+        from netra_backend.app.schemas.registry import Message
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -136,8 +136,8 @@ class TestMessageRepositoryQueries:
         assert page2[0].id == "msg20"
     
     async def test_complex_message_queries(self):
-        from app.services.database.message_repository import MessageRepository
-        from app.schemas.registry import Message
+        from netra_backend.app.services.database.message_repository import MessageRepository
+        from netra_backend.app.schemas.registry import Message
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -177,8 +177,8 @@ class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
     async def test_password_hashing(self):
-        from app.services.database.user_repository import UserRepository
-        from app.schemas.registry import User
+        from netra_backend.app.services.database.user_repository import UserRepository
+        from netra_backend.app.schemas.registry import User
         from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
@@ -205,8 +205,8 @@ class TestUserRepositoryAuth:
             mock_hash.assert_called_once()
     
     async def test_authentication_flow(self):
-        from app.services.database.user_repository import UserRepository
-        from app.schemas.registry import User
+        from netra_backend.app.services.database.user_repository import UserRepository
+        from netra_backend.app.schemas.registry import User
         from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
@@ -243,8 +243,8 @@ class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
     async def test_optimization_versioning(self):
-        from app.services.database.optimization_repository import OptimizationRepository
-        from app.schemas.registry import Optimization
+        from netra_backend.app.services.database.optimization_repository import OptimizationRepository
+        from netra_backend.app.schemas.registry import Optimization
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -283,8 +283,8 @@ class TestOptimizationRepositoryStorage:
         assert new_version.parent_id == "opt123"
     
     async def test_optimization_history(self):
-        from app.services.database.optimization_repository import OptimizationRepository
-        from app.schemas.registry import Optimization
+        from netra_backend.app.services.database.optimization_repository import OptimizationRepository
+        from netra_backend.app.schemas.registry import Optimization
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -307,8 +307,8 @@ class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
     async def test_metric_aggregation(self):
-        from app.services.database.metric_repository import MetricRepository
-        from app.schemas.registry import Metric
+        from netra_backend.app.services.database.metric_repository import MetricRepository
+        from netra_backend.app.schemas.registry import Metric
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
@@ -339,8 +339,8 @@ class TestMetricRepositoryAggregation:
         assert max_val == 70.0
     
     async def test_time_series_queries(self):
-        from app.services.database.metric_repository import MetricRepository
-        from app.schemas.registry import Metric
+        from netra_backend.app.services.database.metric_repository import MetricRepository
+        from netra_backend.app.schemas.registry import Metric
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
@@ -369,7 +369,7 @@ class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
     
     async def test_connection_pooling(self):
-        from app.db.clickhouse import ClickHouseDatabase
+        from netra_backend.app.db.clickhouse import ClickHouseDatabase
         
         with patch('clickhouse_driver.Client') as mock_client_class:
             mock_client = Mock()
@@ -402,7 +402,7 @@ class TestClickHouseConnectionPool:
                 await asyncio.wait_for(db.get_connection(), timeout=0.1)
     
     async def test_query_timeout(self):
-        from app.db.clickhouse import ClickHouseDatabase
+        from netra_backend.app.db.clickhouse import ClickHouseDatabase
         
         with patch('clickhouse_driver.Client') as mock_client_class:
             mock_client = AsyncMock()
@@ -429,7 +429,7 @@ class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
     
     async def test_migration_rollback(self):
-        from app.db.migrations.migration_runner import MigrationRunner
+        from netra_backend.app.db.migrations.migration_runner import MigrationRunner
         
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MigrationRunner(mock_session)
@@ -451,7 +451,7 @@ class TestMigrationRunnerSafety:
         assert mock_session.rollback.called
     
     async def test_migration_transaction_safety(self):
-        from app.db.migrations.migration_runner import MigrationRunner
+        from netra_backend.app.db.migrations.migration_runner import MigrationRunner
         
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MigrationRunner(mock_session)
@@ -476,7 +476,7 @@ class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
     
     async def test_health_monitoring(self):
-        from app.db.health_checks import DatabaseHealthChecker
+        from netra_backend.app.db.health_checks import DatabaseHealthChecker
         
         mock_session = AsyncMock(spec=AsyncSession)
         checker = DatabaseHealthChecker(mock_session)
@@ -496,7 +496,7 @@ class TestDatabaseHealthChecks:
         assert "error" in health
     
     async def test_alert_thresholds(self):
-        from app.db.health_checks import DatabaseHealthChecker
+        from netra_backend.app.db.health_checks import DatabaseHealthChecker
         
         mock_session = AsyncMock(spec=AsyncSession)
         checker = DatabaseHealthChecker(mock_session)

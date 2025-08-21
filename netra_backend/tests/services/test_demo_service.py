@@ -390,7 +390,7 @@ class TestDemoService:
     async def test_generate_demo_response(self, demo_service):
         """Test demo response generation."""
         # Import the function directly for testing
-        from app.services.demo.response_generator import generate_demo_response
+        from netra_backend.app.services.demo.response_generator import generate_demo_response
         
         # Execute
         response = generate_demo_response(

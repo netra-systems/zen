@@ -2,10 +2,10 @@
 
 from typing import Dict, List, Any, Tuple, Optional
 
-from app.logging_config import central_logger
-from app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
-from app.core.interfaces_quality import QualityValidator as CoreQualityValidator
-from app.core.quality_types import ContentType, QualityLevel, QualityMetrics
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
+from netra_backend.app.core.interfaces_quality import QualityValidator as CoreQualityValidator
+from netra_backend.app.core.quality_types import ContentType, QualityLevel, QualityMetrics
 
 logger = central_logger.get_logger(__name__)
 

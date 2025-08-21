@@ -9,17 +9,17 @@ import asyncio
 from multiprocessing import Pool, cpu_count
 from typing import Dict, Any
 
-from app.config import settings
-from app.data.synthetic.content_generator import META_PROMPTS
-from app.services.generation_worker import init_worker, generate_content_for_worker
-from app.services.generation_job_manager import (
+from netra_backend.app.config import settings
+from netra_backend.app.data.synthetic.content_generator import META_PROMPTS
+from netra_backend.app.services.generation_worker import init_worker, generate_content_for_worker
+from netra_backend.app.services.generation_job_manager import (
     update_job_status,
     save_corpus_to_clickhouse,
     validate_job_params,
     create_output_directory,
     save_job_result_to_file
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

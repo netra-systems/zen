@@ -3,8 +3,8 @@ Legacy Migration Logic for Unified Tools API
 """
 from typing import Dict, Any, List, Tuple, Callable
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models_postgres import User
-from app.logging_config import central_logger
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 

@@ -23,7 +23,7 @@ from enum import Enum
 from datetime import datetime, timezone
 from collections import deque, defaultdict
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

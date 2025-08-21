@@ -3,8 +3,8 @@ Auth Route Utilities
 """
 import os
 from typing import Optional
-from app.clients.auth_client import auth_client
-from app.config import settings
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.config import settings
 
 
 def get_explicit_frontend_url() -> Optional[str]:

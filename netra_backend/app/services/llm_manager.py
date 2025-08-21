@@ -112,7 +112,7 @@ class LLMManager:
     async def _check_cache(self, request: LLMRequest) -> Optional[LLMResponse]:
         """Check if request is cached."""
         try:
-            from app.services.llm_cache_service import llm_cache_service
+            from netra_backend.app.services.llm_cache_service import llm_cache_service
             
             cache_key = self._generate_cache_key(request)
             cached_data = await llm_cache_service.get(cache_key)
@@ -138,7 +138,7 @@ class LLMManager:
     async def _cache_response(self, request: LLMRequest, response: LLMResponse) -> None:
         """Cache the response."""
         try:
-            from app.services.llm_cache_service import llm_cache_service
+            from netra_backend.app.services.llm_cache_service import llm_cache_service
             
             cache_key = self._generate_cache_key(request)
             cache_data = {

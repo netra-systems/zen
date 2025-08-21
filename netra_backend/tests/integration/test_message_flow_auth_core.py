@@ -7,10 +7,10 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone, timedelta
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.integration.test_unified_message_flow import MessageFlowTracker
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from logging_config import central_logger
-from tests.services.test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 import time
 from routes.utils.websocket_helpers import validate_websocket_token
 

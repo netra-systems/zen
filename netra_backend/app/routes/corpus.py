@@ -1,12 +1,12 @@
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app import schemas
-from app.services import clickhouse_service
-from app.services.corpus_service import corpus_service_instance as corpus_service
-from app.dependencies import get_db_session
-from app.auth_integration.auth import get_current_user
-from app.db.models_postgres import User
+from netra_backend.app import schemas
+from netra_backend.app.services import clickhouse_service
+from netra_backend.app.services.corpus_service import corpus_service_instance as corpus_service
+from netra_backend.app.dependencies import get_db_session
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.db.models_postgres import User
 from pydantic import BaseModel
 
 router = APIRouter()

@@ -5,16 +5,16 @@ Main scheduler service using modular components
 
 import asyncio
 from typing import Dict, List, Optional, Any
-from app.background import BackgroundTaskManager
-from app.llm.llm_manager import LLMManager
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger as logger
+from netra_backend.app.background import BackgroundTaskManager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger as logger
 
 # Import modular components
-from app.services.supply_research.scheduler_models import ScheduleFrequency, ResearchSchedule
-from app.services.supply_research.schedule_manager import ScheduleManager
-from app.services.supply_research.research_executor import ResearchExecutor
-from app.services.supply_research.result_manager import ResultManager
+from netra_backend.app.services.supply_research.scheduler_models import ScheduleFrequency, ResearchSchedule
+from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
+from netra_backend.app.services.supply_research.research_executor import ResearchExecutor
+from netra_backend.app.services.supply_research.result_manager import ResultManager
 
 # Mock Database class removed - was test stub in production code
 

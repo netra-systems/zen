@@ -6,20 +6,20 @@ for maintainability and adherence to the 450-line limit.
 """
 
 # Re-export core classes for backward compatibility
-from app.services.state_migration_core import (
+from netra_backend.app.services.state_migration_core import (
     StateVersion,
     StateMigration, 
     StateVersionManager
 )
 
 # Import migration implementations
-from app.services.state_migration_implementations import (
+from netra_backend.app.services.state_migration_implementations import (
     Migration_1_0_to_1_1,
     Migration_1_1_to_1_2
 )
 
 # Import compatibility checker
-from app.services.state_compatibility_checker import StateCompatibilityChecker
+from netra_backend.app.services.state_compatibility_checker import StateCompatibilityChecker
 
 # Global instances for backward compatibility
 state_version_manager = StateVersionManager()

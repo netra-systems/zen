@@ -10,12 +10,12 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from typing import Dict, List, Any, Set
 
-from app.services.tool_permission_service import ToolPermissionService
-from app.schemas.ToolPermission import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import (
     ToolPermission, ToolExecutionContext, PermissionCheckResult,
     ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
 )
-from app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 
 
 class MockRedisClient:
@@ -129,7 +129,7 @@ class TestBusinessRequirements:
         """Test business requirements check with valid feature flags"""
         requirements = BusinessRequirement(feature_flags=["data_operations"])
         
-        from app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -144,7 +144,7 @@ class TestBusinessRequirements:
         """Test business requirements check with missing feature flags"""
         requirements = BusinessRequirement(feature_flags=["advanced_optimization"])
         
-        from app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -209,7 +209,7 @@ class TestBusinessRequirements:
             environment=["development"]
         )
         
-        from app.schemas.UserPlan import PlanFeatures
+        from netra_backend.app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="dev_user",
             tier=PlanTier.ENTERPRISE,

@@ -66,7 +66,7 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates staging-specific behavior where dev_launcher is not available.
         """
-        from app.core.middleware_setup import setup_cors_middleware
+        from netra_backend.app.core.middleware_setup import setup_cors_middleware
         
         # Create a test FastAPI app
         app = FastAPI()
@@ -82,7 +82,7 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates that CORS is properly configured for staging.
         """
-        from app.core.middleware_setup import setup_cors_middleware
+        from netra_backend.app.core.middleware_setup import setup_cors_middleware
         
         app = FastAPI()
         setup_cors_middleware(app)
@@ -111,7 +111,7 @@ class TestStagingEnvironmentImports:
         L4 Test - End-to-end validation of backend startup without dev dependencies.
         """
         # Import should not fail even without dev_launcher
-        from app.core.middleware_setup import setup_cors_middleware, setup_rate_limiting, setup_security_middleware
+        from netra_backend.app.core.middleware_setup import setup_cors_middleware, setup_rate_limiting, setup_security_middleware
         
         app = FastAPI()
         
@@ -129,7 +129,7 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates fallback behavior when service discovery is not available.
         """
-        from app.core.middleware_setup import _setup_custom_cors_middleware
+        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
         from fastapi import FastAPI
         
         app = FastAPI()
@@ -152,7 +152,7 @@ class TestStagingEnvironmentImports:
         """
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, environment)
         
-        from app.core.middleware_setup import _setup_custom_cors_middleware
+        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
         
         app = FastAPI()
         
@@ -179,7 +179,7 @@ class TestStagingEnvironmentImports:
         """
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, Environment.DEVELOPMENT.value)
         
-        from app.core.middleware_setup import _setup_custom_cors_middleware
+        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
         
         app = FastAPI()
         
@@ -208,7 +208,7 @@ class TestStagingEnvironmentImports:
         
         L2 Test - Unit test for environment detection logic.
         """
-        from app.core.environment_constants import EnvironmentDetector
+        from netra_backend.app.core.environment_constants import EnvironmentDetector
         
         # Test Cloud Run staging detection
         with mock.patch.dict(os.environ, {

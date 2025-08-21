@@ -11,9 +11,9 @@ from fastapi import Request, HTTPException
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.logging_config import central_logger
-from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
-from app.core.error_response import ErrorResponse
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
+from netra_backend.app.core.error_response import ErrorResponse
 from netra_backend.app..base_error_handler import BaseErrorHandler
 from netra_backend.app.response_builder import ErrorResponseBuilder
 from netra_backend.app.exception_router import ExceptionRouter

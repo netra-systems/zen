@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Dict, Callable, Optional, Any, List
 
 try:
-    from app.logging_config import central_logger
+    from netra_backend.app.logging_config import central_logger
     from .reconnection_types import (
         CallbackType, CallbackCriticality, CallbackFailure, CallbackCircuitBreaker
     )

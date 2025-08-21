@@ -7,10 +7,10 @@ Each module focuses on a specific aspect of testing with functions ≤8 lines.
 """
 
 # Import all split test modules to maintain comprehensive coverage
-from tests.agents.test_triage_init_validation import *
-from tests.agents.test_triage_entity_intent import *
-from tests.agents.test_triage_caching_async import *
-from tests.agents.test_triage_edge_performance import *
+from netra_backend.tests.agents.test_triage_init_validation import *
+from netra_backend.tests.agents.test_triage_entity_intent import *
+from netra_backend.tests.agents.test_triage_caching_async import *
+from netra_backend.tests.agents.test_triage_edge_performance import *
 
 import pytest
 

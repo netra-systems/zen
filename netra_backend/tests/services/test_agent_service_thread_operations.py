@@ -8,8 +8,8 @@ history, creation, switching, deletion, and listing.
 import pytest
 from unittest.mock import AsyncMock
 
-from tests.helpers.test_agent_orchestration_pytest_fixtures import agent_service, mock_supervisor
-from tests.helpers.test_agent_orchestration_assertions import (
+from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import agent_service, mock_supervisor
+from netra_backend.tests.helpers.test_agent_orchestration_assertions import (
     setup_websocket_message, assert_thread_operations_handled
 )
 

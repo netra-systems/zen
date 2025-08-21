@@ -7,12 +7,12 @@ database index optimization system with proper async/await handling.
 from typing import Dict, List, Any
 
 # Import from new modular structure
-from app.db.index_optimizer_core import IndexRecommendation
-from app.db.postgres_index_optimizer import PostgreSQLIndexOptimizer
-from app.db.clickhouse_index_optimizer import ClickHouseIndexOptimizer  
-from app.db.database_index_manager import DatabaseIndexManager
+from netra_backend.app.db.index_optimizer_core import IndexRecommendation
+from netra_backend.app.db.postgres_index_optimizer import PostgreSQLIndexOptimizer
+from netra_backend.app.db.clickhouse_index_optimizer import ClickHouseIndexOptimizer  
+from netra_backend.app.db.database_index_manager import DatabaseIndexManager
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -12,8 +12,8 @@ from typing import Dict, List, Optional, Any, Set
 from netra_backend.app.alert_types import Alert, AlertRule, AlertLevel, NotificationChannel, NotificationConfig
 from netra_backend.app.alert_rules import create_default_alert_rules, RuleEvaluator, CooldownManager
 from netra_backend.app.alert_notifications import create_default_notification_configs, NotificationDeliveryManager
-from app.services.metrics.agent_metrics import AgentMetricsCollector, agent_metrics_collector
-from app.logging_config import central_logger
+from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector, agent_metrics_collector
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

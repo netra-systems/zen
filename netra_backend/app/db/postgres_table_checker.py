@@ -5,7 +5,7 @@ Validates table existence before index creation.
 
 from typing import Set
 from sqlalchemy import text
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

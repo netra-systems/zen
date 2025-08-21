@@ -8,8 +8,8 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Dict, Optional
 
-from app.core.error_recovery import OperationType
-from app.logging_config import central_logger
+from netra_backend.app.core.error_recovery import OperationType
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.types import Transaction, Operation, TransactionState, OperationState
 from netra_backend.app.compensation import create_compensation_system, CompensationExecutor

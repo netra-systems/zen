@@ -6,9 +6,9 @@ All functions maintain 25-line limit with single responsibility.
 """
 
 from typing import Dict, Any, List, Optional, Callable
-from app.logging_config import central_logger
-from app.services.corpus_service import CorpusService
-from app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 
 # Import modular components
 from netra_backend.app.corpus_models import CorpusToolType, CorpusToolRequest, CorpusToolResponse

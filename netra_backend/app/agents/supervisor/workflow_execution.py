@@ -7,9 +7,9 @@ Business Value: Modular workflow execution with standardized patterns.
 """
 
 from typing import Dict, List, Any
-from app.logging_config import central_logger
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 logger = central_logger.get_logger(__name__)
 

@@ -25,12 +25,12 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
-from app.schemas.startup_types import (
+from netra_backend.app.schemas.startup_types import (
     StartupStatus, LastStartup, MigrationStatus, ServiceConfig,
     CrashEntry, HealthCheckHistory, StartupEvent, ServiceType, Environment
 )
-from app.core.exceptions_file import FileError, FileNotFoundError, DataParsingError
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_file import FileError, FileNotFoundError, DataParsingError
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class StartupStatusManager:
