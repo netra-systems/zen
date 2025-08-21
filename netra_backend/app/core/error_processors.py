@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from fastapi import Request
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.error_response_models import ErrorResponse
+from netra_backend.app.core.error_response_models import ErrorResponse
 from netra_backend.app.exceptions import NetraException, ErrorSeverity
 from netra_backend.app.error_handlers_netra import NetraExceptionHandler
 from netra_backend.app.error_handlers_validation import ValidationErrorHandler

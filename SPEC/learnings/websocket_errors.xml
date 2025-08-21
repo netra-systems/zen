@@ -53,7 +53,7 @@ if (hasattr(websocket, 'application_state') and
         </pattern>
       </prevention>
       <testing>
-        <test_file>netra_backend/app/tests/unit/test_websocket_error_handling.py</test_file>
+        <test_file>netra_backend/tests/unit/test_websocket_error_handling.py</test_file>
         <test_cases>
           <test>test_close_websocket_safely_with_unconnected_socket</test>
           <test>test_close_websocket_safely_with_connected_socket</test>
@@ -147,7 +147,7 @@ if (not conn_info.is_closing and
         </pattern>
       </prevention>
       <testing>
-        <test_file>netra_backend/app/tests/unit/websocket/test_websocket_closing_state.py</test_file>
+        <test_file>netra_backend/tests/unit/websocket/test_websocket_closing_state.py</test_file>
         <test_cases>
           <test>test_is_closing_flag_prevents_send</test>
           <test>test_disconnect_sets_is_closing_flag</test>
@@ -220,7 +220,7 @@ async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
         </pattern>
       </prevention>
       <testing>
-        <test_file>netra_backend/app/tests/unit/monitoring/test_metrics_collector.py</test_file>
+        <test_file>netra_backend/tests/unit/monitoring/test_metrics_collector.py</test_file>
         <test_cases>
           <test>test_websocket_metrics_collection_async</test>
           <test>test_gather_websocket_metrics_awaits_stats</test>
@@ -370,7 +370,7 @@ def get_connection_manager_instance():
         </pattern>
       </prevention>
       <testing>
-        <test_file>netra_backend/app/tests/critical/test_websocket_circular_import_regression.py</test_file>
+        <test_file>netra_backend/tests/critical/test_websocket_circular_import_regression.py</test_file>
         <test_class>TestConnectionModuleCircularImportPrevention</test_class>
         <tests>
           <test>test_connection_manager_lazy_initialization - Verifies lazy init behavior</test>

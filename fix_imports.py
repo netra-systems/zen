@@ -1,39 +1,42 @@
-#!/usr/bin/env python3
-"""
-Script to update all relative imports to absolute imports following the new namespace convention:
-- netra_backend.app for main backend
-- netra_backend.tests for tests
-- {service_name}.app for microservices
-"""
+#!/usr/bin/env python
+"""Fix all import issues after netra_backend.app migration."""
 
 import os
 import re
 from pathlib import Path
 from typing import List, Tuple
 
-def get_namespace_for_file(filepath: str) -> str:
-    """Determine the correct namespace prefix for a file."""
-    path_parts = Path(filepath).parts
+# Define import mappings
+IMPORT_FIXES = [
+    # Base class imports
+    (r'from netra_backend\.app\.base import Base', 'from netra_backend.app.db.base import Base'),
+    (r'from netra_backend\.app\.base import', 'from netra_backend.app.db.base import'),
     
-    if 'auth_service' in path_parts:
-        if 'tests' in path_parts:
-            return 'auth_service.tests'
-        return 'auth_service.app'
-    elif 'frontend' in path_parts:
-        # Frontend doesn't use Python imports
-        return None
-    elif 'app' in path_parts:
-        if 'tests' in path_parts:
-            return 'netra_backend.tests'
-        return 'netra_backend.app'
-    return None
+    # Schema imports that were moved
+    (r'from netra_backend\.app\.([A-Z]\w+) import', r'from netra_backend.app.schemas.\1 import'),
+    (r'from netra_backend\.app\.auth_types import', 'from netra_backend.app.schemas.auth_types import'),
+    (r'from netra_backend\.app\.agent_models import', 'from netra_backend.app.schemas.agent_models import'),
+    (r'from netra_backend\.app\.agent_state import', 'from netra_backend.app.schemas.agent_state import'),
+    (r'from netra_backend\.app\.error_response_models import', 'from netra_backend.app.core.error_response_models import'),
+    
+    # Model imports that were moved to db
+    (r'from netra_backend\.app\.models_(\w+) import', r'from netra_backend.app.db.models_\1 import'),
+    
+    # Logging imports that were moved
+    (r'from netra_backend\.app\.logging_formatters import', 'from netra_backend.app.core.logging_formatters import'),
+    (r'from netra_backend\.app\.logging_context import', 'from netra_backend.app.core.logging_context import'),
+    
+    # Core imports
+    (r'from netra_backend\.app\.unified_logging import', 'from netra_backend.app.core.unified_logging import'),
+    (r'from netra_backend\.app\.lifespan_manager import', 'from netra_backend.app.core.lifespan_manager import'),
+    (r'from netra_backend\.app\.app_factory import', 'from netra_backend.app.core.app_factory import'),
+    
+    # Fix relative imports in schemas __init__.py
+    (r'from netra_backend\.app\.schemas\.schemas\.', 'from netra_backend.app.schemas.'),
+]
 
-def fix_imports_in_file(filepath: str) -> bool:
-    """Fix imports in a single Python file."""
-    namespace = get_namespace_for_file(filepath)
-    if not namespace:
-        return False
-    
+def fix_file(filepath: Path) -> bool:
+    """Fix imports in a single file."""
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -43,50 +46,15 @@ def fix_imports_in_file(filepath: str) -> bool:
     
     original_content = content
     
-    # Pattern 1: Fix relative imports starting with dot
-    # from .module import Something -> from netra_backend.app.module import Something
-    content = re.sub(
-        r'^from \.([\w\.]+) import',
-        lambda m: f'from {namespace}.{m.group(1)} import',
-        content,
-        flags=re.MULTILINE
-    )
+    # Apply all fixes
+    for pattern, replacement in IMPORT_FIXES:
+        content = re.sub(pattern, replacement, content)
     
-    # Pattern 2: Fix imports without dots that should be absolute
-    # These are imports from root modules that should be prefixed
-    modules_to_fix = [
-        'agents', 'api', 'config', 'core', 'db', 'logging_config',
-        'models', 'schemas', 'services', 'utils', 'websocket',
-        'middleware', 'metrics', 'telemetry'
-    ]
+    # Special case: Fix schema __init__.py double schemas
+    if 'schemas/__init__.py' in str(filepath):
+        content = re.sub(r'from netra_backend\.app\.schemas\.schemas\.', 'from netra_backend.app.schemas.', content)
     
-    for module in modules_to_fix:
-        # Handle: from module import ...
-        pattern = rf'^from {module}(\.|$)'
-        if 'tests' in namespace:
-            # In test files, imports from app modules should use netra_backend.app
-            replacement = f'from netra_backend.app.{module}\\1'
-        else:
-            replacement = f'from {namespace}.{module}\\1'
-        content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
-        
-        # Handle: import module
-        pattern = rf'^import {module}(\.|$)'
-        if 'tests' in namespace:
-            replacement = f'import netra_backend.app.{module}\\1'
-        else:
-            replacement = f'import {namespace}.{module}\\1'
-        content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
-    
-    # Special handling for test fixtures and helpers
-    if 'tests' in filepath:
-        # Fix test-specific imports
-        test_modules = ['conftest', 'fixtures', 'helpers', 'test_helpers']
-        for module in test_modules:
-            pattern = rf'^from {module} import'
-            replacement = f'from netra_backend.tests.{module} import'
-            content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
-    
+    # Only write if changed
     if content != original_content:
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
@@ -98,42 +66,46 @@ def fix_imports_in_file(filepath: str) -> bool:
     
     return False
 
-def find_python_files(directory: str) -> List[str]:
-    """Find all Python files in directory."""
-    python_files = []
-    for root, dirs, files in os.walk(directory):
-        # Skip __pycache__ and .git directories
-        dirs[:] = [d for d in dirs if d not in ['__pycache__', '.git', '.pytest_cache']]
-        for file in files:
-            if file.endswith('.py'):
-                python_files.append(os.path.join(root, file))
-    return python_files
-
 def main():
     """Main function to fix all imports."""
-    directories_to_fix = ['app', 'auth_service']
+    root_dir = Path('netra_backend')
     
-    total_fixed = 0
-    total_files = 0
+    if not root_dir.exists():
+        print("Error: netra_backend directory not found")
+        return
     
-    for directory in directories_to_fix:
-        if not os.path.exists(directory):
-            print(f"Directory {directory} not found, skipping...")
+    # Find all Python files
+    python_files = list(root_dir.rglob('*.py'))
+    
+    print(f"Found {len(python_files)} Python files to check")
+    
+    fixed_files = []
+    for filepath in python_files:
+        if '__pycache__' in str(filepath):
             continue
-            
-        print(f"\nProcessing {directory}...")
-        python_files = find_python_files(directory)
         
-        for filepath in python_files:
-            total_files += 1
-            if fix_imports_in_file(filepath):
-                total_fixed += 1
+        if fix_file(filepath):
+            fixed_files.append(filepath)
+    
+    print(f"\nFixed {len(fixed_files)} files:")
+    for filepath in fixed_files:
+        print(f"  - {filepath}")
+    
+    # Also fix integration tests
+    integration_tests = Path('integration_tests')
+    if integration_tests.exists():
+        test_files = list(integration_tests.rglob('*.py'))
+        print(f"\nChecking {len(test_files)} integration test files")
+        
+        for filepath in test_files:
+            if '__pycache__' in str(filepath):
+                continue
+            
+            if fix_file(filepath):
+                fixed_files.append(filepath)
                 print(f"  Fixed: {filepath}")
     
-    print(f"\n{'='*60}")
-    print(f"Total files processed: {total_files}")
-    print(f"Total files fixed: {total_fixed}")
-    print(f"{'='*60}")
+    print(f"\nTotal files fixed: {len(fixed_files)}")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@
 from typing import Optional, Union
 from datetime import datetime, timezone
 
-from netra_backend.app.error_response_models import ErrorResponse
+from netra_backend.app.core.error_response_models import ErrorResponse
 from netra_backend.app.exceptions import NetraException, ErrorSeverity
 
 
