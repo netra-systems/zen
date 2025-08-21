@@ -13,7 +13,7 @@ from netra_backend.app.routes.factory_status.metrics_routes import (
     get_specific_metric_handler, get_velocity_trend_handler,
     get_business_objectives_handler, get_compliance_status_handler
 )
-from netra_backend.app.routes.database_monitoring.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
+from netra_backend.app.routes.factory_status.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
 
 
 router = APIRouter(

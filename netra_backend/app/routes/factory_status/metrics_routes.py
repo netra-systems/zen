@@ -8,7 +8,7 @@ from netra_backend.app.services.factory_status.report_builder import ReportBuild
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.routes.factory_status.models import ReportResponse, MetricResponse, GenerateReportRequest
 from netra_backend.app.routes.factory_status.business_logic import fetch_metric
-from netra_backend.app.services.audit.utils import calculate_trend
+from netra_backend.app.routes.factory_status.utils import calculate_trend
 
 
 def build_metric_response(metric_name: str, value: Any, hours: int) -> MetricResponse:

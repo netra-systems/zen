@@ -3,8 +3,7 @@
 Analyzes GitHub repositories to map AI/LLM operations and configurations.
 """
 
-# FIXME: GitHubAnalyzerService not available
-# from netra_backend.app.agents.corpus_admin.agent import GitHubAnalyzerService
+from netra_backend.app.agents.github_analyzer.agent import GitHubAnalyzerService
 from netra_backend.app.agents.github_analyzer.scanner_core import RepositoryScanner
 from netra_backend.app.agents.github_analyzer.pattern_detector import AIPatternDetector
 from netra_backend.app.agents.github_analyzer.config_parser import ConfigurationExtractor

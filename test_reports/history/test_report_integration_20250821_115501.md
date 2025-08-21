@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:56:34.379471  
+**Generated:** 2025-08-21T11:55:01.706880  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.96s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 33.73s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 8.16s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 26.28s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 40.69s
+- **Total Duration:** 34.45s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -60,7 +60,7 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.99s
+[FAIL] TESTS FAILED with exit code 4 after 7.13s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
@@ -92,9 +92,11 @@ netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_stat
     from netra_backend.app.routes.factory_status import router as factory_status_router
 netra_backend\app\routes\factory_status\__init__.py:5: in <module>
     from netra_backend.app.routes.factory_status.router import router
-netra_backend\app\routes\factory_status\router.py:16: in <module>
-    from netra_backend.app.routes.database_monitoring.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
-E   ImportError: cannot import name 'get_dashboard_summary_handler' from 'netra_backend.app.routes.database_monitoring.dashboard_routes' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\routes\database_monitoring\dashboard_routes.py)
+netra_backend\app\routes\factory_status\router.py:12: in <module>
+    from netra_backend.app.routes.factory_status.metrics_routes import (
+netra_backend\app\routes\factory_status\metrics_routes.py:11: in <module>
+    from netra_backend.app.services.audit.utils import calculate_trend
+E   ImportError: cannot import name 'calculate_trend' from 'netra_backend.app.services.audit.utils' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\audit\utils.py)
 
 ```
 
@@ -104,21 +106,6 @@ E   ImportError: cannot import name 'get_dashboard_summary_handler' from 'netra_
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 15
-================================================================================
-
-Cleaning up test processes...
 
 
 ```

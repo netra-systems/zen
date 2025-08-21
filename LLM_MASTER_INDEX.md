@@ -389,6 +389,15 @@ python scripts/test_backend.py --no-bad-test-detection
 | **`exampleNetraPrompts.xml`** | Example prompts | Usage examples |
 | **`instructions.xml`** | General instructions | Guidelines |
 
+### 🔧 Import Management Tools
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **`import_management.py`** | Unified import system | `python scripts/import_management.py all` |
+| **`fix_all_import_issues.py`** | Fix known import issues | `python scripts/fix_all_import_issues.py --verify` |
+| **`fix_comprehensive_imports.py`** | Pattern-based fixes | `python scripts/fix_comprehensive_imports.py --verify` |
+| **`unified_import_manager.py`** | Legacy import manager | `python scripts/unified_import_manager.py all` |
+| **`learnings/import_management.xml`** | Import issue patterns | Documentation of common issues |
+
 ### 🔍 String Literals & Constants
 | Spec | Purpose | Usage |
 |------|---------|-------|

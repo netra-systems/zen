@@ -998,65 +998,47 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "test_framework/tests/test_backend_startup_path.py::TestBackendStartupPath::test_backend_app_directory_path": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:54:37.290159",
+      "last_failure": "2025-08-21T11:54:37.290159",
+      "last_pass": "2025-08-21T11:55:22.929158",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_115436_76837",
+          "timestamp": "2025-08-21T11:54:37.290159",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: 1 != 0 : run_server.py failed to find app directory. Error:"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "test_framework/tests/test_backend_startup_path.py::TestBackendStartupPath::test_uvicorn_import_path": {
+      "component": "backend",
+      "first_seen": "2025-08-21T11:54:37.294622",
+      "last_failure": "2025-08-21T11:54:37.294622",
+      "last_pass": "2025-08-21T11:55:22.931151",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250821_115436_76837",
+          "timestamp": "2025-08-21T11:54:37.294622",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: '\"app.main:app\"' unexpectedly found in 'import sys\\nimport os\\nfrom pathlib import Path\\n\\n# Add project root to Python path to ensure app module can be imported\\ncurrent_file = Path(__file__).resolve()\\nif current_file.parent.name == \\'scripts\\':\\n    # We\\'re in the scripts directory, add parent (project root) to path\\n    project_root = current_file.parent.parent\\nelse:\\n    # We\\'re in the project root already\\n    project_root = current_file.parent\\n\\n# Add to Python path if"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250821_100416_56539",
-      "timestamp": "2025-08-21T10:04:24.919677",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100434_74685",
-      "timestamp": "2025-08-21T10:04:34.713428",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100453_93098",
-      "timestamp": "2025-08-21T10:04:53.131302",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100508_8377",
-      "timestamp": "2025-08-21T10:05:09.144793",
-      "total_tests": 0,
-      "passed": -1,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100612_72628",
-      "timestamp": "2025-08-21T10:06:13.349090",
-      "total_tests": 0,
-      "passed": -1,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100651_11348",
-      "timestamp": "2025-08-21T10:06:51.690390",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250821_100702_22445",
-      "timestamp": "2025-08-21T10:07:04.518369",
-      "total_tests": 0,
-      "passed": -5,
-      "failed": 5,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250821_100747_67637",
       "timestamp": "2025-08-21T10:07:51.110014",
@@ -1784,10 +1766,82 @@
       "passed": 10,
       "failed": 8,
       "bad_tests_count": 8
+    },
+    {
+      "run_id": "run_20250821_115010_10951",
+      "timestamp": "2025-08-21T11:50:14.632160",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115209_29913",
+      "timestamp": "2025-08-21T11:52:17.408449",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115236_56049",
+      "timestamp": "2025-08-21T11:52:44.234920",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115359_39528",
+      "timestamp": "2025-08-21T11:54:06.216371",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115427_67250",
+      "timestamp": "2025-08-21T11:54:35.413238",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115436_76837",
+      "timestamp": "2025-08-21T11:54:37.301809",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 2,
+      "bad_tests_count": 2
+    },
+    {
+      "run_id": "run_20250821_115522_22437",
+      "timestamp": "2025-08-21T11:55:22.935159",
+      "total_tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115529_29096",
+      "timestamp": "2025-08-21T11:55:35.705998",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_115553_53701",
+      "timestamp": "2025-08-21T11:56:00.637336",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 98,
-    "last_updated": "2025-08-21T11:47:25.526383"
+    "total_runs": 107,
+    "last_updated": "2025-08-21T11:56:00.637336"
   }
 }

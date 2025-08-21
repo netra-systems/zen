@@ -35,8 +35,7 @@ export class TestWebSocket implements WebSocketLike {
   
   constructor(url: string, protocols?: string | string[]) {
     this.url = url;
-    // Simulate async connection with proper React synchronization
-    this.scheduleOpenEvent();
+    // Don't auto-connect - let the test manager control when to connect
   }
   
   send(data: string | ArrayBuffer | Blob): void {
@@ -100,6 +99,12 @@ export class TestWebSocket implements WebSocketLike {
   simulateReconnect(): void {
     this.readyState = 0; // CONNECTING
     this.scheduleOpenEvent();
+  }
+  
+  connect(): void {
+    if (this.readyState === 0) {
+      this.scheduleOpenEvent();
+    }
   }
   
   private simulateOpen(): void {

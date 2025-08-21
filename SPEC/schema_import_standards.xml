@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <title>Schema Import Standards</title>
+    <version>1.0</version>
+    <created>2025-01-21</created>
+    <updated>2025-01-21</updated>
+    
+    <overview>
+        <description>
+            This specification defines the standards for schema organization and imports
+            in the Netra codebase. All schemas must be stored in canonical locations
+            and imported from those locations to maintain consistency and prevent
+            circular dependencies.
+        </description>
+    </overview>
+    
+    <principles>
+        <principle id="canonical-location">
+            <title>Canonical Schema Location</title>
+            <description>
+                All schema definitions MUST be stored in designated canonical schema directories.
+                This ensures a single source of truth and prevents schema duplication.
+            </description>
+        </principle>
+        
+        <principle id="no-sub-module-schemas">
+            <title>No Sub-Module Schemas</title>
+            <description>
+                Schemas MUST NOT be defined in sub-modules like routes, agents, services, etc.
+                All schemas must be centralized in the canonical schema directories.
+            </description>
+        </principle>
+        
+        <principle id="explicit-imports">
+            <title>Explicit Imports</title>
+            <description>
+                All schema imports MUST use explicit paths from the canonical locations.
+                This makes dependencies clear and prevents circular imports.
+            </description>
+        </principle>
+    </principles>
+    
+    <canonical-locations>
+        <location service="netra_backend">
+            <path>netra_backend/app/schemas/</path>
+            <description>Main backend service schemas</description>
+        </location>
+        
+        <location service="auth_service">
+            <path>auth_service/app/schemas/</path>
+            <description>Authentication service schemas</description>
+        </location>
+        
+        <location service="frontend">
+            <path>frontend/schemas/</path>
+            <description>Frontend application schemas</description>
+        </location>
+    </canonical-locations>
+    
+    <import-patterns>
+        <correct-patterns>
+            <pattern>
+                <example>from netra_backend.app.schemas.request import RequestModel</example>
+                <description>Import from canonical schemas directory</description>
+            </pattern>
+            
+            <pattern>
+                <example>from netra_backend.app.schemas.user import UserSchema</example>
+                <description>Direct import from schema module</description>
+            </pattern>
+            
+            <pattern>
+                <example>from auth_service.app.schemas.token import TokenSchema</example>
+                <description>Cross-service schema import from canonical location</description>
+            </pattern>
+        </correct-patterns>
+        
+        <incorrect-patterns>
+            <pattern>
+                <example>from netra_backend.app.routes.unified_tools.schemas import ToolSchema</example>
+                <reason>Schemas should not be in route modules</reason>
+                <fix>Move to netra_backend.app.schemas.unified_tools</fix>
+            </pattern>
+            
+            <pattern>
+                <example>from netra_backend.app.agents.supervisor.schemas import AgentSchema</example>
+                <reason>Schemas should not be in agent modules</reason>
+                <fix>Move to netra_backend.app.schemas.agents</fix>
+            </pattern>
+            
+            <pattern>
+                <example>from netra_backend.app.services.auth.schemas import AuthSchema</example>
+                <reason>Schemas should not be in service modules</reason>
+                <fix>Move to netra_backend.app.schemas.auth</fix>
+            </pattern>
+            
+            <pattern>
+                <example>from tests.fixtures.schemas import TestSchema</example>
+                <reason>Test schemas should use fixtures or canonical locations</reason>
+                <fix>Use test fixtures or move to canonical location</fix>
+            </pattern>
+        </incorrect-patterns>
+    </import-patterns>
+    
+    <organization-guidelines>
+        <guideline id="file-naming">
+            <title>Schema File Naming</title>
+            <rules>
+                <rule>Use descriptive names that indicate the domain (e.g., user.py, auth.py)</rule>
+                <rule>Group related schemas in the same file</rule>
+                <rule>Avoid generic names like schemas.py or models.py</rule>
+                <rule>Use singular nouns for entity schemas (user.py not users.py)</rule>
+            </rules>
+        </guideline>
+        
+        <guideline id="schema-grouping">
+            <title>Schema Grouping</title>
+            <rules>
+                <rule>Group schemas by domain or feature area</rule>
+                <rule>Keep request/response schemas together with their domain</rule>
+                <rule>Separate internal and external (API) schemas when needed</rule>
+            </rules>
+        </guideline>
+        
+        <guideline id="init-file">
+            <title>__init__.py Management</title>
+            <rules>
+                <rule>Maintain an __init__.py that exports all public schemas</rule>
+                <rule>Use __all__ to explicitly define exported schemas</rule>
+                <rule>Keep imports organized alphabetically</rule>
+            </rules>
+        </guideline>
+    </organization-guidelines>
+    
+    <migration-process>
+        <step number="1">
+            <action>Identify Non-Canonical Schemas</action>
+            <command>python scripts/check_schema_imports.py</command>
+            <description>Run the schema import checker to identify violations</description>
+        </step>
+        
+        <step number="2">
+            <action>Move Schemas to Canonical Location</action>
+            <command>python scripts/fix_schema_imports.py</command>
+            <description>Automatically move schemas and update imports</description>
+        </step>
+        
+        <step number="3">
+            <action>Verify Changes</action>
+            <command>python scripts/check_schema_imports.py</command>
+            <description>Re-run checker to ensure all violations are resolved</description>
+        </step>
+        
+        <step number="4">
+            <action>Run Tests</action>
+            <command>python -m test_framework.test_runner --level integration --no-coverage --fast-fail</command>
+            <description>Ensure all tests pass after schema reorganization</description>
+        </step>
+    </migration-process>
+    
+    <enforcement>
+        <tool name="check_schema_imports.py">
+            <purpose>Detect schema import violations</purpose>
+            <location>scripts/check_schema_imports.py</location>
+            <usage>python scripts/check_schema_imports.py</usage>
+        </tool>
+        
+        <tool name="fix_schema_imports.py">
+            <purpose>Automatically fix schema import violations</purpose>
+            <location>scripts/fix_schema_imports.py</location>
+            <usage>python scripts/fix_schema_imports.py</usage>
+        </tool>
+        
+        <ci-integration>
+            <description>
+                The schema import checker should be integrated into CI/CD pipelines
+                to prevent violations from being merged into the main branch.
+            </description>
+        </ci-integration>
+    </enforcement>
+    
+    <examples>
+        <example id="moving-route-schemas">
+            <title>Moving Route Schemas</title>
+            <before>
+                <!-- File: netra_backend/app/routes/unified_tools/schemas.py -->
+                class ToolExecutionRequest(BaseModel):
+                    tool_name: str
+                    arguments: Dict[str, Any]
+                
+                <!-- Import: -->
+                from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest
+            </before>
+            <after>
+                <!-- File: netra_backend/app/schemas/unified_tools.py -->
+                class ToolExecutionRequest(BaseModel):
+                    tool_name: str
+                    arguments: Dict[str, Any]
+                
+                <!-- Import: -->
+                from netra_backend.app.schemas.unified_tools import ToolExecutionRequest
+            </after>
+        </example>
+        
+        <example id="consolidating-schemas">
+            <title>Consolidating Related Schemas</title>
+            <before>
+                <!-- Multiple scattered schema files -->
+                netra_backend/app/agents/supervisor/schemas.py
+                netra_backend/app/agents/triage/schemas.py
+                netra_backend/app/agents/data/schemas.py
+            </before>
+            <after>
+                <!-- Single consolidated file -->
+                netra_backend/app/schemas/agents.py
+                
+                <!-- With sections for each agent type -->
+                # Supervisor Agent Schemas
+                class SupervisorRequest(BaseModel): ...
+                
+                # Triage Agent Schemas  
+                class TriageRequest(BaseModel): ...
+                
+                # Data Agent Schemas
+                class DataRequest(BaseModel): ...
+            </after>
+        </example>
+    </examples>
+    
+    <benefits>
+        <benefit>Single source of truth for all schemas</benefit>
+        <benefit>Prevents circular dependencies</benefit>
+        <benefit>Easier schema discovery and reuse</benefit>
+        <benefit>Cleaner module organization</benefit>
+        <benefit>Simplified import paths</benefit>
+        <benefit>Better IDE support and autocomplete</benefit>
+    </benefits>
+    
+    <learnings>
+        <learning date="2025-01-21">
+            <insight>
+                Having schemas scattered across sub-modules leads to import confusion
+                and makes it difficult to maintain consistency.
+            </insight>
+            <action>
+                Centralized all schemas in canonical locations and created automated
+                tools to detect and fix violations.
+            </action>
+        </learning>
+    </learnings>
+</specification>

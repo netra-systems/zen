@@ -192,7 +192,7 @@ class UnifiedConfigManager:
     
     def _get_config_class_for_environment(self) -> type:
         """Get configuration class for current environment."""
-        from netra_backend.app.schemas.config import (
+        from netra_backend.app.schemas.Config import (
             DevelopmentConfig, StagingConfig, 
             ProductionConfig, NetraTestingConfig
         )

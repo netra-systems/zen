@@ -432,10 +432,10 @@ def main():
     
     # Return exit code based on violations found
     if analyzer.analysis.violations:
-        print(f"\n⚠️  Found {len(analyzer.analysis.violations)} schema import violations")
+        print(f"\n[WARNING] Found {len(analyzer.analysis.violations)} schema import violations")
         return 1
     else:
-        print("\n✓ No schema import violations found")
+        print("\n[SUCCESS] No schema import violations found")
         return 0
         
 

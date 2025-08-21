@@ -108,6 +108,9 @@ export class WebSocketTestManager {
         this.logEvent('message');
       });
     });
+    
+    // Now that listeners are set up, trigger the connection
+    this.testWebSocket.connect();
   }
 
   /**

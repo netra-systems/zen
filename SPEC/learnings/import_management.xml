@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <title>Import Management and Resolution Patterns</title>
+    <last_updated>2025-08-21</last_updated>
+    
+    <overview>
+        <description>
+            Comprehensive learnings from resolving import issues across the Netra codebase.
+            These patterns help maintain import integrity and prevent common import errors.
+        </description>
+        <business_value>
+            - Segment: Platform
+            - Business Goal: Development Velocity and Stability
+            - Value Impact: Reduces development friction and test failures
+            - Strategic Impact: Enables faster iteration and reliable CI/CD
+        </business_value>
+    </overview>
+    
+    <key_learnings>
+        <learning id="L001">
+            <title>Import Path Consistency</title>
+            <problem>Inconsistent import paths between modules lead to ImportError failures</problem>
+            <solution>Always use absolute imports starting from netra_backend</solution>
+            <example>
+                <!-- Wrong -->
+                from value_corpus_to_xml import process_corpus
+                <!-- Correct -->
+                from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_to_xml import process_corpus
+            </example>
+        </learning>
+        
+        <learning id="L002">
+            <title>Class Name Changes</title>
+            <problem>Classes renamed without updating all imports (e.g., CostOptimizer -> LLMCostOptimizer)</problem>
+            <solution>When renaming classes, create backwards compatibility aliases</solution>
+            <example>
+                # In cost_optimizer.py
+                class LLMCostOptimizer:
+                    # ... implementation ...
+                
+                # Backwards compatibility
+                CostOptimizer = LLMCostOptimizer
+            </example>
+        </learning>
+        
+        <learning id="L003">
+            <title>Missing Module Dependencies</title>
+            <problem>Services import from modules that don't exist (e.g., metrics_collectors.py)</problem>
+            <solution>Create placeholder modules with proper interfaces when needed</solution>
+            <pattern>
+                1. Check what's being imported
+                2. Create module with minimal viable implementation
+                3. Add proper __all__ exports
+            </pattern>
+        </learning>
+        
+        <learning id="L004">
+            <title>Schema vs Models Confusion</title>
+            <problem>Some routes import from .models when the file is .schemas</problem>
+            <solution>Standardize on one naming convention per module</solution>
+            <convention>
+                - Routes: Use schemas.py for request/response models
+                - Database: Use models.py for ORM models
+                - Services: Use models.py for domain models
+            </convention>
+        </learning>
+        
+        <learning id="L005">
+            <title>Circular Import Prevention</title>
+            <problem>Circular imports between configuration and models</problem>
+            <solution>Use lazy imports or dependency injection</solution>
+            <pattern>
+                # Instead of top-level import
+                def get_config():
+                    from netra_backend.app.core.configuration import unified_config_manager
+                    return unified_config_manager.get_config()
+            </pattern>
+        </learning>
+        
+        <learning id="L006">
+            <title>Missing Enum Import</title>
+            <problem>Using Enum without importing it from enum module</problem>
+            <solution>Always check for standard library imports when using base classes</solution>
+            <checklist>
+                - from enum import Enum
+                - from typing import Dict, List, Optional
+                - from dataclasses import dataclass
+            </checklist>
+        </learning>
+    </key_learnings>
+    
+    <common_import_errors>
+        <error type="ModuleNotFoundError">
+            <pattern>No module named 'netra_backend.app.monitoring.metrics_collectors'</pattern>
+            <cause>Module doesn't exist but is imported by factory_status_service</cause>
+            <fix>Created metrics_collectors.py with required classes</fix>
+        </error>
+        
+        <error type="ImportError">
+            <pattern>cannot import name 'CostOptimizer' from 'netra_backend.app.services.llm.cost_optimizer'</pattern>
+            <cause>Class renamed to LLMCostOptimizer</cause>
+            <fix>Added alias: CostOptimizer = LLMCostOptimizer</fix>
+        </error>
+        
+        <error type="ImportError">
+            <pattern>cannot import name 'DemoService' from 'netra_backend.app.services.corpus.core'</pattern>
+            <cause>Class doesn't exist in target module</cause>
+            <fix>Comment out import with FIXME note</fix>
+        </error>
+        
+        <error type="NameError">
+            <pattern>name 'Enum' is not defined</pattern>
+            <cause>Missing import statement</cause>
+            <fix>Add: from enum import Enum</fix>
+        </error>
+    </common_import_errors>
+    
+    <tools_created>
+        <tool name="fix_all_import_issues.py">
+            <purpose>Comprehensive import fixer for known issues</purpose>
+            <location>scripts/fix_all_import_issues.py</location>
+            <usage>python scripts/fix_all_import_issues.py --verify</usage>
+        </tool>
+        
+        <tool name="fix_comprehensive_imports.py">
+            <purpose>Pattern-based import fixer with verification</purpose>
+            <location>scripts/fix_comprehensive_imports.py</location>
+            <usage>python scripts/fix_comprehensive_imports.py --verify</usage>
+        </tool>
+        
+        <tool name="unified_import_manager.py">
+            <purpose>Centralized import management system</purpose>
+            <location>scripts/unified_import_manager.py</location>
+            <usage>python scripts/unified_import_manager.py all</usage>
+        </tool>
+    </tools_created>
+    
+    <best_practices>
+        <practice>
+            <title>Import Testing</title>
+            <description>Always run import tests before committing</description>
+            <command>python -m test_framework.test_runner --import-only</command>
+        </practice>
+        
+        <practice>
+            <title>Module Creation</title>
+            <description>When creating new modules, always include __all__ exports</description>
+            <template>
+                __all__ = [
+                    'ClassName1',
+                    'ClassName2',
+                    'function_name'
+                ]
+            </template>
+        </practice>
+        
+        <practice>
+            <title>Import Organization</title>
+            <description>Group imports by category</description>
+            <order>
+                1. Standard library imports
+                2. Third-party imports
+                3. Local application imports
+            </order>
+        </practice>
+    </best_practices>
+    
+    <monitoring>
+        <metric name="import_errors_count">
+            <description>Number of import errors in test runs</description>
+            <target>0</target>
+            <current>566</current>
+        </metric>
+        
+        <metric name="modules_fixed">
+            <description>Number of modules with import fixes applied</description>
+            <count>20+</count>
+        </metric>
+    </monitoring>
+    
+    <future_improvements>
+        <improvement priority="high">
+            <title>Automated Import Validation</title>
+            <description>Pre-commit hook to validate all imports</description>
+        </improvement>
+        
+        <improvement priority="medium">
+            <title>Import Graph Visualization</title>
+            <description>Tool to visualize import dependencies</description>
+        </improvement>
+        
+        <improvement priority="low">
+            <title>Import Performance Analysis</title>
+            <description>Identify slow imports and circular dependencies</description>
+        </improvement>
+    </future_improvements>
+</learnings>

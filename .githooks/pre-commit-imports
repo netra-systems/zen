@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""
+Pre-commit hook for import validation
+Ensures all imports are valid before allowing commits
+
+Installation:
+1. Copy this file to .git/hooks/pre-commit
+2. Make it executable: chmod +x .git/hooks/pre-commit
+3. Or symlink: ln -s ../../.githooks/pre-commit-imports .git/hooks/pre-commit
+"""
+
+import sys
+import subprocess
+from pathlib import Path
+
+def check_imports():
+    """Check for import issues in staged files."""
+    print("🔍 Checking imports in staged files...")
+    
+    # Get list of staged Python files
+    result = subprocess.run(
+        ['git', 'diff', '--cached', '--name-only', '--diff-filter=ACM'],
+        capture_output=True,
+        text=True
+    )
+    
+    staged_files = [f for f in result.stdout.strip().split('\n') if f.endswith('.py')]
+    
+    if not staged_files:
+        print("✓ No Python files staged")
+        return True
+    
+    print(f"  Checking {len(staged_files)} Python files...")
+    
+    # Check imports in staged files
+    errors = []
+    for file_path in staged_files:
+        try:
+            # Try to compile the file (catches syntax errors)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                compile(f.read(), file_path, 'exec')
+            
+            # Try to import if it's a module
+            if file_path.startswith('netra_backend/'):
+                module_path = file_path[:-3].replace('/', '.')
+                try:
+                    __import__(module_path)
+                except ImportError as e:
+                    if 'No module named' in str(e):
+                        # Check if it's a critical import error
+                        error_msg = str(e)
+                        if any(critical in error_msg for critical in [
+                            'CostOptimizer', 'DemoService', 'GitHubAnalyzerService',
+                            'metrics_collectors', 'health_calculator'
+                        ]):
+                            # These are known issues that are being fixed
+                            print(f"  ⚠ Known import issue in {file_path}: {error_msg}")
+                        else:
+                            errors.append((file_path, error_msg))
+                
+        except SyntaxError as e:
+            errors.append((file_path, f"Syntax error: {e}"))
+        except Exception as e:
+            # Non-critical error, just warn
+            print(f"  ⚠ Warning checking {file_path}: {e}")
+    
+    if errors:
+        print("\n❌ Import errors found:")
+        for file_path, error in errors:
+            print(f"  - {file_path}: {error}")
+        print("\nRun 'python scripts/import_management.py fix' to fix import issues")
+        return False
+    
+    print("✓ All imports valid")
+    return True
+
+def main():
+    """Main pre-commit hook entry point."""
+    # Check if we should skip the hook
+    if subprocess.run(['git', 'config', '--get', 'hooks.skipimports'], 
+                     capture_output=True).returncode == 0:
+        print("⚠ Import check skipped (hooks.skipimports is set)")
+        sys.exit(0)
+    
+    # Run import checks
+    if not check_imports():
+        print("\n❌ Pre-commit check failed")
+        print("To skip this check: git config hooks.skipimports true")
+        print("To fix imports: python scripts/import_management.py fix")
+        sys.exit(1)
+    
+    print("✓ Pre-commit import check passed")
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()

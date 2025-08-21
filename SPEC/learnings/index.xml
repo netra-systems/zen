@@ -126,6 +126,13 @@
             <critical-takeaway>Use 'async with' for @asynccontextmanager functions, NOT 'async for' (context managers != iterators).</critical-takeaway>
             <critical-takeaway>Context managers implement __aenter__/__aexit__, iterators implement __aiter__/__anext__.</critical-takeaway>
         </category>
+        
+        <category name="Import Management" path="SPEC/learnings/import_management.xml" keywords="Imports, ImportError, ModuleNotFoundError, CostOptimizer">
+            <critical-takeaway>Always use absolute imports starting from netra_backend, never relative imports</critical-takeaway>
+            <critical-takeaway>When renaming classes, create backwards compatibility aliases (e.g., CostOptimizer = LLMCostOptimizer)</critical-takeaway>
+            <critical-takeaway>Missing Enum import is common - always check for standard library imports</critical-takeaway>
+            <critical-takeaway>Use import_management.py for comprehensive import checking and fixing</critical-takeaway>
+        </category>
 
         <category name="Database/Migration" path="SPEC/learnings/alembic_asyncpg_greenlet.xml" keywords="Alembic, Migration, AsyncPG, Greenlet, SQLAlchemy">
             <critical-takeaway>Alembic requires synchronous database URL - remove asyncpg driver for migrations.</critical-takeaway>
@@ -240,6 +247,13 @@
             <critical-takeaway>Use progressive validation modes (WARN, ENFORCE_CRITICAL, ENFORCE_ALL) instead of binary strict/permissive (progressive-validation-modes).</critical-takeaway>
             <critical-takeaway>Implement fallback behaviors and graceful degradation rather than hard failures (fallback-behaviors).</critical-takeaway>
             <critical-takeaway>Prefer duck typing over strict isinstance() checks - focus on behavior over inheritance (duck-typing-over-isinstance).</critical-takeaway>
+        </category>
+        
+        <category name="Backend Startup" path="SPEC/learnings/backend_startup.xml" keywords="Backend, Startup, run_server, Path, Configuration">
+            <critical-takeaway>Backend app directory is at netra_backend/app, NOT project_root/app (backend-app-path).</critical-takeaway>
+            <critical-takeaway>Uvicorn must use "netra_backend.app.main:app" import path, NOT "app.main:app".</critical-takeaway>
+            <critical-takeaway>Always verify startup scripts check correct paths relative to actual project structure.</critical-takeaway>
+            <critical-takeaway>Test startup scripts with --help flag to ensure basic initialization works.</critical-takeaway>
         </category>
     </categories>
 </specification>
