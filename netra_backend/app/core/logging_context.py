@@ -159,18 +159,22 @@ class ContextFilter:
         self._environment = None  # Will be lazy-loaded
         self._noisy_modules = {"uvicorn.access", "uvicorn.error", "watchfiles"}
         self._config_loaded = False
+        self._loading_config = False  # Recursion guard
     
     def _load_config(self):
         """Lazy load configuration to avoid circular imports."""
-        if not self._config_loaded:
+        if not self._config_loaded and not self._loading_config:
+            self._loading_config = True  # Set guard
             try:
                 from netra_backend.app.core.configuration import unified_config_manager
                 config = unified_config_manager.get_config()
                 self._environment = getattr(config, 'environment', 'development')
-            except ImportError:
-                # Fallback if configuration is not available
+            except (ImportError, RecursionError):
+                # Fallback if configuration is not available or circular import
                 self._environment = os.getenv('ENVIRONMENT', 'development')
-            self._config_loaded = True
+            finally:
+                self._config_loaded = True
+                self._loading_config = False  # Clear guard
     
     def should_log(self, record) -> bool:
         """Determine if a message should be logged."""

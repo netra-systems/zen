@@ -113,6 +113,7 @@ class UnifiedConfigManager:
         """Initialize configuration manager components."""
         if hasattr(self, '_initialized'):
             return
+        self._loading = False  # Add loading flag
         self._initialize_core_components()
         self._initialize_config_managers()
         self._config_cache: Optional[AppConfig] = None
@@ -169,6 +170,7 @@ class UnifiedConfigManager:
     
     def _load_complete_configuration(self) -> AppConfig:
         """Load complete configuration from all sources."""
+        self._loading = True  # Set loading flag to prevent recursion
         try:
             config = self._create_base_config()
             self._populate_configuration_data(config)
@@ -176,6 +178,8 @@ class UnifiedConfigManager:
             return config
         except Exception as e:
             self._handle_configuration_error(e)
+        finally:
+            self._loading = False  # Clear loading flag
     
     def _create_base_config(self) -> AppConfig:
         """Create base configuration for current environment."""

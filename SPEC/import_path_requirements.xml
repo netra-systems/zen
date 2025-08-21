@@ -153,23 +153,88 @@
     <step>6. dev_launcher.* (development tools)</step>
   </import_resolution_order>
 
+  <unified_import_management>
+    <description>Centralized import management system that orchestrates all import-related operations</description>
+    <system_overview>
+      The unified import manager provides a single interface for:
+      - Checking import compliance across all components
+      - Automatically fixing import issues using multiple specialized fixers
+      - Pre-commit hook integration for enforcement
+      - Comprehensive reporting and status tracking
+    </system_overview>
+    
+    <component_fixers>
+      <fixer>
+        <name>Backend Import Fixer</name>
+        <script>scripts/fix_netra_backend_imports.py</script>
+        <scope>netra_backend/app and netra_backend/tests</scope>
+        <functionality>Fixes legacy app.* and tests.* imports to netra_backend.* patterns</functionality>
+      </fixer>
+      
+      <fixer>
+        <name>Test Import Aligner</name>
+        <script>scripts/align_test_imports.py</script>
+        <scope>All test files and configurations</scope>
+        <functionality>Aligns test imports, fixes relative imports, updates test configurations</functionality>
+      </fixer>
+      
+      <fixer>
+        <name>Specific Issue Fixer</name>
+        <script>scripts/fix_import_issues.py</script>
+        <scope>All Python files</scope>
+        <functionality>Fixes specific issues like validate_token→validate_token_jwt, websocket imports</functionality>
+      </fixer>
+      
+      <fixer>
+        <name>Import Analyzer</name>
+        <script>scripts/check_netra_backend_imports.py</script>
+        <scope>netra_backend directory</scope>
+        <functionality>Comprehensive analysis and validation of import patterns</functionality>
+      </fixer>
+    </component_fixers>
+  </unified_import_management>
+
   <validation_commands>
     <command>
-      <name>Check Import Compliance</name>
-      <cli>python scripts/check_architecture_compliance.py --imports</cli>
-      <description>Validates all imports follow canonical patterns</description>
+      <name>Unified Import Check</name>
+      <cli>python scripts/unified_import_manager.py check</cli>
+      <description>Comprehensive check of all import compliance across components</description>
     </command>
     
     <command>
-      <name>Fix Imports Automatically</name>
-      <cli>python scripts/fix_imports.py --fix</cli>
-      <description>Automatically updates imports to canonical form</description>
+      <name>Unified Import Fix</name>
+      <cli>python scripts/unified_import_manager.py fix</cli>
+      <description>Automatically fixes all import issues using orchestrated fixers</description>
+    </command>
+    
+    <command>
+      <name>Import Report Generation</name>
+      <cli>python scripts/unified_import_manager.py report</cli>
+      <description>Generates comprehensive import status report</description>
+    </command>
+    
+    <command>
+      <name>Complete Import Management</name>
+      <cli>python scripts/unified_import_manager.py all</cli>
+      <description>Check, fix, and report in a single operation</description>
     </command>
     
     <command>
       <name>Pre-commit Hook</name>
-      <cli>pre-commit run check-imports --all-files</cli>
+      <cli>pre-commit run unified-import-compliance --all-files</cli>
       <description>Prevents non-compliant imports from being committed</description>
+    </command>
+    
+    <command>
+      <name>Legacy: Backend-specific Check</name>
+      <cli>python scripts/check_netra_backend_imports.py</cli>
+      <description>Direct check of netra_backend imports (now integrated into unified system)</description>
+    </command>
+    
+    <command>
+      <name>Legacy: Backend-specific Fix</name>
+      <cli>python scripts/fix_netra_backend_imports.py</cli>
+      <description>Direct fix of netra_backend imports (now integrated into unified system)</description>
     </command>
   </validation_commands>
 

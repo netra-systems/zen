@@ -9,7 +9,7 @@ from dataclasses import dataclass
 import asyncio
 
 from netra_backend.app.services.mcp_client_service import MCPClientService
-from netra_backend.app.routes.mcp_client import MCPTool, MCPToolResult
+from netra_backend.app.mcp_client.models import MCPTool, MCPToolResult
 from netra_backend.app.agents.mcp_integration.context_manager import MCPAgentContext
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger
@@ -89,7 +89,7 @@ class MCPToolDiscoveryService:
         return MCPTool(
             name=tool_dict.get("name", ""),
             description=tool_dict.get("description", ""),
-            schema=tool_dict.get("schema", {}),
+            input_schema=tool_dict.get("schema", {}),
             server_name=tool_dict.get("server_name", "")
         )
 

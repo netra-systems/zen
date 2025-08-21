@@ -14,7 +14,7 @@ from typing import Dict, Any
 import pandas as pd
 
 from netra_backend.app.config import settings
-from netra_backend.app.routes.unified_tools.schemas import ContentCorpus
+from netra_backend.app.schemas.Corpus import ContentCorpus
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema

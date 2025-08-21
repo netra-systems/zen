@@ -64,3 +64,21 @@ repos:
         pass_filenames: true
         stages: [commit]
         description: 'Prevents non-semantic numbered file naming patterns like _1.py, _2.py, _core_1.py'
+        
+      # UNIFIED IMPORT COMPLIANCE: Enforce import standards across all components
+      - id: unified-import-compliance
+        name: Unified Import Compliance Check
+        entry: python scripts/unified_import_manager.py precommit
+        language: system
+        files: '\.(py)$'
+        stages: [commit]
+        description: 'Enforces canonical import patterns across backend, tests, and frameworks'
+        
+      # IMPORT PATH VALIDATION: Validate against forbidden patterns
+      - id: import-path-validation
+        name: Import Path Pattern Validation
+        entry: python scripts/check_netra_backend_imports.py
+        language: system
+        files: '^netra_backend/.*\.py$'
+        stages: [commit]
+        description: 'Validates that all netra_backend imports follow canonical patterns'
