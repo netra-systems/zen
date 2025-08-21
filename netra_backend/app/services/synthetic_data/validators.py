@@ -2,11 +2,62 @@
 Validation functions for synthetic data
 """
 
+import re
 import uuid
 import statistics
 from datetime import datetime, UTC
 from typing import Dict, List, Optional
 from collections import namedtuple
+
+
+class AuthValidationError(Exception):
+    """Custom exception for auth validation errors"""
+    pass
+
+
+def validate_email_format(email: str) -> bool:
+    """Validate email format"""
+    if not email:
+        return False
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+
+def validate_password_strength(password: str) -> bool:
+    """Validate password meets minimum requirements"""
+    if not password or len(password) < 8:
+        return False
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    return has_upper and has_lower and has_digit
+
+
+def validate_token_format(token: str) -> bool:
+    """Validate token format"""
+    if not token:
+        return False
+    # Basic JWT format validation (header.payload.signature)
+    parts = token.split('.')
+    return len(parts) == 3 and all(len(part) > 0 for part in parts)
+
+
+def validate_service_id(service_id: str) -> bool:
+    """Validate service ID format"""
+    if not service_id:
+        return False
+    # Service IDs should be alphanumeric with underscores
+    pattern = r'^[a-zA-Z0-9_]+$'
+    return bool(re.match(pattern, service_id))
+
+
+def validate_permission_format(permission: str) -> bool:
+    """Validate permission format"""
+    if not permission:
+        return False
+    # Permissions should follow format: resource:action
+    pattern = r'^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$'
+    return bool(re.match(pattern, permission))
 
 
 def validate_schema(record: Dict) -> bool:

@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:03:18.576324  
+**Generated:** 2025-08-21T10:36:25.087877  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 4.19s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.97s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 5.42s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.05s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 5.16s
-- **Exit Code:** 15
+- **Total Duration:** 6.48s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
@@ -60,7 +60,7 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 3.51s
+[FAIL] TESTS FAILED with exit code 4 after 4.64s
 ================================================================================
 
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
@@ -72,7 +72,39 @@ netra_backend\app\routes\mcp\main.py:13: in <module>
     from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
 netra_backend\app\auth_integration\__init__.py:87: in <module>
     from netra_backend.app.services.synthetic_data.validators import (
-E   ImportError: cannot import name 'validate_email_format' from 'netra_backend.app.services.synthetic_data.validators' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\synthetic_data\validators.py)
+netra_backend\app\services\synthetic_data\__init__.py:5: in <module>
+    from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService, synthetic_data_service
+netra_backend\app\services\synthetic_data\core_service.py:9: in <module>
+    from netra_backend.app.services.synthetic_data.synthetic_data_service_main import SyntheticDataService, synthetic_data_service
+netra_backend\app\services\synthetic_data\synthetic_data_service_main.py:7: in <module>
+    from netra_backend.app.services.synthetic_data.generation_coordinator import GenerationCoordinator
+netra_backend\app\services\synthetic_data\generation_coordinator.py:8: in <module>
+    from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
+netra_backend\app\services\synthetic_data\core_service_base.py:13: in <module>
+    from netra_backend.app.services.synthetic_data.job_manager import JobManager
+netra_backend\app\services\synthetic_data\job_manager.py:11: in <module>
+    from netra_backend.app.services.websocket.ws_manager import manager
+netra_backend\app\services\websocket\ws_manager.py:14: in <module>
+    from netra_backend.app.ws_manager import (
+netra_backend\app\ws_manager.py:21: in <module>
+    from netra_backend.app.websocket.connection import ConnectionInfo
+netra_backend\app\websocket\connection.py:14: in <module>
+    from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+netra_backend\app\websocket\connection_manager.py:19: in <module>
+    from netra_backend.app.websocket.connection_executor import ConnectionExecutionOrchestrator
+netra_backend\app\websocket\connection_executor.py:13: in <module>
+    from netra_backend.app.agents.base.interface import (
+netra_backend\app\agents\base\__init__.py:15: in <module>
+    from netra_backend.app.agents.base_agent import BaseSubAgent
+netra_backend\app\agents\base_agent.py:9: in <module>
+    from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
+    from netra_backend.app.routes.unified_tools.router import router
+netra_backend\app\routes\unified_tools\router.py:10: in <module>
+    from netra_backend.app.services.tool_permission_service import ToolPermissionService
+netra_backend\app\services\tool_permission_service.py:11: in <module>
+    from netra_backend.app.tool_permissions.tool_permission_service_main import ToolPermissionService
+E   ModuleNotFoundError: No module named 'netra_backend.app.tool_permissions'
 
 ```
 
@@ -82,6 +114,21 @@ E   ImportError: cannot import name 'validate_email_format' from 'netra_backend.
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
+================================================================================
+NETRA AI PLATFORM - FRONTEND TEST RUNNER
+================================================================================
+
+================================================================================
+Running Jest Tests
+--------------------------------------------------------------------------------
+Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
+--------------------------------------------------------------------------------
+
+================================================================================
+[FAIL] CHECKS FAILED with exit code 1
+================================================================================
+
+Cleaning up test processes...
 
 Error: Can't find a root directory while resolving a config file path.
 Provided path to resolve: jest.config.simple.cjs
