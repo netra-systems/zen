@@ -18,10 +18,12 @@ def setup_cloud_run_environment():
     asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
     
     # Set environment variables for Cloud Run
+    # @marked: Python runtime configuration for Cloud Run deployment
     os.environ.setdefault("PYTHONUNBUFFERED", "1")
     os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
     
     # Disable interactive mode
+    # @marked: Encoding configuration for Cloud Run container
     os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 
 

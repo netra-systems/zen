@@ -1,10 +1,10 @@
 """Main Netra MCP Tools - Orchestrates all tool registration functionality"""
 
-from netra_backend.app.agent_tools import AgentTools
-from netra_backend.app.optimization_tools import OptimizationTools
-from netra_backend.app.data_tools import DataTools
-from netra_backend.app.thread_tools import ThreadTools
-from netra_backend.app.catalog_tools import CatalogTools
+from netra_backend.app.netra_mcp.modules.agent_tools import AgentTools
+from netra_backend.app.netra_mcp.modules.optimization_tools import OptimizationTools
+from netra_backend.app.netra_mcp.modules.data_tools import DataTools
+from netra_backend.app.netra_mcp.modules.thread_tools import ThreadTools
+from netra_backend.app.netra_mcp.modules.catalog_tools import CatalogTools
 
 
 class NetraMCPTools:

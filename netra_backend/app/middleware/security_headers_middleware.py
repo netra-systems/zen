@@ -11,8 +11,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.security_headers_config import SecurityHeadersConfig
-from netra_backend.app.nonce_generator import NonceGenerator
+from netra_backend.app.middleware.security_headers_config import SecurityHeadersConfig
+from netra_backend.app.middleware.nonce_generator import NonceGenerator
 
 logger = central_logger.get_logger(__name__)
 

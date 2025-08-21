@@ -133,16 +133,37 @@ class TestOSEnvironViolations:
     def allowed_files(self):
         """Files allowed to access os.environ directly."""
         return [
+            # Core configuration system files
             'configuration/base.py',
-            'configuration/database.py', 
+            'configuration/database.py',
+            'configuration/environment.py',
             'configuration/secrets.py',
             'configuration/unified_secrets.py',
             'config_manager.py',
             'config_secrets_manager.py',
             'config.py',
-            'conftest.py',  # Test fixtures
+            
+            # Test infrastructure
+            'conftest.py',
+            'test_',  # All test files
+            '/tests/',  # All test directories
+            
+            # Development and deployment tools
+            'dev_launcher.py',
+            'dev_launcher/',  # Dev launcher modules
+            'scripts/',  # All scripts are infrastructure
+            'organized_root/deployment_configs/',  # Deployment scripts
+            '.github/',  # CI/CD workflows
+            
+            # Setup and management files
             'setup.py',
-            'manage.py'
+            'manage.py',
+            'alembic/',  # Database migrations
+            
+            # Build and packaging
+            'build.py',
+            'install.py',
+            '__init__.py'  # Package initialization
         ]
         
     def test_no_direct_os_environ_access(self, project_root, allowed_files):

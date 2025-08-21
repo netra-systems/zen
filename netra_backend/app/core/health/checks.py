@@ -10,8 +10,8 @@ from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.health_types import HealthCheckResult
-from netra_backend.app.health_checkers import (
+from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.core.health_checkers import (
     check_postgres_health, check_clickhouse_health, 
     check_redis_health, check_websocket_health
 )

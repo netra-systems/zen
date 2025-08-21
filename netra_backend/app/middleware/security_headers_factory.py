@@ -8,7 +8,7 @@ from fastapi import Request
 
 from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.security_headers_middleware import SecurityHeadersMiddleware
+from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware
 
 logger = central_logger.get_logger(__name__)
 

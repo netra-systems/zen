@@ -10,6 +10,7 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 import logging
+from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +20,8 @@ class SessionManager:
     def __init__(self):
         # In containerized environments, Redis should connect to a Redis service, not localhost
         # For staging/production, Redis is disabled by environment check
-        default_redis_url = "redis://redis:6379" if os.getenv("ENVIRONMENT") not in ["development", "test"] else "redis://localhost:6379"
-        self.redis_url = os.getenv("REDIS_URL", default_redis_url)
-        self.session_ttl = int(os.getenv("SESSION_TTL_HOURS", "24"))
+        self.redis_url = AuthConfig.get_redis_url()
+        self.session_ttl = AuthConfig.get_session_ttl_hours()
         self.redis_client = None
         self.redis_enabled = self._should_enable_redis()
         if self.redis_enabled:
@@ -35,8 +35,8 @@ class SessionManager:
             
     def _should_enable_redis(self) -> bool:
         """Determine if Redis should be enabled based on environment"""
-        env = os.getenv("ENVIRONMENT", "development").lower()
-        redis_disabled = os.getenv("REDIS_DISABLED", "false").lower() == "true"
+        env = AuthConfig.get_environment()
+        redis_disabled = AuthConfig.is_redis_disabled()
         
         # Disable Redis in staging or if explicitly disabled
         if env == "staging" or redis_disabled:

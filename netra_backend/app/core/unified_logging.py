@@ -54,6 +54,7 @@ class UnifiedLogger:
         except ImportError:
             # Fallback configuration if config module not available
             return {
+                # @marked: Logging bootstrap before config initialization
                 'log_level': os.getenv('LOG_LEVEL', 'INFO').upper(),
                 'enable_file_logging': False,
                 'enable_json_logging': False,

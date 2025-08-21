@@ -17,7 +17,7 @@ from netra_backend.app.agents.interfaces import BaseAgentProtocol, AgentStatePro
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.websocket.ws_manager import get_manager
-from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+from netra_backend.app.schemas.Agent import SubAgentLifecycle
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 logger = central_logger.get_logger(__name__)

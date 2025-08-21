@@ -11,7 +11,7 @@ from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.apex_optimizer_agent.models import QualityAlert, QualityTrend
+from netra_backend.app.services.quality_monitoring.models import QualityAlert, QualityTrend
 from netra_backend.app.services.quality_monitoring.alerts import QualityAlertManager
 from netra_backend.app.services.quality_monitoring.metrics import MetricsCollector
 from netra_backend.app.services.quality_monitoring.analytics import TrendAnalyzer

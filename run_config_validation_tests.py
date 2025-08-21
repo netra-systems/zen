@@ -42,7 +42,7 @@ def run_central_config_tests():
     # Test 1: No direct config module imports
     print("\nTest 1: Checking for direct config module imports...")
     violations = []
-    for filepath in python_files[:50]:  # Limit for demo
+    for filepath in python_files:  # Process all files
         if 'configuration' in filepath or 'config' in os.path.basename(filepath):
             continue
         try:
@@ -94,7 +94,7 @@ def run_os_environ_tests():
         if 'venv' in root or '__pycache__' in root:
             continue
             
-        for filename in files[:30]:  # Limit for demo
+        for filename in files:  # Process all files
             if not filename.endswith('.py'):
                 continue
                 
@@ -164,7 +164,7 @@ def run_isolation_tests():
         if 'venv' in root or '__pycache__' in root:
             continue
             
-        for filename in files[:30]:  # Limit for demo
+        for filename in files:  # Process all files
             if not filename.endswith('.py'):
                 continue
                 
@@ -192,7 +192,7 @@ def run_isolation_tests():
         if 'venv' in root or '__pycache__' in root or 'test' in root:
             continue
             
-        for filename in files[:30]:  # Limit for demo
+        for filename in files:  # Process all files
             if not filename.endswith('.py') or 'config' in filename:
                 continue
                 

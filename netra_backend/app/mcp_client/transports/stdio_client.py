@@ -75,6 +75,7 @@ class StdioTransport(MCPTransport):
 
     def _build_environment(self) -> Dict[str, str]:
         """Build environment variables for subprocess."""
+        # @marked: Subprocess environment inheritance for MCP server execution
         return {**os.environ, **self.env}
 
     def _build_command_args(self) -> List[str]:

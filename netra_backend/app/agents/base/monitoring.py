@@ -372,3 +372,7 @@ class MetricsCollector:
             "total_circuit_breaker_trips": total_metrics.circuit_breaker_trips,
             "monitors_count": len(self.monitors)
         }
+
+
+# Global instance for backward compatibility
+performance_monitor = ExecutionMonitor()

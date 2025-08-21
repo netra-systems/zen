@@ -15,7 +15,7 @@ def get_clickhouse_client():
     # Import here to avoid circular imports while allowing test patching
     import netra_backend.app.services.corpus_service as corpus_service_module
     return corpus_service_module.get_clickhouse_client()
-from netra_backend.app...ws_manager import manager
+from netra_backend.app.ws_manager import manager
 from netra_backend.app.db.base import CorpusNotAvailableError, ClickHouseOperationError
 from netra_backend.app.services.corpus.validation import ValidationManager
 from netra_backend.app.logging_config import central_logger
@@ -317,7 +317,7 @@ class DocumentManager:
     
     def _update_corpus_status(self, db, corpus_id: str) -> None:
         """Update corpus status to available"""
-        from ...db import models_postgres as models
+        from netra_backend.app.db import models_postgres as models
         db.query(models.Corpus).filter(
             models.Corpus.id == corpus_id
         ).update({"status": "available"})

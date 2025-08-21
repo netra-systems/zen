@@ -244,3 +244,7 @@ def get_manager() -> WebSocketManager:
 # CONSOLIDATED: Maintain compatibility while using unified system
 manager = get_manager()
 ws_manager = manager  # Alias for compatibility
+
+def get_ws_manager() -> WebSocketManager:
+    """Compatibility function for get_ws_manager (alias for get_manager)."""
+    return get_manager()

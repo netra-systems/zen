@@ -5,8 +5,8 @@ Unified core corpus service - combines all corpus operations under 300 lines
 from typing import Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app...db import models_postgres as models
-from netra_backend.app... import schemas
+from netra_backend.app.db import models_postgres as models
+from netra_backend.app import schemas
 from netra_backend.app.db.base import ContentSource
 from netra_backend.app.services.corpus.corpus_creation import CorpusCreationService
 from netra_backend.app.services.corpus.corpus_crud import CorpusCrudService

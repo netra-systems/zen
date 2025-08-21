@@ -68,6 +68,7 @@ async def lifespan(app: FastAPI):
     # Log configuration
     from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
+    # @marked: Port must be read from environment for container deployment
     logger.info(f"Port: {os.getenv('PORT', '8080')}")
     
     # Log Redis configuration status
@@ -77,8 +78,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"Redis session management: {redis_status}")
     
     # Check if we're in fast test mode
+    # @marked: Test mode flag for test infrastructure
     fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
-    env = os.getenv("ENVIRONMENT", "development").lower()
+    env = AuthConfig.get_environment()
     
     if fast_test_mode or env == "test":
         logger.info("Running in fast test mode - skipping database initialization")
@@ -130,8 +132,9 @@ app = FastAPI(
 )
 
 # Configure CORS
+# @marked: CORS configuration from environment for security
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
-env = os.getenv("ENVIRONMENT", "development")
+env = AuthConfig.get_environment()
 
 # Handle wildcard CORS for development
 if cors_origins_env == "*":
@@ -246,7 +249,7 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
 app.add_middleware(DynamicCORSMiddleware, allowed_origins=cors_origins)
 
 # Security middleware for production
-if os.getenv("ENVIRONMENT") in ["staging", "production"]:
+if AuthConfig.get_environment() in ["staging", "production"]:
     allowed_hosts = [
         "*.netrasystems.ai",
         "*.run.app",
@@ -263,6 +266,7 @@ async def add_service_headers(request: Request, call_next):
     response.headers["X-Service-Version"] = "1.0.0"
     
     # Security headers
+    # @marked: Security headers toggle for production environments
     if os.getenv("SECURE_HEADERS_ENABLED", "false").lower() == "true":
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -315,7 +319,7 @@ async def health_ready() -> Dict[str, Any]:
     except Exception as e:
         logger.warning(f"Readiness check failed: {e}")
         # In development, we might still be ready even if DB check fails
-        env = os.getenv("ENVIRONMENT", "development")
+        env = AuthConfig.get_environment()
         if env == "development":
             return {
                 "status": "ready",
@@ -331,5 +335,6 @@ async def health_ready() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
+    # @marked: Port binding for container runtime
     port = int(os.getenv("PORT", "8080"))
     uvicorn.run(app, host="0.0.0.0", port=port)

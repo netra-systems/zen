@@ -7,9 +7,9 @@ import asyncio
 from typing import Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app...db import models_postgres as models
-from netra_backend.app...db.clickhouse import get_clickhouse_client
-from netra_backend.app...ws_manager import manager
+from netra_backend.app.db import models_postgres as models
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.ws_manager import manager
 from netra_backend.app.db.base import CorpusStatus, ClickHouseOperationError
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.corpus.clickhouse_helpers import (

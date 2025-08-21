@@ -142,6 +142,16 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": True,
         "run_both": False
     },
+    "code-quality": {
+        "description": "Code quality checks including circular imports (< 1 minute)",
+        "purpose": "Static code analysis and import validation",
+        "backend_args": [],
+        "frontend_args": [],
+        "timeout": 60,
+        "run_coverage": False,
+        "run_both": False,
+        "custom_validation": ["circular_imports"]
+    },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
 import logging
 
-from auth_service.app..config import AuthConfig
+from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +17,15 @@ class JWTHandler:
     
     def __init__(self):
         self.secret = self._get_jwt_secret()
-        self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
-        self.access_expiry = int(os.getenv("JWT_ACCESS_EXPIRY_MINUTES", "15"))
-        self.refresh_expiry = int(os.getenv("JWT_REFRESH_EXPIRY_DAYS", "7"))
-        self.service_expiry = int(os.getenv("JWT_SERVICE_EXPIRY_MINUTES", "5"))
+        self.algorithm = AuthConfig.get_jwt_algorithm()
+        self.access_expiry = AuthConfig.get_jwt_access_expiry_minutes()
+        self.refresh_expiry = AuthConfig.get_jwt_refresh_expiry_days()
+        self.service_expiry = AuthConfig.get_jwt_service_expiry_minutes()
     
     def _get_jwt_secret(self) -> str:
         """Get JWT secret with production safety"""
         secret = AuthConfig.get_jwt_secret()
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env = AuthConfig.get_environment()
         
         if not secret:
             if env in ["staging", "production"]:

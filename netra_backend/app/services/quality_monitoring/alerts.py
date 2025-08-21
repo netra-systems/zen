@@ -6,7 +6,8 @@ from collections import deque
 import statistics
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.apex_optimizer_agent.models import AlertSeverity, MetricType, QualityAlert
+from netra_backend.app.services.quality_monitoring.models import MetricType, QualityAlert
+from netra_backend.app.core.health_types import AlertSeverity
 from netra_backend.app.services.quality_gate_service import QualityMetrics
 
 logger = central_logger.get_logger(__name__)

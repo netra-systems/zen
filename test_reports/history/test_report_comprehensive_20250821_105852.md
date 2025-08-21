@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:58:52.807364  
+**Generated:** 2025-08-21T10:38:47.185024  
 **Test Level:** comprehensive - Full test suite with coverage including staging tests (30-45 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 4.48s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.93s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 5.12s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.02s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Pre-release validation, full system testing including staging environment
 - **Timeout:** 2700s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 5.41s
+- **Total Duration:** 6.14s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -60,7 +60,7 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -v -n 6 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings --html=reports/tests/report.html --self-contained-html
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 3.80s
+[FAIL] TESTS FAILED with exit code 4 after 4.42s
 
 [Report] HTML Report: reports/tests/report.html
 ================================================================================
@@ -84,15 +84,33 @@ netra_backend\app\services\synthetic_data\generation_coordinator.py:8: in <modul
     from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
 netra_backend\app\services\synthetic_data\core_service_base.py:13: in <module>
     from netra_backend.app.services.synthetic_data.job_manager import JobManager
-netra_backend\app\services\synthetic_data\job_manager.py:15: in <module>
-    from netra_backend.app.services.quality_monitoring.metrics import calculate_generation_rate
-netra_backend\app\services\quality_monitoring\__init__.py:3: in <module>
-    from netra_backend.app.services.quality_monitoring.service import QualityMonitoringService
-netra_backend\app\services\quality_monitoring\service.py:17: in <module>
-    from netra_backend.app.services.quality_monitoring.analytics import TrendAnalyzer
-netra_backend\app\services\quality_monitoring\analytics.py:10: in <module>
-    from netra_backend.app.services.apex_optimizer_agent.models import QualityTrend, MetricType, AgentQualityProfile
-E   ImportError: cannot import name 'QualityTrend' from 'netra_backend.app.services.apex_optimizer_agent.models' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\apex_optimizer_agent\models.py)
+netra_backend\app\services\synthetic_data\job_manager.py:11: in <module>
+    from netra_backend.app.services.websocket.ws_manager import manager
+netra_backend\app\services\websocket\ws_manager.py:14: in <module>
+    from netra_backend.app.ws_manager import (
+netra_backend\app\ws_manager.py:21: in <module>
+    from netra_backend.app.websocket.connection import ConnectionInfo
+netra_backend\app\websocket\connection.py:14: in <module>
+    from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+netra_backend\app\websocket\connection_manager.py:19: in <module>
+    from netra_backend.app.websocket.connection_executor import ConnectionExecutionOrchestrator
+netra_backend\app\websocket\connection_executor.py:13: in <module>
+    from netra_backend.app.agents.base.interface import (
+netra_backend\app\agents\base\__init__.py:15: in <module>
+    from netra_backend.app.agents.base_agent import BaseSubAgent
+netra_backend\app\agents\base_agent.py:9: in <module>
+    from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
+netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
+    from netra_backend.app.routes.unified_tools.router import router
+netra_backend\app\routes\unified_tools\router.py:20: in <module>
+    from netra_backend.app.core.error_handlers import (
+netra_backend\app\core\error_handlers\__init__.py:13: in <module>
+    from netra_backend.app.core.error_handlers.agents.agent_error_handler import AgentErrorHandler
+netra_backend\app\core\error_handlers\agents\__init__.py:4: in <module>
+    from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
+netra_backend\app\core\error_handlers\agents\execution_error_handler.py:13: in <module>
+    from netra_backend.app.base_error_handler import BaseErrorHandler
+E   ModuleNotFoundError: No module named 'netra_backend.app.base_error_handler'
 
 ```
 

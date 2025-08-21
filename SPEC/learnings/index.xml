@@ -42,6 +42,15 @@
             <critical-takeaway>When imports fail, update them to match structure. NEVER move files to accommodate old patterns.</critical-takeaway>
             <critical-takeaway>Test runner uses netra_backend/tests/, dev launcher uses netra_backend.app.main:app.</critical-takeaway>
         </category>
+        
+        <category name="AI-Native Path Management" path="SPEC/learnings/ai_native_path_management.xml" keywords="AI-Native, Path Migration, Refactoring, Service Creation, Batch Operations, Import Management">
+            <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
+            <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
+            <critical-takeaway>Use multi-agent coordination for large migrations: Principal (strategy), Implementation (execution), QA (verification), DevOps (deployment).</critical-takeaway>
+            <critical-takeaway>New services must follow standard scaffold: {service_name}/{service_name}_core/ structure with health endpoints from start.</critical-takeaway>
+            <critical-takeaway>Validate import hierarchy: Core->Models->Services->Routes->Main, never reverse imports.</critical-takeaway>
+            <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
+        </category>
 
         <category name="WebSocket" path="SPEC/learnings/websocket_message_paradox.xml" keywords="Realtime, Coroutine, Async">
             <critical-takeaway context="Error Handling">All failures MUST raise exceptions. Silent failures (e.g., auth hanging) are forbidden.</critical-takeaway>

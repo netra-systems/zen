@@ -11,7 +11,7 @@ from datetime import datetime, UTC
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.shared_health_types import HealthStatus
+from netra_backend.app.core.shared_health_types import HealthStatus
 from netra_backend.app.schemas.core_models import HealthCheckResult
 from netra_backend.app.core.health.telemetry import telemetry_manager
 
