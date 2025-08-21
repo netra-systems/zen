@@ -191,7 +191,7 @@ class ContextCompressor:
                     content=summary,
                     role=group[0].role,
                     token_count=int(sum(seg.token_count for seg in group) * target_reduction),
-                    priority=max(seg.priority for seg in group, key=lambda p: p.value),
+                    priority=max((seg.priority for seg in group), key=lambda p: p.value if hasattr(p, 'value') else p),
                     timestamp=group[-1].timestamp,
                     metadata={"original_segments": len(group), "compression_ratio": target_reduction},
                     compressed=True
@@ -249,7 +249,7 @@ class ContextCompressor:
                     content=summary,
                     role=cluster[0].role,
                     token_count=int(sum(seg.token_count for seg in cluster) * target_reduction),
-                    priority=max(seg.priority for seg in cluster, key=lambda p: p.value),
+                    priority=max((seg.priority for seg in cluster), key=lambda p: p.value if hasattr(p, 'value') else p),
                     timestamp=cluster[-1].timestamp,
                     metadata={"cluster_size": len(cluster)},
                     compressed=True

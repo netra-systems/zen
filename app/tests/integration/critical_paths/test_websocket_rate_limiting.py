@@ -577,12 +577,25 @@ async def redis_client():
         # Use mock for CI environments
         client = AsyncMock()
         client.get = AsyncMock(return_value=None)
-        client.incr = AsyncMock()
-        client.expire = AsyncMock()
+        client.incr = AsyncMock(return_value=1)
+        client.expire = AsyncMock(return_value=True)
         client.hgetall = AsyncMock(return_value={})
-        client.hset = AsyncMock()
-        client.delete = AsyncMock()
+        client.hset = AsyncMock(return_value=True)
+        client.delete = AsyncMock(return_value=1)
+        client.pipeline = AsyncMock()
+        client.scan_iter = AsyncMock(return_value=async_iter([]))
+        
+        # Mock pipeline
+        mock_pipeline = AsyncMock()
+        mock_pipeline.execute = AsyncMock(return_value=[1, True, 1, True])
+        client.pipeline.return_value = mock_pipeline
+        
         yield client
+
+async def async_iter(items):
+    """Helper for async iteration in tests."""
+    for item in items:
+        yield item
 
 
 @pytest.fixture
