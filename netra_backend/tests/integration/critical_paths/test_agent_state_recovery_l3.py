@@ -34,7 +34,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState 
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import UserInDB
 from netra_backend.app.core.exceptions_base import NetraException, StateRecoveryException
 from test_framework.mock_utils import mock_justified

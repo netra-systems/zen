@@ -23,13 +23,6 @@ from pathlib import Path
 from startup_checks import StartupChecker, StartupCheckResult
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.core.app_factory import create_app
 from config import get_config

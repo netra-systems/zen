@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock
 # Add project root to path
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

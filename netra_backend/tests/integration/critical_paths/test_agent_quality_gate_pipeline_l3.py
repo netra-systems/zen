@@ -33,7 +33,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.services.quality_gate.quality_gate_core import QualityGateService
 from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import UserInDB
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.exceptions_base import NetraException, QualityGateException

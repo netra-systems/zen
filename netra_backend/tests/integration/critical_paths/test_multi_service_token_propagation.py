@@ -36,17 +36,10 @@ from auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.db.postgres import get_postgres_db
 from netra_backend.app.db.models_postgres import User
-from redis_manager import RedisManager  
+from netra_backend.app.redis_manager import RedisManager  
 from netra_backend.app.services.agent_service import get_agent_service
 from sqlalchemy import select
 

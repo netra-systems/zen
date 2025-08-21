@@ -6,7 +6,7 @@ Maintains 25-line function limit and focused responsibility.
 """
 
 from typing import List
-from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.startup_checks.models import StartupCheckResult
 from netra_backend.app.core.configuration import unified_config_manager
 
 

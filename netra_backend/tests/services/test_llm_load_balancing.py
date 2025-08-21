@@ -14,13 +14,6 @@ from typing import Dict, List, Any
 from schemas import AppConfig
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.tests.helpers.llm_manager_helpers import (
 

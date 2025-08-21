@@ -45,7 +45,7 @@ from sqlalchemy.exc import DatabaseError, IntegrityError
 
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

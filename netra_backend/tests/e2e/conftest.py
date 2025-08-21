@@ -16,6 +16,7 @@ Provides fixtures for:
 - Authentication and authorization testing
 """
 import os
+import sys
 import asyncio
 import pytest
 import time
@@ -23,6 +24,12 @@ import httpx
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import Mock, AsyncMock, patch
+
+# Add the project root directory to Python path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from netra_backend.tests.e2e.infrastructure import (
     LLMTestManager,
     LLMTestModel,

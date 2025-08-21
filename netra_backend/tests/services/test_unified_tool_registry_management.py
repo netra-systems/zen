@@ -10,13 +10,6 @@ import pytest
 from unittest.mock import MagicMock
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.tool_registry_test_mocks import MockAdvancedTool, create_test_tools, assert_tool_status, ToolStatus

@@ -17,7 +17,7 @@ Architecture:
 import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
-from pydantic import validator, ValidationError
+from pydantic import ValidationError
 from email_validator import validate_email, EmailNotValidError
 
 

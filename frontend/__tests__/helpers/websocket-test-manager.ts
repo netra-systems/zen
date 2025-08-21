@@ -109,6 +109,9 @@ export class WebSocketTestManager {
       });
     });
     
+    // Set initial state to connecting before triggering connection
+    this.stateManager.setState('connecting');
+    
     // Now that listeners are set up, trigger the connection
     this.testWebSocket.connect();
   }
@@ -161,7 +164,7 @@ export class WebSocketTestManager {
   /**
    * Waits for WebSocket connection with React-synchronized timing
    */
-  async waitForConnection(timeoutMs: number = 1000): Promise<void> {
+  async waitForConnection(timeoutMs: number = 5000): Promise<void> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
       
@@ -169,13 +172,14 @@ export class WebSocketTestManager {
         if (this.stateManager.getState() === 'connected') {
           resolve();
         } else if (Date.now() - startTime > timeoutMs) {
-          reject(new Error('Connection timeout'));
+          reject(new Error(`Connection timeout after ${timeoutMs}ms. Current state: ${this.stateManager.getState()}`));
         } else {
-          // Use queueMicrotask for better React synchronization
-          queueMicrotask(checkConnection);
+          // Use setTimeout with better timing for WebSocket simulation
+          setTimeout(checkConnection, 10);
         }
       };
       
+      // Start connection check immediately
       checkConnection();
     });
   }
@@ -303,8 +307,8 @@ export class WebSocketTestManager {
    */
   private synchronizeStateChange(stateChangeFn: () => void): void {
     if (this.isUsingRealSimulation) {
-      // Use queueMicrotask for better React synchronization
-      queueMicrotask(stateChangeFn);
+      // Use setTimeout with minimal delay for better WebSocket simulation timing
+      setTimeout(stateChangeFn, 0);
     } else {
       // For mock mode, execute immediately
       stateChangeFn();

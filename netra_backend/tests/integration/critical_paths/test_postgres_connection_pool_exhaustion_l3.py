@@ -33,7 +33,7 @@ from testcontainers.postgres import PostgresContainer
 from netra_backend.app.db.postgres import get_async_db, get_postgres_session
 from netra_backend.app.db.postgres_core import Database, async_engine
 from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

@@ -13,6 +13,7 @@ from netra_backend.app.services.metrics.agent_metrics import (
     AgentMetricsCollector, AgentMetrics, AgentOperationRecord, 
     AgentMetricType, FailureType, agent_metrics_collector
 )
+from netra_backend.app.services.metrics.analytics_collector import AnalyticsCollector
 
 __all__ = [
     "CorpusMetricsCollector",
@@ -26,5 +27,6 @@ __all__ = [
     "AgentOperationRecord",
     "AgentMetricType", 
     "FailureType",
-    "agent_metrics_collector"
+    "agent_metrics_collector",
+    "AnalyticsCollector"
 ]

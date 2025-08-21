@@ -112,11 +112,15 @@ class RedisManager:
             return await self.redis_client.set(key, value, ex=expiration)
         return None
     
-    async def delete(self, key: str):
-        """Delete a key from Redis"""
-        if self.redis_client:
-            return await self.redis_client.delete(key)
-        return None
+    async def delete(self, *keys):
+        """Delete one or more keys from Redis"""
+        if self.redis_client and keys:
+            try:
+                return await self.redis_client.delete(*keys)
+            except Exception as e:
+                logger.warning(f"Failed to delete keys {keys}: {e}")
+                return 0
+        return 0
 
     def _calculate_list_range(self, limit: int) -> int:
         """Calculate list range end index."""
@@ -157,5 +161,151 @@ class RedisManager:
                 logger.warning(f"Failed to add to list {key}: {e}")
                 return False
         return False
+
+    # Additional Redis methods needed by test files
+    async def keys(self, pattern: str = "*"):
+        """Get keys matching pattern from Redis"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.keys(pattern)
+            except Exception as e:
+                logger.warning(f"Failed to get keys with pattern {pattern}: {e}")
+                return []
+        return []
+
+    async def lpop(self, key: str):
+        """Pop item from left side of list"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.lpop(key)
+            except Exception as e:
+                logger.warning(f"Failed to lpop from {key}: {e}")
+                return None
+        return None
+
+    async def lpush(self, key: str, *values):
+        """Push items to left side of list"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.lpush(key, *values)
+            except Exception as e:
+                logger.warning(f"Failed to lpush to {key}: {e}")
+                return 0
+        return 0
+
+    async def ttl(self, key: str):
+        """Get time to live for key"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.ttl(key)
+            except Exception as e:
+                logger.warning(f"Failed to get ttl for {key}: {e}")
+                return -1
+        return -1
+
+    async def expire(self, key: str, seconds: int):
+        """Set expiration time for key"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.expire(key, seconds)
+            except Exception as e:
+                logger.warning(f"Failed to set expire for {key}: {e}")
+                return False
+        return False
+
+    async def hset(self, key: str, field_or_mapping, value=None):
+        """Set hash field(s)"""
+        if self.redis_client:
+            try:
+                if value is not None:
+                    # hset(key, field, value) format
+                    return await self.redis_client.hset(key, field_or_mapping, value)
+                else:
+                    # hset(key, mapping) format
+                    return await self.redis_client.hset(key, mapping=field_or_mapping)
+            except Exception as e:
+                logger.warning(f"Failed to hset {key}: {e}")
+                return 0
+        return 0
+
+    async def hget(self, key: str, field: str):
+        """Get hash field value"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.hget(key, field)
+            except Exception as e:
+                logger.warning(f"Failed to hget {key} {field}: {e}")
+                return None
+        return None
+
+    async def hgetall(self, key: str):
+        """Get all hash fields and values"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.hgetall(key)
+            except Exception as e:
+                logger.warning(f"Failed to hgetall {key}: {e}")
+                return {}
+        return {}
+
+    async def zadd(self, key: str, mapping: dict):
+        """Add members to sorted set"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.zadd(key, mapping)
+            except Exception as e:
+                logger.warning(f"Failed to zadd to {key}: {e}")
+                return 0
+        return 0
+
+    async def zrangebyscore(self, key: str, min_val, max_val):
+        """Get members from sorted set by score range"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.zrangebyscore(key, min_val, max_val)
+            except Exception as e:
+                logger.warning(f"Failed to zrangebyscore from {key}: {e}")
+                return []
+        return []
+
+    async def rpop(self, key: str):
+        """Pop item from right side of list"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.rpop(key)
+            except Exception as e:
+                logger.warning(f"Failed to rpop from {key}: {e}")
+                return None
+        return None
+
+    async def llen(self, key: str):
+        """Get length of list"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.llen(key)
+            except Exception as e:
+                logger.warning(f"Failed to get llen of {key}: {e}")
+                return 0
+        return 0
+
+    async def scard(self, key: str):
+        """Get number of members in set"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.scard(key)
+            except Exception as e:
+                logger.warning(f"Failed to get scard of {key}: {e}")
+                return 0
+        return 0
+
+    async def scan_keys(self, pattern: str):
+        """Scan keys matching pattern (equivalent to keys but more efficient)"""
+        if self.redis_client:
+            try:
+                return await self.redis_client.keys(pattern)
+            except Exception as e:
+                logger.warning(f"Failed to scan keys with pattern {pattern}: {e}")
+                return []
+        return []
 
 redis_manager = RedisManager()

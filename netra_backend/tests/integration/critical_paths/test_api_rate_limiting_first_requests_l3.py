@@ -30,8 +30,8 @@ from datetime import datetime, timezone, timedelta
 # Add project root to path
 
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
-from redis_manager import RedisManager
-from logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.unified.config import TestTier
 
 # Add project root to path

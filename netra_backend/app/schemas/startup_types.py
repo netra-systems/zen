@@ -16,7 +16,7 @@ Usage:
 
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 
 
@@ -84,7 +84,8 @@ class StartupStatus(BaseModel):
     crash_history: List[CrashEntry] = Field(default_factory=list)
     health_check_history: HealthCheckHistory = Field(default_factory=HealthCheckHistory)
 
-    @validator('crash_history')
+    @field_validator('crash_history')
+    @classmethod
     def limit_crash_history(cls, v: List[CrashEntry]) -> List[CrashEntry]:
         """Limit crash history to last 50 entries."""
         return v[-50:] if len(v) > 50 else v

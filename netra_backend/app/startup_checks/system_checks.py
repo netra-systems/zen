@@ -10,7 +10,7 @@ from typing import List, Tuple
 from pathlib import Path
 import psutil
 from netra_backend.app.config import settings
-from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.startup_checks.models import StartupCheckResult
 
 
 class SystemChecker:

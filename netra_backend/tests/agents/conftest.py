@@ -1,9 +1,17 @@
 """Shared fixtures for agent tests."""
 
+import os
+import sys
 import pytest
 import uuid
 from unittest.mock import Mock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Add the project root directory to Python path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.core.config import get_config

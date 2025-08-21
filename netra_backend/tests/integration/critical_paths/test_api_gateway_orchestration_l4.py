@@ -27,13 +27,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 import httpx
 
-# Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 aioredis
 
 # Add project root to path
@@ -43,7 +36,7 @@ aioredis
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 # from auth_integration import create_access_token, validate_token_jwt
 # from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock

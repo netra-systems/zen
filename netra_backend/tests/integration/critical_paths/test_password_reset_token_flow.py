@@ -40,7 +40,7 @@ import redis.asyncio as aioredis
 # Add project root to path
 
 from netra_backend.app.schemas.auth_types import TokenData, UserInfo
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

@@ -10,7 +10,7 @@ import asyncio
 from typing import List
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.llm_types import LLMProvider
-from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.startup_checks.models import StartupCheckResult
 from netra_backend.app.core.configuration import unified_config_manager
 
 

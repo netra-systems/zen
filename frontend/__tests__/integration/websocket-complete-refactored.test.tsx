@@ -28,12 +28,9 @@ import {
   AdvancedWebSocketTester
 } from '../setup/websocket-test-utils';
 
-// Import all modular test suites for comprehensive coverage
-import './websocket-lifecycle.test';
-import './websocket-messaging.test';
-import './websocket-large-messages.test';
-import './websocket-performance.test';
-import './websocket-stress.test';
+// Note: Modular test suites are run separately to avoid import conflicts
+// Tests for lifecycle, messaging, large-messages, performance, and stress 
+// are available in their respective test files
 
 // Re-export shared components from the modular architecture
 export { 

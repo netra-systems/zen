@@ -25,13 +25,6 @@ from pathlib import Path
 from config import get_config, reload_config, validate_configuration
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.core.configuration.base import get_unified_config, config_manager
 from netra_backend.app.schemas.Config import AppConfig

@@ -28,7 +28,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 from config import get_config
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
 logger = logging.getLogger(__name__)

@@ -14,13 +14,6 @@ import json
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
 from schemas import AppConfig, LLMConfig

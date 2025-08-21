@@ -31,7 +31,7 @@ from decimal import Decimal
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.user_service import user_service as UserService
 from netra_backend.app.services.audit_service import AuditService
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.core.security.encryption_service import EncryptionService
 from netra_backend.app.core.cache.cache_manager import CacheManager
