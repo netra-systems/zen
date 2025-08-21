@@ -10,9 +10,9 @@ from typing import Optional, Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_service.tests..config.test_settings import TestSettings
-from auth_service.tests..config.test_env import TestEnvironment
-from auth_service.tests..factories import (
+from auth_service.tests.config.test_settings import TestSettings
+from auth_service.tests.config.test_env import TestEnvironment
+from auth_service.tests.factories import (
     UserFactory, AuthUserFactory,
     SessionFactory, AuthSessionFactory,
     TokenFactory, PermissionFactory
