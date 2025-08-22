@@ -277,6 +277,8 @@ def main():
                         help='Include test directories')
     parser.add_argument('--enhanced-mode', action='store_true',
                         help='Use enhanced categorizer when available (preview)')
+    parser.add_argument('--dirs', nargs='+', 
+                        help='Specific directories to scan (default: main app directories)')
     
     args = parser.parse_args()
     
@@ -292,10 +294,14 @@ def main():
     
     indexer = StringLiteralIndexer(root_dir)
     
-    # Scan main directories (updated directory list)
-    dirs_to_scan = ['netra_backend', 'frontend', 'auth_service', 'scripts', 'shared']
-    if args.include_tests:
-        dirs_to_scan.extend(['tests', '__tests__'])
+    # Determine directories to scan
+    if args.dirs:
+        dirs_to_scan = args.dirs
+    else:
+        # Scan main directories (updated directory list)
+        dirs_to_scan = ['netra_backend', 'frontend', 'auth_service', 'scripts', 'shared']
+        if args.include_tests:
+            dirs_to_scan.extend(['tests', '__tests__'])
         
     for dir_name in dirs_to_scan:
         dir_path = root_dir / dir_name

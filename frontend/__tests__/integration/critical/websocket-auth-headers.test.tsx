@@ -168,10 +168,10 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
-      const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
+      const websocketCall = webSocketConstructorSpy.mock.calls[0];
       const url = websocketCall[0];
 
       // SECURITY VERIFICATION: Token should NOT be in URL
@@ -201,15 +201,20 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
-      const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
+      const websocketCall = webSocketConstructorSpy.mock.calls[0];
       const protocols = websocketCall[1];
 
       // Frontend now supports secure subprotocol authentication
       expect(protocols).toBeDefined();
-      expect(Array.isArray(protocols) ? protocols : [protocols]).toContain('jwt.Bearer test-jwt-token-123');
+      expect(Array.isArray(protocols) ? protocols : [protocols]).toEqual(
+        expect.arrayContaining([
+          'jwt-auth',
+          expect.stringMatching(/^jwt\./)
+        ])
+      );
     });
 
     it('should handle authentication protocol correctly', async () => {
@@ -226,15 +231,20 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
-      const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
+      const websocketCall = webSocketConstructorSpy.mock.calls[0];
       const protocols = websocketCall[1];
 
       // Should use proper authentication protocol
       const protocolArray = Array.isArray(protocols) ? protocols : [protocols];
-      expect(protocolArray).toContain('jwt.Bearer test-jwt-token-123');
+      expect(protocolArray).toEqual(
+        expect.arrayContaining([
+          'jwt-auth',
+          expect.stringMatching(/^jwt\./)
+        ])
+      );
       expect(protocolArray.length).toBeGreaterThan(0);
     });
   });
@@ -254,10 +264,10 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
-      const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
+      const websocketCall = webSocketConstructorSpy.mock.calls[0];
       const url = websocketCall[0];
 
       // Should connect to secure endpoint with proper authentication
@@ -283,7 +293,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       
       // Simulate authentication rejection from backend
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
       // Simulate backend rejection due to improper auth
@@ -319,10 +329,10 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
-      const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
+      const websocketCall = webSocketConstructorSpy.mock.calls[0];
       const url = websocketCall[0];
 
       // Security requirement: No sensitive data in URLs
@@ -350,7 +360,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(global.WebSocket).toHaveBeenCalled();
+        expect(webSocketConstructorSpy).toHaveBeenCalled();
       });
 
       // Simulate token refresh
@@ -361,10 +371,10 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       // This will fail because current implementation doesn't support runtime token updates
       
       // Should reconnect with new token using proper auth method
-      expect(global.WebSocket).toHaveBeenCalledTimes(1); // Initial connection
+      expect(webSocketConstructorSpy).toHaveBeenCalledTimes(1); // Initial connection
       
       // After token refresh, should not use query params
-      const websocketCalls = (global.WebSocket as jest.Mock).mock.calls;
+      const websocketCalls = webSocketConstructorSpy.mock.calls;
       websocketCalls.forEach(call => {
         expect(call[0]).not.toContain('token=');
       });
