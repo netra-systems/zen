@@ -31,7 +31,6 @@ from tests.e2e.websocket_resilience_core import (
     AgentErrorSimulator
 )
 
-
 @pytest.mark.asyncio
 class TestWebSocketReconnectionWithStateRecovery:
     """Test #3: WebSocket Reconnection with State Recovery."""
@@ -51,7 +50,7 @@ class TestWebSocketReconnectionWithStateRecovery:
         """Initialize message continuity validator."""
         return MessageContinuityValidator()
     
-    async def test_real_connection_drop_and_recovery(self, test_core, state_manager,
+    async def test_real_connection_drop_and_recovery(self, test_core, state_manager,:
                                                    continuity_validator):
         """Test real connection drop with automatic reconnection and state recovery."""
         user_id = TEST_USERS["enterprise"].id
@@ -98,7 +97,6 @@ class TestWebSocketReconnectionWithStateRecovery:
         assert "active_conversations" in state_data
         assert "message_history" in state_data
         assert state_data["user_id"] == user_id
-
 
 @pytest.mark.asyncio
 class TestErrorMessageToUserNotificationRecovery:

@@ -9,15 +9,15 @@ import sys
 
 # Add the project root directory to Python path for imports
 
-from netra_backend.tests.e2e.infrastructure.e2e.infrastructure.llm_test_manager import (
+from netra_backend.tests.e2e.infrastructure.llm_test_manager import (
     LLMTestConfig,
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,
     LLMTestResponse,
 )
-from netra_backend.tests.e2e.e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
-from netra_backend.tests.e2e.infrastructure.e2e.infrastructure.llm_response_cache import (
+from netra_backend.tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
+from netra_backend.tests.e2e.infrastructure.llm_response_cache import (
     CacheEntry,
     CacheStatistics,
     LLMResponseCache,

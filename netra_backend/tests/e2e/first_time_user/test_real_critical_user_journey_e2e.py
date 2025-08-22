@@ -15,21 +15,21 @@ Real Critical User Journey E2E Tests - First-time user experience validation wit
 Each test follows 25-line function limit through delegation to specialized helper classes.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
 
 import pytest
 
-from netra_backend.tests.agents.test_helpers import (
+from netra_backend.tests.e2e.first_time_user.real_critical_helpers import (
     AIProviderHelpers,
     ConcurrentTestHelpers,
     OAuthFlowHelpers,
     OptimizationHelpers,
     WebSocketHelpers,
 )
-from netra_backend.tests.real_critical_fixtures import *
+from netra_backend.tests.e2e.first_time_user.real_critical_fixtures import *
 
 @pytest.mark.real_e2e
 class TestRealCriticalUserJourney:

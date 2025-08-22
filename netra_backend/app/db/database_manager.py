@@ -24,6 +24,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 
 
@@ -37,7 +38,18 @@ class DatabaseManager:
         Returns:
             Clean database URL with driver prefixes and SSL params stripped
         """
+        # First check direct environment variable (for tests that patch os.environ)
+        import os
         raw_url = os.environ.get("DATABASE_URL", "")
+        
+        # If not found, try unified config
+        if not raw_url:
+            try:
+                config = get_unified_config()
+                raw_url = config.database_url or ""
+            except Exception:
+                pass  # Will use default URL below
+        
         if not raw_url:
             return DatabaseManager._get_default_database_url()
         
@@ -160,9 +172,13 @@ class DatabaseManager:
         """
         migration_url = DatabaseManager.get_migration_url_sync_format()
         
+        # Check SQL_ECHO environment variable directly since unified config doesn't support it
+        import os
+        sql_echo = os.environ.get("SQL_ECHO", "false").lower() in ("true", "1", "yes", "on")
+        
         return create_engine(
             migration_url,
-            echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+            echo=sql_echo,
             pool_pre_ping=True,
             pool_recycle=3600,
         )
@@ -188,9 +204,13 @@ class DatabaseManager:
                 }
             }
         
+        # Check SQL_ECHO environment variable directly since unified config doesn't support it
+        import os
+        sql_echo = os.environ.get("SQL_ECHO", "false").lower() in ("true", "1", "yes", "on")
+        
         return create_async_engine(
             app_url,
-            echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+            echo=sql_echo,
             pool_pre_ping=True,
             pool_recycle=3600,
             pool_size=10,
@@ -230,7 +250,18 @@ class DatabaseManager:
         Returns:
             True if using Cloud SQL Unix socket connections
         """
+        # First check direct environment variable (for tests that patch os.environ)
+        import os
         database_url = os.environ.get("DATABASE_URL", "")
+        
+        # If not found, try unified config
+        if not database_url:
+            try:
+                config = get_unified_config()
+                database_url = config.database_url or ""
+            except Exception:
+                pass  # Will return False below
+        
         return "/cloudsql/" in database_url
     
     @staticmethod

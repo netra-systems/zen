@@ -33,7 +33,6 @@ pytestmark = pytest.mark.skipif(
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
 )
 
-
 class MultiServiceWebSocketAuthTester:
     """Tests WebSocket authentication flow across Auth, Backend, and Database services."""
     
@@ -204,7 +203,7 @@ class MultiServiceWebSocketAuthTester:
             
         return True  # Accept any response as valid user context
     
-    async def test_websocket_reconnection_with_token(
+    async def test_websocket_reconnection_with_token(:
         self, token: str, expected_user_email: str
     ) -> Dict[str, Any]:
         """Test WebSocket reconnection maintains session continuity."""
@@ -278,7 +277,6 @@ class MultiServiceWebSocketAuthTester:
                 "session_continuity": False,
                 "error": str(e)
             }
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -357,7 +355,6 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     
     print(f"✓ Complete multi-service WebSocket auth flow successful in {total_flow_time:.3f}s")
 
-
 @pytest.mark.asyncio
 async def test_websocket_reconnect_maintains_session_continuity(real_services):
     """Test that WebSocket reconnection with valid token maintains session continuity."""
@@ -382,7 +379,6 @@ async def test_websocket_reconnect_maintains_session_continuity(real_services):
     print(f"✓ WebSocket reconnection with session continuity in {reconnect_result['reconnection_time']:.3f}s")
     print(f"✓ First message context: {reconnect_result['first_message_context']}")
     print(f"✓ Second message context: {reconnect_result['second_message_context']}")
-
 
 @pytest.mark.asyncio 
 async def test_multiple_users_concurrent_websocket_auth(real_services):
@@ -458,7 +454,6 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
             except Exception as e:
                 print(f"Warning: Error disconnecting WebSocket: {e}")
 
-
 @pytest.mark.asyncio
 async def test_cross_service_token_consistency_validation(real_services):
     """Test that tokens are consistently validated across Auth, Backend, and WebSocket services."""
@@ -505,7 +500,6 @@ async def test_cross_service_token_consistency_validation(real_services):
         await websocket.disconnect()
     
     print("✓ Token consistently validated across all service boundaries")
-
 
 # Business Impact Summary
 """

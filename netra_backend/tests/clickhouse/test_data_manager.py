@@ -6,7 +6,7 @@ Handles test data insertion and management for ClickHouse
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import json
 from dataclasses import asdict

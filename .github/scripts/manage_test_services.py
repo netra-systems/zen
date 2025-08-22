@@ -62,7 +62,7 @@ class TestServiceManager:
         return {
             "postgres": ServiceConfig(
                 name="test-postgres",
-                image="postgres:15-alpine",
+                image="postgres:17.6-alpine",
                 ports={"5432": "5433"},
                 env_vars={
                     "POSTGRES_DB": "netra_test",

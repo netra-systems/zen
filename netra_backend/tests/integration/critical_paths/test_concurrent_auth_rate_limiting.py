@@ -10,7 +10,7 @@ L3 Test: Real Redis rate limiting with concurrent auth requests, per-IP/user lim
 proper error responses, and rate limit reset validation.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

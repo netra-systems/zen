@@ -39,7 +39,7 @@ class ControlledSignupHelper:
         pass
     
     @staticmethod
-    async def verify_user_in_database(user_id: str, test_user_data: Dict[str, Any]) -> None:
+    async def test_verify_user_in_database(user_id: str, test_user_data: Dict[str, Any]) -> None:
         """Verify user exists in test environment."""
         assert user_id == test_user_data["user_id"], f"User ID mismatch: {user_id}"
         assert test_user_data["email"], "User email must be set"
@@ -49,7 +49,7 @@ class ControlledLoginHelper:
     """Helper for controlled login operations."""
     
     @staticmethod
-    async def execute_controlled_login(test_user_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def test_execute_controlled_login(test_user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute controlled login with JWT token generation."""
         # Generate test JWT token (controlled but realistic)
         access_token = f"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{uuid.uuid4().hex}.{uuid.uuid4().hex[:16]}"

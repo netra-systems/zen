@@ -33,14 +33,12 @@ from tests.e2e.agent_startup_validators import AgentStartupValidatorSuite
 # Test infrastructure
 from tests.e2e.config import TEST_CONFIG, TestTier
 
-
 class CoverageLevel(str, Enum):
     """Test coverage validation levels"""
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     COMPLETE = "complete"
-
 
 class StartupTestArea(str, Enum):
     """Agent startup test areas"""
@@ -55,7 +53,6 @@ class StartupTestArea(str, Enum):
     CONCURRENT_USERS = "concurrent_users"
     EDGE_CASES = "edge_cases"
 
-
 @dataclass
 class CoverageMetrics:
     """Container for test coverage metrics"""
@@ -67,7 +64,6 @@ class CoverageMetrics:
     missing_areas: List[str] = field(default_factory=list)
     coverage_percentage: float = 0.0
 
-
 @dataclass
 class TestValidationResult:
     """Result of test validation"""
@@ -77,7 +73,6 @@ class TestValidationResult:
     test_count: int
     edge_cases: List[str] = field(default_factory=list)
     performance_metrics: Dict[str, Any] = field(default_factory=dict)
-
 
 class StartupTestDiscoverer:
     """Discovers and analyzes agent startup tests"""
@@ -131,7 +126,6 @@ class StartupTestDiscoverer:
                 
         return areas
 
-
 class TestContentAnalyzer:
     """Analyzes test file content for completeness"""
     
@@ -160,7 +154,7 @@ class TestContentAnalyzer:
     
     def _count_test_functions(self, content: str) -> int:
         """Count test functions in file"""
-        return content.count("async def test_") + content.count("def test_")
+        return content.count("async def test_") + content.count("def test_"):
     
     def _identify_edge_cases(self, content: str) -> List[str]:
         """Identify edge cases covered in tests"""
@@ -208,7 +202,6 @@ class TestContentAnalyzer:
             "authenticate", "websocket", "supervisor", "agent",
             "response", "timeout", "performance", "validation"
         ]
-
 
 class CoverageReportGenerator:
     """Generates comprehensive coverage reports"""
@@ -308,7 +301,6 @@ class CoverageReportGenerator:
         with open(self.report_file, 'w') as f:
             json.dump(report, f, indent=2)
 
-
 class StartupCoverageValidator:
     """Complete startup test coverage validator"""
     
@@ -354,7 +346,6 @@ class StartupCoverageValidator:
             coverage_percentage=(covered_areas / required_areas) * 100
         )
 
-
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
 async def test_validate_10_critical_startup_tests():
@@ -366,7 +357,6 @@ async def test_validate_10_critical_startup_tests():
     assert summary["status"] == "COMPLETE", f"Coverage incomplete: {summary['coverage_percentage']}%"
     assert "10/10" in summary["critical_coverage"], "Not all 10 critical tests implemented"
 
-
 @pytest.mark.asyncio  
 @pytest.mark.coverage_validation
 async def test_validate_all_startup_paths_covered():
@@ -376,7 +366,6 @@ async def test_validate_all_startup_paths_covered():
     
     missing_coverage = coverage_report["missing_coverage"] 
     assert len(missing_coverage) == 0, f"Missing coverage for: {missing_coverage}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation  
@@ -388,7 +377,6 @@ async def test_validate_no_missing_edge_cases():
     recommendations = coverage_report["recommendations"]
     edge_case_missing = any("edge case" in rec for rec in recommendations)
     assert not edge_case_missing, f"Missing edge cases: {recommendations}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
@@ -405,7 +393,6 @@ async def test_validate_performance_metrics_tracked():
     missing_metrics = required_metrics - tracked_metrics
     assert len(missing_metrics) == 0, f"Missing performance metrics: {missing_metrics}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.coverage_validation
 async def test_validate_all_services_integration():
@@ -420,12 +407,10 @@ async def test_validate_all_services_integration():
     missing_service_areas = set(service_areas) - covered_areas
     assert len(missing_service_areas) == 0, f"Missing service integration: {missing_service_areas}"
 
-
 @pytest.fixture
 def startup_coverage_validator():
     """Provide startup coverage validator for tests"""
     return StartupCoverageValidator()
-
 
 @pytest.fixture
 def sample_coverage_data():
@@ -436,7 +421,6 @@ def sample_coverage_data():
         "edge_cases": 8,
         "performance_tests": 4
     }
-
 
 # Export validation components
 __all__ = [

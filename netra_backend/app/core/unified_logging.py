@@ -59,11 +59,21 @@ class UnifiedLogger:
             # Fallback configuration if config module not available
             return {
                 # @marked: Logging bootstrap before config initialization
-                'log_level': os.getenv('LOG_LEVEL', 'INFO').upper(),
+                'log_level': self._get_fallback_log_level(),
                 'enable_file_logging': False,
                 'enable_json_logging': False,
                 'log_file_path': 'logs/netra.log'
             }
+    
+    def _get_fallback_log_level(self) -> str:
+        """Get log level from unified config with fallback."""
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            return config.logging.level.upper()
+        except:
+            # Ultimate fallback
+            return "INFO"
     
     def _setup_logging(self):
         """Initialize the logging system."""

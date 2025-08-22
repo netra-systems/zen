@@ -6,7 +6,7 @@ Business Value: Prevents $12K MRR loss from data consistency issues.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime

@@ -13,7 +13,7 @@ Comprehensive test for database failover and recovery flow:
 This test validates database high availability and disaster recovery.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

@@ -14,7 +14,7 @@ Quality target: ≥0.6 quality score threshold with real-time monitoring.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

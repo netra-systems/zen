@@ -70,7 +70,7 @@ class ErrorPropagationTester:
             logger.error(f"Failed to setup test environment: {e}")
             return False
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Clean up test resources."""
         if self.ws_client:
             await self.ws_client.close()

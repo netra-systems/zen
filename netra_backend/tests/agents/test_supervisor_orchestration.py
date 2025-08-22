@@ -9,7 +9,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from netra_backend.tests.test_supervisor_basic import TestSupervisorOrchestration
 from netra_backend.tests.test_supervisor_patterns import (

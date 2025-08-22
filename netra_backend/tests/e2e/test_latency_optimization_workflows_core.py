@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import time
 
@@ -19,7 +19,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.latency_optimization_helpers import (
+# from latency_optimization_helpers - using fixtures instead (
     create_3x_latency_state,
     create_bottleneck_analysis_state,
     create_caching_optimization_state,

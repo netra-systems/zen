@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents 100% service outage affecting all customers
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

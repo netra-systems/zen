@@ -9,14 +9,11 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.test_capacity_planning import TestCapacityPlanningWorkflows
-from netra_backend.tests.test_rate_limit_analysis import TestRateLimitImpactAnalysis
-from netra_backend.tests.test_scaling_edge_cases import TestScalingEdgeCases
-from netra_backend.tests.test_scaling_integrity import TestScalingWorkflowIntegrity
-from netra_backend.tests.test_scaling_metrics import TestScalingMetricsValidation
-from netra_backend.tests.test_usage_increase_analysis import (
+from netra_backend.tests.e2e.test_capacity_planning import TestCapacityPlanningWorkflows
+from netra_backend.tests.e2e.test_rate_limit_analysis import TestRateLimitImpactAnalysis
+from netra_backend.tests.e2e.test_usage_increase_analysis import (
     TestUsageIncreaseAnalysis,
 )
 
@@ -25,7 +22,4 @@ __all__ = [
     'TestUsageIncreaseAnalysis',
     'TestRateLimitImpactAnalysis', 
     'TestCapacityPlanningWorkflows',
-    'TestScalingMetricsValidation',
-    'TestScalingWorkflowIntegrity',
-    'TestScalingEdgeCases'
 ]

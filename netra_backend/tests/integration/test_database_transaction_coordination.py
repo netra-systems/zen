@@ -16,7 +16,7 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

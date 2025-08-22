@@ -29,7 +29,6 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-
 class ThreadStateManager:
     """Manages thread state persistence and validation."""
     
@@ -218,12 +217,10 @@ class ThreadStateManager:
         """Get state operations for specific user."""
         return [op for op in self.state_operations if op["user_id"] == user_id]
 
-
 @pytest.fixture
 def thread_state_manager(ws_thread_fixtures, thread_context_manager):
     """Thread state manager fixture."""
     return ThreadStateManager(ws_thread_fixtures, thread_context_manager)
-
 
 @pytest.fixture
 async def stateful_thread_setup(ws_thread_fixtures, thread_state_manager):
@@ -292,7 +289,6 @@ async def stateful_thread_setup(ws_thread_fixtures, thread_state_manager):
         "preserved_state": preserved_state
     }
 
-
 @pytest.mark.asyncio
 async def test_thread_state_preservation_across_operations(stateful_thread_setup, thread_state_manager):
     """Test thread state is preserved across various operations."""
@@ -325,9 +321,8 @@ async def test_thread_state_preservation_across_operations(stateful_thread_setup
     assert initial_snapshot["preserved_state"] == final_snapshot["preserved_state"], \
            "Preserved state must remain intact across operations"
 
-
 @pytest.mark.asyncio
-async def test_thread_state_restoration_after_interruption(stateful_thread_setup, 
+async def test_thread_state_restoration_after_interruption(stateful_thread_setup,:
                                                             thread_state_manager, ws_thread_fixtures):
     """Test thread state can be restored after connection interruption."""
     user = stateful_thread_setup["user"]
@@ -372,9 +367,8 @@ async def test_thread_state_restoration_after_interruption(stateful_thread_setup
     assert original_preserved_state == restored_state, \
            "Restored state must match original preserved state"
 
-
 @pytest.mark.asyncio
-async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_state_manager, 
+async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_state_manager,:
                                                 thread_context_manager):
     """Test state isolation across multiple threads for same user."""
     user = TEST_USERS["enterprise"]
@@ -452,7 +446,6 @@ async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_state_
                 assert restored_state != other_state, \
                        f"Thread {i} state must be different from thread {j} state"
 
-
 @pytest.mark.asyncio
 async def test_thread_state_versioning_and_updates(stateful_thread_setup, thread_state_manager):
     """Test thread state versioning and incremental updates."""
@@ -517,7 +510,6 @@ async def test_thread_state_versioning_and_updates(stateful_thread_setup, thread
     assert "tertiary_agent" in restored_state["agent_states"]
     assert restored_state["execution_context"]["current_phase"] == "optimization"
     assert len(restored_state["execution_context"]["checkpoints"]) == 4
-
 
 @pytest.mark.asyncio
 async def test_thread_state_performance_under_load(ws_thread_fixtures, thread_state_manager):

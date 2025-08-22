@@ -4,7 +4,7 @@ Tests the complete agent pipeline with real LLM calls and proper error handling.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
@@ -18,7 +18,7 @@ import uuid
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas import SubAgentLifecycle
-from netra_backend.tests.state_validation_utils import StateIntegrityChecker, StateValidationReporter
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 @pytest.mark.skipif(
 

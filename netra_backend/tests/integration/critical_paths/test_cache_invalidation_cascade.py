@@ -13,7 +13,7 @@ Comprehensive test to verify cache invalidation cascade:
 This test ensures cache consistency across all service layers.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

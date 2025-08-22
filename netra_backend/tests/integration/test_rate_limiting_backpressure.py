@@ -29,7 +29,7 @@ from pathlib import Path
 - Ensures 100% code coverage for rate limiting components
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

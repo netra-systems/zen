@@ -14,7 +14,7 @@ L3 Realism: Tests against real database constraints, Redis rate limiting, ClickH
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging

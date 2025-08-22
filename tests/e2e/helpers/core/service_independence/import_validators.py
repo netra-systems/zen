@@ -60,7 +60,7 @@ class ImportIndependenceValidator:
                 path=self.project_root / "frontend", 
                 entry_point="package.json",
                 required_files=["package.json", "next.config.ts", "app/layout.tsx"],
-                forbidden_patterns=["from ../app/", "from ../auth_service/", "import('../app", "import('../auth_service"],
+                forbidden_patterns=["from netra_backend./app/", "from netra_backend./auth_service/", "import('../app", "import('../auth_service"],
                 allowed_external_deps={"next", "react", "axios", "fetch"},
                 api_endpoints=["/api/health", "/"]
             )

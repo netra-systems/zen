@@ -48,7 +48,6 @@ class TestUser:
 
     startup_metrics: Dict[str, float] = field(default_factory=dict)
 
-
 class IsolationReport:
 
     """Report for isolation validation results."""
@@ -65,14 +64,12 @@ class IsolationReport:
 
     validation_details: Dict[str, Any] = field(default_factory=dict)
 
-
 class ContaminationReport:
 
     """Report for cross-contamination detection."""
 
     incidents: List[Dict[str, Any]] = field(default_factory=list)
     
-
     def add_contamination_incident(self, source_user: str, target_user: str, 
 
                                  contaminated_data: str, detection_context: Dict[str, Any]):
@@ -93,7 +90,6 @@ class ContaminationReport:
 
         })
     
-
     @property
 
     def contamination_incidents(self) -> int:
@@ -101,7 +97,6 @@ class ContaminationReport:
         """Get total contamination incidents."""
 
         return len(self.incidents)
-
 
 class ConcurrentTestReport:
 
@@ -125,7 +120,6 @@ class ConcurrentTestReport:
 
     state_isolation: Optional[IsolationReport] = None
     
-
     @property
 
     def success_rate(self) -> float:
@@ -138,7 +132,6 @@ class ConcurrentTestReport:
 
         return self.successful_startups / self.total_users
     
-
     @property
 
     def test_duration(self) -> float:
@@ -149,12 +142,10 @@ class ConcurrentTestReport:
 
         return end_time - self.test_start_time
 
-
 class ConcurrentTestEnvironment:
 
     """Manages test environment for concurrent agent startup testing."""
     
-
     def __init__(self):
 
         self.redis_client: Optional[redis.Redis] = None
@@ -165,7 +156,6 @@ class ConcurrentTestEnvironment:
 
         self.cleanup_tasks: List[asyncio.Task] = []
     
-
     async def initialize(self):
 
         """Initialize test environment."""
@@ -204,7 +194,6 @@ class ConcurrentTestEnvironment:
 
         logger.info("Concurrent test environment initialized successfully")
     
-
     async def _verify_services(self):
 
         """Verify all required services are available."""
@@ -241,7 +230,6 @@ class ConcurrentTestEnvironment:
 
                 logger.warning(f"Auth service not available: {e}")
     
-
     async def seed_user_data(self, users: List[TestUser]):
 
         """Seed user data in databases."""
@@ -260,10 +248,8 @@ class ConcurrentTestEnvironment:
 
             await asyncio.gather(*tasks, return_exceptions=True)
         
-
         logger.info("User data seeding completed")
     
-
     async def _seed_single_user(self, user: TestUser):
 
         """Seed data for a single user."""
@@ -291,14 +277,12 @@ class ConcurrentTestEnvironment:
 
             )
     
-
     async def cleanup_user_data(self, users: List[TestUser]):
 
         """Clean up user data from databases."""
 
         logger.info(f"Cleaning up data for {len(users)} users...")
         
-
         user_ids = [user.user_id for user in users]
         
         # Clean database
@@ -337,10 +321,8 @@ class ConcurrentTestEnvironment:
 
             await self.redis_client.delete(*redis_keys)
         
-
         logger.info("User data cleanup completed")
     
-
     async def cleanup(self):
 
         """Clean up test environment."""
@@ -349,36 +331,30 @@ class ConcurrentTestEnvironment:
 
             await self.cleanup_user_data(self.test_users)
         
-
         if self.redis_client:
 
             await self.redis_client.aclose()
         
-
         if self.db_pool:
 
             await self.db_pool.close()
-
 
 class CrossContaminationDetector:
 
     """Advanced detection system for identifying data leakage between users."""
     
-
     def __init__(self):
 
         self.contamination_patterns = []
 
         self.sensitivity_markers = set()
     
-
     async def inject_unique_markers(self, users: List[TestUser]) -> Dict[str, Set[str]]:
 
         """Inject unique sensitivity markers for each user."""
 
         user_markers = {}
         
-
         for user in users:
 
             markers = {
@@ -389,7 +365,6 @@ class CrossContaminationDetector:
 
             }
             
-
             user_markers[user.user_id] = markers
 
             self.sensitivity_markers.update(markers)
@@ -408,17 +383,14 @@ class CrossContaminationDetector:
 
             })
         
-
         return user_markers
     
-
     async def scan_for_contamination(self, responses: List[Dict[str, Any]], user_markers: Dict[str, Set[str]]) -> ContaminationReport:
 
         """Scan agent responses for cross-user contamination."""
 
         contamination_report = ContaminationReport()
         
-
         for response in responses:
 
             user_id = response.get('user_id')
@@ -427,7 +399,6 @@ class CrossContaminationDetector:
 
                 continue
                 
-
             response_text = json.dumps(response)
             
             # Check for other users' markers in this response
@@ -452,15 +423,12 @@ class CrossContaminationDetector:
 
                             )
         
-
         return contamination_report
-
 
 class ConcurrentTestOrchestrator:
 
     """Orchestrates concurrent agent startup testing."""
     
-
     def __init__(self, test_env: ConcurrentTestEnvironment):
 
         self.test_env = test_env
@@ -469,7 +437,6 @@ class ConcurrentTestOrchestrator:
 
         self.contamination_detector = CrossContaminationDetector()
     
-
     async def create_concurrent_users(self, count: int) -> List[TestUser]:
 
         """Create concurrent test users with unique data."""
@@ -478,7 +445,6 @@ class ConcurrentTestOrchestrator:
 
         regions = ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]
         
-
         for i in range(count):
 
             user = TestUser(
@@ -521,10 +487,8 @@ class ConcurrentTestOrchestrator:
 
         await self.contamination_detector.inject_unique_markers(users)
         
-
         return users
     
-
     def _generate_test_jwt(self, user_id: str) -> str:
 
         """Generate test JWT token for user."""
@@ -543,7 +507,6 @@ class ConcurrentTestOrchestrator:
 
         return jwt.encode(payload, "test-secret", algorithm="HS256")
     
-
     async def establish_websocket_connections(self, users: List[TestUser]) -> int:
 
         """Establish WebSocket connections for all users concurrently."""
@@ -556,14 +519,12 @@ class ConcurrentTestOrchestrator:
 
         successful_connections = 0
         
-
         for i in range(0, len(users), batch_size):
 
             batch_end = min(i + batch_size, len(users))
 
             batch_users = users[i:batch_end]
             
-
             connection_tasks = [
 
                 self._establish_single_connection(user) 
@@ -572,10 +533,8 @@ class ConcurrentTestOrchestrator:
 
             ]
             
-
             results = await asyncio.gather(*connection_tasks, return_exceptions=True)
             
-
             for j, result in enumerate(results):
 
                 if isinstance(result, Exception):
@@ -592,12 +551,10 @@ class ConcurrentTestOrchestrator:
 
                 await asyncio.sleep(0.5)
         
-
         logger.info(f"Successfully established {successful_connections} WebSocket connections")
 
         return successful_connections
     
-
     async def _establish_single_connection(self, user: TestUser) -> bool:
 
         """Establish WebSocket connection for a single user."""
@@ -610,7 +567,6 @@ class ConcurrentTestOrchestrator:
 
             uri = f"{SERVICE_ENDPOINTS['websocket']}?token={user.auth_token}"
             
-
             user.websocket_client = await websockets.connect(
 
                 uri,
@@ -619,12 +575,10 @@ class ConcurrentTestOrchestrator:
 
             )
             
-
             user.startup_metrics['websocket_connection_time'] = time.time() - start_time
 
             return True
             
-
         except Exception as e:
 
             logger.warning(f"Failed to establish WebSocket connection for user {user.user_id}: {e}")
@@ -633,7 +587,6 @@ class ConcurrentTestOrchestrator:
 
             return False
     
-
     async def send_concurrent_first_messages(self, users: List[TestUser]) -> List[Dict[str, Any]]:
 
         """Send first messages concurrently to all connected users."""
@@ -644,7 +597,6 @@ class ConcurrentTestOrchestrator:
 
         connected_users = [user for user in users if user.websocket_client]
         
-
         if not connected_users:
 
             logger.error("No connected users available for message sending")
@@ -661,7 +613,6 @@ class ConcurrentTestOrchestrator:
 
         ]
         
-
         responses = await asyncio.gather(*message_tasks, return_exceptions=True)
         
         # Process responses
@@ -678,12 +629,10 @@ class ConcurrentTestOrchestrator:
 
                 valid_responses.append(response)
         
-
         logger.info(f"Received {len(valid_responses)} valid responses")
 
         return valid_responses
     
-
     async def _send_first_message(self, user: TestUser) -> Dict[str, Any]:
 
         """Send first message to user and receive response."""
@@ -692,7 +641,6 @@ class ConcurrentTestOrchestrator:
 
             raise RuntimeError(f"No WebSocket connection for user {user.user_id}")
         
-
         start_time = time.time()
         
         # Create user-specific message with sensitive data
@@ -725,7 +673,6 @@ class ConcurrentTestOrchestrator:
 
         )
         
-
         response = json.loads(response_raw)
         
         # Record timing
@@ -752,7 +699,6 @@ class ConcurrentTestOrchestrator:
 
         )
         
-
         return {
 
             'user_id': user.user_id,
@@ -767,8 +713,7 @@ class ConcurrentTestOrchestrator:
 
         }
 
-
-async def test_cross_contamination_detection(
+async def test_cross_contamination_detection(:
 
     concurrent_test_environment, 
 
@@ -778,7 +723,6 @@ async def test_cross_contamination_detection(
 
     """Test Case 2: Cross-Contamination Detection
     
-
     Objective: Detect any data leakage between concurrent user sessions
 
     Success Criteria:
@@ -795,7 +739,6 @@ async def test_cross_contamination_detection(
 
     logger.info("Starting Test Case 2: Cross-Contamination Detection")
     
-
     orchestrator = ConcurrentTestOrchestrator(concurrent_test_environment)
     
     # Inject contamination markers and establish connections
@@ -834,11 +777,9 @@ async def test_cross_contamination_detection(
 
         f"Unauthorized state access detected: {unauthorized_access_count} attempts"
     
-
     logger.info("Test Case 2 completed: No contamination detected")
 
-
-async def test_state_persistence_isolation(
+async def test_state_persistence_isolation(:
 
     concurrent_test_environment, 
 
@@ -848,7 +789,6 @@ async def test_state_persistence_isolation(
 
     """Test Case 5: State Persistence Isolation
     
-
     Objective: Verify agent state persistence maintains isolation between users
 
     Success Criteria:
@@ -865,7 +805,6 @@ async def test_state_persistence_isolation(
 
     logger.info("Starting Test Case 5: State Persistence Isolation")
     
-
     orchestrator = ConcurrentTestOrchestrator(concurrent_test_environment)
     
     # Establish connections and create persistent states
@@ -916,5 +855,4 @@ async def test_state_persistence_isolation(
 
         f"State integrity violations detected: {integrity_violations}"
     
-
     logger.info("Test Case 5 completed: State persistence isolation validated")

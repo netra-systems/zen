@@ -7,7 +7,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock

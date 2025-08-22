@@ -5,7 +5,7 @@ Tests comprehensive thread lifecycle, persistence, and isolation.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -25,7 +25,7 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.tests.helpers.thread_test_helpers import (
+from netra_backend.tests.e2e.helpers.thread_test_helpers import (
     create_mock_thread,
     setup_thread_repo_mock,
     setup_ws_manager_mock,

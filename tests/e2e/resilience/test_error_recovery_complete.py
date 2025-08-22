@@ -31,7 +31,6 @@ import httpx
 import pytest
 import pytest_asyncio
 
-
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import (
     CircuitBreakerOpenError,
@@ -50,7 +49,6 @@ from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class ErrorRecoveryResult:
     """Result of error recovery test execution."""
@@ -61,7 +59,6 @@ class ErrorRecoveryResult:
     circuit_breaker_activated: bool
     data_integrity_preserved: bool
     within_sla: bool
-
 
 class RealCircuitBreakerTester:
     """Tests real circuit breaker behavior with actual service calls."""
@@ -86,7 +83,7 @@ class RealCircuitBreakerTester:
         self.failure_counts[service_name] = 0
         return circuit
     
-    async def test_circuit_activation(self, service_name: str, 
+    async def test_circuit_activation(self, service_name: str,:
                                     failing_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker activation with real failing operations."""
         circuit = self.circuit_breakers.get(service_name)
@@ -125,7 +122,7 @@ class RealCircuitBreakerTester:
             "circuit_state": circuit.state.value
         }
     
-    async def test_circuit_recovery(self, service_name: str,
+    async def test_circuit_recovery(self, service_name: str,:
                                   working_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker recovery with working operation."""
         circuit = self.circuit_breakers.get(service_name)
@@ -153,7 +150,6 @@ class RealCircuitBreakerTester:
             "final_state": final_state,
             "circuit_closed": circuit.state == CircuitState.CLOSED
         }
-
 
 class ServiceIsolationValidator:
     """Validates service isolation during failures."""
@@ -210,7 +206,6 @@ class ServiceIsolationValidator:
             "service_results": isolation_results,
             "failed_service": failed_service
         }
-
 
 class DataIntegrityTracker:
     """Tracks data integrity throughout failure and recovery."""
@@ -328,7 +323,6 @@ class DataIntegrityTracker:
             logger.error(f"Post-recovery validation failed: {e}")
             return {"integrity_validated": False, "error": str(e)}
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestCompleteErrorRecovery:
@@ -359,7 +353,7 @@ class TestCompleteErrorRecovery:
         """Initialize data integrity tracker."""
         return DataIntegrityTracker()
     
-    async def test_error_recovery(self, orchestrator, circuit_breaker_tester,
+    async def test_error_recovery(self, orchestrator, circuit_breaker_tester,:
                                 isolation_validator, data_tracker):
         """Main test: Complete error recovery with circuit breaker activation."""
         # Skip if services not available
@@ -586,7 +580,6 @@ class TestCompleteErrorRecovery:
         
         logger.info("✅ No cascading failures detected across service boundaries")
 
-
 # Helper functions for test execution
 async def run_error_recovery_test() -> Dict[str, Any]:
     """Run error recovery test and return comprehensive results."""
@@ -599,7 +592,6 @@ async def run_error_recovery_test() -> Dict[str, Any]:
         "error_recovery_patterns": "implemented",
         "sla_compliance": "30_second_requirement"
     }
-
 
 def validate_circuit_breaker_implementation() -> bool:
     """Validate that circuit breaker implementation exists and is accessible."""
@@ -622,7 +614,6 @@ def validate_circuit_breaker_implementation() -> bool:
     except Exception as e:
         logger.error(f"Circuit breaker validation failed: {e}")
         return False
-
 
 if __name__ == "__main__":
     # Validation when run directly

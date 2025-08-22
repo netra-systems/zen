@@ -14,7 +14,7 @@ Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 
@@ -26,8 +26,8 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
-from ws_manager import WebSocketManager, manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import WebSocketManager, manager
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread
@@ -170,7 +170,7 @@ def websocket_capture():
 async def real_thread_service():
 
     """Fixture providing real thread service."""
-    from netra_backend.app.agents.supply_researcher.database_manager import (
+    from netra_backend.app.agents.data_sub_agent.database_manager import (
 
         get_database_manager,
 
@@ -293,7 +293,7 @@ class TestAgentMessageFlow:
 
     """Test complete agent message flow end-to-end."""
     
-    async def test_complete_user_message_to_agent_response_flow(
+    async def test_complete_user_message_to_agent_response_flow(:
 
         self, 
 
@@ -398,7 +398,7 @@ class TestAgentMessageFlow:
 
         assert len(errors) == 0, f"Unexpected errors: {errors}"
     
-    async def test_agent_message_ordering_guarantees(
+    async def test_agent_message_ordering_guarantees(:
 
         self,
 
@@ -496,16 +496,14 @@ class TestAgentMessageFlow:
         ]
         
         assert len(completed_responses) == len(test_messages), \
-
             f"Expected {len(test_messages)} responses, got {len(completed_responses)}"
         
         # Validate ordering (messages should be processed in some deterministic order)
 
         assert len(processed_order) == len(test_messages), \
-
             "Not all messages completed processing"
     
-    async def test_streaming_response_handling(
+    async def test_streaming_response_handling(:
 
         self,
 
@@ -592,7 +590,6 @@ class TestAgentMessageFlow:
         )
         
         assert has_streaming or has_complete, \
-
             "Neither streaming chunks nor complete response was generated"
         
         # If streaming was used, validate chunk ordering
@@ -606,10 +603,9 @@ class TestAgentMessageFlow:
             ]
 
             assert chunk_indices == sorted(chunk_indices), \
-
                 "Streaming chunks were not sent in order"
     
-    async def test_agent_error_handling_and_recovery(
+    async def test_agent_error_handling_and_recovery(:
 
         self,
 
@@ -666,10 +662,9 @@ class TestAgentMessageFlow:
         error_message = errors[0]
 
         assert "Unknown message type" in error_message or "invalid" in error_message.lower(), \
-
             f"Error message not descriptive: {error_message}"
     
-    async def test_concurrent_user_message_isolation(
+    async def test_concurrent_user_message_isolation(:
 
         self,
 
@@ -748,10 +743,9 @@ class TestAgentMessageFlow:
             response_content = str(user_messages)
 
             assert user_id in response_content or f"thread_{user_id}" in response_content, \
-
                 f"Response for {user_id} doesn't contain user-specific content"
     
-    async def test_agent_websocket_connection_recovery(
+    async def test_agent_websocket_connection_recovery(:
 
         self,
 
@@ -847,7 +841,7 @@ class TestAgentMessageFlowPerformance:
 
     """Performance tests for agent message flow."""
     
-    async def test_message_processing_latency(
+    async def test_message_processing_latency(:
 
         self,
 
@@ -910,12 +904,11 @@ class TestAgentMessageFlowPerformance:
         # Validate processing time is reasonable (< 30 seconds for test)
 
         assert processing_time < 30.0, \
-
             f"Processing took too long: {processing_time:.2f}s"
         
         logger.info(f"Message processing latency: {processing_time:.3f}s")
     
-    async def test_concurrent_message_throughput(
+    async def test_concurrent_message_throughput(:
 
         self,
 
@@ -996,7 +989,6 @@ class TestAgentMessageFlowPerformance:
         )
         
         assert total_responses >= num_concurrent, \
-
             f"Expected at least {num_concurrent} responses, got {total_responses}"
         
         # Calculate throughput

@@ -7,14 +7,14 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from typing import Dict, List
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
-from netra_backend.tests.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
     create_agent_instances,
     create_holistic_optimization_state,

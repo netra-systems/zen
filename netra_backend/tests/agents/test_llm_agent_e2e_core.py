@@ -10,7 +10,7 @@ BVJ:
 4. Revenue Impact: Maintains customer trust and prevents churn from failed optimizations
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

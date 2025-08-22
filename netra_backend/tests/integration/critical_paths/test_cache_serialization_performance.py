@@ -14,7 +14,7 @@ Performance Requirements: Serialization overhead < 10%, throughput > 10K ops/s, 
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import gzip

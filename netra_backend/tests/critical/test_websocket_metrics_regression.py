@@ -9,7 +9,7 @@ Business Value: Prevents metrics collection failures from impacting monitoring.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict

@@ -28,7 +28,6 @@ from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.e2e.network_failure_simulator import NetworkFailureSimulator
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
-
 class NetworkFailureMessageQueue:
     """Message queue manager for network failure scenarios."""
     
@@ -71,7 +70,6 @@ class NetworkFailureMessageQueue:
             "no_message_loss": True  # Would validate actual message delivery
         }
 
-
 class RealNetworkFailureSimulator:
     """Real network failure simulator for E2E testing."""
     
@@ -112,7 +110,6 @@ class RealNetworkFailureSimulator:
             "recovery_timestamp": recovery_time
         }
 
-
 class AutoReconnectionValidator:
     """Validator for automatic reconnection functionality."""
     
@@ -151,7 +148,6 @@ class AutoReconnectionValidator:
             "within_time_limit": self.reconnection_attempts <= max_attempts
         }
 
-
 @pytest.mark.asyncio
 class TestRealNetworkFailureWithMessageQueue:
     """Test #4: Real Network Failure with Message Queue Preservation."""
@@ -176,7 +172,7 @@ class TestRealNetworkFailureWithMessageQueue:
         """Initialize auto-reconnection validator."""
         return AutoReconnectionValidator()
     
-    async def test_real_network_failure_complete_flow(self, test_core, message_queue,
+    async def test_real_network_failure_complete_flow(self, test_core, message_queue,:
                                                      network_simulator, reconnection_validator):
         """Test complete real network failure and recovery flow."""
         start_time = time.time()

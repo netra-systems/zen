@@ -236,7 +236,7 @@ class ThreadMessagingExecutor:
 
 
 @pytest.fixture
-async def messaging_executor(test_users):
+async def test_messaging_executor(test_users):
     """Thread messaging executor fixture."""
     user = test_users["mid"]
     return ThreadMessagingExecutor(user.id)

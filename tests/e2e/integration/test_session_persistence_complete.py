@@ -111,7 +111,7 @@ class SessionPersistenceTestManager:
             print(f"WebSocket connection failed: {e}")
             return None
             
-    async def send_test_messages(self, ws_client, user_id: str, count: int = 3) -> List[Dict]:
+    async def test_send_test_messages(self, ws_client, user_id: str, count: int = 3) -> List[Dict]:
         """Send test messages to establish session state."""
         messages = []
         

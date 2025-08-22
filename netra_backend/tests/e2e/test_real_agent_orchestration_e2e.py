@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -23,7 +23,7 @@ from netra_backend.app.agents.data_sub_agent.models import (
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 from netra_backend.app.schemas import SubAgentLifecycle
-from netra_backend.tests.state_validation_utils import (
+from netra_backend.tests.e2e.state_validation_utils import (
     StateIntegrityChecker,
     StateValidationReporter,
 )

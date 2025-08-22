@@ -9,7 +9,7 @@ Comprehensive test to verify the complete dev environment flow:
 This test runs against the actual dev environment to ensure everything works end-to-end.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

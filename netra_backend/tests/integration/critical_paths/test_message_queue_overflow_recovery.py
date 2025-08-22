@@ -11,7 +11,7 @@ Comprehensive test to verify message queue overflow and recovery:
 This test ensures message queues handle overflow gracefully.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

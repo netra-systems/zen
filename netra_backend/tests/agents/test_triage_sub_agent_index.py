@@ -9,7 +9,7 @@ COMPLIANCE: Modular split from 500-line monolith
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from netra_backend.tests.test_triage_agent_caching import (
     TestCaching,

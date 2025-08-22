@@ -15,7 +15,7 @@ Module ≤300 lines per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -24,7 +24,7 @@ from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentHealthStatus

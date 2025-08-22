@@ -11,7 +11,7 @@ Comprehensive test for API gateway load distribution:
 8. Failover handling
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

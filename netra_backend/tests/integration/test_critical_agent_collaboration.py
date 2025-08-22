@@ -6,7 +6,7 @@ Business Value: Ensures $20K MRR from multi-agent optimization workflows.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import time
 import uuid

@@ -6,7 +6,7 @@ Tests session persistence across service restarts and Redis operations
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

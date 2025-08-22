@@ -515,7 +515,7 @@ class TestThreadManagementUIUpdate:
 
     @pytest.fixture
 
-    async def thread_executor(self, test_user_id):
+    async def test_thread_executor(self, test_user_id):
 
         """Initialize thread operation executor."""
 
@@ -524,7 +524,7 @@ class TestThreadManagementUIUpdate:
 
     @pytest.fixture
 
-    async def concurrent_manager(self, test_user_id):
+    async def test_concurrent_manager(self, test_user_id):
 
         """Initialize concurrent thread manager."""
 

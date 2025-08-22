@@ -200,7 +200,7 @@ class RapidReconnectionClient:
             logger.error(f"Stable connection failed: {e}")
             return False
             
-    async def send_test_message(self) -> bool:
+    async def test_send_test_message(self) -> bool:
         """Send a test message to verify connection functionality."""
         if not self.is_connected or not self.websocket:
             return False

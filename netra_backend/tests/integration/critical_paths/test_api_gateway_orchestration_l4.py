@@ -15,7 +15,7 @@ Coverage: Real nginx/envoy gateway, JWT validation, Redis rate limiting, respons
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

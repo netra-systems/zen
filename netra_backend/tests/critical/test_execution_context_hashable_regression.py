@@ -9,7 +9,7 @@ Business Value: Prevents runtime crashes from type errors.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from dataclasses import asdict, dataclass
 from datetime import datetime

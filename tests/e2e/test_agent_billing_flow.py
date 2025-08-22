@@ -40,7 +40,6 @@ from tests.e2e.agent_billing_test_helpers import (
 )
 from netra_backend.app.schemas.UserPlan import PlanTier
 
-
 @pytest.mark.asyncio
 class TestAgentBillingFlow:
     """Test #2: Agent Request → Processing → Response → Billing Record Flow."""
@@ -67,7 +66,7 @@ class TestAgentBillingFlow:
         return BillingFlowValidator(billing_helper)
     
     @pytest.mark.asyncio
-    async def test_complete_agent_billing_flow_triage(self, test_core, request_simulator, 
+    async def test_complete_agent_billing_flow_triage(self, test_core, request_simulator,:
                                                     billing_validator):
         """Test complete billing flow for triage agent."""
         # Setup authenticated session
@@ -92,7 +91,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_multiple_agent_types_billing_accuracy(self, test_core, request_simulator,
+    async def test_multiple_agent_types_billing_accuracy(self, test_core, request_simulator,:
                                                        billing_validator):
         """Test billing accuracy across different agent types."""
         session = await test_core.establish_authenticated_user_session(PlanTier.ENTERPRISE)
@@ -120,7 +119,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_billing_performance_requirements(self, test_core, request_simulator,
+    async def test_billing_performance_requirements(self, test_core, request_simulator,:
                                                   billing_validator):
         """Test that billing operations meet performance requirements."""
         session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
@@ -168,7 +167,7 @@ class TestAgentBillingFlow:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_tier_specific_billing_validation(self, test_core, request_simulator,
+    async def test_tier_specific_billing_validation(self, test_core, request_simulator,:
                                                   billing_validator):
         """Test billing validation for different user tiers."""
         tiers_to_test = [PlanTier.PRO, PlanTier.ENTERPRISE, PlanTier.DEVELOPER]
@@ -217,7 +216,6 @@ class TestAgentBillingFlow:
         for agent_type, result in billing_results.items():
             assert result["flow_complete"], f"{agent_type} agent billing flow failed"
             assert result["cost_accurate"], f"{agent_type} agent cost calculation incorrect"
-
 
 @pytest.mark.asyncio 
 class TestAgentBillingPerformance:

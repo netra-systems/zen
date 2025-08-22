@@ -8,7 +8,7 @@ The actual comprehensive tests are in other test files in this directory.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import AsyncMock, Mock, patch
 

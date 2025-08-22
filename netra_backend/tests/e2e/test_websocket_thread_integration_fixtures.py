@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService

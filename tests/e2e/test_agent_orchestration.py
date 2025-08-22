@@ -23,7 +23,6 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 
-
 class AgentOrchestrationTester:
     """Tests multi-agent orchestration and coordination."""
     
@@ -51,7 +50,7 @@ class AgentOrchestrationTester:
         self.active_agents[name] = sub_agent
         return sub_agent
     
-    async def test_agent_coordination(self, supervisor: SupervisorAgent, 
+    async def test_agent_coordination(self, supervisor: SupervisorAgent,:
                                     sub_agents: List[BaseSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
         start_time = time.time()
@@ -82,7 +81,7 @@ class AgentOrchestrationTester:
             return False
         return all(all(key in r for key in ["agent_name", "response_data"]) for r in responses)
     
-    async def test_agent_error_propagation(self, supervisor: SupervisorAgent,
+    async def test_agent_error_propagation(self, supervisor: SupervisorAgent,:
                                          failing_agent: str) -> Dict[str, Any]:
         """Test error propagation through agent hierarchy."""
         error_test_result = {
@@ -92,7 +91,6 @@ class AgentOrchestrationTester:
         recovery_result = await self._simulate_agent_failure_recovery(supervisor, failing_agent)
         error_test_result.update(recovery_result)
         return error_test_result
-
 
 class TestAgentOrchestration:
     """E2E tests for agent orchestration."""
@@ -205,7 +203,6 @@ class TestAgentOrchestration:
         """Simulate agent failure and recovery mechanisms."""
         await asyncio.sleep(0.05)
         return {"error_handled": True, "fallback_triggered": True, "recovery_strategy": "fallback_agent"}
-
 
 @pytest.mark.critical
 class TestCriticalOrchestrationScenarios:

@@ -30,8 +30,7 @@ import websockets
 # Import required classes from test_spike_recovery_core
 from tests.e2e.test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
 
-
-async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGenerator,
+async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGenerator,:
                                                  spike_metrics: SpikeLoadMetrics):
     """
     Performance benchmark for spike testing capabilities.

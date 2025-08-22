@@ -6,7 +6,7 @@ Tests for error handling and recovery mechanisms
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 from logging_config import central_logger as logger

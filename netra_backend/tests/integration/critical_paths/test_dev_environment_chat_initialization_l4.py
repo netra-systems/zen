@@ -19,7 +19,7 @@ BVJ:
 - Strategic Impact: Foundation for all user-agent conversations and value delivery
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import concurrent.futures

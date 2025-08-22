@@ -10,7 +10,7 @@ Comprehensive test to verify multi-tenant session isolation:
 This test ensures complete isolation between different tenant sessions.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

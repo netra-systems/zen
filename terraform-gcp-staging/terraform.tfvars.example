@@ -1,0 +1,99 @@
+# Example Terraform Variables for GCP Staging
+# Copy this file to terraform.tfvars and customize as needed
+
+# GCP Configuration
+project_id = "netra-staging"
+region     = "us-central1"
+zone       = "us-central1-c"
+
+# Environment
+environment = "staging"
+
+# Cloud SQL PostgreSQL Configuration
+postgres_version = "POSTGRES_17"    # Use latest PostgreSQL 17
+database_tier    = "db-g1-small"    # Small instance for staging
+database_name    = "netra"
+database_user    = "postgres"
+app_database_user = "netra_app"
+
+# Network Configuration
+enable_private_ip = true
+enable_public_ip  = true  # Enable for external access
+
+# For staging, allow all IPs (restrict in production)
+authorized_networks = [
+  {
+    name  = "allow-all"
+    value = "0.0.0.0/0"
+  }
+]
+
+# Backup Configuration
+backup_enabled                 = true
+backup_start_time              = "02:00"
+backup_location                = "us"
+retained_backups               = 7
+transaction_log_retention_days = 7
+
+# Storage Configuration
+disk_size              = 10      # Start with 10GB
+disk_type              = "PD_SSD"
+disk_autoresize        = true
+disk_autoresize_limit  = 100     # Max 100GB
+
+# High Availability
+availability_type = "ZONAL"  # Use REGIONAL for production
+
+# Maintenance Window
+maintenance_window_day         = 7  # Sunday
+maintenance_window_hour        = 3  # 3 AM
+maintenance_window_update_track = "stable"
+
+# Database Performance Flags
+database_flags = [
+  {
+    name  = "max_connections"
+    value = "200"
+  },
+  {
+    name  = "shared_buffers"
+    value = "256000"  # ~2GB
+  },
+  {
+    name  = "work_mem"
+    value = "4096"  # 4MB
+  },
+  {
+    name  = "maintenance_work_mem"
+    value = "65536"  # 64MB
+  },
+  {
+    name  = "effective_cache_size"
+    value = "1048576"  # ~8GB
+  },
+  {
+    name  = "random_page_cost"
+    value = "1.1"  # SSD optimization
+  },
+  {
+    name  = "log_statement"
+    value = "all"  # Full logging for staging
+  },
+  {
+    name  = "log_duration"
+    value = "on"
+  }
+]
+
+# Redis Configuration
+redis_tier           = "BASIC"
+redis_memory_size_gb = 1
+redis_version        = "REDIS_7_2"
+
+# Resource Labels
+labels = {
+  environment = "staging"
+  project     = "netra"
+  managed_by  = "terraform"
+  team        = "platform"
+}

@@ -15,7 +15,7 @@ L4 Realism Level: Tests against actual staging configuration and real service en
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

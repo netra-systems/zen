@@ -19,7 +19,7 @@ BVJ:
 - Strategic Impact: Direct revenue impact through AI value delivery and user engagement
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

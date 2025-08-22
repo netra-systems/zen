@@ -69,7 +69,7 @@ class AgentStartupE2EManager:
         self.ws_manager.connect_user.return_value = True
         self.ws_manager.send_message.return_value = True
     
-    async def authenticate_test_user(self) -> str:
+    async def test_authenticate_test_user(self) -> str:
         """Authenticate test user and get JWT token."""
         start_time = time.time()
         auth_result = await self.auth_service.authenticate(

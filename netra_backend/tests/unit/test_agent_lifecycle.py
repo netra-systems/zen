@@ -335,8 +335,12 @@ class TestErrorHandling:
         error = RuntimeError("Test error")
         test_agent._handle_execution_error = AsyncMock()
         
+        # Test the method within a proper exception context as it would be used in production
         with pytest.raises(RuntimeError, match="Test error"):
-            await test_agent._handle_and_reraise_error(error, deep_agent_state, "test_run", True)
+            try:
+                raise error
+            except RuntimeError as e:
+                await test_agent._handle_and_reraise_error(e, deep_agent_state, "test_run", True)
         test_agent._handle_execution_error.assert_called_once()
 
     @pytest.mark.asyncio

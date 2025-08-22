@@ -21,7 +21,7 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict
 from unittest.mock import MagicMock, Mock, patch

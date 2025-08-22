@@ -28,13 +28,13 @@ from tests.e2e.example_message_test_helpers import (
 
 
 @pytest.fixture
-async def thread_repo(database_test_session):
+async def test_thread_repo(database_test_session):
     """Get thread repository with test database session"""
     return ThreadRepository(database_test_session)
 
 
 @pytest.fixture
-async def message_repo(database_test_session):
+async def test_message_repo(database_test_session):
     """Get message repository with test database session"""
     return MessageRepository(database_test_session)
 

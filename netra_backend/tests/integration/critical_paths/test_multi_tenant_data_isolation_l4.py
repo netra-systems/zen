@@ -13,7 +13,7 @@ Comprehensive test for multi-tenant data isolation:
 This test validates complete data isolation in a multi-tenant environment.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

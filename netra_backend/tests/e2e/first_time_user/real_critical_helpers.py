@@ -12,13 +12,13 @@ Provides unified access to all helper classes while maintaining modular design.
 """
 
 # Import all helper classes from split modules
-from netra_backend.tests.real_critical_auth_helpers import (
+from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import (
     AIProviderHelpers,
     CriticalUserJourneyHelpers,
     OAuthFlowHelpers,
     WebSocketHelpers,
 )
-from netra_backend.tests.real_critical_optimization_helpers import (
+from netra_backend.tests.e2e.first_time_user.real_critical_optimization_helpers import (
     ConcurrentTestHelpers,
     ErrorRecoveryHelpers,
     OptimizationHelpers,

@@ -11,7 +11,7 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict, Optional

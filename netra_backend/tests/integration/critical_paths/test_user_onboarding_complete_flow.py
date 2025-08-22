@@ -13,7 +13,7 @@ Comprehensive test for complete user onboarding flow:
 This test validates the entire new user journey from signup to first AI agent deployment.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

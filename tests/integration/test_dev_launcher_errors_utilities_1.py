@@ -21,6 +21,7 @@ import pytest
 import requests
 
 from dev_launcher import DevLauncher, LauncherConfig
+from dev_launcher.error_detector import ErrorDetector
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager

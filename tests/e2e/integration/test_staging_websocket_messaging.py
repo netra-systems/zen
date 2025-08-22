@@ -25,7 +25,6 @@ from tests.e2e.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.e2e.test_environment_config import TestEnvironmentType
 
-
 class StagingWebSocketTester:
     """Staging WebSocket test coordinator with comprehensive validation."""
     
@@ -54,14 +53,12 @@ class StagingWebSocketTester:
             await client.close()
         self.websocket_clients.clear()
 
-
 @pytest.fixture
 async def staging_harness() -> UnifiedE2ETestHarness:
     """Create staging E2E test harness."""
     harness = create_e2e_harness(environment=TestEnvironmentType.STAGING)
     async with harness.test_environment():
         yield harness
-
 
 @pytest.fixture
 async def staging_tester(staging_harness: UnifiedE2ETestHarness) -> StagingWebSocketTester:
@@ -72,17 +69,15 @@ async def staging_tester(staging_harness: UnifiedE2ETestHarness) -> StagingWebSo
     finally:
         await tester.cleanup_websockets()
 
-
 @pytest.fixture
 async def test_user(staging_harness: UnifiedE2ETestHarness) -> TestUser:
     """Create authenticated test user for staging tests."""
     return await staging_harness.create_test_user()
 
-
 class TestStagingWebSocketConnection:
     """Test WebSocket connection establishment in staging environment."""
     
-    async def test_websocket_connection_with_authentication(
+    async def test_websocket_connection_with_authentication(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test WebSocket connection with proper authentication."""
@@ -92,7 +87,7 @@ class TestStagingWebSocketConnection:
         assert client.metrics.connection_time is not None
         assert client.metrics.connection_time < 5.0  # Connection within 5 seconds
     
-    async def test_cors_headers_validation_staging_domains(
+    async def test_cors_headers_validation_staging_domains(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test CORS headers validation for staging domains."""
@@ -108,11 +103,10 @@ class TestStagingWebSocketConnection:
         # Connection should succeed with valid staging origin
         assert client.state == ConnectionState.CONNECTED
 
-
 class TestStagingWebSocketMessaging:
     """Test WebSocket messaging functionality in staging environment."""
     
-    async def test_send_example_prompt_llm_costs(
+    async def test_send_example_prompt_llm_costs(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Send example prompt about reducing LLM costs and verify response."""
@@ -138,7 +132,7 @@ class TestStagingWebSocketMessaging:
         cost_keywords = ["cost", "optimization", "efficiency", "token", "model"]
         assert any(keyword in response_content.lower() for keyword in cost_keywords)
     
-    async def test_agent_response_handling(
+    async def test_agent_response_handling(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test agent response handling and message structure."""
@@ -161,7 +155,7 @@ class TestStagingWebSocketMessaging:
         assert "payload" in response
         assert response["payload"].get("thread_id") == thread_id
     
-    async def test_message_format_validation(
+    async def test_message_format_validation(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test message format validation for type, content, and thread_id."""
@@ -190,11 +184,10 @@ class TestStagingWebSocketMessaging:
         assert error_response is not None
         assert "error" in error_response.get("type", "").lower()
 
-
 class TestStagingWebSocketAuthentication:
     """Test WebSocket authentication flows in staging environment."""
     
-    async def test_websocket_authentication_flow(
+    async def test_websocket_authentication_flow(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test complete WebSocket authentication flow."""
@@ -211,7 +204,7 @@ class TestStagingWebSocketAuthentication:
         success = await client.send(test_message)
         assert success, "Authenticated user should be able to send messages"
     
-    async def test_websocket_invalid_token_rejection(
+    async def test_websocket_invalid_token_rejection(:
         self, staging_tester: StagingWebSocketTester
     ):
         """Test WebSocket rejects invalid authentication tokens."""
@@ -226,11 +219,10 @@ class TestStagingWebSocketAuthentication:
         assert not success
         assert client.state in [ConnectionState.FAILED, ConnectionState.DISCONNECTED]
 
-
 class TestStagingWebSocketReconnection:
     """Test WebSocket reconnection logic in staging environment."""
     
-    async def test_websocket_reconnection_after_disconnect(
+    async def test_websocket_reconnection_after_disconnect(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test WebSocket reconnection after disconnect."""
@@ -250,7 +242,7 @@ class TestStagingWebSocketReconnection:
         assert reconnect_success, "Reconnection should succeed"
         assert client.state == ConnectionState.CONNECTED
     
-    async def test_websocket_message_persistence_after_reconnect(
+    async def test_websocket_message_persistence_after_reconnect(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test message handling works after reconnection."""
@@ -283,11 +275,10 @@ class TestStagingWebSocketReconnection:
         success = await client.send(post_reconnect_message)
         assert success, "Should be able to send messages after reconnection"
 
-
 class TestStagingWebSocketConcurrency:
     """Test concurrent WebSocket connections in staging environment."""
     
-    async def test_multiple_concurrent_websocket_connections(
+    async def test_multiple_concurrent_websocket_connections(:
         self, staging_tester: StagingWebSocketTester
     ):
         """Test multiple concurrent WebSocket connections."""
@@ -324,7 +315,7 @@ class TestStagingWebSocketConcurrency:
         results = await asyncio.gather(*message_tasks)
         assert all(results), "All concurrent messages should send successfully"
     
-    async def test_websocket_isolation_between_users(
+    async def test_websocket_isolation_between_users(:
         self, staging_tester: StagingWebSocketTester
     ):
         """Test WebSocket message isolation between different users."""
@@ -357,11 +348,10 @@ class TestStagingWebSocketConcurrency:
             # Timeout is expected - user2 shouldn't receive user1's messages
             pass
 
-
 class TestStagingWebSocketRateLimit:
     """Test WebSocket rate limiting in staging environment."""
     
-    async def test_rate_limiting_websocket_messages(
+    async def test_rate_limiting_websocket_messages(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test rate limiting on WebSocket messages."""
@@ -391,11 +381,10 @@ class TestStagingWebSocketRateLimit:
         # If rate limiting is active, we might get fewer than 10 messages sent
         # This test validates the rate limiting mechanism exists
 
-
 class TestStagingWebSocketHeartbeat:
     """Test WebSocket ping/pong heartbeat in staging environment."""
     
-    async def test_websocket_ping_pong_heartbeat(
+    async def test_websocket_ping_pong_heartbeat(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test WebSocket ping/pong heartbeat mechanism."""
@@ -419,11 +408,10 @@ class TestStagingWebSocketHeartbeat:
         # Connection should remain healthy after ping/pong
         assert client.state == ConnectionState.CONNECTED
 
-
 class TestStagingWebSocketErrorHandling:
     """Test WebSocket error handling in staging environment."""
     
-    async def test_error_handling_invalid_messages(
+    async def test_error_handling_invalid_messages(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test error handling for invalid messages."""
@@ -447,7 +435,7 @@ class TestStagingWebSocketErrorHandling:
         # Connection should remain stable after error
         assert client.state == ConnectionState.CONNECTED
     
-    async def test_websocket_graceful_error_recovery(
+    async def test_websocket_graceful_error_recovery(:
         self, staging_tester: StagingWebSocketTester, test_user: TestUser
     ):
         """Test graceful error recovery in WebSocket communication."""
@@ -471,7 +459,6 @@ class TestStagingWebSocketErrorHandling:
         
         # Verify connection remains healthy
         assert client.state == ConnectionState.CONNECTED
-
 
 if __name__ == "__main__":
     # Run specific test for development

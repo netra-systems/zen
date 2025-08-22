@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     ExecutionStrategy,

@@ -6,7 +6,7 @@ Tests all major functionality including categorization, caching, fallback, and e
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import json
 from typing import Any, Dict

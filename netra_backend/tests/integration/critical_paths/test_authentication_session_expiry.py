@@ -11,7 +11,7 @@ Comprehensive test to verify authentication session expiry and refresh:
 This test ensures proper session lifecycle management.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

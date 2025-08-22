@@ -17,7 +17,7 @@ Architecture: ≤300 lines total, ≤8 line functions for compliance
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import statistics

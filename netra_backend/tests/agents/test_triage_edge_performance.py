@@ -6,7 +6,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime
 

@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Revenue Impact: Catches issues before they affect real users
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import sys

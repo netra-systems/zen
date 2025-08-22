@@ -7,7 +7,7 @@ Split from oversized test_llm_agent_e2e_real.py
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -254,7 +254,7 @@ def _create_e2e_supervisor(infrastructure):
 
 def _configure_e2e_pipeline(supervisor):
     """Configure supervisor pipeline for E2E testing"""
-    from netra_backend.app.agents.supervisor.execution_context import (
+    from netra_backend.app.agents.base.execution_context import (
         AgentExecutionResult,
     )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[

@@ -1,7 +1,7 @@
 """WebSocket Integration Fixtures and Tests"""
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 
@@ -17,7 +17,6 @@ from netra_backend.app.auth_integration.auth import validate_token_jwt
 from fastapi.testclient import TestClient
 from netra_backend.app.main import app
 from netra_backend.app.routes.mcp.main import websocket_endpoint
-from ws_manager import WebSocketManager
 
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 

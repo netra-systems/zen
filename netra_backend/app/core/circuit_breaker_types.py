@@ -19,6 +19,10 @@ class CircuitState(Enum):
     HALF_OPEN = "half_open"  # Testing recovery
 
 
+# Alias for compatibility with existing code
+CircuitBreakerState = CircuitState
+
+
 @dataclass
 class CircuitConfig:
     """Circuit breaker configuration with environment-aware defaults."""

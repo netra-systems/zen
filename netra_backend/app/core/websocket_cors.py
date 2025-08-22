@@ -15,30 +15,45 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# Default allowed origins for WebSocket connections - expanded for dynamic ports
-DEFAULT_WEBSOCKET_ORIGINS = [
-    "http://localhost:3000",
-    "https://localhost:3000", 
-    "http://127.0.0.1:3000",
-    "https://127.0.0.1:3000",
-    "http://localhost:3001",
-    "https://localhost:3001",
-    "http://localhost:3002",
-    "http://localhost:3003",
-    "http://localhost:4000",
-    "http://localhost:4001",
-    "http://localhost:4200",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:3001",
-    "http://127.0.0.1:3002",
-    "http://127.0.0.1:3003",
-    "http://127.0.0.1:4000",
-    "http://127.0.0.1:4001",
-    "http://127.0.0.1:4200",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174"
-]
+def _get_default_websocket_origins():
+    """Get default WebSocket origins from unified configuration."""
+    try:
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
+        
+        # Start with configured frontend URL
+        default_origins = []
+        if hasattr(config, 'frontend_url') and config.frontend_url:
+            default_origins.append(config.frontend_url)
+            # Add HTTPS variant
+            if config.frontend_url.startswith("http://"):
+                https_url = config.frontend_url.replace("http://", "https://", 1)
+                default_origins.append(https_url)
+        
+        # Add common development ports if in development
+        environment = getattr(config, 'environment', 'development').lower()
+        if environment in ['development', 'testing']:
+            dev_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
+            for port in dev_ports:
+                default_origins.extend([
+                    f"http://localhost:{port}",
+                    f"https://localhost:{port}",
+                    f"http://127.0.0.1:{port}",
+                    f"https://127.0.0.1:{port}"
+                ])
+        
+        return default_origins
+    except Exception:
+        # Fallback to minimal origins if config fails
+        return [
+            "http://localhost:3000",
+            "https://localhost:3000",
+            "http://localhost:3010"  # Common frontend port
+        ]
+
+
+# Default allowed origins for WebSocket connections - loaded from configuration
+DEFAULT_WEBSOCKET_ORIGINS = _get_default_websocket_origins()
 
 # Production origins (should be configured via environment variables)
 PRODUCTION_ORIGINS = [
@@ -294,15 +309,21 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
 
 def get_environment_origins() -> List[str]:
     """Get allowed origins based on environment configuration and service discovery."""
-    from netra_backend.app.core.configuration import unified_config_manager
-    config = unified_config_manager.get_config()
+    from netra_backend.app.core.configuration.base import get_unified_config
+    config = get_unified_config()
     
     env = getattr(config, 'environment', 'development').lower()
     
-    # Get custom origins from unified config
-    custom_origins = getattr(config, 'websocket_allowed_origins', '')
-    if custom_origins:
-        custom_list = [origin.strip() for origin in custom_origins.split(",") if origin.strip()]
+    # Get CORS origins from unified config
+    cors_origins = getattr(config, 'cors_origins', None)
+    if cors_origins:
+        # Handle both list and comma-separated string formats
+        if isinstance(cors_origins, str):
+            custom_list = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+        elif isinstance(cors_origins, list):
+            custom_list = [str(origin).strip() for origin in cors_origins if origin]
+        else:
+            custom_list = []
     else:
         custom_list = []
     
@@ -413,8 +434,8 @@ def get_websocket_cors_handler() -> WebSocketCORSHandler:
     global _global_cors_handler
     
     if _global_cors_handler is None:
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
         environment = getattr(config, 'environment', 'development').lower()
         _global_cors_handler = WebSocketCORSHandler(
             get_environment_origins(), 

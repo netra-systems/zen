@@ -10,7 +10,7 @@ L3 Test: Real multi-service auth token propagation with containerized services.
 Tests JWT token generation, Redis storage, cross-service validation, and WebSocket authentication.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

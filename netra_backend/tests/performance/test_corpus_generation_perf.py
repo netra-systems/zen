@@ -8,7 +8,7 @@ All functions maintain 25-line limit with single responsibility.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time

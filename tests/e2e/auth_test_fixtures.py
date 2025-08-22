@@ -179,7 +179,7 @@ class WebSocketAuthTester:
                 pass
         return None
     
-    async def send_test_message(self, websocket, message_content: str) -> Dict[str, Any]:
+    async def test_send_test_message(self, websocket, message_content: str) -> Dict[str, Any]:
         """Send test message and measure response time."""
         start_time = time.time()
         

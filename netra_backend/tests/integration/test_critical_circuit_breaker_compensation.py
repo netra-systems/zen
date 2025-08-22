@@ -6,7 +6,7 @@ Business Value: Maintains $25K MRR through graceful degradation and fault tolera
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime

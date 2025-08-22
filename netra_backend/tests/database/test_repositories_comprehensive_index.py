@@ -9,7 +9,7 @@ COMPLIANCE: Modular split from 521-line monolith
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from netra_backend.tests.test_database_connections import (
     TestClickHouseConnectionPool,

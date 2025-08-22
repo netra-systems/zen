@@ -133,7 +133,7 @@ class MessageContinuityValidator:
         self.sent_messages: Dict[str, list] = {}
         self.received_messages: Dict[str, list] = {}
     
-    async def send_test_messages(self, client: RealWebSocketClient, 
+    async def test_send_test_messages(self, client: RealWebSocketClient, 
                                user_id: str, count: int = 3) -> bool:
         """Send test messages and track for continuity."""
         messages = []

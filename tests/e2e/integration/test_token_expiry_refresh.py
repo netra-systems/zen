@@ -26,7 +26,6 @@ from tests.e2e.token_lifecycle_helpers import (
     TokenValidationHelper, PerformanceBenchmark
 )
 
-
 class TestTokenExpiryRefreshE2E:
     """E2E test for seamless JWT token refresh during active sessions."""
     
@@ -52,7 +51,7 @@ class TestTokenExpiryRefreshE2E:
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio
-    async def test_seamless_token_refresh_during_chat(
+    async def test_seamless_token_refresh_during_chat(:
         self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """
@@ -156,7 +155,7 @@ class TestTokenExpiryRefreshE2E:
         assert propagation_ok, "New token not properly propagated"
 
     @pytest.mark.asyncio
-    async def test_expired_token_handling_gracefully(
+    async def test_expired_token_handling_gracefully(:
         self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """Test graceful handling when token expires without refresh."""
@@ -187,7 +186,7 @@ class TestTokenExpiryRefreshE2E:
         await websocket_manager.close()
 
     @pytest.mark.asyncio
-    async def test_refresh_token_performance_benchmark(
+    async def test_refresh_token_performance_benchmark(:
         self, token_manager, test_user_id
     ):
         """Benchmark token refresh performance for SLA compliance."""
@@ -209,7 +208,7 @@ class TestTokenExpiryRefreshE2E:
         assert structure_valid, "Refreshed token has invalid structure"
 
     @pytest.mark.asyncio
-    async def test_invalid_refresh_token_rejection(
+    async def test_invalid_refresh_token_rejection(:
         self, token_manager, test_user_id
     ):
         """Test system properly rejects invalid refresh tokens."""
@@ -241,7 +240,7 @@ class TestTokenExpiryRefreshE2E:
         return await token_manager.jwt_helper.create_jwt_token(expired_payload)
 
     @pytest.mark.asyncio
-    async def test_concurrent_refresh_race_condition_safety(
+    async def test_concurrent_refresh_race_condition_safety(:
         self, token_manager, test_user_id
     ):
         """Test concurrent refresh attempts don't cause race conditions."""
@@ -260,7 +259,6 @@ class TestTokenExpiryRefreshE2E:
             if r is not None and isinstance(r, dict) and "access_token" in r
         ]
         assert len(successful_results) >= 1, "At least one concurrent refresh should succeed"
-
 
 # Business Value Summary
 """

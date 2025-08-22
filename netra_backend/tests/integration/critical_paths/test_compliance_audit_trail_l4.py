@@ -24,7 +24,7 @@ ensuring enterprise customers maintain regulatory compliance.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

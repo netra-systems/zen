@@ -7,7 +7,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )

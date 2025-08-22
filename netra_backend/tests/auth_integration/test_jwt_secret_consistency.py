@@ -3,7 +3,7 @@ Test JWT secret consistency between auth service and backend service.
 Ensures both services use the same JWT secret for token validation.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import os
 import sys
@@ -16,7 +16,7 @@ import pytest
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.secret_loader import AuthSecretLoader
-from netra_backend.app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
 from netra_backend.app.schemas.Config import AppConfig
 
 class TestJWTSecretConsistency:

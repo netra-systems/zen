@@ -28,7 +28,6 @@ import websockets
 # Import required classes
 from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
-
 class AgentStateMonitor:
     """Monitors agent state consistency during rapid messaging."""
     
@@ -110,7 +109,7 @@ class TestAgentStateConsistencyRapidUpdates:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_agent_state_consistency_rapid_updates(
+    async def test_agent_state_consistency_rapid_updates(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """
@@ -210,7 +209,7 @@ class TestCrossAgentStateSynchronization:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_cross_agent_state_synchronization(
+    async def test_cross_agent_state_synchronization(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """

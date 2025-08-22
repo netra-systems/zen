@@ -222,7 +222,7 @@ class AgentTestHarness:
                 return False
         return True
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup all test resources and services."""
         logger.info("Cleaning up test environment...")
         

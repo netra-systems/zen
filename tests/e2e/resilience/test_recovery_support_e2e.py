@@ -17,7 +17,6 @@ from pathlib import Path
 
 from tests.e2e.test_helpers import setup_test_path
 
-
 setup_test_path()
 
 from datetime import datetime, timezone
@@ -30,11 +29,10 @@ from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 # Add project root to path
 
-
 class TestRecoverySupportE2E:
     """Abandonment recovery and error support E2E tests"""
 
-    async def test_9_onboarding_abandonment_recovery_e2e(
+    async def test_9_onboarding_abandonment_recovery_e2e(:
         self, conversion_environment
     ):
         """
@@ -54,7 +52,7 @@ class TestRecoverySupportE2E:
         # Phase 3: Re-engagement and completion
         await self._complete_recovery_conversion(env, recovery_result)
 
-    async def test_10_first_time_error_experience_and_support_e2e(
+    async def test_10_first_time_error_experience_and_support_e2e(:
         self, conversion_environment
     ):
         """

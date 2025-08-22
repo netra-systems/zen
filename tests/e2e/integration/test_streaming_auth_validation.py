@@ -40,7 +40,6 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
 from tests.e2e.harness_complete import UnifiedTestHarness
 
-
 class StreamingAuthManager:
     """Manages streaming operations with authentication validation."""
     
@@ -175,7 +174,6 @@ class StreamingAuthManager:
         self.active_streams[stream_id] = stream_info
         return {"stream_started": True, "stream_id": stream_id, "stream_info": stream_info}
 
-
 class AuthenticatedWebSocketStreamer:
     """Handles authenticated WebSocket streaming with comprehensive validation."""
     
@@ -303,25 +301,22 @@ class AuthenticatedWebSocketStreamer:
         }
         await self._send_websocket_message(completion_msg)
 
-
 @pytest.fixture
 def auth_manager():
     """Authentication manager fixture."""
     setup_test_environment()
     return StreamingAuthManager()
 
-
 @pytest.fixture 
 def websocket_streamer(auth_manager):
     """WebSocket streamer fixture."""
     return AuthenticatedWebSocketStreamer(auth_manager)
 
-
 class TestStreamingWithAuthValidation:
     """Test real-time streaming with comprehensive auth validation."""
     
     @pytest.mark.asyncio
-    async def test_successful_streaming_with_valid_token(
+    async def test_successful_streaming_with_valid_token(:
             self, auth_manager, websocket_streamer):
         """Test #1: Valid token allows successful streaming."""
         user_id = "no_limit_success_user"  # No rate limit for this test
@@ -351,7 +346,7 @@ class TestStreamingWithAuthValidation:
         assert len(completion_messages) == 1
         
     @pytest.mark.asyncio
-    async def test_expired_token_prevents_streaming(
+    async def test_expired_token_prevents_streaming(:
             self, auth_manager, websocket_streamer):
         """Test #2: Expired token prevents streaming start."""
         user_id = "no_limit_expired_user"
@@ -374,7 +369,7 @@ class TestStreamingWithAuthValidation:
         auth_manager.test_mode = True
         
     @pytest.mark.asyncio
-    async def test_rate_limiting_triggers_backpressure(
+    async def test_rate_limiting_triggers_backpressure(:
             self, auth_manager, websocket_streamer):
         """Test #3: Rate limiting triggers backpressure notifications."""
         user_id = "rate_limited_user"  # This user will face rate limits
@@ -400,7 +395,7 @@ class TestStreamingWithAuthValidation:
         assert success_criteria, f"Expected backpressure or success. Backpressure: {len(backpressure_messages)}, Completed: {result['streaming_completed']}"
         
     @pytest.mark.asyncio
-    async def test_periodic_auth_validation_during_stream(
+    async def test_periodic_auth_validation_during_stream(:
             self, auth_manager, websocket_streamer):
         """Test #4: Periodic auth checks during long streams."""
         user_id = "no_limit_periodic_user"
@@ -423,7 +418,7 @@ class TestStreamingWithAuthValidation:
             assert auth_check["token_valid"] is True
             
     @pytest.mark.asyncio
-    async def test_resource_usage_tracking(
+    async def test_resource_usage_tracking(:
             self, auth_manager, websocket_streamer):
         """Test #5: Resource usage is tracked during streaming."""
         user_id = "no_limit_resource_user"
@@ -451,7 +446,7 @@ class TestStreamingWithAuthValidation:
         assert final_connections > initial_connections
         
     @pytest.mark.asyncio
-    async def test_concurrent_streaming_sessions(
+    async def test_concurrent_streaming_sessions(:
             self, auth_manager, websocket_streamer):
         """Test #6: Multiple concurrent streaming sessions."""
         user_base = "no_limit_concurrent"
@@ -480,7 +475,7 @@ class TestStreamingWithAuthValidation:
         assert auth_manager.resource_usage["connections"] >= len(successful_results)
         
     @pytest.mark.asyncio
-    async def test_large_response_chunked_delivery(
+    async def test_large_response_chunked_delivery(:
             self, auth_manager, websocket_streamer):
         """Test #7: Large responses delivered in chunks efficiently."""
         user_id = "no_limit_chunked_user"
@@ -514,7 +509,7 @@ class TestStreamingWithAuthValidation:
         assert sequences == list(range(10))
         
     @pytest.mark.asyncio
-    async def test_stream_termination_on_auth_failure(
+    async def test_stream_termination_on_auth_failure(:
             self, auth_manager, websocket_streamer):
         """Test #8: Stream terminates gracefully on auth failure mid-stream."""
         user_id = "no_limit_termination_user"
@@ -557,7 +552,7 @@ class TestStreamingWithAuthValidation:
         assert len(termination_messages) >= 1
         
     @pytest.mark.asyncio
-    async def test_comprehensive_streaming_flow(
+    async def test_comprehensive_streaming_flow(:
             self, auth_manager, websocket_streamer):
         """Test #9: Complete streaming flow with all features."""
         user_id = "no_limit_comprehensive_user"
@@ -597,7 +592,7 @@ class TestStreamingWithAuthValidation:
         assert stream_info["active"] is False
         
     @pytest.mark.asyncio
-    async def test_deterministic_performance_requirements(
+    async def test_deterministic_performance_requirements(:
             self, auth_manager, websocket_streamer):
         """Test #10: Deterministic performance under 30 seconds."""
         user_id = "no_limit_performance_user"

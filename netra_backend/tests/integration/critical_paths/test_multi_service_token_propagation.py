@@ -22,7 +22,7 @@ Architecture Compliance: <450 lines, <25 line functions, real components (L2)
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

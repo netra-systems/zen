@@ -8,7 +8,6 @@ from pathlib import Path
 
 from tests.e2e.test_helpers import setup_test_path
 
-
 setup_test_path()
 
 import asyncio
@@ -26,10 +25,9 @@ from tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
 
 # Add project root to path
 
-
 class ThreadLoadTests:
     """Tests for thread operations under load."""
-    async def test_concurrent_thread_creation_load(
+    async def test_concurrent_thread_creation_load(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test concurrent thread creation under load."""
@@ -93,7 +91,7 @@ class ThreadLoadTests:
         
         # Validate success count
         assert performance_data["success_count"] >= expected_count * 0.95
-    async def test_message_creation_throughput(
+    async def test_message_creation_throughput(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test message creation throughput."""
@@ -143,10 +141,9 @@ class ThreadLoadTests:
         # Should create most messages successfully
         assert performance_data["success_count"] >= expected_count * 0.98
 
-
 class ThreadStressTests:
     """Stress tests for thread operations."""
-    async def test_thread_memory_usage_stress(
+    async def test_thread_memory_usage_stress(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test thread operations under memory stress."""
@@ -216,7 +213,7 @@ class ThreadStressTests:
         # Verify reasonable performance under stress
         assert results["thread_throughput"] > 5.0  # At least 5 threads/second
         assert results["message_throughput"] > 50.0  # At least 50 messages/second
-    async def test_concurrent_read_write_stress(
+    async def test_concurrent_read_write_stress(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test concurrent read/write operations stress."""
@@ -282,10 +279,9 @@ class ThreadStressTests:
         # Reasonable throughput under stress
         assert results["operations_per_second"] >= 30.0
 
-
 class ThreadScalabilityTests:
     """Tests for thread operation scalability."""
-    async def test_thread_count_scalability(
+    async def test_thread_count_scalability(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test scalability with increasing thread counts."""
@@ -355,10 +351,9 @@ class ThreadScalabilityTests:
             # Average time per operation should stay reasonable
             assert data["average_time_per_operation"] <= 1.0  # Max 1 second per operation
 
-
 class ThreadLatencyTests:
     """Tests for thread operation latency characteristics."""
-    async def test_thread_operation_latency_distribution(
+    async def test_thread_operation_latency_distribution(:
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
         """Test latency distribution of thread operations."""
@@ -439,12 +434,10 @@ class ThreadLatencyTests:
         
         return sorted_values[f] * (1 - c) + sorted_values[f + 1] * c
 
-
 @pytest.fixture
 def thread_service():
     """Thread service fixture."""
     return ThreadService()
-
 
 @pytest.fixture
 async def mock_db_session():

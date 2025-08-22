@@ -10,7 +10,7 @@ L3 Test: Real local services with containers for auth service config endpoint te
 Tests config availability, response time, structure validation, and resilience.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

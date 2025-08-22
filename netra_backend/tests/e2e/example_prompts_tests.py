@@ -13,7 +13,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.model_effectiveness_tests import (
+from netra_backend.tests.e2e.model_effectiveness_tests import (
     _execute_model_selection_workflow,
     _validate_model_effectiveness_results,
 )

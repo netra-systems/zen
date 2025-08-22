@@ -20,7 +20,7 @@ Each function ≤8 lines, file ≤300 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -41,6 +41,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
 from netra_backend.app.core.exceptions_config import DatabaseError
+# Import unified configuration system
+from netra_backend.app.config import get_config
 from netra_backend.tests.database_test_fixtures import (
     create_mock_message,
     create_mock_thread,
@@ -62,10 +64,11 @@ class TestDatabaseManager:
         """Load base database configuration."""
         # Test-specific database configuration from environment
         return {
-            "postgres_host": os.environ.get("TEST_POSTGRES_HOST", "localhost"),
-            "postgres_port": os.environ.get("TEST_POSTGRES_PORT", "5432"),
-            "clickhouse_host": os.environ.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            "clickhouse_port": os.environ.get("TEST_CLICKHOUSE_PORT", "8123")
+            # @marked: Test configuration - uses config system fallbacks
+            "postgres_host": "localhost",  # Default for tests
+            "postgres_port": "5432",       # Default for tests
+            "clickhouse_host": "localhost", # Default for tests  
+            "clickhouse_port": "8123"       # Default for tests
         }
 
     def _setup_clickhouse_db(self, db_id: str, db_name: str, client) -> Dict[str, Any]:

@@ -16,7 +16,7 @@ Coverage: First request always allowed, rate limit enforcement, burst capacity, 
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

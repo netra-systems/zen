@@ -24,7 +24,7 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import random

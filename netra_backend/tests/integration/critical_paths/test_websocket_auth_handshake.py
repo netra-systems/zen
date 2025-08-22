@@ -12,7 +12,7 @@ Performance target: <200ms handshake completion, 99.9% auth accuracy.
 """
 
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

@@ -12,7 +12,7 @@ L3 Realism: Tests with real dashboard services and actual query workloads
 """
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

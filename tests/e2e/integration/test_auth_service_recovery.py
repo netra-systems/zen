@@ -378,7 +378,7 @@ class AuthServiceRecoveryTester:
         except Exception as e:
             return {"degraded_properly": False, "error": str(e)}
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and resources."""
         try:
             if self.orchestrator:

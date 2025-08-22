@@ -14,7 +14,7 @@ without disruption in staging environment.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import os
 from pathlib import Path

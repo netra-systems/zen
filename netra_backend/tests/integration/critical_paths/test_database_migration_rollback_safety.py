@@ -14,7 +14,7 @@ safety, data preservation, and recovery mechanisms under various failure scenari
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import shutil

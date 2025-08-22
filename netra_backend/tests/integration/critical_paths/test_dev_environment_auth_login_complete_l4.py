@@ -19,7 +19,7 @@ BVJ:
 - Strategic Impact: Foundation for user trust and platform access
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

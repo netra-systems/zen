@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import text
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from netra_backend.tests.isolated_test_config import (
     isolated_clickhouse,

@@ -13,7 +13,7 @@ Comprehensive test to verify database migration and rollback:
 This test ensures database migrations are safe and reversible.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

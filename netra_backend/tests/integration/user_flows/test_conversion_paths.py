@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Optimizes revenue funnel and reduces churn
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

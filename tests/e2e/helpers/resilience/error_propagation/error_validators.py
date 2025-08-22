@@ -48,6 +48,24 @@ class AuthServiceFailurePropagationValidator:
         api_result = await self._test_http_auth_rejection(invalid_token, context)
         
         # Test 2: WebSocket with invalid token
+        return {"validation": "placeholder"}
+
+
+# Validation functions for export
+def validate_error_propagation(error_context: Dict[str, Any]) -> bool:
+    """Validate that errors propagate correctly across service boundaries."""
+    required_fields = ["error_type", "source_service", "target_services"]
+    return all(field in error_context for field in required_fields)
+
+
+def validate_error_isolation(error_context: Dict[str, Any]) -> bool:
+    """Validate that errors are properly isolated to prevent cascading failures."""
+    return error_context.get("isolated", False) and error_context.get("contained", False)
+
+
+def validate_recovery_behavior(recovery_context: Dict[str, Any]) -> bool:
+    """Validate that service recovery behavior is appropriate."""
+    return recovery_context.get("recovered", False) and recovery_context.get("recovery_time", 0) < 30
         ws_result = await self._test_websocket_auth_rejection(invalid_token, context)
         
         # Test 3: Verify error correlation

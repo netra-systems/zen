@@ -19,7 +19,7 @@ from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
 # Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from tests.e2e.scaling_test_helpers import (
+# from scaling_test_helpers - using fixtures instead (
     create_declining_usage_state,
     create_extreme_usage_state,
     # Add project root to path

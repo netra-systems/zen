@@ -30,7 +30,6 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-
 class ThreadCreationManager:
     """Manages thread creation operations via WebSocket."""
     
@@ -109,12 +108,10 @@ class ThreadCreationManager:
             event["timestamp"] > 0
         )
 
-
 @pytest.fixture
 def thread_creator(ws_thread_fixtures):
     """Thread creation manager fixture."""
     return ThreadCreationManager(ws_thread_fixtures)
-
 
 @pytest.mark.asyncio
 async def test_thread_creation_websocket_notification(ws_thread_fixtures, thread_creator):
@@ -138,7 +135,6 @@ async def test_thread_creation_websocket_notification(ws_thread_fixtures, thread
     event = creation_events[0]
     assert thread_creator.validate_thread_creation_event(event, thread_id, thread_name)
     assert event["user_id"] == user.id, "Event must be associated with correct user"
-
 
 @pytest.mark.asyncio
 async def test_multiple_threads_per_user_creation(ws_thread_fixtures, thread_creator):
@@ -172,7 +168,6 @@ async def test_multiple_threads_per_user_creation(ws_thread_fixtures, thread_cre
     for event in creation_events:
         assert event["user_id"] == user.id, "All events must be associated with correct user"
         assert event["thread_id"] in created_thread_ids, "Event thread ID must match created threads"
-
 
 @pytest.mark.asyncio
 async def test_thread_creation_with_metadata_preservation(ws_thread_fixtures, thread_creator):
@@ -215,7 +210,6 @@ async def test_thread_creation_with_metadata_preservation(ws_thread_fixtures, th
            "Agent assignments must be preserved"
     assert preserved_metadata["created_by"] == user.id, "Creator metadata must be preserved"
 
-
 @pytest.mark.asyncio
 async def test_thread_creation_isolation_across_users(ws_thread_fixtures, thread_creator):
     """Test thread creation maintains isolation across different users."""
@@ -251,9 +245,8 @@ async def test_thread_creation_isolation_across_users(ws_thread_fixtures, thread
     assert len(user_a_thread_ids.intersection(user_b_thread_ids)) == 0, \
            "Users must not have access to each other's threads"
 
-
 @pytest.mark.asyncio
-async def test_thread_creation_context_initialization(ws_thread_fixtures, thread_creator, 
+async def test_thread_creation_context_initialization(ws_thread_fixtures, thread_creator,:
                                                        thread_context_manager):
     """Test thread creation properly initializes context for agent operations."""
     user = TEST_USERS["enterprise"]
@@ -290,7 +283,6 @@ async def test_thread_creation_context_initialization(ws_thread_fixtures, thread
     updated_context = ws_thread_fixtures.thread_contexts[context_key]
     assert "agent_context" in updated_context, "Agent context must be preserved"
     assert updated_context["agent_context"]["agent_id"] == "initialization_agent"
-
 
 @pytest.mark.asyncio
 async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread_creator):

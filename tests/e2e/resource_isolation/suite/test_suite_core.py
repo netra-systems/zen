@@ -55,7 +55,7 @@ class ResourceIsolationTestSuite:
             f"({violation.measured_value:.1f} > {violation.threshold_value:.1f})"
         )
 
-    async def initialize_test_environment(self):
+    async def test_initialize_test_environment(self):
         """Initialize the test environment."""
         logger.info("Initializing resource isolation test environment...")
         
@@ -102,7 +102,7 @@ class ResourceIsolationTestSuite:
             logger.error(f"Service verification failed: {e}")
             return False
 
-    async def cleanup_test_environment(self):
+    async def test_cleanup_test_environment(self):
         """Clean up the test environment."""
         logger.info("Cleaning up test environment...")
         

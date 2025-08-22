@@ -166,7 +166,7 @@ class DevDatabaseTestFixture:
 
 
 @pytest.fixture
-async def db_test_fixture():
+async def test_db_test_fixture():
     """Fixture providing database test environment."""
     fixture = DevDatabaseTestFixture()
     yield fixture

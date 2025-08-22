@@ -6,7 +6,7 @@ Tests advanced business value scenarios for cache, resilience, reporting, and wo
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from typing import Dict, List

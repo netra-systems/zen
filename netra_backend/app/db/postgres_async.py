@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
 from sqlalchemy import text
 
-from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -40,8 +40,12 @@ class AsyncPostgresManager:
             logger.debug("Database already initialized, skipping")
             return
         
-        # Get async-compatible database URL from centralized manager
-        database_url = DatabaseManager.get_application_url_async()
+        # Get database URL from unified configuration system
+        config = get_unified_config()
+        database_url = config.database_url
+        
+        if not database_url:
+            raise RuntimeError("DATABASE_URL not configured in unified configuration")
         
         logger.info(f"Creating async engine for local development")
         
@@ -49,8 +53,8 @@ class AsyncPostgresManager:
             # Create async engine with proper pooling for local dev
             self.engine = create_async_engine(
                 database_url,
-                echo=os.getenv("SQL_ECHO", "false").lower() == "true",
-                echo_pool=os.getenv("SQL_ECHO_POOL", "false").lower() == "true",
+                echo=config.database.sql_echo,
+                echo_pool=config.database.sql_echo_pool,
                 poolclass=AsyncAdaptedQueuePool,
                 pool_size=10,
                 max_overflow=20,

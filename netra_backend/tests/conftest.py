@@ -103,7 +103,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+# Import unified configuration system
 from netra_backend.app.config import get_config
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.db.base import Base
 
 # Import the main app first - this will load all models through app.db imports
@@ -239,7 +241,8 @@ def ensure_db_initialized():
 
 async def test_engine():
 
-    config = get_config()
+    # Use unified config for test engine setup
+    config = get_unified_config()
     engine = create_async_engine(config.database_url, echo=False)
 
     async with engine.begin() as conn:
@@ -289,7 +292,8 @@ def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
 
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from netra_backend.app.config import get_config
+        # Use unified configuration system
+        from netra_backend.app.config import get_unified_config as get_config
         from netra_backend.app.llm.llm_manager import LLMManager
 
         config = get_config()
@@ -687,7 +691,8 @@ def sample_usage_patterns():
 def setup_real_infrastructure():
 
     """Setup infrastructure for real LLM tests."""
-    from netra_backend.app.core.config import get_config
+    # Use unified configuration system
+    from netra_backend.app.config import get_unified_config as get_config
 
     config = get_config()
 

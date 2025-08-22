@@ -57,7 +57,7 @@ class JWTSecurityTestManager(JWTGenerationTestManager):
         self.security_test_results: List[Dict] = []
     
 
-    async def revoke_token_and_test_propagation(self, token_set: TokenSet) -> Dict[str, Any]:
+    async def test_revoke_token_and_test_propagation(self, token_set: TokenSet) -> Dict[str, Any]:
 
         """
 

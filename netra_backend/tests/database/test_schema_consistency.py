@@ -7,7 +7,7 @@ Prevents type mismatches and schema drift.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 from sqlalchemy import JSON, Boolean, DateTime, Integer, String, inspect

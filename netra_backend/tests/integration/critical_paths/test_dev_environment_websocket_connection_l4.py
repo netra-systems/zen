@@ -19,7 +19,7 @@ BVJ:
 - Strategic Impact: Core platform capability for live agent responses
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

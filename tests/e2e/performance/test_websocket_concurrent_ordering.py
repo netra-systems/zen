@@ -28,7 +28,7 @@ Validation criteria:
 # Add parent directories to sys.path for imports
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 import asyncio

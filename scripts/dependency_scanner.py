@@ -154,7 +154,7 @@ async def scan_system_dependencies() -> List[DependencyInfo]:
     system_checks = [
         ("python", ">=3.10", ["python", "--version"]),
         ("node", ">=18.0", ["node", "--version"]),
-        ("postgresql", ">=13", ["psql", "--version"]),
+        ("postgresql", ">=17", ["psql", "--version"]),
         ("redis", ">=6.0", ["redis-cli", "--version"])
     ]
     

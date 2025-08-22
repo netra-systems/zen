@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
@@ -20,7 +20,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.scaling_test_helpers import (
+# from scaling_test_helpers - using fixtures instead (
     create_gradual_scaling_state,
     create_scaling_setup,
     create_traffic_spike_state,

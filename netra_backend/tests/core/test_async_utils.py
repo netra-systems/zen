@@ -9,7 +9,7 @@ Imports all modular test files to maintain test discovery while enforcing archit
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from core.test_async_batch_processor import TestAsyncBatchProcessor
 from core.test_async_connection_pool import TestAsyncConnectionPool

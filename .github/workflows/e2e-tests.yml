@@ -109,7 +109,7 @@ jobs:
       
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17.6
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_pass
@@ -169,7 +169,7 @@ jobs:
     
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17.6
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_pass

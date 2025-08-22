@@ -7,7 +7,7 @@ Test classes: TestSupervisorAdvancedFeatures
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -27,7 +27,7 @@ from netra_backend.app.schemas import (
 from netra_backend.app.agents.state import (
     DeepAgentState,  # Use the state module version with methods
 )
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     ExecutionStrategy,

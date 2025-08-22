@@ -8,7 +8,7 @@ maintain, and debug. Use these patterns as templates for new tests.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime

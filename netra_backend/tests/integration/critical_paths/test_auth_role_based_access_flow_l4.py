@@ -21,7 +21,7 @@ Mock-Real Spectrum: L4 (Production-like environment)
 - Real cross-service auth
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path

@@ -30,7 +30,6 @@ import pytest
 
 from tests.e2e.config import TEST_CONFIG, TestDatabaseManager
 
-
 @dataclass
 class AgentResourceLimits:
     """Resource limits for agent initialization"""
@@ -39,7 +38,6 @@ class AgentResourceLimits:
     max_db_connections: int = 10
     max_threads: int = 15
     token_tracking_enabled: bool = True
-
 
 @dataclass
 class AgentResourceMetrics:
@@ -51,7 +49,6 @@ class AgentResourceMetrics:
     thread_count: int
     token_count: int = 0
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
 
 class AgentResourceMonitor:
     """Monitors agent resource usage in real-time"""
@@ -100,7 +97,6 @@ class AgentResourceMonitor:
         threads = process.num_threads()
         return AgentResourceMetrics(agent_id, memory_mb, cpu_percent, connections, threads)
 
-
 class TokenUsageTracker:
     """Tracks LLM token usage for agents"""
     
@@ -123,7 +119,6 @@ class TokenUsageTracker:
     def reset_tracking(self, agent_id: str) -> None:
         """Reset token tracking for agent"""
         self.token_counts[agent_id] = 0
-
 
 class DatabaseConnectionPool:
     """Mock database connection pool for testing"""
@@ -158,7 +153,6 @@ class DatabaseConnectionPool:
         """Get active connection count for agent"""
         return len(self.active_connections.get(agent_id, []))
 
-
 class TestAgentResourceInitialization:
     """Core agent resource limit initialization tests"""
     
@@ -192,7 +186,7 @@ class TestAgentResourceInitialization:
         return agent
     
     @pytest.mark.asyncio
-    async def test_agent_resource_initialization(self, test_agent: AsyncMock,
+    async def test_agent_resource_initialization(self, test_agent: AsyncMock,:
                                                resource_monitor: AgentResourceMonitor,
                                                token_tracker: TokenUsageTracker,
                                                db_pool: DatabaseConnectionPool):
@@ -257,7 +251,6 @@ class TestAgentResourceInitialization:
         for _ in range(1000):
             hash(f"agent_work_{_}")
         await asyncio.sleep(0.1)
-
 
 class TestResourceLimitValidation:
     """Validation tests for resource limit enforcement"""
@@ -357,7 +350,6 @@ class TestResourceLimitValidation:
         for _ in range(50000):
             hash(f"cpu_intensive_{_}")
         await asyncio.sleep(0.2)
-
 
 class TestResourceLimitIntegration:
     """Integration tests for complete resource limit system"""

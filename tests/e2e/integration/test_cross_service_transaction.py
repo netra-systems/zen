@@ -134,7 +134,7 @@ class CrossServiceTransactionTester:
         """Verify data consistency across all services."""
         return await self.verifier.verify_full_consistency(user_id, self.transaction_id)
 
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and connections."""
         await self.rollback_transaction()
         await self.db_connections.disconnect_all()

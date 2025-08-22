@@ -7,11 +7,11 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-from netra_backend.tests.latency_optimization_helpers import (
+# from latency_optimization_helpers - using fixtures instead (
     create_3x_latency_state,
     create_already_optimized_state,
     create_caching_optimization_state,

@@ -9,7 +9,7 @@ where tokens were created but users didn't exist in the database.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid

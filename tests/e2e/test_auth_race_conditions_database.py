@@ -16,16 +16,15 @@ from auth_service.auth_core.models.auth_models import (
     AuthProvider,
     LoginRequest,
 )
-from netra_backend.tests.factories.user_factory import UserFactory
+from netra_backend.tests.e2e.factories.user_factory import UserFactory
 
 # Add auth_service to path for imports
-
 
 class TestDatabaseTransactionIsolation:
     """Test Case 5: Database Transaction Isolation Verification"""
 
     @pytest.mark.asyncio
-    async def test_database_transaction_isolation(
+    async def test_database_transaction_isolation(:
         self, isolated_auth_environment, concurrent_executor, race_detector
     ):
         """

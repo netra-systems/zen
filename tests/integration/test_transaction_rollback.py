@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 # Define a simple model for the test
 Base = declarative_base()

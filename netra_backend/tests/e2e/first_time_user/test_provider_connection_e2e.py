@@ -14,14 +14,14 @@ These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.tests.e2e.e2e.conftest import *
-from netra_backend.tests.helpers import FirstTimeUserTestHelpers
+from netra_backend.tests.conftest import *
+from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHelpers
 
 class TestProviderConnectionE2E:
     """AI provider connection and optimization E2E tests"""

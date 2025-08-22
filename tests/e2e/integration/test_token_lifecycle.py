@@ -27,7 +27,6 @@ from tests.e2e.token_lifecycle_helpers import (
     TokenValidationHelper, PerformanceBenchmark
 )
 
-
 class TestTokenLifecycleE2E:
     """E2E test for JWT token refresh during active sessions."""
     
@@ -53,7 +52,7 @@ class TestTokenLifecycleE2E:
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_during_active_session(
+    async def test_token_refresh_during_active_session(:
         self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """
@@ -137,7 +136,7 @@ class TestTokenLifecycleE2E:
         assert propagation_success, "Token propagation across services failed"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_with_invalid_refresh_token(
+    async def test_token_refresh_with_invalid_refresh_token(:
         self, token_manager, test_user_id
     ):
         """Test token refresh fails gracefully with invalid refresh token."""
@@ -159,7 +158,7 @@ class TestTokenLifecycleE2E:
         return await token_manager.jwt_helper.create_jwt_token(expired_payload)
 
     @pytest.mark.asyncio 
-    async def test_websocket_handles_token_expiration_gracefully(
+    async def test_websocket_handles_token_expiration_gracefully(:
         self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """Test WebSocket handles token expiration gracefully."""
@@ -190,7 +189,7 @@ class TestTokenLifecycleE2E:
             "WebSocket should handle expired tokens gracefully"
 
     @pytest.mark.asyncio
-    async def test_concurrent_token_refresh_race_conditions(
+    async def test_concurrent_token_refresh_race_conditions(:
         self, token_manager, test_user_id
     ):
         """Test concurrent token refresh requests don't cause race conditions."""
@@ -202,7 +201,7 @@ class TestTokenLifecycleE2E:
         assert len(successful_refreshes) >= 1, "At least one concurrent refresh should succeed"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_performance_benchmark(
+    async def test_token_refresh_performance_benchmark(:
         self, token_manager, test_user_id
     ):
         """Benchmark token refresh performance."""
@@ -222,7 +221,6 @@ class TestTokenLifecycleE2E:
         new_token = refresh_response["access_token"]
         token_valid = token_manager.jwt_helper.validate_token_structure(new_token)
         assert token_valid, "Refreshed token has invalid structure"
-
 
 # Business Value Justification Summary
 """

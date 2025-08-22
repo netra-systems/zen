@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Tuple
 
 from pydantic import ValidationError
 
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 
 try:
@@ -60,8 +61,8 @@ class ConfigValidator:
     
     def _validate_database_url(self, config: AppConfig, errors: list) -> None:
         """Validate database URL configuration."""
-        import os
-        is_cloud_run = os.getenv("K_SERVICE") is not None
+        unified_config = get_unified_config()
+        is_cloud_run = unified_config.deployment.is_cloud_run
         self._check_database_url_presence(config, errors, is_cloud_run)
         self._check_database_url_format(config, errors)
     

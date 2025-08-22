@@ -80,7 +80,7 @@ class RealServiceE2ETestSuite:
         
         logger.info("E2E test environment setup complete")
     
-    async def teardown_test_environment(self):
+    async def test_teardown_test_environment(self):
         """Cleanup test environment and close connections."""
         logger.info("Tearing down E2E test environment")
         

@@ -15,7 +15,7 @@ Coverage: Real ClickHouse time-series, Prometheus aggregation, retention policie
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

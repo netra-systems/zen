@@ -6,7 +6,7 @@ Tests for ClickHouse performance and optimization features
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import json
 import random

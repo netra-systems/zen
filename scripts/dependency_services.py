@@ -59,14 +59,14 @@ def get_os_specific_pg_instructions(os_type: str) -> List[str]:
 def get_mac_pg_instructions() -> List[str]:
     """Get macOS PostgreSQL installation instructions"""
     if check_command_exists("brew"):
-        run_command(["brew", "install", "postgresql@14"])
-        run_command(["brew", "services", "start", "postgresql@14"])
+        run_command(["brew", "install", "postgresql@17"])
+        run_command(["brew", "services", "start", "postgresql@17"])
         return ["Installing PostgreSQL via Homebrew..."]
     else:
         return [
             "Install Homebrew first:",
             '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
-            "Then run: brew install postgresql@14"
+            "Then run: brew install postgresql@17"
         ]
 
 

@@ -13,7 +13,7 @@ Coverage: Usage tracking accuracy, billing calculations, invoice generation, pay
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging

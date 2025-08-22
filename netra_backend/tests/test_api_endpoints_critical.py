@@ -8,7 +8,7 @@ Each module contains specific test categories with 25-line maximum functions.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 # Import all critical API tests from focused modules
 

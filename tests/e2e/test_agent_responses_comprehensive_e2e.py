@@ -29,7 +29,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 class AgentResponseTester:
     """Helper class for agent response testing."""
     
@@ -96,7 +95,7 @@ class AgentResponseTester:
         
         return response
     
-    async def test_multi_turn_conversation(self, agent_type: str, 
+    async def test_multi_turn_conversation(self, agent_type: str,:
                                          messages: List[str]) -> List[Dict[str, Any]]:
         """Test multi-turn conversation with an agent."""
         responses = []
@@ -130,7 +129,7 @@ class AgentResponseTester:
             "fallback_available": True
         }
     
-    async def test_agent_tool_execution(self, agent_type: str, 
+    async def test_agent_tool_execution(self, agent_type: str,:
                                       tool_name: str) -> Dict[str, Any]:
         """Test agent tool execution."""
         start_time = time.time()
@@ -176,12 +175,10 @@ class AgentResponseTester:
             "agent_types_used": list(set(r.get("agent_type") for r in self.conversation_history))
         }
 
-
 @pytest.fixture
 def agent_response_tester():
     """Create agent response tester fixture."""
     return AgentResponseTester()
-
 
 class TestAgentResponsesComprehensiveE2E:
     """Comprehensive E2E tests for agent responses."""

@@ -29,7 +29,6 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-
 class ThreadDeletionHandler:
     """Handles thread deletion and cleanup operations."""
     
@@ -180,12 +179,10 @@ class ThreadDeletionHandler:
         
         return verification
 
-
 @pytest.fixture
 def deletion_handler(ws_thread_fixtures):
     """Thread deletion handler fixture."""
     return ThreadDeletionHandler(ws_thread_fixtures)
-
 
 @pytest.fixture
 async def threads_for_deletion(ws_thread_fixtures):
@@ -225,7 +222,6 @@ async def threads_for_deletion(ws_thread_fixtures):
     
     return {"user": user, "threads": threads}
 
-
 @pytest.mark.asyncio
 async def test_deleted_threads_handled_correctly(threads_for_deletion, deletion_handler):
     """Test deleted threads trigger WebSocket notifications and proper cleanup."""
@@ -257,7 +253,6 @@ async def test_deleted_threads_handled_correctly(threads_for_deletion, deletion_
     assert thread_deletion_events[0]["type"] == WebSocketMessageType.THREAD_DELETED.value, \
            "Deletion event must have correct type"
     assert thread_deletion_events[0]["cleanup_success"], "Cleanup must be successful"
-
 
 @pytest.mark.asyncio
 async def test_thread_deletion_complete_cleanup_verification(threads_for_deletion, deletion_handler):
@@ -299,7 +294,6 @@ async def test_thread_deletion_complete_cleanup_verification(threads_for_deletio
     assert thread_cleanup_ops[0]["success"], "Cleanup operation must be successful"
     assert len(thread_cleanup_ops[0]["operations_performed"]) > 0, "Cleanup steps must be recorded"
 
-
 @pytest.mark.asyncio
 async def test_multiple_thread_deletion_performance(threads_for_deletion, deletion_handler):
     """Test deletion of multiple threads performs efficiently."""
@@ -331,7 +325,6 @@ async def test_multiple_thread_deletion_performance(threads_for_deletion, deleti
     # Verify all deletion events captured
     deletion_events = deletion_handler.get_deletion_events_for_user(user.id)
     assert len(deletion_events) == len(thread_ids), "All deletions must generate events"
-
 
 @pytest.mark.asyncio
 async def test_thread_deletion_isolation_across_users(ws_thread_fixtures, deletion_handler):
@@ -383,7 +376,6 @@ async def test_thread_deletion_isolation_across_users(ws_thread_fixtures, deleti
     assert len(user_b_deletions) == 0, "User B must have no deletion events"
     assert user_a_deletions[0]["thread_id"] == thread_a_id, "Deletion event must match User A thread"
 
-
 @pytest.mark.asyncio
 async def test_thread_deletion_error_handling(ws_thread_fixtures, deletion_handler):
     """Test thread deletion handles errors gracefully."""
@@ -421,9 +413,8 @@ async def test_thread_deletion_error_handling(ws_thread_fixtures, deletion_handl
     
     assert len(non_existent_deletion_events) == 1, "Deletion event must be captured for audit"
 
-
 @pytest.mark.asyncio
-async def test_thread_deletion_with_active_agent_context(ws_thread_fixtures, deletion_handler, 
+async def test_thread_deletion_with_active_agent_context(ws_thread_fixtures, deletion_handler,:
                                                          thread_context_manager):
     """Test thread deletion properly cleans up active agent contexts."""
     user = TEST_USERS["enterprise"]

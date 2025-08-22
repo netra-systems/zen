@@ -30,11 +30,10 @@ import websockets
 # Import required classes from test_spike_recovery_core
 from tests.e2e.test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
 
-
 class TestWebSocketConnectionAvalanche:
     """Test Case 2: WebSocket Connection Avalanche"""
     
-    async def test_websocket_connection_avalanche(self, load_generator: SpikeLoadGenerator,
+    async def test_websocket_connection_avalanche(self, load_generator: SpikeLoadGenerator,:
                                                 spike_metrics: SpikeLoadMetrics,
                                                 system_health_validator):
         """

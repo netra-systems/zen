@@ -154,7 +154,7 @@ class DevHealthTestFixture:
 
 
 @pytest.fixture
-async def health_test_fixture():
+async def test_health_test_fixture():
     """Fixture providing health test environment."""
     fixture = DevHealthTestFixture()
     yield fixture

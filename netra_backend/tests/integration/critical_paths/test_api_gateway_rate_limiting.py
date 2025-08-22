@@ -13,7 +13,7 @@ Coverage: API gateway rate limiting, per-endpoint limits, burst handling, tier-b
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging

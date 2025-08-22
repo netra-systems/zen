@@ -5,7 +5,7 @@ Tests for SupplyResearchScheduler functionality
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch

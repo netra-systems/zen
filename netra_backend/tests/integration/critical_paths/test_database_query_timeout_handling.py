@@ -14,7 +14,7 @@ enforcement, graceful degradation, and system recovery from timeout scenarios.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time

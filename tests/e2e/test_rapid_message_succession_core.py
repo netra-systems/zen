@@ -17,7 +17,6 @@ import pytest
 # Import required classes
 from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
-
 class MessageSequenceEntry:
     """Tracking entry for message sequence validation."""
 
@@ -31,7 +30,6 @@ class MessageSequenceEntry:
     status: str = "pending"
     response_data: Optional[Dict] = None
 
-
 class MessageBurstResult:
     """Result tracking for message burst operations."""
 
@@ -44,7 +42,6 @@ class MessageBurstResult:
     sequence_violations: List[str] = field(default_factory=list)
     memory_growth: int = 0
     queue_overflows: int = 0
-
 
 class MessageSequenceValidator:
     """Advanced message sequence integrity validator."""
@@ -164,13 +161,12 @@ class MessageSequenceValidator:
         assert len(violations) == 0, f"Sequence violations detected: {violations}"
         return validation_result
 
-
 class TestBurstMessageIdempotencyEnforcement:
     """Test Case 2: Burst Message Idempotency Enforcement"""
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_burst_message_idempotency_enforcement(
+    async def test_burst_message_idempotency_enforcement(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """
@@ -267,13 +263,12 @@ class TestBurstMessageIdempotencyEnforcement:
                 len(duplicate_rejections)} rejected"
         )
 
-
 class TestQueueOverflowBackpressureHandling:
     """Test Case 3: Queue Overflow and Backpressure Handling"""
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_queue_overflow_backpressure_handling(
+    async def test_queue_overflow_backpressure_handling(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """
@@ -403,7 +398,6 @@ class TestQueueOverflowBackpressureHandling:
                 break
 
         return states
-
 
 async def test_user_token():
     """Create test user and return auth token."""

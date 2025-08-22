@@ -4,7 +4,7 @@ Provides shared fixtures and helper methods for test execution
 """
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

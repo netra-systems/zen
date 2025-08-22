@@ -22,7 +22,6 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
-
 @dataclass
 class DynamicServiceConfig:
     """Dynamic service configuration for testing."""
@@ -43,7 +42,6 @@ class DynamicServiceConfig:
     def auth_url(self) -> str:
         return f"http://localhost:{self.auth_port}"
 
-
 def find_free_port(start_port: int = 8000) -> int:
     """Find a free port starting from the given port."""
     port = start_port
@@ -55,7 +53,6 @@ def find_free_port(start_port: int = 8000) -> int:
             except OSError:
                 port += 1
     raise RuntimeError(f"No free port found starting from {start_port}")
-
 
 @contextmanager
 def mock_service_discovery(config: DynamicServiceConfig):
@@ -84,7 +81,6 @@ def mock_service_discovery(config: DynamicServiceConfig):
         ):
             yield mock_discovery
 
-
 class TestCORSDynamicFrontendPorts:
     """Test 1: Dynamic Frontend Port Test - Expose hardcoded frontend port issues."""
 
@@ -102,7 +98,7 @@ class TestCORSDynamicFrontendPorts:
         ]
 
     @pytest.mark.asyncio
-    async def test_cors_hardcoded_localhost_origins_limitation(
+    async def test_cors_hardcoded_localhost_origins_limitation(:
         self, dynamic_frontend_configs
     ):
         """
@@ -192,7 +188,7 @@ class TestCORSDynamicFrontendPorts:
                         )
 
     @pytest.mark.asyncio
-    async def test_dynamic_frontend_cors_headers_unit_test(
+    async def test_dynamic_frontend_cors_headers_unit_test(:
         self, dynamic_frontend_configs
     ):
         """
@@ -289,7 +285,6 @@ class TestCORSDynamicFrontendPorts:
             except httpx.TimeoutException:
                 pytest.skip("Backend service timeout during integration test")
 
-
 class TestCORSDynamicBackendPorts:
     """Test 2: Dynamic Backend Port Test - Expose backend port configuration issues."""
 
@@ -305,7 +300,7 @@ class TestCORSDynamicBackendPorts:
         ]
 
     @pytest.mark.asyncio
-    async def test_dynamic_backend_port_service_discovery(
+    async def test_dynamic_backend_port_service_discovery(:
         self, dynamic_backend_configs
     ):
         """
@@ -350,7 +345,7 @@ class TestCORSDynamicBackendPorts:
                     config.backend_port}"
 
     @pytest.mark.asyncio
-    async def test_dynamic_backend_cors_configuration_unit(
+    async def test_dynamic_backend_cors_configuration_unit(:
         self, dynamic_backend_configs
     ):
         """
@@ -431,7 +426,6 @@ class TestCORSDynamicBackendPorts:
 
                 except httpx.ConnectError:
                     pytest.skip("Dynamic backend not running for cross-service test")
-
 
 class TestCORSDynamicAuthServicePorts:
     """Test 3: Dynamic Auth Service Port Test - Expose auth service port issues."""
@@ -582,7 +576,6 @@ class TestCORSDynamicAuthServicePorts:
                     pytest.skip(
                         "Auth service not running on dynamic port for OAuth test"
                     )
-
 
 class TestCORSComprehensiveDynamicPortFailures:
     """Comprehensive test showing the complete scope of dynamic port failures."""
@@ -747,7 +740,6 @@ class TestCORSComprehensiveDynamicPortFailures:
                 f"with docker-compose, multiple developers, or CI/CD pipelines."
             )
 
-
 class TestCORSRegexPatternLimitations:
     """Test the limitations of current regex pattern matching for dynamic ports."""
 
@@ -848,7 +840,6 @@ class TestCORSRegexPatternLimitations:
                 f"localhost origins, but they get rejected by the hardcoded static origin list. "
                 f"The pattern matching logic is more flexible than the implementation uses."
             )
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -13,7 +13,7 @@ Coverage: Concurrent editing protection, performance benchmarks, audit trails
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time

@@ -4,11 +4,6 @@ Tests KV cache auditing and optimization using real LLM agents.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
-from pathlib import Path
-import sys
-
 import asyncio
 import uuid
 from datetime import datetime, timezone
@@ -16,8 +11,9 @@ from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
+
 from netra_backend.app.schemas import SubAgentLifecycle
-from ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState

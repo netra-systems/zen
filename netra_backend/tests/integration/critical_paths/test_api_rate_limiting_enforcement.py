@@ -13,7 +13,7 @@ Comprehensive test to verify API rate limiting enforcement:
 This test ensures rate limiting protects the API from abuse.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

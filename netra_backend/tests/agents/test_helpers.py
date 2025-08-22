@@ -6,7 +6,7 @@ All helper functions broken into ≤8 line functions for architectural complianc
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from unittest.mock import AsyncMock, Mock
@@ -88,7 +88,7 @@ def _setup_supervisor_ids(supervisor):
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from netra_backend.app.agents.supervisor.execution_context import (
+    from netra_backend.app.agents.base.execution_context import (
         AgentExecutionResult,
     )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[

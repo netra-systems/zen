@@ -7,7 +7,7 @@ from multiple angles including error cases and concurrent operations.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 """
 

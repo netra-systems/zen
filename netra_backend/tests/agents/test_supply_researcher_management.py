@@ -6,7 +6,7 @@ Modular design with ≤300 lines, ≤8 lines per function
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch

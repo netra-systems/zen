@@ -170,7 +170,12 @@ class ContextFilter:
                 self._environment = getattr(config, 'environment', 'development')
             except (ImportError, RecursionError):
                 # Fallback if configuration is not available or circular import
-                self._environment = os.getenv('ENVIRONMENT', 'development')
+                from netra_backend.app.core.configuration.base import get_unified_config
+                try:
+                    self._environment = get_unified_config().environment
+                except:
+                    # Ultimate fallback
+                    self._environment = "development"
             finally:
                 self._config_loaded = True
                 self._loading_config = False  # Clear guard

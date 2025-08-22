@@ -11,7 +11,7 @@ them to agent_service.handle_websocket_message(), causing total system failure.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

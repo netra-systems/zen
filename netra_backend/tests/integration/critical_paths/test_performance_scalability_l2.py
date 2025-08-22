@@ -5,7 +5,7 @@ Total MRR Protection: $80K
 """
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

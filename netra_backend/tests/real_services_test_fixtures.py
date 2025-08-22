@@ -3,9 +3,12 @@ Shared fixtures and data models for real services tests.
 All functions ≤8 lines per requirements.
 """
 
+# @marked: Test infrastructure - checks test configuration flags
 import os
 
 import pytest
+# Import unified configuration system
+from netra_backend.app.config import get_config
 from pydantic import BaseModel
 
 class Thread(BaseModel):
@@ -22,6 +25,7 @@ class MessageCreate(BaseModel):
 
 def _has_any_real_services_enabled() -> bool:
     """Check if any real services are enabled"""
+    # @marked: Test infrastructure - checks environment flags for test mode
     return any([
         os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
         os.environ.get("ENABLE_REAL_DB_TESTING") == "true",
@@ -47,6 +51,7 @@ skip_if_no_real_services = pytest.mark.skipif(
 
 # Database-specific skip conditions
 skip_if_no_database = pytest.mark.skipif(
+    # @marked: Test infrastructure - checks test configuration flags
     os.environ.get("ENABLE_REAL_DB_TESTING") != "true",
     reason="Real database tests disabled. Set ENABLE_REAL_DB_TESTING=true to run"
 )

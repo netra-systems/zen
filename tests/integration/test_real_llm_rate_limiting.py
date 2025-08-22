@@ -5,7 +5,7 @@ import pytest
 
 # NOTE: Assuming the agent implementation lives in a path like this.
 # This will likely need to be adjusted.
-from netra_backend.app.agents.supervisor import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 @pytest.mark.slow

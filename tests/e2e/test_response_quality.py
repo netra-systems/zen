@@ -22,7 +22,6 @@ from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 
-
 class ResponseQualityTester:
     """Tests response quality validation and gates."""
     
@@ -122,7 +121,7 @@ class ResponseQualityTester:
         
         return threshold_results
     
-    async def test_content_type_validation(self, responses: List[Dict[str, Any]],
+    async def test_content_type_validation(self, responses: List[Dict[str, Any]],:
                                          content_types: List[ContentType]) -> Dict[str, Any]:
         """Test content type specific validation."""
         type_results = {}
@@ -143,7 +142,6 @@ class ResponseQualityTester:
             }
         
         return type_results
-
 
 class TestResponseQuality:
     """E2E tests for response quality validation."""
@@ -260,7 +258,6 @@ class TestResponseQuality:
         """Calculate specific quality metrics."""
         length_factor = min(1.0, len(content) / 100)
         return {"specificity": length_factor * 0.8, "actionability": length_factor * 0.7, "completeness": length_factor * 0.75, "clarity": length_factor * 0.85, "overall": length_factor * 0.77}
-
 
 @pytest.mark.critical
 class TestCriticalQualityScenarios:

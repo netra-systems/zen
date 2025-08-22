@@ -11,7 +11,7 @@ Comprehensive test to verify background job orchestration:
 This test ensures background jobs are properly orchestrated.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

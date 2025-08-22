@@ -13,7 +13,7 @@ Coverage: Invitation workflow, permission validation, edge cases
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime, timedelta, timezone

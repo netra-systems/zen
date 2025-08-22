@@ -12,7 +12,7 @@ Rate limiting target: 100 msgs/min per client with 99.9% accuracy.
 """
 
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

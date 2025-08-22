@@ -7,7 +7,7 @@ Critical: Supervisor must reliably initialize entire agent ecosystem
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone

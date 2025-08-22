@@ -6,7 +6,7 @@ Tests for basic ClickHouse connectivity and database operations
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 from netra_backend.app.core.unified_logging import central_logger as logger

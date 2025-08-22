@@ -8,7 +8,7 @@ orchestration metrics, and test outcomes with ≤8 lines per function.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock

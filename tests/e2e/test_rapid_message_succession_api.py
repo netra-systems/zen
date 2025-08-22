@@ -12,7 +12,6 @@ import psutil
 import pytest
 import websockets
 
-
 class RapidMessageSender:
     """Utility for controlled rapid message sending."""
 
@@ -181,13 +180,12 @@ class RapidMessageSender:
         health_data["final_memory_usage"] = {"rss": psutil.Process().memory_info().rss}
         return health_data
 
-
 class TestSequentialMessageProcessingRapidSuccession:
     """Test Case 1: Sequential Message Processing Under Rapid Succession"""
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_sequential_message_processing_rapid_succession(
+    async def test_sequential_message_processing_rapid_succession(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """

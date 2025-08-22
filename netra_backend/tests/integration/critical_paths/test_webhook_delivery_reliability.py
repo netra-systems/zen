@@ -11,7 +11,7 @@ Comprehensive test for webhook delivery reliability:
 8. Circuit breaker for failing endpoints
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib

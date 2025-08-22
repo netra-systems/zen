@@ -274,7 +274,7 @@ def mock_queue_manager_small():
 
 
 @pytest.fixture
-async def queue_test_client(mock_queue_manager):
+async def test_queue_test_client(mock_queue_manager):
     """WebSocket queue test client fixture"""
     client = WebSocketQueueTestClient("ws://mock/ws", "test_user_123", mock_queue_manager)
     yield client
@@ -285,7 +285,7 @@ async def queue_test_client(mock_queue_manager):
 
 
 @pytest.fixture
-async def connected_client(queue_test_client):
+async def test_connected_client(queue_test_client):
     """Pre-connected test client"""
     await queue_test_client.connect()
     return queue_test_client

@@ -13,7 +13,7 @@ Comprehensive test for agent failover and recovery:
 This test validates the complete agent failover and recovery system.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

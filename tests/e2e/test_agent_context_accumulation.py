@@ -29,7 +29,6 @@ from tests.e2e.agent_response_test_utilities import (
     AgentResponseSimulator,
 )
 
-
 class AgentContextAccumulationTester:
     """Tests agent context accumulation and memory management."""
     
@@ -103,7 +102,7 @@ class AgentContextAccumulationTester:
         context_building_result["conversation_time"] = time.time() - conversation_start
         return context_building_result
 
-    async def test_context_window_management(self, supervisor: SupervisorAgent,
+    async def test_context_window_management(self, supervisor: SupervisorAgent,:
                                            max_context_size: int = 4000) -> Dict[str, Any]:
         """Test context window management and truncation."""
         window_test_start = time.time()
@@ -155,7 +154,7 @@ class AgentContextAccumulationTester:
         window_management_result["management_time"] = time.time() - window_test_start
         return window_management_result
 
-    async def test_context_retrieval_accuracy(self, supervisor: SupervisorAgent,
+    async def test_context_retrieval_accuracy(self, supervisor: SupervisorAgent,:
                                             historical_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test context retrieval accuracy and relevance."""
         retrieval_start = time.time()
@@ -242,7 +241,6 @@ class AgentContextAccumulationTester:
                 persistence_result["persistence_successful"] = True
         
         return persistence_result
-
 
 class TestAgentContextAccumulation:
     """Integration tests for agent context accumulation."""
@@ -411,7 +409,6 @@ class TestAgentContextAccumulation:
         await asyncio.sleep(0.02)  # Simulate retrieval
         relevance_score = 0.8 if "cost" in query.lower() else 0.6
         return {"relevant_context_found": True, "accuracy_score": relevance_score}
-
 
 @pytest.mark.critical
 class TestCriticalContextScenarios:

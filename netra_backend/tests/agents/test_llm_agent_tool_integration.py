@@ -7,7 +7,7 @@ Split from oversized test_llm_agent_e2e_real.py
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

@@ -24,7 +24,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class WebSocketTestClient:
     """WebSocket test client with session management and reconnection capabilities."""
     
@@ -142,7 +141,6 @@ class WebSocketTestClient:
         
         return {}
 
-
 class MockAuthService:
     """Mock authentication service for testing."""
     
@@ -168,7 +166,6 @@ class MockAuthService:
     async def get_token_metadata(self, token: str) -> Optional[Dict]:
         """Get token metadata."""
         return self.token_metadata.get(token)
-
 
 class MockAgentContext:
     """Mock agent context for testing."""
@@ -226,7 +223,6 @@ class MockAgentContext:
             return True
         return False
 
-
 # Test Fixtures
 
 @pytest.fixture
@@ -234,12 +230,10 @@ def mock_auth_service():
     """Mock authentication service fixture."""
     return MockAuthService()
 
-
 @pytest.fixture
 def mock_agent_context():
     """Mock agent context fixture."""
     return MockAgentContext()
-
 
 @pytest.fixture
 async def session_token(mock_auth_service):
@@ -249,9 +243,8 @@ async def session_token(mock_auth_service):
         metadata={"test_session": True}
     )
 
-
 @pytest.fixture
-async def websocket_test_client(session_token):
+async def test_websocket_test_client(session_token):
     """WebSocket test client fixture."""
     # Use mock URI to trigger mock connection
     uri = "ws://mock-server/ws"
@@ -267,9 +260,8 @@ async def websocket_test_client(session_token):
     if client.is_connected:
         await client.disconnect()
 
-
 @pytest.fixture
-async def established_conversation(websocket_test_client, mock_agent_context, session_token):
+async def test_established_conversation(websocket_test_client, mock_agent_context, session_token):
     """Fixture with established conversation history."""
     # Create test conversation
     test_messages = [
@@ -307,11 +299,10 @@ async def established_conversation(websocket_test_client, mock_agent_context, se
     
     return websocket_test_client, mock_agent_context, test_messages
 
-
 # Test Cases
 
 @pytest.mark.asyncio
-async def test_basic_reconnection_preserves_conversation_history(
+async def test_basic_reconnection_preserves_conversation_history(:
     established_conversation, session_token
 ):
     """
@@ -372,9 +363,8 @@ async def test_basic_reconnection_preserves_conversation_history(
     
     logger.info(f"✓ Conversation history preserved: {len(retrieved_history)} messages in {retrieval_time:.3f}s")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_preserves_agent_memory_and_context(
+async def test_reconnection_preserves_agent_memory_and_context(:
     established_conversation, session_token
 ):
     """
@@ -435,9 +425,8 @@ async def test_reconnection_preserves_agent_memory_and_context(
     
     logger.info(f"✓ Agent context preserved: workflow step {restored_workflow['current_step']}, {len(restored_tools)} tool calls")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_same_token_different_ip_location(
+async def test_reconnection_same_token_different_ip_location(:
     established_conversation, session_token
 ):
     """
@@ -513,9 +502,8 @@ async def test_reconnection_same_token_different_ip_location(
     
     logger.info(f"✓ Cross-location reconnection successful in {connection_time:.3f}s")
 
-
 @pytest.mark.asyncio
-async def test_multiple_reconnections_maintain_consistency(
+async def test_multiple_reconnections_maintain_consistency(:
     established_conversation, session_token
 ):
     """
@@ -595,9 +583,8 @@ async def test_multiple_reconnections_maintain_consistency(
     
     logger.info(f"✓ {reconnection_cycles} cycles: {consistency_rate:.1%} consistency, {memory_increase:.1%} memory growth")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_brief_vs_extended_disconnection_periods(
+async def test_reconnection_brief_vs_extended_disconnection_periods(:
     established_conversation, session_token, mock_auth_service
 ):
     """
@@ -721,7 +708,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
     
     logger.info(f"✓ Disconnection handling: Brief {brief['restoration_time']:.3f}s, Medium {medium['restoration_time']:.3f}s, Extended expired")
 
-
 # Integration and Helper Tests
 
 @pytest.mark.asyncio
@@ -751,7 +737,6 @@ async def test_websocket_client_error_handling(session_token):
     message = await client.receive_message(timeout=1.0)
     assert message is None
 
-
 @pytest.mark.asyncio
 async def test_mock_services_functionality(mock_auth_service, mock_agent_context):
     """Test mock service functionality for proper test isolation."""
@@ -775,7 +760,6 @@ async def test_mock_services_functionality(mock_auth_service, mock_agent_context
     retrieved_context = mock_agent_context.get_context(token)
     assert len(retrieved_context["conversation_history"]) == 1
     assert retrieved_context["conversation_history"][0]["content"] == "test message"
-
 
 @pytest.mark.asyncio
 async def test_performance_benchmarks(established_conversation, session_token):
@@ -801,7 +785,6 @@ async def test_performance_benchmarks(established_conversation, session_token):
     assert max_connection_time < 1.0, f"Max connection time {max_connection_time:.3f}s too slow"
     
     logger.info(f"✓ Performance: avg {avg_connection_time:.3f}s, max {max_connection_time:.3f}s")
-
 
 if __name__ == "__main__":
     # Run tests with detailed output

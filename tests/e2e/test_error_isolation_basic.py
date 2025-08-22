@@ -45,7 +45,7 @@ class ErrorIsolationTester:
         self.degradation_validator = GracefulDegradationValidator()
         self.recovery_verifier = AutoRecoveryVerifier()
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment."""
         if self.client_factory:
             await self.client_factory.cleanup()

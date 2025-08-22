@@ -29,13 +29,12 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
     StreamingResponseGenerator,
 )
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestTextStreamingDisconnection:
     """Test text streaming disconnection and recovery."""
     
-    async def test_basic_text_stream_interruption(self, network_condition, stream_buffer, 
+    async def test_basic_text_stream_interruption(self, network_condition, stream_buffer,:
                                                  test_user_id, response_configs):
         """Test basic text streaming interruption and recovery."""
         config = response_configs["text_response"]
@@ -68,7 +67,7 @@ class TestTextStreamingDisconnection:
         assert stream_buffer.chunks_received > 0
         assert len(stream_buffer.get_full_data()) > 0
         
-    async def test_mid_chunk_disconnection(self, network_condition, stream_buffer,
+    async def test_mid_chunk_disconnection(self, network_condition, stream_buffer,:
                                          test_user_id, response_configs):
         """Test disconnection in the middle of a chunk."""
         config = response_configs["text_response"]
@@ -96,7 +95,7 @@ class TestTextStreamingDisconnection:
         assert disconnection_occurred
         assert stream_buffer.chunks_received > 0
         
-    async def test_multiple_disconnections(self, network_condition, stream_buffer,
+    async def test_multiple_disconnections(self, network_condition, stream_buffer,:
                                          test_user_id, response_configs):
         """Test multiple disconnections during streaming."""
         config = response_configs["text_response"]
@@ -125,7 +124,7 @@ class TestTextStreamingDisconnection:
         assert disconnection_count == max_disconnections
         assert stream_buffer.chunks_received > 0
         
-    async def test_long_disconnection_recovery(self, network_condition, stream_buffer,
+    async def test_long_disconnection_recovery(self, network_condition, stream_buffer,:
                                              test_user_id, response_configs):
         """Test recovery from extended disconnection."""
         config = response_configs["text_response"]
@@ -153,7 +152,7 @@ class TestTextStreamingDisconnection:
         assert long_disconnection_occurred
         assert stream_buffer.chunks_received > 0
         
-    async def test_high_frequency_disconnections(self, network_condition, stream_buffer,
+    async def test_high_frequency_disconnections(self, network_condition, stream_buffer,:
                                                test_user_id, response_configs):
         """Test handling of very frequent disconnections."""
         config = response_configs["text_response"]

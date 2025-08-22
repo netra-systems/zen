@@ -70,11 +70,16 @@ class CircuitBreakerManager:
             
             # Create circuit breaker for the service
             config = service_config.circuit_breaker_config
-            circuit_breaker = CoreCircuitBreaker(
+            from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+            
+            circuit_config = CircuitConfig(
+                name=service_config.name,
                 failure_threshold=config.failure_threshold,
                 recovery_timeout=config.recovery_timeout_seconds,
-                timeout=config.timeout_seconds
+                timeout_seconds=config.timeout_seconds,
+                half_open_max_calls=config.half_open_max_calls
             )
+            circuit_breaker = CoreCircuitBreaker(circuit_config)
             self._circuit_breakers[service_config.name] = circuit_breaker
     
     async def unregister_service(self, service_name: str) -> None:

@@ -302,7 +302,7 @@ class OAuthRealServiceFlowRunner:
             logger.error(f"Cross-service token validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
-    async def cleanup_test_resources(self) -> None:
+    async def test_cleanup_test_resources(self) -> None:
         """Clean up all test resources and real services"""
         try:
             # Close HTTP clients

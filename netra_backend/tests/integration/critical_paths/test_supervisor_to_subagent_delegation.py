@@ -12,7 +12,7 @@ L3 Test: Uses real local services with Testcontainers for agent spawning and coo
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

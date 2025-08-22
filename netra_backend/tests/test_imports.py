@@ -5,7 +5,7 @@ This module runs import tests for all critical modules to ensure
 no import errors exist in the codebase.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
@@ -128,7 +128,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             'netra_backend.app.core.error_handlers',
             'netra_backend.app.core.configuration.base',
             'netra_backend.app.core.configuration.database',
-            'netra_backend.app.core.configuration.secrets',
+            'netra_backend.app.core.configuration.unified_secrets',
             'netra_backend.app.core.agent_recovery',
             'netra_backend.app.core.health.checks',
             'netra_backend.app.core.resource_manager',

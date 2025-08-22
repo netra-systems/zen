@@ -7,7 +7,7 @@ Test JSON-RPC 2.0 request processing.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import json
 from unittest.mock import AsyncMock, Mock, patch

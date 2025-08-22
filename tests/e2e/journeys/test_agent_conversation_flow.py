@@ -34,7 +34,6 @@ from tests.e2e.agent_conversation_helpers import (
     RealTimeUpdateValidator,
 )
 
-
 @pytest.mark.asyncio
 class TestAgentConversationFlow:
     """Test #2: Complete Agent Conversation Flow with Context Preservation."""
@@ -58,7 +57,7 @@ class TestAgentConversationFlow:
         return ConversationFlowValidator()
     
     @pytest.mark.asyncio
-    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator, 
+    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator,:
                                                          flow_validator):
         """Test complete optimization conversation with context preservation."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
@@ -185,7 +184,6 @@ class TestAgentConversationFlow:
         for agent_type, result in orchestration_results.items():
             assert result["status"] == "success", f"{agent_type} agent orchestration failed"
             assert result["agent_type"] == agent_type, f"Wrong agent type in {agent_type} response"
-
 
 @pytest.mark.asyncio
 class TestAgentConversationPerformance:

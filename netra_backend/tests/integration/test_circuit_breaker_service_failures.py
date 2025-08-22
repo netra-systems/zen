@@ -10,7 +10,7 @@ Tests circuit breaker behavior with real service failures using Docker container
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time

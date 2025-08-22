@@ -123,8 +123,8 @@ class MicroserviceIsolationValidator:
                 path=self.project_root / "frontend",
                 module_namespace="frontend",
                 forbidden_imports=[
-                    "from ../app/",
-                    "from ../auth_service/",
+                    "from netra_backend./app/",
+                    "from netra_backend./auth_service/",
                     "import('../app",
                     "import('../auth_service",
                     "require('../app",

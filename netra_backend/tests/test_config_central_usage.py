@@ -13,7 +13,7 @@ configuration system and don't bypass it with direct imports.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import ast
 import os
@@ -122,7 +122,10 @@ class TestCentralConfigUsage:
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
-        
+        current_file = Path(__file__)
+        # Navigate up to the netra-core-generation-1 directory
+        project_root = current_file.parent.parent.parent
+        return str(project_root)
     @pytest.fixture
     def python_files(self, project_root):
         """Get all Python files in the project."""

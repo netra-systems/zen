@@ -30,11 +30,10 @@ import websockets
 # Import required classes from test_spike_recovery_core
 from tests.e2e.test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
 
-
 class TestDatabaseConnectionPoolStress:
     """Test Case 5: Database Connection Pool Stress Testing"""
     
-    async def test_database_connection_pool_stress(self, load_generator: SpikeLoadGenerator,
+    async def test_database_connection_pool_stress(self, load_generator: SpikeLoadGenerator,:
                                                  spike_metrics: SpikeLoadMetrics,
                                                  system_health_validator):
         """

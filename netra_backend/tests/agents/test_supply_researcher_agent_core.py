@@ -5,7 +5,7 @@ Core tests for SupplyResearcherAgent - Basic functionality
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
 from unittest.mock import AsyncMock, Mock

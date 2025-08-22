@@ -7,7 +7,7 @@ Each test must be concise and focused as per architecture requirements.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     PipelineStep,

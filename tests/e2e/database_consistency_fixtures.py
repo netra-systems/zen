@@ -220,7 +220,7 @@ class DatabaseConsistencyTester:
         duration = transaction.end_time - transaction.start_time
         return duration.total_seconds()
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and connections."""
         if self.websocket_client:
             await self.websocket_client.close()

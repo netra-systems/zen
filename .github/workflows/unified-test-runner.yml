@@ -235,7 +235,7 @@ jobs:
       
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:17.6-alpine
         env:
           POSTGRES_DB: netra_test
           POSTGRES_USER: test_user

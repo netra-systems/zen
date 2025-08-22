@@ -25,7 +25,6 @@ import psutil
 import pytest
 import websockets
 
-
 class MockWebSocketServer:
     """Mock WebSocket server for testing without real services."""
     
@@ -155,7 +154,7 @@ class TestWebSocketStabilityMessageBursts:
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_websocket_stability_message_bursts(
+    async def test_websocket_stability_message_bursts(:
         self, rapid_message_sender, message_sequence_validator, agent_state_monitor
     ):
         """

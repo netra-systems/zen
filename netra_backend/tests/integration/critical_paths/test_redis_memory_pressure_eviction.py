@@ -14,7 +14,7 @@ Performance Requirements: Eviction time < 50ms, memory recovery > 80%, cache eff
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

@@ -89,9 +89,13 @@ class AgentLifecycleMixin(ABC):
     
     async def _send_websocket_warning(self, run_id: str) -> None:
         """Send WebSocket warning about entry conditions."""
-        ws_user_id = self._get_websocket_user_id(run_id)
-        message = f"Entry conditions not met for {self.name}"
-        await self.websocket_manager.send_agent_log(ws_user_id, "warning", message, self.name)
+        try:
+            ws_user_id = self._get_websocket_user_id(run_id)
+            message = f"Entry conditions not met for {self.name}"
+            await self.websocket_manager.send_agent_log(ws_user_id, "warning", message, self.name)
+        except (ConnectionError, Exception) as e:
+            # Log the error but don't let WebSocket issues break agent execution
+            self.logger.warning(f"Failed to send WebSocket warning for {self.name}: {e}")
     
     async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Handle WebSocket disconnection during execution."""

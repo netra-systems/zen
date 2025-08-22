@@ -30,7 +30,6 @@ class PerformanceMetricsCollector:
 
     """Collects comprehensive performance metrics during testing."""
     
-
     def __init__(self):
 
         self.metrics = defaultdict(list)
@@ -41,7 +40,6 @@ class PerformanceMetricsCollector:
 
         self.monitor_task: Optional[asyncio.Task] = None
     
-
     @asynccontextmanager
 
     async def monitoring_context(self):
@@ -52,7 +50,6 @@ class PerformanceMetricsCollector:
 
         start_time = time.time()
         
-
         try:
 
             yield self
@@ -63,7 +60,6 @@ class PerformanceMetricsCollector:
 
             self.metrics['total_test_time'] = time.time() - start_time
     
-
     async def start_monitoring(self):
 
         """Start system monitoring."""
@@ -72,7 +68,6 @@ class PerformanceMetricsCollector:
 
         self.monitor_task = asyncio.create_task(self._monitor_system_resources())
     
-
     async def stop_monitoring(self):
 
         """Stop system monitoring."""
@@ -91,7 +86,6 @@ class PerformanceMetricsCollector:
 
                 pass
     
-
     async def _monitor_system_resources(self):
 
         """Monitor system resources continuously."""
@@ -104,19 +98,16 @@ class PerformanceMetricsCollector:
 
                 cpu_percent = self.system_process.cpu_percent()
                 
-
                 self.metrics['memory_usage_mb'].append(memory_mb)
 
                 self.metrics['cpu_usage_percent'].append(cpu_percent)
                 
-
                 await asyncio.sleep(1.0)  # Sample every second
 
             except Exception as e:
 
                 logger.warning(f"Error monitoring system resources: {e}")
     
-
     async def record_agent_startup_metrics(self, user_id: str, timing_data: Dict[str, float]):
 
         """Record individual agent startup metrics."""
@@ -131,19 +122,16 @@ class PerformanceMetricsCollector:
 
         })
     
-
     def calculate_performance_summary(self) -> Dict[str, Any]:
 
         """Calculate performance summary statistics."""
 
         startup_times = [m['total_startup_time'] for m in self.metrics['agent_startups']]
         
-
         if not startup_times:
 
             return {"error": "No startup metrics recorded"}
         
-
         return {
 
             'total_agents_started': len(startup_times),
@@ -166,8 +154,7 @@ class PerformanceMetricsCollector:
 
         }
 
-
-async def test_performance_under_concurrent_load(
+async def test_performance_under_concurrent_load(:
 
     concurrent_test_environment, 
 
@@ -177,7 +164,6 @@ async def test_performance_under_concurrent_load(
 
     """Test Case 3: Performance Under Concurrent Load
     
-
     Objective: Validate system performance meets SLA requirements under 100 user load
 
     Success Criteria:
@@ -196,10 +182,8 @@ async def test_performance_under_concurrent_load(
 
     logger.info("Starting Test Case 3: Performance Under Concurrent Load")
     
-
     orchestrator = ConcurrentTestOrchestrator(concurrent_test_environment)
     
-
     async with orchestrator.metrics_collector.monitoring_context():
         # Execute concurrent startup test
 
@@ -243,7 +227,6 @@ async def test_performance_under_concurrent_load(
 
         f"CPU usage exceeded: {performance_summary['avg_cpu_usage_percent']:.1f}%"
     
-
     logger.info(f"Test Case 3 completed: Performance within SLA thresholds")
 
     logger.info(f"Performance details: {performance_summary}")

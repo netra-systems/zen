@@ -4,7 +4,7 @@ Designed to reveal system flaws in auth, login, websockets, and core operations
 """
 
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

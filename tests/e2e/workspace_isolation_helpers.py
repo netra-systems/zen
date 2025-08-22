@@ -40,7 +40,7 @@ class WorkspaceIsolationTestCore:
         await self._populate_workspace_data()
         await self._setup_rbac_roles()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup all test data ensuring no residual isolation breaches."""
         await self._verify_complete_cleanup()
         await self._cleanup_test_workspaces()

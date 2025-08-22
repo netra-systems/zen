@@ -14,7 +14,7 @@ These tests validate the missing critical paths that cause the highest revenue l
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime, timezone
@@ -22,8 +22,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.tests.e2e.e2e.conftest import *
-from netra_backend.tests.helpers import FirstTimeUserTestHelpers
+from netra_backend.tests.conftest import *
+from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHelpers
 
 class TestCriticalMissingE2E:
     """TOP 5 most critical missing E2E tests for first-time user conversion"""

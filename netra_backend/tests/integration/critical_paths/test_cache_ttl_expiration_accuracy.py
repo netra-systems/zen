@@ -14,7 +14,7 @@ Performance Requirements: TTL accuracy > 99.5%, expiration variance < 50ms, memo
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json

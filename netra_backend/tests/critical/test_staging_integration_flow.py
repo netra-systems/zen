@@ -11,7 +11,7 @@ Each function ≤8 lines, file ≤300 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os

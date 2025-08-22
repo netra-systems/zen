@@ -12,7 +12,7 @@ Performance Requirements: p99 < 500ms for billing calculations, 99.9% accuracy u
 """
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

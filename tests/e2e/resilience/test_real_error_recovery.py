@@ -40,7 +40,6 @@ import psutil
 import pytest
 import pytest_asyncio
 
-
 from tests.e2e.config import TEST_USERS
 from tests.e2e.error_cascade_core import ServiceFailureSimulator
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
@@ -48,7 +47,6 @@ from tests.e2e.real_client_types import ClientConfig
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
-
 
 class NetworkFailureSimulator:
     """Simulates real network failures and connection drops."""
@@ -91,7 +89,6 @@ class NetworkFailureSimulator:
         client.config.timeout = original_timeout
         self.failure_active = False
 
-
 class CircuitBreakerTester:
     """Tests circuit breaker behavior during service failures."""
     
@@ -101,7 +98,7 @@ class CircuitBreakerTester:
         self.circuit_open = False
         self.recovery_attempts = 0
     
-    async def test_circuit_breaker_activation(self, client: RealWebSocketClient,
+    async def test_circuit_breaker_activation(self, client: RealWebSocketClient,:
                                             failure_threshold: int = 3) -> Dict[str, Any]:
         """Test circuit breaker opens after threshold failures."""
         attempts = []
@@ -153,7 +150,6 @@ class CircuitBreakerTester:
             "recovery_success": recovery_success,
             "recovery_attempts": self.recovery_attempts
         }
-
 
 class DataIntegrityValidator:
     """Validates data integrity during and after service failures."""
@@ -221,7 +217,6 @@ class DataIntegrityValidator:
         except Exception as e:
             return {"integrity_validated": False, "error": str(e)}
 
-
 class ServiceRecoveryCoordinator:
     """Coordinates service recovery and validates restoration."""
     
@@ -285,7 +280,6 @@ class ServiceRecoveryCoordinator:
         except Exception as e:
             return {"service_restored": False, "error": str(e)}
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestRealErrorRecovery:
@@ -326,7 +320,7 @@ class TestRealErrorRecovery:
         """Initialize recovery coordinator."""
         return ServiceRecoveryCoordinator(orchestrator)
     
-    async def test_backend_service_failure_recovery(self, orchestrator, failure_simulator,
+    async def test_backend_service_failure_recovery(self, orchestrator, failure_simulator,:
                                                   recovery_coordinator, data_validator):
         """Test complete backend service failure and recovery cycle."""
         # Establish connection and capture initial state
@@ -367,7 +361,7 @@ class TestRealErrorRecovery:
         finally:
             await ws_client.close()
     
-    async def test_network_failure_with_timeouts(self, orchestrator, network_simulator,
+    async def test_network_failure_with_timeouts(self, orchestrator, network_simulator,:
                                                 circuit_breaker_tester):
         """Test network failure handling with timeout and retry logic."""
         ws_client = await self._setup_test_connection(orchestrator)
@@ -455,7 +449,7 @@ class TestRealErrorRecovery:
             error_str = str(e)
             assert len(error_str) > 0, "Error message should not be empty"
     
-    async def test_complete_error_recovery_flow(self, network_simulator, circuit_breaker_tester,
+    async def test_complete_error_recovery_flow(self, network_simulator, circuit_breaker_tester,:
                                               data_validator):
         """Test complete error recovery flow logic validation."""
         start_time = time.time()
@@ -624,12 +618,10 @@ class TestRealErrorRecovery:
             "data_integrity": integrity.get("integrity_validated", False)
         }
 
-
 # Test execution helper functions
 def create_error_recovery_test_suite() -> TestRealErrorRecovery:
     """Create error recovery test suite instance."""
     return TestRealErrorRecovery()
-
 
 async def run_error_recovery_validation() -> Dict[str, Any]:
     """Run error recovery validation and return results."""

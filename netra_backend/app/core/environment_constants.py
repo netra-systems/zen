@@ -3,10 +3,18 @@
 Single source of truth for all environment-related constants and utilities.
 Eliminates hardcoded environment strings throughout the codebase.
 
-**BOOTSTRAP MODULE**: This module contains infrastructure-level environment
-detection that requires direct os.environ access for initial configuration
-system setup. All application-level environment access should use the
-unified configuration system instead.
+**UNIFIED CONFIGURATION INTEGRATION**: This module now integrates with the
+unified configuration system while maintaining bootstrap functionality.
+
+**BOOTSTRAP vs APPLICATION METHODS**:
+- Bootstrap methods (marked BOOTSTRAP ONLY): Required for initial config system setup
+- Application methods (marked APPLICATION METHOD): Use unified config when available
+- Convenience functions: Automatically use unified config, fall back to bootstrap
+
+**USAGE GUIDANCE**:
+- Application code: Use convenience functions (get_current_environment(), is_production(), etc.)  
+- Bootstrap/infrastructure: Use EnvironmentDetector bootstrap methods directly
+- New code: Always prefer unified config integration
 
 Business Value: Platform/Internal - Deployment Stability - Prevents deployment
 errors and ensures consistent environment handling across all services.
@@ -15,6 +23,13 @@ errors and ensures consistent environment handling across all services.
 import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+# Import unified config for non-bootstrap functionality
+try:
+    from netra_backend.app.core.configuration.base import get_unified_config
+    UNIFIED_CONFIG_AVAILABLE = True
+except ImportError:
+    UNIFIED_CONFIG_AVAILABLE = False
 
 
 class Environment(Enum):
@@ -97,6 +112,11 @@ class EnvironmentDetector:
     """Centralized environment detection logic.
     
     Provides consistent environment detection across all services.
+    
+    BOOTSTRAP METHODS: Static methods marked with BOOTSTRAP comments
+    require direct os.environ access for initial configuration system setup.
+    
+    APPLICATION METHODS: Use unified config when available.
     """
     
     @staticmethod
@@ -275,6 +295,66 @@ class EnvironmentDetector:
         """
         # BOOTSTRAP ONLY: Direct env access for Kubernetes detection
         return bool(os.environ.get(EnvironmentVariables.KUBERNETES_SERVICE_HOST))
+    
+    # APPLICATION-FRIENDLY METHODS (Unified Config Aware)
+    
+    @staticmethod
+    def get_environment_unified() -> str:
+        """Get current environment using unified config when available.
+        
+        APPLICATION METHOD: Prefers unified config, falls back to bootstrap.
+        Use this for application code instead of get_environment().
+        """
+        if UNIFIED_CONFIG_AVAILABLE:
+            try:
+                config = get_unified_config()
+                return config.environment
+            except Exception:
+                # Fallback to bootstrap method if unified config fails
+                pass
+        
+        # Bootstrap fallback
+        return EnvironmentDetector.get_environment()
+    
+    @staticmethod
+    def is_testing_context_unified() -> bool:
+        """Check if running in test context using unified config when available.
+        
+        APPLICATION METHOD: Prefers unified config, falls back to bootstrap.
+        """
+        if UNIFIED_CONFIG_AVAILABLE:
+            try:
+                config = get_unified_config()
+                # Check unified config fields first
+                if config.testing or config.pytest_current_test:
+                    return True
+                # Check if environment is explicitly testing
+                if config.environment == Environment.TESTING.value:
+                    return True
+                return False
+            except Exception:
+                # Fallback to bootstrap method if unified config fails
+                pass
+        
+        # Bootstrap fallback
+        return EnvironmentDetector.is_testing_context()
+    
+    @staticmethod
+    def is_cloud_run_unified() -> bool:
+        """Check if running on Google Cloud Run using unified config when available.
+        
+        APPLICATION METHOD: Prefers unified config, falls back to bootstrap.
+        """
+        if UNIFIED_CONFIG_AVAILABLE:
+            try:
+                config = get_unified_config()
+                return bool(config.k_service)
+            except Exception:
+                # Fallback to bootstrap method if unified config fails
+                pass
+        
+        # Bootstrap fallback
+        return EnvironmentDetector.is_cloud_run()
 
 
 class EnvironmentConfig:
@@ -371,8 +451,11 @@ class EnvironmentConfig:
 
 # Convenience functions for common environment checks
 def get_current_environment() -> str:
-    """Get the current environment using standardized detection."""
-    return EnvironmentDetector.get_environment()
+    """Get the current environment using standardized detection.
+    
+    PREFERRED: Uses unified config when available, falls back to bootstrap.
+    """
+    return EnvironmentDetector.get_environment_unified()
 
 
 def is_production() -> bool:
@@ -404,10 +487,21 @@ def get_environment_config() -> Dict[str, Any]:
 def get_current_project_id() -> str:
     """Get the appropriate GCP project ID for the current environment.
     
+    PREFERRED: Uses unified config when available.
     NOTE: Bootstrap method for infrastructure setup.
-    For application use, prefer config.google_cloud_project.
+    For application use, prefer config.google_cloud.project_id.
     """
-    current_env = get_current_environment()
+    if UNIFIED_CONFIG_AVAILABLE:
+        try:
+            config = get_unified_config()
+            if config.google_cloud.project_id:
+                return config.google_cloud.project_id
+        except Exception:
+            # Fallback to bootstrap method if unified config fails
+            pass
+    
+    # Bootstrap fallback for initial system setup
+    current_env = EnvironmentDetector.get_environment()  # Use bootstrap method directly
     
     # BOOTSTRAP ONLY: Direct env access for project ID detection
     # Check for explicit override first

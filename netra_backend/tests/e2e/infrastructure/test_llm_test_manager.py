@@ -8,14 +8,14 @@ model support, caching, and intelligent fallback mechanisms.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from netra_backend.tests.e2e.infrastructure.e2e.infrastructure import (
+from netra_backend.tests.e2e.infrastructure import (
     LLMTestConfig,
     LLMTestManager,
     LLMTestModel,

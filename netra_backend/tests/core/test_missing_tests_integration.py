@@ -16,7 +16,7 @@ Tests 21-30 from original missing tests covering:
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import patch
 

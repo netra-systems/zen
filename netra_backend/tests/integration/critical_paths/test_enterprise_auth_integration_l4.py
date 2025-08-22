@@ -13,7 +13,7 @@ Comprehensive test for enterprise authentication integration:
 This test validates complete enterprise authentication capabilities.
 """
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import base64

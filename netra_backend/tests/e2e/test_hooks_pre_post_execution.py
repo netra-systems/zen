@@ -13,7 +13,7 @@ Module ≤300 lines per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import UTC, datetime
@@ -21,11 +21,11 @@ from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.quality_hooks import QualityHooksManager
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.base.execution_context import AgentExecutionContext
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityMetrics,

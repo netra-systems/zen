@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -15,7 +15,7 @@ import time
 import aiohttp
 import pytest
 
-from netra_backend.tests.concurrent_load_helpers import (
+from netra_backend.tests.e2e.concurrent_load_helpers import (
     ConcurrentUserLoadTest,
     create_priority_user_request,
     validate_fair_queuing_results,

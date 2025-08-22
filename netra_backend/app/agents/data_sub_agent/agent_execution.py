@@ -195,10 +195,21 @@ class ExecutionManager:
     def _build_success_result(self, data_result, execution_time_ms: float, 
                             metrics: AgentExecutionMetrics) -> TypedAgentResult:
         """Build success TypedAgentResult."""
-        common_params = self._get_common_result_params(execution_time_ms, metrics)
+        # Convert complex data to simple format for TypedAgentResult compatibility
+        if hasattr(data_result, 'model_dump'):
+            data_dict = data_result.model_dump()
+            # Convert to JsonCompatibleDict format (only str, int, float, bool, None values)
+            result_dict = self._flatten_to_json_compatible(data_dict)
+        elif isinstance(data_result, dict):
+            result_dict = self._flatten_to_json_compatible(data_result)
+        else:
+            result_dict = {"message": str(data_result)}
+        
         return TypedAgentResult(
-            agent_name="DataSubAgent", success=True,
-            result_data=data_result, **common_params
+            success=True,
+            result=result_dict, 
+            execution_time_ms=execution_time_ms,
+            metadata={"agent_name": "DataSubAgent"}
         )
     
     def _create_failure_result(self, error_message: str, start_time: float) -> TypedAgentResult:
@@ -212,6 +223,30 @@ class ExecutionManager:
         """Build failure TypedAgentResult."""
         common_params = self._get_common_result_params(execution_time_ms, metrics)
         return TypedAgentResult(
-            agent_name="DataSubAgent", success=False,
-            error_message=error_message, **common_params
+            success=False,
+            result=None,
+            error=error_message, 
+            execution_time_ms=execution_time_ms,
+            metadata={"agent_name": "DataSubAgent"}
         )
+    
+    def _flatten_to_json_compatible(self, data: dict) -> dict:
+        """Flatten complex data structures to JSON-compatible format."""
+        result = {}
+        for key, value in data.items():
+            if isinstance(value, (str, int, float, bool, type(None))):
+                result[key] = value
+            elif isinstance(value, list):
+                # Convert lists to string summary
+                if value:
+                    result[f"{key}_count"] = len(value)
+                    result[f"{key}_summary"] = f"List of {len(value)} items"
+                else:
+                    result[f"{key}_count"] = 0
+            elif isinstance(value, dict):
+                # Convert nested dicts to string representation
+                result[f"{key}_keys"] = str(list(value.keys()))
+            else:
+                # Convert other types to string
+                result[key] = str(value)
+        return result

@@ -6,7 +6,7 @@ Focuses on integration with other components and performance
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime

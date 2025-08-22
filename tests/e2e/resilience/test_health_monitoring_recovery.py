@@ -37,7 +37,6 @@ from tests.e2e.health_monitoring_helpers import (
 
 logger = logging.getLogger(__name__)
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestHealthMonitoringRecovery:
@@ -96,7 +95,7 @@ class TestHealthMonitoringRecovery:
         except Exception as e:
             pytest.skip(f"Health monitoring not available: {e}")
     
-    async def test_unhealthy_service_detection(self, orchestrator, health_monitor,
+    async def test_unhealthy_service_detection(self, orchestrator, health_monitor,:
                                              failure_simulator):
         """Test detection of unhealthy service."""
         # Establish baseline health
@@ -127,7 +126,7 @@ class TestHealthMonitoringRecovery:
         logger.info(f"Health status: {post_failure_health}")
         logger.info(f"Simulated failures: {failure_simulator.simulated_failures}")
     
-    async def test_auto_recovery_trigger(self, orchestrator, health_monitor,
+    async def test_auto_recovery_trigger(self, orchestrator, health_monitor,:
                                        failure_simulator, recovery_engine,
                                        recovery_tracker):
         """Test auto-recovery trigger mechanism."""
@@ -145,7 +144,7 @@ class TestHealthMonitoringRecovery:
         assert recovery_result["recovery_actions"] > 0, "No recovery actions taken"
         assert recovery_result["target_services"], "No target services for recovery"
     
-    async def test_service_restoration_verification(self, orchestrator, health_monitor,
+    async def test_service_restoration_verification(self, orchestrator, health_monitor,:
                                                   failure_simulator, recovery_engine):
         """Test service restoration after auto-recovery."""
         # Simulate failure
@@ -174,7 +173,7 @@ class TestHealthMonitoringRecovery:
         )
         assert recovery_detected, "Recovery execution not detected"
     
-    async def test_alert_notifications(self, orchestrator, failure_simulator,
+    async def test_alert_notifications(self, orchestrator, failure_simulator,:
                                      alert_validator):
         """Test alert notifications during health issues."""
         # Setup alert monitoring
@@ -190,7 +189,7 @@ class TestHealthMonitoringRecovery:
         assert alert_results["notification_channels"] > 0, "No notification channels active"
         assert alert_results["alert_severity"] in ["WARNING", "CRITICAL"], "Invalid alert severity"
     
-    async def test_complete_health_monitoring_recovery_flow(self, orchestrator, health_monitor,
+    async def test_complete_health_monitoring_recovery_flow(self, orchestrator, health_monitor,:
                                                           failure_simulator, recovery_engine,
                                                           alert_validator, recovery_tracker):
         """Complete health monitoring auto-recovery test within time limit."""
@@ -272,12 +271,10 @@ class TestHealthMonitoringRecovery:
         assert alert_results["alerts_generated"], "No alerts generated"
         assert alert_results["notification_channels"] > 0, "No notifications sent"
 
-
 # Test execution helper functions
 def create_health_monitoring_test_suite() -> TestHealthMonitoringRecovery:
     """Create health monitoring test suite instance."""
     return TestHealthMonitoringRecovery()
-
 
 async def run_health_monitoring_validation() -> Dict[str, Any]:
     """Run health monitoring validation and return results."""

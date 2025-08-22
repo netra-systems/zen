@@ -26,8 +26,7 @@ import redis
 import redis.asyncio
 import websockets
 
-
-async def test_websocket_connection_scaling(
+async def test_websocket_connection_scaling(:
     concurrent_test_environment, 
     isolated_test_users
 ):

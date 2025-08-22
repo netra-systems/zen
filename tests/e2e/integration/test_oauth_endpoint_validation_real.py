@@ -359,7 +359,7 @@ class OAuthEndpointValidator:
             logger.error(f"JWT claims validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
-    async def cleanup_test_resources(self) -> None:
+    async def test_cleanup_test_resources(self) -> None:
         """Clean up OAuth test resources and services"""
         try:
             # Close HTTP clients

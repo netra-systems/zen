@@ -42,7 +42,6 @@ from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestServiceFailureRecovery:
@@ -92,7 +91,7 @@ class TestServiceFailureRecovery:
         degradation = await degradation_tester.test_backend_degradation(orchestrator)
         assert degradation["degraded_properly"], "Backend did not degrade gracefully"
     
-    async def test_frontend_error_handling_during_failure(self, orchestrator, failure_simulator, 
+    async def test_frontend_error_handling_during_failure(self, orchestrator, failure_simulator,:
                                                         degradation_tester):
         """Test frontend handles Auth failure gracefully."""
         # Setup WebSocket connection
@@ -119,7 +118,7 @@ class TestServiceFailureRecovery:
         connected = await ws_client.connect()
         return ws_client if connected else None
     
-    async def test_state_preservation_during_recovery(self, orchestrator, failure_simulator, 
+    async def test_state_preservation_during_recovery(self, orchestrator, failure_simulator,:
                                                     state_validator):
         """Test system preserves state during failure and recovery."""
         ws_client = await self._create_test_websocket(orchestrator)
@@ -186,7 +185,7 @@ class TestServiceFailureRecovery:
         # Verify service isolation maintained
         assert backend_status.get("graceful", False), "Service isolation not maintained"
     
-    async def test_complete_service_failure_recovery_flow(self, orchestrator, failure_simulator, 
+    async def test_complete_service_failure_recovery_flow(self, orchestrator, failure_simulator,:
                                                         degradation_tester, state_validator, recovery_timer):
         """Complete service failure recovery test within time limit."""
         start_time = time.time()
@@ -269,12 +268,10 @@ class TestServiceFailureRecovery:
             assert results["state_results"].get("state_preserved", False), \
                 "State was not preserved during recovery"
 
-
 # Test execution helper functions
 def create_service_failure_recovery_test_suite() -> TestServiceFailureRecovery:
     """Create service failure recovery test suite instance."""
     return TestServiceFailureRecovery()
-
 
 async def run_service_failure_recovery_validation() -> Dict[str, Any]:
     """Run service failure recovery validation and return results."""

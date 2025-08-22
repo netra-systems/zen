@@ -13,7 +13,7 @@ Coverage: Migration safety, rollback mechanisms, data integrity, recovery valida
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging

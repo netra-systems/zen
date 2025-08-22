@@ -41,7 +41,7 @@ class TestRealAgentPipeline:
     """Test #4: Complete Agent Pipeline with Real LLM and Supervisor Routing."""
     
     @pytest_asyncio.fixture
-    async def pipeline_test_core(self):
+    async def test_pipeline_test_core(self):
         """Initialize agent pipeline test infrastructure."""
         core = AgentPipelineTestCore()
         await core.setup_pipeline_environment()
@@ -49,7 +49,7 @@ class TestRealAgentPipeline:
         await core.teardown_pipeline_environment()
     
     @pytest_asyncio.fixture
-    async def supervisor_setup(self, pipeline_test_core):
+    async def test_supervisor_setup(self, pipeline_test_core):
         """Setup supervisor agent with real dependencies."""
         return await pipeline_test_core.setup_supervisor_agent()
     

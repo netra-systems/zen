@@ -40,7 +40,6 @@ from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestErrorCascadePrevention:
@@ -71,7 +70,7 @@ class TestErrorCascadePrevention:
         """Initialize auto-recovery verifier."""
         return create_recovery_verifier()
     
-    async def test_backend_failure_isolation(self, orchestrator, failure_simulator, 
+    async def test_backend_failure_isolation(self, orchestrator, failure_simulator,:
                                            degradation_validator):
         """Test that backend failure doesn't crash auth service."""
         # Verify all services initially healthy
@@ -87,7 +86,7 @@ class TestErrorCascadePrevention:
         assert auth_status["auth_responsive"], "Auth service not responsive after backend failure"
         assert auth_status["isolation_maintained"], "Service isolation not maintained"
     
-    async def test_graceful_frontend_degradation(self, orchestrator, failure_simulator,
+    async def test_graceful_frontend_degradation(self, orchestrator, failure_simulator,:
                                                degradation_validator):
         """Test frontend shows graceful error during backend failure."""
         # Establish WebSocket connection
@@ -153,7 +152,7 @@ class TestErrorCascadePrevention:
         finally:
             await ws_client.close()
     
-    async def test_complete_error_cascade_prevention_flow(self, orchestrator, failure_simulator,
+    async def test_complete_error_cascade_prevention_flow(self, orchestrator, failure_simulator,:
                                                         degradation_validator, recovery_verifier):
         """Complete error cascade prevention test within time limit."""
         start_time = time.time()
@@ -219,12 +218,10 @@ class TestErrorCascadePrevention:
         assert results["auth_status"]["auth_responsive"], "Auth service isolation failed"
         assert results["recovery_result"].get("chat_restored", False), "System recovery failed"
 
-
 # Test execution helper functions
 def create_error_cascade_test_suite() -> TestErrorCascadePrevention:
     """Create error cascade test suite instance."""
     return TestErrorCascadePrevention()
-
 
 async def run_error_cascade_validation() -> Dict[str, Any]:
     """Run error cascade validation and return results."""

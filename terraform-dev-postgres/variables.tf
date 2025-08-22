@@ -10,7 +10,7 @@ variable "docker_host" {
 variable "postgres_version" {
   description = "PostgreSQL Docker image version"
   type        = string
-  default     = "14-alpine"
+  default     = "17.6-alpine"
 }
 
 variable "postgres_port" {

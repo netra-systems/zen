@@ -13,7 +13,7 @@ Architecture Requirements: File ≤300 lines, Functions ≤8 lines
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import base64
 import json

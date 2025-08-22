@@ -5,7 +5,7 @@ Critical: First user message must seamlessly authenticate and process
 """
 
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
 

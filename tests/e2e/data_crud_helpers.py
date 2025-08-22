@@ -235,7 +235,7 @@ class DataCRUDManager:
         """Create billing data for testing."""
         return True
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and connections."""
         if self.websocket_client:
             await self.websocket_client.disconnect()

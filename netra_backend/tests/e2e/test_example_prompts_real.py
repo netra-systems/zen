@@ -7,11 +7,11 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-from netra_backend.tests.example_prompts_core import (
+from netra_backend.tests.e2e.example_prompts_core import (
     EXAMPLE_PROMPTS,
     create_ep_001_state,
     create_ep_002_state,
@@ -25,7 +25,7 @@ from netra_backend.tests.example_prompts_core import (
     execute_full_prompt_workflow,
     real_llm_prompt_setup,
 )
-from netra_backend.tests.example_prompts_validators import (
+from netra_backend.tests.e2e.example_prompts_validators import (
     validate_capacity_planning_result,
     validate_cost_optimization_result,
     validate_function_optimization_result,

@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import os
 from unittest.mock import MagicMock, patch
@@ -11,7 +11,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pydantic import ValidationError
 
-from netra_backend.app.core.config import get_config, reload_config
+# Import unified configuration system
+from netra_backend.app.config import get_config, reload_config
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.core.config_validator import (
     ConfigurationValidationError,
     ConfigValidator,
@@ -308,7 +310,7 @@ class TestUnifiedConfigManager:
 class TestConfigurationFunctions:
     """Test global configuration functions."""
     
-    @patch('app.config.config_manager')
+    @patch('netra_backend.app.config.config_manager')
     def test_get_config(self, mock_manager):
         """Test global get_config function."""
         mock_config = DevelopmentConfig()
@@ -319,7 +321,7 @@ class TestConfigurationFunctions:
         assert config == mock_config
         mock_manager.get_config.assert_called_once()
     
-    @patch('app.config.config_manager')
+    @patch('netra_backend.app.config.config_manager')
     def test_reload_config(self, mock_manager):
         """Test global reload_config function."""
         reload_config()

@@ -5,7 +5,7 @@ Execution and async tests for SupplyResearcherAgent
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch

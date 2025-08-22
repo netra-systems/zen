@@ -7,14 +7,14 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from test_framework import setup_test_path
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.tests.scaling_test_helpers import (
+# from scaling_test_helpers - using fixtures instead (
     create_multi_provider_state,
     create_rate_limit_analysis_state,
     create_scaling_setup,

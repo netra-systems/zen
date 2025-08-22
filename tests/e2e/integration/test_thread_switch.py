@@ -29,7 +29,6 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-
 class ThreadSwitchingManager:
     """Manages thread switching operations via WebSocket."""
     
@@ -120,7 +119,6 @@ class ThreadSwitchingManager:
             if op["user_id"] == user_id
         ]
 
-
 class HistoricalMessageLoader:
     """Handles historical message loading with pagination."""
     
@@ -186,18 +184,15 @@ class HistoricalMessageLoader:
         }
         self.load_operations.append(operation)
 
-
 @pytest.fixture
 def thread_switcher(ws_thread_fixtures):
     """Thread switching manager fixture."""
     return ThreadSwitchingManager(ws_thread_fixtures)
 
-
 @pytest.fixture
 def message_loader(ws_thread_fixtures):
     """Historical message loader fixture."""
     return HistoricalMessageLoader(ws_thread_fixtures)
-
 
 @pytest.fixture
 async def prepared_threads(ws_thread_fixtures):
@@ -243,9 +238,8 @@ async def prepared_threads(ws_thread_fixtures):
     
     return {"user": user, "threads": threads}
 
-
 @pytest.mark.asyncio
-async def test_thread_switching_loads_correct_history(prepared_threads, thread_switcher, 
+async def test_thread_switching_loads_correct_history(prepared_threads, thread_switcher,:
                                                        thread_context_manager):
     """Test thread switching loads correct message history and restores context."""
     user = prepared_threads["user"]
@@ -284,9 +278,8 @@ async def test_thread_switching_loads_correct_history(prepared_threads, thread_s
     switch_events = thread_switcher.get_switch_events_for_user(user.id)
     assert len(switch_events) == 2, "Both thread switches must generate events"
 
-
 @pytest.mark.asyncio
-async def test_agent_context_maintained_per_thread(prepared_threads, thread_switcher, 
+async def test_agent_context_maintained_per_thread(prepared_threads, thread_switcher,:
                                                     thread_context_manager):
     """Test agent context is maintained per thread without cross-contamination."""
     user = prepared_threads["user"]
@@ -335,7 +328,6 @@ async def test_agent_context_maintained_per_thread(prepared_threads, thread_swit
     assert isolation_verified, "Thread contexts must remain isolated from each other"
     assert context_preserved, "Agent context must be preserved when returning to thread"
 
-
 @pytest.mark.asyncio
 async def test_historical_message_loading_with_pagination(ws_thread_fixtures, message_loader):
     """Test historical message loading with proper pagination support."""
@@ -366,9 +358,8 @@ async def test_historical_message_loading_with_pagination(ws_thread_fixtures, me
     page_2_ids = {msg["id"] for msg in page_2["messages"]}
     assert len(page_1_ids.intersection(page_2_ids)) == 0, "Pages must not contain duplicate messages"
 
-
 @pytest.mark.asyncio
-async def test_websocket_reconnection_preserves_thread_state(ws_thread_fixtures, thread_switcher, 
+async def test_websocket_reconnection_preserves_thread_state(ws_thread_fixtures, thread_switcher,:
                                                              thread_context_manager):
     """Test WebSocket reconnection preserves thread state and context."""
     user = TEST_USERS["enterprise"]
@@ -414,7 +405,6 @@ async def test_websocket_reconnection_preserves_thread_state(ws_thread_fixtures,
     )
     assert state_preserved, "Thread state must be preserved after WebSocket reconnection"
     assert new_connection["connected"], "New connection must be established successfully"
-
 
 @pytest.mark.asyncio
 async def test_thread_switching_performance_optimization(ws_thread_fixtures, thread_switcher):

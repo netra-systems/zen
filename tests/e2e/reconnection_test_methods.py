@@ -67,7 +67,7 @@ class StabilityTestMethods:
     """Helper methods for multiple reconnection stability tests."""
     
     @staticmethod
-    async def execute_stability_test_cycle(fixture, user_id: str, reconnect_count: int):
+    async def test_execute_stability_test_cycle(fixture, user_id: str, reconnect_count: int):
         """Execute complete stability test cycle."""
         stability_results = []
         

@@ -222,7 +222,7 @@ jobs:
       
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:17.6-alpine
         env:
           POSTGRES_DB: netra_test
           POSTGRES_USER: test_user
@@ -278,7 +278,7 @@ jobs:
           sudo apt-get update -q
           
           # Install PostgreSQL client
-          sudo apt-get install -y postgresql-client-common postgresql-client-15
+          sudo apt-get install -y postgresql-client-common postgresql-client-17
           
           # Install Redis client
           sudo apt-get install -y redis-tools
@@ -669,7 +669,7 @@ jobs:
           # Collect service logs if services are running
           if [[ "${{ needs.setup-test-services.outputs.services_ready }}" == "true" ]]; then
             echo "Collecting service logs..."
-            docker logs $(docker ps -q --filter "ancestor=postgres:15-alpine") > failure_reports/${{ matrix.test_category }}/postgres_logs.txt 2>&1 || true
+            docker logs $(docker ps -q --filter "ancestor=postgres:17.6-alpine") > failure_reports/${{ matrix.test_category }}/postgres_logs.txt 2>&1 || true
             docker logs $(docker ps -q --filter "ancestor=redis:7-alpine") > failure_reports/${{ matrix.test_category }}/redis_logs.txt 2>&1 || true
             docker logs $(docker ps -q --filter "ancestor=clickhouse/clickhouse-server:24.1-alpine") > failure_reports/${{ matrix.test_category }}/clickhouse_logs.txt 2>&1 || true
           fi
