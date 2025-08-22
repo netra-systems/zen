@@ -81,7 +81,7 @@ class SessionCleanupService:
         # Delete oldest sessions
         sessions_to_delete = sessions[max_sessions:]
         for session in sessions_to_delete:
-            db_session.delete(session)
+            await db_session.delete(session)
         
         await db_session.commit()
         return len(sessions_to_delete)
@@ -145,6 +145,12 @@ class TestSessionCleanupJob:
     @pytest.mark.asyncio
     async def test_enforce_session_limits(self, cleanup_service, test_db_session):
         """Test enforcement of maximum sessions per user"""
+        # Clean up any existing sessions for user123 to ensure test isolation
+        await test_db_session.execute(
+            delete(AuthSession).where(AuthSession.user_id == "user123")
+        )
+        await test_db_session.commit()
+        
         # Create 7 sessions for same user
         import uuid
         sessions = []
@@ -169,6 +175,12 @@ class TestSessionCleanupJob:
     @pytest.mark.asyncio
     async def test_cleanup_preserves_recent_sessions(self, cleanup_service, test_db_session):
         """Test cleanup preserves most recent sessions"""
+        # Clean up any existing sessions for user123 to ensure test isolation
+        await test_db_session.execute(
+            delete(AuthSession).where(AuthSession.user_id == "user123")
+        )
+        await test_db_session.commit()
+        
         # Create sessions with different activity times
         import uuid
         sessions = []
