@@ -70,9 +70,11 @@ describe('Auth Logout Flow', () => {
 
       console.log('Debug: mockAuthServiceClient.logout type:', typeof mockAuthServiceClient.logout);
       console.log('Debug: is mockAuthServiceClient.logout a jest mock?', jest.isMockFunction(mockAuthServiceClient.logout));
+      console.log('Debug: mockAuthServiceClient.logout.mock.calls before:', mockAuthServiceClient.logout.mock.calls);
       
       await authService.handleLogout(mockAuthConfig);
 
+      console.log('Debug: mockAuthServiceClient.logout.mock.calls after:', mockAuthServiceClient.logout.mock.calls);
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
       // Note: window.location.href assignment will cause JSDOM error but still executes

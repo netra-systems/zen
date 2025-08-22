@@ -111,7 +111,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config import get_config
+from netra_backend.app.config import get_config
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_agent_state import *  # Import all agent state models
 from netra_backend.app.db.models_content import *  # Import all content models
@@ -233,7 +233,7 @@ except Exception as e:
 def ensure_db_initialized():
 
     """Ensure database is initialized for tests that need it."""
-    from app.db.postgres import async_session_factory, initialize_postgres
+    from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
 
     if async_session_factory is None:
@@ -338,7 +338,7 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
 
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
     manager = WebSocketManager()
 
@@ -451,7 +451,7 @@ async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
     """Mock structured LLM call with TriageResult support."""
     from unittest.mock import Mock
-    from app.agents.triage_sub_agent.models import TriageResult
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 
     if schema == TriageResult or hasattr(schema, '__name__') and 'TriageResult' in schema.__name__:
 
@@ -484,7 +484,7 @@ def _setup_agent_llm_manager():
 
     """Create LLM manager mock with realistic response methods."""
     from unittest.mock import AsyncMock, Mock
-    from app.llm.llm_manager import LLMManager
+    from netra_backend.app.llm.llm_manager import LLMManager
 
     llm_manager = Mock(spec=LLMManager)
 

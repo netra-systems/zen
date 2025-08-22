@@ -2,7 +2,7 @@
 
 Component names, class names, field names, and identifiers
 
-*Generated on 2025-08-21 22:03:58*
+*Generated on 2025-08-21 22:10:00*
 
 ## 📊 Category Statistics
 
@@ -100,7 +100,7 @@ Component names, class names, field names, and identifiers
 | `auth\_service` | enhanced_string_literals_docs.py:28 | scan_and_generate_docs | `JWTConstants.NE...`, `HeaderConstant... |
 | `auth\_service` | enhanced_string_literals_docs.py:93 | main | `JWTConstants.NE...`, `HeaderConstant... |
 | `auth\_service` | remove_duplicate_test_setup.py:39 | main | `JWTConstants.NE...`, `HeaderConstant... |
-| `auth\_service` | scan_string_literals.py:296 | main | `JWTConstants.NE...`, `HeaderConstant... |
+| `auth\_service` | scan_string_literals.py:302 | main | `JWTConstants.NE...`, `HeaderConstant... |
 | `auth\_service` | scan_string_literals_enhanced.py:302 | EnhancedStringLiteralIndexe... | `JWTConstants.NE...`, `HeaderConstant... |
 | `auth\_service` | start_auth_service.py:52 | AuthServiceManager.start_au... | `JWTConstants.NE...`, `HeaderConstant... |
 | `auth\_service` | test_staging_startup.py:83 | StagingStartupTester.test_d... | `JWTConstants.NE...`, `HeaderConstant... |
@@ -759,7 +759,7 @@ Validation ` | validate_agent_tests.py:367 | main | `def `, `class ` |
 | `Removed ` | fix_imports.py:230 | ImportFixer.fix_duplicate_i... | `def `, `class ` |
 | `Scanning ` | auth_constants_migration.py:269 | AuthConstantsMigrator.check... | `def `, `class ` |
 | `Scanning ` | fix_all_import_issues.py:197 | ComprehensiveImportFixer.fi... | `def `, `class ` |
-| `Scanning ` | scan_string_literals.py:303 | main | `def `, `class ` |
+| `Scanning ` | scan_string_literals.py:309 | main | `def `, `class ` |
 | `Skipping ` | reset_clickhouse_auto.py:72 | _check_password_requirements | `def `, `class ` |
 | `Skipping ` | reset_clickhouse_auto.py:135 | reset_clickhouse_instance | `def `, `class ` |
 | `Spec ` | code_review_analysis.py:127 | CodeReviewAnalysis._check_k... | `def `, `class ` |

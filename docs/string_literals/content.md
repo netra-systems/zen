@@ -2,7 +2,7 @@
 
 General text content and user-facing text
 
-*Generated on 2025-08-21 22:03:59*
+*Generated on 2025-08-21 22:10:01*
 
 ## 📊 Category Statistics
 
@@ -424,7 +424,7 @@ from \.boundary\_monitor import Boun...` | enhance_dev_launcher_boundaries.py:12
 | ` fix patterns` | fix_all_import_issues.py:133 | ComprehensiveImportFixer._b... | `class TestSynta...`, `    """Generat... |
 | ` focused modules` | enforce_limits.py:65 | FileLineChecker._get_split_... | `class TestSynta...`, `    """Generat... |
 | ` for environment: ` | fetch_secrets_to_env.py:25 | _get_project_id | `class TestSynta...`, `    """Generat... |
-| ` for string literals\.\.\.` | scan_string_literals.py:286 | main | `class TestSynta...`, `    """Generat... |
+| ` for string literals\.\.\.` | scan_string_literals.py:288 | main | `class TestSynta...`, `    """Generat... |
 | ` for string literals\.\.\.` | scan_string_literals_enhanced.py:77 | EnhancedStringLiteralIndexe... | `class TestSynta...`, `    """Generat... |
 | ` from production` | create_staging_secrets.py:147 | _create_missing_secrets | `class TestSynta...`, `    """Generat... |
 | ` from wrong module\. Should import from ` | validate_type_deduplication.py:207 | TypeDeduplicationValidator.... | `class TestSynta...`, `    """Generat... |

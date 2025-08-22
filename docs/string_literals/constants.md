@@ -2,7 +2,7 @@
 
 Enumeration values and constant definitions
 
-*Generated on 2025-08-21 22:03:59*
+*Generated on 2025-08-21 22:10:02*
 
 ## 📊 Category Statistics
 

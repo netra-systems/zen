@@ -2,7 +2,7 @@
 
 Event handlers, event types, and lifecycle events
 
-*Generated on 2025-08-21 22:03:59*
+*Generated on 2025-08-21 22:10:02*
 
 ## 📊 Category Statistics
 
