@@ -183,11 +183,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const url = websocketCall[0];
+      const connection = capturedConnections[0];
+      const url = connection.url;
 
       // SECURITY VERIFICATION: Token should NOT be in URL
       expect(url).not.toContain('?token=');
@@ -216,11 +216,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const protocols = websocketCall[1];
+      const connection = capturedConnections[0];
+      const protocols = connection.protocols;
 
       // Frontend now supports secure subprotocol authentication
       expect(protocols).toBeDefined();
@@ -246,11 +246,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const protocols = websocketCall[1];
+      const connection = capturedConnections[0];
+      const protocols = connection.protocols;
 
       // Should use proper authentication protocol
       const protocolArray = Array.isArray(protocols) ? protocols : [protocols];
@@ -279,11 +279,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const url = websocketCall[0];
+      const connection = capturedConnections[0];
+      const url = connection.url;
 
       // Should connect to secure endpoint with proper authentication
       expect(url).toContain('/ws/secure');
@@ -292,7 +292,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
     });
 
     it('should handle authentication errors from secure endpoint', async () => {
-      // THIS TEST WILL FAIL because frontend doesn't handle auth rejections properly
+      // Test authentication error handling
       
       const onError = jest.fn();
       
@@ -308,7 +308,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       
       // Simulate authentication rejection from backend
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
       // Simulate backend rejection due to improper auth
@@ -331,7 +331,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
 
   describe('Token Management Integration', () => {
     it('should not expose token in connection URL', async () => {
-      // THIS TEST WILL FAIL because frontend exposes token in URL
+      // This test verifies that tokens are not exposed in URLs
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -344,11 +344,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const url = websocketCall[0];
+      const connection = capturedConnections[0];
+      const url = connection.url;
 
       // Security requirement: No sensitive data in URLs
       expect(url).not.toMatch(/token=/);
@@ -362,7 +362,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
     });
 
     it('should properly handle token refresh scenarios', async () => {
-      // THIS TEST WILL FAIL because frontend doesn't handle token refresh during connection
+      // This test verifies token handling during connection
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -375,7 +375,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       render(<TestApp />);
       
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
       // Simulate token refresh
@@ -386,12 +386,11 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       // This will fail because current implementation doesn't support runtime token updates
       
       // Should reconnect with new token using proper auth method
-      expect(webSocketConstructorSpy).toHaveBeenCalledTimes(1); // Initial connection
+      expect(capturedConnections.length).toBe(1); // Initial connection
       
       // After token refresh, should not use query params
-      const websocketCalls = webSocketConstructorSpy.mock.calls;
-      websocketCalls.forEach(call => {
-        expect(call[0]).not.toContain('token=');
+      capturedConnections.forEach(connection => {
+        expect(connection.url).not.toContain('token=');
       });
     });
   });

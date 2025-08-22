@@ -592,7 +592,7 @@ def agent(mock_dependencies):
 
     """Create DataSubAgent instance with mocked dependencies for test compatibility"""
     from unittest.mock import patch, Mock, AsyncMock
-    from app.agents.data_sub_agent.agent import DataSubAgent
+    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     
 
     llm_manager, tool_dispatcher = mock_dependencies
@@ -730,7 +730,7 @@ def sample_usage_patterns():
 def setup_real_infrastructure():
 
     """Setup infrastructure for real LLM tests."""
-    from app.core.config import get_config
+    from netra_backend.app.core.config import get_config
 
     config = get_config()
 

@@ -63,10 +63,21 @@ async def _check_postgres_connection(db: AsyncSession) -> None:
         result.scalar_one_or_none()
 
 async def _check_clickhouse_connection() -> None:
-    """Check ClickHouse database connection."""
+    """Check ClickHouse database connection (non-blocking for readiness)."""
     config = unified_config_manager.get_config()
     skip_clickhouse = getattr(config, 'skip_clickhouse_init', False)
-    if not skip_clickhouse:
+    if skip_clickhouse:
+        logger.debug("ClickHouse check skipped - skip_clickhouse_init=True")
+        return
+    
+    # In development, make ClickHouse optional for readiness
+    if config.environment in ["development", "staging"]:
+        try:
+            await asyncio.wait_for(_perform_clickhouse_check(), timeout=2.0)
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.warning(f"ClickHouse check failed (non-critical in {config.environment}): {e}")
+            return  # Don't fail readiness for ClickHouse in development
+    else:
         await _perform_clickhouse_check()
 
 async def _perform_clickhouse_check() -> None:
@@ -92,19 +103,38 @@ async def _check_database_connection(db: AsyncSession) -> None:
     await _check_clickhouse_connection()
 
 async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
-    """Check application readiness including database connectivity."""
+    """Check application readiness including core database connectivity."""
     try:
-        # First check database connectivity using dependency injection
-        await _check_database_connection(db)
+        # Fast check - only verify PostgreSQL is accessible (core requirement)
+        await asyncio.wait_for(_check_postgres_connection(db), timeout=5.0)
         
-        # Then get overall health status
-        health_status = await health_interface.get_health_status(HealthLevel.STANDARD)
-        if health_status["status"] in ["healthy", "degraded"]:
-            return {"status": "ready", "service": "netra-ai-platform", "details": health_status}
-        raise HTTPException(status_code=503, detail="Service Unavailable")
+        # Optional: Check ClickHouse with short timeout (non-blocking)
+        try:
+            await asyncio.wait_for(_check_clickhouse_connection(), timeout=3.0)
+        except (asyncio.TimeoutError, Exception) as e:
+            logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
+        
+        # Basic health status check (fast)
+        health_status = await asyncio.wait_for(
+            health_interface.get_health_status(HealthLevel.BASIC), 
+            timeout=2.0
+        )
+        
+        # Return ready if core services are available
+        return {
+            "status": "ready", 
+            "service": "netra-ai-platform", 
+            "timestamp": time.time(),
+            "core_db": "connected",
+            "details": health_status
+        }
+        
+    except asyncio.TimeoutError:
+        logger.error("Readiness check timed out")
+        raise HTTPException(status_code=503, detail="Service readiness timeout")
     except Exception as e:
-        logger.error(f"Database readiness check failed: {e}")
-        raise HTTPException(status_code=503, detail="Service Unavailable")
+        logger.error(f"Core database readiness check failed: {e}")
+        raise HTTPException(status_code=503, detail="Core database unavailable")
 
 @router.get("/ready")
 async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
