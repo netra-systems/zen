@@ -19,11 +19,7 @@ Test Coverage:
 """
 
 from datetime import datetime, timedelta, timezone
-
-from tests.test_auth_jwt_generation import (
-
 from typing import Any, Dict
-
 from uuid import uuid4
 import asyncio
 import jwt

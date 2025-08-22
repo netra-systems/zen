@@ -11,7 +11,9 @@ from typing import Any, Dict, List
 from fastapi import FastAPI
 
 from netra_backend.app.core.configuration import unified_config_manager
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
 from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
 from netra_backend.app.startup_checks.models import StartupCheckResult

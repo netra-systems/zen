@@ -6,6 +6,15 @@ Provides configuration for E2E test environments.
 import os
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from enum import Enum
+
+
+class TestEnvironmentType(Enum):
+    """Test environment types."""
+    LOCAL = "local"
+    DEV = "dev"
+    STAGING = "staging"
+    PRODUCTION = "production"
 
 
 @dataclass

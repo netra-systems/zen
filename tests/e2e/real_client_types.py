@@ -4,7 +4,7 @@ Provides client types and interfaces for E2E tests.
 """
 
 from typing import Dict, Any, Optional, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import httpx
 import websockets
 from unittest.mock import MagicMock
@@ -120,3 +120,52 @@ class MockClient:
     
     async def close(self):
         pass
+
+
+@dataclass
+class ClientConfig:
+    """Configuration for test clients."""
+    
+    base_url: str = "http://localhost:8000"
+    websocket_url: str = "ws://localhost:8000/websocket"
+    auth_url: str = "http://localhost:8001"
+    timeout: float = 30.0
+    headers: Dict[str, str] = field(default_factory=dict)
+    cookies: Dict[str, str] = field(default_factory=dict)
+    use_ssl: bool = False
+    verify_ssl: bool = True
+    
+    def get_http_client(self) -> TestClient:
+        """Create HTTP client with this config."""
+        return TestClient(
+            base_url=self.base_url,
+            headers=self.headers,
+            cookies=self.cookies,
+            timeout=self.timeout
+        )
+    
+    def get_websocket_client(self) -> WebSocketClient:
+        """Create WebSocket client with this config."""
+        return WebSocketClient(
+            url=self.websocket_url,
+            headers=self.headers
+        )
+
+
+class ConnectionState:
+    """Track connection state for clients."""
+    
+    def __init__(self):
+        self.connected = False
+        self.authenticated = False
+        self.session_id = None
+        self.user_id = None
+        self.last_heartbeat = None
+        
+    def reset(self):
+        """Reset connection state."""
+        self.connected = False
+        self.authenticated = False
+        self.session_id = None
+        self.user_id = None
+        self.last_heartbeat = None

@@ -28,32 +28,21 @@ import pytest
 import pytest_asyncio
 import time
 
-    AgentConversationTestCore, ConversationFlowSimulator, ConversationFlowValidator, AgentConversationTestUtils, RealTimeUpdateValidator,
-
+from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
-
     ConversationFlowSimulator,
-
     ConversationFlowValidator,
-
     AgentConversationTestUtils,
-
-    RealTimeUpdateValidator
-
+    RealTimeUpdateValidator,
 )
 
 
 @pytest.mark.real_llm
-
 @pytest.mark.asyncio
-
 class TestAgentOrchestrationRealLLM:
-
     """Test agent orchestration with real LLM integration."""
     
-
     @pytest_asyncio.fixture
-
     async def test_core(self):
 
         """Initialize test core with real LLM support."""
