@@ -233,7 +233,7 @@ except Exception as e:
 def ensure_db_initialized():
 
     """Ensure database is initialized for tests that need it."""
-    from app.db.postgres import async_session_factory, initialize_postgres
+    from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
 
     if async_session_factory is None:
