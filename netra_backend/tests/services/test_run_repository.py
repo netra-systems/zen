@@ -19,7 +19,7 @@ from netra_backend.tests.database_repository_helpers import (
 )
 
 # Import fixtures from helpers
-pytest_plugins = ["app.tests.helpers.database_repository_fixtures"]
+pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestRunRepository:
     """Test run repository specific functionality."""
 

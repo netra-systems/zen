@@ -44,7 +44,7 @@ class TestJWTTokenValidation(unittest.TestCase):
             self.test_user_id, 
             self.test_email
         )
-        payload = self.jwt_handler.validate_token_jwt(token, "access")
+        payload = self.jwt_handler.validate_token(token, "access")
         
         assert payload is not None
         assert payload["sub"] == self.test_user_id
@@ -54,7 +54,7 @@ class TestJWTTokenValidation(unittest.TestCase):
     def test_validate_valid_refresh_token(self):
         """Test validation of valid refresh token"""
         token = self.jwt_handler.create_refresh_token(self.test_user_id)
-        payload = self.jwt_handler.validate_token_jwt(token, "refresh")
+        payload = self.jwt_handler.validate_token(token, "refresh")
         
         assert payload is not None
         assert payload["sub"] == self.test_user_id
@@ -66,7 +66,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         service_name = "test-service-name"
         
         token = self.jwt_handler.create_service_token(service_id, service_name)
-        payload = self.jwt_handler.validate_token_jwt(token, "service")
+        payload = self.jwt_handler.validate_token(token, "service")
         
         assert payload is not None
         assert payload["sub"] == service_id
@@ -78,24 +78,27 @@ class TestJWTTokenValidation(unittest.TestCase):
         refresh_token = self.jwt_handler.create_refresh_token(self.test_user_id)
         
         # Try to validate refresh token as access token
-        payload = self.jwt_handler.validate_token_jwt(refresh_token, "access")
+        payload = self.jwt_handler.validate_token(refresh_token, "access")
         assert payload is None
     
     def test_validate_expired_token(self):
         """Test validation of expired token"""
-        # Create token with very short expiry
-        with patch.object(self.jwt_handler, '_get_token_expiry') as mock_expiry:
-            # Mock expiry to be in the past
-            past_time = datetime.now(timezone.utc) - timedelta(seconds=10)
-            mock_expiry.return_value = past_time
-            
-            token = self.jwt_handler.create_access_token(
-                self.test_user_id,
-                self.test_email
-            )
+        # Create an expired token by manually creating JWT with past timestamps
+        past_time = datetime.now(timezone.utc) - timedelta(seconds=10)
+        expired_payload = {
+            "sub": self.test_user_id,
+            "email": self.test_email,
+            "type": "access",
+            "iat": int(past_time.timestamp()),
+            "exp": int((past_time + timedelta(seconds=5)).timestamp()),  # Expired 5 seconds ago
+            "iss": "netra-auth-service"
+        }
+        
+        # Manually create expired token using PyJWT
+        expired_token = jwt.encode(expired_payload, self.jwt_handler._get_jwt_secret(), algorithm="HS256")
         
         # Validation should fail for expired token
-        payload = self.jwt_handler.validate_token_jwt(token, "access")
+        payload = self.jwt_handler.validate_token(expired_token, "access")
         assert payload is None
     
     def test_validate_malformed_token(self):
@@ -112,7 +115,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         for malformed_token in malformed_tokens:
             if malformed_token is None:
                 continue
-            payload = self.jwt_handler.validate_token_jwt(malformed_token, "access")
+            payload = self.jwt_handler.validate_token(malformed_token, "access")
             assert payload is None, f"Malformed token should be invalid: {malformed_token}"
     
     def test_validate_token_with_invalid_signature(self):
@@ -128,7 +131,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         tampered_token = f"{parts[0]}.{parts[1]}.invalid_signature"
         
         # Validation should fail
-        payload = self.jwt_handler.validate_token_jwt(tampered_token, "access")
+        payload = self.jwt_handler.validate_token(tampered_token, "access")
         assert payload is None
     
     def test_validate_token_without_required_claims(self):
@@ -146,7 +149,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         minimal_token = jwt.encode(minimal_payload, secret, algorithm="HS256")
         
         # Validation should fail due to missing required claims
-        payload = self.jwt_handler.validate_token_jwt(minimal_token, "access")
+        payload = self.jwt_handler.validate_token(minimal_token, "access")
         assert payload is None
     
     def test_validate_token_with_wrong_issuer(self):
@@ -166,7 +169,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         wrong_issuer_token = jwt.encode(wrong_issuer_payload, secret, algorithm="HS256")
         
         # Validation should fail due to wrong issuer
-        payload = self.jwt_handler.validate_token_jwt(wrong_issuer_token, "access")
+        payload = self.jwt_handler.validate_token(wrong_issuer_token, "access")
         assert payload is None
     
     def test_validate_token_performance(self):
@@ -185,7 +188,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         successful_validations = 0
         
         for _ in range(validation_count):
-            payload = self.jwt_handler.validate_token_jwt(token, "access")
+            payload = self.jwt_handler.validate_token(token, "access")
             if payload is not None:
                 successful_validations += 1
         
@@ -207,19 +210,19 @@ class TestJWTTokenValidation(unittest.TestCase):
         service_token = self.jwt_handler.create_service_token("test-service", "test")
         
         # Test access token boundaries
-        assert self.jwt_handler.validate_token_jwt(access_token, "access") is not None
-        assert self.jwt_handler.validate_token_jwt(access_token, "refresh") is None
-        assert self.jwt_handler.validate_token_jwt(access_token, "service") is None
+        assert self.jwt_handler.validate_token(access_token, "access") is not None
+        assert self.jwt_handler.validate_token(access_token, "refresh") is None
+        assert self.jwt_handler.validate_token(access_token, "service") is None
         
         # Test refresh token boundaries
-        assert self.jwt_handler.validate_token_jwt(refresh_token, "refresh") is not None
-        assert self.jwt_handler.validate_token_jwt(refresh_token, "access") is None
-        assert self.jwt_handler.validate_token_jwt(refresh_token, "service") is None
+        assert self.jwt_handler.validate_token(refresh_token, "refresh") is not None
+        assert self.jwt_handler.validate_token(refresh_token, "access") is None
+        assert self.jwt_handler.validate_token(refresh_token, "service") is None
         
         # Test service token boundaries
-        assert self.jwt_handler.validate_token_jwt(service_token, "service") is not None
-        assert self.jwt_handler.validate_token_jwt(service_token, "access") is None
-        assert self.jwt_handler.validate_token_jwt(service_token, "refresh") is None
+        assert self.jwt_handler.validate_token(service_token, "service") is not None
+        assert self.jwt_handler.validate_token(service_token, "access") is None
+        assert self.jwt_handler.validate_token(service_token, "refresh") is None
     
     def test_validate_token_with_future_issued_time(self):
         """Test validation of token with issued time in the future"""
@@ -239,7 +242,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         future_token = jwt.encode(future_payload, secret, algorithm="HS256")
         
         # Validation should fail for future-issued token
-        payload = self.jwt_handler.validate_token_jwt(future_token, "access")
+        payload = self.jwt_handler.validate_token(future_token, "access")
         assert payload is None
     
     def test_validate_token_edge_case_timing(self):
@@ -252,12 +255,12 @@ class TestJWTTokenValidation(unittest.TestCase):
             token = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)
         
         # Should be valid immediately
-        payload = self.jwt_handler.validate_token_jwt(token, "access")
+        payload = self.jwt_handler.validate_token(token, "access")
         assert payload is not None
         
         # Wait for expiry and test again
         time.sleep(2)
-        payload = self.jwt_handler.validate_token_jwt(token, "access")
+        payload = self.jwt_handler.validate_token(token, "access")
         assert payload is None
     
     def test_validate_token_concurrent_validation(self):
@@ -276,7 +279,7 @@ class TestJWTTokenValidation(unittest.TestCase):
         def validate_tokens():
             thread_results = []
             for _ in range(validations_per_thread):
-                payload = self.jwt_handler.validate_token_jwt(token, "access")
+                payload = self.jwt_handler.validate_token(token, "access")
                 thread_results.append(payload is not None)
             results.put(thread_results)
         

@@ -16,8 +16,7 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from monitoring import WebSocketMetrics
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector, WebSocketMetrics
 
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
@@ -167,7 +166,7 @@ class TestWebSocketMetricsRegression:
             ConnectionManager,
         )
         
-        manager = Modernget_connection_manager()
+        manager = ConnectionManager()
         
         # Test with None result
         mock_result = MagicMock()

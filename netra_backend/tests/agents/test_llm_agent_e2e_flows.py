@@ -39,6 +39,8 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     setup_websocket_manager,
 )
 
+@pytest.mark.asyncio
+
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
     """Test handling multiple concurrent requests"""
@@ -69,6 +71,8 @@ def verify_optimization_flow(state, supervisor):
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
 
+@pytest.mark.asyncio
+
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""
     # Create infrastructure and setup responses
@@ -83,6 +87,8 @@ async def test_end_to_end_optimization_flow():
     # Execute and verify flow
     state = await _execute_e2e_flow(supervisor)
     _verify_e2e_flow_completion(state, supervisor)
+
+@pytest.mark.asyncio
 
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
@@ -108,6 +114,8 @@ async def test_complex_multi_step_flow():
     # Verify flow completion
     verify_optimization_flow(state, supervisor)
 
+@pytest.mark.asyncio
+
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -129,6 +137,8 @@ async def test_flow_interruption_and_recovery():
     recovered_state = await mock_persistence.load_agent_state("thread123", "user123")
     assert recovered_state.user_request == "Interrupted optimization"
     assert recovered_state.triage_result["step"] == "analysis"
+
+@pytest.mark.asyncio
 
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""

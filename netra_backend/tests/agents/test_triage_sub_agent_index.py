@@ -23,7 +23,7 @@ from netra_backend.tests.agents.test_triage_agent_core import (
     TestTriageSubAgentInitialization,
 )
 from netra_backend.tests.agents.test_triage_agent_models import TestCleanup, TestPydanticModels
-from netra_backend.tests.test_triage_agent_validation import (
+from netra_backend.tests.agents.test_triage_agent_validation import (
     TestEntryConditions,
     TestFallbackCategorization,
     TestJSONExtraction,

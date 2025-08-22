@@ -42,9 +42,16 @@ class AuthDatabase:
         is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
         
         if self.is_test_mode or self.environment == "test" or is_pytest:
-            # Use in-memory SQLite for testing - always use NullPool for tests
-            logger.info("Using in-memory SQLite for test mode")
-            database_url = "sqlite+aiosqlite:///:memory:"
+            # Check if we should use file-based DB for tests (needed for proper table persistence)
+            use_file_db = os.getenv("AUTH_USE_FILE_DB", "false").lower() == "true"
+            if use_file_db:
+                # Use file-based SQLite from environment for integration tests
+                database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///test_auth.db")
+                logger.info(f"Using file-based SQLite for test mode: {database_url}")
+            else:
+                # Use in-memory SQLite for unit tests
+                logger.info("Using in-memory SQLite for test mode")
+                database_url = "sqlite+aiosqlite:///:memory:"
             pool_class = NullPool
             connect_args = {"check_same_thread": False}
         elif self.is_cloud_run:

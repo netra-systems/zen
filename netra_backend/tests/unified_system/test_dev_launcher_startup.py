@@ -37,14 +37,14 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from dev_launcher.config import LauncherConfig
-from dev_launcher.health_monitor import HealthMonitor
+# from scripts.dev_launcher_config import  # Should be mocked in tests LauncherConfig
+# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
 
 # Dev launcher imports
-from dev_launcher.launcher import DevLauncher
-from dev_launcher.process_manager import ProcessManager
-from dev_launcher.service_discovery import ServiceDiscovery
-from dev_launcher.startup_validator import StartupValidator
+# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
+# from scripts.dev_launcher_process_manager import  # Should be mocked in tests ProcessManager
+# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
+# from scripts.dev_launcher_startup_validator import  # Should be mocked in tests StartupValidator
 
 # Test utilities
 from netra_backend.tests.startup_check_helpers import (

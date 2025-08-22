@@ -22,7 +22,7 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from startup_checks import StartupChecker, StartupCheckResult
+from netra_backend.app.startup_checks import StartupChecker, StartupCheckResult
 
 from netra_backend.app.config import get_config
 

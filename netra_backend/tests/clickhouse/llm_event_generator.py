@@ -8,8 +8,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from netra_backend.tests.data_models import LLMEvent
-from netra_backend.tests.generator_base import DataGeneratorBase
+from netra_backend.tests.clickhouse.data_models import LLMEvent
+from netra_backend.tests.clickhouse.generator_base import DataGeneratorBase
 
 class LLMEventGenerator(DataGeneratorBase):
     """Generate realistic LLM events"""

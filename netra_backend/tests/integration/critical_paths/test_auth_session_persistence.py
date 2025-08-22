@@ -17,7 +17,7 @@ import redis.asyncio as redis
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 
 class TestAuthSessionPersistenceL3:
     """Test authentication session persistence scenarios"""

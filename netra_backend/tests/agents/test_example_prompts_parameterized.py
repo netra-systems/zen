@@ -101,6 +101,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
     
     @pytest.mark.parametrize("prompt_index", range(9))
     @pytest.mark.parametrize("variation_num", range(10))
+    @pytest.mark.asyncio
     async def test_prompt_variations(
         self, 
         prompt_index: int, 
@@ -164,6 +165,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         (7, "tool_migration"),
         (8, "rollback_analysis"),
     ])
+    @pytest.mark.asyncio
     async def test_prompt_context_mapping(
         self, 
         prompt_index: int, 
@@ -180,6 +182,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         assert isinstance(context, dict), "Context should be a dictionary"
     
     @pytest.mark.slow
+    @pytest.mark.asyncio
     async def test_all_prompts_summary(self, real_infrastructure):
         """Run a summary test of all prompts with basic validation"""
         results = []
@@ -225,6 +228,7 @@ class TestPromptGroups(ExamplePromptsTestBase):
         self.test_runner = TestRunner()
     
     @pytest.mark.parametrize("prompt_index", [0, 6])  # Cost-related prompts
+    @pytest.mark.asyncio
     async def test_cost_optimization_prompts(
         self, 
         prompt_index: int,
@@ -244,6 +248,7 @@ class TestPromptGroups(ExamplePromptsTestBase):
         assert "cost" in result["response"].lower() or "budget" in result["response"].lower()
     
     @pytest.mark.parametrize("prompt_index", [1, 3])  # Performance-related prompts
+    @pytest.mark.asyncio
     async def test_performance_optimization_prompts(
         self, 
         prompt_index: int,

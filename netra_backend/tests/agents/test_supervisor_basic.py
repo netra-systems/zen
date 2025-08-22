@@ -45,6 +45,8 @@ install_supervisor_extensions()
 class TestSupervisorOrchestration:
     """Test agent coordination and workflow orchestration"""
     
+    @pytest.mark.asyncio
+    
     async def test_sequential_agent_execution(self):
         """Test sequential execution of multiple agents"""
         mocks = create_supervisor_mocks()
@@ -87,6 +89,8 @@ class TestSupervisorOrchestration:
         assert final_state.triage_result.category == "complex_query"
         assert final_state.data_result.confidence_score == 0.85
         assert len(final_state.optimizations_result.recommendations) == 2
+        
+    @pytest.mark.asyncio
         
     async def test_parallel_agent_execution(self):
         """Test parallel execution of independent agents"""
@@ -131,6 +135,8 @@ class TestSupervisorOrchestration:
         assert all(result.success for result in results)
         assert results[0].state.data_result["analysis"] == "complete"
         assert results[1].state.optimizations_result["optimization_type"] == "parallel_test"
+        
+    @pytest.mark.asyncio
         
     async def test_conditional_workflow_branching(self):
         """Test conditional workflow based on intermediate results"""
@@ -184,6 +190,8 @@ class TestSupervisorOrchestration:
             opt_result = await supervisor._route_to_agent(current_state, context, "optimization")
             assert opt_result.success
             assert opt_result.state.optimizations_result["optimization_type"] == "specialized"
+            
+    @pytest.mark.asyncio
             
     async def test_state_accumulation_across_agents(self):
         """Test that state accumulates properly across multiple agents"""

@@ -21,7 +21,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import.*from '@/__tests__/helpers/websocket-test-manager';
+import * from '@/__tests__/helpers/websocket-test-manager';
 import {
   ConnectionStateManager,
   MessageBuffer,

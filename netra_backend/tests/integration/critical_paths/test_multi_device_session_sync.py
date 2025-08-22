@@ -27,14 +27,14 @@ from unittest.mock import patch, AsyncMock
 import redis.asyncio as redis
 
 # JWT service replaced with auth_integration
-from auth_integration import create_access_token, validate_token_jwt
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis

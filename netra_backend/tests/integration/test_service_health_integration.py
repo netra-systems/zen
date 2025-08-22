@@ -21,7 +21,7 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from startup_checks import StartupChecker
+from netra_backend.app.startup_checks import StartupChecker
 
 from test_framework.mock_utils import mock_justified
 

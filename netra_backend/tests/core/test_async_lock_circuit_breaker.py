@@ -14,7 +14,7 @@ import pytest
 
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, AsyncLock
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
-from netra_backend.tests.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     assert_circuit_breaker_state,
     assert_lock_state,
     create_circuit_breaker_operation,

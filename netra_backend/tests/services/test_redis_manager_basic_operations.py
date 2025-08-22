@@ -57,7 +57,7 @@ class TestRedisManagerOperations:
         manager.enabled = True
         
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            from helpers.redis_test_fixtures import MockRedisClient
+            from netra_backend.tests.helpers.redis_test_fixtures import MockRedisClient
             mock_client = MockRedisClient()
             setup_failing_redis_client(mock_client, "connection")
             mock_redis_class.return_value = mock_client

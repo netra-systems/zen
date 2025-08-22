@@ -38,7 +38,7 @@ import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client import auth_client
 
-from dev_launcher.health_monitor import HealthMonitor
+# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_postgres import User

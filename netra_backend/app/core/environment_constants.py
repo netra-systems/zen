@@ -516,3 +516,13 @@ def get_clickhouse_password_var_name() -> str:
     """Get the ClickHouse password environment variable name for current environment."""
     current_env = get_current_environment()
     return EnvironmentConfig.get_clickhouse_password_var(current_env)
+
+
+# Import specific cloud run detection function for compatibility
+try:
+    from netra_backend.app.cloud_environment_detector import detect_cloud_run_environment
+except ImportError:
+    # Fallback implementation if cloud_environment_detector is not available
+    def detect_cloud_run_environment() -> Optional[str]:
+        """Fallback implementation for detect_cloud_run_environment."""
+        return EnvironmentDetector.get_cloud_run_environment() if EnvironmentDetector.is_cloud_run() else None

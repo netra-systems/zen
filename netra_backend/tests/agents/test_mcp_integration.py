@@ -69,6 +69,8 @@ def sample_agent_context():
 class TestMCPContextManager:
     """Test MCP context manager functionality."""
     
+    @pytest.mark.asyncio
+    
     async def test_create_agent_context(self, mcp_context_manager):
         """Test agent context creation."""
         context = await mcp_context_manager.create_agent_context(
@@ -80,6 +82,8 @@ class TestMCPContextManager:
         assert context.run_id == "run123"
         assert context.thread_id == "thread123"
     
+    @pytest.mark.asyncio
+    
     async def test_get_available_tools(self, mcp_context_manager, sample_agent_context):
         """Test tool discovery with permissions."""
         tools = await mcp_context_manager.get_available_tools(
@@ -88,6 +92,8 @@ class TestMCPContextManager:
         
         assert len(tools) >= 0
         assert all(isinstance(tool, MCPTool) for tool in tools)
+    
+    @pytest.mark.asyncio
     
     async def test_execute_tool_with_context_success(self, mcp_context_manager, sample_agent_context):
         """Test successful tool execution."""
@@ -99,6 +105,8 @@ class TestMCPContextManager:
         )
         
         assert result["status"] == "success"
+    
+    @pytest.mark.asyncio
     
     async def test_execute_tool_permission_denied(self, mcp_context_manager, sample_agent_context):
         """Test tool execution with permission denied."""
@@ -170,6 +178,8 @@ class TestMCPIntentDetector:
 class TestAgentMCPBridge:
     """Test agent-MCP bridge functionality."""
     
+    @pytest.mark.asyncio
+    
     async def test_discover_tools(self, agent_mcp_bridge, sample_agent_context):
         """Test tool discovery through bridge."""
         tools = await agent_mcp_bridge.discover_tools(
@@ -179,6 +189,8 @@ class TestAgentMCPBridge:
         assert len(tools) >= 0
         assert all(isinstance(tool, MCPTool) for tool in tools)
     
+    @pytest.mark.asyncio
+    
     async def test_execute_tool_for_agent_success(self, agent_mcp_bridge, sample_agent_context):
         """Test successful tool execution through bridge."""
         result = await agent_mcp_bridge.execute_tool_for_agent(
@@ -187,6 +199,8 @@ class TestAgentMCPBridge:
         
         assert result["status"] == "success"
         assert "type" in result
+    
+    @pytest.mark.asyncio
     
     async def test_execute_tool_for_agent_error(self, agent_mcp_bridge, sample_agent_context):
         """Test tool execution error handling."""
@@ -200,6 +214,8 @@ class TestAgentMCPBridge:
         assert result["status"] == "error"
         assert "error" in result
     
+    @pytest.mark.asyncio
+    
     async def test_get_server_capabilities(self, agent_mcp_bridge):
         """Test server capabilities retrieval."""
         agent_mcp_bridge.mcp_service.list_servers.return_value = [
@@ -210,10 +226,14 @@ class TestAgentMCPBridge:
         
         assert "tools" in capabilities or capabilities == {}
     
+    @pytest.mark.asyncio
+    
     async def test_health_check_success(self, agent_mcp_bridge):
         """Test successful server health check."""
         health = await agent_mcp_bridge.health_check("test_server")
         assert health is True
+    
+    @pytest.mark.asyncio
     
     async def test_health_check_failure(self, agent_mcp_bridge):
         """Test failed server health check."""
@@ -224,6 +244,8 @@ class TestAgentMCPBridge:
 
 class TestMCPIntegrationEndToEnd:
     """End-to-end integration tests."""
+    
+    @pytest.mark.asyncio
     
     async def test_full_mcp_workflow(self, mcp_context_manager, mcp_intent_detector, agent_mcp_bridge):
         """Test complete MCP workflow from intent detection to execution."""

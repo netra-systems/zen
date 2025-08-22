@@ -83,7 +83,7 @@ class LoggingTestSettings:
 
 
 @dataclass
-class TestSettings:
+class MainTestSettings:
     """Main test settings configuration"""
     environment: str = "test"
     debug: bool = True
@@ -109,7 +109,7 @@ class TestSettings:
     coverage_report_dir: Optional[Path] = None
     
     @classmethod
-    def for_unit_tests(cls) -> "TestSettings":
+    def for_unit_tests(cls) -> "MainTestSettings":
         """Settings optimized for unit tests"""
         settings = cls()
         settings.logging.level = "WARNING"
@@ -119,7 +119,7 @@ class TestSettings:
         return settings
     
     @classmethod
-    def for_integration_tests(cls) -> "TestSettings":
+    def for_integration_tests(cls) -> "MainTestSettings":
         """Settings optimized for integration tests"""
         settings = cls()
         settings.logging.level = "INFO"
@@ -130,7 +130,7 @@ class TestSettings:
         return settings
     
     @classmethod
-    def for_e2e_tests(cls) -> "TestSettings":
+    def for_e2e_tests(cls) -> "MainTestSettings":
         """Settings optimized for E2E tests"""
         settings = cls()
         settings.logging.level = "DEBUG"
@@ -143,7 +143,7 @@ class TestSettings:
         return settings
     
     @classmethod
-    def for_performance_tests(cls) -> "TestSettings":
+    def for_performance_tests(cls) -> "MainTestSettings":
         """Settings optimized for performance tests"""
         settings = cls()
         settings.logging.level = "ERROR"  # Minimize logging overhead

@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from netra_backend.app.core.async_resource_manager import AsyncResourceManager
-from netra_backend.tests.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     assert_callbacks_called,
     assert_resource_manager_state,
     create_failing_callback,

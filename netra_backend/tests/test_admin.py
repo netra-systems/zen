@@ -3,7 +3,8 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-import datetime
+from datetime import datetime
+from datetime import timezone
 import uuid
 from unittest.mock import MagicMock, patch
 
@@ -34,6 +35,8 @@ def superuser_client():
         full_name="Super User",
         is_active=True,
         is_superuser=True,
+        role="admin",
+        created_at=datetime.now(timezone.utc),
     )
     app.dependency_overrides[ActiveUserWsDep] = lambda: mock_user
     with TestClient(app) as client:

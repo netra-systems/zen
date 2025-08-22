@@ -26,6 +26,8 @@ from netra_backend.tests.agents.supply_researcher_fixtures import (
 class TestSupplyResearcherPersistence:
     """Database and persistence tests"""
 
+    @pytest.mark.asyncio
+
     async def test_database_transaction_rollback(self, agent, mock_db):
         """Test database transaction rollback on failure"""
         state = _create_transaction_test_state()
@@ -91,6 +93,8 @@ class TestSupplyResearcherPersistence:
         """Verify anomaly detection results (≤8 lines)"""
         assert len(anomalies) > 0
         assert anomalies[0]["percent_change"] == 150
+
+    @pytest.mark.asyncio
 
     async def test_audit_trail_generation(self, agent, mock_db):
         """Test comprehensive audit trail generation"""
@@ -211,6 +215,8 @@ class TestSupplyResearcherPersistence:
         """Verify performance metrics (≤8 lines)"""
         # Performance should be acceptable for large datasets
         assert result is not None
+
+    @pytest.mark.asyncio
 
     async def test_backup_and_recovery(self, agent, mock_db):
         """Test backup and recovery functionality"""

@@ -44,6 +44,8 @@ class TestSupplyResearcherSecurity:
         """Verify input was parsed safely (≤8 lines)"""
         assert_malicious_input_safe(parsed)
 
+    @pytest.mark.asyncio
+
     async def test_rate_limiting_backoff(self, agent):
         """Test exponential backoff on rate limit errors"""
         state = _create_rate_limit_test_state()
@@ -223,6 +225,8 @@ class TestSupplyResearcherSecurity:
         # Ensure no command injection patterns were preserved
         assert "cat " not in str(parsed).lower()
         assert "whoami" not in str(parsed).lower()
+
+    @pytest.mark.asyncio
 
     async def test_input_length_validation(self, agent):
         """Test validation of input length limits"""

@@ -14,7 +14,7 @@ import pytest
 from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.tests.test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_create_permission,
 )
 

@@ -15,26 +15,35 @@ from netra_backend.app.services.realistic_test_data_service import (
 
 # Import all fixture modules
 # Import all fixture functions
-from netra_backend.tests.fixtures_core import (
+from netra_backend.tests.fixtures.fixtures_core import (
     CoreTestFixtures,
     core_fixtures,
     large_core_data,
     medium_core_data,
     small_core_data,
 )
-from netra_backend.tests.fixtures_metrics import (
+from netra_backend.tests.fixtures.fixtures_metrics import (
     MetricsFixtures,
     error_cascade_logs,
     memory_leak_logs,
     metrics_fixtures,
     performance_metrics,
 )
-from netra_backend.tests.fixtures_workloads import (
+from netra_backend.tests.fixtures.fixtures_workloads import (
     WorkloadFixtures,
     batch_jobs,
     inference_endpoints,
     training_jobs,
     workload_fixtures,
+)
+
+# Import ClickHouse-specific functions from the clickhouse fixtures module
+from netra_backend.tests.clickhouse.realistic_test_fixtures import (
+    create_query_interceptor_with_mock,
+    validate_array_query_syntax,
+    create_mock_clickhouse_client,
+    generate_realistic_logs,
+    generate_llm_metrics,
 )
 
 class RealisticTestFixtures:
@@ -139,5 +148,11 @@ __all__ = [
     "metrics_fixtures",
     "error_cascade_logs",
     "memory_leak_logs",
-    "performance_metrics"
+    "performance_metrics",
+    # ClickHouse-specific functions
+    "create_query_interceptor_with_mock",
+    "validate_array_query_syntax",
+    "create_mock_clickhouse_client",
+    "generate_realistic_logs",
+    "generate_llm_metrics"
 ]

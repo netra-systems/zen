@@ -9,7 +9,7 @@ import time
 from typing import Any, Callable, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.e2e.e2e.state_validation_utils import StateIntegrityChecker
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
 from netra_backend.tests.performance_analyzer import (
     BenchmarkComparator,
     RegressionDetector,

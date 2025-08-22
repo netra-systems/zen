@@ -5,7 +5,7 @@ Provides production-like test data for ClickHouse testing
 
 import pytest
 
-from netra_backend.tests.data_generator import RealisticDataGenerator
+from netra_backend.tests.clickhouse.data_generator import RealisticDataGenerator
 from netra_backend.tests.test_data_manager import ClickHouseTestData
 
 # Pytest fixtures

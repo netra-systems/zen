@@ -268,6 +268,7 @@ class TestJSONExtraction:
 
 class TestCaching:
     """Test caching functionality."""
+    @pytest.mark.asyncio
     async def test_cache_hit(self, triage_agent, sample_state, mock_redis_manager):
         """Test successful cache hit."""
         cached_result = {
@@ -290,6 +291,7 @@ class TestCaching:
         # Check result uses cached data
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.cache_hit == True
+    @pytest.mark.asyncio
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
         mock_redis_manager.get = AsyncMock(return_value=None)  # Cache miss
@@ -318,6 +320,7 @@ class TestCaching:
 
 class TestExecuteMethod:
     """Test the main execute method."""
+    @pytest.mark.asyncio
     async def test_successful_execution(self, triage_agent, sample_state):
         """Test successful execution with valid LLM response."""
         llm_response = json.dumps({
@@ -336,6 +339,7 @@ class TestExecuteMethod:
         assert hasattr(sample_state.triage_result, 'extracted_entities')
         assert "user_intent" in sample_state.triage_result
         assert "tool_recommendations" in sample_state.triage_result
+    @pytest.mark.asyncio
     async def test_execution_with_retry(self, triage_agent, sample_state):
         """Test execution with LLM failure and retry."""
         # First call fails, second succeeds
@@ -350,6 +354,7 @@ class TestExecuteMethod:
         assert triage_agent.llm_manager.ask_llm.call_count == 2
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.retry_count == 1
+    @pytest.mark.asyncio
     async def test_execution_with_fallback(self, triage_agent, sample_state):
         """Test execution falling back to simple categorization."""
         # All retries fail
@@ -364,6 +369,7 @@ class TestExecuteMethod:
         assert sample_state.triage_result != None
         assert sample_state.triage_result.metadata.fallback_used == True
         assert sample_state.triage_result.confidence_score == 0.5
+    @pytest.mark.asyncio
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
         """Test execution with WebSocket updates enabled."""
         triage_agent.websocket_manager = AsyncMock()
@@ -378,15 +384,18 @@ class TestExecuteMethod:
 
 class TestEntryConditions:
     """Test entry condition validation."""
+    @pytest.mark.asyncio
     async def test_entry_conditions_met(self, triage_agent, sample_state):
         """Test when entry conditions are met."""
         result = await triage_agent.check_entry_conditions(sample_state, "test_run")
         assert result == True
+    @pytest.mark.asyncio
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
         empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
         assert result == False
+    @pytest.mark.asyncio
     async def test_entry_conditions_invalid_request(self, triage_agent):
         """Test when request is invalid."""
         state = DeepAgentState(user_request="a")  # Too short
@@ -439,6 +448,7 @@ class TestPydanticModels:
 
 class TestCleanup:
     """Test cleanup functionality."""
+    @pytest.mark.asyncio
     async def test_cleanup_with_metrics(self, triage_agent, sample_state):
         """Test cleanup logs metrics when available."""
         sample_state.triage_result = {

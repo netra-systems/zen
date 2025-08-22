@@ -23,7 +23,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.models.session import Session
 from netra_backend.app.models.user import User
 
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.token_service import TokenService
 

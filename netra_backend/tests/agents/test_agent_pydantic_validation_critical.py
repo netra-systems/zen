@@ -92,6 +92,8 @@ class TestPydanticValidationCritical:
 
         return Mock(spec=ToolDispatcher)
 
+    @pytest.mark.asyncio
+
     async def test_triage_malformed_parameters_fallback_handling(self):
 
         """Test production fallback behavior for malformed tool parameters"""
@@ -144,6 +146,8 @@ class TestPydanticValidationCritical:
         assert result.tool_recommendations[0].parameters == {}
 
         assert result.tool_recommendations[1].parameters == {}
+
+    @pytest.mark.asyncio
 
     async def test_triage_string_parameters_recovery(self):
 
@@ -200,6 +204,8 @@ class TestPydanticValidationCritical:
 
         assert result.tool_recommendations[0].parameters == {"key": "value"}
 
+    @pytest.mark.asyncio
+
     async def test_optimizations_result_recommendations_dict_error(self):
 
         """Test exact error: recommendations as dict instead of list of strings"""
@@ -230,6 +236,8 @@ class TestPydanticValidationCritical:
         # The validator should convert the dict to its description or string representation
 
         assert "Optimize" in result.recommendations[0] or "general" in result.recommendations[0]
+
+    @pytest.mark.asyncio
 
     async def test_optimizations_fallback_format_error(self):
 
@@ -285,6 +293,8 @@ class TestPydanticValidationCritical:
 
         assert result.recommendations == ["Optimize"]
 
+    @pytest.mark.asyncio
+
     async def test_usage_pattern_enum_validation_error(self):
 
         """Test UsagePattern enum validation with invalid values"""
@@ -302,6 +312,8 @@ class TestPydanticValidationCritical:
             UsagePattern(**invalid_pattern)
 
         assert "Input should be" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_data_quality_metrics_range_validation(self):
 
@@ -328,6 +340,8 @@ class TestPydanticValidationCritical:
 
         assert "less than or equal to 100" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_correlation_analysis_validation_error(self):
 
         """Test CorrelationAnalysis nested validation failures"""
@@ -346,6 +360,8 @@ class TestPydanticValidationCritical:
             CorrelationAnalysis(**invalid_correlation)
 
         assert "Input should be a valid list" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_plan_step_dependency_validation_error(self):
 
@@ -366,6 +382,8 @@ class TestPydanticValidationCritical:
             PlanStep(**invalid_step)
 
         assert "Input should be a valid list" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_batch_processing_nested_validation(self):
 
@@ -395,6 +413,8 @@ class TestPydanticValidationCritical:
 
         assert "Input should be a valid list" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_data_analysis_nested_validation_error(self):
 
         """Test DataAnalysisResponse nested field validation failures"""
@@ -414,6 +434,8 @@ class TestPydanticValidationCritical:
 
         assert "Input should be a valid dictionary" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_action_plan_nested_validation_error(self):
 
         """Test ActionPlanResult PlanStep validation failures"""
@@ -430,6 +452,8 @@ class TestPydanticValidationCritical:
             ActionPlanResult(**invalid_response)
 
         assert "Input should be a valid list" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_real_llm_truncation_pattern(self):
 
@@ -458,6 +482,8 @@ class TestPydanticValidationCritical:
 
         return data
 
+    @pytest.mark.asyncio
+
     async def test_comprehensive_nested_recovery(self):
 
         """Test comprehensive nested field recovery patterns"""
@@ -479,6 +505,8 @@ class TestPydanticValidationCritical:
         assert result.performance_metrics.throughput_avg == 100.0
 
         assert result.performance_metrics.error_rate == 0.1
+
+    @pytest.mark.asyncio
 
     async def test_llm_retry_with_validation_error(self, mock_llm_manager):
 

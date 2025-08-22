@@ -28,10 +28,10 @@ class AuthService {
             callback: authConfig.endpoints?.callback || config.endpoints.callback,
             token: authConfig.endpoints?.token || config.endpoints.token,
             user: authConfig.endpoints?.user || config.endpoints.me,
-            ...(authConfig.endpoints?.dev_login && { dev_login: authConfig.endpoints.dev_login })
+            dev_login: authConfig.endpoints?.dev_login || `${config.baseUrl}/auth/dev/login`
           },
-          authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth.javascriptOrigins,
-          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth.redirectUri]
+          authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth?.javascriptOrigins || [],
+          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth?.redirectUri || 'http://localhost:3000/auth/callback']
         };
       } catch (error) {
         if (i < retries - 1) {

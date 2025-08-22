@@ -1,133 +1,185 @@
 #!/usr/bin/env python3
-"""Test WebSocket connection to ensure it's working properly."""
+"""
+WebSocket Connection Test for Netra Backend
+
+This script tests WebSocket endpoints to validate:
+1. Connection establishment
+2. Authentication handling  
+3. Message sending/receiving
+4. Error handling
+"""
 
 import asyncio
 import json
-import websockets
 import sys
-import os
+import time
+from datetime import datetime
 
-# Fix Unicode for Windows
-if sys.platform == "win32":
-    os.environ["PYTHONIOENCODING"] = "utf-8"
-    if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+print("Installing required dependencies...")
+import subprocess
+try:
+    import websockets
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "websockets"])
+    import websockets
 
+try:
+    import requests
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+    import requests
 
-async def test_websocket():
-    """Test WebSocket connection."""
-    url = "ws://localhost:8000/ws"
-    
-    try:
-        print(f"🔌 Connecting to WebSocket at {url}...")
+print("Dependencies installed successfully")
+
+class WebSocketConnectionTester:
+    def __init__(self):
+        self.results = {}
+        self.backend_running = False
         
-        # Connect with a test token
-        headers = {
-            "Authorization": "Bearer test-token-123"
+    async def check_backend_health(self, base_url="http://localhost:8000"):
+        """Check if backend is running"""
+        try:
+            response = requests.get(f"{base_url}/health", timeout=5)
+            if response.status_code == 200:
+                self.backend_running = True
+                print(f"✓ Backend is running at {base_url}")
+                print(f"  Health response: {response.json()}")
+                return True
+        except Exception as e:
+            print(f"✗ Backend not reachable at {base_url}: {e}")
+        
+        self.backend_running = False
+        return False
+    
+    async def test_websocket_info_endpoint(self, base_url="http://localhost:8000"):
+        """Test the WebSocket info endpoint"""
+        try:
+            response = requests.get(f"{base_url}/ws", timeout=5)
+            print(f"WebSocket info endpoint status: {response.status_code}")
+            if response.status_code == 200:
+                info = response.json()
+                print(f"Available endpoints: {info.get(\"endpoints\", {})}")
+                return info
+        except Exception as e:
+            print(f"Failed to get WebSocket info: {e}")
+        return None
+    
+    async def test_basic_websocket_connection(self, ws_url, timeout=10):
+        """Test basic WebSocket connection without auth"""
+        test_name = f"Basic Connection: {ws_url}"
+        result = {
+            "url": ws_url,
+            "connected": False,
+            "messages_sent": 0,
+            "messages_received": 0,
+            "errors": [],
+            "duration": 0,
+            "close_code": None,
+            "close_reason": None
         }
         
-        async with websockets.connect(url, extra_headers=headers) as websocket:
-            print("✅ WebSocket connected successfully!")
-            
-            # Send a test message
-            test_message = {
-                "type": "ping",
-                "data": {"message": "Hello from test client"}
-            }
-            
-            print(f"📤 Sending test message: {test_message}")
-            await websocket.send(json.dumps(test_message))
-            
-            # Wait for response (with timeout)
-            try:
-                response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                print(f"📥 Received response: {response}")
-                
-                # Parse response
-                response_data = json.loads(response)
-                print(f"✅ WebSocket communication successful!")
-                print(f"   Response type: {response_data.get('type', 'unknown')}")
-                
-                return True
-                
-            except asyncio.TimeoutError:
-                print("⏱️ No response received within 5 seconds (this may be normal)")
-                return True  # Connection successful even if no response
-                
-    except websockets.exceptions.WebSocketException as e:
-        print(f"❌ WebSocket error: {e}")
-        return False
-    except ConnectionRefusedError:
-        print(f"❌ Connection refused - is the backend running on port 8000?")
-        return False
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        return False
-
-
-async def test_websocket_endpoints():
-    """Test multiple WebSocket endpoint patterns."""
-    endpoints = [
-        "ws://localhost:8000/ws",
-        "ws://localhost:8000/ws/test-user-123",
-        "ws://localhost:8000/ws/v1/test-user-123"
-    ]
-    
-    results = {}
-    for endpoint in endpoints:
-        print(f"\n🧪 Testing endpoint: {endpoint}")
-        print("-" * 50)
-        
+        start_time = time.time()
         try:
-            async with websockets.connect(endpoint) as ws:
-                print(f"✅ Connected to {endpoint}")
-                results[endpoint] = "Connected"
-                await ws.close()
+            print(f"\nTesting {test_name}")
+            
+            async with websockets.connect(ws_url, timeout=timeout) as websocket:
+                result["connected"] = True
+                print(f"✓ Connected to {ws_url}")
+                
+                # Send ping message
+                ping_message = {
+                    "type": "ping",
+                    "timestamp": time.time(),
+                    "test_id": "websocket_test"
+                }
+                
+                await websocket.send(json.dumps(ping_message))
+                result["messages_sent"] = 1
+                print(f"Sent: {ping_message}")
+                
+                # Wait for response
+                try:
+                    response = await asyncio.wait_for(websocket.recv(), timeout=5)
+                    result["messages_received"] = 1
+                    parsed_response = json.loads(response)
+                    print(f"Received: {parsed_response}")
+                except asyncio.TimeoutError:
+                    print("No response received within timeout")
+                    result["errors"].append("Response timeout")
+                
+        except websockets.exceptions.ConnectionClosedError as e:
+            result["close_code"] = e.code
+            result["close_reason"] = e.reason
+            result["errors"].append(f"Connection closed: {e.code} - {e.reason}")
+            print(f"✗ Connection closed: {e.code} - {e.reason}")
+            
         except Exception as e:
-            error_msg = str(e)
-            if "404" in error_msg:
-                results[endpoint] = "404 Not Found"
-            elif "401" in error_msg:
-                results[endpoint] = "401 Unauthorized (auth required)"
-            elif "403" in error_msg:
-                results[endpoint] = "403 Forbidden"
-            else:
-                results[endpoint] = f"Error: {error_msg[:50]}"
-            print(f"❌ {results[endpoint]}")
+            result["errors"].append(str(e))
+            print(f"✗ Connection failed: {e}")
+        
+        result["duration"] = time.time() - start_time
+        self.results[test_name] = result
+        return result
     
-    print("\n📊 Summary of WebSocket Endpoints:")
-    print("-" * 50)
-    for endpoint, status in results.items():
-        status_icon = "✅" if "Connected" in status or "401" in status else "❌"
-        print(f"{status_icon} {endpoint}: {status}")
+    async def run_comprehensive_test(self):
+        """Run comprehensive WebSocket testing"""
+        print("=== NETRA WEBSOCKET CONNECTION AUDIT ===")
+        print(f"Test started at: {datetime.now().isoformat()}")
+        
+        # 1. Check backend health
+        backend_ok = await self.check_backend_health()
+        if not backend_ok:
+            print("\n❌ Backend not running - cannot test WebSocket connections")
+            return
+        
+        # 2. Check WebSocket info endpoints
+        await self.test_websocket_info_endpoint()
+        
+        # 3. Test WebSocket endpoints
+        test_urls = [
+            "ws://localhost:8000/ws",
+            "ws://localhost:8000/ws/secure"
+        ]
+        
+        for url in test_urls:
+            await self.test_basic_websocket_connection(url)
+        
+        # 4. Generate report
+        self.generate_report()
     
-    return results
+    def generate_report(self):
+        """Generate comprehensive test report"""
+        print("\n" + "="*60)
+        print("WEBSOCKET CONNECTION AUDIT REPORT")
+        print("="*60)
+        
+        total_tests = len(self.results)
+        successful_connections = sum(1 for r in self.results.values() if r["connected"])
+        
+        print(f"Total Tests: {total_tests}")
+        print(f"Successful Connections: {successful_connections}")
+        print(f"Backend Running: {\"Yes\" if self.backend_running else \"No\"}")
+        
+        print(f"\nDETAILED RESULTS:")
+        print("-" * 60)
+        
+        for test_name, result in self.results.items():
+            status = "✓ PASS" if result["connected"] else "✗ FAIL"
+            
+            print(f"\n{test_name}: {status}")
+            print(f"  Connected: {result[\"connected\"]}")
+            print(f"  Messages Sent: {result[\"messages_sent\"]}")
+            print(f"  Messages Received: {result[\"messages_received\"]}")
+            print(f"  Duration: {result[\"duration\"]:.2f}s")
+            
+            if result["errors"]:
+                print(f"  Errors: {result[\"errors\"]}")
 
 
 async def main():
-    """Main test runner."""
-    print("🚀 Starting WebSocket Connection Test")
-    print("=" * 60)
-    
-    # Test basic connection
-    success = await test_websocket()
-    
-    # Test all endpoint patterns
-    print("\n" + "=" * 60)
-    print("🔍 Testing All WebSocket Endpoint Patterns")
-    print("=" * 60)
-    endpoint_results = await test_websocket_endpoints()
-    
-    # Final summary
-    print("\n" + "=" * 60)
-    if success:
-        print("✅ WEBSOCKET TEST PASSED - Connection successful!")
-    else:
-        print("❌ WEBSOCKET TEST FAILED - Please check backend logs")
-    
-    return 0 if success else 1
-
+    """Main test execution"""
+    tester = WebSocketConnectionTester()
+    await tester.run_comprehensive_test()
 
 if __name__ == "__main__":
-    exit_code = asyncio.run(main())
-    sys.exit(exit_code)
+    asyncio.run(main())

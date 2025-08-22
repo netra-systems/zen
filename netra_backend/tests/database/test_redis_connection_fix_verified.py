@@ -13,7 +13,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 # Add parent directory to path for imports
-from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
+# from scripts.dev_launcher_database_connector import  # Should be mocked in tests DatabaseConnector, DatabaseType, ConnectionStatus
 
 @pytest.mark.asyncio
 async def test_redis_connection_works_with_python312():
@@ -108,7 +108,7 @@ def test_fallback_to_aioredis_if_needed():
     This ensures backward compatibility for older environments.
     """
     # This test verifies the fallback logic exists
-    from dev_launcher.database_connector import DatabaseConnector
+    # from scripts.dev_launcher_database_connector import  # Should be mocked in tests DatabaseConnector
     
     # Read the source to verify fallback logic exists
     import inspect

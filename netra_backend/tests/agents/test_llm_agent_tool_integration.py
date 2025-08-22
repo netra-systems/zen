@@ -33,6 +33,8 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     supervisor_agent,
 )
 
+@pytest.mark.asyncio
+
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
     # Test successful tool execution
@@ -46,6 +48,8 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     with pytest.raises(Exception) as exc_info:
         await mock_tool_dispatcher.dispatch_tool("failing_tool", {})
     assert "Tool error" in str(exc_info.value)
+
+@pytest.mark.asyncio
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
@@ -84,6 +88,8 @@ async def test_tool_execution_with_llm():
     assert tool_results[0]["tool"] == "analyze_workload"
     assert tool_results[1]["tool"] == "optimize_batch_size"
 
+@pytest.mark.asyncio
+
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
     llm_manager = Mock(spec=LLMManager)
@@ -112,6 +118,8 @@ async def test_real_llm_interaction():
     
     assert result["content"] == "Successful response after retry"
     assert call_count == 2
+
+@pytest.mark.asyncio
 
 async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
@@ -150,6 +158,8 @@ async def test_tool_call_integration_complex():
     assert len(execution_log) == 6  # Start and complete for each tool
     assert execution_log[0] == "Starting data_fetcher"
     assert execution_log[1] == "Completed data_fetcher"
+
+@pytest.mark.asyncio
 
 async def test_llm_tool_chain_execution():
     """Test LLM-driven tool chain execution"""

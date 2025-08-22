@@ -20,10 +20,16 @@ async def test_database_connectivity_check_success():
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)
     mock_conn = AsyncMock()
-    mock_result = AsyncMock()
+    # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    mock_result = MagicMock()
     mock_result.scalar.return_value = 1
-    mock_conn.execute.return_value = mock_result
+    
+    # Mock the execute method to return the mock_result when awaited
+    mock_conn.execute = AsyncMock(return_value=mock_result)
+    
+    # Mock the async context manager properly
     mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+    mock_engine.connect.return_value.__aexit__.return_value = None
     
     # Test connectivity
     result = await SchemaValidationService.check_database_connectivity(mock_engine)
@@ -81,13 +87,19 @@ async def test_comprehensive_validation_with_engine():
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)
     mock_conn = AsyncMock()
-    mock_result = AsyncMock()
+    # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    mock_result = MagicMock()
     mock_result.scalar.return_value = 1
-    mock_conn.execute.return_value = mock_result
+    
+    # Mock the execute method to return the mock_result when awaited
+    mock_conn.execute = AsyncMock(return_value=mock_result)
+    
+    # Mock the async context manager properly
     mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+    mock_engine.connect.return_value.__aexit__.return_value = None
     
     # Mock inspector for schema validation
-    with patch('app.services.schema_validation_service.inspect') as mock_inspect:
+    with patch('netra_backend.app.services.schema_validation_service.inspect') as mock_inspect:
         mock_inspector = MagicMock()
         mock_inspector.get_table_names.return_value = []
         mock_inspect.return_value = mock_inspector

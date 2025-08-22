@@ -50,7 +50,7 @@ import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import.*from '@/__tests__/helpers/websocket-test-manager';
+import * from '@/__tests__/helpers/websocket-test-manager';
 
 // Mock fetch
 global.fetch = jest.fn();

@@ -43,7 +43,7 @@ import jwt as jwt_lib
 import pytest
 import redis.asyncio as aioredis
 import websockets
-from ws_manager import get_manager
+from netra_backend.app.ws_manager import get_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 

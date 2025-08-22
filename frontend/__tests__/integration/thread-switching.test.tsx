@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
-import.*from '@/__tests__/helpers/websocket-test-manager';
+import * from '@/__tests__/helpers/websocket-test-manager';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock router for navigation testing

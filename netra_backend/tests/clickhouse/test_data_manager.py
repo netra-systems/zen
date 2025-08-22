@@ -12,9 +12,9 @@ import json
 from dataclasses import asdict
 from typing import Any, Dict, List
 
-from netra_backend.tests.data_generator import RealisticDataGenerator
+from netra_backend.tests.clickhouse.data_generator import RealisticDataGenerator
 
-from netra_backend.tests.data_models import LLMEvent, LogEntry, WorkloadMetric
+from netra_backend.tests.clickhouse.data_models import LLMEvent, LogEntry, WorkloadMetric
 
 class ClickHouseTestData:
     """Manage test data for ClickHouse tests"""

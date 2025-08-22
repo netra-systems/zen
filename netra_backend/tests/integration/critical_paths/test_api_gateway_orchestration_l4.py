@@ -38,7 +38,7 @@ try:
 except ImportError:
     StagingTestSuite = AsyncMock
     get_staging_suite = AsyncMock
-# from auth_integration import create_access_token, validate_token_jwt
+# from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 # from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 

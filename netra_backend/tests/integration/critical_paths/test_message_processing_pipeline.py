@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # JWT service replaced with auth_integration
-from auth_integration import create_access_token, validate_token_jwt
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 

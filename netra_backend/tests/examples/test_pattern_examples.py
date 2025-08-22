@@ -18,7 +18,7 @@ import pytest
 
 from netra_backend.app.services.agent_service import AgentService
 
-from netra_backend.tests.examples.helpers.shared_test_types import (
+from netra_backend.tests.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
 

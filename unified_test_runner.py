@@ -49,6 +49,19 @@ from typing import Dict, List, Optional, Tuple
 # Project root
 PROJECT_ROOT = Path(__file__).parent.absolute()
 
+def _check_pytest_timeout_installed() -> bool:
+    """Check if pytest-timeout plugin is installed."""
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "show", "pytest-timeout"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
 # Import test framework
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.test_config import TEST_LEVELS, configure_dev_environment, configure_real_llm, resolve_test_level
@@ -253,23 +266,31 @@ class UnifiedTestRunner:
             cmd_parts.extend([
                 "tests/e2e/test_dev_launcher_real_startup.py",
                 "tests/integration/test_dev_launcher_utilities_validation.py",
-                "tests/test_system_startup.py",
-                "--timeout=300"  # 5 minute timeout for integration tests
+                "tests/test_system_startup.py"
             ])
+            # Only add timeout if pytest-timeout is installed
+            if _check_pytest_timeout_installed():
+                cmd_parts.append("--timeout=300")  # 5 minute timeout for integration tests
         elif args.level == "e2e":
             # For e2e tests, include comprehensive startup tests
             cmd_parts.extend(dev_launcher_patterns)
-            cmd_parts.extend(["--timeout=600"])  # 10 minute timeout for e2e tests
+            # Only add timeout if pytest-timeout is installed
+            if _check_pytest_timeout_installed():
+                cmd_parts.extend(["--timeout=600"])  # 10 minute timeout for e2e tests
         elif args.level == "performance":
             # For performance tests, focus on startup performance
             cmd_parts.extend([
-                "tests/e2e/test_dev_launcher_real_startup.py::TestDevLauncherRealStartup::test_service_startup_order_validation",
-                "--timeout=300"
+                "tests/e2e/test_dev_launcher_real_startup.py::TestDevLauncherRealStartup::test_service_startup_order_validation"
             ])
+            # Only add timeout if pytest-timeout is installed  
+            if _check_pytest_timeout_installed():
+                cmd_parts.append("--timeout=300")
         elif args.level == "comprehensive":
             # For comprehensive tests, run all dev_launcher tests
             cmd_parts.extend(dev_launcher_patterns)
-            cmd_parts.extend(["--timeout=900"])  # 15 minute timeout for comprehensive tests
+            # Only add timeout if pytest-timeout is installed
+            if _check_pytest_timeout_installed():
+                cmd_parts.extend(["--timeout=900"])  # 15 minute timeout for comprehensive tests
         else:
             # Default pattern
             cmd_parts.extend(dev_launcher_patterns)
@@ -464,14 +485,20 @@ def main():
     
     # Handle special operations
     if args.list:
-        discovery = TestDiscovery(PROJECT_ROOT)
-        tests = discovery.discover_tests()
-        for category, test_list in tests.items():
-            print(f"\n{category}:")
-            for test in test_list[:5]:  # Show first 5
-                print(f"  - {test}")
-            if len(test_list) > 5:
-                print(f"  ... and {len(test_list)-5} more")
+        # Simple pytest-based test listing for now
+        import subprocess
+        result = subprocess.run(
+            ["python", "-m", "pytest", "--collect-only", "-q", "tests/integration/"], 
+            capture_output=True, text=True, cwd=PROJECT_ROOT
+        )
+        if result.returncode == 0:
+            print("Integration Tests Found:")
+            for line in result.stdout.strip().split('\n')[:20]:  # Show first 20
+                if "::" in line:
+                    print(f"  - {line}")
+        else:
+            print("Error collecting tests:")
+            print(result.stderr)
         return 0
     
     if args.validate:

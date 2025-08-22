@@ -36,7 +36,7 @@ import websockets
 StagingTestSuite = AsyncMock
 
 get_staging_suite = AsyncMock
-# from ws_manager import WebSocketManager
+# from netra_backend.app.ws_manager import WebSocketManager
 
 WebSocketManager = AsyncMock
 # from app.services.redis.session_manager import RedisSessionManager

@@ -36,10 +36,10 @@ import httpx
 import psutil
 import pytest
 
-from dev_launcher.config import LauncherConfig
-from dev_launcher.health_monitor import HealthMonitor
-from dev_launcher.launcher import DevLauncher
-from dev_launcher.service_discovery import ServiceDiscovery
+# from scripts.dev_launcher_config import  # Should be mocked in tests LauncherConfig
+# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
+# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
+# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
 
 class ServiceInfo:
     """Service information container."""

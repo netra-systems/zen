@@ -23,7 +23,9 @@ class TestImports:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Setup test environment"""
-        self.tester = ImportTester(verbose=False)
+        # Get project root path (parent of netra_backend/)
+        project_root = Path(__file__).parent.parent.parent
+        self.tester = ImportTester(root_path=str(project_root), verbose=False)
         self.critical_errors = []
     
     def _assert_import_success(self, result: ImportResult):

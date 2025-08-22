@@ -25,7 +25,7 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.services.agent_service_core import AgentService
 
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified

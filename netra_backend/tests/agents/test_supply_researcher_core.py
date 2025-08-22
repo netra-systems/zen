@@ -30,6 +30,8 @@ from netra_backend.tests.agents.supply_researcher_fixtures import (
 class TestSupplyResearcherCore:
     """Core agent functionality tests"""
 
+    @pytest.mark.asyncio
+
     async def test_llm_prompt_template_usage(self, agent, mock_llm_manager):
         """Test that agent uses LLM prompt templates correctly"""
         request = "What are the latest prices for Claude-3 Opus?"
@@ -52,6 +54,8 @@ class TestSupplyResearcherCore:
         assert parsed["research_type"] == ResearchType.PRICING
         assert parsed["provider"] == "anthropic"
         assert "claude" in parsed["model_name"].lower()
+
+    @pytest.mark.asyncio
 
     async def test_websocket_event_streaming(self, agent):
         """Test WebSocket event streaming during research"""
@@ -97,6 +101,8 @@ class TestSupplyResearcherCore:
                         statuses.append(status)
         return statuses
 
+    @pytest.mark.asyncio
+
     async def test_state_persistence_redis(self, agent):
         """Test agent state persistence in Redis"""
         _setup_redis_mock()
@@ -136,6 +142,8 @@ class TestSupplyResearcherCore:
         mock_redis = Mock()
         agent.redis_manager = mock_redis
         assert hasattr(agent, 'redis_manager')
+
+    @pytest.mark.asyncio
 
     async def test_multi_provider_parallel_research(self, agent):
         """Test parallel research execution for multiple providers"""

@@ -23,7 +23,7 @@ from netra_backend.app.db.clickhouse_init import (
     initialize_clickhouse_tables,
     verify_workload_events_table,
 )
-from netra_backend.tests.test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_insert_permission,
 )
 

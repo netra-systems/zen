@@ -26,7 +26,7 @@ from netra_backend.app.core.exceptions import (
     TokenRevokedError,
     TokenTamperError,
 )
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.redis_service import RedisService
 
 from netra_backend.app.services.token_service import TokenService

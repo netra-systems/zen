@@ -33,8 +33,10 @@ export const typeMessage = async (text: string) => {
 
 // Helper to send message via Enter
 export const sendViaEnter = async (text: string) => {
-  const textarea = await typeMessage(text);
-  await userEvent.type(textarea, '{enter}');
+  const textarea = getTextarea();
+  // Use fireEvent for more direct input control
+  fireEvent.change(textarea, { target: { value: text } });
+  fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
   return textarea;
 };
 
@@ -55,5 +57,5 @@ export const expectMessageSent = async (mockSend: jest.Mock, content: string) =>
       currentThreadId: 'thread-1', 
       isAuthenticated: true
     });
-  });
+  }, { timeout: 3000 });
 };

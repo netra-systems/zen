@@ -24,46 +24,55 @@ from netra_backend.tests.tool_dispatcher_assertions import (
 
 class TestProductionToolSpecificOperations:
     """Test specific tool operations."""
+    @pytest.mark.asyncio
     async def test_execute_synthetic_data_batch_success(self):
         """Test synthetic data batch generation success."""
         tool = ProductionTool("generate_synthetic_data_batch")
         result = await self._execute_with_batch_service_mock(tool)
         assert_batch_execution_success(result, 2)
+    @pytest.mark.asyncio
     async def test_execute_synthetic_data_batch_failure(self):
         """Test synthetic data batch generation failure."""
         tool = ProductionTool("generate_synthetic_data_batch")
         result = await self._execute_with_batch_service_failure(tool)
         assert_tool_execute_response_error(result, "Failed to generate synthetic data")
+    @pytest.mark.asyncio
     async def test_execute_create_corpus_success(self):
         """Test corpus creation success."""
         tool = ProductionTool("create_corpus")
         result = await self._execute_with_corpus_service_mock(tool)
         assert_corpus_creation_success(result, "corpus_123", "test_corpus")
+    @pytest.mark.asyncio
     async def test_execute_create_corpus_failure(self):
         """Test corpus creation failure."""
         tool = ProductionTool("create_corpus")
         result = await self._execute_with_corpus_service_failure(tool)
         assert_tool_execute_response_error(result, "Failed to create corpus")
+    @pytest.mark.asyncio
     async def test_execute_search_corpus_success(self):
         """Test corpus search success."""
         tool = ProductionTool("search_corpus")
         result = await self._execute_with_search_service_mock(tool)
         assert_corpus_search_success(result, 2)
+    @pytest.mark.asyncio
     async def test_execute_search_corpus_missing_id(self):
         """Test corpus search with missing corpus_id."""
         tool = ProductionTool("search_corpus")
         result = await tool._execute_search_corpus({"query": "test"})
         assert_missing_parameter_error(result, "corpus_id")
+    @pytest.mark.asyncio
     async def test_execute_validate_synthetic_data(self):
         """Test synthetic data validation."""
         tool = ProductionTool("validate_synthetic_data")
         result = await self._execute_with_validation_mock(tool)
         assert_validation_success(result, True)
+    @pytest.mark.asyncio
     async def test_execute_store_synthetic_data(self):
         """Test synthetic data storage."""
         tool = ProductionTool("store_synthetic_data")
         result = await self._execute_with_storage_mock(tool)
         assert_storage_success(result, 10)
+    @pytest.mark.asyncio
     async def test_execute_default(self):
         """Test default execution method."""
         tool = ProductionTool("unknown_tool")

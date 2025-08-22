@@ -38,7 +38,7 @@ import pytest
 from netra_backend.app.clients.auth_client import auth_client
 
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.token_manager import TokenManager
 from netra_backend.app.db.redis_manager import get_redis_manager
 

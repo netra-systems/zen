@@ -19,7 +19,7 @@ import aiohttp
 import jwt
 import pytest
 
-from netra_backend.app.core.auth import TokenManager
+from netra_backend.app.auth_integration.auth import JWTTokenManager as TokenManager
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
 

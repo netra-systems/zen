@@ -40,12 +40,16 @@ from netra_backend.tests.agents.test_fixtures import (
     supervisor_agent,
 )
 
+@pytest.mark.asyncio
+
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
     assert supervisor_agent.thread_id is not None
     assert supervisor_agent.user_id is not None
     assert len(supervisor_agent.agents) > 0
+
+@pytest.mark.asyncio
 
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
@@ -65,6 +69,8 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     assert state.user_request == user_request
     assert state.chat_thread_id == supervisor_agent.thread_id
     assert state.user_id == supervisor_agent.user_id
+
+@pytest.mark.asyncio
 
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
@@ -89,6 +95,8 @@ async def test_llm_response_parsing(mock_llm_manager):
     except json.JSONDecodeError:
         pass  # Expected
 
+@pytest.mark.asyncio
+
 async def test_agent_state_creation():
     """Test basic agent state creation and structure"""
     state = DeepAgentState(
@@ -104,6 +112,8 @@ async def test_agent_state_creation():
     assert state.data_result is None
     assert state.optimizations_result is None
 
+@pytest.mark.asyncio
+
 async def test_basic_llm_call():
     """Test basic LLM call functionality"""
     llm_manager = Mock(spec=LLMManager)
@@ -115,6 +125,8 @@ async def test_basic_llm_call():
     result = await llm_manager.call_llm("Test prompt")
     assert result["content"] == "Test response"
     assert result["tool_calls"] == []
+
+@pytest.mark.asyncio
 
 async def test_structured_llm_call():
     """Test structured LLM call functionality"""
@@ -132,6 +144,8 @@ async def test_structured_llm_call():
     assert result["category"] == "optimization"
     assert result["confidence"] == 0.95
     assert result["requires_analysis"] is True
+
+@pytest.mark.asyncio
 
 async def test_agent_registry():
     """Test agent registry functionality"""
@@ -154,6 +168,8 @@ async def test_agent_registry():
         # Should have key agent types
         agent_names = list(supervisor.agents.keys())
         assert any("triage" in name.lower() for name in agent_names)
+
+@pytest.mark.asyncio
 
 async def test_basic_error_handling():
     """Test basic error handling in supervisor"""
@@ -181,6 +197,8 @@ async def test_basic_error_handling():
         except Exception as e:
             # Error should be handled appropriately
             assert isinstance(e, Exception)
+
+@pytest.mark.asyncio
 
 async def test_mock_infrastructure_creation():
     """Test mock infrastructure creation helpers"""
@@ -228,6 +246,8 @@ def _setup_basic_persistence_mock():
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
     return mock_persistence
 
+@pytest.mark.asyncio
+
 async def test_basic_agent_lifecycle():
     """Test basic agent lifecycle"""
     # Create basic state
@@ -237,6 +257,8 @@ async def test_basic_agent_lifecycle():
     # Verify state can be modified
     state.triage_result = {"category": "test"}
     assert state.triage_result["category"] == "test"
+
+@pytest.mark.asyncio
 
 async def test_basic_mock_setup():
     """Test basic mock setup functionality"""
@@ -250,6 +272,8 @@ async def test_basic_mock_setup():
     # Test persistence mock
     save_result = await persistence.save_agent_state("test", "session")
     assert save_result == (True, "test_id")
+
+@pytest.mark.asyncio
 
 async def test_uuid_generation():
     """Test UUID generation for IDs"""

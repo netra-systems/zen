@@ -42,6 +42,7 @@ install_supervisor_extensions()
 
 class TestSupervisorErrorHandling:
     """Test supervisor handles agent initialization errors gracefully"""
+    @pytest.mark.asyncio
     async def test_supervisor_error_handling(self):
         """Test supervisor handles agent initialization errors gracefully"""
         mocks = create_supervisor_mocks()
@@ -61,6 +62,7 @@ class TestSupervisorErrorHandling:
         # Verify error was handled
         assert not result.success
         assert "Agent failed" in str(result.error)
+    @pytest.mark.asyncio
     async def test_supervisor_state_management(self):
         """Test supervisor properly manages agent states"""
         mocks = create_supervisor_mocks()
@@ -81,6 +83,7 @@ class TestSupervisorErrorHandling:
 
 class TestSupervisorConcurrentRequests:
     """Test supervisor handles multiple concurrent requests"""
+    @pytest.mark.asyncio
     async def test_supervisor_concurrent_requests(self):
         """Test supervisor handles multiple concurrent requests"""
         mocks = create_supervisor_mocks()
@@ -127,6 +130,7 @@ class TestSupervisorConcurrentRequests:
 
 class TestRetryMechanisms:
     """Test retry and circuit breaker patterns"""
+    @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff(self):
         """Test retry mechanism with exponential backoff"""
         mocks = create_supervisor_mocks()
@@ -148,6 +152,7 @@ class TestRetryMechanisms:
         assert result.state.triage_result.category == "success"
         # Should have taken some time due to backoff
         assert end_time - start_time > 0.1
+    @pytest.mark.asyncio
     async def test_circuit_breaker_recovery(self):
         """Test circuit breaker can recover after cooldown"""
         mocks = create_supervisor_mocks()
@@ -190,6 +195,7 @@ class TestRetryMechanisms:
 
 class TestErrorPropagation:
     """Test error propagation and isolation"""
+    @pytest.mark.asyncio
     async def test_error_isolation_between_agents(self):
         """Test that errors in one agent don't affect others"""
         mocks = create_supervisor_mocks()
@@ -214,6 +220,7 @@ class TestErrorPropagation:
         data_result = await supervisor._route_to_agent(state, context, "data")
         assert data_result.success
         assert data_result.state.data_result["status"] == "healthy"
+    @pytest.mark.asyncio
     async def test_partial_pipeline_failure_recovery(self):
         """Test recovery when part of pipeline fails"""
         mocks = create_supervisor_mocks()
@@ -249,6 +256,7 @@ class TestErrorPropagation:
 
 class TestErrorRecoveryStrategies:
     """Test different error recovery strategies"""
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self):
         """Test graceful degradation when services are unavailable"""
         mocks = create_supervisor_mocks()
@@ -276,6 +284,7 @@ class TestErrorRecoveryStrategies:
         assert result.success
         assert result.state.triage_result["degraded_mode"]
         assert "basic_response" in result.state.triage_result["available_features"]
+    @pytest.mark.asyncio
     async def test_fallback_agent_selection(self):
         """Test fallback to alternative agents when primary fails"""
         mocks = create_supervisor_mocks()

@@ -23,9 +23,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from dev_launcher.google_secret_manager import GoogleSecretManager
-from dev_launcher.secret_config import SecretConfig
-from dev_launcher.secret_loader import SecretLoader
+# from scripts.dev_launcher_google_secret_manager import  # Should be mocked in tests GoogleSecretManager
+# from scripts.dev_launcher_secret_config import  # Should be mocked in tests SecretConfig
+# from scripts.dev_launcher_secret_loader import  # Should be mocked in tests SecretLoader
 from test_framework.mock_utils import mock_justified
 
 class TestStagingSecretsManagerIntegration:

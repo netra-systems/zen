@@ -32,7 +32,8 @@ export function createActWrapper<T extends (...args: any[]) => void>(callback: T
 }
 
 export async function waitForConnection(server: WS): Promise<void> {
-  await expect(server).toReceiveMessage(expect.any(Object));
+  // Wait for WebSocket connection to be established
+  await server.connected;
 }
 
 export function sendMessage(server: WS, content: string, threadId: string = 'test-thread'): void {
@@ -60,9 +61,9 @@ export function sendStreamChunk(server: WS, chunk: string, messageId: string = `
   }));
 }
 
-export function sendAgentStart(server: WS, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentStart(server: WS, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
-    type: 'agent_start',
+    type: 'agent_started',
     data: {
       agentType,
       threadId,
@@ -72,7 +73,7 @@ export function sendAgentStart(server: WS, agentType: string, threadId: string =
   }));
 }
 
-export function sendAgentMessage(server: WS, content: string, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentMessage(server: WS, content: string, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
     type: 'agent_message',
     data: {
@@ -86,9 +87,9 @@ export function sendAgentMessage(server: WS, content: string, agentType: string,
   }));
 }
 
-export function sendAgentComplete(server: WS, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentComplete(server: WS, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
-    type: 'agent_complete',
+    type: 'agent_completed',
     data: {
       agentType,
       threadId,

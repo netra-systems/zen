@@ -132,6 +132,7 @@ class AgentUtils:
 
 class TestAgentPromptsTemplateRendering:
     """Test 8: Test prompt template generation"""
+    @pytest.mark.asyncio
     async def test_prompt_template_rendering(self):
         """Test rendering of prompt templates with variables"""
         prompts = AgentPrompts()
@@ -146,6 +147,7 @@ class TestAgentPromptsTemplateRendering:
         result = prompts.render_template(template, variables)
         
         assert result == "Optimize transformer for latency with constraints: memory < 8GB"
+    @pytest.mark.asyncio
     async def test_prompt_variable_substitution(self):
         """Test complex variable substitution in prompts"""
         prompts = AgentPrompts()
@@ -169,6 +171,7 @@ class TestAgentPromptsTemplateRendering:
         assert "You are an AI optimizer" in result
         assert "Improve model performance" in result
         assert str(variables["context"]) in result
+    @pytest.mark.asyncio
     async def test_prompt_template_validation(self):
         """Test validation of prompt templates"""
         prompts = AgentPrompts()
@@ -184,6 +187,7 @@ class TestAgentPromptsTemplateRendering:
 
 class TestEnhancedPromptsContextBuilding:
     """Test 9: Test enhanced context construction"""
+    @pytest.mark.asyncio
     async def test_enhanced_context_construction(self):
         """Test building enhanced context for prompts"""
         enhanced_prompts = EnhancedPrompts()
@@ -203,6 +207,7 @@ class TestEnhancedPromptsContextBuilding:
         assert enhanced_context["user_query"] == "Optimize training"
         assert len(enhanced_context["conversation_history"]) == 2
         assert "model_info" in enhanced_context
+    @pytest.mark.asyncio
     async def test_prompt_optimization_logic(self):
         """Test prompt optimization for better responses"""
         enhanced_prompts = EnhancedPrompts()
@@ -217,6 +222,7 @@ class TestEnhancedPromptsContextBuilding:
         # Optimized prompt should be more specific
         assert len(optimized) > len(original_prompt)
         assert "specific" in optimized.lower() or "detailed" in optimized.lower()
+    @pytest.mark.asyncio
     async def test_context_window_management(self):
         """Test management of context window size"""
         enhanced_prompts = EnhancedPrompts()
@@ -237,6 +243,7 @@ class TestEnhancedPromptsContextBuilding:
 
 class TestAgentUtilsHelperFunctions:
     """Test 10: Test utility helper functions"""
+    @pytest.mark.asyncio
     async def test_retry_with_backoff(self):
         """Test retry utility with exponential backoff"""
         utils = AgentUtils()
@@ -258,6 +265,7 @@ class TestAgentUtilsHelperFunctions:
         
         assert result == "Success"
         assert call_count == 3
+    @pytest.mark.asyncio
     async def test_parallel_execution_helper(self):
         """Test parallel execution of multiple tasks"""
         utils = AgentUtils()
@@ -270,6 +278,7 @@ class TestAgentUtilsHelperFunctions:
         results = await utils.execute_parallel(tasks)
         
         assert results == [0, 2, 4, 6, 8]
+    @pytest.mark.asyncio
     async def test_timeout_wrapper(self):
         """Test timeout wrapper for long-running operations"""
         utils = AgentUtils()
@@ -280,6 +289,7 @@ class TestAgentUtilsHelperFunctions:
         
         with pytest.raises(asyncio.TimeoutError):
             await utils.with_timeout(slow_operation(), timeout=0.5)
+    @pytest.mark.asyncio
     async def test_state_merging_utility(self):
         """Test utility for merging agent states"""
         utils = AgentUtils()

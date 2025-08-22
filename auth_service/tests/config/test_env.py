@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional
 from auth_service.auth_core.config import AuthConfig
 
 
-class TestEnvironment:
+class AuthTestEnvironment:
     """Test environment management with isolation"""
     
     # Default test environment variables
@@ -147,7 +147,7 @@ def load_test_config() -> AuthConfig:
     """Load test configuration with proper environment setup"""
     # Ensure test environment is set
     if os.getenv("ENVIRONMENT") != "test":
-        test_env = TestEnvironment()
+        test_env = AuthTestEnvironment()
         test_env.setup()
     
     return AuthConfig
@@ -157,18 +157,18 @@ class EnvironmentPresets:
     """Predefined environment configurations for different test scenarios"""
     
     @staticmethod
-    def unit_test_env() -> TestEnvironment:
+    def unit_test_env() -> AuthTestEnvironment:
         """Environment for unit tests - minimal setup"""
-        return TestEnvironment({
+        return AuthTestEnvironment({
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
             "REDIS_URL": "redis://localhost:6379/15",
             "LOG_LEVEL": "WARNING",  # Reduce noise in unit tests
         })
     
     @staticmethod
-    def integration_test_env() -> TestEnvironment:
+    def integration_test_env() -> AuthTestEnvironment:
         """Environment for integration tests - full setup"""
-        return TestEnvironment({
+        return AuthTestEnvironment({
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
             "REDIS_URL": "redis://localhost:6379/15",
             "LOG_LEVEL": "INFO",
@@ -176,9 +176,9 @@ class EnvironmentPresets:
         })
     
     @staticmethod
-    def e2e_test_env() -> TestEnvironment:
+    def e2e_test_env() -> AuthTestEnvironment:
         """Environment for E2E tests - production-like"""
-        return TestEnvironment({
+        return AuthTestEnvironment({
             "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
             "REDIS_URL": "redis://localhost:6379/15",
             "LOG_LEVEL": "DEBUG",
@@ -187,18 +187,18 @@ class EnvironmentPresets:
         })
     
     @staticmethod
-    def postgres_test_env() -> TestEnvironment:
+    def postgres_test_env() -> AuthTestEnvironment:
         """Environment for PostgreSQL integration tests"""
-        return TestEnvironment({
+        return AuthTestEnvironment({
             "DATABASE_URL": "postgresql+asyncpg://postgres:postgres@localhost:5432/test_auth_service",
             "REDIS_URL": "redis://localhost:6379/15",
             "LOG_LEVEL": "INFO",
         })
     
     @staticmethod
-    def oauth_test_env() -> TestEnvironment:
+    def oauth_test_env() -> AuthTestEnvironment:
         """Environment for OAuth testing"""
-        return TestEnvironment({
+        return AuthTestEnvironment({
             "GOOGLE_CLIENT_ID": "test-oauth-client-id",
             "GOOGLE_CLIENT_SECRET": "test-oauth-secret",
             "GITHUB_CLIENT_ID": "test-github-client-id", 
@@ -207,7 +207,7 @@ class EnvironmentPresets:
         })
 
 
-def get_test_environment(test_type: str = "unit") -> TestEnvironment:
+def get_test_environment(test_type: str = "unit") -> AuthTestEnvironment:
     """Get predefined test environment by type"""
     presets = {
         "unit": EnvironmentPresets.unit_test_env,

@@ -93,7 +93,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_suggestions_for_issues(self, quality_service):
         """Test suggestion generation for various quality issues"""
-        from helpers.quality_gate_fixtures import (
+        from netra_backend.tests.helpers.quality_gate_fixtures import (
             create_low_specificity_metrics,
         )
         low_spec_metrics = create_low_specificity_metrics()
@@ -103,7 +103,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_prompt_adjustments(self, quality_service):
         """Test prompt adjustment generation"""
-        from helpers.quality_gate_fixtures import (
+        from netra_backend.tests.helpers.quality_gate_fixtures import (
             create_poor_metrics,
         )
         poor_metrics = create_poor_metrics()

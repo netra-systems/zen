@@ -65,7 +65,7 @@ describe('Data Flow Integration Tests', () => {
           const ws = new WebSocket('ws://localhost:8000/ws');
           ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
-            setMessage(data.content);
+            setMessage(data.data?.content || data.content);
           });
           return () => ws.close();
         }, []);
@@ -76,7 +76,7 @@ describe('Data Flow Integration Tests', () => {
       const { getByTestId } = render(<TestComponent />);
       
       await waitForConnection(server);
-      sendMessage(server, JSON.stringify({ content: 'Hello from server' }));
+      sendMessage(server, 'Hello from server');
       
       await assertTextContent(getByTestId('message'), 'Hello from server');
     });
@@ -105,7 +105,7 @@ describe('Data Flow Integration Tests', () => {
           ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'stream_chunk') {
-              setStreamingContent(prev => prev + data.chunk);
+              setStreamingContent(prev => (prev || '') + data.data.chunk);
             }
           });
           return () => ws.close();
@@ -120,10 +120,10 @@ describe('Data Flow Integration Tests', () => {
       
       await waitForConnection(server);
       
-      sendStreamChunk(server, 'Hello ');
-      await assertTextContent(getByTestId('streaming-content'), 'Hello ');
+      sendStreamChunk(server, 'Hello');
+      await assertTextContent(getByTestId('streaming-content'), 'Hello');
       
-      sendStreamChunk(server, 'World!');
+      sendStreamChunk(server, ' World!');
       await assertTextContent(getByTestId('streaming-content'), 'Hello World!');
     });
   });
@@ -189,20 +189,18 @@ describe('Data Flow Integration Tests', () => {
             if (data.type === 'agent_started') {
               setAgentStatus('processing');
             } else if (data.type === 'agent_message') {
-              setAgentMessage(data.content);
+              setAgentMessage(data.data?.content || data.content);
             } else if (data.type === 'agent_completed') {
               setAgentStatus('completed');
             }
           });
           
-          const startAgent = () => {
+          ws.onopen = createActWrapper(() => {
             ws.send(JSON.stringify({
               type: 'start_agent',
               task: 'analyze'
             }));
-          };
-          
-          setTimeout(startAgent, 100);
+          });
           
           return () => ws.close();
         }, []);
@@ -218,7 +216,9 @@ describe('Data Flow Integration Tests', () => {
       const { getByTestId } = render(<AgentComponent />);
       
       await waitForConnection(server);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Wait for the component to send the initial start_agent message
+      await server.nextMessage;
       
       sendAgentStart(server);
       await assertTextContent(getByTestId('agent-status'), 'processing');

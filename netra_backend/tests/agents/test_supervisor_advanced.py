@@ -39,6 +39,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 class TestSupervisorAdvancedFeatures:
     """Additional tests for advanced supervisor functionality"""
+    @pytest.mark.asyncio
     async def test_supervisor_error_handling(self):
         """Test supervisor handles agent initialization errors gracefully"""
         # Mock dependencies with proper async context managers
@@ -80,6 +81,7 @@ class TestSupervisorAdvancedFeatures:
         # In our architecture, errors trigger fallback mechanisms rather than failing outright
         assert result.success is True  # Fallback should provide graceful degradation
         assert result.state is not None  # State should still be returned
+    @pytest.mark.asyncio
     async def test_supervisor_state_management(self):
         """Test supervisor properly manages agent states"""
         # Mock dependencies
@@ -103,6 +105,7 @@ class TestSupervisorAdvancedFeatures:
         # Test additional valid transitions
         # Note: Cannot go from COMPLETED back to PENDING - this is by design
         # The state machine enforces forward-only transitions for lifecycle integrity
+    @pytest.mark.asyncio
     async def test_supervisor_concurrent_requests(self):
         """Test supervisor handles multiple concurrent requests"""
         # Mock dependencies with proper async context managers
@@ -163,6 +166,7 @@ class TestSupervisorAdvancedFeatures:
                 pytest.fail(f"Request {i} failed with: {result}")
             assert result.success is True
             assert result.state.user_request == f"Message {i}"
+    @pytest.mark.asyncio
     async def test_supervisor_resource_cleanup(self):
         """Test supervisor properly cleans up resources"""
         mock_db = AsyncMock()
@@ -184,6 +188,7 @@ class TestSupervisorAdvancedFeatures:
         await supervisor.cleanup()
         
         assert supervisor.cleanup_called
+    @pytest.mark.asyncio
     async def test_supervisor_metrics_tracking(self):
         """Test supervisor tracks execution metrics"""
         mock_db = AsyncMock()
@@ -305,6 +310,8 @@ class TestSupervisorAdvancedFeatures:
         """Verify circuit breaker recovery"""
         assert supervisor.circuit_breaker["state"] == "closed"
         assert supervisor.circuit_breaker["failures"] == 0
+
+    @pytest.mark.asyncio
 
     async def test_supervisor_circuit_breaker_recovery(self):
         """Test supervisor can recover from circuit breaker state"""

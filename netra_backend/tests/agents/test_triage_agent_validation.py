@@ -125,17 +125,23 @@ class TestJSONExtraction:
 class TestEntryConditions:
     """Test entry condition validation."""
     
+    @pytest.mark.asyncio
+    
     async def test_entry_conditions_met(self, triage_agent):
         """Test when entry conditions are met."""
         sample_state = DeepAgentState(user_request="Optimize my GPT-4 costs by 30%")
         result = await triage_agent.check_entry_conditions(sample_state, "test_run")
         assert result == True
 
+    @pytest.mark.asyncio
+
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
         empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
         assert result == False
+
+    @pytest.mark.asyncio
 
     async def test_entry_conditions_invalid_request(self, triage_agent):
         """Test when request is invalid."""

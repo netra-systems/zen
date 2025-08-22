@@ -19,7 +19,7 @@ from netra_backend.app.core.async_retry_logic import (
     with_timeout,
 )
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError
-from netra_backend.tests.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     create_eventually_successful,
     create_quick_operation,
     create_retry_counter,

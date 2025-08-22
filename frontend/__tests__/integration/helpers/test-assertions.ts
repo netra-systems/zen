@@ -26,13 +26,13 @@ export const assertAuthState = (isAuthenticated: boolean, token: string | null =
 };
 
 export const assertMessageCount = (expectedCount: number) => {
-  // Message count assertions are handled by individual test mocks
-  // This function provides a common interface but logic is test-specific
-  console.debug(`assertMessageCount called: expectedCount=${expectedCount}`);
+  const { useChatStore } = require('@/store/chatStore');
+  const messages = useChatStore.getState().messages;
+  expect(messages).toHaveLength(expectedCount);
 };
 
 export const assertThreadCount = (expectedCount: number) => {
-  // Thread count assertions are handled by individual test mocks  
-  // This function provides a common interface but logic is test-specific
-  console.debug(`assertThreadCount called: expectedCount=${expectedCount}`);
+  const { useThreadStore } = require('@/store/threadStore');
+  const threads = useThreadStore.getState().threads;
+  expect(threads).toHaveLength(expectedCount);
 };

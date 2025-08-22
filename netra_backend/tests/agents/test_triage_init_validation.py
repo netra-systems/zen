@@ -145,6 +145,7 @@ class TestSecurityAndValidation:
             "optimize my ai costs",
             "Optimize\tmy\nAI\rcosts",
         ]
+    @pytest.mark.asyncio
     async def test_resource_limits(self, triage_agent):
         """Test resource limit enforcement"""
         max_size_request = "a" * 10000

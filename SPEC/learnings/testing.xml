@@ -944,6 +944,96 @@
                 <practice>EXTRACT complex fixtures to utility modules for reusability</practice>
             </best_practices_established>
         </learning>
+        
+        <learning id="e2e-test-comprehensive-fixes">
+            <title>E2E Test Comprehensive Fixes - Critical Startup Issues Resolved</title>
+            <problem>
+                All e2e tests across 4 services were failing with different critical issues:
+                1. Backend: ImportError blocking 755 tests - missing fixture imports
+                2. Auth Service: Missing testcontainers module + database table initialization
+                3. Frontend: Dev mode authentication tests failing
+                4. Dev Launcher: pytest-timeout plugin not handling gracefully
+            </problem>
+            <solution>
+                Fixed all 4 service test issues systematically:
+                1. Backend: Fixed import paths in realistic_test_fixtures.py (fixtures_core → fixtures.fixtures_core)
+                2. Backend: Added missing ClickHouse test functions to main fixtures export
+                3. Auth: Added testcontainers to requirements-test.txt
+                4. Auth: Fixed database initialization in test fixtures
+                5. Frontend: Fixed AuthContext dev mode tests with proper mocking
+                6. Dev Launcher: Added pytest-timeout check before using --timeout argument
+            </solution>
+            <files_affected>
+                <file>netra_backend/tests/fixtures/realistic_test_fixtures.py</file>
+                <file>auth_service/tests/requirements-test.txt</file>
+                <file>auth_service/tests/conftest.py</file>
+                <file>frontend/__tests__/auth/context.dev-mode.test.tsx</file>
+                <file>unified_test_runner.py</file>
+            </files_affected>
+            <verification>
+                Backend tests now collecting 755 items successfully
+                Auth service tests collecting 193 items
+                Frontend auth tests passing (3/3)
+                Dev launcher basic tests executing without timeout errors
+            </verification>
+            <business_value>
+                Critical for startup survival - e2e tests validate entire system
+                Enables CI/CD pipeline to function properly
+                Prevents production failures through comprehensive testing
+            </business_value>
+        </learning>
+        
+        <learning id="fixture-import-path-resolution">
+            <title>Test Fixture Import Path Resolution Pattern</title>
+            <problem>
+                Test files importing from netra_backend.tests.fixtures_core
+                Actual file location was netra_backend.tests.fixtures.fixtures_core
+                Import path mismatch caused 755 backend tests to fail collection
+            </problem>
+            <solution>
+                Fixed import paths to use correct module structure:
+                Pattern: netra_backend.tests.fixtures.{module_name}
+                Not: netra_backend.tests.{module_name}
+                Added re-exports in main fixtures file for backward compatibility
+            </solution>
+            <best_practice>
+                Always verify fixture import paths match actual file structure
+                Use main fixture index files to consolidate imports
+                Re-export commonly used functions for convenience
+            </best_practice>
+            <files_affected>
+                <file>netra_backend/tests/fixtures/realistic_test_fixtures.py</file>
+                <file>netra_backend/tests/clickhouse/test_clickhouse_array_operations.py</file>
+            </files_affected>
+        </learning>
+        
+        <learning id="pytest-timeout-graceful-handling">
+            <title>Pytest Timeout Plugin Graceful Handling</title>
+            <problem>
+                unified_test_runner.py unconditionally added --timeout argument
+                pytest-timeout plugin not always installed
+                Caused dev_launcher tests to fail with unrecognized argument error
+            </problem>
+            <solution>
+                Added _check_pytest_timeout_installed() function
+                Only add --timeout argument if plugin is available
+                Pattern: Check plugin availability before using plugin-specific args
+            </solution>
+            <implementation>
+                def _check_pytest_timeout_installed() -> bool:
+                    try:
+                        result = subprocess.run(
+                            [sys.executable, "-m", "pip", "show", "pytest-timeout"],
+                            capture_output=True, text=True, timeout=5
+                        )
+                        return result.returncode == 0
+                    except Exception:
+                        return False
+            </implementation>
+            <files_affected>
+                <file>unified_test_runner.py</file>
+            </files_affected>
+        </learning>
     </learnings>
     
     <best_practices>

@@ -10,10 +10,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 try:
-    from scripts.string_literals.scanner_core import RawLiteral
+    from string_literals.scanner_core import RawLiteral
 except ImportError:
     # Handle direct execution
-    from scanner_core import RawLiteral
+    from .scanner_core import RawLiteral
 
 
 @dataclass

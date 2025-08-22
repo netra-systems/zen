@@ -122,6 +122,8 @@ class TestWorkflowPatterns:
         assert opt_result and opt_result.state.optimizations_result["result"] == "optimizations_processed"
         assert validation_result and validation_result.state.data_result["validation"]["status"] == "valid"
 
+    @pytest.mark.asyncio
+
     async def test_fan_out_fan_in_pattern(self):
         """Test fan-out/fan-in pattern for parallel processing"""
         supervisor = await self._setup_fanout_supervisor()
@@ -131,6 +133,8 @@ class TestWorkflowPatterns:
         triage_result = await self._execute_triage_phase(supervisor, state, context)
         parallel_results = await self._execute_parallel_phase(supervisor, triage_result.state, context)
         self._verify_fanin_results(parallel_results)
+        
+    @pytest.mark.asyncio
         
     async def test_pipeline_with_feedback_loops(self):
         """Test pipeline with feedback loops and iterative refinement"""
@@ -181,6 +185,8 @@ class TestWorkflowPatterns:
 
 class TestResourceManagement:
     """Test resource management and coordination"""
+    
+    @pytest.mark.asyncio
     
     async def test_resource_contention_handling(self):
         """Test handling of resource contention between agents"""

@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
-from auth_integration import (
+from netra_backend.app.auth_integration.auth import (
     AuthServiceProtocol,
     LoginRequest,
     LoginResponse,

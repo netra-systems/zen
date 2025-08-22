@@ -71,6 +71,8 @@ class TestErrorHandlerDecorator:
             return "success"
         return successful_function
 
+    @pytest.mark.asyncio
+
     async def test_decorator_successful_execution(self):
         """Test decorator with successful function execution."""
         successful_function = await self._create_successful_function()
@@ -90,6 +92,8 @@ class TestErrorHandlerDecorator:
         
         return retryable_function, call_count
 
+    @pytest.mark.asyncio
+
     async def test_decorator_with_retries(self):
         """Test decorator with retryable errors."""
         retryable_function, call_count = await self._create_retryable_function()
@@ -104,6 +108,8 @@ class TestErrorHandlerDecorator:
             raise ValidationError("Non-retryable validation error")
         return non_retryable_function
 
+    @pytest.mark.asyncio
+
     async def test_decorator_with_non_retryable_error(self):
         """Test decorator with non-retryable error."""
         non_retryable_function = await self._create_non_retryable_function()
@@ -117,6 +123,8 @@ class TestErrorHandlerDecorator:
         async def max_retries_function():
             raise NetworkError("Persistent network issue")
         return max_retries_function
+
+    @pytest.mark.asyncio
 
     async def test_decorator_max_retries_exceeded(self):
         """Test decorator when max retries is exceeded."""
@@ -138,6 +146,8 @@ class TestErrorHandlerDecorator:
             raise ValidationError("Custom handler test")
         
         return custom_handler_function, custom_handler
+
+    @pytest.mark.asyncio
 
     async def test_decorator_with_custom_handler(self):
         """Test decorator with custom error handler."""
@@ -173,12 +183,16 @@ class TestErrorHandlerDecorator:
             raise NetworkError("Context test error")
         return context_function
 
+    @pytest.mark.asyncio
+
     async def test_decorator_context_propagation(self):
         """Test decorator context propagation."""
         context_function = await self._create_function_with_context_propagation()
         
         with pytest.raises(NetworkError):
             await context_function()
+
+    @pytest.mark.asyncio
 
     async def test_decorator_preserves_function_metadata(self):
         """Test decorator preserves original function metadata."""
@@ -209,6 +223,8 @@ class TestErrorHandlerDecorator:
             return "delayed_success"
         
         return delayed_retry_function, call_times
+
+    @pytest.mark.asyncio
 
     async def test_decorator_retry_delay(self):
         """Test decorator retry delay functionality."""

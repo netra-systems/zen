@@ -11,18 +11,18 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.test_database_connections import (
+from netra_backend.tests.database.test_database_connections import (
     TestClickHouseConnectionPool,
     TestDatabaseHealthChecks,
     TestMigrationRunnerSafety,
 )
-from netra_backend.tests.test_message_repository import TestMessageRepositoryQueries
-from netra_backend.tests.test_repository_auth import (
+from netra_backend.tests.database.test_message_repository import TestMessageRepositoryQueries
+from netra_backend.tests.database.test_repository_auth import (
     TestMetricRepositoryAggregation,
     TestOptimizationRepositoryStorage,
     TestUserRepositoryAuth,
 )
-from netra_backend.tests.test_thread_repository import TestThreadRepositoryOperations
+from netra_backend.tests.services.test_thread_repository import TestThreadRepository as TestThreadRepositoryOperations
 
 # Re-export for backward compatibility
 __all__ = [

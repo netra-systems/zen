@@ -32,14 +32,13 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from database.database_manager import get_database_session
+from netra_backend.app.db.session import get_db_session as get_database_session
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.models.thread import Thread
+from netra_backend.app.schemas.core_models import Thread, User
 
 # Real imports - not mocked unless external API
-from netra_backend.app.models.user import User
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.user_service import UserService
 from netra_backend.app.websocket.connection import ConnectionInfo

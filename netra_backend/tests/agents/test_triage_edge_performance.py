@@ -41,6 +41,7 @@ def triage_agent():
 
 class TestEdgeCasesAndBoundaryConditions:
     """Test edge cases and boundary conditions"""
+    @pytest.mark.asyncio
     async def test_empty_and_whitespace_requests(self, triage_agent):
         """Test handling of empty and whitespace-only requests"""
         edge_cases = EdgeCaseHelpers.get_empty_requests()
@@ -53,6 +54,7 @@ class TestEdgeCasesAndBoundaryConditions:
             assert result is not None
             if state.triage_result:
                 assert "error" in state.triage_result
+    @pytest.mark.asyncio
     async def test_unicode_and_special_characters(self, triage_agent):
         """Test handling of Unicode and special characters"""
         unicode_requests = EdgeCaseHelpers.get_unicode_requests()
@@ -72,6 +74,7 @@ class TestEdgeCasesAndBoundaryConditions:
         
         assert state.triage_result != None
         assert "category" in state.triage_result
+    @pytest.mark.asyncio
     async def test_extremely_long_requests(self, triage_agent):
         """Test handling of extremely long requests"""
         boundary_request = "Optimize AI costs " * 588
@@ -91,6 +94,7 @@ class TestEdgeCasesAndBoundaryConditions:
         validation = agent.triage_core.validator.validate_request(request)
         # Basic test - actual validation behavior may vary
         assert validation is not None
+    @pytest.mark.asyncio
     async def test_malformed_json_responses(self, triage_agent):
         """Test handling of malformed JSON responses from LLM"""
         malformed_responses = EdgeCaseHelpers.get_malformed_json_responses()
@@ -110,6 +114,7 @@ class TestEdgeCasesAndBoundaryConditions:
 
 class TestPerformanceOptimization:
     """Test performance optimization features"""
+    @pytest.mark.asyncio
     async def test_request_processing_performance(self, triage_agent):
         """Test request processing performance"""
         request_sizes = PerformanceHelpers.get_request_sizes()
@@ -134,6 +139,7 @@ class TestPerformanceOptimization:
         
         assert execution_time < 5000  # 5 seconds max
         assert state.triage_result != None
+    @pytest.mark.asyncio
     async def test_memory_efficiency(self, triage_agent):
         """Test memory efficiency with large datasets"""
         large_request = PerformanceHelpers.create_large_request()

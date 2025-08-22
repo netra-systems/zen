@@ -55,6 +55,8 @@ def sample_state():
 class TestCaching:
     """Test caching functionality."""
     
+    @pytest.mark.asyncio
+    
     async def test_cache_hit(self, triage_agent, sample_state, mock_redis_manager):
         """Test successful cache hit."""
         cached_result = {
@@ -77,6 +79,8 @@ class TestCaching:
         # Check result uses cached data
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.cache_hit == True
+
+    @pytest.mark.asyncio
 
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
@@ -107,6 +111,8 @@ class TestCaching:
 class TestExecuteMethod:
     """Test the main execute method."""
     
+    @pytest.mark.asyncio
+    
     async def test_successful_execution(self, triage_agent, sample_state):
         """Test successful execution with valid LLM response."""
         llm_response = json.dumps({
@@ -125,6 +131,8 @@ class TestExecuteMethod:
         assert "user_intent" in sample_state.triage_result
         assert "tool_recommendations" in sample_state.triage_result
 
+    @pytest.mark.asyncio
+
     async def test_execution_with_retry(self, triage_agent, sample_state):
         """Test execution with LLM failure and retry."""
         # First call fails, second succeeds
@@ -140,6 +148,8 @@ class TestExecuteMethod:
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.retry_count == 1
 
+    @pytest.mark.asyncio
+
     async def test_execution_with_fallback(self, triage_agent, sample_state):
         """Test execution falling back to simple categorization."""
         # All retries fail
@@ -154,6 +164,8 @@ class TestExecuteMethod:
         assert sample_state.triage_result != None
         assert sample_state.triage_result.metadata.fallback_used == True
         assert sample_state.triage_result.confidence_score == 0.5
+
+    @pytest.mark.asyncio
 
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
         """Test execution with WebSocket updates enabled."""

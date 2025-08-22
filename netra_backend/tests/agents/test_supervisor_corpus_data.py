@@ -141,6 +141,8 @@ class TestCorpusAdminDocumentManagement:
         assert result["failed"] == 0
         corpus_admin.vector_store.add_documents.assert_called_once()
     
+    @pytest.mark.asyncio
+    
     async def test_document_indexing_workflow(self):
         """Test document indexing workflow"""
         corpus_admin, documents = self._setup_indexing_test()
@@ -167,6 +169,8 @@ class TestCorpusAdminDocumentManagement:
         assert len(results) == 2
         assert results[0]["score"] == 0.95
         assert results[0]["id"] == "doc1"
+    
+    @pytest.mark.asyncio
     
     async def test_document_retrieval_with_similarity_search(self):
         """Test document retrieval using similarity search"""
@@ -201,6 +205,8 @@ class TestCorpusAdminDocumentManagement:
         assert result["success"]
         corpus_admin.vector_store.update_document.assert_called_with(update)
     
+    @pytest.mark.asyncio
+    
     async def test_corpus_update_operations(self):
         """Test corpus update operations"""
         corpus_admin = self._setup_update_test()
@@ -234,6 +240,8 @@ class TestSupplyResearcherDataCollection:
         """Assert supply chain data collection results"""
         assert len(result["suppliers"]) == 2
         assert result["inventory"]["gpu"] == 1000
+    
+    @pytest.mark.asyncio
     
     async def test_supply_chain_data_collection(self):
         """Test supply chain data collection workflow"""
@@ -273,6 +281,8 @@ class TestSupplyResearcherDataCollection:
         assert result["quantity"] == 100
         assert "quality_score" in result
     
+    @pytest.mark.asyncio
+    
     async def test_data_validation_and_enrichment(self):
         """Test data validation and enrichment process"""
         supply_researcher = self._setup_validation_test()
@@ -303,6 +313,8 @@ class TestDemoServiceWorkflow:
         assert result["metrics"]["accuracy"] == 0.95
         assert len(result["recommendations"]) == 2
     
+    @pytest.mark.asyncio
+    
     async def test_demo_scenario_execution(self):
         """Test execution of demo scenarios"""
         demo_service = self._setup_demo_scenario_test()
@@ -331,6 +343,8 @@ class TestDemoServiceWorkflow:
         assert results[0] != results[1]
         assert results[1] != results[2]
         assert all("timestamp" in r for r in results)
+    
+    @pytest.mark.asyncio
     
     async def test_demo_data_generation_variety(self):
         """Test variety in demo data generation"""

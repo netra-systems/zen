@@ -3,7 +3,7 @@ String Literals Scanner Package
 Modular components for scanning and processing string literals in Python codebases.
 """
 
-from scripts.string_literals.scanner_core import RawLiteral, StringLiteralScanner, scan_file, scan_directory
+from string_literals.scanner_core import RawLiteral, StringLiteralScanner, scan_file, scan_directory
 from .categorizer_enhanced import (
     CategorizedLiteral, 
     EnhancedStringLiteralCategorizer,

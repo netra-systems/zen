@@ -93,7 +93,7 @@ class TestAgentReliabilityMixinInitialization:
     @pytest.fixture
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.reliability.get_reliability_wrapper') as mock_wrapper:
             mock_reliability = Mock()
             mock_reliability.execute_safely = Mock()
             mock_reliability.circuit_breaker = Mock()

@@ -25,16 +25,19 @@ class TestProductionTool:
         """Test ProductionTool initialization."""
         tool = ProductionTool("test_tool")
         assert_production_tool_initialized(tool, "test_tool")
+    @pytest.mark.asyncio
     async def test_arun_success(self):
         """Test ProductionTool arun method with success."""
         tool = self._setup_arun_success_test()
         result = await self._execute_arun_with_mocks(tool)
         self._verify_arun_success(result)
+    @pytest.mark.asyncio
     async def test_execute_success(self):
         """Test ProductionTool execute method with success."""
         tool = self._setup_execute_success_test()
         result = await tool.execute({"param": "value"}, None, "run_123")
         self._verify_execute_success(result, tool)
+    @pytest.mark.asyncio
     async def test_execute_failure(self):
         """Test ProductionTool execute method with failure."""
         tool = self._setup_execute_failure_test()
@@ -91,21 +94,25 @@ class TestProductionTool:
 
 class TestProductionToolInternalExecution:
     """Test ProductionTool internal execution methods."""
+    @pytest.mark.asyncio
     async def test_execute_internal_synthetic_tools(self):
         """Test _execute_internal with synthetic tools."""
         tool = self._setup_synthetic_tool_test()
         result = await tool._execute_internal({}, None, "run_123")
         self._verify_synthetic_tool_result(result, tool)
+    @pytest.mark.asyncio
     async def test_execute_internal_corpus_tools(self):
         """Test _execute_internal with corpus tools."""
         tool = self._setup_corpus_tool_test()
         result = await tool._execute_internal({}, None, "run_123")
         self._verify_corpus_tool_result(result, tool)
+    @pytest.mark.asyncio
     async def test_execute_internal_default(self):
         """Test _execute_internal with default fallback."""
         tool = self._setup_default_tool_test()
         result = await tool._execute_internal({}, None, "run_123")
         assert_not_implemented_error(result, "unknown_tool")
+    @pytest.mark.asyncio
     async def test_try_synthetic_tools_batch_generation(self):
         """Test _try_synthetic_tools with batch generation."""
         tool = self._setup_batch_generation_test()
@@ -113,16 +120,19 @@ class TestProductionToolInternalExecution:
             mock_service.return_value = [{"data": "item1"}, {"data": "item2"}]
             result = await tool._try_synthetic_tools({"batch_size": 100})
             self._verify_batch_generation_result_real(result)
+    @pytest.mark.asyncio
     async def test_try_synthetic_tools_validation(self):
         """Test _try_synthetic_tools with validation."""
         tool = self._setup_validation_test()
         result = await tool._try_synthetic_tools({"data": "test_data"})
         assert_tool_execute_response_success(result)
+    @pytest.mark.asyncio
     async def test_try_synthetic_tools_storage(self):
         """Test _try_synthetic_tools with storage."""
         tool = self._setup_storage_test()
         result = await tool._try_synthetic_tools({"data": "test_data"})
         assert_tool_execute_response_success(result)
+    @pytest.mark.asyncio
     async def test_try_corpus_tools_create(self):
         """Test _try_corpus_tools with create operation."""
         tool = self._setup_corpus_create_test()
@@ -134,6 +144,7 @@ class TestProductionToolInternalExecution:
             mock_service.return_value = mock_corpus
             result = await tool._try_corpus_tools({"name": "test_corpus", "description": "test"})
             self._verify_corpus_create_result_real(result)
+    @pytest.mark.asyncio
     async def test_try_corpus_tools_search(self):
         """Test _try_corpus_tools with search operation."""
         tool = self._setup_corpus_search_test()
@@ -141,6 +152,7 @@ class TestProductionToolInternalExecution:
             mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2}
             result = await tool._try_corpus_tools({"corpus_id": "123", "query": "test"})
             assert_tool_execute_response_success(result)
+    @pytest.mark.asyncio
     async def test_try_corpus_tools_unknown(self):
         """Test _try_corpus_tools with unknown corpus operation."""
         tool = ProductionTool("unknown_corpus_tool")

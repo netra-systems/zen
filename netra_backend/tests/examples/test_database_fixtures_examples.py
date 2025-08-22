@@ -16,7 +16,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from netra_backend.tests.database_test_fixtures import (
+from netra_backend.tests.fixtures.database_test_fixtures import (
     async_session_mock,
     clickhouse_mocker,
     connection_pool,

@@ -43,7 +43,7 @@ from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
 from netra_backend.app.core.exceptions_config import DatabaseError
 # Import unified configuration system
 from netra_backend.app.config import get_config
-from netra_backend.tests.database_test_fixtures import (
+from netra_backend.tests.fixtures.database_test_fixtures import (
     create_mock_message,
     create_mock_thread,
     create_mock_user,

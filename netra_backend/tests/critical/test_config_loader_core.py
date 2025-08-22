@@ -23,7 +23,7 @@ import pytest
 from netra_backend.app.core.configuration.loader import ConfigurationLoader
 from netra_backend.app.core.configuration.environment import EnvironmentDetector
 from netra_backend.app.core.configuration.secrets import SecretManager
-from netra_backend.app.core.environment_constants import (
+from netra_backend.app.cloud_environment_detector import (
     detect_cloud_run_environment,
 )
 

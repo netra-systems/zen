@@ -483,27 +483,28 @@ CMD ["npm", "start"]
         
         # Add service-specific configurations
         if service.name == "backend":
-            # Backend needs connections to databases
+            # Backend needs connections to databases and all required secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database and JWT secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url:latest,JWT_SECRET=jwt-secret:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest"
             ])
         elif service.name == "frontend":
-            # Frontend needs API URLs
-            backend_url = self.get_service_url("netra-backend")
-            auth_url = self.get_service_url("netra-auth")
+            # Frontend needs API URLs - use staging URLs for consistent configuration
+            # These will be the final Cloud Run URLs or use predefined staging domains
+            staging_api_url = "https://api.staging.netrasystems.ai"
+            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
             
-            if backend_url and auth_url:
-                cmd.extend([
-                    "--update-env-vars",
-                    f"NEXT_PUBLIC_API_URL={backend_url},NEXT_PUBLIC_AUTH_URL={auth_url}"
-                ])
+            cmd.extend([
+                "--update-env-vars",
+                f"NEXT_PUBLIC_API_URL={staging_api_url},NEXT_PUBLIC_AUTH_URL={staging_auth_url},NEXT_PUBLIC_WS_URL={staging_ws_url}"
+            ])
         
         try:
             result = subprocess.run(
@@ -560,10 +561,15 @@ CMD ["npm", "start"]
         """Create necessary secrets in Secret Manager."""
         print("\n🔐 Setting up secrets in Secret Manager...")
         
+        # CRITICAL: All these secrets are REQUIRED for staging deployment
+        # Based on staging_secrets_requirements.xml
         secrets = {
-            "database-url": "postgresql://netra_staging:zRR9caaayrRraaaaaaa6EK@35.223.209.195:5432/netra_staging",
-            "redis-url": "redis://10.0.0.1:6379",
-            "jwt-secret": "your-secure-jwt-secret-here"
+            "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
+            "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
+            "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
+            "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
+            "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
+            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum"  # Auth service uses this name
         }
         
         for name, value in secrets.items():

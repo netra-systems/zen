@@ -30,7 +30,7 @@ import pytest
 # from app.services.database.tenant_service import TenantService
 TenantService = AsyncMock
 # Permissions service replaced with auth_integration
-# from auth_integration import require_permission
+# from netra_backend.app.auth_integration.auth import require_permission
 # from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 

@@ -52,6 +52,8 @@ class TestSupervisorAgentStats:
 class TestSupervisorAgentEdgeCases:
     """Test edge cases and error scenarios."""
     
+    @pytest.mark.asyncio
+    
     async def test_concurrent_execution_locking(self):
         """Test that execution lock prevents concurrent runs."""
         llm_manager = Mock(spec=LLMManager)

@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from starlette.websockets import WebSocketDisconnect
-from ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.schemas.websocket_models import UserMessagePayload

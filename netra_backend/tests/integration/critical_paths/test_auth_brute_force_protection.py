@@ -16,7 +16,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 
 class TestAuthBruteForceProtectionL3:
     """Test brute force protection scenarios"""

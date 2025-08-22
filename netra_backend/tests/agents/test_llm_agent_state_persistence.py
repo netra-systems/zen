@@ -33,6 +33,8 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     supervisor_agent,
 )
 
+@pytest.mark.asyncio
+
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
     # Create a proper mock that matches the expected interface
@@ -63,6 +65,8 @@ async def test_state_persistence(supervisor_agent):
     assert result is not None
     assert isinstance(result, DeepAgentState)
 
+@pytest.mark.asyncio
+
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
     # Simulate error in execution pipeline
@@ -80,6 +84,8 @@ async def test_error_recovery(supervisor_agent):
         )
     except Exception as e:
         assert "Pipeline error" in str(e)
+
+@pytest.mark.asyncio
 
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
@@ -102,6 +108,8 @@ async def test_state_recovery_from_interruption():
     assert recovered_state.user_request == "Interrupted request"
     assert recovered_state.triage_result["category"] == "optimization"
 
+@pytest.mark.asyncio
+
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
     mock_persistence = AsyncMock()
@@ -114,6 +122,8 @@ async def test_persistence_failure_handling():
         await mock_persistence.save_agent_state("run123", "thread123", "user123", {}, None)
     
     assert "Database connection failed" in str(exc_info.value)
+
+@pytest.mark.asyncio
 
 async def test_state_serialization_consistency():
     """Test state serialization and deserialization consistency"""
@@ -140,6 +150,8 @@ async def test_state_serialization_consistency():
     assert deserialized_data["user_request"] == "Test serialization"
     assert deserialized_data["chat_thread_id"] == "thread123"
     assert deserialized_data["triage_result"]["category"] == "optimization"
+
+@pytest.mark.asyncio
 
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
@@ -173,6 +185,8 @@ async def test_concurrent_state_operations():
     assert len(results) == 5
     for result in results:
         assert not isinstance(result, Exception)
+
+@pytest.mark.asyncio
 
 async def test_state_version_compatibility():
     """Test backward compatibility of state versions"""

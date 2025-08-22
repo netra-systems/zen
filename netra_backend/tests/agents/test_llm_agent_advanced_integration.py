@@ -52,6 +52,8 @@ async def _run_concurrent_requests(supervisors):
     tasks = create_concurrent_tasks(supervisors)
     return await asyncio.gather(*tasks, return_exceptions=True)
 
+@pytest.mark.asyncio
+
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
     """Test handling multiple concurrent requests"""
@@ -82,6 +84,8 @@ def _verify_performance_timing(start_time, max_expected_time=2.0):
     execution_time = time.time() - start_time
     assert execution_time < max_expected_time, f"Execution took {execution_time}s, expected < {max_expected_time}s"
 
+@pytest.mark.asyncio
+
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
     start_time, run_id = _setup_performance_test(supervisor_agent)
@@ -101,6 +105,8 @@ def _verify_retry_result(result, call_counter):
     assert result["content"] == "Successful response after retry"
     assert call_counter["count"] == 2
 
+@pytest.mark.asyncio
+
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
     llm_manager, call_counter = setup_mock_llm_with_retry()
@@ -111,6 +117,8 @@ async def _execute_llm_tool_flow(dispatcher, llm_response):
     """Execute LLM tool flow"""
     for tool_call in llm_response["tool_calls"]:
         await dispatcher.dispatch_tool(tool_call["name"], tool_call["parameters"])
+
+@pytest.mark.asyncio
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
@@ -136,6 +144,8 @@ async def _run_end_to_end_flow(supervisor):
     state = await execute_optimization_flow(supervisor)
     verify_optimization_flow(state, supervisor)
     return state
+
+@pytest.mark.asyncio
 
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""

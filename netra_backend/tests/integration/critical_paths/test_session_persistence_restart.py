@@ -30,14 +30,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # JWT service replaced with auth_integration
-from auth_integration import create_access_token, validate_token_jwt
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.database.models import User, Session
 from netra_backend.app.logging_config import central_logger

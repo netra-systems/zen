@@ -28,7 +28,7 @@ from unittest.mock import patch
 
 import httpx
 import pytest
-from testcontainers.generic import GenericContainer
+from testcontainers.generic.server import ServerContainer as GenericContainer
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 

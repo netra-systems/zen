@@ -29,6 +29,7 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 
 class TestSupplyResearcherIntegration:
     """Integration tests for supply research system"""
+    @pytest.mark.asyncio
     async def test_agent_database_integration(self):
         """Test agent integration with database models"""
         mock_db = Mock()
@@ -132,6 +133,7 @@ class TestSupplyResearcherIntegration:
         print(f"E2E Test Success: Admin request processed, GPT-5 pricing would be added to supply")
         print(f"Research confidence: {result.get('confidence_score', 0):.2f}")
         print(f"Citations: {len(result.get('citations', []))} sources")
+    @pytest.mark.asyncio
     async def test_e2e_admin_chat_supply_update(self):
         """End-to-end test: Admin requests supply update via chat"""
         mock_db, mock_user, mock_ws_manager = self._setup_test_infrastructure()
@@ -148,6 +150,7 @@ class TestSupplyResearcherIntegration:
             self._verify_database_operations(mock_db)
             self._verify_websocket_updates(mock_ws_manager)
             self._verify_supply_updates(result)
+    @pytest.mark.asyncio
     async def test_full_research_workflow(self):
         """Test complete research workflow from request to database update"""
         # This would be a full integration test with real components

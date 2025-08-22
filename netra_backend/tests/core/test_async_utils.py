@@ -11,26 +11,26 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from core.test_async_batch_processor import TestAsyncBatchProcessor
-from core.test_async_connection_pool import TestAsyncConnectionPool
-from core.test_async_globals_threadpool import (
+from netra_backend.tests.core.test_async_batch_processor import TestAsyncBatchProcessor
+from netra_backend.tests.core.test_async_connection_pool import TestAsyncConnectionPool
+from netra_backend.tests.core.test_async_globals_threadpool import (
     TestGlobalInstances,
     TestRunInThreadpool,
     TestShutdownAsyncUtils,
 )
-from core.test_async_integration_scenarios import (
+from netra_backend.tests.core.test_async_integration_scenarios import (
     TestIntegrationScenarios,
 )
-from core.test_async_lock_circuit_breaker import (
+from netra_backend.tests.core.test_async_lock_circuit_breaker import (
     TestAsyncCircuitBreaker,
     TestAsyncLock,
 )
-from core.test_async_rate_limiter import TestAsyncRateLimiter
-from core.test_async_resource_manager import (
+from netra_backend.tests.core.test_async_rate_limiter import TestAsyncRateLimiter
+from netra_backend.tests.core.test_async_resource_manager import (
     TestAsyncResourceManager,
 )
-from core.test_async_task_pool import TestAsyncTaskPool
-from core.test_async_timeout_retry import (
+from netra_backend.tests.core.test_async_task_pool import TestAsyncTaskPool
+from netra_backend.tests.core.test_async_timeout_retry import (
     TestAsyncTimeout,
     TestWithRetry,
 )

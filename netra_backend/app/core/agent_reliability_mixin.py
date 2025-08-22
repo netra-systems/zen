@@ -59,6 +59,16 @@ class AgentReliabilityMixin:
         """Default recovery strategy that does nothing but doesn't raise errors."""
         return None
     
+    def _record_successful_operation(self, operation_name: str, execution_time: float):
+        """Record a successful operation for monitoring."""
+        self.health_monitor.record_successful_operation(operation_name, execution_time)
+    
+    async def _attempt_operation_recovery(self, operation_name: str, error: Exception, context: dict):
+        """Attempt recovery for a failed operation."""
+        return await self.recovery_manager.attempt_operation_recovery(
+            operation_name, error, context, self.error_history
+        )
+    
     def _get_circuit_breaker_config(self) -> CircuitBreakerConfig:
         """Get circuit breaker configuration for this agent."""
         return CircuitBreakerConfig(
@@ -159,6 +169,8 @@ class AgentReliabilityMixin:
     ) -> None:
         """Register a recovery strategy for a specific operation."""
         self.recovery_manager.register_recovery_strategy(operation_name, recovery_func)
+        # Also update the local recovery_strategies dict for test compatibility
+        self.recovery_strategies[operation_name] = recovery_func
 
     def get_comprehensive_health_status(self) -> AgentHealthStatus:
         """Get comprehensive health status of the agent."""
@@ -188,12 +200,18 @@ class AgentReliabilityMixin:
         return self.health_monitor.should_perform_health_check()
 
     # Convenience properties for backward compatibility
-    @property
+    @property  
     def error_history(self):
         """Get error history from error handler."""
-        return self.error_handler.error_history
+        return self.error_handler.error_history if hasattr(self, 'error_handler') else []
+        
+    @error_history.setter
+    def error_history(self, value):
+        """Set error history on the error handler."""
+        if hasattr(self, 'error_handler'):
+            self.error_handler.error_history = value
 
     @property
     def operation_times(self):
         """Get operation times from health monitor."""
-        return self.health_monitor.operation_times
+        return self.health_monitor.operation_times if hasattr(self, 'health_monitor') else []

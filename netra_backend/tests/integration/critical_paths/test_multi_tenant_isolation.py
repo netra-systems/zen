@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # Permissions service replaced with auth_integration
-from auth_integration import require_permission
+from netra_backend.app.auth_integration.auth import require_permission
 
 from netra_backend.app.services.database.tenant_service import TenantService
 

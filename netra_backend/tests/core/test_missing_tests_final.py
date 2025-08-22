@@ -13,7 +13,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from netra_backend.tests.core_test_helpers import create_mock_config
+from netra_backend.tests.helpers.core_test_helpers import create_mock_config
 
 class TestConfigValidator:
     """Test configuration validation with ≤8 line functions."""

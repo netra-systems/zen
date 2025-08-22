@@ -13,7 +13,7 @@ import asyncio
 import pytest
 
 from netra_backend.app.core.async_batch_processor import AsyncBatchProcessor
-from helpers.async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     assert_batch_results,
     assert_progress_tracking,
     create_dummy_processor,

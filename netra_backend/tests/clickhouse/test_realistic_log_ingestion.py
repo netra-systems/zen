@@ -14,16 +14,16 @@ import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 from netra_backend.tests.fixtures.realistic_test_fixtures import (
-    generate_realistic_logs_fixture,
-    mock_clickhouse_client,
+    generate_realistic_logs,
+    create_mock_clickhouse_client,
 )
 
 class TestRealisticLogIngestion:
     """Test realistic log ingestion patterns"""
     
-    async def test_streaming_log_ingestion(self, generate_realistic_logs_fixture, mock_clickhouse_client):
+    async def test_streaming_log_ingestion(self, generate_realistic_logs, mock_clickhouse_client):
         """Test streaming ingestion of logs"""
-        logs = generate_realistic_logs_fixture(1000)
+        logs = generate_realistic_logs(1000)
         
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_client:
             mock_client.return_value.__aenter__.return_value = mock_clickhouse_client

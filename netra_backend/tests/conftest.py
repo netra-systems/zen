@@ -1,6 +1,16 @@
 """
 Backend-specific test configuration.
 Depends on root /tests/conftest.py for common fixtures and environment setup.
+
+# Setup Python path for imports
+import sys
+from pathlib import Path
+
+# Add project root to Python path for netra_backend imports
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 """
 
 import os
@@ -374,6 +384,9 @@ def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatch
         'dispatcher': tool_dispatcher, 'run_id': str(uuid.uuid4()), 'user_id': 'test-user-e2e'
 
     }
+
+# Import database repository fixtures to make them available
+pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 
 # =============================================================================
 # AGENT TESTING FIXTURES

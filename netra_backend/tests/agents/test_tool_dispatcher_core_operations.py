@@ -24,16 +24,19 @@ class TestToolDispatcherCoreOperations:
         dispatcher = ToolDispatcher()
         self._verify_existing_tool_found(dispatcher)
         self._verify_nonexistent_tool_not_found(dispatcher)
+    @pytest.mark.asyncio
     async def test_dispatch_success(self):
         """Test successful tool dispatch."""
         tool, dispatcher = self._setup_successful_dispatch()
         result = await dispatcher.dispatch("test_tool", param1="value1", param2="value2")
         self._verify_successful_dispatch_result(result)
+    @pytest.mark.asyncio
     async def test_dispatch_tool_not_found(self):
         """Test dispatch with non-existent tool."""
         dispatcher = ToolDispatcher()
         result = await dispatcher.dispatch("nonexistent_tool", param="value")
         verify_tool_result_error(result, "Tool nonexistent_tool not found")
+    @pytest.mark.asyncio
     async def test_dispatch_tool_failure(self):
         """Test dispatch with failing tool."""
         failing_tool, dispatcher = self._setup_failing_dispatch()
@@ -46,11 +49,13 @@ class TestToolDispatcherCoreOperations:
         tool_input, error_message = self._setup_error_result_test()
         result = dispatcher._create_error_result(tool_input, error_message)
         self._verify_error_result(result, tool_input, error_message)
+    @pytest.mark.asyncio
     async def test_execute_tool_success(self):
         """Test _execute_tool method with success."""
         dispatcher, tool, tool_input, kwargs = self._setup_execute_tool_test()
         result = await dispatcher._execute_tool(tool_input, tool, kwargs)
         self._verify_execute_tool_success(result)
+    @pytest.mark.asyncio
     async def test_execute_tool_failure(self):
         """Test _execute_tool method with failure."""
         dispatcher, failing_tool, tool_input = self._setup_execute_tool_failure_test()

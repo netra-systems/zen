@@ -71,6 +71,7 @@ class TestDataSubAgentInitialization:
 
 class TestDataProcessing:
     """Test data processing capabilities"""
+    @pytest.mark.asyncio
     async def test_process_data_success(self):
         """Test successful data processing"""
         mock_llm_manager = Mock()
@@ -90,6 +91,8 @@ class TestDataProcessing:
         assert result != None
         assert result["processed"] == True
 
+    @pytest.mark.asyncio
+
     async def test_process_data_validation_failure(self):
         """Test data processing with validation failure"""
         mock_llm_manager = Mock()
@@ -105,6 +108,8 @@ class TestDataProcessing:
         agent.execute = AsyncMock(side_effect=Exception("Invalid data"))
         with pytest.raises(Exception):
             await agent.execute(invalid_data)
+
+    @pytest.mark.asyncio
 
     async def test_batch_processing(self):
         """Test batch data processing"""

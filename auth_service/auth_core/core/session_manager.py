@@ -7,7 +7,7 @@ import json
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 import redis
@@ -69,8 +69,8 @@ class SessionManager:
             session_id = str(uuid.uuid4())
         session_data = {
             "user_id": user_id,
-            "created_at": datetime.utcnow().isoformat(),
-            "last_activity": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "last_activity": datetime.now(timezone.utc).isoformat(),
             **user_data
         }
         
@@ -131,7 +131,7 @@ class SessionManager:
             return False
             
         session.update(updates)
-        session["last_activity"] = datetime.utcnow().isoformat()
+        session["last_activity"] = datetime.now(timezone.utc).isoformat()
         
         return self._store_session(session_id, session)
     
@@ -172,7 +172,7 @@ class SessionManager:
         last_activity = datetime.fromisoformat(session["last_activity"])
         expiry = last_activity + timedelta(hours=self.session_ttl)
         
-        if datetime.utcnow() > expiry:
+        if datetime.now(timezone.utc) > expiry:
             self.delete_session(session_id)
             return False
             
@@ -318,7 +318,7 @@ class SessionManager:
         try:
             self._memory_sessions[session_id] = {
                 **session_data,
-                "_expires_at": datetime.utcnow() + timedelta(hours=self.session_ttl)
+                "_expires_at": datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
             }
             logger.debug(f"Session {session_id} stored in memory fallback")
             return True
@@ -334,13 +334,13 @@ class SessionManager:
                 return None
             
             # Check expiration
-            if datetime.utcnow() > session.get("_expires_at", datetime.utcnow()):
+            if datetime.now(timezone.utc) > session.get("_expires_at", datetime.now(timezone.utc)):
                 del self._memory_sessions[session_id]
                 return None
             
             # Update last activity
-            session["last_activity"] = datetime.utcnow().isoformat()
-            session["_expires_at"] = datetime.utcnow() + timedelta(hours=self.session_ttl)
+            session["last_activity"] = datetime.now(timezone.utc).isoformat()
+            session["_expires_at"] = datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
             
             # Return session without internal fields
             return {k: v for k, v in session.items() if not k.startswith("_")}

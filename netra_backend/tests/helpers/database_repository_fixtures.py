@@ -94,13 +94,19 @@ def unit_of_work(mock_session, mock_models):
         setup_thread_mock_behavior,
     )
     
-    with patch('app.services.database.unit_of_work.async_session_factory') as mock_factory:
-        mock_factory.return_value = mock_session
+    # Create a proper async context manager for the session factory
+    mock_context = AsyncMock()
+    mock_context.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_context.__aexit__ = AsyncMock(return_value=None)
+    
+    with patch('netra_backend.app.services.database.unit_of_work.async_session_factory') as mock_factory, \
+         patch('netra_backend.app.services.database.unit_of_work.validate_session', return_value=True):
+        mock_factory.return_value = mock_context
         
-        with patch('app.services.database.unit_of_work.ThreadRepository') as MockThreadRepo, \
-             patch('app.services.database.unit_of_work.MessageRepository') as MockMessageRepo, \
-             patch('app.services.database.unit_of_work.RunRepository') as MockRunRepo, \
-             patch('app.services.database.unit_of_work.ReferenceRepository') as MockReferenceRepo:
+        with patch('netra_backend.app.services.database.unit_of_work.ThreadRepository') as MockThreadRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.MessageRepository') as MockMessageRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.RunRepository') as MockRunRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.ReferenceRepository') as MockReferenceRepo:
             
             # Create mock repositories
             mock_thread_repo = AsyncMock()

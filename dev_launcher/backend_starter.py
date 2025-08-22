@@ -212,7 +212,7 @@ class BackendStarter:
     def _verify_backend_health(self, port: int) -> bool:
         """Verify backend is responding on the expected port."""
         from dev_launcher.utils import wait_for_service_with_details
-        backend_url = f"http://localhost:{port}/health"
+        backend_url = f"http://localhost:{port}/health/"
         success, details = wait_for_service_with_details(backend_url, timeout=30)
         if not success:
             logger.debug(f"Backend health check failed on port {port}: {details}")

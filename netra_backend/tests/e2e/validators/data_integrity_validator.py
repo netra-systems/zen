@@ -15,7 +15,7 @@ from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
-from netra_backend.tests.e2e.e2e.state_validation_utils import StateIntegrityChecker
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
 
 class TypeSafetyResult(BaseModel):
     """Result of type safety verification."""

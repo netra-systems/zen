@@ -51,6 +51,8 @@ class TestErrorHandling(SharedTestErrorHandling):
         
         assert "Database unavailable" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
         mock_llm_manager = Mock()
@@ -71,6 +73,8 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert result["success"] == True
         assert mock_process.call_count == 3
 
+    @pytest.mark.asyncio
+
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
         mock_llm_manager = Mock()
@@ -86,6 +90,8 @@ class TestErrorHandling(SharedTestErrorHandling):
                 
         assert "Persistent error" in str(exc_info.value)
         assert mock_process.call_count == 2
+
+    @pytest.mark.asyncio
 
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
@@ -116,6 +122,7 @@ class TestErrorHandling(SharedTestErrorHandling):
 
 class TestCaching:
     """Test caching functionality"""
+    @pytest.mark.asyncio
     async def test_cache_hit(self):
         """Test cache hit for repeated data"""
         mock_llm_manager = Mock()
@@ -133,6 +140,8 @@ class TestCaching:
             
         assert result1 == result2
         mock_process.assert_not_called()
+
+    @pytest.mark.asyncio
 
     async def test_cache_expiration(self):
         """Test cache expiration with real TTL"""

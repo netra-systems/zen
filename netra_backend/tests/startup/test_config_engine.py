@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from dev_launcher.config_validator import (
+# from scripts.dev_launcher_config_validator import  # Should be mocked in tests (
     ConfigDecisionEngine,
     ConfigStatus,
     ConfigValidationResult,
@@ -26,7 +26,7 @@ from dev_launcher.config_validator import (
     _handle_fallback_action,
     validate_service_config,
 )
-from dev_launcher.service_config import ServicesConfiguration
+# from scripts.dev_launcher_service_config import  # Should be mocked in tests ServicesConfiguration
 
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:

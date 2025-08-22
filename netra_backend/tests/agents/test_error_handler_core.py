@@ -63,6 +63,8 @@ class TestErrorHandler:
         result = await error_handler.handle_error(error, sample_context)
         return result, error
 
+    @pytest.mark.asyncio
+
     async def test_handle_error_with_agent_error(self, error_handler, sample_context):
         """Test handle_error with AgentError."""
         result, error = await self._test_handle_error_with_agent_error_helper(error_handler, sample_context)
@@ -74,6 +76,8 @@ class TestErrorHandler:
         original_error = ValueError("Generic error")
         result = await error_handler.handle_error(original_error, sample_context)
         return result, original_error
+
+    @pytest.mark.asyncio
 
     async def test_handle_error_with_generic_exception(self, error_handler, sample_context):
         """Test handle_error with generic exception."""
@@ -88,6 +92,8 @@ class TestErrorHandler:
             raise NetworkError("Network failure")
         return operation
 
+    @pytest.mark.asyncio
+
     async def test_handle_error_with_retry_context(self, error_handler, sample_context):
         """Test handle_error with retry context."""
         error = NetworkError("Temporary failure")
@@ -101,6 +107,8 @@ class TestErrorHandler:
         """Create WebSocket error for handling test"""
         from netra_backend.app.core.exceptions_websocket import WebSocketError
         return WebSocketError("WebSocket connection lost")
+
+    @pytest.mark.asyncio
 
     async def test_handle_websocket_error(self, error_handler, sample_context):
         """Test handling WebSocket-specific errors."""

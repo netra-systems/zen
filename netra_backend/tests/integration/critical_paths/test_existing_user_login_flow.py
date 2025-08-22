@@ -36,7 +36,7 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 from netra_backend.app.config import get_config
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.main import app
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.session_service import SessionService
 
 class TestExistingUserLoginFlow:

@@ -57,6 +57,8 @@ from netra_backend.tests.agents.helpers.performance_test_helpers import (
     verify_performance_requirements,
 )
 
+@pytest.mark.asyncio
+
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
     start_time = time.time()
@@ -73,6 +75,8 @@ async def test_performance_metrics(supervisor_agent):
     
     # Should complete quickly with mocked components
     assert execution_time < 2.0, f"Execution took {execution_time}s, expected < 2s"
+
+@pytest.mark.asyncio
 
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
@@ -92,6 +96,8 @@ async def test_error_recovery(supervisor_agent):
     except Exception as e:
         assert "Pipeline error" in str(e)
 
+@pytest.mark.asyncio
+
 async def test_concurrent_request_handling_optimized():
     """Test handling multiple concurrent requests with optimized setup"""
     # Create optimized mock infrastructure
@@ -106,6 +112,8 @@ async def test_concurrent_request_handling_optimized():
     assert len(results) == 3
     _verify_concurrent_results(results)
 
+@pytest.mark.asyncio
+
 async def test_end_to_end_optimization_flow_optimized():
     """Test complete end-to-end optimization flow with optimized structure"""
     # Create infrastructure with optimized setup
@@ -117,6 +125,8 @@ async def test_end_to_end_optimization_flow_optimized():
     
     # Verify complete flow
     _verify_e2e_completion(state, supervisor)
+
+@pytest.mark.asyncio
 
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
@@ -137,6 +147,8 @@ async def test_complex_multi_step_flow():
     # Verify flow completion
     _verify_optimization_flow(state, supervisor)
 
+@pytest.mark.asyncio
+
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -150,6 +162,8 @@ async def test_flow_interruption_and_recovery():
     recovered_state = await mock_persistence.load_agent_state("thread123", "user123")
     _verify_recovery_state(recovered_state)
 
+@pytest.mark.asyncio
+
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""
     performance_metrics = []
@@ -160,6 +174,8 @@ async def test_flow_performance_benchmarks():
     
     # Verify performance is reasonable
     _verify_performance_metrics(performance_metrics)
+
+@pytest.mark.asyncio
 
 async def test_high_load_scenarios():
     """Test system behavior under high load"""

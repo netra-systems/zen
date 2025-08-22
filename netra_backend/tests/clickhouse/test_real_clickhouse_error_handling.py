@@ -14,7 +14,7 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.config import get_config
 
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
-from netra_backend.tests.clickhouse_test_fixtures import get_clickhouse_config
+from netra_backend.tests.clickhouse.clickhouse_test_fixtures import get_clickhouse_config
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""

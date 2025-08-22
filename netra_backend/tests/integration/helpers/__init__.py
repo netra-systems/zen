@@ -5,7 +5,7 @@ BVJ: Supporting infrastructure for critical integration tests
 
 # Import helpers that exist
 try:
-from netra_backend.tests.integration.helpers.critical_integration_helpers import (
+    from netra_backend.tests.integration.helpers.critical_integration_helpers import (
         AgentTestHelpers,
         AuthenticationTestHelpers,
         DatabaseTestHelpers,

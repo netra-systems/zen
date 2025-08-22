@@ -66,6 +66,7 @@ class TestSupplyResearchScheduler:
         # Set next run to future
         schedule.next_run = datetime.now(UTC) + timedelta(hours=1)
         assert not schedule.should_run()
+    @pytest.mark.asyncio
     async def test_scheduler_execute_research(self):
         """Test executing scheduled research task"""
         background_manager = BackgroundTaskManager()
@@ -141,6 +142,7 @@ class TestSupplyResearchScheduler:
         assert all("name" in s for s in status)
         assert all("frequency" in s for s in status)
         assert all("next_run" in s for s in status)
+    @pytest.mark.asyncio
     async def test_scheduler_agent_integration(self):
         """Test scheduler integration with agent"""
         background_manager = BackgroundTaskManager()

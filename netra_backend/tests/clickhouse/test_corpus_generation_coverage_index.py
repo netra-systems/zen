@@ -11,11 +11,11 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.test_corpus_content_ops import (
+from netra_backend.tests.clickhouse.test_corpus_content_ops import (
     TestBatchProcessing,
     TestContentGeneration,
 )
-from netra_backend.tests.test_corpus_lifecycle import (
+from netra_backend.tests.clickhouse.test_corpus_lifecycle import (
     TestCorpusLifecycle,
     TestWorkloadTypesCoverage,
 )

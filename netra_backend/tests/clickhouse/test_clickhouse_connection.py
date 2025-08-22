@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from netra_backend.app.core.unified_logging import central_logger as logger
 
-from clickhouse.test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_system_metrics_permission,
     real_clickhouse_client,
 )

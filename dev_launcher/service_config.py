@@ -93,7 +93,8 @@ class ServicesConfiguration:
             "http_port": int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
-            "database": os.environ.get("CLICKHOUSE_DB", "netra_dev")
+            "database": os.environ.get("CLICKHOUSE_DB", "netra_dev"),
+            "secure": False
         },
         shared_config={
             "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "clickhouse_host_url_placeholder"),

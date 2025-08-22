@@ -20,7 +20,7 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.services.auth_failover_service import AuthFailoverService
 
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.health_monitor import HealthMonitor
 from netra_backend.app.services.redis_service import RedisService
 

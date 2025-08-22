@@ -38,7 +38,7 @@ import jwt
 import pytest
 
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.middleware.audit_middleware import AuditMiddleware
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.middleware.cors_middleware import CORSMiddleware

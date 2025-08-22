@@ -20,9 +20,17 @@ export const clearStorages = (): void => {
 };
 
 export const resetStores = (): void => {
-  // Store resetting is handled by individual test mocks
-  // This function exists for compatibility but does nothing
-  console.debug('resetStores called - handled by test mocks');
+  // Import stores dynamically to avoid circular dependency issues
+  try {
+    const { useChatStore } = require('@/store/chatStore');
+    const { useThreadStore } = require('@/store/threadStore');
+    
+    // Reset both stores to their initial state
+    useChatStore.getState().reset();
+    useThreadStore.getState().reset();
+  } catch (error) {
+    console.warn('Could not reset stores:', error);
+  }
 };
 
 export const setupGlobalFetch = (): void => {

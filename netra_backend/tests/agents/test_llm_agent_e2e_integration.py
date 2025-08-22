@@ -40,6 +40,8 @@ from netra_backend.tests.agents.test_fixtures import (
     supervisor_agent,
 )
 
+@pytest.mark.asyncio
+
 async def test_agent_state_transitions(supervisor_agent):
     """Test agent state transitions through pipeline"""
     state = DeepAgentState(
@@ -59,6 +61,8 @@ async def test_agent_state_transitions(supervisor_agent):
     
     # Verify state has expected structure
     _verify_state_transitions(state)
+
+@pytest.mark.asyncio
 
 async def test_websocket_message_streaming(supervisor_agent, mock_websocket_manager):
     """Test WebSocket message streaming during execution"""
@@ -81,6 +85,8 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     # Should have sent at least completion message
     assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
 
+@pytest.mark.asyncio
+
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
     # Test successful tool execution
@@ -94,6 +100,8 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     with pytest.raises(Exception) as exc_info:
         await mock_tool_dispatcher.dispatch_tool("failing_tool", {})
     assert "Tool error" in str(exc_info.value)
+
+@pytest.mark.asyncio
 
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
@@ -113,6 +121,8 @@ async def test_state_persistence(supervisor_agent):
     assert result is not None
     assert isinstance(result, DeepAgentState)
 
+@pytest.mark.asyncio
+
 async def test_multi_agent_coordination(supervisor_agent):
     """Test coordination between multiple sub-agents"""
     # Verify all expected agents are registered
@@ -123,6 +133,8 @@ async def test_multi_agent_coordination(supervisor_agent):
     for expected in expected_agents:
         assert any(expected in name.lower() for name in agent_names), \
             f"Missing expected agent: {expected}"
+
+@pytest.mark.asyncio
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
@@ -153,6 +165,8 @@ async def test_real_llm_interaction():
     assert result["content"] == "Successful response after retry"
     assert call_count == 2
 
+@pytest.mark.asyncio
+
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -179,6 +193,8 @@ async def test_tool_execution_with_llm():
     assert tool_results[0]["tool"] == "analyze_workload"
     assert tool_results[1]["tool"] == "optimize_batch_size"
 
+@pytest.mark.asyncio
+
 async def test_websocket_error_handling(mock_websocket_manager):
     """Test WebSocket error handling during message streaming"""
     # Setup WebSocket to fail
@@ -191,6 +207,8 @@ async def test_websocket_error_handling(mock_websocket_manager):
     except Exception as e:
         assert "WebSocket error" in str(e)
 
+@pytest.mark.asyncio
+
 async def test_state_recovery_scenarios():
     """Test various state recovery scenarios"""
     # Test successful recovery
@@ -202,6 +220,8 @@ async def test_state_recovery_scenarios():
     partial_state = _create_partial_recovery_state()
     assert partial_state.triage_result is not None
     assert partial_state.data_result is None
+
+@pytest.mark.asyncio
 
 async def test_integration_error_boundaries():
     """Test error boundaries in integration scenarios"""
