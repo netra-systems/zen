@@ -41,21 +41,27 @@ describe('Auth Logout Flow', () => {
     mockToken = createMockToken();
     resetAuthTestMocks(testEnv);
     
-    // Mock window.location.href properly for JSDOM
+    // Mock window.location without triggering JSDOM navigation
     originalLocation = window.location;
-    delete (window as any).location;
-    const mockLocation: any = {
-      href: '',
-      protocol: 'http:',
-      host: 'localhost',
-      hostname: 'localhost',
-      port: '3000',
-      pathname: '/',
-      search: '',
-      hash: '',
-      origin: 'http://localhost:3000'
-    };
-    window.location = mockLocation;
+    mockLocationAssign = jest.fn();
+    
+    // Create a simple mock that captures href assignments without triggering JSDOM navigation
+    Object.defineProperty(window, 'location', {
+      value: {
+        href: '',
+        protocol: 'http:',
+        host: 'localhost:3000',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/',
+        search: '',
+        hash: '',
+        origin: 'http://localhost:3000',
+        assign: mockLocationAssign
+      },
+      writable: true,
+      configurable: true
+    });
     
     // Reset mocks
     Object.values(mockAuthServiceClient).forEach(mock => {
@@ -71,7 +77,12 @@ describe('Auth Logout Flow', () => {
   });
 
   afterEach(() => {
-    window.location = originalLocation;
+    // Restore original location
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+      writable: true,
+      configurable: true
+    });
   });
 
   afterAll(() => {
