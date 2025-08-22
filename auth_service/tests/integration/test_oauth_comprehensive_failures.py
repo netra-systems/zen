@@ -73,7 +73,12 @@ class TestOAuthComprehensiveFailures:
     @pytest.fixture
     def real_db_session(self, postgres_container):
         """Real database session using containerized PostgreSQL"""
+        from auth_service.auth_core.database.models import Base
         engine = create_engine(postgres_container.get_connection_url())
+        
+        # Create all auth service tables
+        Base.metadata.create_all(engine)
+        
         with Session(engine) as session:
             yield session
 

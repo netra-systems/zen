@@ -158,8 +158,8 @@ describe('ThreadList Component Tests', () => {
       renderThreadList({ threads: [mockThreadData.adminType] });
       
       const threadItem = screen.getByTestId('thread-item-thread-3');
-      // Admin threads should have Database icon for corpus type
-      const icon = within(threadItem).querySelector('svg');
+      // Admin threads should have Database icon for corpus type - check via DOM
+      const icon = threadItem.querySelector('svg');
       expect(icon).toBeInTheDocument();
     });
 

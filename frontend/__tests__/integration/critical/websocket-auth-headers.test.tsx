@@ -14,8 +14,6 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
-// Import the actual WebSocketProvider implementation (not the mock)
-import { WebSocketProvider, useWebSocketContext } from '../../../providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 import { webSocketService } from '@/services/webSocketService';
 
@@ -26,6 +24,14 @@ jest.mock('@/config', () => ({
     wsUrl: 'ws://localhost:8000/ws/secure'
   }
 }));
+
+// Unmock the WebSocketProvider and related services to test the actual implementation
+jest.unmock('@/providers/WebSocketProvider');
+jest.unmock('@/services/webSocketService');
+jest.unmock('@/hooks/useWebSocket');
+
+// Import the actual WebSocketProvider implementation after unmocking
+import { WebSocketProvider, useWebSocketContext } from '../../../providers/WebSocketProvider';
 
 // Test component that uses WebSocket context
 const TestWebSocketComponent = () => {

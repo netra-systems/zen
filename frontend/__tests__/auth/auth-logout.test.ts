@@ -32,8 +32,7 @@ describe('Auth Logout Flow', () => {
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
-  let originalLocation: Location;
-  let mockLocationAssign: jest.Mock;
+  let hrefSpy: jest.SpyInstance;
 
   beforeEach(() => {
     testEnv = setupAuthTestEnvironment();
