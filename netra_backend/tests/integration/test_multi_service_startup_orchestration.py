@@ -28,7 +28,7 @@ from unittest.mock import AsyncMock, patch
 import aiohttp
 import pytest
 import yaml
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

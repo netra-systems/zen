@@ -120,10 +120,12 @@ class TestOAuthComprehensiveFailures:
             with patch("httpx.AsyncClient.get") as mock_get:
                 mock_get.return_value.json.return_value = mock_google_user
                 
+                # Use unique code to avoid reuse detection across test runs
+                unique_code = f"test_auth_code_{secrets.token_urlsafe(8)}"
                 response = client.post(
                     "/auth/callback/google",
                     json={
-                        "code": "valid_auth_code",
+                        "code": unique_code,
                         "state": state,
                     }
                 )

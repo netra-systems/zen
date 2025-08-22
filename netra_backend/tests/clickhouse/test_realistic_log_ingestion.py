@@ -13,7 +13,7 @@ from unittest.mock import patch
 import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
-from netra_backend.tests.realistic_test_fixtures import (
+from netra_backend.tests.fixtures.realistic_test_fixtures import (
     generate_realistic_logs_fixture,
     mock_clickhouse_client,
 )

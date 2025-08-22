@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import asyncpg
 import clickhouse_connect
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 

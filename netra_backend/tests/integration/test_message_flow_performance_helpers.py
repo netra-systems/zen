@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.tests.test_unified_message_flow import MessageFlowTracker
 

@@ -26,7 +26,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.tests.integration.helpers.user_flow_helpers import (
     MonitoringTestHelpers,

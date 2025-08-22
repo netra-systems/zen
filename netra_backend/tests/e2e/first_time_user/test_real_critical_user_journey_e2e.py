@@ -25,6 +25,7 @@ import pytest
 from netra_backend.tests.e2e.first_time_user.real_critical_helpers import (
     AIProviderHelpers,
     ConcurrentTestHelpers,
+    CriticalUserJourneyHelpers,
     OAuthFlowHelpers,
     OptimizationHelpers,
     WebSocketHelpers,
@@ -237,7 +238,7 @@ class TestRealCriticalUserJourney:
 
     async def _simulate_real_error_scenarios(self):
         """Simulate real error scenarios"""
-        from netra_backend.real_critical_helpers import CriticalUserJourneyHelpers
+        # CriticalUserJourneyHelpers already imported at top of file
         scenarios = CriticalUserJourneyHelpers.setup_error_simulation_scenarios()
         return [{"scenario": name, "simulated": True} for name in scenarios.keys()]
 

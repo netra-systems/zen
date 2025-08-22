@@ -24,7 +24,7 @@ from netra_backend.app.agents.base.execution_context import (
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.supervisor_extensions import (
+from netra_backend.tests.helpers.supervisor_extensions import (
     install_supervisor_extensions,
 )
 from netra_backend.tests.supervisor_test_helpers import (

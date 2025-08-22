@@ -17,7 +17,7 @@ import { ChatComponent, ThreadComponent } from './helpers/test-components';
 import { setupTestEnvironment, clearStorages, resetStores, cleanupWebSocket } from './helpers/test-setup';
 import { createMockMessage, createMockThread } from './helpers/test-builders';
 import { assertTextContent, assertMessageCount, assertThreadCount } from './helpers/test-assertions';
-import { waitForConnection, sendMessage, sendStreamChunk, sendAgentStart, sendAgentMessage, sendAgentComplete } from './helpers/websocket-helpers';
+import { waitForConnection, sendMessage, sendStreamChunk, sendAgentStart, sendAgentMessage, sendAgentComplete, createActWrapper } from './helpers/websocket-helpers';
 
 describe('Data Flow Integration Tests', () => {
   let server: WS;
@@ -39,8 +39,8 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onopen = () => setConnected(true);
-          ws.onclose = () => setConnected(false);
+          ws.onopen = createActWrapper(() => setConnected(true));
+          ws.onclose = createActWrapper(() => setConnected(false));
           return () => ws.close();
         }, []);
         
@@ -63,10 +63,10 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             setMessage(data.content);
-          };
+          });
           return () => ws.close();
         }, []);
         
@@ -102,12 +102,12 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'stream_chunk') {
               setStreamingContent(prev => prev + data.chunk);
             }
-          };
+          });
           return () => ws.close();
         }, []);
         
@@ -183,7 +183,7 @@ describe('Data Flow Integration Tests', () => {
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
           
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             
             if (data.type === 'agent_started') {
@@ -193,7 +193,7 @@ describe('Data Flow Integration Tests', () => {
             } else if (data.type === 'agent_completed') {
               setAgentStatus('completed');
             }
-          };
+          });
           
           const startAgent = () => {
             ws.send(JSON.stringify({

@@ -33,7 +33,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from database.database_manager import get_database_session
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.models.thread import Thread

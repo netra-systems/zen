@@ -38,6 +38,11 @@ class DatabaseConfigManager:
         self._environment = self._get_environment()
         self._validation_rules = self._load_validation_rules()
         self._connection_templates = self._load_connection_templates()
+        # Add caching to prevent repeated configuration loading and logging
+        self._postgres_url_cache: Optional[str] = None
+        self._clickhouse_config_cache: Optional[Dict[str, str]] = None
+        self._redis_url_cache: Optional[str] = None
+        self._logged_urls = set()  # Track what we've already logged
     
     def _get_environment(self) -> str:
         """Get current environment for database configuration."""
@@ -102,23 +107,36 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for database URL loading.
         """
+        # Return cached URL if available
+        if self._postgres_url_cache is not None:
+            return self._postgres_url_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for database URL configuration
         url = os.environ.get("DATABASE_URL")
         if url:
             # Normalize the URL to add driver if missing
             url = self._normalize_postgres_url(url)
             
-            # Mask password but show full URL structure for debugging
-            parsed = urlparse(url)
-            # Handle Unix socket URLs (Cloud SQL proxy)
-            if "/cloudsql/" in url or not parsed.hostname:
-                masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
-            else:
-                masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
-            self._logger.info(f"Loading DATABASE_URL: {masked_url}")
+            # Only log once per URL to prevent spam
+            if url not in self._logged_urls:
+                # Mask password but show full URL structure for debugging
+                parsed = urlparse(url)
+                # Handle Unix socket URLs (Cloud SQL proxy)
+                if "/cloudsql/" in url or not parsed.hostname:
+                    masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
+                else:
+                    masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
+                self._logger.info(f"Loading DATABASE_URL: {masked_url}")
+                self._logged_urls.add(url)
         else:
             url = self._get_default_postgres_url()
-            self._logger.debug(f"Using default database URL for {self._environment}")
+            # Only log default URL once
+            if "default" not in self._logged_urls:
+                self._logger.debug(f"Using default database URL for {self._environment}")
+                self._logged_urls.add("default")
+                
+        # Cache the URL
+        self._postgres_url_cache = url
         return url
     
     def _normalize_postgres_url(self, url: str) -> str:
@@ -192,16 +210,23 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for ClickHouse configuration loading.
         """
+        # Return cached configuration if available
+        if self._clickhouse_config_cache is not None:
+            return self._clickhouse_config_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
         # Ensure HTTP port 8123 is used for development
         default_port = "8123"  # Always use HTTP port for dev launcher
-        return {
+        config = {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
             "database": os.environ.get("CLICKHOUSE_DB", "default")
         }
+        # Cache the configuration
+        self._clickhouse_config_cache = config
+        return config
     
     def _apply_clickhouse_config(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply ClickHouse configuration to config objects."""
@@ -256,8 +281,15 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for Redis URL loading.
         """
+        # Return cached URL if available
+        if self._redis_url_cache is not None:
+            return self._redis_url_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for Redis URL
-        return os.environ.get("REDIS_URL")
+        url = os.environ.get("REDIS_URL")
+        # Cache the URL
+        self._redis_url_cache = url
+        return url
     
     def _update_redis_config_object(self, config: AppConfig, redis_url: str) -> None:
         """Update Redis configuration object from URL."""

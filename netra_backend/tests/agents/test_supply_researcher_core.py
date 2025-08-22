@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
-from netra_backend.tests.supply_researcher_fixtures import (
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     assert_api_response_structure,
     assert_websocket_updates_sent,

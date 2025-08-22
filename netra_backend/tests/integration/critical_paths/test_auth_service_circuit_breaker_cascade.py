@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import docker
 import pytest
-from clients.auth_client_cache import AuthCircuitBreakerManager
+from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManager
 
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState

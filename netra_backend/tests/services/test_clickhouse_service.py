@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pytest_asyncio
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse import get_clickhouse_client

@@ -8,6 +8,12 @@ def _setup_basic_llm_mocks(mock_manager):
     mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
     mock_manager.generate = AsyncMock(return_value="Mock generated content")
     mock_manager.stream_response = AsyncMock()
+    mock_manager.generate_response = AsyncMock(return_value={
+        "content": "This is a sample AI response for testing",
+        "model": "gpt-3.5-turbo",
+        "tokens_used": 45,
+        "cost": 0.0012
+    })
 
 def _setup_performance_llm_mocks(mock_manager):
     """Setup performance-specific LLM mock methods."""

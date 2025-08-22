@@ -16,7 +16,7 @@ import pytest
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.db.models_postgres import SupplyUpdateLog
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-from netra_backend.tests.supply_researcher_fixtures import (
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     anomaly_test_data,
     mock_db,

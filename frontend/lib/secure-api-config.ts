@@ -146,9 +146,6 @@ export const API_BASE_URL = secureApiConfig.apiUrl;
 export const WS_BASE_URL = secureApiConfig.wsUrl;
 export const AUTH_BASE_URL = secureApiConfig.authUrl;
 
-// Export async config getter for components that can handle promises
-export { getSecureApiConfigAsync };
-
 // Export service discovery for direct access
 export { serviceDiscovery };
 

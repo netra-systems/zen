@@ -15,7 +15,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import (

@@ -33,7 +33,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 import pytest
-from clients.auth_client_core import AuthServiceClient
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

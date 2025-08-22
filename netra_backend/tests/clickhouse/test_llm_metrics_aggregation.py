@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
-from netra_backend.tests.realistic_test_fixtures import (
+from netra_backend.tests.fixtures.realistic_test_fixtures import (
     generate_llm_metrics,
     llm_metrics_batch,
 )

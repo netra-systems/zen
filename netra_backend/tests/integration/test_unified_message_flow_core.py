@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
 

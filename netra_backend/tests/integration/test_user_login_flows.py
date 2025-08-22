@@ -46,7 +46,7 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 
 # Import auth types
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 # Test infrastructure
 from netra_backend.app.core.config import get_settings

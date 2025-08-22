@@ -23,7 +23,7 @@ import uuid
 from typing import Dict, List
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.tests.integration.cache_invalidation_fixtures import (
     CACHE_TEST_CONFIG,

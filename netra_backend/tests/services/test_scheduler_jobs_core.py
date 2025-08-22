@@ -14,7 +14,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from background import BackgroundTaskManager
+from netra_backend.app.background import BackgroundTaskManager
 
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from netra_backend.app.core.exceptions_base import NetraException

@@ -31,7 +31,7 @@ import httpx
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
 from netra_backend.app.schemas import User
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (

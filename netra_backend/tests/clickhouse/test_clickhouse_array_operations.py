@@ -15,7 +15,7 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
 )
-from netra_backend.tests.realistic_test_fixtures import (
+from netra_backend.tests.fixtures.realistic_test_fixtures import (
     create_query_interceptor_with_mock,
     validate_array_query_syntax,
 )

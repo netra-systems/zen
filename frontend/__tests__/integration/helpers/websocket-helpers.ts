@@ -4,6 +4,32 @@
  */
 
 import WS from 'jest-websocket-mock';
+import { act } from '@testing-library/react';
+
+/**
+ * Creates a WebSocket event handler wrapper that properly wraps state updates in act()
+ * This prevents React act() warnings in tests when WebSocket event handlers update component state
+ * 
+ * @example
+ * // Instead of:
+ * ws.onopen = () => setConnected(true);
+ * 
+ * // Use:
+ * ws.onopen = createActWrapper(() => setConnected(true));
+ * 
+ * // For handlers with parameters:
+ * ws.onmessage = createActWrapper((event) => {
+ *   const data = JSON.parse(event.data);
+ *   setMessage(data.content);
+ * });
+ */
+export function createActWrapper<T extends (...args: any[]) => void>(callback: T): T {
+  return ((...args: any[]) => {
+    act(() => {
+      callback(...args);
+    });
+  }) as T;
+}
 
 export async function waitForConnection(server: WS): Promise<void> {
   await expect(server).toReceiveMessage(expect.any(Object));
@@ -22,7 +48,7 @@ export function sendMessage(server: WS, content: string, threadId: string = 'tes
   }));
 }
 
-export function sendStreamChunk(server: WS, chunk: string, messageId: string, threadId: string = 'test-thread'): void {
+export function sendStreamChunk(server: WS, chunk: string, messageId: string = `msg-${Date.now()}`, threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
     type: 'stream_chunk',
     data: {

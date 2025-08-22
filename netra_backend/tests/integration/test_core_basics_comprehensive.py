@@ -12,7 +12,7 @@ import os
 import sys
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
@@ -186,6 +186,8 @@ class MockJWTHandler:
     def __init__(self):
 
         self.secret = "test_secret"
+        self.current_token = None
+        self.current_user = None
     
     def create_token(self, user_id: str, expires_in: int = 3600) -> str:
 
@@ -195,13 +197,17 @@ class MockJWTHandler:
 
             "user_id": user_id,
 
-            "exp": datetime.utcnow() + timedelta(seconds=expires_in),
+            "exp": datetime.now(timezone.utc) + timedelta(seconds=expires_in),
 
-            "iat": datetime.utcnow()
+            "iat": datetime.now(timezone.utc)
 
         }
 
-        return jwt.encode(payload, self.secret, algorithm="HS256")
+        token = jwt.encode(payload, self.secret, algorithm="HS256")
+        # Store current context for get_current_user
+        self.current_token = token
+        self.current_user = user_id
+        return token
     
     def verify_token(self, token: str) -> Optional[Dict]:
 
@@ -222,6 +228,21 @@ class MockJWTHandler:
 
         except:
 
+            return None
+    
+    def get_current_user(self) -> Optional[str]:
+        """Get current user from active token context"""
+        if not self.current_token:
+            return None
+        
+        # Verify current token is still valid
+        payload = self.verify_token(self.current_token)
+        if payload:
+            return self.current_user
+        else:
+            # Token expired, clear context
+            self.current_token = None
+            self.current_user = None
             return None
 
 class MockOAuthHandler:
@@ -1382,15 +1403,37 @@ class TestAuthLoginCore:
 
         user_id = "user123"
         
-        token = jwt_handler.create_token(user_id, expires_in=1)
+        # Use longer expiry time to avoid timing issues
+        token = jwt_handler.create_token(user_id, expires_in=3)
 
-        await asyncio.sleep(0.9)
-
+        # Verify token is valid before expiry
+        await asyncio.sleep(0.5)
         assert jwt_handler.verify_token(token) is not None
         
-        await asyncio.sleep(0.2)  # Now expired
+        # Wait for token to expire
+        await asyncio.sleep(3)  # Now expired
 
         assert jwt_handler.verify_token(token) is None
+    
+    @pytest.mark.asyncio
+
+    async def test_jwt_token_expiry(self):
+
+        """Test JWT token expiry with get_current_user context"""
+
+        jwt_handler = MockJWTHandler()
+
+        # Create token with short expiry (2 seconds)
+        token = jwt_handler.create_token("test_user", expires_in=2)
+        
+        # Verify user is available before expiry
+        assert jwt_handler.get_current_user() == "test_user"
+        
+        # Wait for token to expire
+        await asyncio.sleep(2.1)
+        
+        # Verify user is no longer available after expiry
+        assert jwt_handler.get_current_user() is None
     
     @pytest.mark.asyncio
 

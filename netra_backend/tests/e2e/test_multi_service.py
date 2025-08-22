@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import httpx
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 from dev_launcher.health_monitor import HealthMonitor
 

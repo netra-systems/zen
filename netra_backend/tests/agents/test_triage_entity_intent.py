@@ -13,7 +13,7 @@ import pytest
 from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.tests.triage_test_helpers import (
+from netra_backend.tests.helpers.triage_test_helpers import (
     EntityExtractionHelpers,
     IntentHelpers,
     TriageMockHelpers,

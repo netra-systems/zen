@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import jwt
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import validate_websocket_token
 
 from netra_backend.tests.test_unified_message_flow import MessageFlowTracker

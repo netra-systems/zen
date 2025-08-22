@@ -169,12 +169,16 @@ async def onboarding_flow_manager():
 async def real_llm_manager():
     """Mock real LLM manager for testing with actual LLM interactions."""
     manager = AsyncMock()
-    manager.generate_response = AsyncMock(return_value={
+    
+    # Configure the generate_response method properly
+    manager.generate_response = AsyncMock()
+    manager.generate_response.return_value = {
         "content": "This is a sample AI response for testing",
         "model": "gpt-3.5-turbo",
         "tokens_used": 45,
         "cost": 0.0012
-    })
+    }
+    
     manager.analyze_optimization = AsyncMock(return_value={
         "optimization_suggestions": ["Use batch processing", "Implement caching"],
         "confidence": 0.85,

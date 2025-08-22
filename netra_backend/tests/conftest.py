@@ -308,7 +308,8 @@ def _create_mock_llm_manager():
     """Create properly configured async mock LLM manager."""
     from unittest.mock import AsyncMock, MagicMock
 
-    mock_manager = MagicMock()
+    # Use AsyncMock for async methods, regular Mock for sync methods
+    mock_manager = AsyncMock()
 
     _setup_basic_llm_mocks(mock_manager)
 

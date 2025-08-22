@@ -38,7 +38,7 @@ from typing import Any, Dict
 
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
-from clients.auth_client_core import AuthServiceClient
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession

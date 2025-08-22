@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_models import (

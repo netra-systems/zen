@@ -11,7 +11,7 @@ from decimal import Decimal
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from background import BackgroundTaskManager
+from netra_backend.app.background import BackgroundTaskManager
 
 from netra_backend.app.agents.state import DeepAgentState
 

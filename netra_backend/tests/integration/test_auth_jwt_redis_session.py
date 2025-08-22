@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 import redis.asyncio as redis
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
 from netra_backend.app.redis_manager import RedisManager

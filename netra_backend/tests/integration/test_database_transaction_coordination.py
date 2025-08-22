@@ -35,7 +35,7 @@ import docker
 import psycopg2
 import pytest
 from docker.errors import DockerException
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres

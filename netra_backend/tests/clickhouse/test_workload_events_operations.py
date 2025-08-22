@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.tests.clickhouse_test_fixtures import (

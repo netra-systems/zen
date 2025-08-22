@@ -11,18 +11,18 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.test_triage_agent_caching import (
+from netra_backend.tests.agents.test_triage_agent_caching import (
     TestCaching,
     TestExecuteMethod,
     TestRequestHashing,
 )
-from netra_backend.tests.test_triage_agent_core import (
+from netra_backend.tests.agents.test_triage_agent_core import (
     TestEntityExtraction,
     TestIntentDetermination,
     TestRequestValidation,
     TestTriageSubAgentInitialization,
 )
-from netra_backend.tests.test_triage_agent_models import TestCleanup, TestPydanticModels
+from netra_backend.tests.agents.test_triage_agent_models import TestCleanup, TestPydanticModels
 from netra_backend.tests.test_triage_agent_validation import (
     TestEntryConditions,
     TestFallbackCategorization,

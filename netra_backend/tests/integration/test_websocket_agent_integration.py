@@ -17,7 +17,7 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

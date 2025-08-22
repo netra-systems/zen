@@ -11,7 +11,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from background import BackgroundTaskManager
+from netra_backend.app.background import BackgroundTaskManager
 
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,

@@ -35,7 +35,7 @@ import secrets
 import string
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -93,7 +93,7 @@ class AuthEdgeCasesTestSuite:
             # RS256 to HS256 attack
             payload = {
                 "sub": "attacker@evil.com",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             }
             # Sign with public key as HMAC secret
             return jwt.encode(payload, "public_key_here", algorithm="HS256")
@@ -102,7 +102,7 @@ class AuthEdgeCasesTestSuite:
             # Expired token
             payload = {
                 "sub": "user@example.com",
-                "exp": datetime.utcnow() - timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1)
             }
             return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
             
@@ -110,8 +110,8 @@ class AuthEdgeCasesTestSuite:
             # Token from the future
             payload = {
                 "sub": "user@example.com",
-                "iat": datetime.utcnow() + timedelta(hours=1),
-                "exp": datetime.utcnow() + timedelta(hours=2)
+                "iat": datetime.now(timezone.utc) + timedelta(hours=1),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=2)
             }
             return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
             
@@ -123,7 +123,7 @@ class AuthEdgeCasesTestSuite:
             # Token with SQL injection attempt
             payload = {
                 "sub": "user@example.com' OR '1'='1",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             }
             return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
             
@@ -131,7 +131,7 @@ class AuthEdgeCasesTestSuite:
             # Token with XSS payload
             payload = {
                 "sub": "<script>alert('XSS')</script>",
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             }
             return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
             
@@ -206,7 +206,7 @@ class TestAuthEdgeCasesL3:
         future_token = edge_suite.generate_malicious_token("future_token")
         
         # Should reject token from the future
-        with pytest.raises(jwt.InvalidIssuedAtError):
+        with pytest.raises(jwt.ImmatureSignatureError):
             jwt.decode(
                 future_token,
                 edge_suite.jwt_secret,
@@ -263,7 +263,7 @@ class TestAuthEdgeCasesL3:
     async def test_timing_attack_on_token_validation(self, edge_suite):
         """Test 8: Prevent timing attacks on token validation."""
         valid_token = jwt.encode(
-            {"sub": "user@example.com", "exp": datetime.utcnow() + timedelta(hours=1)},
+            {"sub": "user@example.com", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
             edge_suite.jwt_secret,
             algorithm="HS256"
         )
@@ -312,7 +312,7 @@ class TestAuthEdgeCasesL3:
             # Mock refresh logic
             await asyncio.sleep(random.uniform(0, 0.1))
             return jwt.encode(
-                {"sub": "user@example.com", "exp": datetime.utcnow() + timedelta(hours=1)},
+                {"sub": "user@example.com", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
                 edge_suite.jwt_secret,
                 algorithm="HS256"
             )
@@ -357,7 +357,7 @@ class TestAuthEdgeCasesL3:
         
         # Create token with Unicode
         token = jwt.encode(
-            {"sub": unicode_input, "exp": datetime.utcnow() + timedelta(hours=1)},
+            {"sub": unicode_input, "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
             edge_suite.jwt_secret,
             algorithm="HS256"
         )
@@ -418,7 +418,7 @@ class TestAuthEdgeCasesL3:
             {
                 "sub": "user@example.com",
                 "jti": jti,
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             edge_suite.jwt_secret,
             algorithm="HS256"
@@ -457,7 +457,7 @@ class TestAuthEdgeCasesL3:
         """Test 19: Prevent token signature stripping attacks."""
         # Create valid token
         token = jwt.encode(
-            {"sub": "user@example.com", "exp": datetime.utcnow() + timedelta(hours=1)},
+            {"sub": "user@example.com", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
             edge_suite.jwt_secret,
             algorithm="HS256"
         )
@@ -561,7 +561,7 @@ class TestAuthEdgeCasesL3:
             {
                 "sub": "user@example.com",
                 "scope": ["read"],
-                "exp": datetime.utcnow() + timedelta(hours=1)
+                "exp": datetime.now(timezone.utc) + timedelta(hours=1)
             },
             edge_suite.jwt_secret,
             algorithm="HS256"

@@ -36,7 +36,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.monitoring import metrics_collector

@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 

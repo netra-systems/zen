@@ -201,6 +201,66 @@ def assert_corpus_creation_success(result: Dict[str, Any], corpus_name: str):
     assert result["name"] == corpus_name, f"Expected corpus name '{corpus_name}', got '{result['name']}'"
 
 
+def assert_tool_execute_response_error(result: Dict[str, Any], expected_error_text: str) -> None:
+    """Assert tool execution response indicates error."""
+    assert result.get("success") is False, f"Expected tool execution to fail, but got success: {result}"
+    error_msg = result.get("error", "")
+    assert expected_error_text in str(error_msg), f"Expected error text '{expected_error_text}' not found in error: {error_msg}"
+
+
+def assert_tool_execute_response_success(result: Dict[str, Any]) -> None:
+    """Assert tool execution response indicates success."""
+    assert result.get("success") is True, f"Expected tool execution to succeed, but got failure: {result.get('error', 'Unknown error')}"
+    assert "data" in result or "result" in result, "Successful response missing data/result field"
+
+
+def assert_corpus_search_success(result: Dict[str, Any], expected_count: int) -> None:
+    """Assert corpus search was successful."""
+    assert result.get("success") is True, f"Corpus search failed: {result.get('error', 'Unknown error')}"
+    results_data = result.get("data", {})
+    if "results" in results_data:
+        actual_count = len(results_data["results"])
+        assert actual_count == expected_count, f"Expected {expected_count} search results, got {actual_count}"
+    elif "total_matches" in results_data:
+        actual_count = results_data["total_matches"]
+        assert actual_count == expected_count, f"Expected {expected_count} matches, got {actual_count}"
+
+
+def assert_missing_parameter_error(result: Dict[str, Any], parameter_name: str) -> None:
+    """Assert that execution failed due to missing parameter."""
+    assert result.get("success") is False, f"Expected failure due to missing parameter '{parameter_name}', but got success: {result}"
+    error_msg = str(result.get("error", "")).lower()
+    param_msg = parameter_name.lower()
+    assert "missing" in error_msg and param_msg in error_msg, f"Expected missing parameter error for '{parameter_name}', got: {result.get('error')}"
+
+
+def assert_storage_success(result: Dict[str, Any], expected_id: Optional[str] = None) -> None:
+    """Assert that storage operation was successful."""
+    assert result.get("success") is True, f"Storage operation failed: {result.get('error', 'Unknown error')}"
+    assert "data" in result or "id" in result, "Storage success response missing data/id field"
+    
+    if expected_id:
+        actual_id = result.get("id") or result.get("data", {}).get("id")
+        assert actual_id == expected_id, f"Expected storage ID '{expected_id}', got '{actual_id}'"
+
+
+def assert_validation_success(result: Dict[str, Any], validation_type: str) -> None:
+    """Assert that validation operation was successful."""
+    assert result.get("success") is True, f"Validation ({validation_type}) failed: {result.get('error', 'Unknown error')}"
+    assert "data" in result or "valid" in result, f"Validation success response missing data/valid field for {validation_type}"
+
+
+def assert_simple_tool_payload(result: Dict[str, Any]) -> None:
+    """Assert that tool result has expected simple payload structure."""
+    assert "status" in result, "Tool result missing status field"
+    assert result["status"] == "success", f"Expected success status, got: {result['status']}"
+    assert "data" in result, "Tool result missing data field"
+    
+    # Simple payload should have basic structure
+    data = result["data"]
+    assert isinstance(data, dict), f"Expected data to be dict, got: {type(data)}"
+
+
 @pytest.fixture
 def sample_tool_result():
     """Fixture providing sample tool result."""

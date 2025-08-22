@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.config import get_config
 
