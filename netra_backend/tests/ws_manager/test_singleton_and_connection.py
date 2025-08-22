@@ -2,21 +2,10 @@
 Tests for WebSocketManager singleton pattern and connection management
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import threading
@@ -26,7 +15,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import (
 
     ConnectionInfo,
@@ -40,31 +28,24 @@ from netra_backend.app.services.websocket.ws_manager import (
 )
 from netra_backend.tests.test_base import MockWebSocket, WebSocketTestBase
 
-# Add project root to path
-
-
 class TestSingletonPattern(WebSocketTestBase):
 
     """Test the singleton pattern implementation"""
     
-
     def test_singleton_instance(self):
 
         """Test that WebSocketManager is a singleton"""
 
         self.reset_manager_singleton()
         
-
         manager1 = WebSocketManager()
 
         manager2 = WebSocketManager()
         
-
         assert manager1 is manager2
 
         assert id(manager1) == id(manager2)
     
-
     def test_module_level_instances(self):
 
         """Test that module-level instances are the same"""
@@ -75,19 +56,16 @@ class TestSingletonPattern(WebSocketTestBase):
 
         assert isinstance(ws_manager, WebSocketManager)
     
-
     def test_singleton_thread_safety(self):
 
         """Test singleton creation is thread-safe"""
 
         self.reset_manager_singleton()
         
-
         instances = []
 
         errors = []
         
-
         def create_instance():
 
             try:
@@ -98,20 +76,16 @@ class TestSingletonPattern(WebSocketTestBase):
 
                 errors.append(e)
         
-
         threads = [threading.Thread(target=create_instance) for _ in range(10)]
         
-
         for thread in threads:
 
             thread.start()
         
-
         for thread in threads:
 
             thread.join()
         
-
         assert len(errors) == 0
 
         assert len(instances) == 10
@@ -119,7 +93,6 @@ class TestSingletonPattern(WebSocketTestBase):
 
         assert all(inst is instances[0] for inst in instances)
     
-
     def test_singleton_with_different_imports(self):
 
         """Test singleton works across different import styles"""
@@ -135,14 +108,11 @@ class TestSingletonPattern(WebSocketTestBase):
 
         WSM2 = ws_module.WebSocketManager
         
-
         instance1 = WSM1()
 
         instance2 = WSM2()
         
-
         assert instance1 is instance2
-
 
 class TestConnectionManagement(WebSocketTestBase):
 
@@ -160,7 +130,6 @@ class TestConnectionManagement(WebSocketTestBase):
 
         metadata = {"source": "test"}
         
-
         await fresh_manager.connect(
 
             websocket=mock_websocket,
@@ -175,12 +144,10 @@ class TestConnectionManagement(WebSocketTestBase):
 
         )
         
-
         assert connection_id in fresh_manager.connections
 
         assert connection_id in fresh_manager.connection_info
         
-
         info = fresh_manager.connection_info[connection_id]
 
         assert info.connection_id == connection_id
@@ -219,15 +186,12 @@ class TestConnectionManagement(WebSocketTestBase):
 
         connection_id = "test-disconnect-123"
         
-
         await fresh_manager.connect(mock_websocket, connection_id)
 
         assert connection_id in fresh_manager.connections
         
-
         await fresh_manager.disconnect(connection_id)
         
-
         assert connection_id not in fresh_manager.connections
 
         assert connection_id not in fresh_manager.connection_info
@@ -245,12 +209,10 @@ class TestConnectionManagement(WebSocketTestBase):
 
         connection_id = "test-close-123"
         
-
         await fresh_manager.connect(mock_websocket, connection_id)
 
         await fresh_manager.disconnect(connection_id, code=1001, reason="Going away")
         
-
         mock_websocket.close.assert_called_once_with(code=1001, reason="Going away")
 
         assert connection_id not in fresh_manager.connections
@@ -263,7 +225,6 @@ class TestConnectionManagement(WebSocketTestBase):
 
         ws = MockWebSocket(WebSocketState.DISCONNECTED)
         
-
         await fresh_manager.connect(ws, connection_id)
         
         # Should handle gracefully without errors
@@ -282,7 +243,6 @@ class TestConnectionManagement(WebSocketTestBase):
 
         mock_websocket.close.side_effect = Exception("Close failed")
         
-
         await fresh_manager.connect(mock_websocket, connection_id)
         
         # Should not raise even if close fails
@@ -299,15 +259,12 @@ class TestConnectionManagement(WebSocketTestBase):
 
         connection_id = "test-get-123"
         
-
         await fresh_manager.connect(mock_websocket, connection_id)
         
-
         retrieved_ws = fresh_manager.get_connection(connection_id)
 
         assert retrieved_ws is mock_websocket
     
-
     def test_get_connection_not_exists(self, fresh_manager):
 
         """Test getting a non-existent connection"""
@@ -322,10 +279,8 @@ class TestConnectionManagement(WebSocketTestBase):
 
         connection_id = "test-connected-123"
         
-
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         assert fresh_manager.is_connected(connection_id) is True
 
     async def test_is_connected_false_disconnected(self, fresh_manager, disconnected_websocket):
@@ -334,20 +289,16 @@ class TestConnectionManagement(WebSocketTestBase):
 
         connection_id = "test-disconnected-123"
         
-
         await fresh_manager.connect(disconnected_websocket, connection_id)
         
-
         assert fresh_manager.is_connected(connection_id) is False
     
-
     def test_is_connected_false_nonexistent(self, fresh_manager):
 
         """Test is_connected returns False for non-existent connection"""
 
         assert fresh_manager.is_connected("nonexistent-123") is False
     
-
     def test_get_all_connections_empty(self, fresh_manager):
 
         """Test getting all connections when empty"""
@@ -366,17 +317,14 @@ class TestConnectionManagement(WebSocketTestBase):
 
         ws3 = MockWebSocket()
         
-
         await fresh_manager.connect(ws1, "conn-1")
 
         await fresh_manager.connect(ws2, "conn-2")
 
         await fresh_manager.connect(ws3, "conn-3")
         
-
         connections = fresh_manager.get_all_connections()
         
-
         assert len(connections) == 3
 
         assert connections["conn-1"] is ws1

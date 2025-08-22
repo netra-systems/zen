@@ -12,17 +12,10 @@ Coverage: Complete OAuth URL consistency across Python, TypeScript, configuratio
 L4 Realism Level: Tests against actual staging configuration and real service endpoints
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -33,8 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import httpx
@@ -42,10 +34,9 @@ import pytest
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
 )
-
 
 @dataclass
 class URLInconsistency:
@@ -58,7 +49,6 @@ class URLInconsistency:
     severity: str
     url_type: str  # 'redirect_uri', 'javascript_origin', 'api_endpoint', 'config'
     context: str   # Additional context about the usage
-
 
 @dataclass
 class OAuthAuditResult:
@@ -73,13 +63,11 @@ class OAuthAuditResult:
     file_types_scanned: Dict[str, int] = field(default_factory=dict)
     staging_endpoints_verified: List[str] = field(default_factory=list)
 
-
 class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
     """L4 test suite for OAuth URL consistency in staging environment."""
     
     def __init__(self):
         super().__init__("oauth_url_consistency")
-        self.project_root = Path(__file__).parent.parent.parent.parent.parent
         
         # Expected staging URLs for different services
         self.expected_staging_urls = {
@@ -596,7 +584,6 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
             "validations": redirect_validations
         }
 
-
 @pytest.fixture
 async def oauth_url_consistency_l4_suite():
     """Create L4 OAuth URL consistency test suite with proper L4 base."""
@@ -604,7 +591,6 @@ async def oauth_url_consistency_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -640,7 +626,6 @@ async def test_oauth_staging_url_consistency_comprehensive_l4(oauth_url_consiste
     files_scanned = audit_data.get("total_files_scanned", 0)
     assert files_scanned >= 10, f"Too few files scanned: {files_scanned}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -673,7 +658,6 @@ async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite
             f"  Severity: {issue_details.get('severity', 'Unknown')}"
         )
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -697,7 +681,6 @@ async def test_oauth_redirect_uri_validation_l4(oauth_url_consistency_l4_suite):
             failure_message += f"  - {detail.get('type', 'unknown')}: {detail.get('issue', 'Unknown issue')}\n"
         
         pytest.fail(failure_message)
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -725,7 +708,6 @@ async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4
         f"({endpoint_results['successful_responses']}/{total_count})"
     )
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -748,7 +730,6 @@ async def test_oauth_audit_performance_and_coverage_l4(oauth_url_consistency_l4_
     # File type diversity
     file_types = audit_data.file_types_scanned
     assert len(file_types) >= 2, f"Should scan multiple file types, only found: {list(file_types.keys())}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

@@ -90,6 +90,17 @@ class RouteManager:
         self._route_counters: Dict[str, int] = {}  # For round-robin
         self._health_monitors: Dict[str, Any] = {}
         self._lock = asyncio.Lock()
+        self._initialized = False
+    
+    async def initialize(self):
+        """Initialize the route manager."""
+        self._initialized = True
+        logger.info("Route manager initialized")
+        
+    async def shutdown(self):
+        """Shutdown the route manager."""
+        self._initialized = False
+        logger.info("Route manager shutdown")
     
     async def add_route(self, route_rule: RouteRule) -> None:
         """Add a new routing rule."""

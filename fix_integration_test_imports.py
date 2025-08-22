@@ -76,7 +76,6 @@ def fix_imports_in_file(file_path):
     )
     
     # Check if we have project root setup
-    if 'PROJECT_ROOT = Path(__file__)' in content and 'sys.path.insert' in content:
         # Already has path setup
         pass
     elif 'from netra_backend.app' not in content and 'from app.' in content:
@@ -119,9 +118,6 @@ def fix_imports_in_file(file_path):
                 "# Add project root to path",
                 "import sys",
                 "from pathlib import Path",
-                "PROJECT_ROOT = Path(__file__).parent.parent.parent",
-                "if str(PROJECT_ROOT) not in sys.path:",
-                "    sys.path.insert(0, str(PROJECT_ROOT))",
                 ""
             ]
             

@@ -34,8 +34,6 @@ from typing import Any, Dict, List, Optional
 import httpx
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Import test helpers
 # Redis for session persistence validation

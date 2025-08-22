@@ -4,16 +4,16 @@ Code review orchestrator.
 Coordinates all review modules and manages the review workflow.
 """
 
-from .ai_detector import AIDetector
-from .cli import DisplayFormatter
-from .command_runner import CommandRunner
-from .core import ReviewConfig, ReviewData, create_review_data
-from .git_analyzer import GitAnalyzer
-from .performance_checker import PerformanceChecker
-from .report_generator import ReportGenerator
-from .security_checker import SecurityChecker
-from .smoke_tester import SmokeTester
-from .spec_checker import SpecChecker
+from scripts.review.ai_detector import AIDetector
+from scripts.review.cli import DisplayFormatter
+from scripts.review.command_runner import CommandRunner
+from scripts.review.core import ReviewConfig, ReviewData, create_review_data
+from scripts.review.git_analyzer import GitAnalyzer
+from scripts.review.performance_checker import PerformanceChecker
+from scripts.review.report_generator import ReportGenerator
+from scripts.review.security_checker import SecurityChecker
+from scripts.review.smoke_tester import SmokeTester
+from scripts.review.spec_checker import SpecChecker
 
 
 class CodeReviewer:

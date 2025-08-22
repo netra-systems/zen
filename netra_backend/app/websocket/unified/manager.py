@@ -34,13 +34,13 @@ from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_inte
 from netra_backend.app.websocket.rate_limiter import RateLimiter
 from netra_backend.app.websocket.room_manager import RoomManager
 
-from .broadcasting import UnifiedBroadcastingManager
-from .circuit_breaker import CircuitBreaker
+from netra_backend.app.websocket.unified.broadcasting import UnifiedBroadcastingManager
+from netra_backend.app.websocket.unified.circuit_breaker import CircuitBreaker
 
 # Import unified modules
-from .messaging import UnifiedMessagingManager
-from .state import UnifiedStateManager
-from .telemetry_manager import TelemetryManager
+from netra_backend.app.websocket.unified.messaging import UnifiedMessagingManager
+from netra_backend.app.websocket.unified.state import UnifiedStateManager
+from netra_backend.app.websocket.unified.telemetry_manager import TelemetryManager
 
 logger = central_logger.get_logger(__name__)
 

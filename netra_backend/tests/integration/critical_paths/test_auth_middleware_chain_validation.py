@@ -20,17 +20,10 @@ Mock-Real Spectrum: L3 (Real middleware with controlled requests)
 - Simulated HTTP requests
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -51,16 +44,13 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.middleware.cors_middleware import CORSMiddleware
 from netra_backend.app.middleware.rate_limit_middleware import RateLimitMiddleware
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthError,
     MiddlewareContext,
     RequestContext,
-    # Add project root to path
     Token,
     TokenData,
 )
-
 
 @dataclass
 class MiddlewareTestCase:
@@ -71,7 +61,6 @@ class MiddlewareTestCase:
     expected_headers: Dict[str, str]
     should_reach_handler: bool
     error_message: Optional[str] = None
-
 
 @dataclass
 class MiddlewareMetrics:
@@ -93,7 +82,6 @@ class MiddlewareMetrics:
         if self.total_requests == 0:
             return 0
         return (self.authenticated_requests / self.total_requests) * 100
-
 
 class TestAuthMiddlewareChainValidation:
     """Test suite for auth middleware chain validation"""

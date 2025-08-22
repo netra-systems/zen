@@ -4,17 +4,10 @@ Tests tool dispatcher integration and tool execution with LLM agents
 Split from oversized test_llm_agent_e2e_real.py
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -29,19 +22,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.llm_agent_fixtures import (
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     mock_db_session,
-    # Add project root to path
     mock_llm_manager,
     mock_persistence_service,
     mock_tool_dispatcher,
     mock_websocket_manager,
     supervisor_agent,
 )
-
 
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
@@ -56,7 +46,6 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     with pytest.raises(Exception) as exc_info:
         await mock_tool_dispatcher.dispatch_tool("failing_tool", {})
     assert "Tool error" in str(exc_info.value)
-
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
@@ -95,7 +84,6 @@ async def test_tool_execution_with_llm():
     assert tool_results[0]["tool"] == "analyze_workload"
     assert tool_results[1]["tool"] == "optimize_batch_size"
 
-
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
     llm_manager = Mock(spec=LLMManager)
@@ -124,7 +112,6 @@ async def test_real_llm_interaction():
     
     assert result["content"] == "Successful response after retry"
     assert call_count == 2
-
 
 async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
@@ -163,7 +150,6 @@ async def test_tool_call_integration_complex():
     assert len(execution_log) == 6  # Start and complete for each tool
     assert execution_log[0] == "Starting data_fetcher"
     assert execution_log[1] == "Completed data_fetcher"
-
 
 async def test_llm_tool_chain_execution():
     """Test LLM-driven tool chain execution"""
@@ -205,7 +191,6 @@ async def test_llm_tool_chain_execution():
     assert "fetch data" in chain_results[0]["content"]
     assert "analyze" in chain_results[1]["content"]
     assert len(chain_results[2]["tool_calls"]) == 0  # Final step has no tools
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

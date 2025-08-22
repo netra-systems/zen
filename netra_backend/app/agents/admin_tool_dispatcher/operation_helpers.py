@@ -37,13 +37,13 @@ def validate_operation_security(operation_params: Dict[str, Any]) -> None:
 
 def check_operation_permissions(operation_type: str, user_role: str) -> None:
     """Check permissions for sensitive operations"""
-    from .dispatcher_helpers import check_operation_permissions
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import check_operation_permissions
     check_operation_permissions(operation_type, user_role)
 
 
 def get_operation_tool_name(operation_type: str) -> str:
     """Get tool name for operation type"""
-    from .dispatcher_helpers import get_operation_tool_mapping
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import get_operation_tool_mapping
     tool_mapping = get_operation_tool_mapping()
     tool_name = tool_mapping.get(operation_type)
     if not tool_name:
@@ -90,7 +90,7 @@ async def execute_operation_safely(dispatcher, tool_name: str,
 
 async def log_audit_operation(dispatcher, operation: Dict[str, Any]) -> None:
     """Log audit information for admin operations"""
-    from .dispatcher_helpers import create_audit_data, log_audit_data
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import create_audit_data, log_audit_data
     if has_valid_audit_logger(dispatcher):
         audit_data = create_audit_data(operation)
         await log_audit_data(dispatcher.audit_logger, audit_data)

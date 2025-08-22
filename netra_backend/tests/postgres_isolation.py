@@ -32,7 +32,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class PostgreSQLTestIsolator:
     """PostgreSQL-specific test database isolation."""
     
@@ -385,7 +384,6 @@ class PostgreSQLTestIsolator:
             "url": config["url"],
             "created_at": config["created_at"].isoformat()
         }
-
 
 # Utility function for common test patterns
 async def with_isolated_postgres(test_name: str, schema_type: str = "basic"):

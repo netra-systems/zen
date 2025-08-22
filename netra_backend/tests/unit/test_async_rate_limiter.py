@@ -7,17 +7,10 @@ Tests critical paths including rate limiting, time windows, concurrent access,
 and edge cases that could lead to cost overruns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -25,11 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
-
-# Add project root to path
-
 
 # Test fixtures for setup
 @pytest.fixture
@@ -37,18 +26,15 @@ def rate_limiter():
     """Standard rate limiter with reasonable limits."""
     return AsyncRateLimiter(max_calls=3, time_window=1.0)
 
-
 @pytest.fixture
 def strict_limiter():
     """Strict rate limiter for testing edge cases."""
     return AsyncRateLimiter(max_calls=1, time_window=0.5)
 
-
 @pytest.fixture
 def fast_limiter():
     """Fast rate limiter for timing tests."""
     return AsyncRateLimiter(max_calls=10, time_window=0.1)
-
 
 # Helper functions for 25-line compliance
 async def acquire_calls(limiter, count):
@@ -56,37 +42,30 @@ async def acquire_calls(limiter, count):
     for _ in range(count):
         await limiter.acquire()
 
-
 def assert_current_calls(limiter, expected):
     """Assert current call count matches expected."""
     assert limiter.current_calls == expected
-
 
 def assert_remaining_calls(limiter, expected):
     """Assert remaining calls matches expected."""
     assert limiter.remaining_calls == expected
 
-
 def assert_max_calls(limiter, expected):
     """Assert max calls matches expected."""
     assert limiter.max_calls == expected
-
 
 def assert_time_window(limiter, expected):
     """Assert time window matches expected."""
     assert limiter.time_window == expected
 
-
 async def wait_for_window_reset(limiter):
     """Wait for time window to reset."""
     await asyncio.sleep(limiter.time_window + 0.01)
-
 
 def create_expired_calls(limiter, count):
     """Create expired calls in the limiter."""
     old_time = time.time() - limiter.time_window - 1
     limiter._calls = [old_time] * count
-
 
 # Core rate limiter functionality tests
 class TestRateLimiterInitialization:
@@ -114,7 +93,6 @@ class TestRateLimiterInitialization:
         """Strict limiter has correct configuration."""
         assert_max_calls(strict_limiter, 1)
         assert_time_window(strict_limiter, 0.5)
-
 
 class TestCallAcquisition:
     """Test call acquisition and tracking."""
@@ -157,7 +135,6 @@ class TestCallAcquisition:
         initial_length = len(rate_limiter._calls)
         await rate_limiter.acquire()
         assert len(rate_limiter._calls) == initial_length + 1
-
 
 class TestTimeWindowBehavior:
     """Test time window and call expiration."""
@@ -202,7 +179,6 @@ class TestTimeWindowBehavior:
         wait_time = rate_limiter._calculate_wait_time(old_time)
         assert 0.4 <= wait_time <= 0.6  # Account for timing variance
 
-
 class TestConcurrentAccess:
     """Test thread safety and concurrent access."""
 
@@ -235,7 +211,6 @@ class TestConcurrentAccess:
         checks = [strict_limiter.can_make_call() for _ in range(5)]
         results = await asyncio.gather(*checks)
         assert all(result is False for result in results)
-
 
 class TestResetFunctionality:
     """Test reset and cleanup functionality."""
@@ -272,7 +247,6 @@ class TestResetFunctionality:
             concurrent_reset()
         )
         assert_current_calls(rate_limiter, 0)
-
 
 class TestEdgeCases:
     """Test edge cases and error conditions."""
@@ -321,7 +295,6 @@ class TestEdgeCases:
         
         # Should have waited for the window
         assert elapsed >= strict_limiter.time_window * 0.8
-
 
 class TestPropertiesAndState:
     """Test property getters and state management."""

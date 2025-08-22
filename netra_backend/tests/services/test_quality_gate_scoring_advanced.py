@@ -4,17 +4,10 @@ This module tests advanced scoring implementations including novelty, clarity,
 redundancy, hallucination risk, and weighted scoring calculations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict, List
@@ -24,16 +17,13 @@ import pytest
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
     QualityLevel,
     QualityMetrics,
     ValidationResult,
 )
-
 
 class TestNoveltyCalculation:
     """Test novelty calculation with Redis integration"""
@@ -64,7 +54,6 @@ class TestNoveltyCalculation:
         
         score = await quality_service.metrics_calculator.calculate_novelty(content)
         assert score == 0.8  # Should be novel if not in cache
-
 
 class TestClarityCalculation:
     """Test clarity calculation edge cases"""
@@ -98,7 +87,6 @@ class TestClarityCalculation:
         score = await quality_service.metrics_calculator.calculate_clarity(content)
         assert score >= 0  # Should handle gracefully
 
-
 class TestRedundancyCalculation:
     """Test redundancy calculation edge cases"""
     
@@ -127,7 +115,6 @@ class TestRedundancyCalculation:
         
         score = await quality_service.metrics_calculator.calculate_redundancy(content)
         assert score > 0.3  # Should detect high redundancy
-
 
 class TestHallucinationRisk:
     """Test hallucination risk detection"""
@@ -158,7 +145,6 @@ class TestHallucinationRisk:
         
         score = await quality_service.metrics_calculator.calculate_hallucination_risk(content, None)
         assert score > 0.8  # Should be very high
-
 
 class TestWeightedScoring:
     """Test weighted score calculation with penalties"""
@@ -213,7 +199,6 @@ class TestWeightedScoring:
         
         score = quality_service.validator.calculate_weighted_score(metrics, weights)
         assert score == 0.0  # Should handle zero weight gracefully
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

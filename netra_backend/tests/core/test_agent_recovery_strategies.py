@@ -19,17 +19,10 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -40,11 +33,9 @@ import pytest
 
 from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
 
-# Add project root to path
 from netra_backend.app.core.agent_recovery_strategies import (
     DataAnalysisRecoveryStrategy,
     SupervisorRecoveryStrategy,
-    # Add project root to path
     TriageAgentRecoveryStrategy,
 )
 from netra_backend.app.core.agent_recovery_types import (
@@ -62,7 +53,6 @@ from netra_backend.app.core.error_recovery import (
 )
 from netra_backend.app.core.interfaces_validation import FailureType
 from netra_backend.app.schemas.agent_state import AgentPhase, RecoveryStatus
-
 
 class TestRecoveryContext:
     """Test recovery context creation and validation"""
@@ -129,7 +119,6 @@ class TestRecoveryContext:
         # Assert
         assert context.metadata["customer_tier"] == "Enterprise"
         assert context.metadata["workload_priority"] == "HIGH"
-
 
 class TestTriageRecoveryStrategy:
     """Test triage agent recovery strategy implementation"""
@@ -211,7 +200,6 @@ class TestTriageRecoveryStrategy:
             
             # Assert
             assert assessment['failure_type'] == expected_failure_type
-
 
 class TestDataAnalysisRecoveryStrategy:
     """Test data analysis recovery strategy"""
@@ -295,7 +283,6 @@ class TestDataAnalysisRecoveryStrategy:
         assert 'recovery_method' in result
         assert result['recovery_method'] == 'optimized_query'
 
-
 class TestSupervisorRecoveryStrategy:
     """Test supervisor recovery strategy implementation"""
 
@@ -370,7 +357,6 @@ class TestSupervisorRecoveryStrategy:
         assert result['recovery_method'] == 'degraded_mode'
         assert result['coordination_disabled'] is True
 
-
 class TestRecoveryStrategySelection:
     """Test recovery strategy selection logic"""
 
@@ -408,7 +394,6 @@ class TestRecoveryStrategySelection:
         # Assert
         assert config.priority == RecoveryPriority.CRITICAL
         assert config.timeout_seconds <= 30  # Faster recovery for enterprise
-
 
 class TestRecoveryStrategyPerformance:
     """Test performance characteristics of recovery strategies"""
@@ -461,7 +446,6 @@ class TestRecoveryStrategyPerformance:
         assert len(results) == 10
         assert all(isinstance(r, dict) for r in results)
         assert all('failure_type' in r for r in results)
-
 
 class TestRecoveryStrategyErrorHandling:
     """Test error handling in recovery strategies"""
@@ -519,7 +503,6 @@ class TestRecoveryStrategyErrorHandling:
             assert result is not None
             assert result["recovery_method"] == "optimized_query"
 
-
 # Helper functions for strategy selection (would be implemented in the actual module)
 def select_recovery_strategy_by_agent_type(agent_type: AgentType, config: AgentRecoveryConfig) -> BaseAgentRecoveryStrategy:
     """Select appropriate recovery strategy based on agent type"""
@@ -531,7 +514,6 @@ def select_recovery_strategy_by_agent_type(agent_type: AgentType, config: AgentR
         return SupervisorRecoveryStrategy(config)
     else:
         return TriageAgentRecoveryStrategy(config)  # Default fallback
-
 
 def select_recovery_config_with_context(context: RecoveryContext) -> AgentRecoveryConfig:
     """Select recovery configuration with context-aware prioritization"""

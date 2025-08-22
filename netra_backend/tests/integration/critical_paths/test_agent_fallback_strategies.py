@@ -10,17 +10,10 @@ Critical Path: Primary failure -> Strategy selection -> Fallback execution -> Re
 Coverage: Real fallback managers, strategy selection, recovery handlers, monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -38,12 +31,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class FailureType(Enum):
     """Types of failures that can trigger fallbacks."""
@@ -56,7 +47,6 @@ class FailureType(Enum):
     RESOURCE_EXHAUSTION = "resource_exhaustion"
     UNKNOWN_ERROR = "unknown_error"
 
-
 class FallbackStrategy(Enum):
     """Available fallback strategies."""
     RETRY = "retry"
@@ -67,7 +57,6 @@ class FallbackStrategy(Enum):
     FAIL_FAST = "fail_fast"
     CIRCUIT_BREAKER = "circuit_breaker"
 
-
 class RecoveryStatus(Enum):
     """Recovery status states."""
     NOT_STARTED = "not_started"
@@ -75,7 +64,6 @@ class RecoveryStatus(Enum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     PARTIAL = "partial"
-
 
 @dataclass
 class FailureContext:
@@ -100,7 +88,6 @@ class FailureContext:
             "retry_count": self.retry_count,
             "severity": self.severity
         }
-
 
 @dataclass
 class FallbackPlan:
@@ -129,7 +116,6 @@ class FallbackPlan:
         
         return True
 
-
 @dataclass
 class FallbackExecution:
     """Represents an ongoing fallback execution."""
@@ -154,7 +140,6 @@ class FallbackExecution:
         """Get total execution time."""
         end_time = self.completed_at or datetime.now()
         return (end_time - self.started_at).total_seconds()
-
 
 class StrategySelector:
     """Selects appropriate fallback strategies based on failure context."""
@@ -192,7 +177,6 @@ class StrategySelector:
     def get_selection_stats(self) -> Dict[str, Any]:
         """Get strategy selection statistics."""
         return self.selection_stats.copy()
-
 
 class FallbackExecutor:
     """Executes fallback strategies."""
@@ -329,7 +313,6 @@ class FallbackExecutor:
         """Get execution statistics."""
         return self.execution_stats.copy()
 
-
 class RecoveryMonitor:
     """Monitors recovery progress and health."""
     
@@ -402,7 +385,6 @@ class RecoveryMonitor:
             "completed_recoveries": len(self.completed_recoveries),
             "health_metrics": self.health_metrics.copy()
         }
-
 
 class FallbackManager:
     """Main manager for fallback strategies."""
@@ -555,7 +537,6 @@ class FallbackManager:
         
         return execution
 
-
 class AgentFallbackStrategiesManager:
     """Manages agent fallback strategies testing."""
     
@@ -593,7 +574,6 @@ class AgentFallbackStrategiesManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def fallback_strategies_manager():
     """Create fallback strategies manager for testing."""
@@ -601,7 +581,6 @@ async def fallback_strategies_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -619,7 +598,6 @@ async def test_basic_fallback_strategy_selection(fallback_strategies_manager):
     assert plan.plan_id == "timeout_plan"
     assert FailureType.TIMEOUT in plan.failure_types
     assert FallbackStrategy.RETRY in plan.strategies
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -640,7 +618,6 @@ async def test_fallback_execution_with_retry(fallback_strategies_manager):
     # Check that retry was attempted
     retry_results = [r for r in execution.results if r.get("strategy") == "retry"]
     assert len(retry_results) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -665,7 +642,6 @@ async def test_alternative_service_fallback(fallback_strategies_manager):
         success_results = [r for r in execution.results if r.get("success")]
         assert len(success_results) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_degraded_mode_operation(fallback_strategies_manager):
@@ -688,7 +664,6 @@ async def test_degraded_mode_operation(fallback_strategies_manager):
     if execution.status == RecoveryStatus.SUCCEEDED:
         success_result = next((r for r in execution.results if r.get("success")), None)
         assert success_result is not None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -714,7 +689,6 @@ async def test_cache_fallback_strategy(fallback_strategies_manager):
         # Cache fallback should be fast
         assert cache_result is not None
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_authentication_error_handling(fallback_strategies_manager):
@@ -734,7 +708,6 @@ async def test_authentication_error_handling(fallback_strategies_manager):
     manual_results = [r for r in execution.results 
                      if r.get("strategy") in ["manual_override", "fail_fast"]]
     assert len(manual_results) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -756,7 +729,6 @@ async def test_strategy_priority_ordering(fallback_strategies_manager):
     # Both should have priority 1 (highest)
     assert rate_plan.priority == 1
     assert timeout_plan.priority == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -785,7 +757,6 @@ async def test_strategy_execution_timeout(fallback_strategies_manager):
     timeout_results = [r for r in execution.results if r.get("error") == "timeout"]
     assert len(timeout_results) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_recovery_monitoring(fallback_strategies_manager):
@@ -811,7 +782,6 @@ async def test_recovery_monitoring(fallback_strategies_manager):
     assert health_status["active_recoveries"] == 0  # All should be completed
     assert "overall_success_rate" in health_status["health_metrics"]
     assert "avg_recovery_time" in health_status["health_metrics"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -847,7 +817,6 @@ async def test_concurrent_fallback_execution(fallback_strategies_manager):
     # Should have reasonable success rate (strategies have good success rates)
     assert success_rate > 30  # At least 30% success rate
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_strategy_success_rate_tracking(fallback_strategies_manager):
@@ -870,7 +839,6 @@ async def test_strategy_success_rate_tracking(fallback_strategies_manager):
         retry_stats = stats["strategy_success_rates"]["retry"]
         assert retry_stats["total"] > 0
         assert 0 <= retry_stats["success_rate"] <= 100
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

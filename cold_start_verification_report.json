@@ -1,0 +1,51 @@
+{
+  "timestamp": "2025-08-22 07:20:55",
+  "project_root": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+  "results": {
+    "environment_files": {
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env": true,
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\.env.local": true,
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\requirements.txt": true,
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\package.json": true
+    },
+    "port_availability": {
+      "8000_Backend API": true,
+      "3000_Frontend": true,
+      "8081_Auth Service": false,
+      "5433_PostgreSQL": false,
+      "6379_Redis": false,
+      "8123_ClickHouse HTTP": false,
+      "9000_ClickHouse Native": false
+    },
+    "environment_variables": {
+      "DATABASE_URL": true,
+      "REDIS_URL": true,
+      "JWT_SECRET_KEY": true,
+      "AUTH_SERVICE_URL": true,
+      "NEXT_PUBLIC_API_URL": true,
+      "NEXT_PUBLIC_WS_URL": true
+    },
+    "service_readiness": {
+      "backend_main": true,
+      "auth_main": true,
+      "frontend_package": true
+    },
+    "python_imports": {
+      "fastapi": true,
+      "sqlalchemy": true,
+      "redis": true,
+      "uvicorn": true,
+      "pydantic": true,
+      "jwt": true
+    },
+    "websocket_config": {
+      "test": true
+    },
+    "startup_test": {
+      "quick_test": true
+    }
+  },
+  "errors": [],
+  "total_errors": 0,
+  "status": "PASS"
+}

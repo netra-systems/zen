@@ -4,21 +4,10 @@ Tests WebSocket connection resilience, automatic reconnection, and state recover
 using real WebSocket connections to verify production-grade reliability.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -58,7 +47,6 @@ except ImportError:
 
             self.reconnection_manager = ReconnectionManager()
             
-
         async def handle_connection(self, websocket, path):
 
             """Handle new WebSocket connection."""
@@ -67,7 +55,6 @@ except ImportError:
 
             self.connections[connection_id] = websocket
             
-
             try:
 
                 async for message in websocket:
@@ -83,7 +70,6 @@ except ImportError:
 
                 del self.connections[connection_id]
                 
-
         async def broadcast(self, message: str):
 
             """Broadcast message to all connections."""
@@ -98,7 +84,6 @@ except ImportError:
 
                     pass
                     
-
     class ConnectionHandler:
 
         def __init__(self):
@@ -107,7 +92,6 @@ except ImportError:
 
             self.reconnection_attempts = {}
             
-
         async def add_connection(self, connection_id: str, websocket):
 
             """Add a new connection."""
@@ -122,7 +106,6 @@ except ImportError:
 
             }
             
-
         async def remove_connection(self, connection_id: str):
 
             """Remove a connection."""
@@ -131,7 +114,6 @@ except ImportError:
 
                 del self.active_connections[connection_id]
                 
-
         async def ping_all_connections(self):
 
             """Send ping to all active connections."""
@@ -148,7 +130,6 @@ except ImportError:
 
                     await self.remove_connection(conn_id)
                     
-
     class ReconnectionManager:
 
         def __init__(self):
@@ -159,7 +140,6 @@ except ImportError:
 
             self.backoff_factor = 2
             
-
         async def attempt_reconnection(self, connection_id: str, url: str) -> bool:
 
             """Attempt to reconnect a WebSocket connection."""
@@ -168,7 +148,6 @@ except ImportError:
 
             delay = 1
             
-
             while attempts < self.max_attempts:
 
                 try:
@@ -185,15 +164,12 @@ except ImportError:
 
                     delay *= self.backoff_factor
                     
-
             return False
-
 
 class TestWebSocketReconnection:
 
     """Test WebSocket reconnection and resilience capabilities."""
     
-
     @pytest.fixture
 
     async def websocket_server(self):
@@ -218,7 +194,6 @@ class TestWebSocketReconnection:
 
         port = server.sockets[0].getsockname()[1]
         
-
         yield {"manager": manager, "port": port, "server": server}
         
         # Cleanup
@@ -227,7 +202,6 @@ class TestWebSocketReconnection:
 
         await server.wait_closed()
     
-
     @pytest.fixture
 
     async def websocket_client(self):
@@ -248,7 +222,6 @@ class TestWebSocketReconnection:
 
                 self.connected = False
                 
-
             async def connect(self):
 
                 """Connect to WebSocket server."""
@@ -267,7 +240,6 @@ class TestWebSocketReconnection:
 
                     return False
                     
-
             async def disconnect(self):
 
                 """Disconnect from server."""
@@ -280,7 +252,6 @@ class TestWebSocketReconnection:
 
                     self.connected = False
                     
-
             async def send(self, message: str):
 
                 """Send message with automatic reconnection."""
@@ -292,7 +263,6 @@ class TestWebSocketReconnection:
 
                         raise ConnectionError("Failed to reconnect")
                         
-
                 try:
 
                     await self.websocket.send(message)
@@ -310,7 +280,6 @@ class TestWebSocketReconnection:
 
                         raise ConnectionError("Failed to reconnect after connection loss")
                         
-
             async def receive(self, timeout=5.0):
 
                 """Receive message with timeout."""
@@ -319,7 +288,6 @@ class TestWebSocketReconnection:
 
                     return None
                     
-
                 try:
 
                     message = await asyncio.wait_for(
@@ -336,10 +304,8 @@ class TestWebSocketReconnection:
 
                     return None
                     
-
         return ReconnectingClient
     
-
     @pytest.mark.asyncio
 
     async def test_basic_websocket_connection(self, websocket_server, websocket_client):
@@ -361,7 +327,6 @@ class TestWebSocketReconnection:
 
         await client.send(test_message)
         
-
         response = await client.receive()
 
         assert response == test_message
@@ -370,7 +335,6 @@ class TestWebSocketReconnection:
 
         await client.disconnect()
     
-
     @pytest.mark.asyncio
 
     async def test_automatic_reconnection(self, websocket_server, websocket_client):
@@ -405,10 +369,8 @@ class TestWebSocketReconnection:
 
         assert response == test_message
         
-
         await client.disconnect()
     
-
     @pytest.mark.asyncio
 
     async def test_connection_state_recovery(self, websocket_server):
@@ -449,7 +411,6 @@ class TestWebSocketReconnection:
 
         assert new_time > initial_time
     
-
     @pytest.mark.asyncio
 
     async def test_exponential_backoff_reconnection(self):
@@ -464,14 +425,12 @@ class TestWebSocketReconnection:
 
         attempt_times = []
         
-
         async def mock_connect(url):
 
             attempt_times.append(time.time())
 
             raise ConnectionError("Connection failed")
         
-
         with patch('websockets.connect', side_effect=mock_connect):
 
             success = await reconnection_manager.attempt_reconnection(
@@ -480,7 +439,6 @@ class TestWebSocketReconnection:
 
             )
         
-
         assert not success  # Should fail after max attempts
 
         assert len(attempt_times) == 3  # Should have made 3 attempts
@@ -497,7 +455,6 @@ class TestWebSocketReconnection:
 
             assert second_delay > first_delay * 1.5
     
-
     @pytest.mark.asyncio
 
     async def test_concurrent_connections(self, websocket_server):
@@ -536,7 +493,6 @@ class TestWebSocketReconnection:
 
             mock_ws.ping.assert_called_once()
     
-
     @pytest.mark.asyncio
 
     async def test_message_buffering_during_reconnection(self, websocket_server, websocket_client):
@@ -555,7 +511,6 @@ class TestWebSocketReconnection:
 
         original_send = client.send
         
-
         async def buffered_send(message):
 
             if not client.connected:
@@ -575,7 +530,6 @@ class TestWebSocketReconnection:
 
                 await original_send(message)
         
-
         client.send = buffered_send
         
         # Disconnect
@@ -594,14 +548,11 @@ class TestWebSocketReconnection:
 
         response2 = await client.receive()
         
-
         assert response1 == json.dumps({"msg": 1})
 
         assert response2 == json.dumps({"msg": 2})
         
-
         await client.disconnect()
-
 
 if __name__ == "__main__":
 

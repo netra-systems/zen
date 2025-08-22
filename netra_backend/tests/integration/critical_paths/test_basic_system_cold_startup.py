@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: 100% - no startup means no service, no revenue
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -31,9 +24,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
-
-# Add project root to path
-
 
 # Set test environment before imports
 os.environ["ENVIRONMENT"] = "testing"
@@ -46,7 +36,6 @@ from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.db.client_clickhouse import clickhouse_client
 from netra_backend.app.db.postgres import engine as pg_engine
-
 
 class TestBasicSystemColdStartup:
     """Test basic system cold startup sequence."""

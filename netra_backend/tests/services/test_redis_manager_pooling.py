@@ -3,27 +3,18 @@ Tests for Redis Manager connection pooling functionality
 Tests connection pool creation, management, and concurrent usage
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.redis_test_fixtures import (
     MockRedisClient,
     connection_pool,
-    # Add project root to path
     enhanced_redis_manager,
 )
 from netra_backend.tests.redis_test_helpers import (
@@ -32,7 +23,6 @@ from netra_backend.tests.redis_test_helpers import (
     verify_connection_pool_state,
     verify_pool_cleanup,
 )
-
 
 class TestRedisManagerConnectionPooling:
     """Test Redis connection pooling functionality"""

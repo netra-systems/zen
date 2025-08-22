@@ -19,7 +19,7 @@ def _check_corpus_cache(corpus_id: str, corpus_cache: Dict) -> Optional[List[Dic
 
 def _get_corpus_metadata(corpus_id: str, db: AsyncSession):
     """Get corpus metadata from PostgreSQL"""
-    from ...db import models_postgres as models
+    from netra_backend.app.db import models_postgres as models
     db_corpus = db.query(models.Corpus).filter(models.Corpus.id == corpus_id).first()
     if not db_corpus or db_corpus.status != "completed":
         return None

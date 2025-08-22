@@ -30,7 +30,6 @@ from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class MetricEvent:
     """Represents a metric event in the collection pipeline."""
@@ -42,7 +41,6 @@ class MetricEvent:
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     trace_id: Optional[str] = None
-
 
 class MockMetricsCollector:
     """Mock metrics collector for testing pipeline integration."""
@@ -113,7 +111,6 @@ class MockMetricsCollector:
         self.collected_metrics.clear()
         return flushed_count
 
-
 class MockMetricsAggregator:
     """Mock metrics aggregator for processing collected metrics."""
     
@@ -171,7 +168,6 @@ class MockMetricsAggregator:
         window_key = f"{window_start.isoformat()}_{current_time.isoformat()}"
         self.aggregated_metrics[window_key] = aggregation_results
         return aggregation_results
-
 
 class MockMetricsStorage:
     """Mock metrics storage for persistence verification."""
@@ -235,7 +231,6 @@ class MockMetricsStorage:
             "oldest_entry": min((entry["stored_at"] for entry in self.stored_metrics.values()), default=None),
             "newest_entry": max((entry["stored_at"] for entry in self.stored_metrics.values()), default=None)
         }
-
 
 class MockUserActionTracker:
     """Mock user action tracker for generating metric events."""
@@ -328,24 +323,20 @@ class MockUserActionTracker:
         collection_results = await self.metrics_collector.collect_batch(metrics_to_collect)
         return collection_results["successful"] == len(metrics_to_collect)
 
-
 @pytest.fixture
 def metrics_collector():
     """Create mock metrics collector."""
     return MockMetricsCollector()
-
 
 @pytest.fixture
 def metrics_aggregator(metrics_collector):
     """Create mock metrics aggregator."""
     return MockMetricsAggregator(metrics_collector)
 
-
 @pytest.fixture
 def metrics_storage():
     """Create mock metrics storage."""
     return MockMetricsStorage()
-
 
 @pytest.fixture
 def user_action_tracker(metrics_collector):

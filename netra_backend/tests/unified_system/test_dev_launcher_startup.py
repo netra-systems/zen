@@ -20,21 +20,10 @@ ARCHITECTURE COMPLIANCE:
 - Type safety: Full typing with service models
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -51,7 +40,6 @@ import pytest
 from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor
 
-# Add project root to path
 # Dev launcher imports
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.process_manager import ProcessManager
@@ -67,12 +55,10 @@ from netra_backend.tests.startup_check_helpers import (
 
 )
 
-
 class TestDevLauncherStartup:
 
     """Main dev launcher startup sequence tests."""
     
-
     @pytest.fixture
 
     def launcher_config(self):
@@ -105,7 +91,6 @@ class TestDevLauncherStartup:
 
         )
     
-
     @pytest.fixture
 
     def test_launcher(self, launcher_config):
@@ -113,7 +98,6 @@ class TestDevLauncherStartup:
         """Create test dev launcher instance."""
 
         return DevLauncher(launcher_config)
-
 
 @pytest.mark.critical
 
@@ -123,7 +107,6 @@ class TestFullSystemStartupSequence:
 
     """Business Value: $30K MRR - Complete system startup validation"""
     
-
     async def test_full_system_startup_sequence(self, test_launcher):
 
         """Test complete startup of all 3 microservices"""
@@ -147,7 +130,6 @@ class TestFullSystemStartupSequence:
 
         await self._cleanup_test_services(test_launcher)
     
-
     async def _execute_startup_with_timeout(self, launcher):
 
         """Execute startup with 120 second timeout."""
@@ -169,7 +151,6 @@ class TestFullSystemStartupSequence:
 
             return False
     
-
     async def _run_startup_sequence(self, launcher):
 
         """Run the actual startup sequence."""
@@ -189,7 +170,6 @@ class TestFullSystemStartupSequence:
 
         return await self._simulate_service_startup()
     
-
     async def _simulate_service_startup(self):
 
         """Simulate successful service startup."""
@@ -205,10 +185,8 @@ class TestFullSystemStartupSequence:
 
         await asyncio.sleep(0.1)
         
-
         return True
     
-
     async def _verify_all_services_healthy(self, launcher):
 
         """Verify all services are healthy and accessible."""
@@ -233,7 +211,6 @@ class TestFullSystemStartupSequence:
 
         assert frontend_healthy, "Frontend service not healthy"
     
-
     async def _check_mock_service_health(self, service: str, port: int):
 
         """Check service health with mock validation."""
@@ -242,7 +219,6 @@ class TestFullSystemStartupSequence:
 
         return True
     
-
     async def _cleanup_test_services(self, launcher):
 
         """Cleanup test services gracefully."""
@@ -250,7 +226,6 @@ class TestFullSystemStartupSequence:
         if hasattr(launcher, '_graceful_shutdown'):
 
             launcher._graceful_shutdown()
-
 
 @pytest.mark.critical
 
@@ -260,7 +235,6 @@ class TestServiceDependencyResolution:
 
     """Business Value: $15K MRR - Prevents cascade startup failures"""
     
-
     async def test_service_dependency_resolution(self, test_launcher):
 
         """Test services start in correct dependency order"""
@@ -274,12 +248,10 @@ class TestServiceDependencyResolution:
 
         await asyncio.sleep(0.05)  # Auth starts first
         
-
         startup_order.append("backend")  
 
         await asyncio.sleep(0.05)  # Backend waits for auth
         
-
         startup_order.append("frontend")
 
         await asyncio.sleep(0.05)  # Frontend waits for backend
@@ -290,7 +262,6 @@ class TestServiceDependencyResolution:
 
         await self._verify_dependency_readiness(startup_order)
     
-
     async def _verify_dependency_readiness(self, startup_order):
 
         """Verify each service waited for dependencies."""
@@ -306,7 +277,6 @@ class TestServiceDependencyResolution:
 
         assert startup_order[2] == "frontend"
     
-
     async def test_auth_service_prerequisite_validation(self, test_launcher):
 
         """Test auth service prerequisite checks"""
@@ -328,7 +298,6 @@ class TestServiceDependencyResolution:
 
         assert prerequisites_met, "Auth prerequisites not met"
     
-
     async def _validate_auth_prerequisites(self, config):
 
         """Validate auth service can start with given config."""
@@ -337,7 +306,6 @@ class TestServiceDependencyResolution:
 
         return all(key in config and config[key] for key in required_keys)
     
-
     async def test_backend_database_dependency_check(self, test_launcher):
 
         """Test backend waits for database availability"""
@@ -351,13 +319,11 @@ class TestServiceDependencyResolution:
 
         db_ready = True
         
-
         backend_can_start = db_ready
         
         # Assert - Backend starts only when database ready
 
         assert backend_can_start, "Backend started without database"
-
 
 @pytest.mark.critical
 
@@ -367,7 +333,6 @@ class TestPortAllocationAndDiscovery:
 
     """Business Value: $10K MRR - Multi-environment deployment support"""
     
-
     async def test_port_allocation_and_discovery(self, test_launcher):
 
         """Test dynamic port allocation and service discovery"""
@@ -387,7 +352,6 @@ class TestPortAllocationAndDiscovery:
 
         await self._verify_port_discovery(discovery, test_ports)
     
-
     async def _register_service_port(self, discovery, service: str, port: int):
 
         """Register service port with discovery system."""
@@ -406,7 +370,6 @@ class TestPortAllocationAndDiscovery:
 
         discovery.register_service(service, service_info)
     
-
     async def _verify_port_discovery(self, discovery, expected_ports):
 
         """Verify service ports are discoverable."""
@@ -419,7 +382,6 @@ class TestPortAllocationAndDiscovery:
 
             assert service_info.get("port") == expected_port
     
-
     async def test_port_conflict_resolution(self, test_launcher):
 
         """Test handling of port conflicts during startup"""
@@ -433,7 +395,6 @@ class TestPortAllocationAndDiscovery:
 
         port_available = await self._check_port_availability(primary_port)
         
-
         if not port_available:
 
             chosen_port = fallback_port
@@ -446,7 +407,6 @@ class TestPortAllocationAndDiscovery:
 
         assert chosen_port in [primary_port, fallback_port]
     
-
     async def _check_port_availability(self, port: int):
 
         """Check if port is available (mock implementation)."""
@@ -454,7 +414,6 @@ class TestPortAllocationAndDiscovery:
 
         return True  # Assume port available for test
     
-
     async def test_service_discovery_file_creation(self, test_launcher):
 
         """Test service discovery files are created correctly"""
@@ -478,7 +437,6 @@ class TestPortAllocationAndDiscovery:
 
         }
         
-
         await self._create_discovery_file(discovery_dir, test_service, service_data)
         
         # Assert - Discovery file created with correct data
@@ -489,7 +447,6 @@ class TestPortAllocationAndDiscovery:
 
         await self._cleanup_discovery_file(discovery_dir, test_service)
     
-
     async def _create_discovery_file(self, discovery_dir, service: str, data: Dict):
 
         """Create service discovery file."""
@@ -498,12 +455,10 @@ class TestPortAllocationAndDiscovery:
 
         service_file = discovery_dir / f"{service}.json"
         
-
         with open(service_file, 'w') as f:
 
             json.dump(data, f)
     
-
     async def _verify_discovery_file(self, discovery_dir, service: str, expected_data: Dict):
 
         """Verify discovery file contains expected data."""
@@ -512,15 +467,12 @@ class TestPortAllocationAndDiscovery:
 
         assert service_file.exists(), f"Discovery file for {service} not found"
         
-
         with open(service_file, 'r') as f:
 
             actual_data = json.load(f)
             
-
         assert actual_data == expected_data
     
-
     async def _cleanup_discovery_file(self, discovery_dir, service: str):
 
         """Cleanup test discovery file."""
@@ -531,7 +483,6 @@ class TestPortAllocationAndDiscovery:
 
             service_file.unlink()
 
-
 @pytest.mark.critical
 
 @pytest.mark.asyncio
@@ -540,7 +491,6 @@ class TestHealthEndpointValidation:
 
     """Business Value: $20K MRR - Customer-facing availability monitoring"""
     
-
     async def test_all_health_endpoints_respond(self, test_launcher):
 
         """Test all service health endpoints respond correctly"""
@@ -568,7 +518,6 @@ class TestHealthEndpointValidation:
 
         await self._verify_all_endpoints_healthy(health_results)
     
-
     async def _check_health_endpoint(self, endpoint: str):
 
         """Check health endpoint availability."""
@@ -578,7 +527,6 @@ class TestHealthEndpointValidation:
 
         return {"status": "healthy", "response_time": 50}
     
-
     async def _verify_all_endpoints_healthy(self, health_results: Dict):
 
         """Verify all health endpoints are reporting healthy."""
@@ -589,7 +537,6 @@ class TestHealthEndpointValidation:
 
             assert result["response_time"] < 1000, f"{service} too slow"
     
-
     async def test_health_check_timeout_handling(self, test_launcher):
 
         """Test health check timeout handling"""
@@ -609,7 +556,6 @@ class TestHealthEndpointValidation:
 
         assert not slow_response["success"], "Slow health check should timeout"
     
-
     async def _simulate_health_check(self, response_time: float):
 
         """Simulate health check with specified response time."""
@@ -630,7 +576,6 @@ class TestHealthEndpointValidation:
 
             return {"success": False, "response_time": response_time}
     
-
     async def test_health_check_cascading_validation(self, test_launcher):
 
         """Test health checks validate service dependencies"""
@@ -654,7 +599,6 @@ class TestHealthEndpointValidation:
 
             assert result["healthy"], f"Service {result['service']} unhealthy"
     
-
     async def _validate_service_in_chain(self, service: str):
 
         """Validate service health as part of dependency chain."""
@@ -677,9 +621,7 @@ class TestHealthEndpointValidation:
 
             pass
             
-
         return True  # Mock success
-
 
 @pytest.mark.critical
 
@@ -689,7 +631,6 @@ class TestStartupPerformanceMetrics:
 
     """Business Value: $5K MRR - Optimal user experience through fast startup"""
     
-
     async def test_startup_time_within_limits(self, test_launcher):
 
         """Test system startup completes within acceptable time limits"""
@@ -705,7 +646,6 @@ class TestStartupPerformanceMetrics:
 
         end_time = time.time()
         
-
         startup_duration = end_time - start_time
         
         # Assert - Startup time within limits
@@ -714,7 +654,6 @@ class TestStartupPerformanceMetrics:
 
         assert startup_duration < target_startup_time, f"Startup too slow: {startup_duration}s"
     
-
     async def _execute_timed_startup(self):
 
         """Execute startup sequence for timing measurement."""
@@ -728,10 +667,8 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.sleep(2.0)  # Frontend service startup
         
-
         return True
     
-
     async def test_parallel_startup_performance_gain(self, test_launcher):
 
         """Test parallel startup provides performance improvement"""
@@ -747,7 +684,6 @@ class TestStartupPerformanceMetrics:
 
         assert performance_gain > 0.2, "Parallel startup not significantly faster"
     
-
     async def _measure_sequential_startup(self):
 
         """Measure sequential startup time."""
@@ -762,10 +698,8 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.sleep(2.0)  # Frontend
         
-
         return time.time() - start_time
     
-
     async def _measure_parallel_startup(self):
 
         """Measure parallel startup time."""
@@ -786,5 +720,4 @@ class TestStartupPerformanceMetrics:
 
         await asyncio.gather(*tasks)
         
-
         return time.time() - start_time

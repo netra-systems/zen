@@ -35,7 +35,6 @@ os.environ["CLICKHOUSE_ENABLED"] = "false"
 os.environ["TEST_DISABLE_REDIS"] = "true"
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Only import if available to avoid failures
 try:

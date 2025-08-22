@@ -4,17 +4,10 @@ Tests basic job scheduling, execution, and resource cleanup
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -28,14 +21,11 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 @pytest.fixture
 def mock_dependencies():
@@ -46,7 +36,6 @@ def mock_dependencies():
         'redis_manager': MagicMock(spec=RedisManager),
         'database': MagicMock()
     }
-
 
 @pytest.fixture
 def scheduler(mock_dependencies):
@@ -63,7 +52,6 @@ def scheduler(mock_dependencies):
                 )
                 scheduler.redis_manager = mock_dependencies['redis_manager']
                 return scheduler
-
 
 class TestSupplyResearchSchedulerJobs:
     """Test job execution for supply research scheduler"""
@@ -221,7 +209,6 @@ class TestSupplyResearchSchedulerJobs:
         assert isinstance(call_args[1], timedelta)
         assert call_args[2] == True
 
-
 def _create_test_schedule(name, research_type):
     """Create test schedule with given parameters."""
     return ResearchSchedule(
@@ -229,7 +216,6 @@ def _create_test_schedule(name, research_type):
         frequency=ScheduleFrequency.DAILY,
         research_type=research_type
     )
-
 
 def _create_concurrent_schedules(count):
     """Create multiple test schedules for concurrency testing."""

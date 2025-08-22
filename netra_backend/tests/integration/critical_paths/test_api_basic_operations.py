@@ -5,17 +5,10 @@ Tests fundamental API operations including CRUD, filtering, sorting,
 and error handling across different endpoints.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -27,7 +20,6 @@ import aiohttp
 import pytest
 
 from test_framework.test_patterns import L3IntegrationTest
-
 
 class TestAPIBasicOperations(L3IntegrationTest):
     """Test API basic operations from multiple angles."""
@@ -310,7 +302,6 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert "error" in data
                 assert "code" in data
                 assert data["code"] == "NOT_FOUND"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

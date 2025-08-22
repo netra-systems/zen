@@ -6,7 +6,7 @@ Custom exceptions for callback failure propagation and circuit breaker handling.
 from typing import List, Optional
 
 try:
-    from .reconnection_types import CallbackFailure, CallbackType
+    from netra_backend.app.websocket.reconnection_types import CallbackFailure, CallbackType
 except ImportError:
     from reconnection_types import CallbackFailure, CallbackType
 

@@ -7,17 +7,10 @@ Tests 13, 16, 17, 20 from original missing tests covering:
 - Startup checks async validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -25,10 +18,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# Add project root to path
-
-
 
 # Test 13: error_handlers_recovery (async components)
 class TestAsyncErrorHandlers:
@@ -78,7 +67,6 @@ class TestAsyncErrorHandlers:
         with pytest.raises(Exception, match="Circuit breaker is open"):
             await error_handler.with_circuit_breaker("test_service", always_fails)
 
-
 # Test 16: resource_manager_limits (async components)
 class TestAsyncResourceManager:
     """Test async resource allocation and limits."""
@@ -120,7 +108,6 @@ class TestAsyncResourceManager:
         
         # Should be able to reuse released resource
         assert await resource_manager.acquire("threads", "thread_2")
-
 
 # Test 17: schema_sync_database_migration (async components)
 class TestAsyncSchemaSync:
@@ -165,7 +152,6 @@ class TestAsyncSchemaSync:
         diff = await schema_sync.get_schema_diff_async(expected_schema, actual_schema)
         assert "created_at" in diff["users"]["missing"]
         assert "deleted" in diff["posts"]["extra"]
-
 
 # Test 20: startup_checks_service_validation (async components)
 class TestAsyncStartupChecks:
@@ -233,7 +219,6 @@ class TestAsyncStartupChecks:
         
         assert results["api"] == True  # All deps available
         assert results["worker"] == False  # Queue unavailable
-
 
 # Run specific async tests
 if __name__ == "__main__":

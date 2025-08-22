@@ -10,17 +10,10 @@ Critical Path: Error detection -> Circuit state management -> Fallback activatio
 Coverage: Circuit breaker patterns, failure isolation, graceful degradation, automatic recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -32,7 +25,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.circuit_breaker.circuit_breaker_service import (
     CircuitBreakerService,
 )
@@ -43,10 +35,7 @@ from netra_backend.app.services.circuit_breaker.circuit_state import (
 from netra_backend.app.services.fallback_service import FallbackService
 from netra_backend.app.services.health_check_service import HealthCheckService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class CircuitBreakerManager:
     """Manages circuit breaker testing with real failure simulation."""
@@ -441,7 +430,6 @@ class CircuitBreakerManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def circuit_manager():
     """Create circuit breaker manager for testing."""
@@ -449,7 +437,6 @@ async def circuit_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_basic_functionality(circuit_manager):
@@ -476,7 +463,6 @@ async def test_circuit_breaker_basic_functionality(circuit_manager):
     assert result["circuit_open"] is True
     assert result["fallback_executed"] is True
 
-
 @pytest.mark.asyncio
 async def test_circuit_recovery_mechanism(circuit_manager):
     """Test circuit breaker recovery from open to closed state."""
@@ -489,7 +475,6 @@ async def test_circuit_recovery_mechanism(circuit_manager):
     assert recovery_result["final_state"] == "CLOSED"
     assert recovery_result["failures_triggered"] >= 5
     assert recovery_result["successes_for_recovery"] >= 3
-
 
 @pytest.mark.asyncio
 async def test_fallback_mechanism_activation(circuit_manager):
@@ -512,7 +497,6 @@ async def test_fallback_mechanism_activation(circuit_manager):
         assert result["fallback_response"]["degraded"] is True
         assert "fallback_type" in result["fallback_response"]
 
-
 @pytest.mark.asyncio
 async def test_cascading_failure_prevention(circuit_manager):
     """Test that circuit breakers prevent cascading failures across services."""
@@ -528,7 +512,6 @@ async def test_cascading_failure_prevention(circuit_manager):
     for detail in cascade_result["isolation_details"]:
         assert detail["service_functional"] is True
         assert detail["circuit_state"] == "CLOSED"
-
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_under_load(circuit_manager):
@@ -552,7 +535,6 @@ async def test_circuit_breaker_under_load(circuit_manager):
         if request_count >= 100:
             assert load_result["fallback_requests"] > 0
 
-
 @pytest.mark.asyncio
 async def test_circuit_breaker_configuration_variations(circuit_manager):
     """Test circuit breakers with different configuration parameters."""
@@ -574,7 +556,6 @@ async def test_circuit_breaker_configuration_variations(circuit_manager):
                 assert result["circuit_open"] is True
             else:
                 assert result["circuit_open"] is False
-
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_performance_metrics(circuit_manager):
@@ -605,7 +586,6 @@ async def test_circuit_breaker_performance_metrics(circuit_manager):
     
     # Verify performance requirements
     assert metrics["average_response_time"] < 1.0  # Should be fast
-
 
 @pytest.mark.asyncio
 async def test_concurrent_circuit_breaker_operations(circuit_manager):

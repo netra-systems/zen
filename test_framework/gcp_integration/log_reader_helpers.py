@@ -8,8 +8,8 @@ from typing import Any, AsyncIterator, Dict, List, Optional
 
 from google.cloud import logging as gcp_logging
 
-from ..unified.base_interfaces import ILogAnalyzer
-from .base import GCPBaseClient, GCPConfig
+from test_framework.unified.base_interfaces import ILogAnalyzer
+from test_framework.gcp_integration.base import GCPBaseClient, GCPConfig
 
 
 @dataclass

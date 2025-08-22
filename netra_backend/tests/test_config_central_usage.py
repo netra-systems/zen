@@ -10,17 +10,10 @@ This test suite validates that all modules properly use the central
 configuration system and don't bypass it with direct imports.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import ast
 import os
@@ -29,7 +22,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 import pytest
-
 
 class ConfigUsageAnalyzer(ast.NodeVisitor):
     """AST analyzer to detect configuration usage patterns."""
@@ -124,14 +116,12 @@ class ConfigUsageAnalyzer(ast.NodeVisitor):
             pass
         return False
 
-
 class TestCentralConfigUsage:
     """Test Suite 1: Validate Central Configuration Usage"""
     
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
-        return Path(__file__).parent.parent.parent
         
     @pytest.fixture
     def python_files(self, project_root):

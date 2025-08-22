@@ -3,17 +3,10 @@ L4 Integration Test: Token Validation Chain Complete
 Tests entire token validation chain including JWT, refresh tokens, and service tokens
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -28,7 +21,6 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.core.exceptions import (
-    # Add project root to path
     InvalidTokenError,
     TokenExpiredError,
     TokenRevokedError,
@@ -37,9 +29,7 @@ from netra_backend.app.core.exceptions import (
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
 from netra_backend.app.services.token_service import TokenService
-
 
 class TestTokenValidationChainCompleteL4:
     """Complete token validation chain testing"""

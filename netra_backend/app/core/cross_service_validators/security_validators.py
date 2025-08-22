@@ -15,6 +15,7 @@ from uuid import uuid4
 import jwt
 from pydantic import BaseModel
 
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.core.cross_service_validators.validator_framework import (
     BaseValidator,
     ValidationResult,
@@ -43,21 +44,14 @@ class TokenValidationValidator(BaseValidator):
     
     def _get_jwt_secret_for_testing(self, config: Optional[Dict[str, Any]] = None) -> str:
         """Get JWT secret for testing, consistent with service configuration."""
-        import os
-        
         # If explicitly provided in config, use it
         if config and "jwt_secret" in config:
             return config["jwt_secret"]
         
-        # Use same environment variable as the services
-        secret = os.getenv("JWT_SECRET_KEY")
-        if secret:
-            return secret
-        
-        # Fallback to legacy JWT_SECRET
-        secret = os.getenv("JWT_SECRET")
-        if secret:
-            return secret
+        # Use unified configuration system
+        unified_config = get_unified_config()
+        if unified_config.jwt_secret_key:
+            return unified_config.jwt_secret_key
         
         # Test environment fallback
         return "test-secret-key-for-validation-testing-32-chars"

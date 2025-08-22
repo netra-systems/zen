@@ -10,17 +10,10 @@ BVJ:
 4. Revenue Impact: Maintains data integrity for optimization value capture
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,11 +28,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -47,7 +39,6 @@ from test_fixtures import (
     mock_websocket_manager,
     supervisor_agent,
 )
-
 
 async def test_agent_state_transitions(supervisor_agent):
     """Test agent state transitions through pipeline"""
@@ -68,7 +59,6 @@ async def test_agent_state_transitions(supervisor_agent):
     
     # Verify state has expected structure
     _verify_state_transitions(state)
-
 
 async def test_websocket_message_streaming(supervisor_agent, mock_websocket_manager):
     """Test WebSocket message streaming during execution"""
@@ -91,7 +81,6 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     # Should have sent at least completion message
     assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
 
-
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
     # Test successful tool execution
@@ -105,7 +94,6 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     with pytest.raises(Exception) as exc_info:
         await mock_tool_dispatcher.dispatch_tool("failing_tool", {})
     assert "Tool error" in str(exc_info.value)
-
 
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
@@ -125,7 +113,6 @@ async def test_state_persistence(supervisor_agent):
     assert result is not None
     assert isinstance(result, DeepAgentState)
 
-
 async def test_multi_agent_coordination(supervisor_agent):
     """Test coordination between multiple sub-agents"""
     # Verify all expected agents are registered
@@ -136,7 +123,6 @@ async def test_multi_agent_coordination(supervisor_agent):
     for expected in expected_agents:
         assert any(expected in name.lower() for name in agent_names), \
             f"Missing expected agent: {expected}"
-
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
@@ -167,7 +153,6 @@ async def test_real_llm_interaction():
     assert result["content"] == "Successful response after retry"
     assert call_count == 2
 
-
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -194,7 +179,6 @@ async def test_tool_execution_with_llm():
     assert tool_results[0]["tool"] == "analyze_workload"
     assert tool_results[1]["tool"] == "optimize_batch_size"
 
-
 async def test_websocket_error_handling(mock_websocket_manager):
     """Test WebSocket error handling during message streaming"""
     # Setup WebSocket to fail
@@ -207,7 +191,6 @@ async def test_websocket_error_handling(mock_websocket_manager):
     except Exception as e:
         assert "WebSocket error" in str(e)
 
-
 async def test_state_recovery_scenarios():
     """Test various state recovery scenarios"""
     # Test successful recovery
@@ -219,7 +202,6 @@ async def test_state_recovery_scenarios():
     partial_state = _create_partial_recovery_state()
     assert partial_state.triage_result is not None
     assert partial_state.data_result is None
-
 
 async def test_integration_error_boundaries():
     """Test error boundaries in integration scenarios"""
@@ -234,7 +216,6 @@ async def test_integration_error_boundaries():
     except Exception as e:
         assert "DB connection lost" in str(e)
 
-
 def _create_triage_result():
     """Create triage result for testing"""
     return {
@@ -243,14 +224,12 @@ def _create_triage_result():
         "requires_optimization": True
     }
 
-
 def _create_data_result():
     """Create data result for testing"""
     return {
         "metrics": {"gpu_util": 0.75, "memory": 0.82},
         "analysis": "High GPU utilization detected"
     }
-
 
 def _create_optimization_result():
     """Create optimization result for testing"""
@@ -262,14 +241,12 @@ def _create_optimization_result():
         "expected_improvement": "25% reduction in memory"
     }
 
-
 def _verify_state_transitions(state):
     """Verify state has expected transition structure"""
     assert state.triage_result is not None
     assert state.data_result is not None
     assert state.optimizations_result is not None
     assert "recommendations" in state.optimizations_result
-
 
 def _setup_persistence_mock(supervisor_agent):
     """Setup persistence mock with proper interfaces"""
@@ -286,7 +263,6 @@ def _setup_persistence_mock(supervisor_agent):
     supervisor_agent.state_persistence.get_thread_context = AsyncMock(return_value=None)
     supervisor_agent.state_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
 
-
 def _create_tool_result(tool_name, params):
     """Create tool execution result"""
     return {
@@ -295,7 +271,6 @@ def _create_tool_result(tool_name, params):
         "result": f"Executed {tool_name}",
         "status": "success"
     }
-
 
 def _create_llm_tool_response():
     """Create LLM response with tool calls"""
@@ -307,7 +282,6 @@ def _create_llm_tool_response():
         ]
     }
 
-
 def _create_recovery_state():
     """Create interrupted state for recovery testing"""
     state = DeepAgentState(
@@ -318,7 +292,6 @@ def _create_recovery_state():
     state.triage_result = {"category": "optimization", "step": "analysis"}
     return state
 
-
 def _create_partial_recovery_state():
     """Create partially recovered state"""
     state = DeepAgentState(
@@ -328,7 +301,6 @@ def _create_partial_recovery_state():
     )
     state.triage_result = {"category": "optimization", "confidence": 0.9}
     return state
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

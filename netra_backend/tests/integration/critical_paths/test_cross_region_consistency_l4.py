@@ -16,17 +16,10 @@ Coverage: Cross-region data replication, eventual consistency validation, confli
          network partition scenarios, region failover, read/write routing optimization.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -49,15 +42,12 @@ from netra_backend.app.db.postgres_core import async_engine, async_session_facto
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class RegionConfig:
@@ -69,7 +59,6 @@ class RegionConfig:
     clickhouse_config: Dict[str, Any]
     geographic_location: str
     priority: int = 0  # 0 = primary, 1+ = secondary
-
 
 @dataclass
 class CrossRegionMetrics:
@@ -123,7 +112,6 @@ class CrossRegionMetrics:
     def cross_region_hit_rate(self) -> float:
         total_reads = self.cross_region_hits + self.cross_region_misses
         return (self.cross_region_hits / total_reads * 100) if total_reads > 0 else 0.0
-
 
 class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
     """L4 Cross-Region Data Consistency Test with staging environment validation."""
@@ -1221,7 +1209,6 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.error(f"Cross-region consistency cleanup failed: {e}")
 
-
 # Pytest fixtures and tests
 @pytest.fixture
 async def cross_region_consistency_l4_test():
@@ -1230,7 +1217,6 @@ async def cross_region_consistency_l4_test():
     await test_instance.initialize_l4_environment()
     yield test_instance
     await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -1284,7 +1270,6 @@ async def test_l4_cross_region_consistency_critical_path(cross_region_consistenc
     logger.info(f"Test metrics: {metrics.duration:.2f}s duration, {metrics.service_calls} service calls")
     logger.info(f"Cross-region summary: {cross_region_summary}")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
@@ -1303,7 +1288,6 @@ async def test_l4_cross_region_basic_operations(cross_region_consistency_l4_test
         assert perf["write_latency_ms"] < 5000, f"Region {region} write latency too high: {perf['write_latency_ms']}ms"
         assert perf["read_latency_ms"] < 3000, f"Region {region} read latency too high: {perf['read_latency_ms']}ms"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
@@ -1316,7 +1300,6 @@ async def test_l4_cross_region_eventual_consistency(cross_region_consistency_l4_
     assert results["eventually_consistent"] >= 3, f"Too few eventually consistent operations: {results['eventually_consistent']}/5"
     assert results["consistency_violations"] <= 2, f"Too many consistency violations: {results['consistency_violations']}"
     assert results["avg_convergence_time"] < 3.0, f"Convergence time too high: {results['avg_convergence_time']}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -1331,7 +1314,6 @@ async def test_l4_cross_region_conflict_resolution(cross_region_consistency_l4_t
         resolution_rate = (results["conflicts_resolved"] / results["conflicts_detected"]) * 100
         assert resolution_rate >= 60.0, f"Conflict resolution rate too low: {resolution_rate}%"
         assert results["avg_resolution_time"] < 8.0, f"Conflict resolution time too high: {results['avg_resolution_time']}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -1351,7 +1333,6 @@ async def test_l4_cross_region_network_partition_handling(cross_region_consisten
         success_rate = (results["successful_operations"] / results["operations_during_partition"]) * 100
         # Lower threshold during partition - some failures expected
         assert success_rate >= 40.0, f"Success rate during partition too low: {success_rate}%"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4

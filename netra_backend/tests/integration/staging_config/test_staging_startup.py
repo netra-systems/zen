@@ -8,8 +8,6 @@ with all dependencies and configurations.
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import os
 import sys
@@ -17,25 +15,20 @@ import time
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
-from tests.base import StagingConfigTestBase
+from netra_backend.tests.base import StagingConfigTestBase
 
 # Add app to path for imports
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-
 
 class TestStagingStartup(StagingConfigTestBase):
 
     """Test full application startup in staging."""
     
-
     async def _start_application(self, env_vars: Dict[str, str]) -> bool:
 
         """
 
         Attempt to start the application with given environment.
         
-
         Returns:
 
             True if startup successful, False otherwise
@@ -102,17 +95,14 @@ class TestStagingStartup(StagingConfigTestBase):
 
             self.assertIsNotNone(ws_manager, "WebSocket manager not initialized")
             
-
             return True
             
-
         except Exception as e:
 
             print(f"Startup failed: {e}")
 
             return False
             
-
         finally:
             # Restore original environment
 
@@ -120,7 +110,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
             os.environ.update(original_env)
             
-
     def test_startup_with_staging_config(self):
 
         """Test application starts with staging configuration."""
@@ -151,10 +140,8 @@ class TestStagingStartup(StagingConfigTestBase):
 
         )
         
-
         self.assertTrue(success, "Application failed to start with staging config")
         
-
     def test_startup_secret_loading(self):
 
         """Test secrets are loaded correctly during startup."""
@@ -163,7 +150,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
         self.require_gcp_credentials()
         
-
         with patch('app.config.secretmanager') as mock_secret_manager:
             # Mock secret client
 
@@ -175,7 +161,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
             accessed_secrets = []
             
-
             def mock_access_secret(request):
 
                 secret_name = request['name'].split('/')[-3]
@@ -190,7 +175,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
                 return mock_response
                 
-
             mock_client.access_secret_version = mock_access_secret
             
             # Start application
@@ -215,21 +199,18 @@ class TestStagingStartup(StagingConfigTestBase):
 
             ]
             
-
             for secret in expected_secrets:
 
                 self.assertIn(secret, accessed_secrets,
 
                             f"Secret '{secret}' not loaded during startup")
                             
-
     def test_startup_with_missing_secrets(self):
 
         """Test startup behavior when secrets are missing."""
 
         self.skip_if_not_staging()
         
-
         with patch('app.config.secretmanager') as mock_secret_manager:
             # Mock secret client that throws errors
 
@@ -237,19 +218,16 @@ class TestStagingStartup(StagingConfigTestBase):
 
             mock_secret_manager.SecretManagerServiceClient.return_value = mock_client
             
-
             def mock_access_secret(request):
 
                 raise Exception("Secret not found")
                 
-
             mock_client.access_secret_version = mock_access_secret
             
             # Start application - should fail gracefully
 
             env_vars = self.get_staging_env_vars()
             
-
             with self.assertRaises(Exception) as context:
 
                 self.loop.run_until_complete(
@@ -258,19 +236,16 @@ class TestStagingStartup(StagingConfigTestBase):
 
                 )
                 
-
             self.assertIn("Secret", str(context.exception),
 
                         "Should fail with secret-related error")
                         
-
     def test_startup_service_initialization_order(self):
 
         """Test services initialize in correct order."""
 
         self.skip_if_not_staging()
         
-
         initialization_order = []
         
         # Patch service initializations to track order
@@ -281,7 +256,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
                 with patch('app.ws_manager.WebSocketManager.__init__') as mock_ws_init:
                     
-
                     def track_init(name):
 
                         def wrapper(*args, **kwargs):
@@ -292,7 +266,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
                         return wrapper
                         
-
                     mock_db_init.side_effect = track_init('database')
 
                     mock_redis_init.side_effect = track_init('redis')
@@ -317,7 +290,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
                         f"Services initialized in wrong order: {initialization_order}")
                         
-
     def test_startup_health_checks(self):
 
         """Test health checks pass after startup."""
@@ -334,7 +306,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
         )
         
-
         if not success:
 
             self.skipTest("Application startup failed")
@@ -361,14 +332,12 @@ class TestStagingStartup(StagingConfigTestBase):
 
                      "Redis health not reported")
                      
-
     def test_startup_performance(self):
 
         """Test application starts within acceptable time."""
 
         self.skip_if_not_staging()
         
-
         start_time = time.time()
         
         # Start application
@@ -381,17 +350,14 @@ class TestStagingStartup(StagingConfigTestBase):
 
         )
         
-
         startup_time = time.time() - start_time
         
-
         self.assertTrue(success, "Application failed to start")
 
         self.assertLess(startup_time, 30,
 
                        f"Startup took {startup_time:.2f}s, exceeds 30s limit")
                        
-
     def test_startup_graceful_shutdown(self):
 
         """Test application shuts down gracefully."""
@@ -408,7 +374,6 @@ class TestStagingStartup(StagingConfigTestBase):
 
         )
         
-
         if not success:
 
             self.skipTest("Application startup failed")
@@ -416,7 +381,6 @@ class TestStagingStartup(StagingConfigTestBase):
         # Simulate shutdown
         from netra_backend.app.routes.mcp.main import shutdown_handlers
         
-
         shutdown_start = time.time()
         
         # Execute shutdown handlers
@@ -425,10 +389,8 @@ class TestStagingStartup(StagingConfigTestBase):
 
             self.loop.run_until_complete(handler())
             
-
         shutdown_time = time.time() - shutdown_start
         
-
         self.assertLess(shutdown_time, 10,
 
                        f"Shutdown took {shutdown_time:.2f}s, exceeds 10s limit")

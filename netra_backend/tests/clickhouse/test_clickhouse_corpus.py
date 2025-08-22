@@ -3,31 +3,20 @@ ClickHouse Corpus Table Tests
 Tests for corpus table creation and management operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 
 import pytest
 from logging_config import central_logger as logger
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.tests.test_clickhouse_permissions import (
     _check_table_create_permission,
 )
-
-# Add project root to path
-
 
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
@@ -104,7 +93,6 @@ class TestCorpusTableOperations:
             logger.info(f"Cleaned up test table: {table_name}")
         except Exception as e:
             logger.warning(f"Failed to cleanup table {table_name}: {e}")
-
 
 if __name__ == "__main__":
     # Run tests with pytest

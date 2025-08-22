@@ -561,7 +561,7 @@ CMD ["npm", "start"]
         print("\n🔐 Setting up secrets in Secret Manager...")
         
         secrets = {
-            "database-url": "postgresql://user:password@/netra?host=/cloudsql/PROJECT_ID:REGION:INSTANCE",
+            "database-url": "postgresql://netra_staging:zRR9caaayrRraaaaaaa6EK@35.223.209.195:5432/netra_staging",
             "redis-url": "redis://10.0.0.1:6379",
             "jwt-secret": "your-secure-jwt-secret-here"
         }

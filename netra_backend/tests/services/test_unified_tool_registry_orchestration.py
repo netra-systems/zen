@@ -3,21 +3,13 @@ Tests for unified tool registry orchestration features.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.tool_registry_management_core import ToolOrchestrator
 from netra_backend.tests.tool_registry_test_mocks import (
@@ -25,14 +17,10 @@ from netra_backend.tests.tool_registry_test_mocks import (
     assert_tool_called,
 )
 
-# Add project root to path
-
-
 @pytest.fixture
 def orchestrator():
     """Create tool orchestrator for testing"""
     return ToolOrchestrator()
-
 
 class TestUnifiedToolRegistryOrchestration:
     """Test advanced orchestration features"""
@@ -115,14 +103,12 @@ class TestUnifiedToolRegistryOrchestration:
         
         _verify_dynamic_registration(orchestrator, dynamic_tool)
 
-
 def _create_conditional_tools() -> tuple:
     """Create tools for conditional execution testing"""
     condition_tool = MockAdvancedTool("condition_checker", "Checks conditions")
     success_tool = MockAdvancedTool("success_handler", "Handles success case")
     failure_tool = MockAdvancedTool("failure_handler", "Handles failure case")
     return condition_tool, success_tool, failure_tool
-
 
 def _setup_condition_tool_behavior(condition_tool) -> None:
     """Setup condition tool to return success condition"""
@@ -131,7 +117,6 @@ def _setup_condition_tool_behavior(condition_tool) -> None:
         result = original_run(query)
         return f"{result} SUCCESS_CONDITION"
     condition_tool._run = mock_run
-
 
 def _create_conditional_chain_config(condition_tool, success_tool, failure_tool) -> dict:
     """Create chain configuration for conditional execution"""
@@ -145,20 +130,17 @@ def _create_conditional_chain_config(condition_tool, success_tool, failure_tool)
         'input_data': 'test condition'
     }
 
-
 def _verify_conditional_execution(condition_tool, success_tool, failure_tool) -> None:
     """Verify conditional execution results"""
     assert condition_tool.call_count == 1
     assert success_tool.call_count == 1
     assert failure_tool.call_count == 1  # Simplified - in real implementation would be conditional
 
-
 def _setup_failing_tool(failing_tool) -> None:
     """Setup tool to fail during execution"""
     def fail_run(query):
         raise NetraException("Tool execution failed")
     failing_tool._run = fail_run
-
 
 def _create_error_chain_config(working_tool, failing_tool) -> dict:
     """Create chain configuration for error testing"""
@@ -170,7 +152,6 @@ def _create_error_chain_config(working_tool, failing_tool) -> dict:
         ],
         'input_data': 'test error handling'
     }
-
 
 async def _test_chain_failure_handling(orchestrator, chain_config, working_tool) -> None:
     """Test chain failure handling"""
@@ -184,14 +165,12 @@ async def _test_chain_failure_handling(orchestrator, chain_config, working_tool)
     chain_id = chain_config['chain_id']
     assert orchestrator.active_chains[chain_id]['status'] == 'failed'
 
-
 def _create_parallel_execution_tools() -> list:
     """Create tools for parallel execution testing"""
     return [
         MockAdvancedTool(f"parallel_tool_{i}", f"Parallel tool {i}")
         for i in range(3)
     ]
-
 
 def _create_parallel_chain_config(tools: list) -> dict:
     """Create chain configuration for parallel execution"""
@@ -201,13 +180,11 @@ def _create_parallel_chain_config(tools: list) -> dict:
         'input_data': 'parallel test data'
     }
 
-
 def _verify_parallel_execution(tools: list, result) -> None:
     """Verify parallel execution results"""
     for tool in tools:
         assert_tool_called(tool, 1)
     assert result is not None
-
 
 def _create_dependent_tools() -> list:
     """Create tools with dependencies"""
@@ -215,7 +192,6 @@ def _create_dependent_tools() -> list:
     tool_b = MockAdvancedTool("tool_b", "Depends on A", dependencies=["tool_a"])
     tool_c = MockAdvancedTool("tool_c", "Depends on B", dependencies=["tool_b"])
     return [tool_a, tool_b, tool_c]
-
 
 def _create_dependency_chain_config(tools: list) -> dict:
     """Create chain configuration with dependencies"""
@@ -225,12 +201,10 @@ def _create_dependency_chain_config(tools: list) -> dict:
         'input_data': 'dependency test data'
     }
 
-
 def _verify_dependency_execution_order(tools: list) -> None:
     """Verify tools were executed in dependency order"""
     for tool in tools:
         assert_tool_called(tool, 1)
-
 
 def _create_performance_test_tools() -> list:
     """Create tools for performance testing"""
@@ -239,7 +213,6 @@ def _create_performance_test_tools() -> list:
         for i in range(5)
     ]
 
-
 def _create_performance_chain_config(tools: list) -> dict:
     """Create chain configuration for performance testing"""
     return {
@@ -247,7 +220,6 @@ def _create_performance_chain_config(tools: list) -> dict:
         'tools': [{'tool': tool} for tool in tools],
         'input_data': 'performance test data'
     }
-
 
 def _verify_performance_metrics(orchestrator, chain_id: str) -> None:
     """Verify performance metrics are collected"""
@@ -260,14 +232,12 @@ def _verify_performance_metrics(orchestrator, chain_id: str) -> None:
     assert 'start_time' in chain_record
     assert 'end_time' in chain_record
 
-
 def _create_composition_tools() -> list:
     """Create tools for chain composition testing"""
     return [
         MockAdvancedTool(f"compose_tool_{i}", f"Composition tool {i}")
         for i in range(4)
     ]
-
 
 def _create_sub_chain_config(tools: list, chain_id: str) -> dict:
     """Create sub-chain configuration"""
@@ -277,13 +247,11 @@ def _create_sub_chain_config(tools: list, chain_id: str) -> dict:
         'input_data': f'sub-chain {chain_id} data'
     }
 
-
 def _verify_chain_composition(orchestrator, result_1, result_2) -> None:
     """Verify chain composition results"""
     assert result_1 is not None
     assert result_2 is not None
     assert len(orchestrator.execution_history) == 2
-
 
 def _create_base_tools() -> list:
     """Create base tools for dynamic registration testing"""
@@ -291,7 +259,6 @@ def _create_base_tools() -> list:
         MockAdvancedTool("base_tool_1", "Base tool 1"),
         MockAdvancedTool("base_tool_2", "Base tool 2")
     ]
-
 
 def _create_base_chain_config(tools: list) -> dict:
     """Create base chain configuration"""
@@ -301,7 +268,6 @@ def _create_base_chain_config(tools: list) -> dict:
         'input_data': 'base chain data'
     }
 
-
 def _create_enhanced_chain_config(base_tools: list, dynamic_tool) -> dict:
     """Create enhanced chain configuration with dynamic tool"""
     all_tools = base_tools + [dynamic_tool]
@@ -310,7 +276,6 @@ def _create_enhanced_chain_config(base_tools: list, dynamic_tool) -> dict:
         'tools': [{'tool': tool} for tool in all_tools],
         'input_data': 'enhanced chain data'
     }
-
 
 def _verify_dynamic_registration(orchestrator, dynamic_tool) -> None:
     """Verify dynamic tool registration"""

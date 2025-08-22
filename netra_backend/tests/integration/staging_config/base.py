@@ -21,7 +21,6 @@ except ImportError:
 import httpx
 import pytest
 
-
 class StagingConfigTestBase(unittest.TestCase):
     """Base class for staging configuration tests."""
     

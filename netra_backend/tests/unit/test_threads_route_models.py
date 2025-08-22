@@ -1,29 +1,18 @@
 """Tests for router configuration and Pydantic models - split from test_threads_route.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
+from netra_backend.app.schemas.core_models import Thread
 from netra_backend.app.routes.threads_route import (
-    Thread,
     ThreadResponse,
     ThreadUpdate,
     router,
 )
-
-# Add project root to path
-
 
 class TestRouterConfiguration:
     """Test router configuration"""
@@ -39,7 +28,6 @@ class TestRouterConfiguration:
     def test_router_redirect_slashes(self):
         """Test router has redirect_slashes disabled"""
         assert router.redirect_slashes == False
-
 
 class TestPydanticModels:
     """Test Pydantic model configurations"""

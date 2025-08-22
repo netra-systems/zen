@@ -284,7 +284,7 @@ class PostgresResilienceManager:
     async def test_connection_health(self) -> bool:
         """Test database connection health with simple query."""
         try:
-            from .postgres_session import get_async_db
+            from netra_backend.app.db.postgres_session import get_async_db
             async with get_async_db() as session:
                 await session.execute("SELECT 1")
                 self.set_connection_health(True)
@@ -304,7 +304,7 @@ class PostgresResilienceManager:
             if self._read_only_mode:
                 try:
                     # Test with a simple write operation
-                    from .postgres_session import get_async_db
+                    from netra_backend.app.db.postgres_session import get_async_db
                     async with get_async_db() as session:
                         # This will test if writes are actually working
                         await session.execute("SELECT 1")  # Simple test
@@ -363,7 +363,7 @@ def with_postgres_resilience(
 @asynccontextmanager
 async def resilient_postgres_session():
     """Get PostgreSQL session with resilience patterns applied."""
-    from .postgres_session import get_async_db
+    from netra_backend.app.db.postgres_session import get_async_db
     
     try:
         async with get_async_db() as session:

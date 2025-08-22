@@ -15,7 +15,6 @@ from netra_backend.tests.performance_metrics import (
     ThroughputMetrics,
 )
 
-
 class RegressionDetector:
     """Detects performance regressions."""
     
@@ -85,7 +84,6 @@ class RegressionDetector:
         """Add regression detail if threshold exceeded."""
         if value > self.regression_threshold:
             details.append(f"{metric_name} regression: {value*100:.1f}% (threshold: {threshold_pct}%)")
-
 
 class BenchmarkComparator:
     """Compares performance against benchmarks."""

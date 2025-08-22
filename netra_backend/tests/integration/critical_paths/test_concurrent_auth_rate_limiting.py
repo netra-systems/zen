@@ -12,14 +12,8 @@ proper error responses, and rate limit reset validation.
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -31,16 +25,11 @@ from datetime import datetime, timezone
 
 import redis.asyncio as redis
 
-# Add project root to path
-
 from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
 from netra_backend.app.logging_config import central_logger
-from integration.helpers.redis_l3_helpers import RedisContainer
-
-# Add project root to path
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
 
 logger = central_logger.get_logger(__name__)
-
 
 class RateLimitTestScenario:
     """Test scenario for rate limiting validation."""
@@ -64,7 +53,6 @@ class RateLimitTestScenario:
             self.success_count += 1
         else:
             self.blocked_count += 1
-
 
 class ConcurrentAuthRateLimitManager:
     """Manages Redis-backed rate limiting for auth endpoints."""
@@ -194,7 +182,6 @@ class ConcurrentAuthRateLimitManager:
             keys = await self.redis_client.keys(pattern)
             if keys:
                 await self.redis_client.delete(*keys)
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -360,7 +347,6 @@ class TestConcurrentAuthRateLimitingL3:
         
         # Login should block more frequently (lower limit)
         assert login_blocks >= refresh_blocks
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])

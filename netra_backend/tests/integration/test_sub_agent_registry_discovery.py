@@ -16,21 +16,13 @@ REQUIREMENTS:
 - 99% routing accuracy to correct agents
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 
-# Add project root to path
 # Set testing environment
 import os
 import time
@@ -55,7 +47,6 @@ from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
 
-
 class MockCapabilityAgent(BaseSubAgent):
     """Mock agent with defined capabilities for testing."""
     
@@ -77,7 +68,6 @@ class MockCapabilityAgent(BaseSubAgent):
     def can_handle(self, request_type: str) -> bool:
         """Check if agent can handle specific request type."""
         return request_type.lower() in [cap.lower() for cap in self.capabilities]
-
 
 class TestSubAgentRegistryDiscovery:
     """BVJ: Protects $35K MRR through reliable agent discovery and capability routing."""
@@ -506,7 +496,6 @@ class TestSubAgentRegistryDiscovery:
         assert throughput >= 50.0, f"Discovery throughput {throughput:.1f} ops/sec too low"
         
         logger.info(f"Discovery load test: {success_rate}% success, {avg_discovery_time:.3f}s avg, {throughput:.1f} ops/sec")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -19,8 +19,6 @@ import aiohttp
 import pytest
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager

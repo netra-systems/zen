@@ -11,8 +11,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from test_framework.test_config import TEST_LEVELS
 from test_framework.test_discovery import TestDiscovery

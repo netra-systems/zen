@@ -4,17 +4,10 @@ Tests progressive health monitoring, adaptive rules, and stage-based checks.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -35,12 +28,10 @@ from dev_launcher.staged_health_monitor import (
     create_url_health_check,
 )
 
-
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
     """Create staged health monitor instance."""
     return StagedHealthMonitor()
-
 
 @pytest.fixture
 def mock_service_config() -> ServiceConfig:
@@ -53,14 +44,12 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-
 @pytest.fixture
 def mock_process() -> Mock:
     """Create mock process for testing."""
     process = Mock()
     process.poll.return_value = None  # Running process
     return process
-
 
 class TestHealthStage:
     """Test health stage enumeration."""
@@ -71,7 +60,6 @@ class TestHealthStage:
         assert HealthStage.STARTUP == "startup"
         assert HealthStage.WARMING == "warming"
         assert HealthStage.OPERATIONAL == "operational"
-
 
 class TestServiceConfig:
     """Test service configuration model."""
@@ -88,7 +76,6 @@ class TestServiceConfig:
         assert mock_service_config.name == "test_service"
         assert mock_service_config.process_check is not None
         assert mock_service_config.basic_health_check is not None
-
 
 class TestHealthCheckResult:
     """Test health check result model."""
@@ -116,7 +103,6 @@ class TestHealthCheckResult:
         assert result.success is False
         assert result.error_message == "Service unavailable"
 
-
 class TestStageConfig:
     """Test stage configuration dataclass."""
     
@@ -133,7 +119,6 @@ class TestStageConfig:
         assert config.max_failures == 5
         assert config.check_function_name == "basic_health_check"
 
-
 class TestServiceState:
     """Test service state dataclass."""
     
@@ -147,7 +132,6 @@ class TestServiceState:
         assert state.last_check is None
         assert len(state.check_history) == 0
         assert state.grace_multiplier == 1.0
-
 
 class TestStagedHealthMonitorInit:
     """Test staged health monitor initialization."""
@@ -170,7 +154,6 @@ class TestStagedHealthMonitorInit:
         init_config = configs[HealthStage.INITIALIZATION]
         assert init_config.duration_seconds == 30
         assert init_config.check_function_name == "process_check"
-
 
 class TestServiceRegistration:
     """Test service registration and management."""
@@ -206,7 +189,6 @@ class TestServiceRegistration:
         """Test unregistering non-existent service."""
         # Should not raise exception
         health_monitor.unregister_service("nonexistent")
-
 
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management."""
@@ -245,7 +227,6 @@ class TestMonitoringLifecycle:
             assert len(health_monitor._monitoring_tasks) == 0
             mock_task1.cancel.assert_called_once()
             mock_task2.cancel.assert_called_once()
-
 
 class TestHealthChecks:
     """Test health check execution."""
@@ -300,7 +281,6 @@ class TestHealthChecks:
         # Should return without error when no check function
         await health_monitor._check_service_health("no_check_service")
 
-
 class TestCheckResultProcessing:
     """Test health check result processing."""
     async def test_process_check_result_success(self, health_monitor: StagedHealthMonitor,
@@ -347,7 +327,6 @@ class TestCheckResultProcessing:
         # Should log error
         await health_monitor._handle_failure("test_service", result)
 
-
 class TestStageProgression:
     """Test service stage progression."""
     async def test_update_service_stage_progression(self, health_monitor: StagedHealthMonitor,
@@ -385,7 +364,6 @@ class TestStageProgression:
         """Test stage calculation for operational period."""
         stage = health_monitor._calculate_stage(300)  # 300 seconds
         assert stage == HealthStage.OPERATIONAL
-
 
 class TestAdaptiveRules:
     """Test adaptive monitoring rules."""
@@ -455,7 +433,6 @@ class TestAdaptiveRules:
             base_interval = health_monitor._stage_configs[HealthStage.OPERATIONAL].check_interval
             assert interval == base_interval * 2  # Doubled for stable operation
 
-
 class TestServiceStatus:
     """Test service status retrieval."""
     
@@ -474,7 +451,6 @@ class TestServiceStatus:
         """Test getting status for non-existent service."""
         status = health_monitor.get_service_status("nonexistent")
         assert status is None
-
 
 class TestHealthCheckFactories:
     """Test health check factory functions."""

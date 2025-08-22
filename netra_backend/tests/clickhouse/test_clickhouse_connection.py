@@ -3,28 +3,18 @@ ClickHouse Basic Connection Tests
 Tests for basic ClickHouse connectivity and database operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 from netra_backend.app.core.unified_logging import central_logger as logger
 
-# Add project root to path
 from clickhouse.test_clickhouse_permissions import (
     _check_system_metrics_permission,
-    # Add project root to path
     real_clickhouse_client,
 )
-
 
 class TestRealClickHouseConnection:
     """Test real ClickHouse connection and basic operations"""
@@ -82,7 +72,6 @@ class TestRealClickHouseConnection:
         for row in metrics_result:
             logger.info(f"System metric {row.get('metric')}: {row.get('value')}")
 
-
 class TestClickHouseIntegration:
     """Integration tests for ClickHouse with the application"""
     
@@ -113,7 +102,6 @@ class TestClickHouseIntegration:
                     logger.info(f"✓ Table {expected_table} exists")
                 else:
                     logger.warning(f"✗ Table {expected_table} not found")
-
 
 if __name__ == "__main__":
     # Run tests with pytest

@@ -1,28 +1,18 @@
 """Test JSON extraction utility improvements."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.utils import (
-    # Add project root to path
     extract_json_from_response,
     extract_partial_json,
     fix_common_json_errors,
     recover_truncated_json,
 )
-
 
 class TestJSONExtraction:
     """Test cases for improved JSON extraction."""
@@ -148,7 +138,6 @@ class TestJSONExtraction:
         fixed = fix_common_json_errors(json_str)
         assert '//' not in fixed
 
-
 class TestTruncatedJSONRecovery:
     """Test cases for truncated JSON recovery functionality."""
     
@@ -211,7 +200,6 @@ class TestTruncatedJSONRecovery:
         assert result == None
         result = recover_truncated_json(None)
         assert result == None
-
 
 class TestPartialJSONExtraction:
     """Test cases for partial JSON extraction functionality."""
@@ -300,7 +288,6 @@ class TestPartialJSONExtraction:
         result = extract_partial_json(None)
         assert result == None
 
-
 class TestLargeResponseHandling:
     """Test cases for handling large JSON responses."""
     
@@ -330,7 +317,6 @@ class TestLargeResponseHandling:
         
         assert result != None
         assert "action_plan_summary" in result
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

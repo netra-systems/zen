@@ -1,16 +1,9 @@
 """Tests for CRUDService functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -18,18 +11,13 @@ import pytest
 
 from netra_backend.app.core.exceptions_database import RecordNotFoundError
 
-# Add project root to path
 from netra_backend.app.core.service_interfaces import CRUDService
-
-# Add project root to path
-
 
 class MockModel:
     """Mock database model for testing."""
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-
 
 class TestCRUDService:
     """Test CRUDService functionality."""

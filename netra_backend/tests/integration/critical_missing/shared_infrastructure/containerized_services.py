@@ -10,7 +10,6 @@ from typing import Any, Dict, Optional
 
 import asyncpg
 
-
 # Simplified mock services for testing
 class MockContainer:
     """Base mock container class"""
@@ -22,7 +21,6 @@ class MockContainer:
     
     def stop(self):
         self.running = False
-
 
 class PostgreSQLContainer:
     """L3 Real PostgreSQL container for integration testing."""
@@ -74,7 +72,6 @@ class PostgreSQLContainer:
             # Mock connection for testing
             yield MockConnection()
 
-
 class MockPool:
     """Mock database pool for testing"""
     async def acquire(self):
@@ -82,7 +79,6 @@ class MockPool:
     
     async def close(self):
         pass
-
 
 class MockConnection:
     """Mock database connection for testing"""
@@ -98,7 +94,6 @@ class MockConnection:
     @asynccontextmanager
     async def transaction(self):
         yield self
-
 
 class ClickHouseContainer:
     """L3 Real ClickHouse container for metrics testing."""
@@ -143,7 +138,6 @@ class ClickHouseContainer:
         except Exception:
             pass
 
-
 class MockClickHouseClient:
     """Mock ClickHouse client for testing"""
     def __init__(self):
@@ -154,7 +148,6 @@ class MockClickHouseClient:
     
     async def disconnect(self):
         pass
-
 
 class RedisContainer:
     """L3 Real Redis container for caching and session testing."""
@@ -186,7 +179,6 @@ class RedisContainer:
         """Flush all data for test isolation."""
         await self.client.flushall()
 
-
 class MockRedisClient:
     """Mock Redis client for testing"""
     def __init__(self):
@@ -197,7 +189,6 @@ class MockRedisClient:
     
     async def flushall(self):
         pass
-
 
 class ServiceOrchestrator:
     """Orchestrate multiple containerized services for L3 testing."""

@@ -9,32 +9,22 @@ Tests production-specific security measures including:
 - Threat pattern detection
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import re
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.websocket_cors import (
     SECURITY_CONFIG,
     SUSPICIOUS_PATTERNS,
-    # Add project root to path
     WebSocketCORSHandler,
     get_environment_origins,
 )
-
 
 class TestProductionCORSSecurity:
     """Test production-specific CORS security measures."""
@@ -91,7 +81,6 @@ class TestProductionCORSSecurity:
                 # Should include both production and custom
                 assert 'https://app.netrasystems.ai' in origins
                 assert 'https://custom.com' in origins
-
 
 class TestThreatPatternDetection:
     """Test detection and blocking of suspicious origin patterns."""
@@ -201,7 +190,6 @@ class TestThreatPatternDetection:
         elapsed = time.time() - start_time
         assert elapsed < 1.0  # Should complete in less than 1 second
 
-
 class TestRateLimitingAndBlocking:
     """Test rate limiting and temporary blocking of violating origins."""
     
@@ -286,7 +274,6 @@ class TestRateLimitingAndBlocking:
         assert "bad1.com" in str(stats["violation_counts"])
         assert stats["environment"] == "production"
 
-
 class TestSecurityHeaderInjection:
     """Test injection of security headers in production responses."""
     
@@ -343,7 +330,6 @@ class TestSecurityHeaderInjection:
         assert headers["Access-Control-Allow-Credentials"] == "true"
         assert headers["Access-Control-Allow-Methods"] == "GET"
         assert headers["Vary"] == "Origin"
-
 
 class TestSecurityConfigurationValidation:
     """Test that security configuration is properly validated and applied."""
@@ -421,7 +407,6 @@ class TestSecurityConfigurationValidation:
             # Restore original setting
             SECURITY_CONFIG["block_suspicious_patterns"] = original_suspicious
 
-
 class TestPerformanceUnderAttack:
     """Test system performance under security attacks."""
     
@@ -481,7 +466,6 @@ class TestPerformanceUnderAttack:
         # Blocked origins should have reasonable upper bound
         # (In real implementation, you might add periodic cleanup)
         assert len(handler._blocked_origins) <= 1000
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

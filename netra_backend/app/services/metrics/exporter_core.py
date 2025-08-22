@@ -145,23 +145,23 @@ class MetricsExporter:
     
     async def _convert_operation_metrics(self, operation_metrics) -> List[Dict[str, Any]]:
         """Convert operation metrics to dictionaries."""
-        from .converter_helpers import convert_operation_metrics
+        from netra_backend.app.services.metrics.converter_helpers import convert_operation_metrics
         return await convert_operation_metrics(operation_metrics)
     
     async def _convert_resource_usage(self, resource_usage) -> List[Dict[str, Any]]:
         """Convert resource usage to dictionaries."""
-        from .converter_helpers import convert_resource_usage
+        from netra_backend.app.services.metrics.converter_helpers import convert_resource_usage
         return await convert_resource_usage(resource_usage)
     
     async def _convert_custom_metrics(self, custom_metrics) -> List[Dict[str, Any]]:
         """Convert custom metrics to dictionaries."""
-        from .converter_helpers import convert_custom_metrics
+        from netra_backend.app.services.metrics.converter_helpers import convert_custom_metrics
         return await convert_custom_metrics(custom_metrics)
     
     async def _add_quality_metrics_if_present(self, result: Dict[str, Any], snapshot: MetricsSnapshot) -> None:
         """Add quality metrics if present in snapshot."""
         if snapshot.quality_metrics:
-            from .converter_helpers import convert_quality_metrics
+            from netra_backend.app.services.metrics.converter_helpers import convert_quality_metrics
             result["quality_metrics"] = await convert_quality_metrics(snapshot.quality_metrics)
     
     def _add_snapshot_metadata_if_needed(self, result: Dict[str, Any], include_metadata: bool) -> None:
@@ -204,12 +204,12 @@ class MetricsExporter:
     
     async def _convert_corpus_metric_item(self, item: CorpusMetric) -> Any:
         """Convert CorpusMetric item."""
-        from .converter_helpers import convert_corpus_metric
+        from netra_backend.app.services.metrics.converter_helpers import convert_corpus_metric
         return await convert_corpus_metric(item)
     
     async def _convert_time_series_item(self, item: TimeSeriesPoint) -> Any:
         """Convert TimeSeriesPoint item."""
-        from .converter_helpers import convert_time_series_point
+        from netra_backend.app.services.metrics.converter_helpers import convert_time_series_point
         return await convert_time_series_point(item)
     
     def _add_list_metadata_if_needed(self, result: Dict[str, Any], include_metadata: bool) -> None:

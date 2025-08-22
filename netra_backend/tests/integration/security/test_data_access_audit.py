@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Performance metrics and compliance flags
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timezone
@@ -33,14 +26,11 @@ import pytest
 
 from netra_backend.app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
 
-# Add project root to path
-from integration.security.shared_fixtures import (
+from netra_backend.tests.integration.security.shared_fixtures import (
     DataAccessAuditHelper,
     data_access_helper,
-    # Add project root to path
     enterprise_security_infrastructure,
 )
-
 
 class TestDataAccessAudit:
     """BVJ: Essential for GDPR Article 30 compliance - detailed access logs."""
@@ -239,7 +229,6 @@ class TestDataAccessAudit:
         
         assert access_log.metadata.ip_address == "192.168.1.100"
         assert access_log.metadata.user_agent == "Enterprise Client v1.0"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

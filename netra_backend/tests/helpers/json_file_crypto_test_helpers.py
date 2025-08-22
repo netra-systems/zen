@@ -11,7 +11,6 @@ from decimal import Decimal
 from typing import Any, Dict, List
 from unittest.mock import patch
 
-
 class JsonTestHelpers:
     """Helper functions for JSON utility testing."""
     
@@ -42,7 +41,6 @@ class JsonTestHelpers:
             current = current["child"]
         return nested
 
-
 class FileTestHelpers:
     """Helper functions for file utility testing."""
     
@@ -65,7 +63,6 @@ class FileTestHelpers:
     def mock_write_failure():
         """Mock write failure for testing."""
         return patch('builtins.open', side_effect=IOError("Write failed"))
-
 
 class CryptoTestHelpers:
     """Helper functions for crypto utility testing."""

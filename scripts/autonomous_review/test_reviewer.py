@@ -10,10 +10,10 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .report_generator import ReportGenerator
-from .test_generator import TestGenerator
-from .types import ReviewMode, TestAnalysis, TestMetadata
-from .ultra_thinking_analyzer import UltraThinkingAnalyzer
+from scripts.autonomous_review.report_generator import ReportGenerator
+from scripts.autonomous_review.test_generator import TestGenerator
+from scripts.autonomous_review.types import ReviewMode, TestAnalysis, TestMetadata
+from scripts.autonomous_review.ultra_thinking_analyzer import UltraThinkingAnalyzer
 
 
 class AutonomousTestReviewer:

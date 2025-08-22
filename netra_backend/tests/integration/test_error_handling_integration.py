@@ -8,17 +8,10 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for enterprise SLAs and customer retention
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -28,17 +21,14 @@ from typing import Any, Dict, List
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
-from integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     AgentTestHelpers,
-    # Add project root to path
     AuthenticationTestHelpers,
     WebSocketTestHelpers,
 )
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
-
 
 class ErrorHandlingMetrics:
     """Tracks error handling performance and recovery metrics."""
@@ -68,12 +58,10 @@ class ErrorHandlingMetrics:
         """Record retry attempt."""
         self.retry_counts[operation] = self.retry_counts.get(operation, 0) + 1
 
-
 @pytest.fixture
 def error_metrics():
     """Create error handling metrics tracker."""
     return ErrorHandlingMetrics()
-
 
 class TestGlobalErrorHandler:
     """Test global error handling and propagation."""
@@ -124,7 +112,6 @@ class TestGlobalErrorHandler:
         error_metrics.record_error_scenario("agent_service", "graceful_degradation", True, duration)
         assert fallback_result["mode"] == "degraded"
         assert len(fallback_result["available_features"]) > 0
-
 
 class TestErrorRecoveryMechanisms:
     """Test automated error recovery and retry logic."""
@@ -181,7 +168,6 @@ class TestErrorRecoveryMechanisms:
         error_metrics.record_error_scenario("health_check", "service_recovery", True, duration)
         assert len(recovery_actions) == 2
 
-
 class TestErrorAggregationReporting:
     """Test error aggregation and reporting systems."""
 
@@ -221,7 +207,6 @@ class TestErrorAggregationReporting:
         
         assert all_steps_successful, "Error recovery workflow failed"
         assert len(recovery_steps) == 3, "Recovery workflow incomplete"
-
 
 if __name__ == "__main__":
     async def run_error_handling_tests():

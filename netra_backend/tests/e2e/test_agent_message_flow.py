@@ -13,21 +13,10 @@ Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -44,22 +33,16 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.schemas.registry import WebSocketMessage
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class MessageOrderTracker:
 
     """Tracks message ordering for validation."""
     
-
     def __init__(self):
 
         self.messages: List[Dict[str, Any]] = []
@@ -68,7 +51,6 @@ class MessageOrderTracker:
 
         self.lock = asyncio.Lock()
     
-
     async def record_message(self, message: Dict[str, Any]) -> None:
 
         """Record a message with timestamp."""
@@ -79,14 +61,12 @@ class MessageOrderTracker:
 
             self.timestamps.append(datetime.now())
     
-
     def get_ordered_messages(self) -> List[Dict[str, Any]]:
 
         """Get messages in order they were received."""
 
         return self.messages.copy()
     
-
     def validate_ordering(self) -> bool:
 
         """Validate messages arrived in correct order."""
@@ -95,7 +75,6 @@ class MessageOrderTracker:
 
             return True
         
-
         for i in range(1, len(self.timestamps)):
 
             if self.timestamps[i] < self.timestamps[i-1]:
@@ -104,12 +83,10 @@ class MessageOrderTracker:
 
         return True
 
-
 class WebSocketMessageCapture:
 
     """Captures WebSocket messages sent to users."""
     
-
     def __init__(self):
 
         self.sent_messages: Dict[str, List[Dict[str, Any]]] = {}
@@ -118,7 +95,6 @@ class WebSocketMessageCapture:
 
         self.streaming_chunks: Dict[str, List[Dict[str, Any]]] = {}
     
-
     async def capture_message(self, user_id: str, message: Dict[str, Any]) -> bool:
 
         """Capture a message sent to user."""
@@ -131,7 +107,6 @@ class WebSocketMessageCapture:
 
         return True
     
-
     async def capture_error(self, user_id: str, error: str) -> bool:
 
         """Capture an error sent to user."""
@@ -144,7 +119,6 @@ class WebSocketMessageCapture:
 
         return True
     
-
     async def capture_streaming_chunk(self, user_id: str, chunk: Dict[str, Any]) -> bool:
 
         """Capture a streaming chunk sent to user."""
@@ -157,27 +131,23 @@ class WebSocketMessageCapture:
 
         return True
     
-
     def get_messages_for_user(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all messages sent to a user."""
 
         return self.sent_messages.get(user_id, [])
     
-
     def get_errors_for_user(self, user_id: str) -> List[str]:
 
         """Get all errors sent to a user."""
 
         return self.error_messages.get(user_id, [])
     
-
     def get_streaming_chunks_for_user(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all streaming chunks sent to a user."""
 
         return self.streaming_chunks.get(user_id, [])
-
 
 @pytest.fixture
 
@@ -187,7 +157,6 @@ def message_tracker():
 
     return MessageOrderTracker()
 
-
 @pytest.fixture
 
 def websocket_capture():
@@ -195,7 +164,6 @@ def websocket_capture():
     """Fixture providing WebSocket message capture."""
 
     return WebSocketMessageCapture()
-
 
 @pytest.fixture
 
@@ -217,7 +185,6 @@ async def real_thread_service():
 
     return ThreadService()
 
-
 @pytest.fixture
 
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
@@ -225,7 +192,6 @@ async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mo
     """Fixture providing real supervisor agent with real components."""
     from netra_backend.app.llm.llm_manager import LLMManager
     
-
     try:
         # Try to create real LLM manager
 
@@ -254,9 +220,7 @@ async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mo
 
     )
     
-
     return supervisor
-
 
 @pytest.fixture
 
@@ -265,7 +229,6 @@ async def real_agent_service(real_supervisor_agent):
     """Fixture providing real agent service."""
 
     return AgentService(real_supervisor_agent)
-
 
 @pytest.fixture
 
@@ -276,7 +239,6 @@ async def mock_db_session():
 
     from sqlalchemy.ext.asyncio import AsyncSession
     
-
     session = AsyncMock(spec=AsyncSession)
     
     # Create proper async context manager mock for db_session.begin()
@@ -289,7 +251,6 @@ async def mock_db_session():
 
     session.begin = MagicMock(return_value=mock_transaction)
     
-
     session.commit = AsyncMock()
 
     session.rollback = AsyncMock()
@@ -324,9 +285,7 @@ async def mock_db_session():
 
     mock_message.role = "user"
     
-
     return session
-
 
 @pytest.mark.asyncio
 
@@ -334,7 +293,6 @@ class TestAgentMessageFlow:
 
     """Test complete agent message flow end-to-end."""
     
-
     async def test_complete_user_message_to_agent_response_flow(
 
         self, 
@@ -351,7 +309,6 @@ class TestAgentMessageFlow:
 
         """Test: User message → Backend → Agent → WebSocket → Response
         
-
         Validates complete message flow with real agent processing.
 
         """
@@ -441,7 +398,6 @@ class TestAgentMessageFlow:
 
         assert len(errors) == 0, f"Unexpected errors: {errors}"
     
-
     async def test_agent_message_ordering_guarantees(
 
         self,
@@ -458,7 +414,6 @@ class TestAgentMessageFlow:
 
         """Test message ordering guarantees under concurrent load.
         
-
         Validates messages are processed and responded to in correct order.
 
         """
@@ -491,7 +446,6 @@ class TestAgentMessageFlow:
 
         processed_order = []
         
-
         async def track_and_capture(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Track message order and capture."""
@@ -541,7 +495,6 @@ class TestAgentMessageFlow:
 
         ]
         
-
         assert len(completed_responses) == len(test_messages), \
 
             f"Expected {len(test_messages)} responses, got {len(completed_responses)}"
@@ -552,7 +505,6 @@ class TestAgentMessageFlow:
 
             "Not all messages completed processing"
     
-
     async def test_streaming_response_handling(
 
         self,
@@ -567,7 +519,6 @@ class TestAgentMessageFlow:
 
         """Test streaming response handling for agent messages.
         
-
         Validates streaming chunks are sent in correct order.
 
         """
@@ -596,7 +547,6 @@ class TestAgentMessageFlow:
 
         streaming_chunks = []
         
-
         async def capture_streaming(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Capture streaming messages."""
@@ -641,7 +591,6 @@ class TestAgentMessageFlow:
 
         )
         
-
         assert has_streaming or has_complete, \
 
             "Neither streaming chunks nor complete response was generated"
@@ -660,7 +609,6 @@ class TestAgentMessageFlow:
 
                 "Streaming chunks were not sent in order"
     
-
     async def test_agent_error_handling_and_recovery(
 
         self,
@@ -675,7 +623,6 @@ class TestAgentMessageFlow:
 
         """Test agent error handling and recovery mechanisms.
         
-
         Validates proper error responses are sent via WebSocket.
 
         """
@@ -722,7 +669,6 @@ class TestAgentMessageFlow:
 
             f"Error message not descriptive: {error_message}"
     
-
     async def test_concurrent_user_message_isolation(
 
         self,
@@ -737,7 +683,6 @@ class TestAgentMessageFlow:
 
         """Test message isolation between concurrent users.
         
-
         Validates messages from different users don't interfere.
 
         """
@@ -788,7 +733,6 @@ class TestAgentMessageFlow:
 
                 ]
                 
-
                 await asyncio.gather(*tasks)
         
         # Validate each user received responses
@@ -807,7 +751,6 @@ class TestAgentMessageFlow:
 
                 f"Response for {user_id} doesn't contain user-specific content"
     
-
     async def test_agent_websocket_connection_recovery(
 
         self,
@@ -822,7 +765,6 @@ class TestAgentMessageFlow:
 
         """Test agent processing continues after WebSocket disconnection.
         
-
         Validates graceful handling of connection issues.
 
         """
@@ -849,7 +791,6 @@ class TestAgentMessageFlow:
 
         disconnect_count = 0
         
-
         async def simulate_disconnect(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Simulate WebSocket disconnect on first send."""
@@ -858,7 +799,6 @@ class TestAgentMessageFlow:
 
             disconnect_count += 1
             
-
             if disconnect_count == 1:
                 # Simulate disconnection
                 from starlette.websockets import WebSocketDisconnect
@@ -901,14 +841,12 @@ class TestAgentMessageFlow:
 
         assert True, "Agent service handled WebSocket disconnection gracefully"
 
-
 @pytest.mark.asyncio
 
 class TestAgentMessageFlowPerformance:
 
     """Performance tests for agent message flow."""
     
-
     async def test_message_processing_latency(
 
         self,
@@ -945,7 +883,6 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-
         with patch.object(manager, 'send_message', websocket_capture.capture_message):
 
             with patch.object(manager, 'send_error', websocket_capture.capture_error):
@@ -960,7 +897,6 @@ class TestAgentMessageFlowPerformance:
 
                 )
         
-
         end_time = datetime.now()
 
         processing_time = (end_time - start_time).total_seconds()
@@ -977,10 +913,8 @@ class TestAgentMessageFlowPerformance:
 
             f"Processing took too long: {processing_time:.2f}s"
         
-
         logger.info(f"Message processing latency: {processing_time:.3f}s")
     
-
     async def test_concurrent_message_throughput(
 
         self,
@@ -999,7 +933,6 @@ class TestAgentMessageFlowPerformance:
 
         users = [f"user_{i}" for i in range(num_concurrent)]
         
-
         messages = [
 
             {
@@ -1026,7 +959,6 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-
         with patch.object(manager, 'send_message', websocket_capture.capture_message):
 
             with patch.object(manager, 'send_error', websocket_capture.capture_error):
@@ -1047,10 +979,8 @@ class TestAgentMessageFlowPerformance:
 
                 ]
                 
-
                 await asyncio.gather(*tasks)
         
-
         end_time = datetime.now()
 
         total_time = (end_time - start_time).total_seconds()
@@ -1065,7 +995,6 @@ class TestAgentMessageFlowPerformance:
 
         )
         
-
         assert total_responses >= num_concurrent, \
 
             f"Expected at least {num_concurrent} responses, got {total_responses}"

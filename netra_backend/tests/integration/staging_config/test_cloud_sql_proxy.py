@@ -5,17 +5,10 @@ Validates database connectivity through Cloud SQL proxy
 in the staging environment.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -25,11 +18,7 @@ import asyncpg
 import psycopg2
 from psycopg2 import sql
 
-# Add project root to path
-from tests.base import StagingConfigTestBase
-
-# Add project root to path
-
+from netra_backend.tests.base import StagingConfigTestBase
 
 class TestCloudSQLProxyConnectivity(StagingConfigTestBase):
     """Test Cloud SQL proxy connectivity in staging."""

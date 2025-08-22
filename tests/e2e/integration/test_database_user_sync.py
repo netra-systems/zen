@@ -40,9 +40,6 @@ import pytest
 import pytest_asyncio
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.service_manager import (
     RealServicesManager as create_real_services_manager,

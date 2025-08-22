@@ -56,7 +56,6 @@ CACHE_TEST_CONFIG = {
     }
 }
 
-
 class CacheInvalidationMetrics:
     """Comprehensive metrics collection for cache invalidation testing."""
     
@@ -108,7 +107,6 @@ class CacheInvalidationMetrics:
             "test_duration_sec": total_time,
             "throughput_ops_per_sec": len(self.invalidation_times) / total_time if total_time > 0 else 0
         }
-
 
 class MultiLayerCacheManager:
     """Manages multi-layer cache hierarchy for testing."""
@@ -287,7 +285,6 @@ class MultiLayerCacheManager:
             logger.warning(f"Consistency violation for key {key}: {results}")
             return False
 
-
 async def generate_test_data(num_keys: int = 500) -> tuple[List[str], Dict[str, str], Set[str]]:
     """Generate test data for cache invalidation tests."""
     test_keys = [f"test:key:{i}" for i in range(num_keys)]
@@ -297,7 +294,6 @@ async def generate_test_data(num_keys: int = 500) -> tuple[List[str], Dict[str, 
         "metrics_cache", "schema_cache"
     }
     return test_keys, test_values, test_tags
-
 
 async def populate_cache_layers(cache_manager: MultiLayerCacheManager, test_keys: List[str], test_values: Dict[str, str], test_tags: Set[str], sample_size: int = 100):
     """Helper method to populate cache layers with test data."""

@@ -1,23 +1,14 @@
 """Tests for Quality Gate Service specificity and actionability calculations"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
 )
 from netra_backend.tests.quality_gate_comprehensive_helpers import (
@@ -25,7 +16,6 @@ from netra_backend.tests.quality_gate_comprehensive_helpers import (
     setup_code_block_content,
     setup_specificity_test_content,
 )
-
 
 class TestSpecificityCalculationEdgeCases:
     """Test edge cases in specificity calculation"""
@@ -53,7 +43,6 @@ class TestSpecificityCalculationEdgeCases:
         )
         
         assert score < 0.2  # Should be penalized for vagueness
-
 
 class TestActionabilityEdgeCases:
     """Test edge cases in actionability calculation"""

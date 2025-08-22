@@ -7,11 +7,11 @@ Main coordinator for enabling and managing metadata tracking system.
 from pathlib import Path
 from typing import Any, Dict
 
-from .archiver_generator import ArchiverGenerator
-from .config_manager import ConfigManager
-from .database_manager import DatabaseManager
-from .git_hooks_manager import GitHooksManager
-from .validator_generator import ValidatorGenerator
+from scripts.metadata_tracking.archiver_generator import ArchiverGenerator
+from scripts.metadata_tracking.config_manager import ConfigManager
+from scripts.metadata_tracking.database_manager import DatabaseManager
+from scripts.metadata_tracking.git_hooks_manager import GitHooksManager
+from scripts.metadata_tracking.validator_generator import ValidatorGenerator
 
 
 class MetadataTrackingEnabler:

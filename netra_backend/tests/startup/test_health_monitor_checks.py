@@ -4,17 +4,10 @@ Tests health check execution, result processing, and stage progression
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
@@ -28,12 +21,10 @@ from dev_launcher.staged_health_monitor import (
     StagedHealthMonitor,
 )
 
-
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
     """Create staged health monitor instance."""
     return StagedHealthMonitor()
-
 
 @pytest.fixture
 def mock_service_config() -> ServiceConfig:
@@ -45,7 +36,6 @@ def mock_service_config() -> ServiceConfig:
         ready_check=lambda: True,
         full_health_check=lambda: True
     )
-
 
 class TestHealthChecks:
     """Test health check execution."""
@@ -104,7 +94,6 @@ class TestHealthChecks:
         # Should return without error when no check function
         await health_monitor._check_service_health("no_check_service")
 
-
 class TestCheckResultProcessing:
     """Test health check result processing."""
     
@@ -154,7 +143,6 @@ class TestCheckResultProcessing:
         
         # Should log error
         await health_monitor._handle_failure("test_service", result)
-
 
 class TestStageProgression:
     """Test service stage progression."""

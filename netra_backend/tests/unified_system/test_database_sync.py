@@ -7,21 +7,10 @@ WebSocket event propagation, and frontend state consistency.
 Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,7 +23,6 @@ import sqlalchemy
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
@@ -44,17 +32,14 @@ from netra_backend.tests.fixtures import (
     clean_database_state,
 
     test_database,
-    # Add project root to path
 
     test_user,
 
 )
 
-
 class TestDatabaseSynchronization:
 
     """Test database synchronization and real-time updates"""
-
 
     async def test_thread_creation_flow(self, clean_database_state):
 
@@ -159,7 +144,6 @@ class TestDatabaseSynchronization:
 
         assert sent_data["payload"]["thread_id"] == "thread-123"
 
-
     async def test_postgres_persistence(self, clean_database_state):
 
         """Test data persistence in PostgreSQL across service restarts"""
@@ -220,7 +204,6 @@ class TestDatabaseSynchronization:
 
         assert saved_thread.metadata_["title"] == "Persistent Thread"
         
-
         message_result = await session.execute(
 
             select(Message).where(Message.id == "persist-msg-123")
@@ -267,7 +250,6 @@ class TestDatabaseSynchronization:
 
         assert restored_message.thread_id == restored_thread.id
 
-
     async def test_ui_update_via_websocket(self, clean_database_state):
 
         """Test UI updates through WebSocket events"""
@@ -284,7 +266,6 @@ class TestDatabaseSynchronization:
 
         user1_connection.state.value = 1
         
-
         user2_connection = AsyncMock()
 
         user2_connection.state = MagicMock()
@@ -349,7 +330,6 @@ class TestDatabaseSynchronization:
 
         sent_message_2 = json.loads(user2_connection.send_text.call_args[0][0])
         
-
         assert sent_message_1["type"] == "thread_updated"
 
         assert sent_message_1["payload"]["thread_id"] == "ui-update-thread"
@@ -357,7 +337,6 @@ class TestDatabaseSynchronization:
         assert sent_message_2["type"] == "thread_updated"
 
         assert sent_message_2["payload"]["thread_id"] == "ui-update-thread"
-
 
     async def test_frontend_state_sync(self, clean_database_state):
 
@@ -391,14 +370,12 @@ class TestDatabaseSynchronization:
 
         tab1_connection.state.value = 1
         
-
         tab2_connection = AsyncMock()
 
         tab2_connection.state = MagicMock()
 
         tab2_connection.state.value = 1
         
-
         tab3_connection = AsyncMock()
 
         tab3_connection.state = MagicMock()
@@ -491,7 +468,6 @@ class TestDatabaseSynchronization:
 
             assert sent_data["payload"]["changes"]["title"] == "Updated Title"
 
-
     async def test_concurrent_database_operations(self, clean_database_state):
 
         """Test concurrent database operations with proper synchronization"""
@@ -560,7 +536,6 @@ class TestDatabaseSynchronization:
 
             session.add(message)
         
-
         await session.commit()
         
         # Update thread message count
@@ -609,7 +584,6 @@ class TestDatabaseSynchronization:
 
             assert connection.send_text.call_count == 5
 
-
     async def test_database_transaction_rollback(self, clean_database_state):
 
         """Test transaction rollback and consistency"""
@@ -622,7 +596,6 @@ class TestDatabaseSynchronization:
 
         original_threads = len(original_count.scalars().all())
         
-
         try:
             # Create thread
 
@@ -664,7 +637,6 @@ class TestDatabaseSynchronization:
 
             await session.commit()
             
-
         except Exception:
             # Rollback occurred
 
@@ -690,7 +662,6 @@ class TestDatabaseSynchronization:
 
         assert rollback_thread is None
 
-
     async def test_websocket_connection_recovery(self, clean_database_state):
 
         """Test WebSocket connection recovery and state restoration"""
@@ -713,7 +684,6 @@ class TestDatabaseSynchronization:
 
         session.add(user)
         
-
         thread = Thread(
 
             id="recovery-thread",
@@ -786,7 +756,6 @@ class TestDatabaseSynchronization:
 
         )
         
-
         await ws_manager.send_message_to_user("recovery-user", restore_message.model_dump())
         
         # Verify new connection received state restoration

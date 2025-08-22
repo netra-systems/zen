@@ -16,7 +16,6 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
-
 class MockSupervisorAgent:
     """Mock supervisor agent for testing routing and coordination"""
     
@@ -242,7 +241,6 @@ class MockSupervisorAgent:
         # In real implementation, this would send messages between agents
         pass
 
-
 class MockAgentRegistry:
     """Mock agent registry for testing"""
     
@@ -255,7 +253,6 @@ class MockAgentRegistry:
             execution_time=0.5
         ))
         return agent
-
 
 class MockDataSubAgentExtensions:
     """Extensions for DataSubAgent to support comprehensive testing"""
@@ -352,14 +349,12 @@ class MockDataSubAgentExtensions:
             
         return json.loads(result_str)
 
-
 # Enum extension for additional statuses
 class ExtendedExecutionStatus:
     """Extended execution status for testing"""
     PARTIAL_SUCCESS = "partial_success"
     NEEDS_IMPROVEMENT = "needs_improvement" 
     FORBIDDEN = "forbidden"
-
 
 # Mock the extended status into the original enum
 ExecutionStatus.PARTIAL_SUCCESS = ExtendedExecutionStatus.PARTIAL_SUCCESS

@@ -87,7 +87,7 @@ def categorize_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict
 
 def _build_service_entry(service: str, circuits: Dict[str, Any]) -> Dict[str, Any]:
     """Build single service entry."""
-    from .response_builders import _assess_service_health
+    from netra_backend.app.routes.utils.response_builders import _assess_service_health
     return {
         "circuit_count": len(circuits),
         "overall_health": _assess_service_health(circuits),

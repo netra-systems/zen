@@ -31,7 +31,6 @@ def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_di
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
-
     agents = {
 
         'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher, None),
@@ -48,7 +47,6 @@ def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_di
 
     return _build_model_setup(agents, real_llm_manager, real_websocket_manager)
 
-
 async def _create_real_llm_manager() -> LLMManager:
 
     """Create real LLM manager instance."""
@@ -59,13 +57,11 @@ async def _create_real_llm_manager() -> LLMManager:
 
     return manager
 
-
 def _create_websocket_manager() -> WebSocketManager:
 
     """Create WebSocket manager instance."""
 
     return WebSocketManager()
-
 
 def _create_agent_instances(llm: LLMManager, ws: WebSocketManager) -> Dict:
 
@@ -84,7 +80,6 @@ def _create_agent_instances(llm: LLMManager, ws: WebSocketManager) -> Dict:
         'reporting': ReportingSubAgent(llm, None)
 
     }
-
 
 def _build_model_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Dict:
 

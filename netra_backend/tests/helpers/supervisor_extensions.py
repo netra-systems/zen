@@ -7,7 +7,6 @@ import asyncio
 
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 
-
 async def _route_to_agent(self, state, context, agent_name):
     """Route to specific agent."""
     agent = self.agents.get(agent_name)
@@ -19,7 +18,6 @@ async def _route_to_agent(self, state, context, agent_name):
         return AgentExecutionResult(success=True, state=result_state)
     except Exception as e:
         return AgentExecutionResult(success=False, error=str(e))
-
 
 async def _route_to_agent_with_retry(self, state, context, agent_name):
     """Route with retry logic."""
@@ -34,7 +32,6 @@ async def _route_to_agent_with_retry(self, state, context, agent_name):
             await asyncio.sleep(2 ** attempt)
     
     return result
-
 
 async def _route_to_agent_with_circuit_breaker(self, state, context, agent_name):
     """Route with circuit breaker."""
@@ -57,7 +54,6 @@ async def _route_to_agent_with_circuit_breaker(self, state, context, agent_name)
         self.circuit_breaker_failures[agent_name] = 0
     
     return result
-
 
 def install_supervisor_extensions():
     """Install extension methods on SupervisorAgent for testing."""

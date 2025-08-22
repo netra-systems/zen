@@ -36,7 +36,6 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 fake = Faker()
 
-
 @dataclass
 class SeedScenarioConfig:
     """Configuration for seed data scenarios."""
@@ -47,7 +46,6 @@ class SeedScenarioConfig:
     message_count: int
     event_count: int
     duration_days: int
-
 
 class TestSeedDataManager:
     """Manages seed data generation for test scenarios."""
@@ -484,7 +482,6 @@ class TestSeedDataManager:
             }
             for config in self._scenarios.values()
         ]
-
 
 # Global seed data manager instance
 seed_data_manager = TestSeedDataManager()

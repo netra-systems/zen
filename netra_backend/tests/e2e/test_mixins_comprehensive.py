@@ -12,17 +12,10 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -33,14 +26,10 @@ from unittest.mock import Mock, patch
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentHealthStatus
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class TestStateMixins:
     """Test state management mixin functionality."""
@@ -92,7 +81,6 @@ class TestStateMixins:
             name = "TestAgent"
         
         return TestAgent()
-
 
 class TestLoggingMixins:
     """Test logging mixin functionality with proper formatting."""
@@ -146,7 +134,6 @@ class TestLoggingMixins:
         
         return TestAgent()
 
-
 class TestValidationMixins:
     """Test validation mixin functionality for data integrity."""
     
@@ -192,7 +179,6 @@ class TestValidationMixins:
             name = "TestAgent"
         
         return TestAgent()
-
 
 class TestCachingMixins:
     """Test caching mixin functionality with TTL."""
@@ -255,7 +241,6 @@ class TestCachingMixins:
             name = "TestAgent"
         
         return TestAgent()
-
 
 class TestErrorHandlingMixins:
     """Test error handling and recovery mixins."""

@@ -7,7 +7,6 @@ import asyncio
 from typing import Any, Callable, Dict, Tuple
 from unittest.mock import AsyncMock
 
-
 class NetworkTestHelpers:
     """Helper functions for network utility testing."""
     
@@ -32,7 +31,6 @@ class NetworkTestHelpers:
             return NetworkTestHelpers.mock_successful_response()
         
         return failing_get, lambda: call_count
-
 
 class PaginationTestHelpers:
     """Helper functions for pagination utility testing."""

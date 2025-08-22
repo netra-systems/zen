@@ -13,17 +13,10 @@ Test Level: L2 (Real Internal Dependencies)
 - Mock external payment gateways
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -44,13 +37,9 @@ from netra_backend.app.services.billing.payment_processor import PaymentProcesso
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 from netra_backend.app.services.billing.subscription_manager import SubscriptionManager
 
-# Add project root to path
 from netra_backend.app.services.billing.usage_metering import UsageMeteringService
 
-# Add project root to path
-
 logger = get_logger(__name__)
-
 
 class BusinessCriticalFlowsTester:
     """L2 tester for business critical flow scenarios."""
@@ -1056,7 +1045,6 @@ class BusinessCriticalFlowsTester:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def business_flows_tester():
     """Create business critical flows tester."""
@@ -1068,7 +1056,6 @@ async def business_flows_tester():
     
     yield tester
     await tester.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

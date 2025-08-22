@@ -1,20 +1,9 @@
 """Core Tests - Split from test_websocket_integration.py"""
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,7 +21,6 @@ from ws_manager import WebSocketManager
 
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
-# Add project root to path
 from netra_backend.app.websocket.connection_manager import (
 
     ConnectionManager,
@@ -46,14 +34,10 @@ from netra_backend.app.websocket.message_handler_core import (
 
 )
 
-# Add project root to path
-
-
 class MockWebSocket:
 
     """Mock WebSocket for testing."""
     
-
     def __init__(self):
 
         self.messages_sent = []
@@ -66,22 +50,18 @@ class MockWebSocket:
 
         self.connection_id = f"test_conn_{int(asyncio.get_event_loop().time() * 1000)}"
     
-
     async def accept(self):
 
         self.accepted = True
     
-
     async def send_json(self, data: Dict[str, Any]):
 
         self.messages_sent.append(data)
     
-
     async def send_text(self, data: str):
 
         self.messages_sent.append(data)
     
-
     async def receive_json(self) -> Dict[str, Any]:
 
         if self.messages_received:
@@ -92,18 +72,15 @@ class MockWebSocket:
 
         return {"type": "ping"}
     
-
     async def close(self):
 
         self.closed = True
     
-
     def add_received_message(self, message: Dict[str, Any]):
 
         """Add message to received queue for testing."""
 
         self.messages_received.append(message)
-
 
 @pytest.fixture
 
@@ -113,7 +90,6 @@ def mock_websocket() -> MockWebSocket:
 
     return MockWebSocket()
 
-
 @pytest.fixture
 
 def connection_manager() -> ConnectionManager:
@@ -122,7 +98,6 @@ def connection_manager() -> ConnectionManager:
 
     return get_connection_manager()
 
-
 @pytest.fixture
 
 def ws_manager() -> WebSocketManager:
@@ -130,7 +105,6 @@ def ws_manager() -> WebSocketManager:
     """Create WebSocket manager for testing."""
 
     return WebSocketManager()
-
 
 @pytest.fixture
 
@@ -150,7 +124,6 @@ def sample_message() -> Dict[str, Any]:
 
     }
 
-
 @pytest.fixture
 
 def error_prone_websocket() -> MockWebSocket:
@@ -165,7 +138,6 @@ def error_prone_websocket() -> MockWebSocket:
 
         raise ConnectionError("Simulated connection error")
     
-
     mock_ws.send_json = error_send_json
 
     return mock_ws
@@ -174,12 +146,10 @@ def error_prone_websocket() -> MockWebSocket:
 # WEBSOCKET CORE TESTS
 # =============================================================================
 
-
 class TestWebSocketConnectionCore:
 
     """Test core WebSocket connection functionality."""
     
-
     async def test_websocket_connection_establishment(self, mock_websocket, connection_manager):
 
         """Test basic WebSocket connection establishment."""
@@ -199,7 +169,6 @@ class TestWebSocketConnectionCore:
 
         assert len(mock_websocket.messages_received) == 0
     
-
     async def test_websocket_message_sending(self, mock_websocket, sample_message):
 
         """Test sending messages through WebSocket."""
@@ -217,7 +186,6 @@ class TestWebSocketConnectionCore:
 
         assert mock_websocket.messages_sent[0] == sample_message
     
-
     async def test_websocket_message_receiving(self, mock_websocket):
 
         """Test receiving messages through WebSocket."""
@@ -235,7 +203,6 @@ class TestWebSocketConnectionCore:
 
         assert received == test_message
     
-
     async def test_websocket_connection_manager_integration(self, connection_manager, mock_websocket):
 
         """Test WebSocket integration with connection manager."""
@@ -249,7 +216,6 @@ class TestWebSocketConnectionCore:
 
         assert hasattr(connection_manager, 'add_connection') or hasattr(connection_manager, 'connect')
     
-
     async def test_websocket_error_handling(self, error_prone_websocket):
 
         """Test WebSocket error handling."""
@@ -263,12 +229,10 @@ class TestWebSocketConnectionCore:
 
             await error_prone_websocket.send_json(test_message)
 
-
 class TestWebSocketMessageHandler:
 
     """Test WebSocket message handling functionality."""
     
-
     async def test_agent_request_message_handling(self, ws_manager, sample_message):
 
         """Test handling of agent request messages."""
@@ -282,7 +246,6 @@ class TestWebSocketMessageHandler:
 
         assert hasattr(ws_manager, 'handle_message') or hasattr(ws_manager, 'send_message')
     
-
     async def test_websocket_connection_lifecycle(self, mock_websocket):
 
         """Test complete WebSocket connection lifecycle."""
@@ -312,7 +275,6 @@ class TestWebSocketMessageHandler:
 
         assert mock_websocket.closed is True
     
-
     async def test_websocket_message_validation(self, mock_websocket):
 
         """Test WebSocket message validation."""
@@ -350,12 +312,10 @@ class TestWebSocketMessageHandler:
 
         assert "thread_id" in sent_message
 
-
 class TestWebSocketIntegration:
 
     """Test WebSocket integration with other components."""
     
-
     async def test_websocket_auth_integration(self, mock_websocket, test_auth_token):
 
         """Test WebSocket integration with authentication."""
@@ -383,7 +343,6 @@ class TestWebSocketIntegration:
 
         assert mock_websocket.messages_sent[0]["type"] == "auth"
     
-
     async def test_websocket_thread_integration(self, mock_websocket, thread_management_service):
 
         """Test WebSocket integration with thread management."""
@@ -411,7 +370,6 @@ class TestWebSocketIntegration:
 
         assert thread_management_service is not None
     
-
     async def test_websocket_agent_communication(self, mock_websocket, agent_orchestration_service):
 
         """Test WebSocket communication with agent system."""

@@ -11,17 +11,10 @@ Business Value Justification (BVJ):
 4. Strategic/Revenue Impact: Prevents cache-related failures in production
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import random
@@ -32,17 +25,14 @@ from typing import Dict, List
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
-from integration.cache_invalidation_fixtures import (
+from netra_backend.tests.integration.cache_invalidation_fixtures import (
     CACHE_TEST_CONFIG,
-    # Add project root to path
     CacheInvalidationMetrics,
     MultiLayerCacheManager,
     generate_test_data,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.integration
 @pytest.mark.cache
@@ -302,5 +292,3 @@ class TestCacheEdgeCases:
         assert success_rate >= 80.0, f"Extreme load success rate {success_rate}% below 80%"
         
         logger.info(f"Extreme load conditions test passed: {success_rate}% success rate")
-
-

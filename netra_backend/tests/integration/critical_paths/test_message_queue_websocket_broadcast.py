@@ -24,21 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -53,7 +42,6 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.schemas.websocket_message_types import (
 
     BroadcastResult,
@@ -63,17 +51,12 @@ from netra_backend.app.schemas.websocket_message_types import (
 )
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class MessageRouter:
 
     """Route messages from queue to appropriate WebSocket clients."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -96,28 +79,24 @@ class MessageRouter:
 
         }
     
-
     def add_routing_rule(self, pattern: str, handler: Callable):
 
         """Add message routing rule."""
 
         self.routing_rules[pattern] = handler
         
-
     def register_message_handler(self, message_type: str, handler: Callable):
 
         """Register handler for specific message type."""
 
         self.message_handlers[message_type] = handler
     
-
     async def route_message(self, channel: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Route message based on channel and content."""
 
         self.delivery_stats["total_routed"] += 1
         
-
         routing_result = {
 
             "channel": channel,
@@ -164,15 +143,12 @@ class MessageRouter:
 
                     logger.error(f"Routing handler error: {e}")
         
-
         return routing_result
-
 
 class WebSocketBroadcaster:
 
     """Broadcast messages to WebSocket clients with delivery guarantees."""
     
-
     def __init__(self, ws_manager: WebSocketManager, redis_client: aioredis.Redis):
 
         self.ws_manager = ws_manager
@@ -195,7 +171,6 @@ class WebSocketBroadcaster:
 
         }
     
-
     async def register_client(self, client_id: str, websocket: AsyncMock, subscriptions: List[str] = None):
 
         """Register WebSocket client for broadcasts."""
@@ -224,7 +199,6 @@ class WebSocketBroadcaster:
 
             self.subscription_map[subscription].add(client_id)
     
-
     async def unregister_client(self, client_id: str):
 
         """Unregister WebSocket client."""
@@ -244,22 +218,18 @@ class WebSocketBroadcaster:
 
                         del self.subscription_map[subscription]
             
-
             del self.active_connections[client_id]
     
-
     async def broadcast_to_all(self, message: Dict[str, Any]) -> BroadcastResult:
 
         """Broadcast message to all connected clients."""
 
         self.broadcast_metrics["broadcasts_sent"] += 1
         
-
         successful_deliveries = 0
 
         failed_deliveries = 0
         
-
         for client_id, client_info in self.active_connections.items():
 
             try:
@@ -276,10 +246,8 @@ class WebSocketBroadcaster:
 
                 self.broadcast_metrics["delivery_failures"] += 1
         
-
         self.broadcast_metrics["clients_reached"] += successful_deliveries
         
-
         return BroadcastResult(
 
             successful_deliveries=successful_deliveries,
@@ -290,7 +258,6 @@ class WebSocketBroadcaster:
 
         )
     
-
     async def broadcast_to_subscription(self, subscription: str, message: Dict[str, Any]) -> BroadcastResult:
 
         """Broadcast message to clients subscribed to specific channel."""
@@ -299,14 +266,12 @@ class WebSocketBroadcaster:
 
             return BroadcastResult(successful_deliveries=0, failed_deliveries=0, total_clients=0)
         
-
         client_ids = list(self.subscription_map[subscription])
 
         successful_deliveries = 0
 
         failed_deliveries = 0
         
-
         for client_id in client_ids:
 
             if client_id in self.active_connections:
@@ -325,10 +290,8 @@ class WebSocketBroadcaster:
 
                     self.broadcast_metrics["delivery_failures"] += 1
         
-
         self.broadcast_metrics["clients_reached"] += successful_deliveries
         
-
         return BroadcastResult(
 
             successful_deliveries=successful_deliveries,
@@ -339,7 +302,6 @@ class WebSocketBroadcaster:
 
         )
     
-
     async def send_to_user(self, user_id: str, message: Dict[str, Any]) -> bool:
 
         """Send message to specific user's connections."""
@@ -352,12 +314,10 @@ class WebSocketBroadcaster:
 
         ]
         
-
         if not user_clients:
 
             return False
         
-
         success_count = 0
 
         for client_id in user_clients:
@@ -372,10 +332,8 @@ class WebSocketBroadcaster:
 
                 logger.error(f"User delivery failed for {client_id}: {e}")
         
-
         return success_count > 0
     
-
     async def _send_to_client(self, client_id: str, message: Dict[str, Any]):
 
         """Send message to specific client with retry logic."""
@@ -384,7 +342,6 @@ class WebSocketBroadcaster:
 
             raise Exception(f"Client {client_id} not connected")
         
-
         client_info = self.active_connections[client_id]
 
         websocket = client_info["websocket"]
@@ -405,12 +362,10 @@ class WebSocketBroadcaster:
 
         client_info["last_activity"] = time.time()
 
-
 class MessageQueueBroadcastManager:
 
     """Manage message queue to WebSocket broadcast flow."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -427,10 +382,8 @@ class MessageQueueBroadcastManager:
 
         self.message_log = []
         
-
         self._setup_routing_rules()
     
-
     def _setup_routing_rules(self):
 
         """Setup default routing rules."""
@@ -441,7 +394,6 @@ class MessageQueueBroadcastManager:
 
         self.router.add_routing_rule("session:", self._handle_session_routing)
     
-
     async def _handle_broadcast_routing(self, channel: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Handle broadcast routing."""
@@ -457,7 +409,6 @@ class MessageQueueBroadcastManager:
 
             result = await self.broadcaster.broadcast_to_subscription(subscription, message_data)
         
-
         return {
 
             "recipients": result.total_clients,
@@ -466,7 +417,6 @@ class MessageQueueBroadcastManager:
 
         }
     
-
     async def _handle_user_routing(self, channel: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Handle user-specific routing."""
@@ -475,7 +425,6 @@ class MessageQueueBroadcastManager:
 
         success = await self.broadcaster.send_to_user(user_id, message_data)
         
-
         return {
 
             "recipients": [user_id] if success else [],
@@ -484,7 +433,6 @@ class MessageQueueBroadcastManager:
 
         }
     
-
     async def _handle_session_routing(self, channel: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Handle session-specific routing."""
@@ -501,7 +449,6 @@ class MessageQueueBroadcastManager:
 
         }
     
-
     async def start_listening(self, channels: List[str]):
 
         """Start listening to Redis pub/sub channels."""
@@ -510,7 +457,6 @@ class MessageQueueBroadcastManager:
 
             return
         
-
         self.pubsub = self.redis.pubsub()
         
         # Subscribe to channels
@@ -519,14 +465,12 @@ class MessageQueueBroadcastManager:
 
             await self.pubsub.subscribe(channel)
         
-
         self.is_listening = True
         
         # Start message processing task
 
         asyncio.create_task(self._process_messages())
     
-
     async def _process_messages(self):
 
         """Process messages from Redis pub/sub."""
@@ -535,7 +479,6 @@ class MessageQueueBroadcastManager:
 
             return
         
-
         try:
 
             async for message in self.pubsub.listen():
@@ -550,7 +493,6 @@ class MessageQueueBroadcastManager:
 
             self.is_listening = False
     
-
     async def _handle_pubsub_message(self, message: Dict[str, Any]):
 
         """Handle incoming pub/sub message."""
@@ -583,12 +525,10 @@ class MessageQueueBroadcastManager:
 
             routing_result = await self.router.route_message(channel, data)
             
-
         except Exception as e:
 
             logger.error(f"Message handling error: {e}")
     
-
     async def publish_message(self, channel: str, message: Dict[str, Any]) -> bool:
 
         """Publish message to Redis channel."""
@@ -607,7 +547,6 @@ class MessageQueueBroadcastManager:
 
             return False
     
-
     async def stop_listening(self):
 
         """Stop listening to pub/sub channels."""
@@ -620,10 +559,8 @@ class MessageQueueBroadcastManager:
 
             self.pubsub = None
         
-
         self.is_listening = False
     
-
     async def get_performance_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive performance metrics."""
@@ -643,7 +580,6 @@ class MessageQueueBroadcastManager:
             "listening_status": self.is_listening
 
         }
-
 
 @pytest.fixture
 
@@ -676,7 +612,6 @@ async def redis_client():
 
         yield client
 
-
 @pytest.fixture
 
 async def broadcast_manager(redis_client):
@@ -688,7 +623,6 @@ async def broadcast_manager(redis_client):
     yield manager
 
     await manager.stop_listening()
-
 
 @pytest.mark.asyncio
 
@@ -719,7 +653,6 @@ async def test_broadcast_to_all_clients(broadcast_manager):
 
     result = await broadcast_manager.broadcaster.broadcast_to_all(test_message)
     
-
     assert result.successful_deliveries == 3
 
     assert result.failed_deliveries == 0
@@ -738,7 +671,6 @@ async def test_broadcast_to_all_clients(broadcast_manager):
 
             websocket_mock.send.assert_called_once()
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -756,7 +688,6 @@ async def test_subscription_based_broadcast(broadcast_manager):
 
     client3_websocket = AsyncMock()
     
-
     await broadcast_manager.broadcaster.register_client(
 
         "client1", client1_websocket, ["updates", "notifications"]
@@ -781,11 +712,9 @@ async def test_subscription_based_broadcast(broadcast_manager):
 
     result = await broadcast_manager.broadcaster.broadcast_to_subscription("updates", test_message)
     
-
     assert result.successful_deliveries == 2  # client1 and client2
 
     assert result.total_clients == 2
-
 
 @pytest.mark.asyncio
 
@@ -820,7 +749,6 @@ async def test_user_targeted_messaging(broadcast_manager):
 
     }
     
-
     broadcast_manager.broadcaster.active_connections["user2_client"] = {
 
         "websocket": user2_websocket,
@@ -843,7 +771,6 @@ async def test_user_targeted_messaging(broadcast_manager):
 
     result = await broadcast_manager.broadcaster.send_to_user("user_123", test_message)
     
-
     assert result is True
 
     if hasattr(user1_websocket, 'send_json'):
@@ -853,7 +780,6 @@ async def test_user_targeted_messaging(broadcast_manager):
     elif hasattr(user1_websocket, 'send'):
 
         user1_websocket.send.assert_called_once()
-
 
 @pytest.mark.asyncio
 
@@ -886,7 +812,6 @@ async def test_redis_pubsub_message_routing(broadcast_manager):
 
     publish_success = await broadcast_manager.publish_message("broadcast:updates", test_message)
     
-
     assert publish_success is True
     
     # Wait a bit for message processing
@@ -898,7 +823,6 @@ async def test_redis_pubsub_message_routing(broadcast_manager):
     metrics = await broadcast_manager.get_performance_metrics()
 
     assert metrics["listening_status"] is True
-
 
 @pytest.mark.asyncio
 
@@ -915,10 +839,8 @@ async def test_message_delivery_failure_handling(broadcast_manager):
 
     failing_websocket.send_json.side_effect = Exception("Connection lost")
     
-
     working_websocket = AsyncMock()
     
-
     await broadcast_manager.broadcaster.register_client("failing_client", failing_websocket)
 
     await broadcast_manager.broadcaster.register_client("working_client", working_websocket)
@@ -929,7 +851,6 @@ async def test_message_delivery_failure_handling(broadcast_manager):
 
     result = await broadcast_manager.broadcaster.broadcast_to_all(test_message)
     
-
     assert result.successful_deliveries == 1
 
     assert result.failed_deliveries == 1
@@ -939,7 +860,6 @@ async def test_message_delivery_failure_handling(broadcast_manager):
     # Check failure metrics
 
     assert broadcast_manager.broadcaster.broadcast_metrics["delivery_failures"] > 0
-
 
 @pytest.mark.asyncio
 
@@ -956,7 +876,6 @@ async def test_concurrent_broadcasting_performance(broadcast_manager):
 
     clients = []
     
-
     for i in range(client_count):
 
         client_id = f"perf_client_{i}"
@@ -975,7 +894,6 @@ async def test_concurrent_broadcasting_performance(broadcast_manager):
 
         return await broadcast_manager.broadcaster.broadcast_to_all(message)
     
-
     start_time = time.time()
 
     tasks = [send_broadcast(i) for i in range(5)]
@@ -991,7 +909,6 @@ async def test_concurrent_broadcasting_performance(broadcast_manager):
     assert all(result.successful_deliveries == client_count for result in results)
 
     assert all(result.failed_deliveries == 0 for result in results)
-
 
 @pytest.mark.asyncio
 
@@ -1015,7 +932,6 @@ async def test_client_connection_lifecycle(broadcast_manager):
 
     )
     
-
     assert client_id in broadcast_manager.broadcaster.active_connections
 
     assert "test_subscription" in broadcast_manager.broadcaster.subscription_map
@@ -1026,11 +942,9 @@ async def test_client_connection_lifecycle(broadcast_manager):
 
     await broadcast_manager.broadcaster.unregister_client(client_id)
     
-
     assert client_id not in broadcast_manager.broadcaster.active_connections
 
     assert "test_subscription" not in broadcast_manager.broadcaster.subscription_map
-
 
 @pytest.mark.asyncio
 
@@ -1044,7 +958,6 @@ async def test_message_routing_rules(broadcast_manager):
 
     routing_calls = []
     
-
     async def custom_handler(channel: str, message_data: Dict[str, Any]) -> Dict[str, Any]:
 
         routing_calls.append({"channel": channel, "message": message_data})
@@ -1061,13 +974,11 @@ async def test_message_routing_rules(broadcast_manager):
 
     result = await broadcast_manager.router.route_message("custom:test", test_message)
     
-
     assert result["routing_type"] == "unknown"  # Default for custom patterns
 
     assert len(routing_calls) == 1
 
     assert routing_calls[0]["channel"] == "custom:test"
-
 
 @pytest.mark.asyncio
 
@@ -1099,13 +1010,11 @@ async def test_broadcast_metrics_tracking(broadcast_manager):
 
     final_metrics = await broadcast_manager.get_performance_metrics()
     
-
     assert final_metrics["active_connections"] == 3
 
     assert final_metrics["broadcaster_stats"]["broadcasts_sent"] > initial_metrics["broadcaster_stats"]["broadcasts_sent"]
 
     assert final_metrics["broadcaster_stats"]["clients_reached"] > initial_metrics["broadcaster_stats"]["clients_reached"]
-
 
 @pytest.mark.asyncio
 
@@ -1122,7 +1031,6 @@ async def test_fan_out_message_distribution(broadcast_manager):
 
     clients_per_group = 4
     
-
     for group in subscriptions:
 
         for i in range(clients_per_group):

@@ -16,17 +16,10 @@ L3 Integration Test Level:
 - Tests dead letter queue functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,7 +33,6 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
-# Add project root to path
 from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
@@ -48,10 +40,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class JobRetryDeadLetterL3Manager:
     """Manages L3 job retry and dead letter testing with real infrastructure."""
@@ -301,7 +290,6 @@ class JobRetryDeadLetterL3Manager:
         except Exception as e:
             logger.error(f"Retry test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def retry_dead_letter_manager():
     """Create retry and dead letter manager for L3 testing."""
@@ -309,7 +297,6 @@ async def retry_dead_letter_manager():
     await manager.initialize_test_infrastructure()
     yield manager
     await manager.cleanup_test_infrastructure()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -337,7 +324,6 @@ async def test_basic_retry_mechanism_l3(retry_dead_letter_manager):
     # Check that flaky jobs eventually succeeded
     flaky_attempts = [a for a in retry_dead_letter_manager.retry_attempts if a["type"] == "flaky"]
     assert len(flaky_attempts) >= 4, "Flaky jobs should have multiple attempts"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -379,7 +365,6 @@ async def test_exponential_backoff_implementation_l3(retry_dead_letter_manager):
         assert delays[0] >= 4.0 and delays[0] <= 7.0, f"First retry delay incorrect: {delays[0]}s"
         if len(delays) > 1:
             assert delays[1] >= 8.0 and delays[1] <= 12.0, f"Second retry delay incorrect: {delays[1]}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -429,7 +414,6 @@ async def test_dead_letter_queue_handling_l3(retry_dead_letter_manager):
         assert job["status"] == "failed", "Dead letter job should have failed status"
         assert job["error"] is not None, "Dead letter job should have error information"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_retry_limit_enforcement_l3(retry_dead_letter_manager):
@@ -471,7 +455,6 @@ async def test_retry_limit_enforcement_l3(retry_dead_letter_manager):
     failed_jobs = [job for job in dead_letter_jobs if job["status"] == "failed"]
     assert len(failed_jobs) > 0, "Job should be marked as permanently failed"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_successful_retry_recovery_l3(retry_dead_letter_manager):
@@ -510,7 +493,6 @@ async def test_successful_retry_recovery_l3(retry_dead_letter_manager):
     # Check final message status is completed
     final_stats = await retry_dead_letter_manager.message_queue.get_queue_stats()
     assert final_stats["completed"] > 0, "Recovery job should have completed successfully"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

@@ -13,17 +13,10 @@ Examples show:
 4. Keeping functions under 8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import Mock, patch
 
@@ -59,7 +52,6 @@ class TestAuthenticationCompliant:
         # Assert
         assert result.success is False
         assert result.error == "Account locked"
-
 
 # ===== EXAMPLE 2: EXTRACTING HELPER METHODS =====
 
@@ -105,7 +97,6 @@ class TestDataProcessingCompliant:
         assert result.success is False
         assert len(result.errors) > 0
 
-
 # ===== EXAMPLE 3: PARAMETRIZED TESTS =====
 
 class TestValidationCompliant:
@@ -122,7 +113,6 @@ class TestValidationCompliant:
         result = validator.validate_email(email)
         # Assert
         assert result.is_valid == expected
-
 
 # ===== EXAMPLE 4: FIXTURE USAGE =====
 
@@ -159,7 +149,6 @@ def validator():
     """Fixture providing validator instance"""
     return Mock()
 
-
 # ===== EXAMPLE 5: INTEGRATION TEST PATTERNS =====
 
 class TestAPIIntegrationCompliant:
@@ -180,7 +169,6 @@ class TestAPIIntegrationCompliant:
         # Assert
         assert response.status_code == 200
         assert response.json()["email"] == existing_user.email
-
 
 # ===== ANTI-PATTERNS TO AVOID =====
 
@@ -203,7 +191,6 @@ def test_complex_workflow_bad():
     
     # More assertions...
     assert service.get_user_status(user.id) == "offline"
-
 
 # ✅ DO THIS - Split into focused functions
 class TestComplexWorkflowGood:
@@ -230,7 +217,6 @@ class TestComplexWorkflowGood:
         # Assert
         assert result.success is False
 
-
 # ===== EXAMPLE 6: TEST FILE SPLITTING PATTERNS =====
 
 """
@@ -255,7 +241,6 @@ When a test file exceeds 300 lines, split using these patterns:
    - test_auth_helpers.py (shared helpers)
    - conftest.py (shared fixtures)
 """
-
 
 # ===== EXAMPLE 7: PROPER TEST ORGANIZATION =====
 
@@ -287,7 +272,6 @@ class TestFileOrganizationExample:
         # Helper methods can be longer than 8 lines
         # They support the test functions
         return {"data": "example"}
-
 
 # Summary of Best Practices:
 # 1. Keep test functions under 8 lines

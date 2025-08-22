@@ -14,7 +14,6 @@ Each function ≤8 lines, file ≤300 lines.
 
 import asyncio
 
-# Add project root to path
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,15 +21,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import text
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-# Add project root to path
 from test_framework import setup_test_path
-
-setup_test_path()
 
 from netra_backend.tests.isolated_test_config import (
     isolated_clickhouse,
@@ -40,7 +31,6 @@ from netra_backend.tests.isolated_test_config import (
     with_database_snapshots,
     with_isolated_postgres,
 )
-
 
 class TestPostgreSQLIsolation:
     """Test PostgreSQL database isolation functionality."""
@@ -118,7 +108,6 @@ class TestPostgreSQLIsolation:
         assert postgres_results["status"] in ["passed", "warning"]
         assert postgres_results["summary"]["failed_checks"] == 0
 
-
 class TestClickHouseIsolation:
     """Test ClickHouse database isolation functionality."""
     
@@ -160,7 +149,6 @@ class TestClickHouseIsolation:
         result = client.query(f"SELECT level FROM {database_name}.test_logs WHERE id = 2")
         level = result.result_rows[0][0]
         assert level == "ERROR"
-
 
 class TestFullStackIsolation:
     """Test full database stack isolation (PostgreSQL + ClickHouse)."""
@@ -219,7 +207,6 @@ class TestFullStackIsolation:
         restored_count = result.scalar()
         assert restored_count == initial_count
 
-
 class TestPerformanceIsolation:
     """Test performance scenarios with isolated databases."""
     
@@ -270,7 +257,6 @@ class TestPerformanceIsolation:
         
         # All should have same count (isolation working)
         assert all(count == 3 for count in results)  # Minimal scenario
-
 
 class TestSnapshotSystem:
     """Test database snapshot system functionality."""
@@ -337,7 +323,6 @@ class TestSnapshotSystem:
         restored_count = result.scalar()
         assert restored_count < current_count
 
-
 class TestValidationSystem:
     """Test database state validation system."""
     
@@ -382,7 +367,6 @@ class TestValidationSystem:
         
         assert pg_status in ["passed", "warning"]
         assert ch_status in ["passed", "warning"]
-
 
 if __name__ == "__main__":
     # Example of running tests programmatically

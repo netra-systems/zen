@@ -3,29 +3,18 @@ Input Validation Tests
 Tests enhanced input validation functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.enhanced_input_validation import (
     EnhancedInputValidator,
     SecurityThreat,
     ValidationLevel,
 )
-
-# Add project root to path
-
 
 class TestInputValidation:
     """Test enhanced input validation."""
@@ -184,7 +173,6 @@ class TestInputValidation:
         
         assert result1.is_valid == result2.is_valid
         assert result1.from_cache != result2.from_cache  # Second should be from cache
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

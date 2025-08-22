@@ -8,17 +8,10 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum config loading relia
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from typing import Any, Dict
@@ -47,7 +40,6 @@ from config_loader import (
     set_gemini_api_key,
     set_llm_api_key,
 )
-
 
 @pytest.mark.critical
 class TestEnvironmentVariableLoading:
@@ -108,7 +100,6 @@ class TestEnvironmentVariableLoading:
         # Assert - Success logged
         assert result is True
         assert mock_logger.debug.called
-
 
 @pytest.mark.critical
 class TestClickHouseConfiguration:
@@ -186,7 +177,6 @@ class TestClickHouseConfiguration:
         log_call = mock_logger.debug.call_args[0][0]
         assert "admin_user" in log_call
 
-
 @pytest.mark.critical
 class TestLLMConfigurationLoading:
     """Business Value: Ensures LLM API key configuration for AI service functionality"""
@@ -241,7 +231,6 @@ class TestLLMConfigurationLoading:
         # Assert - Missing config handled gracefully
         assert success
 
-
 @pytest.mark.critical
 class TestCriticalVariableMapping:
     """Business Value: Ensures critical environment variables properly mapped for system startup"""
@@ -287,7 +276,6 @@ class TestCriticalVariableMapping:
         assert len(mapping) >= 8  # At least database, auth, and env vars
         assert all(isinstance(key, str) for key in mapping.keys())
         assert all(isinstance(value, str) for value in mapping.values())
-
 
 @pytest.mark.critical
 class TestSecretApplicationLogic:
@@ -353,7 +341,6 @@ class TestSecretApplicationLogic:
         
         # Assert - None returned for missing attribute
         assert value is None
-
 
 @pytest.mark.critical
 class TestCloudRunEnvironmentDetection:

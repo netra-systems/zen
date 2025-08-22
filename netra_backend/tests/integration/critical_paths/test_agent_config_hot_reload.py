@@ -10,17 +10,10 @@ Critical Path: Config change -> Validation -> Hot reload -> Propagation -> Verif
 Coverage: Real configuration management, file watching, graceful updates
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,12 +38,10 @@ from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.core.events import EventBus
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AgentConfig:
@@ -76,7 +67,6 @@ class AgentConfig:
         """Create from dictionary."""
         data["updated_at"] = datetime.fromisoformat(data["updated_at"])
         return cls(**data)
-
 
 class ConfigValidator:
     """Validates agent configuration."""
@@ -148,7 +138,6 @@ class ConfigValidator:
                 errors.append(f"Timeout {key} must be a positive integer")
         return errors
 
-
 class ConfigFileWatcher(FileSystemEventHandler):
     """Watches configuration files for changes."""
     
@@ -173,7 +162,6 @@ class ConfigFileWatcher(FileSystemEventHandler):
         
         # Trigger config reload
         asyncio.create_task(self.config_manager.handle_file_change(file_path))
-
 
 class ConfigManager:
     """Manages agent configuration with hot reload capabilities."""
@@ -403,7 +391,6 @@ class ConfigManager:
             observer.stop()
             observer.join()
 
-
 class MockAgent:
     """Mock agent for testing configuration hot reload."""
     
@@ -433,7 +420,6 @@ class MockAgent:
         })
         self.current_config = new_config
         logger.info(f"Agent {self.agent_id} received config update")
-
 
 class ConfigHotReloadManager:
     """Manages configuration hot reload testing."""
@@ -493,7 +479,6 @@ class ConfigHotReloadManager:
             import shutil
             shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-
 @pytest.fixture
 async def hot_reload_manager():
     """Create hot reload manager for testing."""
@@ -501,7 +486,6 @@ async def hot_reload_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -523,7 +507,6 @@ async def test_config_loading_and_validation(hot_reload_manager):
     assert loaded_config.agent_id == "test_agent_1"
     assert loaded_config.model_settings["max_tokens"] == 2000
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_config_registration_and_caching(hot_reload_manager):
@@ -543,7 +526,6 @@ async def test_config_registration_and_caching(hot_reload_manager):
     cached_config = await manager.config_manager.get_config("cache_test_agent")
     assert cached_config is not None
     assert cached_config.agent_id == "cache_test_agent"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -574,7 +556,6 @@ async def test_config_file_watching(hot_reload_manager):
     updated_config = await manager.config_manager.get_config("watch_test_agent")
     assert updated_config.model_settings["max_tokens"] == 4000
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_config_validation_rules(hot_reload_manager):
@@ -601,7 +582,6 @@ async def test_config_validation_rules(hot_reload_manager):
     is_valid, errors = validator.validate_config(invalid_config)
     assert is_valid is False
     assert any("temperature" in error for error in errors)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -633,7 +613,6 @@ async def test_agent_config_callbacks(hot_reload_manager):
     # Verify callback was triggered
     assert len(mock_agent.config_changes) == 1
     assert mock_agent.current_config.rate_limits["requests_per_minute"] == 120
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -675,7 +654,6 @@ async def test_concurrent_config_operations(hot_reload_manager):
     assert len(retrieved_configs) == 10
     assert all(config is not None for config in retrieved_configs)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_config_reload_performance(hot_reload_manager):
@@ -712,7 +690,6 @@ async def test_config_reload_performance(hot_reload_manager):
     
     logger.info(f"Performance: {avg_reload_time*1000:.1f}ms per config reload")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_yaml_config_support(hot_reload_manager):
@@ -732,7 +709,6 @@ async def test_yaml_config_support(hot_reload_manager):
     assert loaded_config is not None
     assert loaded_config.agent_id == "yaml_test_agent"
     assert loaded_config.model_settings["temperature"] == 0.7
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

@@ -10,21 +10,10 @@ These tests verify that JWT tokens are properly encoded for WebSocket subprotoco
 to prevent "SyntaxError: Failed to construct 'WebSocket'" errors.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -39,17 +28,12 @@ from fastapi import WebSocket
 from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
 from starlette.websockets import WebSocketState
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_async_db
-
-# Add project root to path
-
 
 class MockWebSocket:
 
     """Mock WebSocket for testing."""
     
-
     def __init__(self, headers: Dict[str, str] = None):
 
         self.headers = headers or {}
@@ -66,26 +50,22 @@ class MockWebSocket:
 
         self.close_reason = None
     
-
     async def accept(self, subprotocol: Optional[str] = None):
 
         self.accepted = True
 
         self.accepted_subprotocol = subprotocol
     
-
     async def send_json(self, data: Any):
 
         self.messages_sent.append(data)
     
-
     async def receive_text(self):
 
         await asyncio.sleep(0.1)
 
         return json.dumps({"type": "ping", "timestamp": datetime.now(timezone.utc).isoformat()})
     
-
     async def close(self, code: int = 1000, reason: str = ""):
 
         self.application_state = WebSocketState.DISCONNECTED
@@ -93,7 +73,6 @@ class MockWebSocket:
         self.close_code = code
 
         self.close_reason = reason
-
 
 def create_test_jwt(user_id: str = "test-user-123", email: str = "test@example.com") -> str:
 
@@ -119,7 +98,6 @@ def create_test_jwt(user_id: str = "test-user-123", email: str = "test@example.c
 
     return jwt.encode(payload, "test-secret", algorithm="HS256")
 
-
 def encode_jwt_for_subprotocol(token: str) -> str:
 
     """Encode JWT token for safe use in WebSocket subprotocol."""
@@ -133,14 +111,12 @@ def encode_jwt_for_subprotocol(token: str) -> str:
 
     return encoded.replace('+', '-').replace('/', '_').replace('=', '')
 
-
 @pytest.mark.asyncio
 
 class TestWebSocketJWTEncodingL3:
 
     """L3 integration tests for WebSocket JWT encoding."""
     
-
     async def test_valid_jwt_encoding_decoding(self):
 
         """Test 1: Valid JWT token is properly encoded and decoded."""
@@ -166,7 +142,6 @@ class TestWebSocketJWTEncodingL3:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -187,7 +162,6 @@ class TestWebSocketJWTEncodingL3:
 
                 result = await manager.validate_secure_auth(mock_ws)
                 
-
                 assert result["user_id"] == "user-123"
 
                 assert result["email"] == "user@test.com"
@@ -202,7 +176,6 @@ class TestWebSocketJWTEncodingL3:
 
                 assert call_args == test_token  # Should be the original token
     
-
     async def test_invalid_base64_encoding_rejection(self):
 
         """Test 2: Invalid base64 encoded tokens are rejected."""
@@ -210,27 +183,22 @@ class TestWebSocketJWTEncodingL3:
 
         invalid_encoded = "not-valid-base64!@#$%"
         
-
         mock_ws = MockWebSocket({
 
             "sec-websocket-protocol": f"jwt.{invalid_encoded}"
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with pytest.raises(Exception) as exc_info:
 
                 await manager.validate_secure_auth(mock_ws)
             
-
             assert "No secure JWT token provided" in str(exc_info.value.detail)
     
-
     async def test_bearer_prefix_handling(self):
 
         """Test 3: Bearer prefix is properly handled in encoding/decoding."""
@@ -244,19 +212,16 @@ class TestWebSocketJWTEncodingL3:
 
         encoded_token = encode_jwt_for_subprotocol(clean_token)
         
-
         mock_ws = MockWebSocket({
 
             "sec-websocket-protocol": f"jwt.{encoded_token}"
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -273,10 +238,8 @@ class TestWebSocketJWTEncodingL3:
 
                 }
                 
-
                 result = await manager.validate_secure_auth(mock_ws)
                 
-
                 assert result["user_id"] == "user-456"
 
                 assert result["auth_method"] == "subprotocol"
@@ -289,7 +252,6 @@ class TestWebSocketJWTEncodingL3:
 
                 assert not call_args.startswith("Bearer ")
     
-
     async def test_special_characters_in_jwt(self):
 
         """Test 4: JWTs with special characters are properly encoded."""
@@ -303,7 +265,6 @@ class TestWebSocketJWTEncodingL3:
 
         assert "_" in test_token or "-" in test_token
         
-
         encoded_token = encode_jwt_for_subprotocol(test_token)
         
         # Encoded version should be subprotocol-safe
@@ -311,19 +272,16 @@ class TestWebSocketJWTEncodingL3:
 
         assert all(c.isalnum() or c in '-_' for c in encoded_token)
         
-
         mock_ws = MockWebSocket({
 
             "sec-websocket-protocol": f"jwt.{encoded_token}"
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -340,12 +298,10 @@ class TestWebSocketJWTEncodingL3:
 
                 }
                 
-
                 result = await manager.validate_secure_auth(mock_ws)
 
                 assert result["user_id"] == "special-user_123.456"
     
-
     async def test_subprotocol_negotiation_with_jwt_auth(self):
 
         """Test 5: Proper subprotocol negotiation with jwt-auth protocol."""
@@ -362,12 +318,10 @@ class TestWebSocketJWTEncodingL3:
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -407,10 +361,8 @@ class TestWebSocketJWTEncodingL3:
 
                         break
                 
-
                 assert selected == "jwt-auth"
     
-
     async def test_malformed_jwt_structure_rejection(self):
 
         """Test 6: Malformed JWT structure (not 3 parts) is rejected."""
@@ -420,32 +372,26 @@ class TestWebSocketJWTEncodingL3:
 
         encoded_token = encode_jwt_for_subprotocol(malformed_token)
         
-
         mock_ws = MockWebSocket({
 
             "sec-websocket-protocol": f"jwt.{encoded_token}"
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {"valid": False}
                 
-
                 with pytest.raises(Exception) as exc_info:
 
                     await manager.validate_secure_auth(mock_ws)
                 
-
                 assert "Invalid or expired token" in str(exc_info.value.detail)
     
-
     async def test_expired_jwt_rejection(self):
 
         """Test 7: Expired JWT tokens are properly rejected."""
@@ -473,33 +419,27 @@ class TestWebSocketJWTEncodingL3:
 
         encoded_token = encode_jwt_for_subprotocol(expired_token)
         
-
         mock_ws = MockWebSocket({
 
             "sec-websocket-protocol": f"jwt.{encoded_token}"
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
                 # Auth service would reject expired token
 
                 mock_validate.return_value = {"valid": False, "error": "Token expired"}
                 
-
                 with pytest.raises(Exception) as exc_info:
 
                     await manager.validate_secure_auth(mock_ws)
                 
-
                 assert "Invalid or expired token" in str(exc_info.value.detail)
     
-
     async def test_empty_subprotocol_fallback(self):
 
         """Test 8: Empty or missing JWT in subprotocol falls back to header auth."""
@@ -507,7 +447,6 @@ class TestWebSocketJWTEncodingL3:
 
         test_token = create_test_jwt("header-user", "header@test.com")
         
-
         mock_ws = MockWebSocket({
 
             "authorization": f"Bearer {test_token}",
@@ -516,12 +455,10 @@ class TestWebSocketJWTEncodingL3:
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -538,15 +475,12 @@ class TestWebSocketJWTEncodingL3:
 
                 }
                 
-
                 result = await manager.validate_secure_auth(mock_ws)
                 
-
                 assert result["user_id"] == "header-user"
 
                 assert result["auth_method"] == "header"  # Used header instead of subprotocol
     
-
     async def test_concurrent_connections_with_encoded_jwt(self):
 
         """Test 9: Multiple concurrent connections with encoded JWTs work correctly."""
@@ -562,26 +496,22 @@ class TestWebSocketJWTEncodingL3:
 
         ]
         
-
         async def connect_user(user_id: str, email: str):
 
             test_token = create_test_jwt(user_id, email)
 
             encoded_token = encode_jwt_for_subprotocol(test_token)
             
-
             mock_ws = MockWebSocket({
 
                 "sec-websocket-protocol": f"jwt.{encoded_token}"
 
             })
             
-
             async with get_async_db() as db_session:
 
                 manager = SecureWebSocketManager(db_session)
                 
-
                 with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                     mock_validate.return_value = {
@@ -598,7 +528,6 @@ class TestWebSocketJWTEncodingL3:
 
                     }
                     
-
                     result = await manager.validate_secure_auth(mock_ws)
 
                     return result
@@ -621,7 +550,6 @@ class TestWebSocketJWTEncodingL3:
 
             assert results[i]["auth_method"] == "subprotocol"
     
-
     async def test_encoding_decoding_roundtrip_integrity(self):
 
         """Test 10: JWT encoding/decoding roundtrip maintains token integrity."""
@@ -657,7 +585,6 @@ class TestWebSocketJWTEncodingL3:
 
         }
         
-
         original_token = jwt.encode(complex_payload, "test-secret", algorithm="HS256")
         
         # Encode for subprotocol
@@ -680,7 +607,6 @@ class TestWebSocketJWTEncodingL3:
 
         decoded_payload = jwt.decode(decoded_token, "test-secret", algorithms=["HS256"])
         
-
         assert decoded_payload["sub"] == "roundtrip-user"
 
         assert decoded_payload["email"] == "roundtrip@test.com"
@@ -697,12 +623,10 @@ class TestWebSocketJWTEncodingL3:
 
         })
         
-
         async with get_async_db() as db_session:
 
             manager = SecureWebSocketManager(db_session)
             
-
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
@@ -719,10 +643,8 @@ class TestWebSocketJWTEncodingL3:
 
                 }
                 
-
                 result = await manager.validate_secure_auth(mock_ws)
                 
-
                 assert result["user_id"] == "roundtrip-user"
 
                 assert result["permissions"] == complex_payload["permissions"]

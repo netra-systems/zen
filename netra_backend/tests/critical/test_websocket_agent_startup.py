@@ -3,17 +3,10 @@
 Tests ensure agents actually start when users send their first message.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import uuid
@@ -24,13 +17,9 @@ import pytest
 
 from netra_backend.app.db.models_postgres import Run, Thread
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
-
 
 class TestAgentStartupWithoutContext:
     """Test agent startup when there's no prior thread/context."""
@@ -321,7 +310,6 @@ class TestAgentStartupWithoutContext:
                 mock_create_msg.assert_called()
                 call_args = mock_create_msg.call_args
                 # Check if references were included in the message metadata or content
-
 
 class TestAgentStartupEdgeCases:
     """Additional edge cases for agent startup."""

@@ -2,7 +2,6 @@
 
 from netra_backend.app.services.quality_gate_service import ContentType
 
-
 def get_high_quality_optimization_content():
     """Get high-quality optimization content for testing"""
     return """
@@ -16,7 +15,6 @@ def get_high_quality_optimization_content():
     and improve p95 latency from 150ms to 115ms.
     """
 
-
 def get_low_quality_generic_content():
     """Get low-quality generic content for testing"""
     return """
@@ -27,7 +25,6 @@ def get_low_quality_generic_content():
     optimizing things. Needless to say, you should think about improving the system.
     """
 
-
 def get_circular_reasoning_content():
     """Get content with circular reasoning patterns"""
     return """
@@ -35,7 +32,6 @@ def get_circular_reasoning_content():
     Optimize the system by optimizing its components.
     For better results, use better algorithms to get better outcomes.
     """
-
 
 def get_data_analysis_content():
     """Get data analysis content with quantitative metrics"""
@@ -49,7 +45,6 @@ def get_data_analysis_content():
     
     Key finding: 65% of latency spikes correlate with batch sizes > 48
     """
-
 
 def get_complete_action_plan_content():
     """Get complete action plan content for testing"""
@@ -91,7 +86,6 @@ def get_complete_action_plan_content():
     Keep GPU memory utilization below 90% at peak load.
     """
 
-
 def get_borderline_quality_content():
     """Get borderline quality content for strict mode testing"""
     return """
@@ -100,7 +94,6 @@ def get_borderline_quality_content():
     Memory usage at 8GB is 85% of capacity and should be reduced to 6GB.
     Implement these changes to achieve 20% performance improvement.
     """
-
 
 def get_good_error_message_content():
     """Get good error message content for testing"""
@@ -116,7 +109,6 @@ def get_good_error_message_content():
     
     Run with --batch-size 32 --gradient-checkpoint to retry
     """
-
 
 def get_redundant_report_content():
     """Get redundant report content for testing"""
@@ -137,7 +129,6 @@ def get_redundant_report_content():
     In conclusion, the system needs optimization to improve performance.
     """
 
-
 def get_domain_specific_content():
     """Get domain-specific content for testing"""
     return """
@@ -146,7 +137,6 @@ def get_domain_specific_content():
     tensor parallelism across 4 A100 GPUs, achieving 3,200 tokens/second throughput
     with p99 latency of 89ms. Cost per million tokens dropped from $2.10 to $1.35.
     """
-
 
 def get_mediocre_content():
     """Get mediocre content for retry suggestion testing"""
@@ -157,7 +147,6 @@ def get_mediocre_content():
     Monitor the results and adjust as needed for your specific use case.
     """
 
-
 def get_hallucination_risk_content():
     """Get content with potential hallucination risks"""
     return """
@@ -166,7 +155,6 @@ def get_hallucination_risk_content():
     and negative latency. This revolutionary approach violates no laws of physics
     and has been proven in -1 production environments.
     """
-
 
 def get_triage_content():
     """Get triage content for testing"""
@@ -183,7 +171,6 @@ def get_triage_content():
     3. Investigate caching strategies for repeated requests
     """
 
-
 def get_high_specificity_content():
     """Get high specificity content for testing"""
     return """
@@ -192,11 +179,9 @@ def get_high_specificity_content():
     Deploy on A100 GPUs with 80GB VRAM, achieving 3,200 tokens/second.
     """
 
-
 def get_low_specificity_content():
     """Get low specificity content for testing"""
     return "You should optimize things to make them better and more efficient."
-
 
 def get_high_actionability_content():
     """Get high actionability content for testing"""
@@ -207,11 +192,9 @@ def get_high_actionability_content():
     Step 4: Set TTL to 3600 seconds for optimal performance
     """
 
-
 def get_low_actionability_content():
     """Get low actionability content for testing"""
     return "You might want to consider perhaps looking into optimization possibilities."
-
 
 def get_high_quantification_content():
     """Get high quantification content for testing"""
@@ -222,26 +205,21 @@ def get_high_quantification_content():
     Cost per request dropped from $0.025 to $0.018 (28% savings).
     """
 
-
 def get_low_quantification_content():
     """Get low quantification content for testing"""
     return "The system runs faster and uses less memory with better performance."
-
 
 def get_optimization_context():
     """Get optimization context for testing"""
     return "Optimize GPU memory usage by enabling mixed precision training and gradient checkpointing."
 
-
 def get_relevant_context():
     """Get relevant context for testing"""
     return {"user_request": "Help me reduce GPU memory consumption during training"}
 
-
 def get_irrelevant_context():
     """Get irrelevant context for testing"""
     return {"user_request": "How do I bake a chocolate cake"}
-
 
 def get_complete_optimization_content():
     """Get complete optimization content for testing"""
@@ -253,7 +231,6 @@ def get_complete_optimization_content():
     Trade-off: Slight increase in complexity and memory overhead.
     """
 
-
 def get_complete_action_plan_simple():
     """Get complete action plan with simple structure"""
     return """
@@ -263,7 +240,6 @@ def get_complete_action_plan_simple():
     Expected outcome: Fully functional deployment pipeline.
     Verification: Run automated tests and performance benchmarks.
     """
-
 
 def get_clear_content():
     """Get clear, well-structured content for testing"""
@@ -276,7 +252,6 @@ def get_clear_content():
     Expected results: 30% performance gain
     """
 
-
 def get_unclear_content():
     """Get unclear, complex content for testing"""
     return """
@@ -287,7 +262,6 @@ def get_unclear_content():
     while maintaining backward compatibility with legacy systems.
     """
 
-
 def get_high_redundancy_content():
     """Get high redundancy content for testing"""
     return """
@@ -296,7 +270,6 @@ def get_high_redundancy_content():
     Better performance requires system optimization efforts.
     Optimization will help the system perform better.
     """
-
 
 def get_low_redundancy_content():
     """Get low redundancy content for testing"""
@@ -307,7 +280,6 @@ def get_low_redundancy_content():
     Finally, monitor performance improvements over time.
     """
 
-
 def get_high_hallucination_risk_content():
     """Get high hallucination risk content for testing"""
     return """
@@ -316,7 +288,6 @@ def get_high_hallucination_risk_content():
     and processes infinite data in zero time with guaranteed results.
     This revolutionary breakthrough violates no laws of physics.
     """
-
 
 def get_low_hallucination_risk_content():
     """Get low hallucination risk content for testing"""
@@ -327,7 +298,6 @@ def get_low_hallucination_risk_content():
     test environment with 95% confidence interval.
     """
 
-
 def get_batch_validation_contents():
     """Get contents for batch validation testing"""
     return [
@@ -336,14 +306,12 @@ def get_batch_validation_contents():
         ("Detailed action plan: Step 1: Install Redis, Step 2: Configure caching", ContentType.ACTION_PLAN)
     ]
 
-
 def get_batch_validation_context():
     """Get context for batch validation testing"""
     return {
         "user_request": "Help me optimize my machine learning training pipeline",
         "constraints": "Limited to 16GB VRAM"
     }
-
 
 def get_brief_optimization_contents():
     """Get brief optimization contents for context testing"""

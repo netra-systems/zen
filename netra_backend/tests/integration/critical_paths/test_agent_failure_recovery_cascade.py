@@ -9,17 +9,10 @@ Business Value Justification (BVJ):
 L3 Test: Uses real local services to validate cascading failure recovery.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -39,7 +32,6 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 # Temporary stub for missing FailureRecoveryManager
@@ -51,10 +43,7 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.database.postgres_service import PostgresService
 from test_framework.testcontainers_utils import TestcontainerHelper
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class L3FailureRecoveryManager:
     """Manages L3 failure recovery testing with real infrastructure."""
@@ -502,7 +491,6 @@ class L3FailureRecoveryManager:
         except Exception as e:
             logger.warning(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def testcontainer_infrastructure():
     """Setup real Redis and Postgres containers for L3 testing."""
@@ -524,7 +512,6 @@ async def testcontainer_infrastructure():
     redis_container_instance.stop()
     postgres_container_instance.stop()
 
-
 @pytest.fixture
 async def l3_recovery_manager(testcontainer_infrastructure):
     """Create L3 recovery manager with real infrastructure."""
@@ -536,7 +523,6 @@ async def l3_recovery_manager(testcontainer_infrastructure):
     yield manager
     
     await manager.cleanup_l3_resources()
-
 
 @pytest.mark.L3
 @pytest.mark.integration

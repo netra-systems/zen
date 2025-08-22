@@ -16,17 +16,10 @@ Tests comprehensive microservice startup orchestration:
 - Recovery from partial startup failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -47,7 +40,6 @@ from docker.models.containers import Container
 
 from test_framework.mock_utils import mock_justified
 
-
 class ServiceState(Enum):
     """Service lifecycle states."""
     UNINITIALIZED = "uninitialized"
@@ -57,7 +49,6 @@ class ServiceState(Enum):
     FAILED = "failed"
     STOPPING = "stopping"
     STOPPED = "stopped"
-
 
 class ServiceDependency:
     """Represents a service dependency relationship."""
@@ -71,7 +62,6 @@ class ServiceDependency:
         self.health_check_attempts = 0
         self.last_health_check: Optional[datetime] = None
         
-
 class MicroserviceContainer:
     """Manages a containerized microservice for L3 testing."""
     
@@ -219,7 +209,6 @@ class MicroserviceContainer:
             "data": data or {}
         }
         self.startup_events.append(event)
-
 
 class StartupSequenceOrchestrator:
     """Orchestrates microservice startup sequence for testing."""
@@ -387,7 +376,6 @@ class StartupSequenceOrchestrator:
                 metrics["total_startup_time"] += service.startup_time
         
         return metrics
-
 
 class TestMicroserviceDependencyStartupSequence:
     """
@@ -780,7 +768,6 @@ class TestMicroserviceDependencyStartupSequence:
         
         duration = time.time() - start_time
         assert duration < 30, f"Smoke test took {duration:.2f}s (max: 30s)"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration 

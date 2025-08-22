@@ -8,17 +8,10 @@ ROOT CAUSE: The unified WebSocket system was validating messages but never forwa
 them to agent_service.handle_websocket_message(), causing total system failure.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -33,14 +26,10 @@ from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket.connection import ConnectionInfo
 
-# Add project root to path
 from netra_backend.app.websocket.unified.message_handlers import (
     MessageHandler,
     MessageProcessor,
 )
-
-# Add project root to path
-
 
 class TestCriticalMessageRoutingToAgentService:
     """CRITICAL: Tests that messages MUST reach agent service or system fails silently."""

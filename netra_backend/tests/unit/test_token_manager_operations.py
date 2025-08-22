@@ -4,29 +4,18 @@ Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for token lifecycle operations and module-level convenience functions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
 from netra_backend.app.core.exceptions_auth import AuthenticationError
-
-# Add project root to path
-
 
 # Test fixtures
 @pytest.fixture
@@ -35,7 +24,6 @@ def mock_config():
     config = Mock()
     config.jwt_secret_key = "test_secret_key_12345"
     return config
-
 
 @pytest.fixture
 def mock_redis_manager():
@@ -46,7 +34,6 @@ def mock_redis_manager():
     redis.set = AsyncMock()
     return redis
 
-
 @pytest.fixture
 def jwt_manager(mock_config, mock_redis_manager):
     """JWT token manager instance with mocked dependencies."""
@@ -55,7 +42,6 @@ def jwt_manager(mock_config, mock_redis_manager):
     manager.redis_manager = mock_redis_manager
     return manager
 
-
 @pytest.fixture
 def sample_user_data():
     """Sample user data for token generation."""
@@ -63,7 +49,6 @@ def sample_user_data():
         "user_id": "user_123",
         "email": "test@example.com"
     }
-
 
 @pytest.fixture
 def sample_token_claims():
@@ -80,7 +65,6 @@ def sample_token_claims():
         "exp": int(future_time.timestamp()),
         "jti": "token_id_789"
     }
-
 
 # Test class for JWT Token Operations
 class TestJWTTokenOperations:
@@ -186,7 +170,6 @@ class TestJWTTokenOperations:
             result = await jwt_manager.is_token_revoked("invalid_token")
             assert result is False
 
-
 # Test convenience functions
 class TestConvenienceFunctions:
     """Test cases for module-level convenience functions."""
@@ -264,7 +247,6 @@ class TestConvenienceFunctions:
         return
         result = await is_token_revoked("test_token")
         assert result is True
-
 
 # Test private helper methods
 class TestPrivateHelperMethods:

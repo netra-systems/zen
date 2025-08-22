@@ -2,17 +2,10 @@
 Tests context preservation, message history, and state isolation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -28,16 +21,13 @@ from netra_backend.app.db.models_postgres import Message, Run, Thread
 from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     RecoveryType,
-    # Add project root to path
     StatePersistenceRequest,
     StateRecoveryRequest,
 )
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.state_persistence import state_persistence_service
 
-# Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-
 
 class ContextPreservationTests:
     """Tests for context preservation across messages."""
@@ -104,7 +94,6 @@ class ContextPreservationTests:
         assert msg.metadata_ == metadata
         assert msg.thread_id == thread.id
 
-
 class MessageHistoryTests:
     """Tests for message history loading and management."""
     async def test_message_history_chronological_order(self, db_session: AsyncSession):
@@ -170,7 +159,6 @@ class MessageHistoryTests:
         assert len(page1) <= 5
         assert len(page2) <= 5
 
-
 class StateIsolationTests:
     """Tests for state isolation between threads."""
     async def test_thread_state_isolation(self, db_session: AsyncSession):
@@ -227,7 +215,6 @@ class StateIsolationTests:
         if state1 and state2:
             assert state1.current_step != state2.current_step
             assert state1.data_points != state2.data_points
-
 
 class ThreadResumeTests:
     """Tests for thread resume after interruption."""
@@ -303,7 +290,6 @@ class ThreadResumeTests:
         )
         assert recovered_state is not None
 
-
 class ContextLimitsTests:
     """Tests for context limits and truncation."""
     async def test_context_limits_and_truncation(self, db_session: AsyncSession):
@@ -352,7 +338,6 @@ class ContextLimitsTests:
             timestamps = [msg.created_at for msg in limited_messages]
             assert timestamps == sorted(timestamps)
 
-
 @pytest.fixture
 async def db_session():
     """Mock database session for testing."""
@@ -361,7 +346,6 @@ async def db_session():
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
     return session
-
 
 @pytest.fixture
 def mock_agent_service():
@@ -372,7 +356,6 @@ def mock_agent_service():
     service.switch_thread = AsyncMock()
     service.delete_thread = AsyncMock()
     return service
-
 
 @pytest.fixture
 def mock_state_persistence():

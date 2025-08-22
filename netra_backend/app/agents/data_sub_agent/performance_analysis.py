@@ -146,7 +146,7 @@ class PerformanceAnalysisOperations:
 
     def _create_performance_processor(self):
         """Create performance data processor instance."""
-        from .performance_data_processor import PerformanceDataProcessor
+        from netra_backend.app.agents.data_sub_agent.performance_data_processor import PerformanceDataProcessor
         return PerformanceDataProcessor(None)  # Will be injected
 
     def _delegate_performance_processing(

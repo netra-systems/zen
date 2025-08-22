@@ -5,8 +5,8 @@ This module provides interfaces and implementations for interacting with Google 
 services including Cloud Logging, Secret Manager, and Cloud Run.
 """
 
-from .base import GCPBaseClient, GCPConfig
-from .log_reader import GCPLogReader, LogEntry, LogFilter
+from test_framework.gcp_integration.base import GCPBaseClient, GCPConfig
+from test_framework.gcp_integration.log_reader import GCPLogReader, LogEntry, LogFilter
 
 __all__ = [
     'GCPLogReader',

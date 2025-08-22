@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="import_rules">
+  <metadata>
+    <title>Import Rules and Standards</title>
+    <category>conventions</category>
+    <priority>critical</priority>
+    <last_updated>2025-08-22</last_updated>
+    <version>1.0.0</version>
+    <status>active</status>
+  </metadata>
+
+  <overview>
+    <summary>
+      Comprehensive import rules for the Netra Apex codebase.
+      ALL Python files MUST use absolute imports - NO EXCEPTIONS.
+    </summary>
+    <rationale>
+      Relative imports create maintenance nightmares, break refactoring,
+      and cause import errors when modules are moved. Absolute imports
+      provide clarity, maintainability, and prevent circular dependencies.
+    </rationale>
+  </overview>
+
+  <rules>
+    <rule id="IMPORT-001" severity="critical">
+      <name>Absolute Imports Only</name>
+      <description>
+        ALL Python files MUST use absolute imports starting from the package root.
+        This rule has NO exceptions and overrides any existing patterns in the codebase.
+      </description>
+      <correct>
+        <example>
+          from netra_backend.app.services.user_service import UserService
+          from netra_backend.tests.test_utils import setup_test_path
+          from auth_service.auth_core.models import User
+          from test_framework.fixtures import create_test_user
+        </example>
+      </correct>
+      <incorrect>
+        <example>
+          from ..test_utils import setup_test_path  # NEVER use relative imports
+          from .models import User  # NEVER use single-dot imports
+          from ...services.user_service import UserService  # NEVER use multi-dot imports
+        </example>
+      </incorrect>
+    </rule>
+
+    <rule id="IMPORT-002" severity="critical">
+      <name>No sys.path Manipulation</name>
+      <description>
+        Files MUST NOT manipulate sys.path to enable imports.
+        The Python path should be configured at the project/environment level.
+      </description>
+      <incorrect>
+        <example>
+          import sys
+          import os
+          project_root = os.path.dirname(os.path.dirname(__file__))
+          sys.path.insert(0, project_root)  # NEVER manipulate sys.path
+        </example>
+      </incorrect>
+    </rule>
+
+    <rule id="IMPORT-003" severity="high">
+      <name>No pytest pythonpath Configuration</name>
+      <description>
+        pytest.ini files MUST NOT use pythonpath configuration to enable relative imports.
+      </description>
+      <incorrect>
+        <example>
+          # pytest.ini
+          [pytest]
+          pythonpath = ..  # NEVER use pythonpath for relative imports
+        </example>
+      </incorrect>
+    </rule>
+
+    <rule id="IMPORT-004" severity="high">
+      <name>Service Independence</name>
+      <description>
+        Services must maintain import independence. Cross-service imports are forbidden
+        except through defined interfaces.
+      </description>
+      <correct>
+        <example>
+          # In netra_backend files:
+          from netra_backend.app.services.user_service import UserService
+          
+          # In auth_service files:
+          from auth_service.auth_core.models import User
+        </example>
+      </correct>
+      <incorrect>
+        <example>
+          # In netra_backend files:
+          from auth_service.auth_core.models import User  # Cross-service import
+          
+          # In auth_service files:
+          from netra_backend.app.services.user_service import UserService  # Cross-service import
+        </example>
+      </incorrect>
+    </rule>
+
+    <rule id="IMPORT-005" severity="medium">
+      <name>Import Organization</name>
+      <description>
+        Imports should be organized in groups: standard library, third-party, local application.
+        Each group should be alphabetically sorted.
+      </description>
+      <correct>
+        <example>
+          # Standard library imports
+          import json
+          import os
+          from typing import Dict, List
+
+          # Third-party imports
+          import pandas as pd
+          from fastapi import FastAPI
+          from pydantic import BaseModel
+
+          # Local application imports
+          from netra_backend.app.core.config import settings
+          from netra_backend.app.services.user_service import UserService
+        </example>
+      </correct>
+    </rule>
+  </rules>
+
+  <enforcement>
+    <tool name="Pre-commit Hook">
+      <description>
+        The prevent-relative-imports hook blocks commits containing relative imports.
+        Located in .pre-commit-config.yaml
+      </description>
+      <command>python scripts/check_relative_imports.py</command>
+    </tool>
+
+    <tool name="Import Fixer">
+      <description>
+        Automated tool to convert all relative imports to absolute imports.
+      </description>
+      <command>python scripts/fix_all_import_issues.py --absolute-only</command>
+    </tool>
+
+    <tool name="CI/CD Pipeline">
+      <description>
+        CI/CD pipelines fail if relative imports are detected in any Python file.
+      </description>
+    </tool>
+  </enforcement>
+
+  <migration>
+    <step number="1">
+      <action>Run the import fixer to convert all existing relative imports</action>
+      <command>python scripts/fix_all_import_issues.py --absolute-only --verify</command>
+    </step>
+
+    <step number="2">
+      <action>Remove pythonpath configuration from pytest.ini files</action>
+      <files>
+        - pytest.ini
+        - netra_backend/pytest.ini
+        - auth_service/pytest.ini
+      </files>
+    </step>
+
+    <step number="3">
+      <action>Remove sys.path manipulations from conftest.py files</action>
+      <files>
+        - netra_backend/tests/conftest.py
+        - auth_service/tests/conftest.py
+        - tests/conftest.py
+      </files>
+    </step>
+
+    <step number="4">
+      <action>Install and configure pre-commit hooks</action>
+      <command>pre-commit install</command>
+    </step>
+
+    <step number="5">
+      <action>Run tests to verify everything works</action>
+      <command>python unified_test_runner.py --level integration --no-coverage --fast-fail</command>
+    </step>
+  </migration>
+
+  <learnings>
+    <learning date="2025-08-22">
+      <title>Relative imports cause maintenance issues</title>
+      <description>
+        Relative imports in tests broke when files were reorganized,
+        causing hundreds of import errors. Absolute imports prevent this.
+      </description>
+    </learning>
+
+    <learning date="2025-08-22">
+      <title>sys.path manipulation is fragile</title>
+      <description>
+        Using sys.path.insert() in conftest.py files caused import
+        conflicts and made the test environment order-dependent.
+      </description>
+    </learning>
+
+    <learning date="2025-08-22">
+      <title>Enforcement must be automatic</title>
+      <description>
+        Manual enforcement of import rules doesn't work. Pre-commit
+        hooks and CI/CD validation are essential for maintaining standards.
+      </description>
+    </learning>
+  </learnings>
+
+  <related_specs>
+    <spec>conventions.xml</spec>
+    <spec>type_safety.xml</spec>
+    <spec>independent_services.xml</spec>
+    <spec>testing.xml</spec>
+  </related_specs>
+</spec>

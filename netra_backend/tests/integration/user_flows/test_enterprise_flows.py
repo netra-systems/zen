@@ -11,14 +11,8 @@ BVJ (Business Value Justification):
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -32,12 +26,7 @@ import httpx
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from tests.user_flow_base import UserFlowTestBase
-
-# Add project root to path
-
+from netra_backend.tests.user_flow_base import UserFlowTestBase
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -103,7 +92,6 @@ async def test_enterprise_onboarding_with_sso_setup(
     assert response.status_code == status.HTTP_200_OK
     assert "application/xml" in response.headers["content-type"]
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -153,7 +141,6 @@ async def test_enterprise_audit_logging_and_compliance(
         assert "action" in event
         assert "ip_address" in event
         assert "user_agent" in event
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -210,7 +197,6 @@ async def test_enterprise_dedicated_support_access(
     )
     assert response.status_code == status.HTTP_201_CREATED
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -257,7 +243,6 @@ async def test_enterprise_advanced_api_access(
     )
     assert response.status_code == status.HTTP_202_ACCEPTED
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -288,7 +273,6 @@ async def test_enterprise_privacy_and_integrations(
         headers=headers
     )
     assert response.status_code == status.HTTP_201_CREATED
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

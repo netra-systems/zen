@@ -12,13 +12,8 @@ BVJ:
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 
 import asyncio
 import json
@@ -33,11 +28,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -46,14 +40,12 @@ from test_fixtures import (
     supervisor_agent,
 )
 
-
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
     assert supervisor_agent.thread_id is not None
     assert supervisor_agent.user_id is not None
     assert len(supervisor_agent.agents) > 0
-
 
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
@@ -73,7 +65,6 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     assert state.user_request == user_request
     assert state.chat_thread_id == supervisor_agent.thread_id
     assert state.user_id == supervisor_agent.user_id
-
 
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
@@ -98,7 +89,6 @@ async def test_llm_response_parsing(mock_llm_manager):
     except json.JSONDecodeError:
         pass  # Expected
 
-
 async def test_agent_state_creation():
     """Test basic agent state creation and structure"""
     state = DeepAgentState(
@@ -114,7 +104,6 @@ async def test_agent_state_creation():
     assert state.data_result is None
     assert state.optimizations_result is None
 
-
 async def test_basic_llm_call():
     """Test basic LLM call functionality"""
     llm_manager = Mock(spec=LLMManager)
@@ -126,7 +115,6 @@ async def test_basic_llm_call():
     result = await llm_manager.call_llm("Test prompt")
     assert result["content"] == "Test response"
     assert result["tool_calls"] == []
-
 
 async def test_structured_llm_call():
     """Test structured LLM call functionality"""
@@ -144,7 +132,6 @@ async def test_structured_llm_call():
     assert result["category"] == "optimization"
     assert result["confidence"] == 0.95
     assert result["requires_analysis"] is True
-
 
 async def test_agent_registry():
     """Test agent registry functionality"""
@@ -167,7 +154,6 @@ async def test_agent_registry():
         # Should have key agent types
         agent_names = list(supervisor.agents.keys())
         assert any("triage" in name.lower() for name in agent_names)
-
 
 async def test_basic_error_handling():
     """Test basic error handling in supervisor"""
@@ -196,10 +182,9 @@ async def test_basic_error_handling():
             # Error should be handled appropriately
             assert isinstance(e, Exception)
 
-
 async def test_mock_infrastructure_creation():
     """Test mock infrastructure creation helpers"""
-    from .fixtures.llm_agent_fixtures import create_mock_infrastructure
+    from netra_backend.tests.agents.fixtures.llm_agent_fixtures import create_mock_infrastructure
     
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
     
@@ -212,13 +197,11 @@ async def test_mock_infrastructure_creation():
     assert isinstance(llm_manager, Mock)
     assert isinstance(ws_manager, Mock)
 
-
 def _verify_basic_state_structure(state):
     """Verify basic state structure"""
     assert hasattr(state, 'user_request')
     assert hasattr(state, 'chat_thread_id')
     assert hasattr(state, 'user_id')
-
 
 def _create_test_state():
     """Create basic test state"""
@@ -227,7 +210,6 @@ def _create_test_state():
         chat_thread_id=str(uuid.uuid4()),
         user_id=str(uuid.uuid4())
     )
-
 
 def _setup_basic_llm_mock():
     """Setup basic LLM mock"""
@@ -238,7 +220,6 @@ def _setup_basic_llm_mock():
     })
     return llm_manager
 
-
 def _setup_basic_persistence_mock():
     """Setup basic persistence mock"""
     mock_persistence = AsyncMock()
@@ -246,7 +227,6 @@ def _setup_basic_persistence_mock():
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
     return mock_persistence
-
 
 async def test_basic_agent_lifecycle():
     """Test basic agent lifecycle"""
@@ -257,7 +237,6 @@ async def test_basic_agent_lifecycle():
     # Verify state can be modified
     state.triage_result = {"category": "test"}
     assert state.triage_result["category"] == "test"
-
 
 async def test_basic_mock_setup():
     """Test basic mock setup functionality"""
@@ -271,7 +250,6 @@ async def test_basic_mock_setup():
     # Test persistence mock
     save_result = await persistence.save_agent_state("test", "session")
     assert save_result == (True, "test_id")
-
 
 async def test_uuid_generation():
     """Test UUID generation for IDs"""
@@ -288,7 +266,6 @@ async def test_uuid_generation():
     assert thread_id != user_id
     assert user_id != run_id
     assert thread_id != run_id
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -31,7 +31,6 @@ pytestmark = [
     pytest.mark.slow
 ]
 
-
 class MockServiceDiscoveryService:
     """Mock service discovery service for L4 testing."""
     
@@ -97,7 +96,6 @@ class MockServiceDiscoveryService:
         """Shutdown discovery service."""
         self.services.clear()
         self.instances.clear()
-
 
 class MockLoadBalancerService:
     """Mock load balancer service for L4 testing."""
@@ -176,7 +174,6 @@ class MockLoadBalancerService:
         """Shutdown load balancer."""
         self.round_robin_index.clear()
 
-
 class MockCircuitBreakerService:
     """Mock circuit breaker service for L4 testing."""
     
@@ -195,7 +192,6 @@ class MockCircuitBreakerService:
         """Shutdown circuit breaker."""
         self.circuit_states.clear()
 
-
 class MockRetryPolicyService:
     """Mock retry policy service for L4 testing."""
     
@@ -213,7 +209,6 @@ class MockRetryPolicyService:
     async def shutdown(self):
         """Shutdown retry policy."""
         pass
-
 
 class ServiceMeshL4Manager:
     """Manages L4 service mesh testing with real microservices infrastructure."""
@@ -450,7 +445,6 @@ class ServiceMeshL4Manager:
         except Exception as e:
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 async def service_mesh_l4():
     """Create L4 service mesh manager for staging tests."""
@@ -459,25 +453,21 @@ async def service_mesh_l4():
     yield manager
     await manager.cleanup()
 
-
 # Utility functions for test simulations
 async def simulate_failing_request() -> Dict[str, Any]:
     """Simulate a failing request for circuit breaker testing."""
     await asyncio.sleep(0.1)
     raise Exception("Simulated request failure")
 
-
 async def simulate_successful_request() -> Dict[str, Any]:
     """Simulate a successful request for circuit breaker testing."""
     await asyncio.sleep(0.1)
     return {"success": True, "data": "test_response"}
 
-
 async def simulate_slow_request(delay: float) -> Dict[str, Any]:
     """Simulate a slow request for timeout testing."""
     await asyncio.sleep(delay)
     return {"success": True, "data": "slow_response"}
-
 
 def calculate_backoff_accuracy(actual_delays: List[float], expected_delays: List[float]) -> float:
     """Calculate accuracy of backoff timing."""
@@ -496,7 +486,6 @@ def calculate_backoff_accuracy(actual_delays: List[float], expected_delays: List
         accuracy_scores.append(accuracy)
     
     return sum(accuracy_scores) / len(accuracy_scores)
-
 
 def calculate_fixed_delay_consistency(actual_delays: List[float], expected_delay: float) -> float:
     """Calculate consistency of fixed delay timing."""

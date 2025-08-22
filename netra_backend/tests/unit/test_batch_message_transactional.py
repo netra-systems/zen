@@ -4,17 +4,10 @@ Tests the critical transactional message processing patterns from
 websocket_reliability.xml to ensure zero message loss.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -23,7 +16,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.websocket.batch_message_core import MessageBatcher
 from netra_backend.app.websocket.batch_message_transactional import (
     MessageStateManager,
@@ -31,14 +23,12 @@ from netra_backend.app.websocket.batch_message_transactional import (
     TransactionalBatchProcessor,
 )
 from netra_backend.app.websocket.batch_message_types import (
-    # Add project root to path
     BatchConfig,
     BatchingStrategy,
     MessageState,
     PendingMessage,
 )
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-
 
 class TestTransactionalBatchProcessor:
     """Test transactional batch processing patterns."""
@@ -100,7 +90,6 @@ class TestTransactionalBatchProcessor:
         self.processor.revert_batch_to_pending(messages)
         
         assert messages[0].state == MessageState.PENDING
-
 
 class TestRetryManager:
     """Test retry logic with exponential backoff."""
@@ -174,7 +163,6 @@ class TestRetryManager:
         assert retryable[0].content["test"] == "msg1"
         assert retryable[1].content["test"] == "msg3"
 
-
 class TestMessageStateManager:
     """Test message state management operations."""
     
@@ -229,7 +217,6 @@ class TestMessageStateManager:
         assert counts[MessageState.SENDING] == 1
         assert counts[MessageState.SENT] == 1
         assert counts[MessageState.FAILED] == 1
-
 
 class TestMessageBatcherTransactional:
     """Test transactional behavior in MessageBatcher."""
@@ -362,7 +349,6 @@ class TestMessageBatcherTransactional:
         assert metrics["pending_messages"] == 1
         assert metrics["sending_messages"] == 1
         assert metrics["failed_messages"] == 1
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

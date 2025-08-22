@@ -13,21 +13,10 @@ This test suite validates production-ready fixes addressing the
 identified WebSocket reliability concerns.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,9 +29,7 @@ import pytest
 
 from netra_backend.app.core.websocket_cors import SECURITY_CONFIG, WebSocketCORSHandler
 
-# Add project root to path
 from netra_backend.app.routes.websocket_enhanced import (
-    # Add project root to path
 
     DatabaseConnectionPool,
 
@@ -53,12 +40,10 @@ from netra_backend.app.routes.websocket_enhanced import (
 )
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
-
 class TestDatabaseConnectionPooling:
 
     """Test database connection pooling to prevent session-per-message anti-pattern."""
     
-
     @pytest.mark.asyncio
 
     async def test_connection_pool_initialization(self):
@@ -67,14 +52,12 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=5)
         
-
         assert pool.max_pool_size == 5
 
         assert pool.active_sessions == 0
 
         assert pool.session_queue.maxsize == 5
     
-
     @pytest.mark.asyncio
 
     async def test_pooled_session_creation(self):
@@ -83,7 +66,6 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=3)
         
-
         with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_session = AsyncMock()
@@ -98,7 +80,6 @@ class TestDatabaseConnectionPooling:
 
             assert pool.active_sessions == 1
     
-
     @pytest.mark.asyncio
 
     async def test_connection_pool_exhaustion_prevention(self):
@@ -107,7 +88,6 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=2)
         
-
         with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_factory.return_value = AsyncMock()
@@ -124,7 +104,6 @@ class TestDatabaseConnectionPooling:
 
                 await pool.get_pooled_session()
     
-
     @pytest.mark.asyncio
 
     async def test_session_return_to_pool(self):
@@ -135,18 +114,15 @@ class TestDatabaseConnectionPooling:
 
         mock_factory = AsyncMock()
         
-
         await pool.return_session_to_pool(mock_factory)
         # Should not raise exception and should add to queue
 
         assert pool.session_queue.qsize() == 1
 
-
 class TestJWTTokenRefresh:
 
     """Test JWT token refresh mechanism for long-lived connections."""
     
-
     @pytest.mark.asyncio
 
     async def test_token_refresh_scheduling(self):
@@ -169,7 +145,6 @@ class TestJWTTokenRefresh:
 
         }
         
-
         with patch.object(manager, '_handle_token_refresh') as mock_refresh:
 
             connection_id = await manager.add_connection("test_user", mock_websocket, session_info)
@@ -180,7 +155,6 @@ class TestJWTTokenRefresh:
 
             assert not manager.token_refresh_tasks[connection_id].done()
     
-
     @pytest.mark.asyncio
 
     async def test_token_refresh_calculation(self):
@@ -205,7 +179,6 @@ class TestJWTTokenRefresh:
 
         }
         
-
         with patch('asyncio.sleep') as mock_sleep:
 
             with patch.object(manager, '_refresh_connection_token', return_value=True):
@@ -223,7 +196,6 @@ class TestJWTTokenRefresh:
 
                     assert 295 <= sleep_time <= 305  # Allow some timing variance
     
-
     @pytest.mark.asyncio
 
     async def test_token_expiry_handling(self):
@@ -250,7 +222,6 @@ class TestJWTTokenRefresh:
 
         }
         
-
         await manager._handle_token_refresh("conn_1", "test_user", mock_websocket, session_info)
         
         # Should send expiry message and close connection
@@ -265,7 +236,6 @@ class TestJWTTokenRefresh:
 
         mock_websocket.close.assert_called_once_with(code=1008, reason="Token expired - please re-authenticate")
     
-
     @pytest.mark.asyncio
 
     async def test_token_refresh_success_notification(self):
@@ -280,10 +250,8 @@ class TestJWTTokenRefresh:
 
         mock_websocket.query_params = {"token": "old_token"}
         
-
         session_info = {"current_token": "old_token"}
         
-
         with patch('app.routes.websocket_enhanced.auth_client') as mock_auth:
 
             mock_auth.refresh_token.return_value = {
@@ -296,14 +264,12 @@ class TestJWTTokenRefresh:
 
             }
             
-
             result = await manager._refresh_connection_token(
 
                 mock_websocket, "conn_1", "test_user", session_info
 
             )
             
-
             assert result is True
 
             mock_websocket.send_json.assert_called_once()
@@ -314,12 +280,10 @@ class TestJWTTokenRefresh:
 
             assert sent_message["payload"]["new_token"] == "new_token"
 
-
 class TestMemoryLeakPrevention:
 
     """Test frontend memory leak prevention in message arrays."""
     
-
     def test_message_queue_size_limit(self):
 
         """Test that message queue enforces size limits."""
@@ -336,7 +300,6 @@ class TestMemoryLeakPrevention:
 
         MAX_MESSAGE_AGE_MS = 300000  # 5 minutes
         
-
         now = time.time() * 1000  # Convert to milliseconds
         
         # Filter old messages
@@ -355,10 +318,8 @@ class TestMemoryLeakPrevention:
 
             filtered_messages = filtered_messages[-MAX_QUEUE_SIZE:]
         
-
         assert len(filtered_messages) <= MAX_QUEUE_SIZE
     
-
     def test_timestamp_array_cleanup(self):
 
         """Test that timestamp arrays are properly cleaned up."""
@@ -370,7 +331,6 @@ class TestMemoryLeakPrevention:
 
         recent_timestamps = [now - 30000, now - 10000]  # Recent
         
-
         all_timestamps = old_timestamps + recent_timestamps
         
         # Cleanup logic (60 second window)
@@ -385,17 +345,14 @@ class TestMemoryLeakPrevention:
 
         ]
         
-
         assert len(cleaned_timestamps) == 2
 
         assert all(ts in recent_timestamps for ts in cleaned_timestamps)
-
 
 class TestTransactionalMessageProcessing:
 
     """Test transactional message processing per websocket_reliability.xml."""
     
-
     @pytest.mark.asyncio
 
     async def test_message_marked_sending_before_send(self):
@@ -404,17 +361,14 @@ class TestTransactionalMessageProcessing:
 
         manager = UnifiedWebSocketManager()
         
-
         with patch.object(manager, '_mark_message_sending') as mock_mark_sending:
 
             with patch.object(manager.messaging, 'send_to_user', return_value=True) as mock_send:
 
                 with patch.object(manager, '_mark_message_sent') as mock_mark_sent:
                     
-
                     result = await manager.send_message_to_user("user_1", {"type": "test"})
                     
-
                     assert result is True
                     # Should mark as sending first
 
@@ -426,7 +380,6 @@ class TestTransactionalMessageProcessing:
 
                     mock_mark_sent.assert_called_once()
     
-
     @pytest.mark.asyncio
 
     async def test_message_reverted_to_pending_on_failure(self):
@@ -435,22 +388,18 @@ class TestTransactionalMessageProcessing:
 
         manager = UnifiedWebSocketManager()
         
-
         with patch.object(manager, '_mark_message_sending'):
 
             with patch.object(manager.messaging, 'send_to_user', return_value=False) as mock_send:
 
                 with patch.object(manager, '_mark_message_pending') as mock_mark_pending:
                     
-
                     result = await manager.send_message_to_user("user_1", {"type": "test"})
                     
-
                     assert result is False
 
                     mock_mark_pending.assert_called_once()
     
-
     @pytest.mark.asyncio
 
     async def test_message_reverted_to_pending_on_exception(self):
@@ -459,22 +408,18 @@ class TestTransactionalMessageProcessing:
 
         manager = UnifiedWebSocketManager()
         
-
         with patch.object(manager, '_mark_message_sending'):
 
             with patch.object(manager.messaging, 'send_to_user', side_effect=Exception("Network error")):
 
                 with patch.object(manager, '_mark_message_pending') as mock_mark_pending:
                     
-
                     with pytest.raises(Exception):
 
                         await manager.send_message_to_user("user_1", {"type": "test"})
                     
-
                     mock_mark_pending.assert_called_once()
     
-
     @pytest.mark.asyncio
 
     async def test_pending_message_retry_mechanism(self):
@@ -503,18 +448,14 @@ class TestTransactionalMessageProcessing:
 
         }
         
-
         manager.pending_messages = {message_id: pending_data}
         
-
         with patch.object(manager, 'send_message_to_user', return_value=True) as mock_send:
 
             await manager._retry_pending_messages()
             
-
             mock_send.assert_called_once_with("user_1", {"type": "test"}, retry=False)
     
-
     @pytest.mark.asyncio
 
     async def test_message_dropped_after_max_retries(self):
@@ -543,22 +484,18 @@ class TestTransactionalMessageProcessing:
 
         }
         
-
         manager.pending_messages = {message_id: pending_data}
         
-
         await manager._retry_pending_messages()
         
         # Message should be removed from pending
 
         assert message_id not in manager.pending_messages
 
-
 class TestExponentialBackoffReconnection:
 
     """Test exponential backoff reconnection logic."""
     
-
     def test_exponential_backoff_calculation(self):
 
         """Test that exponential backoff is calculated correctly."""
@@ -598,7 +535,6 @@ class TestExponentialBackoffReconnection:
 
             assert delays[i] > delays[i-1]
     
-
     def test_reconnection_delay_cap(self):
 
         """Test that reconnection delay is capped at maximum value."""
@@ -615,19 +551,15 @@ class TestExponentialBackoffReconnection:
 
         jitter = 1000
         
-
         capped_delay = min(exponential_delay + jitter, max_delay)
         
-
         assert capped_delay == max_delay
     
-
     def test_jitter_prevents_thundering_herd(self):
 
         """Test that jitter helps prevent thundering herd problem."""
         import random
         
-
         base_delay = 2000
 
         attempt = 3
@@ -652,12 +584,10 @@ class TestExponentialBackoffReconnection:
 
         assert len(unique_delays) > 50  # Should have many different delay values
 
-
 class TestCORSSecurityHardening:
 
     """Test CORS production security hardening."""
     
-
     def test_production_https_requirement(self):
 
         """Test that production environment requires HTTPS origins."""
@@ -678,7 +608,6 @@ class TestCORSSecurityHardening:
 
         assert handler.is_origin_allowed("http://netrasystems.ai") is False
     
-
     def test_suspicious_origin_blocking(self):
 
         """Test that suspicious origins are blocked."""
@@ -699,12 +628,10 @@ class TestCORSSecurityHardening:
 
         ]
         
-
         for origin in suspicious_origins:
 
             assert handler.is_origin_allowed(origin) is False
     
-
     def test_origin_length_validation(self):
 
         """Test that overly long origins are rejected."""
@@ -715,19 +642,16 @@ class TestCORSSecurityHardening:
 
         long_origin = "https://" + "a" * 300 + ".com"
         
-
         assert len(long_origin) > SECURITY_CONFIG["max_origin_length"]
 
         assert handler.is_origin_allowed(long_origin) is False
     
-
     def test_violation_rate_limiting(self):
 
         """Test that origins with too many violations get temporarily blocked."""
 
         handler = WebSocketCORSHandler(environment="production")
         
-
         malicious_origin = "http://malicious-site.com"
         
         # Generate multiple violations
@@ -746,14 +670,12 @@ class TestCORSSecurityHardening:
 
         assert handler.is_origin_allowed(malicious_origin) is False
     
-
     def test_security_headers_in_production(self):
 
         """Test that security headers are added in production."""
 
         handler = WebSocketCORSHandler(environment="production")
         
-
         headers = handler.get_cors_headers("https://netrasystems.ai")
         
         # Should include security headers
@@ -768,12 +690,10 @@ class TestCORSSecurityHardening:
 
         assert "Referrer-Policy" in headers
         
-
         assert headers["X-Frame-Options"] == "DENY"
 
         assert headers["X-Content-Type-Options"] == "nosniff"
     
-
     def test_development_environment_more_permissive(self):
 
         """Test that development environment is more permissive."""
@@ -793,14 +713,12 @@ class TestCORSSecurityHardening:
         assert dev_result is True
         # Production should require HTTPS (depending on allowed origins)
     
-
     def test_manual_origin_unblocking(self):
 
         """Test that blocked origins can be manually unblocked."""
 
         handler = WebSocketCORSHandler(environment="production")
         
-
         origin = "http://blocked-origin.com"
         
         # Block the origin by generating violations
@@ -809,21 +727,18 @@ class TestCORSSecurityHardening:
 
             handler.is_origin_allowed(origin)
         
-
         assert origin in handler._blocked_origins
         
         # Unblock manually
 
         result = handler.unblock_origin(origin)
         
-
         assert result is True
 
         assert origin not in handler._blocked_origins
 
         assert handler._violation_counts.get(origin, 0) == 0
     
-
     def test_security_statistics_tracking(self):
 
         """Test that security statistics are properly tracked."""
@@ -838,10 +753,8 @@ class TestCORSSecurityHardening:
 
         handler.is_origin_allowed("http://bad-origin1.com")  # Repeat
         
-
         stats = handler.get_security_stats()
         
-
         assert stats["total_violations"] >= 3
 
         assert "bad-origin1.com" in str(stats["violation_counts"])
@@ -850,12 +763,10 @@ class TestCORSSecurityHardening:
 
         assert stats["environment"] == "production"
 
-
 class TestIntegrationScenarios:
 
     """Test integration scenarios combining multiple fixes."""
     
-
     @pytest.mark.asyncio
 
     async def test_network_failure_during_token_refresh(self):
@@ -870,27 +781,22 @@ class TestIntegrationScenarios:
 
         mock_websocket.close = AsyncMock()
         
-
         session_info = {"current_token": "expiring_token"}
         
-
         with patch('app.routes.websocket_enhanced.auth_client') as mock_auth:
             # Simulate network failure during refresh
 
             mock_auth.refresh_token.side_effect = Exception("Network timeout")
             
-
             result = await manager._refresh_connection_token(
 
                 mock_websocket, "conn_1", "test_user", session_info
 
             )
             
-
             assert result is False
             # Should not crash, should handle gracefully
     
-
     @pytest.mark.asyncio  
 
     async def test_memory_cleanup_during_connection_pool_exhaustion(self):
@@ -899,7 +805,6 @@ class TestIntegrationScenarios:
 
         pool = DatabaseConnectionPool(max_pool_size=1)
         
-
         with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_factory.return_value = AsyncMock()
@@ -919,7 +824,6 @@ class TestIntegrationScenarios:
 
             assert pool.active_sessions == 1  # Pool state is still consistent
     
-
     @pytest.mark.asyncio
 
     async def test_transactional_processing_with_cors_rejection(self):
@@ -946,7 +850,6 @@ class TestIntegrationScenarios:
 
                 with patch.object(manager, '_mark_message_pending') as mock_pending:
                     
-
                     with pytest.raises(Exception):
 
                         await manager.send_message_to_user("user_1", {"type": "test"})
@@ -954,7 +857,6 @@ class TestIntegrationScenarios:
                     # Should still mark as pending for potential retry
 
                     mock_pending.assert_called_once()
-
 
 if __name__ == "__main__":
 

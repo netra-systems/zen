@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestServiceInitialization, TestGetUserPlan, TestGetUserPermissions, TestToolRequiredPermissions, TestHasPermission
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -30,14 +23,11 @@ from netra_backend.app.schemas.ToolPermission import (
     RateLimit,
     ToolAvailability,
     ToolExecutionContext,
-    # Add project root to path
     ToolPermission,
 )
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-
 
 class MockRedisClient:
     """Mock Redis client for testing"""
@@ -68,24 +58,20 @@ class MockRedisClient:
             self.expires[key] = datetime.now(UTC) + timedelta(seconds=seconds)
         return True
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
-
 
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
 
-
 @pytest.fixture
 def service_with_redis(mock_redis):
     """Create ToolPermissionService with Redis"""
     return ToolPermissionService(mock_redis)
-
 
 @pytest.fixture
 def sample_context():
@@ -100,7 +86,6 @@ def sample_context():
         environment="production"
     )
 
-
 @pytest.fixture
 def developer_context():
     """Create developer execution context"""
@@ -113,7 +98,6 @@ def developer_context():
         is_developer=True,
         environment="development"
     )
-
 
 class TestServiceInitialization:
     """Test service initialization and configuration"""
@@ -155,7 +139,6 @@ class TestServiceInitialization:
         assert basic_perm.level == PermissionLevel.READ
         assert len(basic_perm.required_roles) == 0  # No special roles required
 
-
 class TestGetUserPlan:
     """Test user plan retrieval"""
     
@@ -166,7 +149,6 @@ class TestGetUserPlan:
         assert isinstance(plan, UserPlan)
         assert plan.tier == PlanTier.FREE
         assert plan.user_id == "test_user"
-
 
 class TestGetUserPermissions:
     """Test user permissions retrieval"""
@@ -197,7 +179,6 @@ class TestGetUserPermissions:
         assert "developer_tools" in permissions
         assert "basic" in permissions
 
-
 class TestToolRequiredPermissions:
     """Test tool required permissions lookup"""
     
@@ -220,7 +201,6 @@ class TestToolRequiredPermissions:
         
         # Should default to basic permissions
         assert "basic" in required
-
 
 class TestHasPermission:
     """Test permission checking logic"""

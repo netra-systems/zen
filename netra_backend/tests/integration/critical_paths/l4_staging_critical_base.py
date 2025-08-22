@@ -28,11 +28,10 @@ import pytest
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.monitoring.models import MetricsCollector
 from netra_backend.app.services.redis_service import RedisService
-from ..e2e.staging_test_helpers import (
+from netra_backend.tests.integration.critical_paths.e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite,
 )
-
 
 @dataclass
 class CriticalPathMetrics:
@@ -64,7 +63,6 @@ class CriticalPathMetrics:
             return 100.0
         return (self.validation_count / total_operations) * 100.0
 
-
 @dataclass
 class ServiceEndpointConfig:
     """Configuration for staging service endpoints."""
@@ -74,7 +72,6 @@ class ServiceEndpointConfig:
     websocket: str
     metrics: str
     billing: str
-
 
 class L4StagingCriticalPathTestBase(ABC):
     """Base class for L4 critical path tests with shared staging utilities."""
@@ -468,7 +465,6 @@ class L4StagingCriticalPathTestBase(ABC):
     async def cleanup_test_specific_resources(self) -> None:
         """Override to implement test-specific resource cleanup."""
         pass
-
 
 # Pytest fixture for L4 critical path test base
 @pytest.fixture

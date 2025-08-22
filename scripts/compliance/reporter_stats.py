@@ -6,7 +6,7 @@ Handles violation statistics calculation and display.
 
 from typing import Dict, List
 
-from .core import ComplianceResults, Violation
+from scripts.compliance.core import ComplianceResults, Violation
 
 
 class StatisticsCalculator:

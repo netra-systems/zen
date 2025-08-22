@@ -19,23 +19,15 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from netra_backend.app.auth_integration.auth import (
-    # Add project root to path
     get_current_user,
     get_current_user_optional,
 )
@@ -45,7 +37,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
-
 
 class TestAuthenticationCore:
     """Core authentication functionality tests"""
@@ -177,7 +168,6 @@ class TestAuthenticationCore:
             with pytest.raises(Exception):
                 await get_current_user(mock_credentials, mock_db_session)
 
-
 class TestOptionalAuthentication:
     """Optional authentication functionality tests"""
 
@@ -244,7 +234,6 @@ class TestOptionalAuthentication:
             # Assert
             assert result is None
 
-
 class TestAuthenticationBoundaries:
     """Test authentication security boundary conditions"""
 
@@ -296,7 +285,6 @@ class TestAuthenticationBoundaries:
             assert result == mock_user
             # Verify session was used as context manager
             mock_session.__aenter__.assert_called_once()
-
 
 class TestAuthenticationPerformance:
     """Performance and scalability tests for authentication"""

@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestQualitySupervisorValidation, TestAdminToolDispatcherRouting
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,11 +28,9 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -57,7 +48,6 @@ from netra_backend.tests.supervisor_test_helpers import (
     setup_tool_dispatcher_mock,
 )
 
-
 # Mock classes for testing (would normally be imported)
 class QualitySupervisor:
     """Mock quality supervisor for testing"""
@@ -73,10 +63,8 @@ class QualitySupervisor:
         )
         return json.loads(quality_check)
 
-
 # Import real AdminToolDispatcher for proper testing
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
-
 
 class TestQualitySupervisorValidation:
     """Test 3: Test quality checks on agent responses"""
@@ -132,7 +120,6 @@ class TestQualitySupervisorValidation:
         result2 = await quality_supervisor.validate_response(response2)
         assert result2["approved"]
         assert result2["quality_score"] == 0.8
-
 
 class TestAdminToolDispatcherRouting:
     """Test 4: Test tool selection logic for admin operations"""

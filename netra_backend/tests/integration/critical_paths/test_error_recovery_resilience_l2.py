@@ -13,17 +13,10 @@ Test Level: L2 (Real Internal Dependencies)
 - Mock external service failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -44,7 +37,6 @@ from netra_backend.app.core.exceptions_base import (
 from netra_backend.app.core.logging_config import get_logger
 from netra_backend.app.services.observability.error_tracker import ErrorTracker
 
-# Add project root to path
 from netra_backend.app.services.resilience.circuit_breaker import (
     CircuitBreaker,
     CircuitState,
@@ -57,10 +49,7 @@ from netra_backend.app.services.resilience.retry_manager import (
 )
 from netra_backend.app.services.resilience.timeout_manager import TimeoutManager
 
-# Add project root to path
-
 logger = get_logger(__name__)
-
 
 class ErrorRecoveryResilienceTester:
     """L2 tester for error recovery and resilience scenarios."""
@@ -1047,7 +1036,6 @@ class ErrorRecoveryResilienceTester:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def error_recovery_tester():
     """Create error recovery resilience tester."""
@@ -1059,7 +1047,6 @@ async def error_recovery_tester():
     
     yield tester
     await tester.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

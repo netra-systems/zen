@@ -19,32 +19,22 @@ PERFORMANCE REQUIREMENTS:
 - Concurrent tests: < 1s for multiple parallel operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.test_agent_service_fixtures import (
-    # Add project root to path
     orchestrator,
     verify_orchestration_metrics,
 )
 from netra_backend.tests.test_agent_service_mock_classes import AgentState
-
 
 class TestAgentLifecycleManagement:
     """Test agent lifecycle management functionality."""
@@ -224,7 +214,6 @@ class TestAgentLifecycleManagement:
         assert metrics['active_agents'] == 2
         assert metrics['pooled_agents'] == 2
         assert metrics['concurrent_peak'] == 3
-
 
 class TestAgentPoolOptimization:
     """Test agent pool optimization and resource management."""

@@ -12,21 +12,10 @@ User request -> Supervisor Agent -> Sub-agent delegation -> State persistence ->
 Coverage: Real LLM calls, agent lifecycle management, cross-agent state persistence, staging environment validation
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,27 +24,21 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-# Add project root to path
 # # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
 
-
 ModernSupervisorAgent = AsyncMock
-
 
 ModernSupervisorAgent = AsyncMock
 # from app.agents.sub_agents.optimization_agent import OptimizationAgent
 
-
 OptimizationAgent = AsyncMock
 # from app.agents.sub_agents.analysis_agent import AnalysisAgent
 
-
 AnalysisAgent = AsyncMock
 # from app.agents.state import DeepAgentState
-
 
 DeepAgentState = AsyncMock
 # from app.llm.llm_manager import LLMManager
@@ -68,20 +51,17 @@ from netra_backend.app.services.database.postgres_service import PostgresService
 RedisSessionManager = AsyncMock
 # from ws_manager import WebSocketManager
 
-
 WebSocketManager = AsyncMock
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 
 StagingTestSuite = AsyncMock
 
 get_staging_suite = AsyncMock
 
-
 class MultiAgentL4TestSuite:
 
     """L4 test suite for multi-agent collaboration in staging environment."""
     
-
     def __init__(self):
 
         self.staging_suite: Optional[StagingTestSuite] = None
@@ -112,7 +92,6 @@ class MultiAgentL4TestSuite:
 
         }
         
-
     async def initialize_l4_environment(self) -> None:
 
         """Initialize L4 staging environment with real services."""
@@ -127,17 +106,14 @@ class MultiAgentL4TestSuite:
 
         await self.postgres_service.initialize()
         
-
         self.redis_session = RedisSessionManager()
 
         await self.redis_session.initialize()
         
-
         self.llm_manager = LLMManager()
 
         await self.llm_manager.initialize()
         
-
         self.websocket_manager = WebSocketManager()
 
         await self.websocket_manager.initialize()
@@ -156,7 +132,6 @@ class MultiAgentL4TestSuite:
 
         )
     
-
     async def create_enterprise_optimization_request(self, scenario: str) -> DeepAgentState:
 
         """Create realistic enterprise optimization request for L4 testing."""
@@ -219,10 +194,8 @@ class MultiAgentL4TestSuite:
 
         }
         
-
         scenario_data = request_scenarios.get(scenario, request_scenarios["cost_optimization"])
         
-
         state = DeepAgentState()
 
         state.user_request = scenario_data["user_request"]
@@ -239,10 +212,8 @@ class MultiAgentL4TestSuite:
 
         state.context_metadata = scenario_data["context"]
         
-
         return state
     
-
     async def execute_multi_agent_workflow(self, initial_state: DeepAgentState) -> Dict[str, Any]:
 
         """Execute complete multi-agent workflow with real LLM calls."""
@@ -251,7 +222,6 @@ class MultiAgentL4TestSuite:
 
         run_id = f"l4_test_{uuid.uuid4().hex[:12]}"
         
-
         try:
             # Step 1: Supervisor processes initial request
 
@@ -267,7 +237,6 @@ class MultiAgentL4TestSuite:
 
             )
             
-
             self.test_metrics["real_llm_calls"] += 1
             
             # Step 2: Verify state persistence across agent boundaries
@@ -290,7 +259,6 @@ class MultiAgentL4TestSuite:
 
             )
             
-
             self.test_metrics["successful_delegations"] += 1
 
             self.test_metrics["agent_collaborations"] += 1
@@ -299,12 +267,10 @@ class MultiAgentL4TestSuite:
 
             final_state = await self.validate_cross_agent_consistency(run_id)
             
-
             workflow_duration = time.time() - workflow_start
 
             self.test_metrics["total_test_duration"] += workflow_duration
             
-
             return {
 
                 "success": True,
@@ -321,7 +287,6 @@ class MultiAgentL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -336,7 +301,6 @@ class MultiAgentL4TestSuite:
 
             }
     
-
     async def verify_state_persistence(self, thread_id: str, run_id: str) -> Dict[str, Any]:
 
         """Verify state persistence across agent lifecycle in staging database."""
@@ -356,19 +320,16 @@ class MultiAgentL4TestSuite:
 
             """
             
-
             result = await self.postgres_service.execute_query(
 
                 state_query, (thread_id, run_id)
 
             )
             
-
             if not result:
 
                 return {"success": False, "error": "No state found in database"}
             
-
             state_data = result[0]
 
             self.test_metrics["state_persistence_operations"] += 1
@@ -379,7 +340,6 @@ class MultiAgentL4TestSuite:
 
             agent_state = json.loads(state_data["agent_state"])
             
-
             return {
 
                 "success": True,
@@ -394,12 +354,10 @@ class MultiAgentL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def test_sub_agent_delegation(self, supervisor_result: Any, run_id: str) -> Dict[str, Any]:
 
         """Test real sub-agent delegation with LLM calls in staging."""
@@ -447,7 +405,6 @@ class MultiAgentL4TestSuite:
 
             }
             
-
             opt_result = await optimization_agent.execute_optimization(optimization_task)
 
             self.test_metrics["real_llm_calls"] += 1
@@ -464,12 +421,10 @@ class MultiAgentL4TestSuite:
 
             }
             
-
             analysis_result = await analysis_agent.execute_analysis(analysis_task)
 
             self.test_metrics["real_llm_calls"] += 1
             
-
             return {
 
                 "success": True,
@@ -484,12 +439,10 @@ class MultiAgentL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def validate_cross_agent_consistency(self, run_id: str) -> Dict[str, Any]:
 
         """Validate state consistency across multiple agents in staging environment."""
@@ -509,10 +462,8 @@ class MultiAgentL4TestSuite:
 
             """
             
-
             results = await self.postgres_service.execute_query(consistency_query, (run_id,))
             
-
             if len(results) < 2:
 
                 return {"success": False, "error": "Insufficient agent states for consistency check"}
@@ -537,12 +488,10 @@ class MultiAgentL4TestSuite:
 
                 })
             
-
             consistent_states = sum(1 for sv in state_versions if sv["run_id_match"])
 
             consistency_rate = consistent_states / len(state_versions)
             
-
             return {
 
                 "success": True,
@@ -557,12 +506,10 @@ class MultiAgentL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def cleanup_l4_resources(self) -> None:
 
         """Clean up L4 test resources in staging environment."""
@@ -592,11 +539,9 @@ class MultiAgentL4TestSuite:
 
                 await self.llm_manager.shutdown()
                 
-
         except Exception as e:
 
             print(f"Cleanup warning: {e}")
-
 
 @pytest.fixture
 
@@ -611,7 +556,6 @@ async def multi_agent_l4_suite():
     yield suite
 
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 
@@ -662,7 +606,6 @@ async def test_enterprise_cost_optimization_workflow_l4(multi_agent_l4_suite):
 
     assert consistency["consistency_rate"] >= 0.9, "State consistency below threshold"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -700,7 +643,6 @@ async def test_latency_optimization_agent_coordination_l4(multi_agent_l4_suite):
 
     )
     
-
     assert persistence_result["success"] is True
 
     assert persistence_result["thread_state_valid"] is True
@@ -708,7 +650,6 @@ async def test_latency_optimization_agent_coordination_l4(multi_agent_l4_suite):
     assert persistence_result["agent_state_valid"] is True
 
     assert persistence_result["state_age_seconds"] < 300, "State too old"
-
 
 @pytest.mark.asyncio
 
@@ -745,7 +686,6 @@ async def test_capacity_planning_multi_agent_flow_l4(multi_agent_l4_suite):
 
     assert "supervisor_agent" in consistency["agents_involved"]
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -759,7 +699,6 @@ async def test_concurrent_agent_workflows_l4(multi_agent_l4_suite):
 
     scenarios = ["cost_optimization", "latency_optimization", "capacity_planning"]
     
-
     initial_states = []
 
     for scenario in scenarios:
@@ -778,7 +717,6 @@ async def test_concurrent_agent_workflows_l4(multi_agent_l4_suite):
 
     ]
     
-
     workflow_results = await asyncio.gather(*workflow_tasks, return_exceptions=True)
     
     # Validate all workflows succeeded
@@ -800,7 +738,6 @@ async def test_concurrent_agent_workflows_l4(multi_agent_l4_suite):
     assert multi_agent_l4_suite.test_metrics["agent_collaborations"] >= 3
 
     assert multi_agent_l4_suite.test_metrics["real_llm_calls"] >= 9  # 3 per workflow minimum
-
 
 @pytest.mark.asyncio
 
@@ -845,7 +782,6 @@ async def test_agent_failure_recovery_l4(multi_agent_l4_suite):
 
     )
     
-
     assert persistence_check["success"] is True
 
     assert persistence_check["state_age_seconds"] < 60, "State not recently persisted"
@@ -862,14 +798,12 @@ async def test_agent_failure_recovery_l4(multi_agent_l4_suite):
 
     """
     
-
     recovery_result = await multi_agent_l4_suite.postgres_service.execute_query(
 
         recovery_query, (initial_state.chat_thread_id, run_id)
 
     )
     
-
     assert len(recovery_result) > 0, "No recoverable state found"
     
     # Validate state can be reconstructed

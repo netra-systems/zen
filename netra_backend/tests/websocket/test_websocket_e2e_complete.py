@@ -13,17 +13,10 @@ Follows SPEC/websockets.xml and SPEC/learnings/websocket_message_paradox.xml
 Business Value: Ensures WebSocket infrastructure supports real-time AI optimization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -46,11 +39,7 @@ from netra_backend.app.schemas.websocket_models import (
     UserMessagePayload,
 )
 
-# Add project root to path
 from netra_backend.tests.jwt_token_helpers import JWTTestHelper
-
-# Add project root to path
-
 
 class WebSocketE2EClient:
     """E2E WebSocket test client with auth and message handling."""
@@ -93,7 +82,6 @@ class WebSocketE2EClient:
         """Get messages by type."""
         return [msg for msg in self.messages if msg.get("type") == msg_type]
 
-
 @pytest.fixture
 async def ws_client():
     """WebSocket E2E client fixture."""
@@ -101,7 +89,6 @@ async def ws_client():
     yield client
     if client.connected:
         await client.disconnect()
-
 
 @pytest.fixture
 def sample_user_message():
@@ -115,7 +102,6 @@ def sample_user_message():
         }
     }
 
-
 @pytest.fixture  
 def sample_example_message():
     """Sample example message for testing."""
@@ -127,7 +113,6 @@ def sample_example_message():
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
     }
-
 
 @pytest.mark.asyncio
 class TestWebSocketAuthenticationFlow:
@@ -154,7 +139,6 @@ class TestWebSocketAuthenticationFlow:
         with pytest.raises(Exception):
             ws = await websockets.connect("ws://localhost:8001/ws/enhanced")
             await ws.close()
-
 
 @pytest.mark.asyncio
 class TestWebSocketMessageFlow:
@@ -202,7 +186,6 @@ class TestWebSocketMessageFlow:
         assert len(error_msgs) >= 1
         assert any("json" in str(error).lower() for error in error_msgs)
 
-
 @pytest.mark.asyncio
 class TestAgentResponseStreaming:
     """Test agent response streaming."""
@@ -239,7 +222,6 @@ class TestAgentResponseStreaming:
         for msg in streaming_msgs:
             assert "payload" in msg
             assert isinstance(msg["payload"], dict)
-
 
 @pytest.mark.asyncio
 class TestConnectionResilience:
@@ -283,7 +265,6 @@ class TestConnectionResilience:
         pong_msgs = ws_client.get_messages_by_type("pong")
         assert len(pong_msgs) >= 1
 
-
 @pytest.mark.asyncio
 class TestServiceDiscovery:
     """Test WebSocket service discovery."""
@@ -301,7 +282,6 @@ class TestServiceDiscovery:
         assert ws_config["features"]["json_first"] is True
         assert ws_config["features"]["auth_required"] is True
         assert "/ws/enhanced" in ws_config["endpoints"]["websocket"]
-
 
 @pytest.mark.asyncio 
 class TestErrorHandlingAndLogging:
@@ -338,7 +318,6 @@ class TestErrorHandlingAndLogging:
         empty_errors = [e for e in error_msgs if "empty" in str(e).lower()]
         assert len(empty_errors) >= 1
 
-
 @pytest.mark.asyncio
 class TestConcurrentConnections:
     """Test concurrent connection handling."""
@@ -366,7 +345,6 @@ class TestConcurrentConnections:
             for client in clients:
                 if client.connected:
                     await client.disconnect()
-
 
 @pytest.mark.asyncio
 class TestRealTimeFeatures:
@@ -404,7 +382,6 @@ class TestRealTimeFeatures:
         pong_msgs = ws_client.get_messages_by_type("pong")
         assert len(pong_msgs) >= 5
 
-
 @pytest.mark.asyncio
 class TestManualDatabaseSessions:
     """Test manual database session handling (not Depends())."""
@@ -441,7 +418,6 @@ class TestManualDatabaseSessions:
             user_id = await authenticate_websocket_with_database(session_info)
             assert user_id == "test_user"
             assert mock_db.called
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

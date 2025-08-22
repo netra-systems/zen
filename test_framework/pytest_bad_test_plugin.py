@@ -9,7 +9,7 @@ from typing import Optional
 
 import pytest
 
-from .bad_test_detector import BadTestDetector
+from test_framework.bad_test_detector import BadTestDetector
 
 
 class BadTestPlugin:

@@ -20,17 +20,10 @@ Mock-Real Spectrum: L3 (Real service with controlled failures)
 - Controlled crash simulation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -51,17 +44,14 @@ from netra_backend.app.core.monitoring import metrics_collector
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.redis_manager import get_redis_manager
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     HealthResponse,
     LoginRequest,
     LoginResponse,
     ServiceStatus,
     SessionInfo,
-    # Add project root to path
     Token,
 )
-
 
 @dataclass
 class RecoveryMetrics:
@@ -94,7 +84,6 @@ class RecoveryMetrics:
         if self.crash_time and self.recovery_complete_time:
             return self.recovery_complete_time - self.crash_time
         return 0.0
-
 
 class TestAuthServiceRecoveryCrash:
     """Test suite for auth service crash recovery"""

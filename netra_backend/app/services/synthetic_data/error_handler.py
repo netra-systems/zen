@@ -65,7 +65,7 @@ class ErrorHandler:
     ) -> None:
         """Mark job as failed in active jobs tracking"""
         if job_id in active_jobs:
-            from .job_manager import JobManager
+            from netra_backend.app.services.synthetic_data.job_manager import JobManager
             job_manager = JobManager()
             job_manager.fail_job(job_id, active_jobs, error)
 

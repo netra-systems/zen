@@ -10,17 +10,10 @@ Tests configuration from multiple sources:
 - Configuration validation and hot-reload
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,13 +27,9 @@ import pytest
 
 from netra_backend.app.config import get_config, reload_config, validate_configuration
 
-# Add project root to path
 from netra_backend.app.core.configuration.base import config_manager, get_unified_config
 from netra_backend.app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 class TestConfigurationIntegration:
     """Integration tests for configuration loading and validation."""
@@ -329,7 +318,6 @@ class TestConfigurationIntegration:
             auth_fields = ['auth_secret_key', 'jwt_secret', 'oauth_client_secret']
             for auth_field in auth_fields:
                 assert not hasattr(config, auth_field) or getattr(config, auth_field) in [None, ""]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

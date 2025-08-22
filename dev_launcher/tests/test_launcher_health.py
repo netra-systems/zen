@@ -12,7 +12,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus

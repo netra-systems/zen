@@ -24,21 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -53,21 +42,15 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class RateLimitTracker:
 
     """Track rate limits using Redis for distributed enforcement."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -108,7 +91,6 @@ class RateLimitTracker:
 
         }
     
-
     async def check_rate_limit(self, client_id: str, user_tier: str = "free") -> Dict[str, Any]:
 
         """Check if client is within rate limits."""
@@ -119,7 +101,6 @@ class RateLimitTracker:
 
         limits = {**self.default_limits, **self.tier_limits.get(user_tier, {})}
         
-
         current_time = time.time()
 
         minute_key = f"rate_limit:{client_id}:minute:{int(current_time // 60)}"
@@ -136,7 +117,6 @@ class RateLimitTracker:
 
         burst_info = await self.redis.hgetall(burst_key)
         
-
         minute_count = int(minute_count)
 
         hour_count = int(hour_count)
@@ -155,7 +135,6 @@ class RateLimitTracker:
 
             burst_start = current_time
         
-
         result = {
 
             "allowed": True,
@@ -190,7 +169,6 @@ class RateLimitTracker:
 
             self.metrics["requests_denied"] += 1
             
-
         elif minute_count >= limits["messages_per_minute"]:
 
             result["allowed"] = False
@@ -201,7 +179,6 @@ class RateLimitTracker:
 
             self.metrics["requests_denied"] += 1
             
-
         elif burst_count >= limits["burst_capacity"]:
 
             result["allowed"] = False
@@ -212,17 +189,14 @@ class RateLimitTracker:
 
             self.metrics["requests_denied"] += 1
         
-
         if result["allowed"]:
 
             await self._record_request(client_id, limits, current_time)
 
             self.metrics["requests_allowed"] += 1
         
-
         return result
     
-
     async def _record_request(self, client_id: str, limits: Dict[str, Any], current_time: float):
 
         """Record allowed request in Redis."""
@@ -239,7 +213,6 @@ class RateLimitTracker:
 
         await self.redis.expire(minute_key, 120)  # Keep for 2 minutes
         
-
         await self.redis.incr(hour_key)
 
         await self.redis.expire(hour_key, 7200)  # Keep for 2 hours
@@ -274,7 +247,6 @@ class RateLimitTracker:
 
             burst_start = current_time
         
-
         await self.redis.hset(burst_key, mapping={
 
             "count": burst_count,
@@ -285,7 +257,6 @@ class RateLimitTracker:
 
         await self.redis.expire(burst_key, limits["burst_window"] + 60)
     
-
     async def get_client_usage(self, client_id: str) -> Dict[str, Any]:
 
         """Get current usage statistics for client."""
@@ -298,14 +269,12 @@ class RateLimitTracker:
 
         burst_key = f"rate_limit:{client_id}:burst"
         
-
         minute_count = await self.redis.get(minute_key) or 0
 
         hour_count = await self.redis.get(hour_key) or 0
 
         burst_info = await self.redis.hgetall(burst_key)
         
-
         return {
 
             "minute_usage": int(minute_count),
@@ -318,12 +287,10 @@ class RateLimitTracker:
 
         }
 
-
 class ThrottleHandler:
 
     """Handle message throttling and backpressure."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -352,7 +319,6 @@ class ThrottleHandler:
 
         }
     
-
     async def throttle_message(self, client_id: str, message: Dict[str, Any], priority: int = 0) -> Dict[str, Any]:
 
         """Add message to throttle queue."""
@@ -373,7 +339,6 @@ class ThrottleHandler:
 
             self.metrics["queues_created"] += 1
         
-
         queue = self.throttle_queues[client_id]
         
         # Check queue capacity
@@ -418,12 +383,10 @@ class ThrottleHandler:
 
                 break
         
-
         if not inserted:
 
             queue["messages"].append(queued_message)
         
-
         self.metrics["messages_queued"] += 1
         
         # Check for backpressure
@@ -446,7 +409,6 @@ class ThrottleHandler:
 
             }
         
-
         return {
 
             "queued": True,
@@ -459,7 +421,6 @@ class ThrottleHandler:
 
         }
     
-
     async def process_throttle_queue(self, client_id: str, websocket: AsyncMock) -> Dict[str, Any]:
 
         """Process messages from throttle queue."""
@@ -468,22 +429,18 @@ class ThrottleHandler:
 
             return {"processed": 0, "remaining": 0}
         
-
         queue = self.throttle_queues[client_id]
         
-
         if queue["processing"]:
 
             return {"processed": 0, "remaining": len(queue["messages"]), "status": "already_processing"}
         
-
         queue["processing"] = True
 
         processed_count = 0
 
         errors = []
         
-
         try:
             # Process messages at configured rate
 
@@ -495,19 +452,16 @@ class ThrottleHandler:
 
             )
             
-
             for _ in range(messages_to_process):
 
                 if not queue["messages"]:
 
                     break
                 
-
                 queued_item = queue["messages"].pop(0)
 
                 message = queued_item["message"]
                 
-
                 try:
                     # Send message to WebSocket
 
@@ -519,12 +473,10 @@ class ThrottleHandler:
 
                         await websocket.send(json.dumps(message))
                     
-
                     processed_count += 1
 
                     self.metrics["messages_processed"] += 1
                     
-
                 except Exception as e:
                     # Retry logic
 
@@ -542,10 +494,8 @@ class ThrottleHandler:
 
                 await asyncio.sleep(1.0 / self.throttle_config["processing_rate"])
             
-
             queue["last_processed"] = time.time()
             
-
         finally:
 
             queue["processing"] = False
@@ -556,7 +506,6 @@ class ThrottleHandler:
 
             del self.throttle_queues[client_id]
         
-
         return {
 
             "processed": processed_count,
@@ -567,7 +516,6 @@ class ThrottleHandler:
 
         }
     
-
     async def get_queue_status(self, client_id: str) -> Optional[Dict[str, Any]]:
 
         """Get current queue status for client."""
@@ -576,12 +524,10 @@ class ThrottleHandler:
 
             return None
         
-
         queue = self.throttle_queues[client_id]
 
         current_time = time.time()
         
-
         return {
 
             "queue_size": len(queue["messages"]),
@@ -600,12 +546,10 @@ class ThrottleHandler:
 
         }
 
-
 class WebSocketRateLimitManager:
 
     """Comprehensive WebSocket rate limiting management system."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -636,7 +580,6 @@ class WebSocketRateLimitManager:
 
         }
     
-
     async def handle_websocket_message(self, client_id: str, user_tier: str, message: Dict[str, Any], 
 
                                      websocket: AsyncMock, priority: int = 0) -> Dict[str, Any]:
@@ -651,7 +594,6 @@ class WebSocketRateLimitManager:
 
         rate_check = await self.rate_tracker.check_rate_limit(client_id, user_tier)
         
-
         if not rate_check["allowed"]:
 
             self.performance_metrics["rate_limit_violations"] += 1
@@ -688,7 +630,6 @@ class WebSocketRateLimitManager:
 
                 logger.error(f"Failed to send rate limit notification: {e}")
             
-
             return {
 
                 "handled": False,
@@ -705,7 +646,6 @@ class WebSocketRateLimitManager:
 
         throttle_result = await self.throttle_handler.throttle_message(client_id, message, priority)
         
-
         if not throttle_result["queued"]:
 
             return {
@@ -730,7 +670,6 @@ class WebSocketRateLimitManager:
 
         self._update_performance_metrics(check_time, throttle_result.get("queue_size", 0))
         
-
         return {
 
             "handled": True,
@@ -749,7 +688,6 @@ class WebSocketRateLimitManager:
 
         }
     
-
     async def send_priority_message(self, client_id: str, user_tier: str, message: Dict[str, Any], 
 
                                   websocket: AsyncMock) -> Dict[str, Any]:
@@ -758,7 +696,6 @@ class WebSocketRateLimitManager:
 
         return await self.handle_websocket_message(client_id, user_tier, message, websocket, priority=10)
     
-
     async def get_client_rate_limit_status(self, client_id: str) -> Dict[str, Any]:
 
         """Get comprehensive rate limit status for client."""
@@ -767,7 +704,6 @@ class WebSocketRateLimitManager:
 
         queue_status = await self.throttle_handler.get_queue_status(client_id)
         
-
         return {
 
             "usage": usage,
@@ -778,7 +714,6 @@ class WebSocketRateLimitManager:
 
         }
     
-
     async def adjust_client_limits(self, client_id: str, user_tier: str, custom_limits: Dict[str, Any]) -> bool:
 
         """Adjust rate limits for specific client (premium feature)."""
@@ -796,7 +731,6 @@ class WebSocketRateLimitManager:
 
             await self.redis.expire(limits_key, 86400)  # 24 hours
             
-
             return True
 
         except Exception as e:
@@ -805,14 +739,12 @@ class WebSocketRateLimitManager:
 
             return False
     
-
     async def simulate_load_test(self, client_count: int, messages_per_client: int) -> Dict[str, Any]:
 
         """Simulate load test to verify rate limiting behavior."""
 
         start_time = time.time()
         
-
         results = {
 
             "total_clients": client_count,
@@ -831,14 +763,12 @@ class WebSocketRateLimitManager:
 
         }
         
-
         async def client_load_test(client_index: int):
 
             client_id = f"load_test_client_{client_index}"
 
             websocket_mock = AsyncMock()
             
-
             client_results = {
 
                 "successful": 0,
@@ -851,7 +781,6 @@ class WebSocketRateLimitManager:
 
             }
             
-
             for msg_index in range(messages_per_client):
 
                 try:
@@ -868,14 +797,12 @@ class WebSocketRateLimitManager:
 
                     }
                     
-
                     result = await self.handle_websocket_message(
 
                         client_id, "free", message, websocket_mock
 
                     )
                     
-
                     if result["handled"]:
 
                         client_results["successful"] += 1
@@ -892,14 +819,12 @@ class WebSocketRateLimitManager:
 
                     await asyncio.sleep(0.01)
                     
-
                 except Exception as e:
 
                     client_results["errors"] += 1
 
                     logger.error(f"Load test error for client {client_index}: {e}")
             
-
             return client_results
         
         # Run load test
@@ -922,15 +847,12 @@ class WebSocketRateLimitManager:
 
                 results["errors"] += client_result["errors"]
         
-
         results["test_duration"] = time.time() - start_time
 
         results["messages_per_second"] = results["total_messages"] / results["test_duration"]
         
-
         return results
     
-
     def _update_performance_metrics(self, check_time: float, queue_size: int):
 
         """Update performance metrics."""
@@ -953,7 +875,6 @@ class WebSocketRateLimitManager:
 
             self.performance_metrics["peak_queue_size"] = queue_size
     
-
     async def get_comprehensive_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive metrics across all components."""
@@ -979,7 +900,6 @@ class WebSocketRateLimitManager:
             }
 
         }
-
 
 @pytest.fixture
 
@@ -1030,9 +950,7 @@ async def redis_client():
 
         client.pipeline.return_value = mock_pipeline
         
-
         yield client
-
 
 async def async_iter(items):
 
@@ -1042,7 +960,6 @@ async def async_iter(items):
 
         yield item
 
-
 @pytest.fixture
 
 async def rate_limit_manager(redis_client):
@@ -1050,7 +967,6 @@ async def rate_limit_manager(redis_client):
     """Create WebSocket rate limit manager."""
 
     return WebSocketRateLimitManager(redis_client)
-
 
 @pytest.mark.asyncio
 
@@ -1088,7 +1004,6 @@ async def test_basic_rate_limiting_enforcement(rate_limit_manager):
 
     assert metrics["rate_tracker"]["requests_allowed"] >= 5
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -1117,7 +1032,6 @@ async def test_rate_limit_exceeded_handling(rate_limit_manager):
 
         )
         
-
         if result["rate_limited"]:
 
             exceeded_count += 1
@@ -1126,7 +1040,6 @@ async def test_rate_limit_exceeded_handling(rate_limit_manager):
 
             break
     
-
     assert exceeded_count > 0
     
     # Verify rate limit notification was sent
@@ -1138,7 +1051,6 @@ async def test_rate_limit_exceeded_handling(rate_limit_manager):
     elif hasattr(websocket_mock, 'send'):
 
         websocket_mock.send.assert_called()
-
 
 @pytest.mark.asyncio
 
@@ -1158,7 +1070,6 @@ async def test_tier_based_rate_limits(rate_limit_manager):
 
     tier_results = {}
     
-
     for tier in tiers:
 
         client_id = f"test_client_{tier}"
@@ -1177,7 +1088,6 @@ async def test_tier_based_rate_limits(rate_limit_manager):
 
             )
             
-
             if result["handled"]:
 
                 allowed_count += 1
@@ -1186,7 +1096,6 @@ async def test_tier_based_rate_limits(rate_limit_manager):
 
                 break
         
-
         tier_results[tier] = allowed_count
     
     # Verify higher tiers allow more messages
@@ -1196,7 +1105,6 @@ async def test_tier_based_rate_limits(rate_limit_manager):
     assert tier_results["mid"] > tier_results["early"]
 
     assert tier_results["early"] >= tier_results["free"]
-
 
 @pytest.mark.asyncio
 
@@ -1218,7 +1126,6 @@ async def test_message_throttling_and_queuing(rate_limit_manager):
 
     queued_messages = 0
     
-
     for i in range(20):
 
         message = {"type": "burst", "content": f"Burst message {i}"}
@@ -1229,14 +1136,12 @@ async def test_message_throttling_and_queuing(rate_limit_manager):
 
         )
         
-
         messages_sent += 1
 
         if result.get("queue_size", 0) > 0:
 
             queued_messages += 1
     
-
     assert queued_messages > 0
     
     # Check queue status
@@ -1246,7 +1151,6 @@ async def test_message_throttling_and_queuing(rate_limit_manager):
     if status["queue"]:
 
         assert status["queue"]["queue_size"] >= 0
-
 
 @pytest.mark.asyncio
 
@@ -1292,7 +1196,6 @@ async def test_priority_message_handling(rate_limit_manager):
 
     assert result.get("queue_position", 0) <= 5  # Should be near front of queue
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -1311,7 +1214,6 @@ async def test_backpressure_detection(rate_limit_manager):
 
     backpressure_detected = False
     
-
     for i in range(90):  # Close to queue limit
 
         message = {"type": "backpressure_test", "content": f"Message {i}"}
@@ -1322,14 +1224,12 @@ async def test_backpressure_detection(rate_limit_manager):
 
         )
         
-
         if result.get("throttled") and result.get("queue_size", 0) > 80:
 
             backpressure_detected = True
 
             break
     
-
     assert backpressure_detected
     
     # Verify backpressure metrics
@@ -1337,7 +1237,6 @@ async def test_backpressure_detection(rate_limit_manager):
     metrics = await rate_limit_manager.get_comprehensive_metrics()
 
     assert metrics["throttle_handler"]["backpressure_events"] > 0
-
 
 @pytest.mark.asyncio
 
@@ -1351,17 +1250,14 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
     client_count = 10
     
-
     async def client_test(client_index: int):
 
         client_id = f"concurrent_client_{client_index}"
 
         websocket_mock = AsyncMock()
         
-
         results = {"handled": 0, "rate_limited": 0}
         
-
         for i in range(20):
 
             message = {"type": "concurrent_test", "content": f"Message {i}"}
@@ -1372,7 +1268,6 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
             )
             
-
             if result["handled"]:
 
                 results["handled"] += 1
@@ -1381,7 +1276,6 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
                 results["rate_limited"] += 1
         
-
         return results
     
     # Run concurrent client tests
@@ -1396,7 +1290,6 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
     total_rate_limited = sum(result["rate_limited"] for result in client_results)
     
-
     assert total_handled > 0
 
     assert total_rate_limited >= 0  # Some may be rate limited
@@ -1406,7 +1299,6 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
     for result in client_results:
 
         assert result["handled"] > 0  # Each client should send at least some messages
-
 
 @pytest.mark.asyncio
 
@@ -1432,19 +1324,16 @@ async def test_custom_rate_limit_adjustment(rate_limit_manager):
 
     }
     
-
     adjustment_success = await rate_limit_manager.adjust_client_limits(
 
         client_id, "enterprise", custom_limits
 
     )
     
-
     assert adjustment_success is True
     
     # Verify custom limits are applied (would require modification to rate tracker)
     # For now, just verify the operation completed successfully
-
 
 @pytest.mark.asyncio
 
@@ -1472,7 +1361,6 @@ async def test_rate_limit_recovery(rate_limit_manager):
 
         )
         
-
         if result["rate_limited"]:
 
             break
@@ -1487,7 +1375,6 @@ async def test_rate_limit_recovery(rate_limit_manager):
     # For test, we verify the structure is in place
 
     assert "retry_after" in result or "minute_usage" in status_before["usage"]
-
 
 @pytest.mark.asyncio
 
@@ -1505,7 +1392,6 @@ async def test_load_test_simulation(rate_limit_manager):
 
     )
     
-
     assert load_test_result["total_clients"] == 5
 
     assert load_test_result["messages_per_client"] == 10
@@ -1535,7 +1421,6 @@ async def test_load_test_simulation(rate_limit_manager):
     assert load_test_result["test_duration"] > 0
 
     assert load_test_result["messages_per_second"] > 0
-
 
 @pytest.mark.asyncio
 

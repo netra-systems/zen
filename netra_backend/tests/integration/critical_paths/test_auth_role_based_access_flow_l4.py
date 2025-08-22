@@ -23,14 +23,8 @@ Mock-Real Spectrum: L4 (Production-like environment)
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -43,11 +37,8 @@ from enum import Enum
 import httpx
 import jwt
 
-# Add project root to path
-
 from netra_backend.app.schemas.auth_types import (
 
-# Add project root to path
     Token, LoginRequest, LoginResponse,
     UserProfile, Permission, Role, ResourceAccess,
     # AuditEvent, AuthorizationResult  # Class may not exist, commented out
@@ -58,7 +49,6 @@ from netra_backend.app.db.redis_manager import get_redis_manager
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.monitoring import metrics_collector
 
-
 class PermissionLevel(Enum):
     """Permission levels for resources"""
     NONE = 0
@@ -66,7 +56,6 @@ class PermissionLevel(Enum):
     WRITE = 2
     DELETE = 3
     ADMIN = 4
-
 
 @dataclass
 class RoleDefinition:
@@ -83,7 +72,6 @@ class RoleDefinition:
             return True
         return self.level > other.level
 
-
 @dataclass
 class AccessTestCase:
     """Test case for access control"""
@@ -92,7 +80,6 @@ class AccessTestCase:
     action: str
     expected_result: bool
     reason: str
-
 
 class TestAuthRoleBasedAccessFlow:
     """Test suite for role-based access control flows"""

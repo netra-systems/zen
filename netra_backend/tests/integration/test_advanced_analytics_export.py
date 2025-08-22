@@ -16,17 +16,10 @@ ARCHITECTURAL COMPLIANCE:
 - Performance: Export 50K records <60 seconds, test completion <5 minutes
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -41,12 +34,11 @@ import pytest
 
 from netra_backend.app.db.clickhouse import ClickHouseService
 from netra_backend.app.services.thread_analytics import get_analytics_dashboard
-from integration.helpers.analytics_export_helpers import (
+from netra_backend.tests.integration.helpers.analytics_export_helpers import (
     AdvancedAnalyticsExportInfrastructure,
     AnalyticsDataGenerator,
     ExportConfigFactory,
 )
-
 
 class TestAdvancedAnalyticsExport:
     """
@@ -271,7 +263,6 @@ class TestAdvancedAnalyticsExport:
         assert validation["all_formats_converted"], "Not all formats converted successfully"
         assert validation["format_count"] == 4, f"Expected 4 formats, got {validation['format_count']}"
         assert len(dataset) == 1000, "Test dataset size mismatch"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

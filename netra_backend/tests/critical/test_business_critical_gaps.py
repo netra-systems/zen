@@ -9,17 +9,10 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum business value prote
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -31,14 +24,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, mock_open, patch
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 
-# Add project root to path
 # FastAPI and WebSocket imports
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketState
 
 # Core business components - simplified and verified
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -67,7 +58,6 @@ class TestWebSocketConnectionResilience:
         assert mock_websocket.client_state == WebSocketState.CONNECTED
         assert mock_manager.get_connection_count() == 1
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestAgentTaskDelegation:
@@ -92,7 +82,6 @@ class TestAgentTaskDelegation:
         assert result.agent_type == "data"
         assert result.status == "completed"
         assert result.confidence > 0.8
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio  
@@ -120,7 +109,6 @@ class TestLLMFallbackChain:
                     
             # Assert - Tertiary provider used successfully
             assert result["content"] == "Tertiary response"
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -152,7 +140,6 @@ class TestMetricsAggregationAccuracy:
         assert abs(result["total_cost"] - 0.07) < 0.0001
         assert abs(result["performance_fee"] - 0.014) < 0.0001  # 20% of cost
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestAuthTokenRefresh:
@@ -181,7 +168,6 @@ class TestAuthTokenRefresh:
             assert mock_auth_client.refresh_token.called
             assert new_token["token"] == "new_token"
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestDatabaseTransactionRollback:
@@ -209,7 +195,6 @@ class TestDatabaseTransactionRollback:
         assert mock_session.in_transaction() is False
         assert len(mock_session.new) == 0
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestRateLimiterEnforcement:
@@ -234,7 +219,6 @@ class TestRateLimiterEnforcement:
         blocked_messages = [r for r in responses if "rate limit" in str(r)]
         assert len(blocked_messages) > 0
         assert len(blocked_messages) == 5  # 5 requests were blocked
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -263,7 +247,6 @@ class TestCorpusDataValidation:
         assert retrieved["metadata"]["quality_score"] == 0.95
         assert created["id"] == retrieved["id"]
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestMultiAgentCoordination:
@@ -285,7 +268,6 @@ class TestMultiAgentCoordination:
         assert len(results) == 5
         assert all("result_" in str(r) for r in results)
         assert len(set(results)) == 5  # All results unique
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -309,7 +291,6 @@ class TestErrorRecoveryPipeline:
         # Assert - Error handled, fallback executed
         assert result.status == "recovered"
         assert result.error_handled is True
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -336,7 +317,6 @@ class TestSystemHealthMonitoring:
         assert health_status["llm_service"]["status"] == "degraded"
         assert health_status["websocket"]["response_time"] == 25
         assert len(health_status) == 3
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -365,7 +345,6 @@ class TestCostTrackingPrecision:
         # Assert - Cost calculation is precise
         assert abs(total_cost - expected_cost) < 0.0001  # Precision check
         assert abs(performance_fee - 0.0143) < 0.0001   # 20% fee precision
-
 
 # Additional simplified tests for completeness
 @pytest.mark.critical 

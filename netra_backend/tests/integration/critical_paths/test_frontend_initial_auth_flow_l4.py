@@ -18,17 +18,10 @@ L4 Test Coverage:
 - Session persistence across page refresh
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,13 +35,10 @@ from urllib.parse import parse_qs, urlparse
 import httpx
 import pytest
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
-
 
 @dataclass
 class FrontendAuthMetrics:
@@ -64,7 +54,6 @@ class FrontendAuthMetrics:
     network_requests_count: int = 0
     websocket_messages_count: int = 0
 
-
 @dataclass
 class AuthFlowStep:
     """Authentication flow step result."""
@@ -73,7 +62,6 @@ class AuthFlowStep:
     duration: float
     error: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
-
 
 class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
     """L4 test for frontend initial load authentication flow."""
@@ -937,7 +925,6 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             print(f"Browser cleanup error: {e}")
 
-
 @pytest.fixture
 async def frontend_auth_l4_test():
     """Fixture for frontend auth flow L4 test."""
@@ -946,7 +933,6 @@ async def frontend_auth_l4_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -995,7 +981,6 @@ async def test_frontend_initial_load_authentication_flow_l4(frontend_auth_l4_tes
     assert auth_metrics.get("network_requests_count", 0) > 0, "No network requests detected"
     assert auth_metrics.get("network_requests_count", 0) < 50, "Too many network requests"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L4
@@ -1022,7 +1007,6 @@ async def test_frontend_auth_flow_performance_l4(frontend_auth_l4_test):
     assert auth_metrics.get("websocket_connect_time", 0) <= 5.0, "WebSocket connect performance"
     assert auth_metrics.get("user_data_load_time", 0) <= 3.0, "User data load performance"
     assert auth_metrics.get("page_refresh_recovery_time", 0) <= 5.0, "Page refresh recovery performance"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

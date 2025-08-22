@@ -3,17 +3,10 @@
 Tests to prevent regression of the "Cannot call send once a close message has been sent" error.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timezone
@@ -25,11 +18,7 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.websocket.broadcast_core import BroadcastManager
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-
-# Add project root to path
-
 
 class TestWebSocketClosingState:
     """Test WebSocket closing state handling."""
@@ -240,7 +229,6 @@ class TestWebSocketClosingState:
         ws1.send_json.assert_not_called()
         ws2.send_json.assert_called_once()
         assert result is True
-
 
 class TestWebSocketStateTransitions:
     """Test WebSocket state transitions."""

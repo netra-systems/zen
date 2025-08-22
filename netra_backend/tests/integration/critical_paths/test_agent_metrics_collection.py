@@ -10,17 +10,10 @@ Critical Path: Metric generation -> Collection -> Aggregation -> Export -> Dashb
 Coverage: Real metric collectors, aggregators, exporters, dashboard integration
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -40,12 +33,10 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class MetricType(Enum):
     """Types of metrics that can be collected."""
@@ -55,7 +46,6 @@ class MetricType(Enum):
     SUMMARY = "summary"
     TIMER = "timer"
 
-
 class MetricCategory(Enum):
     """Categories of metrics for organization."""
     PERFORMANCE = "performance"
@@ -64,7 +54,6 @@ class MetricCategory(Enum):
     RESOURCE = "resource"
     SECURITY = "security"
     CUSTOM = "custom"
-
 
 @dataclass
 class MetricDefinition:
@@ -82,7 +71,6 @@ class MetricDefinition:
         """Get unique key for this metric."""
         label_hash = hashlib.md5(json.dumps(self.labels, sort_keys=True).encode()).hexdigest()[:8]
         return f"{self.name}_{label_hash}"
-
 
 @dataclass
 class MetricPoint:
@@ -112,7 +100,6 @@ class MetricPoint:
         
         timestamp_ms = int(self.timestamp.timestamp() * 1000)
         return f"{self.metric_name}{label_str} {self.value} {timestamp_ms}"
-
 
 class MetricBuffer:
     """Buffer for collecting metrics before aggregation."""
@@ -168,7 +155,6 @@ class MetricBuffer:
             "current_size": len(self.buffer),
             "utilization": len(self.buffer) / self.max_size * 100
         }
-
 
 class MetricAggregator:
     """Aggregates metrics over time windows."""
@@ -269,7 +255,6 @@ class MetricAggregator:
         else:
             return statistics.mean(values)  # Default to mean
 
-
 class MetricExporter:
     """Exports metrics to external systems."""
     
@@ -335,7 +320,6 @@ class MetricExporter:
         
         return stats
 
-
 class DashboardIntegration:
     """Integration with dashboard systems."""
     
@@ -375,7 +359,6 @@ class DashboardIntegration:
     def get_dashboard_data(self, dashboard_id: str) -> Dict[str, Any]:
         """Get all data for a dashboard."""
         return self.widget_data.get(dashboard_id, {})
-
 
 class AlertManager:
     """Manages alerting based on metric thresholds."""
@@ -479,7 +462,6 @@ class AlertManager:
             "alert_history_count": len(self.alert_history),
             "active_alert_details": list(self.active_alerts.values())
         }
-
 
 class MetricsCollectionSystem:
     """Main metrics collection system."""
@@ -614,7 +596,6 @@ class MetricsCollectionSystem:
             "export_stats": self.metric_exporter.get_export_stats(),
             "alert_status": self.alert_manager.get_alert_status()
         }
-
 
 class AgentMetricsCollectionManager:
     """Manages agent metrics collection testing."""
@@ -757,7 +738,6 @@ class AgentMetricsCollectionManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def metrics_collection_manager():
     """Create metrics collection manager for testing."""
@@ -765,7 +745,6 @@ async def metrics_collection_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -785,7 +764,6 @@ async def test_basic_metric_recording(metrics_collection_manager):
     assert len(points) == 1
     assert points[0].value == 42.5
     assert points[0].labels["source"] == "test"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -807,7 +785,6 @@ async def test_metric_buffer_operations(metrics_collection_manager):
     stats = manager.metrics_system.metric_buffer.get_stats()
     assert stats["buffer_overflows"] > 0
     assert stats["total_points"] == 15
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -840,7 +817,6 @@ async def test_metric_aggregation(metrics_collection_manager):
     assert avg_point is not None
     assert avg_point.value == 30.0  # Average of [10, 20, 30, 40, 50]
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_metric_export_functionality(metrics_collection_manager):
@@ -867,7 +843,6 @@ async def test_metric_export_functionality(metrics_collection_manager):
     # Check export stats
     stats = manager.metrics_system.metric_exporter.get_export_stats()
     assert stats["successful_exports"] > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -898,7 +873,6 @@ async def test_alert_rule_evaluation(metrics_collection_manager):
     alert_status = manager.metrics_system.alert_manager.get_alert_status()
     assert alert_status["active_alerts"] > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_prometheus_format_export(metrics_collection_manager):
@@ -922,7 +896,6 @@ async def test_prometheus_format_export(metrics_collection_manager):
     assert 'method="GET"' in prometheus_line
     assert 'status="200"' in prometheus_line
     assert "100" in prometheus_line
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -960,7 +933,6 @@ async def test_dashboard_integration(metrics_collection_manager):
     assert widget_data["point_count"] == 5
     assert widget_data["latest_value"] == 40  # Last recorded value
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_system_metrics_collection(metrics_collection_manager):
@@ -983,7 +955,6 @@ async def test_system_metrics_collection(metrics_collection_manager):
     
     latest_utilization = utilization_points[-1].value
     assert 0 <= latest_utilization <= 100
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1010,7 +981,6 @@ async def test_agent_metrics_simulation(metrics_collection_manager):
         agent_ids.add(point.labels.get("agent_id"))
     
     assert agent_ids == set(agents)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1046,7 +1016,6 @@ async def test_concurrent_metric_collection(metrics_collection_manager):
     
     # Performance check
     assert collection_time < 5.0  # Should complete quickly with concurrency
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

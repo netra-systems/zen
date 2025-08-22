@@ -3,21 +3,10 @@ Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import os
@@ -34,12 +23,8 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.db.base import Base
 
-# Add project root to path
 from netra_backend.app.db.models_postgres import Message, Run, Thread, User
 from netra_backend.app.services.websocket_manager import WebSocketManager
-
-# Add project root to path
-
 
 @pytest.fixture
 
@@ -55,23 +40,19 @@ async def test_database():
 
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
-
     async with engine.begin() as conn:
 
         await conn.run_sync(Base.metadata.create_all)
     
-
     session = async_session()
 
     yield {"session": session, "engine": engine, "db_file": db_file.name}
     
-
     await session.close()
 
     await engine.dispose()
 
     os.unlink(db_file.name)
-
 
 @pytest.fixture
 
@@ -91,7 +72,6 @@ def mock_infrastructure():
 
     cache_service.set = AsyncMock(return_value=True)
     
-
     return {
 
         "llm_manager": llm_manager,
@@ -101,7 +81,6 @@ def mock_infrastructure():
         "cache_service": cache_service
 
     }
-
 
 async def create_test_user_with_oauth(db_setup):
 
@@ -125,7 +104,6 @@ async def create_test_user_with_oauth(db_setup):
 
     return user
 
-
 async def setup_circuit_breakers_for_chain(service_chain):
 
     """Setup circuit breakers for each service"""
@@ -146,7 +124,6 @@ async def setup_circuit_breakers_for_chain(service_chain):
 
     return breakers
 
-
 async def setup_clickhouse_mock():
 
     """Setup ClickHouse mock for transaction testing"""
@@ -162,7 +139,6 @@ async def setup_clickhouse_mock():
     ch_mock.rollback = AsyncMock()
 
     return ch_mock
-
 
 def create_test_optimization_data():
 
@@ -181,7 +157,6 @@ def create_test_optimization_data():
         "updated_at": datetime.utcnow().isoformat()
 
     }
-
 
 async def verify_state_preservation(original, recovered):
 

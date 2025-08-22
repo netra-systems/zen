@@ -8,7 +8,6 @@ import random
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
-
 class MockDataGenerator:
     """Generate mock data for factory status reports."""
     

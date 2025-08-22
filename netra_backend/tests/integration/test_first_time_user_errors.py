@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Maintains user confidence and platform reliability
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -28,7 +21,6 @@ from unittest.mock import patch
 import httpx
 import pytest
 from fastapi import status
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -51,7 +43,6 @@ async def test_validation_error_handling(
     error = response.json()
     assert "detail" in error
     assert any("content" in str(e).lower() for e in error["detail"])
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -78,7 +69,6 @@ async def test_rate_limit_error_handling(
         assert "retry_after" in error
         assert "upgrade" in error["detail"].lower()
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -104,7 +94,6 @@ async def test_service_unavailable_error_handling(
         assert "temporarily unavailable" in error["detail"].lower()
         assert "support_options" in error
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
@@ -123,7 +112,6 @@ async def test_support_options_access(
     assert "contact_methods" in support
     assert "knowledge_base_url" in support
     assert "status_page_url" in support
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -151,7 +139,6 @@ async def test_support_ticket_creation(
     ticket = response.json()
     assert "ticket_id" in ticket
     assert "estimated_response_time" in ticket
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -191,7 +178,6 @@ async def test_error_recovery_with_retry(
     
     assert success, "Retry mechanism did not recover from error"
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
@@ -208,7 +194,6 @@ async def test_error_logging_and_debugging(
     assert response.status_code == status.HTTP_200_OK
     errors = response.json()
     assert "errors" in errors
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -233,7 +218,6 @@ async def test_graceful_degradation_features(
         response = await async_client.get("/api/v1/analytics/summary", headers=headers)
         # Should either work with basic features or provide helpful message
         assert response.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -265,7 +249,6 @@ async def test_timeout_error_handling(
         if response.status_code == status.HTTP_408_REQUEST_TIMEOUT:
             error = response.json()
             assert "timeout" in error["detail"].lower()
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

@@ -6,19 +6,10 @@ COMPLIANCE: Modular split from 500-line monolith
 
 # Import all test classes from focused modules
 
-# Add project root to path
-
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from netra_backend.tests.test_triage_agent_caching import (
     TestCaching,
@@ -29,7 +20,6 @@ from netra_backend.tests.test_triage_agent_core import (
     TestEntityExtraction,
     TestIntentDetermination,
     TestRequestValidation,
-    # Add project root to path
     TestTriageSubAgentInitialization,
 )
 from netra_backend.tests.test_triage_agent_models import TestCleanup, TestPydanticModels

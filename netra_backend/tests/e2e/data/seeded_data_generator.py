@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable generators
 
 Usage:
-    from tests.e2e.data.seeded_data_generator import (
+    from netra_backend.tests.e2e.data.seeded_data_generator import (
         ProductionMirrorGenerator,
         StressTestGenerator,
         DomainSpecificGenerator
@@ -37,7 +37,6 @@ from netra_backend.app.schemas.agent_models import AgentMetadata, ToolResultData
 from netra_backend.app.schemas.core_enums import MessageType
 from netra_backend.app.schemas.core_models import Message, Thread, User
 
-
 @dataclass
 class DatasetConfig:
     """Configuration for dataset generation."""
@@ -46,7 +45,6 @@ class DatasetConfig:
     error_rate: float = 0.02
     domain: Optional[str] = None
     include_edge_cases: bool = True
-
 
 class BaseDataGenerator(ABC):
     """Abstract base for all data generators."""
@@ -65,7 +63,6 @@ class BaseDataGenerator(ABC):
     def generate_dataset(self) -> Iterator[Dict[str, Any]]:
         """Generate complete dataset."""
         pass
-
 
 class ProductionMirrorGenerator(BaseDataGenerator):
     """Generates production-mirror datasets (100K records)."""
@@ -102,7 +99,6 @@ class ProductionMirrorGenerator(BaseDataGenerator):
             "name": self.fake.name()
         }
 
-
 class StressTestGenerator(BaseDataGenerator):
     """Generates stress-test datasets (1M records)."""
     
@@ -137,7 +133,6 @@ class StressTestGenerator(BaseDataGenerator):
             "type": random.choice(["batch", "stream", "interactive"]),
             "concurrent_requests": random.randint(100, 1000)
         }
-
 
 class DomainSpecificGenerator(BaseDataGenerator):
     """Generates domain-specific datasets."""
@@ -196,7 +191,6 @@ class DomainSpecificGenerator(BaseDataGenerator):
             "quality_rating": random.randint(85, 99)
         }
 
-
 class WorkloadProvider(BaseProvider):
     """Faker provider for workload data."""
     
@@ -210,7 +204,6 @@ class WorkloadProvider(BaseProvider):
         models = ["pay_per_use", "reserved", "spot", "commitment"]
         return self.random.choice(models)
 
-
 class MetricsProvider(BaseProvider):
     """Faker provider for metrics data."""
     
@@ -221,7 +214,6 @@ class MetricsProvider(BaseProvider):
     def throughput_rps(self) -> float:
         """Generate realistic throughput."""
         return max(1.0, np.random.gamma(2.0, 50.0))
-
 
 # Helper functions for common record building
 def _build_record(timestamp: datetime, user: Dict, workload: Dict, metrics: Dict) -> Dict[str, Any]:
@@ -234,7 +226,6 @@ def _build_record(timestamp: datetime, user: Dict, workload: Dict, metrics: Dict
         "id": str(uuid.uuid4())
     }
 
-
 def _generate_production_workload() -> Dict[str, Any]:
     """Generate production workload data."""
     fake = Faker()
@@ -243,7 +234,6 @@ def _generate_production_workload() -> Dict[str, Any]:
         "cost_model": fake.cost_model(),
         "resource_usage": random.uniform(0.1, 0.9)
     }
-
 
 def _generate_production_metrics(workload: Dict[str, Any]) -> Dict[str, Any]:
     """Generate production metrics."""
@@ -255,7 +245,6 @@ def _generate_production_metrics(workload: Dict[str, Any]) -> Dict[str, Any]:
         "cost_usd": random.uniform(0.01, 100.0)
     }
 
-
 def _generate_stress_metrics(workload: Dict[str, Any]) -> Dict[str, Any]:
     """Generate stress test metrics."""
     multiplier = workload.get("concurrent_requests", 1) / 100
@@ -264,7 +253,6 @@ def _generate_stress_metrics(workload: Dict[str, Any]) -> Dict[str, Any]:
         "throughput_rps": random.uniform(10, 1000) / multiplier,
         "error_rate": random.uniform(0.0, 0.1) * multiplier
     }
-
 
 def _generate_concurrent_user(index: int) -> Dict[str, str]:
     """Generate concurrent user for stress testing."""

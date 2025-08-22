@@ -3,17 +3,10 @@ Tests for LLM Manager with structured output and provider switching
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict, List
@@ -24,15 +17,11 @@ from netra_backend.app.schemas import AppConfig
 
 from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
 
-# Add project root to path
 from netra_backend.tests.llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
 )
 from netra_backend.tests.llm_mock_clients import MockLLMClient
-
-# Add project root to path
-
 
 class OutputSchema(BaseModel):
     """Test schema for structured output"""
@@ -40,7 +29,6 @@ class OutputSchema(BaseModel):
     confidence: float
     categories: List[str]
     metadata: Dict[str, Any]
-
 
 class TestLLMManagerStructuredOutput:
     """Test LLM manager with structured output and provider switching"""

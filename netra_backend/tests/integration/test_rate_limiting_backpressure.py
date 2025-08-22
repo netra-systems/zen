@@ -20,14 +20,8 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 import sys
 from pathlib import Path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
 
 - Uses canonical rate limiting types from app.schemas.rate_limit_types
 - Tests real rate limiting infrastructure (not mocks)
@@ -36,8 +30,6 @@ if str(PROJECT_ROOT) not in sys.path:
 """
 
 from test_framework import setup_test_path
-
-setup_test_path()
 
 import asyncio
 import json
@@ -49,7 +41,6 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 # Mock justification decorator
 def mock_justified(reason: str):
@@ -76,7 +67,6 @@ from netra_backend.app.schemas.rate_limit_types import (
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.websocket.rate_limiter import AdaptiveRateLimiter, RateLimiter
 
-
 class BackpressureTestHarness:
     """Test harness for rate limiting and backpressure validation."""
     
@@ -90,9 +80,7 @@ class BackpressureTestHarness:
         """Initialize test environment with rate limiting configurations."""
         self.test_user_token = "test_token_12345"
 
-
 # Core test components for rate limiting functionality
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -107,7 +95,6 @@ async def test_comprehensive_rate_limiting_integration():
     estimated_protection_value = 75000
     assert estimated_protection_value >= 50000
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration 
 async def test_rate_limiting_fairness_validation():
@@ -120,7 +107,6 @@ async def test_rate_limiting_fairness_validation():
         processed_requests[user] = int(total_requests * weight / total_weight)
     assert processed_requests["free_user_1"] == processed_requests["free_user_2"]
     assert processed_requests["premium_user_1"] > processed_requests["free_user_1"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -136,7 +122,6 @@ async def test_rate_limiting_metrics_collection():
             metrics.violations += 1
     assert (metrics.allowed_requests / metrics.total_requests) >= 0.75
 
-
 # Additional standalone tests for comprehensive coverage
 
 def test_token_bucket_basic_consumption():
@@ -148,7 +133,6 @@ def test_token_bucket_basic_consumption():
     assert bucket.get_available_tokens() == 5.0
     assert bucket.consume(5.0) is True
     assert bucket.get_available_tokens() == 0.0
-
 
 @mock_justified("Time progression needed for rate limiting mechanics testing")
 def test_token_bucket_refill_mechanics():
@@ -162,7 +146,6 @@ def test_token_bucket_refill_mechanics():
         bucket._refill()
         assert bucket.get_available_tokens() == 10.0
 
-
 def test_token_bucket_burst_handling():
     """Test burst capacity and burst protection."""
     bucket = TokenBucket(capacity=20.0, tokens=20.0, refill_rate=5.0)
@@ -171,14 +154,12 @@ def test_token_bucket_burst_handling():
     assert bucket.consume(10.0) is False
     assert bucket.get_available_tokens() == 5.0
 
-
 def test_token_bucket_reset():
     """Test token bucket reset functionality."""
     bucket = TokenBucket(capacity=10.0, tokens=3.0, refill_rate=1.0)
     bucket.reset()
     assert bucket.get_available_tokens() == 10.0
     assert bucket.tokens == 10.0
-
 
 @mock_justified("WebSocket connection not available in integration test")
 @pytest.mark.asyncio
@@ -194,7 +175,6 @@ async def test_rate_limiter_basic_throttling():
     info = rate_limiter.get_rate_limit_info(conn_info)
     assert info["is_limited"] is True
 
-
 @pytest.mark.asyncio
 async def test_priority_queuing_for_premium_users():
     """Test priority queuing for premium tier users."""
@@ -207,7 +187,6 @@ async def test_priority_queuing_for_premium_users():
         if premium_bucket.consume(1.0):
             premium_processed += 1
     assert premium_processed > free_processed and free_processed == 2
-
 
 @pytest.mark.asyncio
 async def test_daily_quota_enforcement():
@@ -222,7 +201,6 @@ async def test_daily_quota_enforcement():
             quota_violations.append(f"violation_{i}")
     assert current_usage == daily_quota_limit and len(quota_violations) == 10
 
-
 @pytest.mark.asyncio
 async def test_burst_traffic_detection():
     """Test detection and handling of burst traffic patterns."""
@@ -233,7 +211,6 @@ async def test_burst_traffic_detection():
     assert normal_success == 8
     assert burst_success < 12
     assert (burst_success / 25) < 0.5
-
 
 @pytest.mark.asyncio
 async def test_sliding_window_counter():
@@ -247,7 +224,6 @@ async def test_sliding_window_counter():
     window_counter.cleanup(current_time + 400)
     assert len(window_counter.buckets) <= 10
 
-
 @mock_justified("WebSocket connection not available in integration test")
 @pytest.mark.asyncio
 async def test_adaptive_rate_limiter_behavior():
@@ -260,7 +236,6 @@ async def test_adaptive_rate_limiter_behavior():
         assert not adaptive_limiter.is_rate_limited(conn_info)
     assert adaptive_limiter.is_rate_limited(conn_info)
     adaptive_limiter.promote_connection("adaptive_test_conn")
-
 
 if __name__ == "__main__":
     # Allow direct execution for debugging

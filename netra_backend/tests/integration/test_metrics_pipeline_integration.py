@@ -4,17 +4,10 @@ Tests metrics collection, Prometheus endpoints, OpenTelemetry tracing, and obser
 Focuses on real component interactions with minimal mocking.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -28,12 +21,8 @@ from netra_backend.app.schemas.Metrics import CorpusMetric, MetricsSnapshot, Met
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
 
-# Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 class MockMetricsData:
     """Mock metrics data for testing."""
@@ -67,7 +56,6 @@ class MockMetricsData:
                 tags={"category": "accuracy", "unit": "percent"}
             )
         ]
-
 
 class TestMetricsPipelineIntegration:
     """Integration tests for metrics collection pipeline."""

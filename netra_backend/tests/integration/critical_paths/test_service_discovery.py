@@ -10,17 +10,10 @@ Critical Path: Service registration -> Discovery -> Health monitoring -> Load ba
 Coverage: Service registry, discovery mechanisms, health integration, load balancing
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,14 +27,10 @@ import pytest
 
 from netra_backend.app.core.health.interface import HealthStatus
 
-# Add project root to path
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class MockServiceRegistry:
     """Mock service registry for testing."""
@@ -89,7 +78,6 @@ class MockServiceRegistry:
         self.services.clear()
         self.instances.clear()
 
-
 class MockLoadBalancer:
     """Mock load balancer for testing."""
     
@@ -121,7 +109,6 @@ class MockLoadBalancer:
     async def shutdown(self):
         """Shutdown load balancer."""
         pass
-
 
 class MockHealthService:
     """Mock health service for testing."""
@@ -166,7 +153,6 @@ class MockHealthService:
         """Stop health service."""
         self.health_status.clear()
         self.registered_services.clear()
-
 
 class ServiceDiscoveryManager:
     """Manages service discovery and registration testing."""
@@ -407,7 +393,6 @@ class ServiceDiscoveryManager:
         if self.service_registry:
             await self.service_registry.shutdown()
 
-
 @pytest.fixture
 async def service_discovery_manager():
     """Create service discovery manager for testing."""
@@ -415,7 +400,6 @@ async def service_discovery_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -457,7 +441,6 @@ async def test_service_registration_and_discovery(service_discovery_manager):
     assert discovery_result["healthy_instances"] >= 1
     assert discovery_result["discovery_time"] < 0.5
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_load_balanced_service_calls(service_discovery_manager):
@@ -493,7 +476,6 @@ async def test_load_balanced_service_calls(service_discovery_manager):
     # No single instance should handle more than 60% of traffic
     assert all(percentage <= 60.0 for percentage in distribution_values)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism  
 async def test_service_failover_mechanism(service_discovery_manager):
@@ -519,7 +501,6 @@ async def test_service_failover_mechanism(service_discovery_manager):
     assert failover_result["failed_instance_excluded"] is True
     assert failover_result["post_failure_healthy"] == failover_result["initial_healthy"] - 1
     assert failover_result["failover_time"] < 10.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

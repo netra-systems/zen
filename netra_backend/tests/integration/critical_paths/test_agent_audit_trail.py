@@ -10,17 +10,10 @@ Critical Path: Event capture -> Enrichment -> Storage -> Indexing -> Query
 Coverage: Real audit logging, compliance tracking, forensic analysis
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -41,12 +34,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class AuditEventType(Enum):
     """Types of audit events."""
@@ -61,7 +52,6 @@ class AuditEventType(Enum):
     SECURITY_EVENT = "security_event"
     PERMISSION_CHANGE = "permission_change"
 
-
 class AuditLevel(Enum):
     """Audit levels for event severity."""
     DEBUG = "debug"
@@ -70,7 +60,6 @@ class AuditLevel(Enum):
     ERROR = "error"
     CRITICAL = "critical"
 
-
 class ComplianceFramework(Enum):
     """Compliance frameworks."""
     SOX = "sox"
@@ -78,7 +67,6 @@ class ComplianceFramework(Enum):
     GDPR = "gdpr"
     PCI_DSS = "pci_dss"
     SOC2 = "soc2"
-
 
 @dataclass
 class AuditEvent:
@@ -116,7 +104,6 @@ class AuditEvent:
         data["compliance_tags"] = [ComplianceFramework(tag) for tag in data["compliance_tags"]]
         return cls(**data)
 
-
 @dataclass
 class AuditQuery:
     """Query parameters for audit trail search."""
@@ -133,7 +120,6 @@ class AuditQuery:
     offset: int = 0
     order_by: str = "timestamp"
     order_desc: bool = True
-
 
 class AuditEventEnricher:
     """Enriches audit events with additional context."""
@@ -210,7 +196,6 @@ class AuditEventEnricher:
             tags.extend([ComplianceFramework.SOC2, ComplianceFramework.PCI_DSS])
         
         return tags
-
 
 class AuditStorage:
     """Stores audit events with different storage backends."""
@@ -356,7 +341,6 @@ class AuditStorage:
         finally:
             await self.db_manager.return_connection(conn)
 
-
 class AuditLogger:
     """Main audit logging service."""
     
@@ -479,7 +463,6 @@ class AuditLogger:
         
         return report
 
-
 class AuditTrailManager:
     """Manages audit trail testing."""
     
@@ -553,7 +536,6 @@ class AuditTrailManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def audit_manager():
     """Create audit trail manager for testing."""
@@ -561,7 +543,6 @@ async def audit_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -585,7 +566,6 @@ async def test_basic_audit_event_logging(audit_manager):
     
     # Flush events to storage
     await manager.audit_logger.flush_events()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -621,7 +601,6 @@ async def test_audit_event_enrichment(audit_manager):
     assert event.details["request_id"] == "req_12345"
     assert "geolocation" in event.details
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_sensitive_data_detection(audit_manager):
@@ -648,7 +627,6 @@ async def test_sensitive_data_detection(audit_manager):
     event = next(e for e in events if e.event_id == event_id)
     assert event.sensitive_data_hash is not None
     assert ComplianceFramework.GDPR in event.compliance_tags
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -691,7 +669,6 @@ async def test_compliance_tagging(audit_manager):
     
     # Config changes should have SOX tag
     assert ComplianceFramework.SOX in config_event.compliance_tags
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -746,7 +723,6 @@ async def test_audit_event_querying(audit_manager):
     events = await manager.audit_logger.query_events(query)
     assert len(events) == 1
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_batch_event_processing(audit_manager):
@@ -774,7 +750,6 @@ async def test_batch_event_processing(audit_manager):
     query = AuditQuery(agent_ids=[agent_id], limit=200)
     events = await manager.audit_logger.query_events(query)
     assert len(events) == 150
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -818,7 +793,6 @@ async def test_compliance_reporting(audit_manager):
     assert len(report["risk_events"]) >= 1  # Security event
     assert report["compliance_score"] < 1.0  # Due to security event
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_encrypted_storage(audit_manager):
@@ -848,7 +822,6 @@ async def test_encrypted_storage(audit_manager):
         assert row["encrypted_data"] is not None
     finally:
         await manager.db_manager.return_connection(conn)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -880,7 +853,6 @@ async def test_redis_caching(audit_manager):
     first_event_data = json.loads(cached_events[0])  # Most recent
     assert first_event_data["message"] == "Cached event 4"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_audit_logging(audit_manager):
@@ -909,7 +881,6 @@ async def test_concurrent_audit_logging(audit_manager):
     query = AuditQuery(message_contains="Concurrent event", limit=100)
     events = await manager.audit_logger.query_events(query)
     assert len(events) == 50
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

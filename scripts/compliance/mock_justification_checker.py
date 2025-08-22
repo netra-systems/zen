@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
-from .core import ComplianceConfig, Violation
+from scripts.compliance.core import ComplianceConfig, Violation
 
 
 class MockJustificationChecker:

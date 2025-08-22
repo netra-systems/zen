@@ -10,17 +10,10 @@ Critical Path: Multiple results -> Conflict detection -> Resolution -> Merging -
 Coverage: Real result aggregators, conflict resolution, merging strategies, formatting
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -39,12 +32,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class ResultType(Enum):
     """Types of results that can be aggregated."""
@@ -55,7 +46,6 @@ class ResultType(Enum):
     LIST = "list"
     STRUCTURED = "structured"
 
-
 class ConflictStrategy(Enum):
     """Strategies for resolving conflicts between results."""
     MAJORITY_VOTE = "majority_vote"
@@ -64,7 +54,6 @@ class ConflictStrategy(Enum):
     MERGE_ALL = "merge_all"
     FIRST_WINS = "first_wins"
     LAST_WINS = "last_wins"
-
 
 class AggregationStrategy(Enum):
     """Strategies for aggregating multiple results."""
@@ -75,7 +64,6 @@ class AggregationStrategy(Enum):
     CONSENSUS = "consensus"
     UNION = "union"
     INTERSECTION = "intersection"
-
 
 @dataclass
 class AgentResult:
@@ -106,7 +94,6 @@ class AgentResult:
         data_str = json.dumps(self.data, sort_keys=True, default=str)
         return hashlib.md5(data_str.encode()).hexdigest()
 
-
 @dataclass
 class ConflictGroup:
     """Group of conflicting results."""
@@ -120,7 +107,6 @@ class ConflictGroup:
         if not self.results:
             return 0.0
         return sum(r.confidence for r in self.results) / len(self.results)
-
 
 class ConflictDetector:
     """Detects conflicts between agent results."""
@@ -226,7 +212,6 @@ class ConflictDetector:
             return "text_disagreement"
         else:
             return "general_conflict"
-
 
 class ConflictResolver:
     """Resolves conflicts between agent results."""
@@ -338,7 +323,6 @@ class ConflictResolver:
         )
         
         return merged_result
-
 
 class ResultAggregator:
     """Aggregates multiple agent results into a final result."""
@@ -455,7 +439,6 @@ class ResultAggregator:
         # Default: return first result
         return results[0].data
 
-
 class ResultFormatter:
     """Formats aggregated results for output."""
     
@@ -516,7 +499,6 @@ class ResultFormatter:
         """Format as summary."""
         result = aggregation_output["result"]
         return f"Aggregated result from {aggregation_output.get('original_count', 0)} agents: {result}"
-
 
 class AgentResultAggregationManager:
     """Manages agent result aggregation testing."""
@@ -581,7 +563,6 @@ class AgentResultAggregationManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def result_aggregation_manager():
     """Create result aggregation manager for testing."""
@@ -589,7 +570,6 @@ async def result_aggregation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -612,7 +592,6 @@ async def test_basic_result_aggregation(result_aggregation_manager):
     assert aggregation_output["result"] == "Hello world"
     assert aggregation_output["original_count"] == 3
     assert aggregation_output["conflicts_detected"] == 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -638,7 +617,6 @@ async def test_conflict_detection_and_resolution(result_aggregation_manager):
     # With majority vote, True should win (2 vs 1)
     assert aggregation_output["result"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_numeric_result_aggregation(result_aggregation_manager):
@@ -663,7 +641,6 @@ async def test_numeric_result_aggregation(result_aggregation_manager):
         output = manager.result_aggregator.aggregate_results(results, strategy)
         assert output["success"] is True
         assert output["result"] == expected
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -698,7 +675,6 @@ async def test_list_result_aggregation(result_aggregation_manager):
     expected_intersection = {"c"}
     assert intersection_result == expected_intersection
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_priority_based_conflict_resolution(result_aggregation_manager):
@@ -725,7 +701,6 @@ async def test_priority_based_conflict_resolution(result_aggregation_manager):
         assert resolved_result.data == "High priority"
         assert resolved_result.priority == 10
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_confidence_weighted_resolution(result_aggregation_manager):
@@ -751,7 +726,6 @@ async def test_confidence_weighted_resolution(result_aggregation_manager):
         assert resolved_result is not None
         assert resolved_result.data == "High confidence"
         assert resolved_result.confidence == 0.9
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -780,7 +754,6 @@ async def test_result_merging_strategy(result_aggregation_manager):
         assert "world" in resolved_result.data
         assert "test" in resolved_result.data
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_text_similarity_conflict_detection(result_aggregation_manager):
@@ -807,7 +780,6 @@ async def test_text_similarity_conflict_detection(result_aggregation_manager):
         # or clearly different (indicating they are actually conflicting)
         assert len(set(result_texts)) > 1  # Different texts in conflict
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_result_formatting_output(result_aggregation_manager):
@@ -833,7 +805,6 @@ async def test_result_formatting_output(result_aggregation_manager):
     summary_output = manager.result_formatter.format_result(aggregation_output, "summary")
     assert "Test result" in summary_output
     assert "Aggregated result" in summary_output
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -868,7 +839,6 @@ async def test_concurrent_result_aggregation(result_aggregation_manager):
     
     avg_processing_time = processing_time / 10
     assert avg_processing_time < 0.2  # Under 200ms per aggregation
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

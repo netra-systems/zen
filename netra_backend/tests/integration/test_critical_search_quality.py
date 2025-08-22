@@ -3,17 +3,10 @@ Critical search and quality gate integration tests.
 Business Value: Powers $22K MRR from intelligent document processing and quality assurance.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from datetime import datetime
@@ -21,11 +14,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
-from tests.test_fixtures_common import mock_infrastructure, test_database
-
-# Add project root to path
-
+from netra_backend.tests.test_fixtures_common import mock_infrastructure, test_database
 
 class TestSearchQualityIntegration:
     """Search and quality gate integration tests"""

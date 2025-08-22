@@ -15,17 +15,10 @@ Tests comprehensive validation including:
 - Recovery from connection failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -43,7 +36,6 @@ from clickhouse_driver import Client as ClickHouseClient
 from redis import Redis
 
 from test_framework.mock_utils import mock_justified
-
 
 class TestDatabaseConnectionPoolInitializationValidation:
     """
@@ -147,7 +139,6 @@ class TestDatabaseConnectionPoolInitializationValidation:
         
         duration = time.time() - start_time
         assert duration < 30, f"Smoke test took {duration:.2f}s (max: 30s)"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

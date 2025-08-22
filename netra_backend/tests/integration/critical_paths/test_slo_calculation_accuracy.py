@@ -11,17 +11,10 @@ Coverage: SLI accuracy, SLO calculations, error budget tracking, trend analysis,
 L3 Realism: Tests with real SLO definitions and actual service metrics
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -46,7 +39,6 @@ pytestmark = [
     pytest.mark.slo
 ]
 
-
 class SLIType(Enum):
     """Types of Service Level Indicators."""
     AVAILABILITY = "availability"
@@ -54,7 +46,6 @@ class SLIType(Enum):
     ERROR_RATE = "error_rate"
     THROUGHPUT = "throughput"
     QUALITY = "quality"
-
 
 class TimeWindow(Enum):
     """Time windows for SLO evaluation."""
@@ -64,7 +55,6 @@ class TimeWindow(Enum):
     ROLLING_30_DAY = "rolling_30d"
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
-
 
 @dataclass
 class SLODefinition:
@@ -79,7 +69,6 @@ class SLODefinition:
     customer_facing: bool
     error_budget_policy: str = "burn_rate"
     compliance_required: bool = False
-
 
 @dataclass
 class SLIDataPoint:
@@ -96,7 +85,6 @@ class SLIDataPoint:
         if self.raw_metrics is None:
             self.raw_metrics = {}
 
-
 @dataclass
 class SLOCalculationResult:
     """Results of SLO calculation."""
@@ -111,7 +99,6 @@ class SLOCalculationResult:
     compliance_status: str  # "compliant", "at_risk", "violated"
     trend_direction: str  # "improving", "stable", "degrading"
 
-
 @dataclass
 class SLOAnalysis:
     """Analysis of SLO performance."""
@@ -122,7 +109,6 @@ class SLOAnalysis:
     average_compliance: float
     critical_violations: List[str]
     error_budget_utilization: float
-
 
 class SLOCalculationValidator:
     """Validates SLO/SLI calculation accuracy with real service metrics."""
@@ -685,7 +671,6 @@ class SLOCalculationValidator:
         except Exception as e:
             logger.error(f"SLO calculation cleanup failed: {e}")
 
-
 class SLIMetricsCollector:
     """Mock SLI metrics collector for L3 testing."""
     
@@ -696,7 +681,6 @@ class SLIMetricsCollector:
     async def shutdown(self):
         """Shutdown metrics collector."""
         pass
-
 
 class SLOCalculator:
     """Mock SLO calculator for L3 testing."""
@@ -712,7 +696,6 @@ class SLOCalculator:
     async def shutdown(self):
         """Shutdown SLO calculator."""
         pass
-
 
 class SLOAlertManager:
     """Mock SLO alert manager for L3 testing."""
@@ -732,7 +715,6 @@ class SLOAlertManager:
             }
             self.alerts_generated.append(alert)
 
-
 @pytest.fixture
 async def slo_calculation_validator():
     """Create SLO calculation validator for L3 testing."""
@@ -740,7 +722,6 @@ async def slo_calculation_validator():
     await validator.initialize_slo_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_slo_calculation_accuracy_l3(slo_calculation_validator):
@@ -763,7 +744,6 @@ async def test_slo_calculation_accuracy_l3(slo_calculation_validator):
     assert accuracy_results["accuracy_percentage"] >= 95.0  # At least 95% accurate calculations
     assert accuracy_results["max_deviation"] <= 2.0  # Maximum 2% deviation
     assert len(accuracy_results["calculation_errors"]) <= 1  # Minimal calculation errors
-
 
 @pytest.mark.asyncio
 async def test_slo_compliance_monitoring_l3(slo_calculation_validator):
@@ -792,7 +772,6 @@ async def test_slo_compliance_monitoring_l3(slo_calculation_validator):
     compliance_rate = (slo_analysis.compliant_slos / slo_analysis.total_slos) * 100
     assert compliance_rate >= 70.0  # At least 70% of SLOs should be compliant
 
-
 @pytest.mark.asyncio
 async def test_error_budget_tracking_l3(slo_calculation_validator):
     """Test error budget tracking and burn rate calculations.
@@ -819,7 +798,6 @@ async def test_error_budget_tracking_l3(slo_calculation_validator):
         for violation in error_budget_results["budget_violations"]:
             assert violation["remaining_budget"] <= 10.0  # Should be low budget
             assert "criticality" in violation
-
 
 @pytest.mark.asyncio
 async def test_slo_time_window_accuracy_l3(slo_calculation_validator):
@@ -858,7 +836,6 @@ async def test_slo_time_window_accuracy_l3(slo_calculation_validator):
             elif "7d" in window_type:
                 assert 604700 <= window_duration <= 604900  # ~7 days
 
-
 @pytest.mark.asyncio
 async def test_slo_trend_analysis_l3(slo_calculation_validator):
     """Test SLO trend analysis and direction calculation.
@@ -893,7 +870,6 @@ async def test_slo_trend_analysis_l3(slo_calculation_validator):
     for direction, count in trend_analysis.items():
         assert count >= 0
 
-
 @pytest.mark.asyncio
 async def test_critical_slo_priority_l3(slo_calculation_validator):
     """Test priority handling for critical SLOs.
@@ -923,7 +899,6 @@ async def test_critical_slo_priority_l3(slo_calculation_validator):
     critical_violations = [r for r in critical_slo_results if r.compliance_status == "violated"]
     violation_rate = len(critical_violations) / len(critical_slo_results)
     assert violation_rate <= 0.2  # No more than 20% critical SLO violations
-
 
 @pytest.mark.asyncio
 async def test_slo_calculation_performance_l3(slo_calculation_validator):

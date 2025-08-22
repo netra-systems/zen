@@ -14,17 +14,10 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Edge case and error scenario coverage
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
@@ -49,9 +42,7 @@ from netra_backend.app.schemas.monitoring_schemas import (
     GCPErrorServiceConfig,
 )
 
-# Add project root to path
 from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
-
 
 class TestGCPErrorService:
     """Comprehensive unit tests for GCP Error Service."""
@@ -367,4 +358,9 @@ class TestGCPErrorService:
         """Assert NetraException properties."""
         assert isinstance(exc_info.value, NetraException)
         assert expected_message in str(exc_info.value)
-        assert exc_info.value.error_code == expected_code
+        # Handle both Enum and string comparison
+        actual_code = exc_info.value.error_details.code
+        if isinstance(actual_code, str):
+            assert actual_code == expected_code.value
+        else:
+            assert actual_code == expected_code

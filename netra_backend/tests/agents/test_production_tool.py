@@ -1,32 +1,22 @@
 """Unit tests for ProductionTool class and internal execution."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
 from netra_backend.tests.tool_dispatcher_assertions import (
     assert_execution_error_response,
     assert_not_implemented_error,
-    # Add project root to path
     assert_production_tool_initialized,
     assert_tool_execute_response_error,
     assert_tool_execute_response_success,
 )
-
 
 class TestProductionTool:
     """Test ProductionTool class."""
@@ -98,7 +88,6 @@ class TestProductionTool:
         assert_tool_execute_response_error(result, "Tool failed")
         assert result["metadata"]["tool"] == "test_tool"
         assert result["metadata"]["run_id"] == "run_123"
-
 
 class TestProductionToolInternalExecution:
     """Test ProductionTool internal execution methods."""

@@ -37,7 +37,6 @@ from netra_backend.tests.fixtures_workloads import (
     workload_fixtures,
 )
 
-
 class RealisticTestFixtures:
     """Main generator combining all fixture modules"""
     
@@ -81,31 +80,26 @@ class RealisticTestFixtures:
         """Generate metrics data using the metrics fixtures"""
         return self.metrics_fixtures.generate_metrics_data(config["workload_days"])
 
-
 # Main fixtures
 @pytest.fixture
 def realistic_fixtures():
     """Provide realistic test fixtures"""
     return RealisticTestFixtures()
 
-
 @pytest.fixture
 def small_seed_data(realistic_fixtures):
     """Small-scale seed data for development"""
     return realistic_fixtures.generate_production_seed_data("small")
-
 
 @pytest.fixture
 def medium_seed_data(realistic_fixtures):
     """Medium-scale seed data for staging"""
     return realistic_fixtures.generate_production_seed_data("medium")
 
-
 @pytest.fixture
 def large_seed_data(realistic_fixtures):
     """Large-scale seed data for production-like testing"""
     return realistic_fixtures.generate_production_seed_data("large")
-
 
 @pytest.fixture
 async def realistic_llm_responses(realistic_fixtures):
@@ -122,7 +116,6 @@ async def realistic_llm_responses(realistic_fixtures):
             responses.append(response)
     
     return responses
-
 
 # Re-export all fixture functions
 __all__ = [

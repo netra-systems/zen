@@ -4,17 +4,10 @@ Tests complete optimization flows and concurrent request handling
 Split from oversized test_llm_agent_e2e_real.py
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -29,10 +22,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -40,13 +32,12 @@ from test_fixtures import (
     mock_websocket_manager,
     supervisor_agent,
 )
-from .fixtures.llm_agent_fixtures import (
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     create_mock_infrastructure,
     create_supervisor_with_mocks,
     setup_llm_responses,
     setup_websocket_manager,
 )
-
 
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
@@ -64,7 +55,6 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
         
         _verify_concurrent_results(results)
 
-
 async def execute_optimization_flow(supervisor):
     """Execute the optimization flow and return result"""
     return await supervisor.run(
@@ -74,12 +64,10 @@ async def execute_optimization_flow(supervisor):
         str(uuid.uuid4())
     )
 
-
 def verify_optimization_flow(state, supervisor):
     """Verify the optimization flow completed successfully"""
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
-
 
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""
@@ -95,7 +83,6 @@ async def test_end_to_end_optimization_flow():
     # Execute and verify flow
     state = await _execute_e2e_flow(supervisor)
     _verify_e2e_flow_completion(state, supervisor)
-
 
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
@@ -121,7 +108,6 @@ async def test_complex_multi_step_flow():
     # Verify flow completion
     verify_optimization_flow(state, supervisor)
 
-
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -144,7 +130,6 @@ async def test_flow_interruption_and_recovery():
     assert recovered_state.user_request == "Interrupted optimization"
     assert recovered_state.triage_result["step"] == "analysis"
 
-
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""
     performance_metrics = []
@@ -154,7 +139,6 @@ async def test_flow_performance_benchmarks():
         performance_metrics.append(metrics)
     
     _verify_performance_requirements(performance_metrics)
-
 
 def _create_concurrent_persistence_mock():
     """Create persistence mock for concurrent testing"""
@@ -174,7 +158,6 @@ def _create_concurrent_persistence_mock():
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return mock_persistence
 
-
 def _create_concurrent_supervisors(mock_db_session, mock_llm_manager, 
                                   mock_websocket_manager, mock_tool_dispatcher, mock_persistence):
     """Create supervisors for concurrent testing"""
@@ -191,7 +174,6 @@ def _create_concurrent_supervisors(mock_db_session, mock_llm_manager,
         supervisors.append(supervisor)
     return supervisors
 
-
 def _create_concurrent_tasks(supervisors):
     """Create concurrent execution tasks"""
     return [
@@ -202,14 +184,12 @@ def _create_concurrent_tasks(supervisors):
         for i, supervisor in enumerate(supervisors)
     ]
 
-
 def _verify_concurrent_results(results):
     """Verify concurrent execution results"""
     assert len(results) == 5
     for result in results:
         if not isinstance(result, Exception):
             assert isinstance(result, DeepAgentState)
-
 
 def _create_e2e_test_infrastructure():
     """Create infrastructure for E2E testing"""
@@ -218,7 +198,6 @@ def _create_e2e_test_infrastructure():
         'llm_manager': Mock(spec=LLMManager),
         'ws_manager': Mock()
     }
-
 
 def _setup_e2e_llm_responses(llm_manager):
     """Setup LLM responses for E2E flow"""
@@ -238,11 +217,9 @@ def _setup_e2e_llm_responses(llm_manager):
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
-
 def _setup_e2e_websocket(ws_manager):
     """Setup WebSocket for E2E testing"""
     ws_manager.send_message = AsyncMock()
-
 
 def _create_e2e_supervisor(infrastructure):
     """Create supervisor for E2E testing"""
@@ -275,7 +252,6 @@ def _create_e2e_supervisor(infrastructure):
         supervisor.state_persistence = mock_persistence
         return supervisor
 
-
 def _configure_e2e_pipeline(supervisor):
     """Configure supervisor pipeline for E2E testing"""
     from netra_backend.app.agents.supervisor.execution_context import (
@@ -287,7 +263,6 @@ def _configure_e2e_pipeline(supervisor):
         AgentExecutionResult(success=True, state=None)
     ])
 
-
 async def _execute_e2e_flow(supervisor):
     """Execute E2E optimization flow"""
     return await supervisor.run(
@@ -297,12 +272,10 @@ async def _execute_e2e_flow(supervisor):
         str(uuid.uuid4())
     )
 
-
 def _verify_e2e_flow_completion(state, supervisor):
     """Verify E2E flow completion"""
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
-
 
 async def _run_concurrency_benchmark(concurrency_level):
     """Run concurrency benchmark for given level"""
@@ -317,7 +290,6 @@ async def _run_concurrency_benchmark(concurrency_level):
         "execution_time": execution_time,
         "success_rate": len([r for r in results if not isinstance(r, Exception)]) / len(results)
     }
-
 
 def _create_benchmark_tasks(concurrency_level):
     """Create benchmark tasks for performance testing"""
@@ -334,13 +306,11 @@ def _create_benchmark_tasks(concurrency_level):
         tasks.append(execute_optimization_flow(supervisor))
     return tasks
 
-
 def _verify_performance_requirements(performance_metrics):
     """Verify performance metrics meet requirements"""
     for metric in performance_metrics:
         assert metric["execution_time"] < 5.0
         assert metric["success_rate"] >= 0.8
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

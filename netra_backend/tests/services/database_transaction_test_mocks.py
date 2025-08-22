@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.database.base_repository import BaseRepository
 from netra_backend.tests.database_transaction_test_helpers import MockDatabaseModel
 
-
 class MockRepository(BaseRepository[MockDatabaseModel]):
     """Mock repository for testing transaction behavior"""
     
@@ -99,7 +98,6 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
     def clear_log(self) -> None:
         """Clear operation log"""
         self.operation_log.clear()
-
 
 class TransactionTestManager:
     """Manages transaction test scenarios"""

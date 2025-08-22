@@ -3,17 +3,10 @@
 Tests for critical exception handling requirements from websocket_reliability.xml.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
@@ -22,12 +15,8 @@ import pytest
 
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 
-# Add project root to path
 from netra_backend.app.websocket.state_synchronizer import ConnectionStateSynchronizer
 from netra_backend.app.websocket.sync_types import CriticalCallbackFailure
-
-# Add project root to path
-
 
 class TestStateSynchronizerExceptionHandling:
     """Test exception handling in state synchronizer."""
@@ -167,7 +156,6 @@ class TestStateSynchronizerExceptionHandling:
             invalid_callback, "test_conn", "state_desync"
         )
         assert result is None  # Failed task creation returns None
-
 
 class TestCallbackHandlerDirectly:
     """Test callback handler functionality directly."""

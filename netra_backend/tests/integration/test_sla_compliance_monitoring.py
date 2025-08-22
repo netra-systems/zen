@@ -14,17 +14,10 @@ Tests comprehensive SLA compliance monitoring covering:
 Architecture: ≤300 lines total, ≤8 line functions for compliance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import statistics
@@ -35,15 +28,11 @@ from unittest.mock import AsyncMock
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
-from integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     MonitoringTestHelpers,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class SLAMetricsTracker:
     """Tracks SLA compliance metrics for Enterprise tier."""
@@ -128,18 +117,15 @@ class SLAMetricsTracker:
         violations = len(self.sla_violations)
         return max(0.0, 1.0 - (violations / total))
 
-
 @pytest.fixture
 def sla_tracker():
     """Create SLA metrics tracker fixture."""
     return SLAMetricsTracker()
 
-
 @pytest.fixture
 async def enterprise_monitoring_infrastructure():
     """Setup enterprise monitoring infrastructure."""
     return await MonitoringTestHelpers.setup_telemetry_infrastructure()
-
 
 class TestEnterpriseResponseTimeSLA:
     """Test Enterprise tier response time SLA compliance."""
@@ -176,7 +162,6 @@ class TestEnterpriseResponseTimeSLA:
         assert violation["type"] == "response_time"
         assert violation["value"] == 150
 
-
 class TestEnterpriseAvailabilitySLA:
     """Test Enterprise tier availability SLA compliance (>99.9%)."""
 
@@ -206,7 +191,6 @@ class TestEnterpriseAvailabilitySLA:
         violation = sla_tracker.sla_violations[0]
         assert violation["type"] == "availability"
 
-
 class TestEnterpriseThroughputSLA:
     """Test Enterprise tier throughput SLA compliance (>1000 RPS)."""
 
@@ -235,7 +219,6 @@ class TestEnterpriseThroughputSLA:
         violation = sla_tracker.sla_violations[0]
         assert violation["type"] == "throughput"
         assert violation["value"] == 800
-
 
 class TestSLAComplianceReporting:
     """Test SLA compliance reporting and monitoring integration."""
@@ -273,7 +256,6 @@ class TestSLAComplianceReporting:
         assert len(sla_tracker.sla_violations) == 3, "All violations should be detected"
         critical_violations = [v for v in sla_tracker.sla_violations if v["severity"] == "critical"]
         assert len(critical_violations) == 3, "All violations should be marked critical"
-
 
 if __name__ == "__main__":
     async def run_manual_sla_test():

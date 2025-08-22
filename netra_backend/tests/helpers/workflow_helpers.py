@@ -2,7 +2,6 @@
 
 from netra_backend.app.services.quality_gate_service import ContentType
 
-
 def create_mixed_content_batch():
     """Create batch with mixed content types"""
     return [
@@ -14,7 +13,6 @@ def create_mixed_content_batch():
         ("General content", ContentType.GENERAL),
         ("Reduce latency by 50ms", ContentType.OPTIMIZATION)
     ]
-
 
 def setup_complete_optimization_workflow_content():
     """Create complete optimization workflow content (part 1)"""
@@ -33,7 +31,6 @@ def setup_complete_optimization_workflow_content():
     2. No caching for repeated queries
     3. Synchronous I/O operations blocking GPU
     """
-
 
 def setup_optimization_strategy_content():
     """Create optimization strategy content (part 2)"""
@@ -59,7 +56,6 @@ def setup_optimization_strategy_content():
     python deploy.py --service inference --async
     ```
     """
-
 
 def setup_optimization_outcomes_content():
     """Create optimization outcomes content (part 3)"""
@@ -92,7 +88,6 @@ def setup_optimization_outcomes_content():
     - Initial 2-day migration effort required
     """
 
-
 def setup_optimization_workflow_context():
     """Create context for optimization workflow testing"""
     return {
@@ -100,7 +95,6 @@ def setup_optimization_workflow_context():
         "data_source": "production_metrics",
         "constraints": "Must maintain 99.9% uptime"
     }
-
 
 def combine_optimization_content():
     """Combine all optimization content parts"""

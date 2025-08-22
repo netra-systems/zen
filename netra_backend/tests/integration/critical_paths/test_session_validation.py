@@ -3,17 +3,10 @@ L3 Integration Test: Session Validation
 Tests session validation and verification scenarios
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -24,11 +17,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
 from netra_backend.app.services.session_service import SessionService
-
-# Add project root to path
-
 
 class TestSessionValidationL3:
     """Test session validation scenarios"""

@@ -3,17 +3,10 @@ Integration tests combining multiple async utilities
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -21,20 +14,17 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from netra_backend.app.core.async_resource_manager import (
     AsyncBatchProcessor,
-    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
 )
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, with_retry
-from ..helpers.shared_test_types import (
+from netra_backend.tests.core.helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
-
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Integration tests combining multiple async utilities"""
@@ -100,7 +90,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             await asyncio.sleep(0.01)
             return len(batch)
         return processor
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

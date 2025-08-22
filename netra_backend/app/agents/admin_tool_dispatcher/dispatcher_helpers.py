@@ -76,7 +76,7 @@ def log_no_admin_permissions(user: User) -> None:
 
 def log_available_admin_tools(user: User) -> None:
     """Log available admin tools with execution context"""
-    from .validation import get_available_admin_tools
+    from netra_backend.app.agents.admin_tool_dispatcher.validation import get_available_admin_tools
     available_tools = get_available_admin_tools(user)
     execution_data = _create_log_context(user, "tools_available")
     execution_data["available_tools"] = available_tools
@@ -123,7 +123,7 @@ def _count_enabled_tools_safe(user: User) -> int:
 
 def _get_enabled_tools_for_user(user: User) -> List[AdminToolType]:
     """Get list of enabled tools for user"""
-    from .validation import validate_admin_tool_access
+    from netra_backend.app.agents.admin_tool_dispatcher.validation import validate_admin_tool_access
     return [
         tool for tool in AdminToolType 
         if validate_admin_tool_access(user, tool.value)
@@ -177,7 +177,7 @@ def create_admin_tool_info(tool_name: str,
 
 def _build_admin_tool_data(tool_name: str, user: Optional[User], admin_tools_enabled: bool) -> Dict[str, Any]:
     """Build admin tool data dictionary"""
-    from .validation import get_required_permissions, validate_admin_tool_access
+    from netra_backend.app.agents.admin_tool_dispatcher.validation import get_required_permissions, validate_admin_tool_access
     available = admin_tools_enabled and validate_admin_tool_access(user, tool_name)
     description = f"Admin tool for {tool_name.replace('_', ' ')}"
     required_permissions = get_required_permissions(tool_name)
@@ -230,7 +230,7 @@ def execute_operation_via_dispatcher(dispatcher: "AdminToolDispatcher",
                                    params: Dict[str, Any]) -> Dict[str, Any]:
     """Execute operation with modern execution patterns"""
     if hasattr(dispatcher, 'tool_dispatcher') and dispatcher.tool_dispatcher:
-        from .execution_pattern_helpers import execute_with_tracking
+        from netra_backend.app.agents.admin_tool_dispatcher.execution_pattern_helpers import execute_with_tracking
         return execute_with_tracking(dispatcher, tool_name, params)
     return create_no_dispatcher_error(tool_name)
 
@@ -267,12 +267,12 @@ def _add_execution_context_to_audit(audit_data: Dict[str, Any]) -> None:
 def log_audit_data(audit_logger, audit_data: Dict[str, Any]) -> None:
     """Log audit data with execution result tracking"""
     if audit_logger:
-        from .execution_pattern_helpers import log_with_execution_result
+        from netra_backend.app.agents.admin_tool_dispatcher.execution_pattern_helpers import log_with_execution_result
         log_with_execution_result(audit_logger, audit_data)
 
 
 def _update_execution_metrics(dispatcher: "AdminToolDispatcher", 
                              metric_name: str, value: Any) -> None:
     """Update execution metrics tracking"""
-    from .execution_pattern_helpers import update_execution_metrics
+    from netra_backend.app.agents.admin_tool_dispatcher.execution_pattern_helpers import update_execution_metrics
     update_execution_metrics(dispatcher, metric_name, value)

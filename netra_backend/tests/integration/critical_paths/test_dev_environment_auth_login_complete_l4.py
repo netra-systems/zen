@@ -21,8 +21,6 @@ BVJ:
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import hashlib
 import json
@@ -38,10 +36,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import aiohttp
 import jwt
 import pytest
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Service URLs
 AUTH_SERVICE_URL = "http://localhost:8081"
@@ -72,7 +66,6 @@ TEST_USERS = [
         "tier": "enterprise"
     }
 ]
-
 
 class AuthenticationFlowTester:
     """Test complete authentication and login flows."""
@@ -609,7 +602,6 @@ class AuthenticationFlowTester:
         
         return all_results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
@@ -665,7 +657,6 @@ async def test_dev_environment_auth_login_complete():
         
         print("\n[SUCCESS] Authentication and login flow tests completed!")
 
-
 async def main():
     """Run the test standalone."""
     if sys.platform == "win32":
@@ -696,7 +687,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

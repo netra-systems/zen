@@ -24,17 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -52,18 +45,15 @@ from ws_manager import get_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthProvider,
     SessionInfo,
-    # Add project root to path
     TokenData,
     TokenResponse,
     UserPermission,
 )
 
 logger = logging.getLogger(__name__)
-
 
 class CacheInvalidator:
     """Real cache invalidation component."""
@@ -162,7 +152,6 @@ class CacheInvalidator:
                 "error": str(e)
             }
 
-
 class PubSubNotifier:
     """Real Redis pub/sub notification component."""
     
@@ -231,7 +220,6 @@ class PubSubNotifier:
         if self.pubsub:
             await self.pubsub.unsubscribe()
             await self.pubsub.close()
-
 
 class WebSocketNotifier:
     """Real WebSocket notification component."""
@@ -314,7 +302,6 @@ class WebSocketNotifier:
         notifications = self.notification_queue.copy()
         self.notification_queue.clear()
         return notifications
-
 
 class CrossServiceAuthSync:
     """Real cross-service auth state synchronization component."""
@@ -418,7 +405,6 @@ class CrossServiceAuthSync:
                 "success": False,
                 "error": str(e)
             }
-
 
 class AuthCacheInvalidationTestManager:
     """Manages auth cache invalidation testing."""
@@ -692,7 +678,6 @@ class AuthCacheInvalidationTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def auth_cache_invalidation_manager():
     """Create auth cache invalidation test manager."""
@@ -700,7 +685,6 @@ async def auth_cache_invalidation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -746,7 +730,6 @@ async def test_complete_auth_cache_invalidation_flow(auth_cache_invalidation_man
     total_time = time.time() - start_time
     assert total_time < 4.0, f"Total test took {total_time:.2f}s, expected <4s"
 
-
 @pytest.mark.asyncio
 async def test_cache_coherency_after_invalidation(auth_cache_invalidation_manager):
     """Test cache coherency across services after invalidation."""
@@ -762,7 +745,6 @@ async def test_cache_coherency_after_invalidation(auth_cache_invalidation_manage
     assert coherency_result["all_cleared_after"], "Cache not cleared after invalidation"
     assert coherency_result["coherency_achieved"], "Cache coherency not achieved"
     assert coherency_result["coherency_time"] < 0.5, "Coherency validation too slow"
-
 
 @pytest.mark.asyncio
 async def test_permission_based_cache_invalidation(auth_cache_invalidation_manager):
@@ -785,7 +767,6 @@ async def test_permission_based_cache_invalidation(auth_cache_invalidation_manag
     assert len(cascade_result["cascade_messages"]) > 0, "No cascade messages received"
     assert cascade_result["cascade_time"] < 1.0, "Permission cascade too slow"
 
-
 @pytest.mark.asyncio
 async def test_real_time_invalidation_notification_latency(auth_cache_invalidation_manager):
     """Test real-time notification latency for cache invalidation."""
@@ -805,7 +786,6 @@ async def test_real_time_invalidation_notification_latency(auth_cache_invalidati
         assert latency_result["pubsub_latency"] < 0.1, f"Pub/sub latency too high: {latency_result['pubsub_latency']:.3f}s"
     
     assert latency_result["total_test_time"] < 4.0, "Latency test took too long"
-
 
 @pytest.mark.asyncio
 async def test_concurrent_cache_invalidation_handling(auth_cache_invalidation_manager):

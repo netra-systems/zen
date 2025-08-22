@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
 from sqlalchemy import text
 
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -39,27 +40,8 @@ class AsyncPostgresManager:
             logger.debug("Database already initialized, skipping")
             return
         
-        # Get database URL from environment or use default
-        database_url = os.getenv(
-            "DATABASE_URL",
-            "postgresql+asyncpg://postgres:password@localhost:5432/netra"
-        )
-        
-        # Ensure URL is async-compatible
-        if database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-        elif database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
-        
-        # Handle SSL parameters for asyncpg
-        if "sslmode=" in database_url:
-            if "/cloudsql/" in database_url:
-                # For Cloud SQL Unix socket, remove sslmode entirely
-                import re
-                database_url = re.sub(r'[&?]sslmode=[^&]*', '', database_url)
-            else:
-                # For regular connections, convert to ssl
-                database_url = database_url.replace("sslmode=", "ssl=")
+        # Get async-compatible database URL from centralized manager
+        database_url = DatabaseManager.get_application_url_async()
         
         logger.info(f"Creating async engine for local development")
         

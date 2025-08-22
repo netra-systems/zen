@@ -14,8 +14,7 @@ from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
-from ..e2e.state_validation_utils import StateIntegrityChecker
-
+from netra_backend.tests.e2e.e2e.state_validation_utils import StateIntegrityChecker
 
 class InputValidationResult(BaseModel):
     """Result of input validation with sanitization details."""
@@ -25,7 +24,6 @@ class InputValidationResult(BaseModel):
     security_threats: List[str] = Field(default_factory=list)
     validation_errors: List[str] = Field(default_factory=list)
 
-
 class ProcessingValidationResult(BaseModel):
     """Result of processing validation with state transition details."""
     is_valid: bool = Field(default=False)
@@ -33,7 +31,6 @@ class ProcessingValidationResult(BaseModel):
     agent_conditions_met: bool = Field(default=False)
     data_transforms_valid: bool = Field(default=False)
     processing_errors: List[str] = Field(default_factory=list)
-
 
 class OutputValidationResult(BaseModel):
     """Result of output validation with format and completeness checks."""
@@ -43,7 +40,6 @@ class OutputValidationResult(BaseModel):
     error_handling_valid: bool = Field(default=False)
     output_errors: List[str] = Field(default_factory=list)
 
-
 class StageValidationResult(BaseModel):
     """Comprehensive stage validation result."""
     stage_name: str
@@ -52,7 +48,6 @@ class StageValidationResult(BaseModel):
     output_validation: OutputValidationResult
     overall_success: bool = Field(default=False)
     checkpoint_passed: bool = Field(default=False)
-
 
 class InputValidator:
     """Validates input schema compliance and sanitization."""
@@ -92,7 +87,6 @@ class InputValidator:
             if pattern.lower() in input_text.lower():
                 threats.append(f"Potential injection: {pattern}")
         return threats
-
 
 class ProcessingValidator:
     """Validates state transitions and agent conditions."""
@@ -153,7 +147,6 @@ class ProcessingValidator:
             return False
         valid_types = (DataAnalysisResponse, AnomalyDetectionResponse)
         return isinstance(state.data_result, valid_types)
-
 
 class OutputValidator:
     """Validates output format, completeness, and error handling."""
@@ -225,7 +218,6 @@ class OutputValidator:
             error_messages = [msg for msg in state.messages if 'error' in str(msg).lower()]
             return len(error_messages) == 0  # No unhandled errors
         return True
-
 
 class StageValidator:
     """Comprehensive stage validation with checkpoints."""

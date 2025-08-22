@@ -18,17 +18,10 @@ Tests cover:
 15. Token expiry and refresh
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -48,18 +41,15 @@ from netra_backend.app.core.websocket_cors import (
 )
 from netra_backend.app.db.postgres import get_async_db
 
-# Add project root to path
 from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_enhanced import (
     authenticate_websocket_with_database,
     connection_manager,
-    # Add project root to path
     enhanced_websocket_endpoint,
     get_websocket_service_discovery,
     validate_websocket_token_enhanced,
 )
 from netra_backend.tests.conftest import create_test_user, get_test_token
-
 
 class WebSocketTestClient:
     """Test client for WebSocket connections."""
@@ -107,7 +97,6 @@ class WebSocketTestClient:
         """Clear message history."""
         self.messages.clear()
 
-
 @pytest.fixture
 async def websocket_client():
     """WebSocket test client fixture."""
@@ -116,12 +105,10 @@ async def websocket_client():
     if client.connected:
         await client.disconnect()
 
-
 @pytest.fixture
 async def authenticated_token(test_user):
     """Get authenticated token for testing."""
     return await get_test_token(test_user.id)
-
 
 @pytest.mark.asyncio
 class TestWebSocketConnection:
@@ -157,7 +144,6 @@ class TestWebSocketConnection:
         """Test connection fails without token."""
         with pytest.raises(Exception):  # Connection should fail
             await websocket_client.connect("/ws/enhanced", "")
-
 
 @pytest.mark.asyncio
 class TestWebSocketAuthentication:
@@ -215,7 +201,6 @@ class TestWebSocketAuthentication:
             # Verify manual session was used (not Depends())
             assert mock_db.called
             assert mock_session.commit.called
-
 
 @pytest.mark.asyncio 
 class TestWebSocketMessaging:
@@ -278,7 +263,6 @@ class TestWebSocketMessaging:
         assert "timestamp" in pong_messages[0]
         assert "server_time" in pong_messages[0]
 
-
 @pytest.mark.asyncio
 class TestWebSocketReconnection:
     """Test WebSocket reconnection logic."""
@@ -326,7 +310,6 @@ class TestWebSocketReconnection:
         # Connection manager should handle rapid reconnections
         assert True  # Basic test passes
 
-
 @pytest.mark.asyncio
 class TestWebSocketErrorHandling:
     """Test WebSocket error handling and recovery."""
@@ -373,7 +356,6 @@ class TestWebSocketErrorHandling:
         pong_messages = websocket_client.get_messages_by_type("pong")
         assert len(pong_messages) >= 1
 
-
 @pytest.mark.asyncio
 class TestWebSocketServiceDiscovery:
     """Test WebSocket service discovery."""
@@ -410,7 +392,6 @@ class TestWebSocketServiceDiscovery:
         assert "endpoints" in ws_config
         assert "websocket" in ws_config["endpoints"]
         assert ws_config["endpoints"]["websocket"] == "/ws/enhanced"
-
 
 @pytest.mark.asyncio
 class TestWebSocketConcurrency:
@@ -476,7 +457,6 @@ class TestWebSocketConcurrency:
         for conn_id, _ in connections[-5:]:  # Keep only last 5
             await connection_manager.remove_connection(user_id, conn_id)
 
-
 @pytest.mark.asyncio
 class TestWebSocketCORS:
     """Test WebSocket CORS handling."""
@@ -530,7 +510,6 @@ class TestWebSocketCORS:
         mock_websocket.headers = {"origin": "http://malicious.com"}
         assert validate_websocket_origin(mock_websocket, cors_handler) is False
 
-
 @pytest.mark.asyncio
 class TestWebSocketHeartbeat:
     """Test WebSocket heartbeat and keepalive."""
@@ -570,7 +549,6 @@ class TestWebSocketHeartbeat:
         
         # Cleanup
         await connection_manager.remove_connection(user_id, conn_id)
-
 
 @pytest.mark.asyncio
 class TestWebSocketResilience:
@@ -624,7 +602,6 @@ class TestWebSocketResilience:
         # Cleanup
         await connection_manager.remove_connection(user_id, new_conn_id)
 
-
 # Integration test that runs all scenarios
 @pytest.mark.asyncio
 class TestWebSocketIntegration:
@@ -675,7 +652,6 @@ class TestWebSocketIntegration:
         # 7. Graceful Disconnection
         await websocket_client.disconnect()
         assert not websocket_client.connected
-
 
 # Performance and load testing
 @pytest.mark.asyncio
@@ -735,7 +711,6 @@ class TestWebSocketPerformance:
         size_errors = [err for err in error_messages 
                       if "too large" in err.get("payload", {}).get("error", "")]
         assert len(size_errors) == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

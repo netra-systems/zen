@@ -4,17 +4,10 @@ Tests content generation workflows and batch processing capabilities
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, patch
@@ -24,15 +17,12 @@ from netra_backend.app.schemas import ContentGenParams
 
 from netra_backend.app.services.corpus_service import CorpusService
 
-# Add project root to path
 from netra_backend.app.services.generation_service import (
     get_corpus_from_clickhouse,
-    # Add project root to path
     run_content_generation_job,
     run_synthetic_data_generation_job,
     save_corpus_to_clickhouse,
 )
-
 
 class TestContentGeneration:
     """Test content generation workflows"""
@@ -93,7 +83,6 @@ class TestContentGeneration:
             assert len(corpus["simple_chat"]) == 2
             assert len(corpus["rag_pipeline"]) == 1
             assert corpus["simple_chat"][0] == ("p1", "r1")
-
 
 class TestBatchProcessing:
     """Test batch processing capabilities"""
@@ -157,7 +146,6 @@ class TestBatchProcessing:
                         # Should call ingest 3 times (2 full batches + 1 partial)
                         assert mock_ingest.call_count == 3
 
-
 def _create_content_gen_params():
     """Create content generation parameters."""
     return ContentGenParams(
@@ -166,14 +154,12 @@ def _create_content_gen_params():
         clickhouse_table="test_corpus"
     )
 
-
 def _assert_corpus_saved_correctly(mock_save):
     """Assert corpus was saved correctly."""
     mock_save.assert_called_once()
     saved_corpus = mock_save.call_args[0][0]
     assert "simple_chat" in saved_corpus
     assert "rag_pipeline" in saved_corpus
-
 
 def _create_test_corpus():
     """Create test corpus for saving."""
@@ -183,7 +169,6 @@ def _create_test_corpus():
         "tool_use": [("p4", "r4")]
     }
 
-
 def _create_query_results():
     """Create mock query results."""
     return [
@@ -191,7 +176,6 @@ def _create_query_results():
         {"workload_type": "simple_chat", "prompt": "p2", "response": "r2"},
         {"workload_type": "rag_pipeline", "prompt": "p3", "response": "r3"}
     ]
-
 
 def _setup_batch_test_mocks():
     """Setup mocks for batch testing."""
@@ -205,14 +189,12 @@ def _setup_batch_test_mocks():
     
     return db, corpus
 
-
 def _create_source_corpus():
     """Create source corpus for synthetic data."""
     return {
         "simple_chat": [("p1", "r1")],
         "rag_pipeline": [("p2", "r2")]
     }
-
 
 def _create_synthetic_data_params():
     """Create synthetic data generation parameters."""

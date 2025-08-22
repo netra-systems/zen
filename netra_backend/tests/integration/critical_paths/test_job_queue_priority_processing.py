@@ -16,17 +16,10 @@ L3 Integration Test Level:
 - Measures actual performance under load
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -41,7 +34,6 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
-# Add project root to path
 from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
@@ -50,10 +42,7 @@ from netra_backend.app.services.websocket.message_queue import (
 )
 from netra_backend.app.websocket.unified.job_queue import JobQueueManager
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class PriorityProcessingL3Manager:
     """Manages L3 priority processing tests with real queue infrastructure."""
@@ -241,7 +230,6 @@ class PriorityProcessingL3Manager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def priority_processing_manager():
     """Create priority processing manager for L3 testing."""
@@ -249,7 +237,6 @@ async def priority_processing_manager():
     await manager.initialize_test_infrastructure()
     yield manager
     await manager.cleanup_test_infrastructure()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -275,7 +262,6 @@ async def test_basic_priority_queue_processing_l3(priority_processing_manager):
     
     assert validation_result["valid"], f"Priority order violations: {validation_result['violations']}"
     assert validation_result["total_jobs"] >= 6, "Not enough jobs processed"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -313,7 +299,6 @@ async def test_concurrent_priority_processing_l3(priority_processing_manager):
         avg_low_time = sum(low_times) / len(low_times)
         assert avg_critical_time < avg_low_time, "Critical jobs should process faster than low priority jobs"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_queue_statistics_accuracy_l3(priority_processing_manager):
@@ -347,7 +332,6 @@ async def test_queue_statistics_accuracy_l3(priority_processing_manager):
     # Validate statistics accuracy
     assert final_stats["total_pending"] < initial_stats["total_pending"], "Queue should decrease during processing"
     assert final_stats["completed"] > 0, "Should have completed jobs"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
@@ -386,7 +370,6 @@ async def test_priority_queue_performance_l3(priority_processing_manager):
     assert processed_count >= 30, f"Low processing count: {processed_count}"
     assert throughput >= 2.0, f"Low throughput: {throughput} jobs/sec"
     assert process_time < 20.0, f"Processing took too long: {process_time}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

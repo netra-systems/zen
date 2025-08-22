@@ -4,26 +4,17 @@ Tests data integrity across multi-constraint workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from typing import Dict, List
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
     create_kv_cache_audit_state,
     create_triple_constraint_state,
@@ -34,13 +25,11 @@ from netra_backend.tests.multi_constraint_test_helpers import (
     validate_optimization_state_preservation,
 )
 
-
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestWorkflowDataIntegrity:
     """Test data integrity across multi-constraint workflows."""
@@ -103,7 +92,6 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_cross_agent_consistency_results(results, state)
 
-
 def validate_metadata_propagation_results(results: List[Dict], state) -> None:
     """Validate metadata propagation integrity."""
     validate_basic_workflow_execution(results)
@@ -112,7 +100,6 @@ def validate_metadata_propagation_results(results: List[Dict], state) -> None:
     assert critical_data.get('key1') == 'value1'
     assert critical_data.get('key2') == 'value2'
     validate_completed_or_fallback_states(results)
-
 
 def validate_validation_chain_results(results: List[Dict], state) -> None:
     """Validate constraint validation chain integrity."""
@@ -124,7 +111,6 @@ def validate_validation_chain_results(results: List[Dict], state) -> None:
     assert 'latency_limits' in validation_rules
     validate_completed_or_fallback_states(results)
 
-
 def validate_state_transition_results(results: List[Dict], state) -> None:
     """Validate workflow state transition integrity."""
     validate_basic_workflow_execution(results)
@@ -134,7 +120,6 @@ def validate_state_transition_results(results: List[Dict], state) -> None:
     assert 'running' in expected_transitions
     assert 'completed' in expected_transitions
     validate_completed_or_fallback_states(results)
-
 
 def validate_cross_agent_consistency_results(results: List[Dict], state) -> None:
     """Validate cross-agent data consistency."""

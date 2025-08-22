@@ -1,28 +1,17 @@
 """Test subagent logging functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.observability import SubAgentLogger, get_subagent_logger
-
-# Add project root to path
-
 
 class MockSubAgent(BaseSubAgent):
     """Test implementation of BaseSubAgent."""
@@ -30,7 +19,6 @@ class MockSubAgent(BaseSubAgent):
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Test execute method."""
         pass
-
 
 class MockSubAgentLogger:
     """Test SubAgentLogger class functionality."""
@@ -88,7 +76,6 @@ class MockSubAgentLogger:
         assert "Agent output:" in call_args
         assert "2048" in call_args
         assert "success" in call_args
-
 
 class TestBaseSubAgentLogging:
     """Test BaseSubAgent logging integration."""
@@ -218,7 +205,6 @@ class TestBaseSubAgentLogging:
         mock_log_comm.assert_called_once_with(
             "system", test_agent.name, test_agent.correlation_id, "agent_start"
         )
-
 
 def test_get_subagent_logger_singleton():
     """Test that get_subagent_logger returns singleton instance."""

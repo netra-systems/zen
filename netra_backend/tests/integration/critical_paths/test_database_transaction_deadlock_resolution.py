@@ -11,17 +11,10 @@ L3 Test: Uses real PostgreSQL via Testcontainers to create actual deadlock scena
 and validate detection/resolution mechanisms work correctly.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -37,15 +30,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.postgres_core import Database
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class DatabaseDeadlockManager:
     """Manages deadlock testing with real PostgreSQL containers."""
@@ -426,7 +415,6 @@ class DatabaseDeadlockManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def deadlock_manager():
     """Create deadlock manager for testing."""
@@ -434,7 +422,6 @@ async def deadlock_manager():
     await manager.setup_postgres_container()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -546,7 +533,6 @@ class TestDatabaseTransactionDeadlockResolutionL3:
         # Should capture sufficient monitoring information
         assert monitoring_results["transaction_details_captured"] is True
         assert monitoring_results["execution_time_tracked"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

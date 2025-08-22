@@ -32,14 +32,12 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class ValidationSeverity(Enum):
     """Severity levels for validation issues."""
     INFO = "info"
     WARNING = "warning" 
     ERROR = "error"
     CRITICAL = "critical"
-
 
 @dataclass
 class ValidationResult:
@@ -54,7 +52,6 @@ class ValidationResult:
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.now(UTC)
-
 
 class DatabaseStateValidator:
     """Validates database state for test reliability."""
@@ -584,7 +581,6 @@ class DatabaseStateValidator:
                 for r in results
             ]
         }
-
 
 # Global database state validator instance
 db_state_validator = DatabaseStateValidator()

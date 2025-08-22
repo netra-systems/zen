@@ -3,17 +3,10 @@ Tests for TriageSubAgent edge cases, performance, and Pydantic model validation
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 
@@ -21,13 +14,11 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent import (
     Complexity,
     ExtractedEntities,
     KeyParameters,
     Priority,
-    # Add project root to path
     TriageResult,
     UserIntent,
 )
@@ -40,7 +31,6 @@ from netra_backend.tests.triage_test_helpers import (
     TriageMockHelpers,
 )
 
-
 @pytest.fixture
 def triage_agent():
     """Create TriageSubAgent with mocked dependencies"""
@@ -48,7 +38,6 @@ def triage_agent():
     mock_tool = TriageMockHelpers.create_mock_tool_dispatcher()
     mock_redis = TriageMockHelpers.create_mock_redis()
     return TriageSubAgent(mock_llm, mock_tool, mock_redis)
-
 
 class TestEdgeCasesAndBoundaryConditions:
     """Test edge cases and boundary conditions"""
@@ -118,7 +107,6 @@ class TestEdgeCasesAndBoundaryConditions:
         
         # Basic assertion that processing completed
         assert state.triage_result is not None
-
 
 class TestPerformanceOptimization:
     """Test performance optimization features"""
@@ -197,7 +185,6 @@ class TestPerformanceOptimization:
         # Hash length may vary based on implementation (MD5=32, SHA256=64)
         assert len(hash_result) >= 32
         assert hash_result.isalnum()
-
 
 class TestPydanticModelValidation:
     """Test Pydantic model validation and serialization"""
@@ -298,7 +285,6 @@ class TestPydanticModelValidation:
         assert intent.primary_intent == "optimize"
         assert len(intent.secondary_intents) == 3
         assert intent.action_required == True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

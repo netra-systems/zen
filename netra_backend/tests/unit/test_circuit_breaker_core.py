@@ -7,17 +7,10 @@ Tests critical paths including state transitions, adaptive thresholds,
 health monitoring, and failure recovery mechanisms.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta
@@ -25,7 +18,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
@@ -34,9 +26,6 @@ from netra_backend.app.schemas.core_models import (
     CircuitBreakerConfig,
     HealthCheckResult,
 )
-
-# Add project root to path
-
 
 # Test fixtures for setup
 @pytest.fixture
@@ -49,7 +38,6 @@ def circuit_config():
         timeout_seconds=1
     )
 
-
 @pytest.fixture
 def mock_health_checker():
     """Mock health checker returning healthy status."""
@@ -57,12 +45,10 @@ def mock_health_checker():
     checker.check_health = AsyncMock(return_value=create_health_result())
     return checker
 
-
 @pytest.fixture
 def circuit_breaker(circuit_config):
     """Circuit breaker instance without health checker."""
     return AdaptiveCircuitBreaker("test", circuit_config)
-
 
 @pytest.fixture  
 async def circuit_with_health(circuit_config, mock_health_checker):
@@ -71,7 +57,6 @@ async def circuit_with_health(circuit_config, mock_health_checker):
     yield circuit
     circuit.cleanup()
 
-
 # Helper functions for 25-line compliance
 def create_health_result(status=HealthStatus.HEALTHY, response_time=0.1):
     """Create standardized health check result."""
@@ -79,38 +64,31 @@ def create_health_result(status=HealthStatus.HEALTHY, response_time=0.1):
         status=status, response_time=response_time, details={}
     )
 
-
 def assert_circuit_state(circuit, expected_state):
     """Assert circuit is in expected state."""
     assert circuit.state == expected_state
-
 
 def assert_failure_count(circuit, expected_count):
     """Assert circuit has expected failure count."""
     assert circuit.failure_count == expected_count
 
-
 def simulate_operation_failure(circuit):
     """Simulate a failed operation."""
     circuit._record_failure(0.1)
 
-
 def simulate_operation_success(circuit):
     """Simulate a successful operation."""
     circuit._record_success(0.1)
-
 
 async def simulate_async_operation():
     """Async operation that always succeeds."""
     await asyncio.sleep(0.001)
     return "success"
 
-
 async def simulate_failing_operation():
     """Async operation that always fails."""
     await asyncio.sleep(0.001)
     raise RuntimeError("Operation failed")
-
 
 # Core circuit breaker functionality tests
 class TestCircuitBreakerInitialization:
@@ -142,7 +120,6 @@ class TestCircuitBreakerInitialization:
         """Circuit breaker accepts health checker."""
         assert circuit_with_health.health_checker == mock_health_checker
         assert circuit_with_health.last_health_check is None
-
 
 class TestCircuitStateTransitions:
     """Test circuit breaker state transition logic."""
@@ -186,7 +163,6 @@ class TestCircuitStateTransitions:
         for _ in range(2):  # Success threshold is 2
             simulate_operation_success(circuit_breaker)
         assert_circuit_state(circuit_breaker, CircuitBreakerState.CLOSED)
-
 
 class TestOperationExecution:
     """Test operation execution through circuit breaker."""
@@ -233,7 +209,6 @@ class TestOperationExecution:
             mock_config.slow_call_threshold = 0.05
             await circuit_breaker.call(slow_operation)
         assert circuit_breaker.slow_requests >= 0
-
 
 class TestAdaptiveThreshold:
     """Test adaptive threshold functionality."""
@@ -319,7 +294,6 @@ class TestAdaptiveThreshold:
         circuit_with_health._adapt_failure_threshold()
         assert circuit_with_health.adaptive_failure_threshold >= original_threshold
 
-
 class TestMetricsAndStatus:
     """Test metrics collection and status reporting."""
 
@@ -352,7 +326,6 @@ class TestMetricsAndStatus:
         circuit_breaker.force_open()
         assert circuit_breaker.last_state_change >= initial_time
 
-
 class TestTimeoutAndRecovery:
     """Test timeout-based recovery mechanisms."""
 
@@ -378,7 +351,6 @@ class TestTimeoutAndRecovery:
         # Trigger state check
         circuit_breaker.should_allow_request()
         assert_circuit_state(circuit_breaker, CircuitBreakerState.HALF_OPEN)
-
 
 class TestCleanup:
     """Test cleanup and resource management."""

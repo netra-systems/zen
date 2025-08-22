@@ -26,6 +26,9 @@ class TestEnvironmentConfig:
     websocket_url: str = "ws://localhost:8000/websocket"
     auth_service_url: str = "http://localhost:8001"
     
+    # Service configurations
+    services: Dict[str, Dict[str, Any]] = None
+    
     # Database configurations
     postgres_url: Optional[str] = None
     clickhouse_url: Optional[str] = None
@@ -44,6 +47,27 @@ class TestEnvironmentConfig:
     use_real_llm: bool = False
     use_real_database: bool = False
     enable_monitoring: bool = False
+    
+    def __post_init__(self):
+        """Initialize services dictionary if not provided."""
+        if self.services is None:
+            self.services = {
+                "backend": {
+                    "url": self.api_base_url,
+                    "port": 8000,
+                    "health_endpoint": "/health"
+                },
+                "auth": {
+                    "url": self.auth_service_url,
+                    "port": 8001,
+                    "health_endpoint": "/health"
+                },
+                "websocket": {
+                    "url": self.websocket_url,
+                    "port": 8000,
+                    "path": "/websocket"
+                }
+            }
     
     @classmethod
     def from_env(cls, env_name: str = "test") -> "TestEnvironmentConfig":
@@ -83,6 +107,7 @@ class TestEnvironmentConfig:
             "api_base_url": self.api_base_url,
             "websocket_url": self.websocket_url,
             "auth_service_url": self.auth_service_url,
+            "services": self.services,
             "postgres_url": self.postgres_url,
             "clickhouse_url": self.clickhouse_url,
             "redis_url": self.redis_url,

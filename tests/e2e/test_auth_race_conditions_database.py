@@ -19,7 +19,6 @@ from auth_service.auth_core.models.auth_models import (
 from netra_backend.tests.factories.user_factory import UserFactory
 
 # Add auth_service to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "auth_service"))
 
 
 class TestDatabaseTransactionIsolation:

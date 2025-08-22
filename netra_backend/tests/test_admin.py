@@ -1,14 +1,7 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import datetime
 import uuid
@@ -21,7 +14,6 @@ from netra_backend.app.main import app
 from netra_backend.app.schemas import User
 
 from netra_backend.app.config import get_config
-
 
 @pytest.fixture(scope="function", autouse=True)
 def settings_override():

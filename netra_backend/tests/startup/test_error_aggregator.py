@@ -4,17 +4,10 @@ Tests error recording, pattern detection, trend analysis, and database operation
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -31,26 +24,21 @@ from netra_backend.app.schemas.startup_types import (
     ErrorPhase,
     ErrorTrend,
     ErrorType,
-    # Add project root to path
     StartupError,
 )
 
-# Add project root to path
 from netra_backend.app.startup.error_aggregator import ErrorAggregator
-
 
 @pytest.fixture
 def temp_db_path(tmp_path: Path) -> Path:
     """Create temporary database path."""
     return tmp_path / "test_error_db.sqlite"
 
-
 @pytest.fixture
 def error_aggregator(temp_db_path: Path) -> ErrorAggregator:
     """Create error aggregator with temporary database."""
     aggregator = ErrorAggregator(str(temp_db_path))
     return aggregator
-
 
 @pytest.fixture
 def sample_error() -> StartupError:
@@ -65,7 +53,6 @@ def sample_error() -> StartupError:
         stack_trace="Stack trace here",
         context={"db_host": "localhost"}
     )
-
 
 @pytest.fixture
 def sample_errors() -> List[StartupError]:
@@ -83,7 +70,6 @@ def sample_errors() -> List[StartupError]:
                     message="React build failed")
     ]
 
-
 class TestErrorAggregatorInit:
     """Test initialization and setup."""
     
@@ -97,7 +83,6 @@ class TestErrorAggregatorInit:
         """Test initialization with custom database path."""
         aggregator = ErrorAggregator(str(temp_db_path))
         assert aggregator.db_path == temp_db_path
-
 
 class TestDatabaseSetup:
     """Test database creation and setup."""
@@ -116,7 +101,6 @@ class TestDatabaseSetup:
             tables = [row[0] for row in await cursor.fetchall()]
             assert "startup_errors" in tables
             assert "error_patterns" in tables
-
 
 class TestErrorRecording:
     """Test error recording functionality."""
@@ -148,7 +132,6 @@ class TestErrorRecording:
             cursor = await db.execute("SELECT COUNT(*) FROM startup_errors")
             count = (await cursor.fetchone())[0]
             assert count == 1
-
 
 class TestErrorRetrieval:
     """Test error retrieval functionality."""
@@ -186,7 +169,6 @@ class TestErrorRetrieval:
         assert error.service == "backend"
         assert error.message == "test message"
 
-
 class TestPatternDetection:
     """Test error pattern detection."""
     async def test_find_patterns_empty_errors(self, error_aggregator: ErrorAggregator) -> None:
@@ -213,7 +195,6 @@ class TestPatternDetection:
         pattern = error_aggregator._create_pattern_from_errors(similar_errors)
         assert pattern.frequency == 2
         assert "Database connection" in pattern.pattern
-
 
 class TestTrendAnalysis:
     """Test error trend analysis."""
@@ -248,7 +229,6 @@ class TestTrendAnalysis:
         assert services["backend"] == 1
         assert error_types["connection"] == 1
 
-
 class TestFixSuggestions:
     """Test fix suggestion functionality."""
     
@@ -266,7 +246,6 @@ class TestFixSuggestions:
         """Test fix suggestion for unknown error types."""
         fix = error_aggregator._suggest_fix(ErrorType.OTHER)
         assert "review error details" in fix.lower()
-
 
 class TestPatternFrequencyTracking:
     """Test pattern frequency tracking."""
@@ -288,7 +267,6 @@ class TestPatternFrequencyTracking:
             cursor = await db.execute("SELECT COUNT(*) FROM error_patterns")
             count = (await cursor.fetchone())[0]
             assert count == 1
-
 
 class TestReportGeneration:
     """Test report generation functionality."""
@@ -312,7 +290,6 @@ class TestReportGeneration:
                 
                 report = await error_aggregator.generate_report("weekly")
                 assert "generated_at" in report
-
 
 class TestRecommendations:
     """Test recommendation generation."""
@@ -349,7 +326,6 @@ class TestRecommendations:
         error_aggregator._add_critical_recommendation(trends, recommendations)
         assert len(recommendations) == 1
         assert "critical errors" in recommendations[0].lower()
-
 
 class TestIntegrationScenarios:
     """Test integration scenarios combining multiple features."""

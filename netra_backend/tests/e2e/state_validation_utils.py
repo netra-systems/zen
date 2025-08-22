@@ -13,7 +13,6 @@ from netra_backend.app.agents.data_sub_agent.models import (
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 
-
 class StateTransitionValidator:
     """Validates state transitions between agents."""
     
@@ -54,7 +53,6 @@ class StateTransitionValidator:
         self.validate_data_completion(state)
         assert state.triage_result is not None, "Triage result should be preserved"
         assert state.data_result is not None, "Data result should be added"
-
 
 class StateArtifactValidator:
     """Validates artifacts and handoffs between agents."""
@@ -101,7 +99,6 @@ class StateArtifactValidator:
             return ' '.join(data_result.recommended_actions)
         return ""
 
-
 class StateTypeValidator:
     """Validates type integrity throughout agent pipeline."""
     
@@ -142,7 +139,6 @@ class StateTypeValidator:
         self.validate_state_base_types(state)
         self.validate_triage_result_types(state.triage_result)
         self.validate_data_result_types(state.data_result)
-
 
 class StateIntegrityChecker:
     """Comprehensive state integrity checking."""
@@ -191,7 +187,6 @@ class StateIntegrityChecker:
         # If data result exists, triage result should also exist
         if state.data_result is not None:
             assert state.triage_result is not None, "Data result requires prior triage result"
-
 
 class StateValidationReporter:
     """Reports validation results and issues."""

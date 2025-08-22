@@ -12,14 +12,8 @@ Tests JWT token generation, Redis storage, cross-service validation, and WebSock
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -35,18 +29,14 @@ from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
+from netra_backend.tests.integration.helpers.multi_service_auth_helpers import (
 
-from integration.helpers.redis_l3_helpers import RedisContainer
-from integration.helpers.multi_service_auth_helpers import (
-
-# Add project root to path
     PostgreSQLContainer, AuthServiceSimulator, 
     BackendServiceSimulator, WebSocketServiceSimulator
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 class MultiServiceAuthManager:
     """Manages multi-service authentication testing scenarios."""
@@ -243,7 +233,6 @@ class MultiServiceAuthManager:
         except Exception as e:
             return {"exists": False, "error": str(e)}
 
-
 @pytest.mark.L3
 @pytest.mark.integration
 class TestMultiServiceAuthTokenPropagationL3:
@@ -363,7 +352,6 @@ class TestMultiServiceAuthTokenPropagationL3:
         await redis_client.set(f"jwt_token:{token_result['token']}", json.dumps(expired_data), ex=3600)
         validation_results = await auth_manager.validate_token_across_services(token_result["token"])
         assert validation_results["overall_success"] is False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

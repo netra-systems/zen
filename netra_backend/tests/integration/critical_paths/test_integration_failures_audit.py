@@ -3,21 +3,10 @@ Critical Integration Tests - Audit-driven failing tests for basic functions
 Tests designed to fail initially to expose integration gaps per testing.xml L3 requirements
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,12 +25,10 @@ from testcontainers.redis import RedisContainer
 
 # Critical Integration Test Suite - 30 challenging tests that will initially fail
 
-
 class TestCriticalDatabaseIntegration:
 
     """Tests for database integration at L3 realism level"""
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -57,7 +44,6 @@ class TestCriticalDatabaseIntegration:
 
             conn2 = psycopg2.connect(postgres.get_connection_url())
             
-
             cur1 = conn1.cursor()
 
             cur2 = conn2.cursor()
@@ -80,7 +66,6 @@ class TestCriticalDatabaseIntegration:
 
             conn2.commit()  # Should raise serialization error
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio  
@@ -108,7 +93,6 @@ class TestCriticalDatabaseIntegration:
 
                 tasks.append(task)
             
-
             results = await asyncio.gather(*tasks, return_exceptions=True)
             
             # Verify all data was written consistently
@@ -117,7 +101,6 @@ class TestCriticalDatabaseIntegration:
 
             assert count == 10000  # Will fail - missing deduplication
     
-
     @pytest.mark.integration
 
     async def test_redis_cache_invalidation_cascade(self):
@@ -147,12 +130,10 @@ class TestCriticalDatabaseIntegration:
 
             assert not r.exists("thread:1:data")
 
-
 class TestAgentOrchestrationIntegration:
 
     """Tests for multi-agent orchestration at L3/L4 realism"""
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -163,7 +144,6 @@ class TestAgentOrchestrationIntegration:
         # Will fail - no deadlock detection mechanism
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
-
         supervisor = SupervisorAgent()
         
         # Create circular dependency scenario
@@ -180,7 +160,6 @@ class TestAgentOrchestrationIntegration:
 
         assert result.get("deadlock_detected") is True
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -191,12 +170,10 @@ class TestAgentOrchestrationIntegration:
         # Will fail - no proper backoff implementation
         from netra_backend.app.agents.base.agent import BaseSubAgent
         
-
         agent = BaseSubAgent()
 
         agent.llm_client = AsyncMock(side_effect=Exception("Rate limited"))
         
-
         start_time = datetime.now()
 
         with pytest.raises(Exception):
@@ -211,13 +188,11 @@ class TestAgentOrchestrationIntegration:
 
             )
         
-
         elapsed = (datetime.now() - start_time).total_seconds()
         # Should take ~7 seconds (1 + 2 + 4) but won't
 
         assert 6 < elapsed < 8
     
-
     @pytest.mark.integration
 
     async def test_agent_memory_leak_under_sustained_load(self):
@@ -226,13 +201,10 @@ class TestAgentOrchestrationIntegration:
         # Will fail - memory leaks exist in agent lifecycle
         import tracemalloc
 
-        
-
         tracemalloc.start()
 
         supervisor = SupervisorAgent()
         
-
         snapshot1 = tracemalloc.take_snapshot()
         
         # Execute 1000 agent operations
@@ -241,7 +213,6 @@ class TestAgentOrchestrationIntegration:
 
             await supervisor.process_request({"query": "test"})
         
-
         snapshot2 = tracemalloc.take_snapshot()
 
         top_stats = snapshot2.compare_to(snapshot1, 'lineno')
@@ -252,12 +223,10 @@ class TestAgentOrchestrationIntegration:
 
         assert total_growth < 10_000_000  # Less than 10MB growth
 
-
 class TestWebSocketIntegration:
 
     """Tests for WebSocket real-time communication at L3 realism"""
     
-
     @pytest.mark.integration  
 
     @pytest.mark.asyncio
@@ -268,7 +237,6 @@ class TestWebSocketIntegration:
         # Will fail - no message replay on reconnect
         from netra_backend.app.services.websocket_manager import WebSocketManager
         
-
         manager = WebSocketManager()
 
         client_id = "test_client"
@@ -291,7 +259,6 @@ class TestWebSocketIntegration:
 
         assert messages[0]["seq"] == 1
     
-
     @pytest.mark.integration
 
     async def test_websocket_broadcast_atomicity(self):
@@ -299,7 +266,6 @@ class TestWebSocketIntegration:
         """Test atomic broadcast to multiple WebSocket clients"""
         # Will fail - broadcasts are not atomic
         
-
         manager = WebSocketManager()
 
         clients = [f"client_{i}" for i in range(100)]
@@ -320,12 +286,10 @@ class TestWebSocketIntegration:
 
         )
         
-
         assert result["delivered_to_all"] is True
 
         assert len(result["failed_clients"]) == 0
     
-
     @pytest.mark.integration
 
     async def test_websocket_rate_limiting_per_client(self):
@@ -333,12 +297,10 @@ class TestWebSocketIntegration:
         """Test per-client WebSocket rate limiting"""
         # Will fail - no rate limiting implemented
         
-
         manager = WebSocketManager()
 
         client_id = "rate_test_client"
         
-
         await manager.connect(client_id)
         
         # Send 100 messages rapidly
@@ -357,12 +319,10 @@ class TestWebSocketIntegration:
 
                 assert result.get("rate_limited") is True
 
-
 class TestSecurityIntegration:
 
     """Security-focused integration tests at L3/L4 realism"""
     
-
     @pytest.mark.integration
 
     async def test_sql_injection_prevention_all_endpoints(self):
@@ -371,7 +331,6 @@ class TestSecurityIntegration:
         # Will fail - some endpoints vulnerable
         from netra_backend.app.db.session import get_db
         
-
         malicious_inputs = [
 
             "'; DROP TABLE threads; --",
@@ -382,7 +341,6 @@ class TestSecurityIntegration:
 
         ]
         
-
         async with get_db() as session:
 
             for payload in malicious_inputs:
@@ -395,7 +353,6 @@ class TestSecurityIntegration:
                 )
                 # This will fail - direct string interpolation
     
-
     @pytest.mark.integration  
 
     async def test_jwt_token_rotation_during_active_session(self):
@@ -404,7 +361,6 @@ class TestSecurityIntegration:
         # Will fail - no token rotation mechanism
         from netra_backend.app.auth.jwt_handler import JWTHandler
         
-
         handler = JWTHandler()
 
         user_id = "test_user"
@@ -427,7 +383,6 @@ class TestSecurityIntegration:
 
         assert await handler.verify_token(token2) is True
     
-
     @pytest.mark.integration
 
     async def test_rate_limit_distributed_enforcement(self):
@@ -436,12 +391,10 @@ class TestSecurityIntegration:
         # Will fail - rate limiting not distributed
         from netra_backend.app.middleware.rate_limiter import RateLimiter
         
-
         limiter1 = RateLimiter(redis_url="redis://localhost")
 
         limiter2 = RateLimiter(redis_url="redis://localhost")
         
-
         client_ip = "192.168.1.1"
         
         # Exhaust limit on instance 1
@@ -458,12 +411,10 @@ class TestSecurityIntegration:
 
         assert "Rate limit exceeded" in str(exc.value)
 
-
 class TestDataConsistencyIntegration:
 
     """Data consistency tests across services at L3/L4 realism"""
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -474,10 +425,8 @@ class TestDataConsistencyIntegration:
         # Will fail - no distributed transaction support
         from netra_backend.app.services.transaction_manager import TransactionManager
         
-
         manager = TransactionManager()
         
-
         async with manager.distributed_transaction() as tx:
             # Update PostgreSQL
 
@@ -498,7 +447,6 @@ class TestDataConsistencyIntegration:
         # All changes should be rolled back
         # This will fail - partial commits will occur
     
-
     @pytest.mark.integration
 
     async def test_event_sourcing_replay_consistency(self):
@@ -507,10 +455,8 @@ class TestDataConsistencyIntegration:
         # Will fail - event replay not idempotent
         from netra_backend.app.events.store import EventStore
         
-
         store = EventStore()
         
-
         events = [
 
             {"type": "user_created", "data": {"id": 1}},
@@ -533,10 +479,8 @@ class TestDataConsistencyIntegration:
 
         state2 = await store.replay_all()
         
-
         assert state1 == state2  # Will fail - not idempotent
     
-
     @pytest.mark.integration
 
     async def test_cache_consistency_during_failover(self):
@@ -545,12 +489,10 @@ class TestDataConsistencyIntegration:
         # Will fail - no failover handling
         from netra_backend.app.cache.manager import CacheManager
         
-
         primary = RedisContainer("redis:7")
 
         replica = RedisContainer("redis:7")
         
-
         manager = CacheManager(primary_url=primary.get_url())
         
         # Write to primary
@@ -567,12 +509,10 @@ class TestDataConsistencyIntegration:
 
         assert value == "value1"  # Will fail - no replication
 
-
 class TestPerformanceIntegration:
 
     """Performance and scalability integration tests at L3/L4"""
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -583,7 +523,6 @@ class TestPerformanceIntegration:
         # Will fail - poor pool recovery
         from netra_backend.app.db.pool import ConnectionPool
         
-
         pool = ConnectionPool(max_connections=10)
         
         # Exhaust pool
@@ -604,7 +543,6 @@ class TestPerformanceIntegration:
 
             await pool.release(connections[0])
         
-
         asyncio.create_task(delayed_release())
         
         # Should acquire within 2 seconds
@@ -619,7 +557,6 @@ class TestPerformanceIntegration:
 
         assert conn is not None
     
-
     @pytest.mark.integration
 
     async def test_batch_processing_optimization(self):
@@ -628,7 +565,6 @@ class TestPerformanceIntegration:
         # Will fail - no batch optimization
         from netra_backend.app.services.batch_processor import BatchProcessor
         
-
         processor = BatchProcessor()
         
         # Queue 1000 individual operations
@@ -647,7 +583,6 @@ class TestPerformanceIntegration:
 
             operations.append(op)
         
-
         start = datetime.now()
 
         await processor.flush()
@@ -658,7 +593,6 @@ class TestPerformanceIntegration:
 
         assert elapsed < 1.0
     
-
     @pytest.mark.integration
 
     async def test_memory_pressure_graceful_degradation(self):
@@ -673,7 +607,6 @@ class TestPerformanceIntegration:
 
         resource.setrlimit(resource.RLIMIT_AS, (100_000_000, 100_000_000))
         
-
         manager = MemoryManager()
         
         # System should detect pressure and adapt
@@ -684,12 +617,10 @@ class TestPerformanceIntegration:
 
         assert result["cache_disabled"] is True
 
-
 class TestObservabilityIntegration:
 
     """Observability and monitoring integration tests at L3"""
     
-
     @pytest.mark.integration
 
     async def test_distributed_tracing_correlation(self):
@@ -700,12 +631,10 @@ class TestObservabilityIntegration:
 
         from netra_backend.app.tracing.manager import TracingManager
         
-
         tracer = trace.get_tracer(__name__)
 
         manager = TracingManager()
         
-
         with tracer.start_as_current_span("parent") as parent:
             # Call multiple services
 
@@ -721,7 +650,6 @@ class TestObservabilityIntegration:
 
             assert traces[1]["parent_id"] == traces[0]["span_id"]
     
-
     @pytest.mark.integration  
 
     async def test_metrics_aggregation_accuracy(self):
@@ -730,7 +658,6 @@ class TestObservabilityIntegration:
         # Will fail - aggregation errors
         from netra_backend.app.metrics.collector import MetricsCollector
         
-
         collector = MetricsCollector()
         
         # Generate metrics concurrently
@@ -747,7 +674,6 @@ class TestObservabilityIntegration:
 
             tasks.append(task)
         
-
         await asyncio.gather(*tasks)
         
         # Verify aggregation accuracy
@@ -758,7 +684,6 @@ class TestObservabilityIntegration:
 
         assert abs(stats["p99"] - 99) < 1  # P99 should be ~99
     
-
     @pytest.mark.integration
 
     async def test_log_correlation_across_async_contexts(self):
@@ -767,17 +692,14 @@ class TestObservabilityIntegration:
         # Will fail - context lost in async
         from netra_backend.app.logging.context import LogContext
         
-
         context = LogContext()
         
-
         async def nested_operation():
 
             context.log("Nested operation")
 
             return context.get_correlation_id()
         
-
         context.set_correlation_id("test-123")
 
         context.log("Parent operation")
@@ -788,12 +710,10 @@ class TestObservabilityIntegration:
 
         assert nested_id == "test-123"
 
-
 class TestErrorHandlingIntegration:
 
     """Error handling and recovery integration tests"""
     
-
     @pytest.mark.integration
 
     @pytest.mark.asyncio
@@ -804,7 +724,6 @@ class TestErrorHandlingIntegration:
         # Will fail - no circuit breaker
         from netra_backend.app.resilience.circuit_breaker import CircuitBreaker
         
-
         breaker = CircuitBreaker(
 
             failure_threshold=3,
@@ -833,7 +752,6 @@ class TestErrorHandlingIntegration:
 
         assert "Circuit breaker open" in str(exc.value)
     
-
     @pytest.mark.integration
 
     async def test_poison_message_handling_queue(self):
@@ -842,7 +760,6 @@ class TestErrorHandlingIntegration:
         # Will fail - poison messages block queue
         from netra_backend.app.queue.processor import QueueProcessor
         
-
         processor = QueueProcessor()
         
         # Add poison message
@@ -873,7 +790,6 @@ class TestErrorHandlingIntegration:
 
         assert len(results["dead_letter"]) == 1
     
-
     @pytest.mark.integration
 
     async def test_graceful_shutdown_inflight_requests(self):
@@ -882,7 +798,6 @@ class TestErrorHandlingIntegration:
         # Will fail - abrupt shutdown
         from netra_backend.app.server import Server
         
-
         server = Server()
 
         await server.start()
@@ -913,15 +828,12 @@ class TestErrorHandlingIntegration:
 
         )
         
-
         assert results[0]["completed"] is True
-
 
 class TestStateManagementIntegration:
 
     """State management and synchronization tests"""
     
-
     @pytest.mark.integration
 
     async def test_distributed_lock_timeout_handling(self):
@@ -930,7 +842,6 @@ class TestStateManagementIntegration:
         # Will fail - locks not cleaned up
         from netra_backend.app.locks.manager import LockManager
         
-
         manager = LockManager(redis_url="redis://localhost")
         
         # Acquire lock with timeout
@@ -953,7 +864,6 @@ class TestStateManagementIntegration:
 
         assert lock2 is not None
     
-
     @pytest.mark.integration
 
     async def test_state_machine_transition_atomicity(self):
@@ -962,7 +872,6 @@ class TestStateManagementIntegration:
         # Will fail - non-atomic transitions
         from netra_backend.app.state.machine import StateMachine
         
-
         machine = StateMachine()
         
         # Concurrent state transitions
@@ -975,7 +884,6 @@ class TestStateManagementIntegration:
 
             await machine.transition("processing", "completed")
         
-
         async def transition_2():
 
             await machine.transition("pending", "cancelled")
@@ -998,7 +906,6 @@ class TestStateManagementIntegration:
 
         assert len(successes) == 1
     
-
     @pytest.mark.integration
 
     async def test_session_consistency_across_replicas(self):
@@ -1007,7 +914,6 @@ class TestStateManagementIntegration:
         # Will fail - sessions not synchronized
         from netra_backend.app.session.manager import SessionManager
         
-
         manager1 = SessionManager(node_id="node1")
 
         manager2 = SessionManager(node_id="node2")
@@ -1022,12 +928,10 @@ class TestStateManagementIntegration:
 
         assert session["user"] == "test"
 
-
 class TestContractValidationIntegration:
 
     """API contract and schema validation tests"""
     
-
     @pytest.mark.integration
 
     async def test_api_versioning_backward_compatibility(self):
@@ -1036,7 +940,6 @@ class TestContractValidationIntegration:
         # Will fail - breaking changes in API
         from netra_backend.app.api.versioning import APIVersionManager
         
-
         manager = APIVersionManager()
         
         # V1 request format
@@ -1061,10 +964,8 @@ class TestContractValidationIntegration:
 
         )
         
-
         assert result["success"] is True
     
-
     @pytest.mark.integration
 
     async def test_schema_evolution_migration(self):
@@ -1073,7 +974,6 @@ class TestContractValidationIntegration:
         # Will fail - migration causes downtime
         from netra_backend.app.db.migrations import MigrationManager
         
-
         manager = MigrationManager()
         
         # Start migration
@@ -1094,10 +994,8 @@ class TestContractValidationIntegration:
 
             await asyncio.sleep(0.5)
         
-
         await migration_task
     
-
     @pytest.mark.integration
 
     async def test_graphql_query_depth_limiting(self):
@@ -1106,7 +1004,6 @@ class TestContractValidationIntegration:
         # Will fail - no depth limiting
         from netra_backend.app.graphql.server import GraphQLServer
         
-
         server = GraphQLServer()
         
         # Deeply nested query
@@ -1149,13 +1046,11 @@ class TestContractValidationIntegration:
 
         """
         
-
         with pytest.raises(Exception) as exc:
 
             await server.execute(query)
 
         assert "Query depth exceeded" in str(exc.value)
-
 
 async def _insert_metrics_batch(client, batch_id):
 

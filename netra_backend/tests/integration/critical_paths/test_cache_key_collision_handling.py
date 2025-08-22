@@ -11,17 +11,10 @@ L3 Realism: Real Redis with hash collision simulation, actual collision scenario
 Performance Requirements: Collision detection < 10ms, resolution success > 99%, data integrity 100%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -41,15 +34,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.critical_paths.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class KeyCollisionMetrics:
@@ -102,7 +91,6 @@ class KeyCollisionMetrics:
         if self.data_integrity_checks == 0:
             return 100.0
         return ((self.data_integrity_checks - self.data_corruption_incidents) / self.data_integrity_checks) * 100.0
-
 
 class CacheKeyCollisionHandlingL3Manager:
     """L3 cache key collision handling test manager with real Redis and collision scenarios."""
@@ -629,7 +617,6 @@ class CacheKeyCollisionHandlingL3Manager:
         except Exception as e:
             logger.error(f"Key collision cleanup failed: {e}")
 
-
 @pytest.fixture
 async def collision_handling_manager():
     """Create L3 key collision handling manager."""
@@ -637,7 +624,6 @@ async def collision_handling_manager():
     await manager.setup_redis_for_collision_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -663,7 +649,6 @@ async def test_birthday_paradox_hash_collisions(collision_handling_manager):
     
     logger.info(f"Birthday paradox test: {result['hash_collisions']} hash collisions, {result['resolution_success_rate']:.1f}% resolution rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -682,7 +667,6 @@ async def test_namespace_collision_isolation(collision_handling_manager):
     
     logger.info(f"Namespace collision test: {result['isolation_effectiveness']:.1f}% isolation, {result['collision_rate']:.1f}% collision rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -699,7 +683,6 @@ async def test_data_integrity_during_collisions(collision_handling_manager):
         assert result["resolution_success_rate"] > 90.0, f"Resolution success rate {result['resolution_success_rate']:.1f}% below 90%"
     
     logger.info(f"Data integrity test: {result['data_integrity_rate']:.1f}% integrity, {result['successful_resolutions']} successful resolutions")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -719,7 +702,6 @@ async def test_concurrent_collision_handling_performance(collision_handling_mana
         logger.warning(f"Lower collision rate than expected: {result['collision_rate']:.1f}% (expected ~{expected_collision_rate}%)")
     
     logger.info(f"Concurrent collision test: {result['collision_rate']:.1f}% collisions, {result['resolution_rate']:.1f}% resolved")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

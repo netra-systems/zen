@@ -31,14 +31,14 @@ def get_primary_agent():
     """Get primary agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-    from .agent_service_core import AgentService
+    from netra_backend.app.services.agent_service_core import AgentService
     return AgentService(SupervisorAgent())
 
 def get_fallback_agent():
     """Get fallback agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-    from .agent_service_core import AgentService
+    from netra_backend.app.services.agent_service_core import AgentService
     return AgentService(SupervisorAgent())
 
 __all__ = [

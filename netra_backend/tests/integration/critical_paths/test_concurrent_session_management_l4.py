@@ -3,17 +3,10 @@ L4 Integration Test: Concurrent Session Management
 Tests concurrent user sessions, resource contention, and consistency
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import random
@@ -30,11 +23,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.resource_manager import ResourceManager
 
-# Add project root to path
 from netra_backend.app.services.session_service import SessionService
-
-# Add project root to path
-
 
 class TestConcurrentSessionManagementL4:
     """Concurrent session management testing"""

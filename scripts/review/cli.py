@@ -8,7 +8,7 @@ import argparse
 import sys
 from typing import Any
 
-from .core import ReviewConfig, ReviewData
+from scripts.review.core import ReviewConfig, ReviewData
 
 
 class CLIHandler:

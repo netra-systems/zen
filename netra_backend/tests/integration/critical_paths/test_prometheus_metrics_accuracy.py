@@ -11,17 +11,10 @@ Coverage: Prometheus metric accuracy, cardinality management, timestamp precisio
 L3 Realism: Tests with actual Prometheus instances and real metric collection
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -37,11 +30,8 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.alert_manager import HealthAlertManager
 
-# Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
-from .integration.metrics.shared_fixtures import MetricEvent
-
-# Add project root to path
+from netra_backend.tests.integration.critical_paths.integration.metrics.shared_fixtures import MetricEvent
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +43,6 @@ pytestmark = [
     pytest.mark.prometheus
 ]
 
-
 @dataclass
 class PrometheusTestMetric:
     """Test metric for Prometheus accuracy validation."""
@@ -63,7 +52,6 @@ class PrometheusTestMetric:
     metric_type: str  # counter, gauge, histogram
     expected_prometheus_format: str
     tolerance: float = 0.001
-
 
 class PrometheusAccuracyValidator:
     """Validates Prometheus metrics accuracy with real infrastructure."""
@@ -403,7 +391,6 @@ class PrometheusAccuracyValidator:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def prometheus_accuracy_validator():
     """Create Prometheus accuracy validator for L3 testing."""
@@ -411,7 +398,6 @@ async def prometheus_accuracy_validator():
     await validator.initialize_prometheus_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_prometheus_metrics_collection_accuracy_l3(prometheus_accuracy_validator):
@@ -437,7 +423,6 @@ async def test_prometheus_metrics_collection_accuracy_l3(prometheus_accuracy_val
     assert accuracy_results["accuracy_percentage"] >= 95.0
     assert accuracy_results["missing_metrics"] <= 2
     assert len(accuracy_results["accuracy_violations"]) <= 3
-
 
 @pytest.mark.asyncio
 async def test_prometheus_revenue_metrics_precision_l3(prometheus_accuracy_validator):
@@ -467,7 +452,6 @@ async def test_prometheus_revenue_metrics_precision_l3(prometheus_accuracy_valid
     ]
     assert len(revenue_violations) == 0
 
-
 @pytest.mark.asyncio
 async def test_prometheus_timestamp_accuracy_l3(prometheus_accuracy_validator):
     """Test timestamp accuracy and drift in Prometheus ingestion.
@@ -493,7 +477,6 @@ async def test_prometheus_timestamp_accuracy_l3(prometheus_accuracy_validator):
         # Allow maximum 1 second drift for L3 testing
         assert max_drift <= 1000, f"Maximum timestamp drift {max_drift}ms exceeds 1000ms limit"
         assert avg_drift <= 500, f"Average timestamp drift {avg_drift}ms exceeds 500ms limit"
-
 
 @pytest.mark.asyncio
 async def test_prometheus_label_consistency_l3(prometheus_accuracy_validator):
@@ -522,7 +505,6 @@ async def test_prometheus_label_consistency_l3(prometheus_accuracy_validator):
     # Verify no single label has excessive cardinality
     for label_key, values in label_analysis.items():
         assert len(values) <= 20, f"Label {label_key} has excessive cardinality: {len(values)} values"
-
 
 @pytest.mark.asyncio  
 async def test_prometheus_error_handling_accuracy_l3(prometheus_accuracy_validator):

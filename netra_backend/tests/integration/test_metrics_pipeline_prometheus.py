@@ -7,17 +7,10 @@ exposed and scraped by Prometheus for alerting and performance monitoring.
 Tests metrics pipeline with real Prometheus container scraping metrics.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -30,7 +23,6 @@ import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.monitoring.prometheus_exporter import PrometheusExporter
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
-
 
 @pytest.mark.L3
 class TestMetricsPipelinePrometheusL3:

@@ -4,17 +4,10 @@ Tests thread CRUD operations and soft delete functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
@@ -25,10 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.base import Base
 
-# Add project root to path
 from netra_backend.app.services.database.thread_repository import ThreadRepository
-
-# Add project root to path
 
 # Mock Thread model for testing (with fields expected by test)
 class Thread(Base):
@@ -43,7 +33,6 @@ class Thread(Base):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-
 
 class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
@@ -105,7 +94,6 @@ class TestThreadRepositoryOperations:
         active_threads = await repo.get_active_threads(mock_session, "user123")
         assert len([t for t in active_threads if t.deleted_at == None]) == 1
 
-
 def _create_thread_data():
     """Create thread test data."""
     return {
@@ -113,7 +101,6 @@ def _create_thread_data():
         "title": "Test Thread",
         "metadata_": {"tags": ["test", "demo"]}
     }
-
 
 def _setup_update_mock(mock_session):
     """Setup update mock for testing."""
@@ -124,7 +111,6 @@ def _setup_update_mock(mock_session):
         created_at=datetime.now(timezone.utc)
     )
 
-
 def _create_test_thread():
     """Create test thread for soft delete."""
     return Thread(
@@ -133,7 +119,6 @@ def _create_test_thread():
         title="Test Thread",
         deleted_at=None
     )
-
 
 def _setup_active_threads_mock(mock_session):
     """Setup active threads mock."""

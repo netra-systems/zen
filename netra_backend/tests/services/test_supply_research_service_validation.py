@@ -3,34 +3,22 @@ Data validation tests for SupplyResearchService
 Tests comprehensive data validation logic and boundary conditions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import Any, Dict, List
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
-# Add project root to path
-
 
 @pytest.fixture
 def service(db_session):
     """Create SupplyResearchService instance with real database"""
     return SupplyResearchService(db_session)
-
 
 class TestDataValidation:
     """Test comprehensive data validation logic"""
@@ -230,7 +218,6 @@ class TestDataValidation:
         assert any("Confidence score must be between 0 and 1" in error for error in errors)
         assert any("Invalid availability status" in error for error in errors)
 
-
 class TestValidationHelpers:
     """Test validation helper methods"""
     
@@ -265,7 +252,6 @@ class TestValidationHelpers:
             # Provider name itself should be valid (other validation may fail)
             provider_errors = [e for e in errors if "Invalid provider" in e]
             assert len(provider_errors) == 0, f"Provider '{provider}' should be valid"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

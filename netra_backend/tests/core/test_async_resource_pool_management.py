@@ -4,17 +4,10 @@ Tests AsyncResourceManager, AsyncTaskPool, and AsyncConnectionPool functionality
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import threading
@@ -26,10 +19,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_utils import (
     AsyncConnectionPool,
-    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
     get_global_resource_manager,
@@ -37,7 +28,6 @@ from netra_backend.app.core.async_utils import (
     run_in_threadpool,
 )
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
-
 
 class TestAsyncResourceManagerComplete:
     """Complete tests for AsyncResourceManager."""
@@ -121,7 +111,6 @@ class TestAsyncResourceManagerComplete:
         assert len(results) == 5
         assert sorted(results) == list(range(5))
 
-
 class TestAsyncTaskPoolComplete:
     """Complete tests for AsyncTaskPool."""
     async def test_pool_limits_and_queuing(self):
@@ -198,7 +187,6 @@ class TestAsyncTaskPoolComplete:
         
         assert results == [0, 1, 2]
         assert len(execution_log) == 3
-
 
 class TestAsyncConnectionPoolComplete:
     """Complete tests for AsyncConnectionPool."""
@@ -332,7 +320,6 @@ class TestAsyncConnectionPoolComplete:
         
         assert results == list(range(5))
         await pool.close()
-
 
 class TestGlobalResourceManagement:
     """Test global resource management functions."""

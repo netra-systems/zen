@@ -7,7 +7,6 @@ to enable isolated testing without dependencies on real services.
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 
-
 class MockLLMService:
     """Mock LLM service for testing."""
     def __init__(self, model_name: str):
@@ -32,7 +31,6 @@ class MockLLMService:
             "usage": {"total_tokens": 100}
         }
 
-
 class MockOAuthProvider:
     """Mock OAuth provider for testing."""
     def __init__(self, provider_name: str):
@@ -50,7 +48,6 @@ class MockOAuthProvider:
     async def stop(self):
         pass
 
-
 class MockWebSocketServer:
     """Mock WebSocket server for testing."""
     def __init__(self, host: str, port: int):
@@ -62,7 +59,6 @@ class MockWebSocketServer:
         
     async def stop(self):
         pass
-
 
 class ServiceRegistry:
     """Mock service registry for testing."""
@@ -86,7 +82,6 @@ class ServiceRegistry:
         
     async def stop_all_services(self):
         pass
-
 
 __all__ = [
     "MockLLMService",

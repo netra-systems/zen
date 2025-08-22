@@ -11,17 +11,10 @@ L3 Test: Uses real ClickHouse via Testcontainers to validate batch insertion per
 memory usage, and data consistency under load.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import random
@@ -36,15 +29,11 @@ from testcontainers.clickhouse import ClickHouseContainer
 
 import asyncio_clickhouse
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class ClickHouseBatchPerformanceManager:
     """Manages ClickHouse batch insertion performance testing with real containers."""
@@ -456,7 +445,6 @@ class ClickHouseBatchPerformanceManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def batch_manager():
     """Create ClickHouse batch performance manager for testing."""
@@ -464,7 +452,6 @@ async def batch_manager():
     await manager.setup_clickhouse_container()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -540,7 +527,6 @@ class TestClickHouseBatchInsertionPerformanceL3:
         assert final_count == 5000
         assert records_per_second > 100  # Lower threshold for memory-intensive data
         assert insertion_time < 30  # Should complete within reasonable time
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

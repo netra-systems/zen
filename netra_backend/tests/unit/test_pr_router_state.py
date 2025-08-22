@@ -1,26 +1,17 @@
 """Tests for PR router state encoding/decoding and CSRF functions."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import time
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
     PR_STATE_TTL,
-    # Add project root to path
     _build_pr_state_data,
     _decode_state_from_base64,
     _encode_state_to_base64,
@@ -29,7 +20,6 @@ from netra_backend.app.auth_integration.auth import (
     _validate_state_timestamp,
 )
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
-
 
 # Shared fixtures
 @pytest.fixture
@@ -41,7 +31,6 @@ def mock_redis_manager():
     redis.setex = AsyncMock()
     redis.delete = AsyncMock()
     return redis
-
 
 # Tests for state encoding/decoding functions
 class TestStateEncoding:
@@ -72,7 +61,6 @@ class TestStateEncoding:
         
         assert decoded == original_data
 
-
 # Tests for timestamp validation
 class TestTimestampValidation:
     """Test timestamp validation functions."""
@@ -90,7 +78,6 @@ class TestTimestampValidation:
         
         with pytest.raises(NetraSecurityException, match="OAuth state has expired"):
             _validate_state_timestamp(state_data, PR_STATE_TTL)
-
 
 # Tests for CSRF token validation
 class TestCsrfTokenValidation:

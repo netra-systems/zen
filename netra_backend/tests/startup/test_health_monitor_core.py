@@ -4,17 +4,10 @@ Tests core health monitoring models and initialization
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 from unittest.mock import Mock
@@ -30,12 +23,10 @@ from dev_launcher.staged_health_monitor import (
     StagedHealthMonitor,
 )
 
-
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
     """Create staged health monitor instance."""
     return StagedHealthMonitor()
-
 
 @pytest.fixture
 def mock_service_config() -> ServiceConfig:
@@ -48,7 +39,6 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-
 class TestHealthStage:
     """Test health stage enumeration."""
     
@@ -58,7 +48,6 @@ class TestHealthStage:
         assert HealthStage.STARTUP == "startup"
         assert HealthStage.WARMING == "warming"
         assert HealthStage.OPERATIONAL == "operational"
-
 
 class TestServiceConfig:
     """Test service configuration model."""
@@ -75,7 +64,6 @@ class TestServiceConfig:
         assert mock_service_config.name == "test_service"
         assert mock_service_config.process_check is not None
         assert mock_service_config.basic_health_check is not None
-
 
 class TestHealthCheckResult:
     """Test health check result model."""
@@ -103,7 +91,6 @@ class TestHealthCheckResult:
         assert result.success is False
         assert result.error_message == "Service unavailable"
 
-
 class TestStageConfig:
     """Test stage configuration dataclass."""
     
@@ -120,7 +107,6 @@ class TestStageConfig:
         assert config.max_failures == 5
         assert config.check_function_name == "basic_health_check"
 
-
 class TestServiceState:
     """Test service state dataclass."""
     
@@ -134,7 +120,6 @@ class TestServiceState:
         assert state.last_check is None
         assert len(state.check_history) == 0
         assert state.grace_multiplier == 1.0
-
 
 class TestStagedHealthMonitorInit:
     """Test staged health monitor initialization."""

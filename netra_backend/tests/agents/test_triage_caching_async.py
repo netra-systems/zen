@@ -3,17 +3,10 @@ Tests for TriageSubAgent caching mechanisms and async operations
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -24,16 +17,13 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.tests.triage_test_helpers import (
     AssertionHelpers,
     AsyncTestHelpers,
     PerformanceHelpers,
-    # Add project root to path
     TriageMockHelpers,
 )
-
 
 @pytest.fixture
 def triage_agent():
@@ -43,7 +33,6 @@ def triage_agent():
     mock_redis = TriageMockHelpers.create_mock_redis()
     return TriageSubAgent(mock_llm, mock_tool, mock_redis)
 
-
 @pytest.fixture
 def complex_state():
     """Create complex state for testing"""
@@ -52,7 +41,6 @@ def complex_state():
         user_id="test_user_complex",
         session_id="session_complex_123"
     )
-
 
 class TestCachingMechanisms:
     """Test comprehensive caching mechanisms"""
@@ -244,7 +232,6 @@ class TestErrorHandlingAndRecovery:
         assert state.triage_result.category == "General Inquiry"
         assert state.triage_result.metadata.cache_hit == False
 
-
 class TestAsyncOperations:
     """Test async operation handling"""
     async def test_concurrent_executions(self):
@@ -332,7 +319,6 @@ class TestAsyncOperations:
             if "status" in message["payload"] or "state" in message["payload"]:
                 return True
         return False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

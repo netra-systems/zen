@@ -1,16 +1,9 @@
 """Part 1: Basic type validation tests - TypeMismatchSeverity, TypeMismatch, basic TypeScriptParser."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import tempfile
@@ -24,18 +17,15 @@ from netra_backend.app.core.exceptions_config import (
     ValidationError as NetraValidationError,
 )
 
-# Add project root to path
 from netra_backend.app.core.type_validation import (
     SchemaValidator,
     TypeCompatibilityChecker,
     TypeMismatch,
-    # Add project root to path
     TypeMismatchSeverity,
     TypeScriptParser,
     generate_validation_report,
     validate_type_consistency,
 )
-
 
 class TestTypeMismatchSeverity:
     """Test TypeMismatchSeverity enum."""
@@ -46,7 +36,6 @@ class TestTypeMismatchSeverity:
         assert TypeMismatchSeverity.WARNING.value == "warning"
         assert TypeMismatchSeverity.ERROR.value == "error"
         assert TypeMismatchSeverity.CRITICAL.value == "critical"
-
 
 class TestTypeMismatch:
     """Test TypeMismatch dataclass."""
@@ -80,7 +69,6 @@ class TestTypeMismatch:
         )
         
         assert mismatch.suggestion == None
-
 
 class TestTypeScriptParserBasic:
     """Test basic TypeScriptParser functionality."""
@@ -213,7 +201,6 @@ class TestTypeScriptParserBasic:
                 parser.parse_typescript_file('/nonexistent/file.ts')
             
             assert "Failed to parse TypeScript file" in str(exc_info.value)
-
 
 class TestTypeCompatibilityCheckerBasic:
     """Test basic TypeCompatibilityChecker functionality."""

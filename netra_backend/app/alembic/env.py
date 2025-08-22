@@ -9,6 +9,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+from netra_backend.app.db.database_manager import DatabaseManager
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -36,10 +37,10 @@ target_metadata = Base.metadata
 
 def _configure_offline_context() -> None:
     """Configure context for offline migrations."""
-    url = config.get_main_option("sqlalchemy.url")
-    # Ensure synchronous URL for offline migrations
-    if url:
-        url = _ensure_sync_database_url(url)
+    # Use centralized DatabaseManager for sync URL format
+    # This ensures proper driver selection (psycopg2/pg8000) and SSL parameter handling
+    url = DatabaseManager.get_migration_url_sync_format()
+    
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -53,33 +54,15 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def _ensure_sync_database_url(url: str) -> str:
-    """Ensure database URL uses synchronous driver for migrations."""
-    if not url:
-        return url
-    
-    # Remove async driver if present
-    if "postgresql+asyncpg://" in url:
-        url = url.replace("postgresql+asyncpg://", "postgresql://", 1)
-        # Convert ssl back to sslmode for psycopg2
-        if "ssl=" in url and "/cloudsql/" not in url:
-            url = url.replace("ssl=", "sslmode=")
-    
-    # Ensure we're using psycopg2 (sync) driver
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
-    
-    return url
-
 def _get_configuration() -> dict:
     """Get database configuration from environment."""
-    from netra_backend.app.core.config import get_config
-    app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
-    if app_config.database_url:
-        # Ensure synchronous URL for migrations
-        sync_url = _ensure_sync_database_url(app_config.database_url)
-        configuration['sqlalchemy.url'] = sync_url
+    
+    # Use centralized DatabaseManager for migration-ready sync URL
+    # This handles all driver conversion and SSL parameter normalization
+    migration_url = DatabaseManager.get_migration_url_sync_format()
+    configuration['sqlalchemy.url'] = migration_url
+    
     return configuration
 
 def _create_connectable(configuration: dict):

@@ -11,7 +11,6 @@ from typing import List, Optional
 from netra_backend.tests.data_models import LogEntry
 from netra_backend.tests.generator_base import DataGeneratorBase
 
-
 class LogEntryGenerator(DataGeneratorBase):
     """Generate realistic log entries"""
     

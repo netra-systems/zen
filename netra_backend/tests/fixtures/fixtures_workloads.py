@@ -14,7 +14,6 @@ from netra_backend.app.services.realistic_test_data_service import (
     RealisticTestDataService,
 )
 
-
 class WorkloadFixtures:
     """Generator for workload-related test fixtures"""
     
@@ -211,25 +210,21 @@ class WorkloadFixtures:
             "failed_records": failed_records
         }
 
-
 # Pytest fixtures
 @pytest.fixture
 def workload_fixtures():
     """Provide workload test fixtures"""
     return WorkloadFixtures()
 
-
 @pytest.fixture
 def training_jobs(workload_fixtures):
     """Generate training job fixtures"""
     return workload_fixtures._generate_training_jobs(20)
 
-
 @pytest.fixture
 def inference_endpoints(workload_fixtures):
     """Generate inference endpoint fixtures"""
     return workload_fixtures._generate_inference_endpoints(10)
-
 
 @pytest.fixture
 def batch_jobs(workload_fixtures):

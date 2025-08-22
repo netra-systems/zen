@@ -4,17 +4,10 @@ Critical security component - Admin checks and edge cases
 Split from test_permission_service.py to maintain 450-line limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from unittest.mock import MagicMock, Mock, patch
@@ -24,14 +17,12 @@ from sqlalchemy.orm import Session
 
 from netra_backend.app.db.models_postgres import User
 
-# Add project root to path
 # Import the module under test
 from netra_backend.app.services.permission_service import (
     ROLE_HIERARCHY,
     ROLE_PERMISSIONS,
     PermissionService,
 )
-
 
 class TestAdminChecks:
     """Test admin and developer check functionality"""
@@ -68,7 +59,6 @@ class TestAdminChecks:
         user.is_developer = False
         assert PermissionService.is_developer_or_higher(user) == False
 
-
 class TestPermissionGroups:
     """Test permission group functionality"""
     
@@ -99,7 +89,6 @@ class TestPermissionGroups:
         # Should not have all of these
         result = PermissionService.has_all_permissions(user, ["debug_panel", "user_management"])
         assert result == False
-
 
 class TestSecurityEdgeCases:
     """Test security edge cases and attack vectors"""
@@ -139,7 +128,6 @@ class TestSecurityEdgeCases:
             # Should remain admin since detect_developer_status returns False
             assert user.role == "admin"
             db.commit.assert_not_called()
-
 
 class TestRoleManagement:
     """Test role management and permission operations"""
@@ -246,7 +234,6 @@ class TestRoleManagement:
         assert PermissionService.get_role_level("super_admin") == 4
         assert PermissionService.get_role_level("invalid_role") == 0
 
-
 class TestPermissionLogic:
     """Test complex permission logic scenarios"""
     
@@ -297,5 +284,3 @@ class TestPermissionLogic:
         # Test that power_user has all standard_user permissions
         standard_perms = ROLE_PERMISSIONS["standard_user"]
         assert standard_perms.issubset(power_perms)
-
-

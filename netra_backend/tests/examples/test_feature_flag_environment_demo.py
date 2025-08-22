@@ -4,17 +4,10 @@ This file demonstrates how environment variables can override feature flags
 for different testing scenarios and CI/CD environments.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 
@@ -22,12 +15,10 @@ import pytest
 
 from test_framework.decorators import (
     experimental_test,
-    # Add project root to path
     feature_flag,
     requires_feature,
     tdd_test,
 )
-
 
 def test_environment_override_demo():
     """Demonstrate environment variable override functionality."""
@@ -53,7 +44,6 @@ def test_environment_override_demo():
     # Clean up
     del os.environ["TEST_FEATURE_ENTERPRISE_SSO"]
 
-
 @feature_flag("enterprise_sso")
 def test_enterprise_sso_when_enabled():
     """This test only runs when enterprise_sso is enabled.
@@ -71,7 +61,6 @@ def test_enterprise_sso_when_enabled():
     # Mock assertion for demo purposes
     assert result is not None or True  # Always pass for demo
 
-
 @requires_feature("smart_caching", "usage_tracking")
 def test_performance_optimization_integration():
     """Test requiring multiple features - demonstrates dependency checking."""
@@ -81,7 +70,6 @@ def test_performance_optimization_integration():
     
     # Will be skipped because smart_caching is in_development
     assert True  # Demo test
-
 
 def test_dynamic_feature_control():
     """Demonstrate dynamic feature control for different environments."""
@@ -110,7 +98,6 @@ def test_dynamic_feature_control():
         assert manager.should_skip("websocket_streaming") is False
         assert manager.should_skip("auth_integration") is False
 
-
 # Demonstrate experimental feature control
 @experimental_test("Testing ML-based caching algorithms")
 def test_experimental_ml_caching():
@@ -118,7 +105,6 @@ def test_experimental_ml_caching():
     # This would test cutting-edge ML algorithms
     # Only runs when explicitly enabled
     assert True
-
 
 if __name__ == "__main__":
     print("Feature Flag Environment Override Demonstration")

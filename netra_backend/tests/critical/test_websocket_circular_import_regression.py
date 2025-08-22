@@ -16,17 +16,10 @@ REGRESSION HISTORY:
 - Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import ast
 import importlib
@@ -35,7 +28,6 @@ import sys
 from typing import List, Set
 
 import pytest
-
 
 class TestCircularImportRegression:
     """Prevent the specific circular import regression."""
@@ -199,7 +191,6 @@ class TestCircularImportRegression:
         assert mock_supervisor.run.called, \
             "Message should trigger supervisor execution after circular fix"
 
-
 class TestConnectionModuleCircularImportPrevention:
     """Prevent regression of connection module circular import fixes."""
     
@@ -309,7 +300,6 @@ class TestConnectionModuleCircularImportPrevention:
         # Verify __all__ matches
         assert set(connection.__all__) == set(required_exports), \
             "__all__ exports don't match required exports"
-
 
 class TestIndirectCircularImportPrevention:
     """Test for indirect circular imports that manifest at runtime.

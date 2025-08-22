@@ -4,27 +4,18 @@ Tests system-wide optimization workflows with multiple constraints.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import Dict, List
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
-# Add project root to path
 from netra_backend.tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
     create_holistic_optimization_state,
     create_infrastructure_app_state,
@@ -33,13 +24,11 @@ from netra_backend.tests.multi_constraint_test_helpers import (
     validate_completed_or_fallback_states,
 )
 
-
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestSystemWideOptimizationWorkflows:
     """Test system-wide optimization workflows with multiple constraints."""
@@ -90,7 +79,6 @@ class TestSystemWideOptimizationWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_scalability_performance_results(results, state)
 
-
 def validate_holistic_optimization_results(results: List[Dict]) -> None:
     """Validate holistic optimization results."""
     validate_basic_workflow_execution(results)
@@ -98,13 +86,11 @@ def validate_holistic_optimization_results(results: List[Dict]) -> None:
     assert data_result['agent_state'] == SubAgentLifecycle.COMPLETED
     assert data_result['state_updated']
 
-
 def validate_infrastructure_app_results(results: List[Dict]) -> None:
     """Validate infrastructure and application optimization results."""
     validate_basic_workflow_execution(results)
     optimization_result = results[2]
     assert optimization_result['agent_state'] == SubAgentLifecycle.COMPLETED
-
 
 def validate_cross_layer_results(results: List[Dict], state) -> None:
     """Validate cross-layer optimization results."""
@@ -112,7 +98,6 @@ def validate_cross_layer_results(results: List[Dict], state) -> None:
     layers = state.metadata.get('layers', [])
     assert len(layers) == 4, "Should have 4 system layers"
     validate_completed_or_fallback_states(results)
-
 
 def validate_resource_constraint_results(results: List[Dict], state) -> None:
     """Validate resource-constrained optimization results."""
@@ -122,7 +107,6 @@ def validate_resource_constraint_results(results: List[Dict], state) -> None:
     assert 'memory' in resource_limits
     assert 'storage' in resource_limits
     validate_completed_or_fallback_states(results)
-
 
 def validate_scalability_performance_results(results: List[Dict], state) -> None:
     """Validate scalability and performance optimization results."""

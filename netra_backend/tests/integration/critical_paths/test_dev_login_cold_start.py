@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Development velocity directly impacts feature delivery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,9 +27,6 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
-# Add project root to path
-
-
 # Set test environment before imports
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
@@ -46,7 +36,6 @@ from auth_dependencies import get_db_session, get_security_service
 from clients.auth_client import auth_client
 from clients.auth_client_config import Environment, OAuthConfig
 from netra_backend.app.main import app
-
 
 class TestDevLoginColdStart:
     """Test dev login functionality during cold start scenarios."""

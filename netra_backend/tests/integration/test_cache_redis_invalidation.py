@@ -11,17 +11,10 @@ Business Value Justification (BVJ):
 4. Strategic/Revenue Impact: Critical for enterprise customers requiring real-time consistency
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import random
@@ -32,10 +25,8 @@ from typing import Dict, List, Set
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
-from integration.cache_invalidation_fixtures import (
+from netra_backend.tests.integration.cache_invalidation_fixtures import (
     CACHE_TEST_CONFIG,
-    # Add project root to path
     CacheInvalidationMetrics,
     MultiLayerCacheManager,
     generate_test_data,
@@ -43,7 +34,6 @@ from integration.cache_invalidation_fixtures import (
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.integration
 @pytest.mark.cache

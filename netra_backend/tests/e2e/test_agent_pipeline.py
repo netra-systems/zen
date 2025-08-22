@@ -23,17 +23,10 @@ COVERAGE:
 - Error recovery and fallback responses
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,16 +38,12 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService
-
-# Add project root to path
-
 
 class MockLLMResponse:
     """Mock LLM response for testing."""
@@ -63,7 +52,6 @@ class MockLLMResponse:
         self.content = content
         self.tool_calls = tool_calls or []
         self.usage = {"tokens": 100}
-
 
 class TestAgentMessageProcessing:
     """Agent message reception and routing tests."""
@@ -146,7 +134,6 @@ class TestAgentMessageProcessing:
             # Verify all messages processed
             assert len(results) == 5
             assert all(result is not None for result in results)
-
 
 class TestSupervisorAgentOrchestration:
     """Supervisor agent orchestration and delegation tests."""
@@ -251,7 +238,6 @@ class TestSupervisorAgentOrchestration:
                 mock_data.assert_called_once()
                 mock_reporting.assert_called_once()
 
-
 class TestSubAgentExecution:
     """Sub-agent execution and specialization tests."""
     
@@ -341,7 +327,6 @@ class TestSubAgentExecution:
             # Verify tool was executed
             mock_execute.assert_called_once()
             assert result is not None
-
 
 class TestAgentResponseGeneration:
     """Agent response generation and quality tests."""
@@ -453,7 +438,6 @@ class TestAgentResponseGeneration:
             assert len(response) > 50  # Minimum length
             assert response.strip() == response  # No leading/trailing whitespace
 
-
 class TestAgentErrorHandling:
     """Agent error handling and fallback tests."""
     
@@ -538,7 +522,6 @@ class TestAgentErrorHandling:
                 result = {"response": "Request is taking longer than expected. Please try again."}
             
             assert result is not None
-
 
 class TestAgentPerformance:
     """Agent performance and efficiency tests."""

@@ -3,27 +3,16 @@ Tests for ClickHouse query validation functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
-
-# Add project root to path
-
 
 class TestClickHouseQueryValidator:
     """Test ClickHouse query validation functionality"""
@@ -69,7 +58,6 @@ class TestClickHouseQueryValidator:
         assert is_valid == False
         assert "incorrect array syntax" in error_message.lower()
 
-
 def _get_valid_queries() -> list:
     """Get list of valid queries"""
     return [
@@ -78,7 +66,6 @@ def _get_valid_queries() -> list:
         "SELECT count(*) FROM table GROUP BY category",
         _get_complex_array_query()
     ]
-
 
 def _get_complex_array_query() -> str:
     """Get complex array query"""
@@ -89,7 +76,6 @@ def _get_complex_array_query() -> str:
         FROM analytics_data
     """
 
-
 def _get_invalid_queries() -> list:
     """Get list of invalid queries"""
     return [
@@ -98,14 +84,12 @@ def _get_invalid_queries() -> list:
         "SELECT logs.message[0], logs.level[0] FROM table"
     ]
 
-
 def _assert_invalid_query(query: str) -> None:
     """Assert query is invalid"""
     is_valid, error_message = validate_clickhouse_query(query)
     assert is_valid == False
     assert "incorrect array syntax" in error_message.lower()
     assert "arrayElement()" in error_message
-
 
 def _get_warning_queries() -> list:
     """Get queries that should generate warnings"""
@@ -115,7 +99,6 @@ def _get_warning_queries() -> list:
         _get_nested_field_query()
     ]
 
-
 def _get_nested_field_query() -> str:
     """Get nested field access query"""
     return """
@@ -124,14 +107,12 @@ def _get_nested_field_query() -> str:
         WHERE status = 'active'
     """
 
-
 def _assert_warning_query(query: str, mock_logger) -> None:
     """Assert query generates warning"""
     is_valid, error_message = validate_clickhouse_query(query)
     # Should be technically valid but generate warning
     assert is_valid == True
     mock_logger.warning.assert_called()
-
 
 def _get_complex_valid_query() -> str:
     """Get complex valid query"""
@@ -149,7 +130,6 @@ def _get_complex_valid_query() -> str:
         WHERE first_latency < 1000
         ORDER BY total_cpu DESC
     """
-
 
 def _make_complex_invalid(complex_valid: str) -> str:
     """Make complex query invalid by adding incorrect array syntax"""

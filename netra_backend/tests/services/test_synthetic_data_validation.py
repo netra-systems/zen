@@ -3,27 +3,16 @@ Validation Tests for Synthetic Data Generation Spec v3
 Tests to validate that the implementation matches the specification
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List
 
 import pytest
-
-# Add project root to path
-
-
 
 class TestSpecificationValidation:
     """Validate the synthetic data generation specification"""
@@ -170,7 +159,6 @@ class TestSpecificationValidation:
         
         steps = migration.findall('.//migration_steps/step')
         assert len(steps) >= 5
-
 
 class TestImplementationConsistency:
     """Test consistency between spec and implementation"""
@@ -321,7 +309,6 @@ class TestImplementationConsistency:
                 
         except ET.ParseError as e:
             pytest.fail(f"XML parsing error: {e}")
-
 
 class TestKeyFeatureImplementation:
     """Test that key features from spec v3 are implementable"""
@@ -482,7 +469,6 @@ class TestKeyFeatureImplementation:
         # Calculate updates per minute
         updates_per_minute = 60 / update_frequency_seconds
         assert updates_per_minute == 60
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

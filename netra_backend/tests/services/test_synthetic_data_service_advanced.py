@@ -3,17 +3,10 @@ Advanced Features Test Suite for Synthetic Data Service
 Testing advanced and specialized features
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -30,17 +23,12 @@ from netra_backend.app.services.synthetic_data.metrics import (
     detect_anomalies,
 )
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
-
-# Add project root to path
-
 
 @pytest.fixture
 def advanced_service():
     return SyntheticDataService()
-
 
 # ==================== Test Suite: Advanced Features ====================
 
@@ -283,7 +271,6 @@ class TestAdvancedFeatures:
         
         assert v1_patterns != v2_patterns
         assert len(v2_patterns - v1_patterns) > 0  # V2 has new patterns
-
 
 # ==================== Test Runner ====================
 

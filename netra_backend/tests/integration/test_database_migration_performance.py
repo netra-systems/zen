@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 Performance and concurrency testing for database migrations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import tempfile
@@ -30,14 +23,10 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-# Add project root to path
-from tests.database_migration_validators import (
+from netra_backend.tests.database_migration_validators import (
     ContainerizedDatabaseManager,
     MigrationValidator,
 )
-
-# Add project root to path
-
 
 class TestDatabaseMigrationPerformance:
     """Performance and concurrency migration tests."""

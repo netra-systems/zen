@@ -13,17 +13,10 @@ Critical Path: First request -> Rate limit check -> Redis tracking -> Burst hand
 Coverage: First request always allowed, rate limit enforcement, burst capacity, per-user tracking, headers, tier limits, recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,16 +30,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import redis.asyncio as redis
 
-# Add project root to path
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from tests.config import TestTier
-
-# Add project root to path
+from netra_backend.tests.integration.config import TestTier
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class RateLimitConfig:
@@ -55,7 +44,6 @@ class RateLimitConfig:
     burst_allowance: int
     priority_level: int
     tier_multipliers: Dict[str, float]
-
 
 @dataclass
 class RequestResult:
@@ -68,7 +56,6 @@ class RequestResult:
     response_time: float
     headers: Dict[str, str]
     is_first_request: bool = False
-
 
 class RedisRateLimiter:
     """Redis-backed token bucket rate limiter for L3 testing."""
@@ -203,7 +190,6 @@ class RedisRateLimiter:
                 stats[endpoint] = json.loads(metadata)
                 
         return stats
-
 
 class ApiRateLimitingFirstRequestsManager:
     """Manages L3 API rate limiting tests with first request focus."""
@@ -442,7 +428,6 @@ class ApiRateLimitingFirstRequestsManager:
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
 
-
 @pytest.fixture
 async def rate_limit_manager():
     """Create rate limiting manager for L3 testing."""
@@ -450,7 +435,6 @@ async def rate_limit_manager():
     await manager.initialize_redis()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -472,7 +456,6 @@ async def test_first_request_always_allowed(rate_limit_manager):
     # Verify headers
     assert result.headers["X-RateLimit-Limit"] == "5"
     assert result.headers["X-RateLimit-Remaining"] == "4"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -498,7 +481,6 @@ async def test_rate_limit_enforcement_after_first_request(rate_limit_manager):
     assert blocked_result.status_code == 429
     assert "Retry-After" in blocked_result.headers
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -522,7 +504,6 @@ async def test_burst_allowance_behavior(rate_limit_manager):
     # Verify first request was marked correctly
     first_request_found = any(r.is_first_request for r in burst_result["results"])
     assert first_request_found is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -564,7 +545,6 @@ async def test_tier_based_rate_limit_differences(rate_limit_manager):
     free_rate = tier_results["free"]["allowed"] / 25 * 100
     assert enterprise_rate > free_rate
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -586,7 +566,6 @@ async def test_per_user_rate_tracking(rate_limit_manager):
         
         # Each user should have similar allowed counts (independent limits)
         assert stats["allowed"] >= 8  # Should allow initial burst
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -619,7 +598,6 @@ async def test_rate_limit_headers_accuracy(rate_limit_manager):
     assert reset_time > now
     assert reset_time <= now + 60
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -643,7 +621,6 @@ async def test_rate_limit_recovery_after_wait(rate_limit_manager):
     recovery_result = await rate_limit_manager.make_rate_limited_request(user_id, endpoint, "free")
     assert recovery_result.allowed is True
     assert recovery_result.status_code == 200
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
@@ -681,7 +658,6 @@ async def test_rate_limiting_performance_requirements(rate_limit_manager):
     assert concurrent_duration < 5.0  # Complete within 5 seconds
     assert concurrent_result["total_requests"] == 50
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -711,7 +687,6 @@ async def test_redis_rate_limit_data_consistency(rate_limit_manager):
     # Stats should be cleared
     cleared_stats = await rate_limit_manager.rate_limiter.get_user_stats(user_id)
     assert len(cleared_stats) == 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

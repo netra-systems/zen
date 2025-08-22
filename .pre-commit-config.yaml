@@ -82,3 +82,13 @@ repos:
         files: '^netra_backend/.*\.py$'
         stages: [commit]
         description: 'Validates that all netra_backend imports follow canonical patterns'
+        
+      # PREVENT RELATIVE IMPORTS: Enforce absolute imports only
+      - id: prevent-relative-imports
+        name: Prevent Relative Imports
+        entry: python scripts/check_relative_imports.py
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Prevents relative imports (. or ..) - all imports must be absolute'

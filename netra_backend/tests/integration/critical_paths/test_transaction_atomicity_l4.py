@@ -17,17 +17,10 @@ Tests include two-phase commit protocol, saga pattern implementation, compensati
 network partition simulation, and service failure recovery scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -57,15 +50,12 @@ from netra_backend.app.services.transaction_manager.types import (
     TransactionState,
 )
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 class TransactionPhase(Enum):
     """Transaction execution phases for two-phase commit."""
@@ -73,7 +63,6 @@ class TransactionPhase(Enum):
     COMMIT = "commit"
     ABORT = "abort"
     COMPENSATE = "compensate"
-
 
 class ServiceType(Enum):
     """Types of services in the distributed system."""
@@ -83,7 +72,6 @@ class ServiceType(Enum):
     BACKEND = "backend"
     AUTH = "auth"
     FRONTEND = "frontend"
-
 
 @dataclass
 class ServiceTransaction:
@@ -106,7 +94,6 @@ class ServiceTransaction:
     def needs_compensation(self) -> bool:
         """Check if transaction needs compensation."""
         return self.committed and not self.compensated
-
 
 @dataclass
 class DistributedTransaction:
@@ -137,7 +124,6 @@ class DistributedTransaction:
     def needs_rollback(self) -> bool:
         """Check if transaction needs rollback."""
         return any(st.error for st in self.services.values()) or self.is_expired
-
 
 class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
     """L4 critical path test for distributed transaction atomicity."""
@@ -813,7 +799,6 @@ class L4TransactionAtomicityTest(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.error(f"Test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_transaction_atomicity_test():
     """Fixture for L4 transaction atomicity test."""
@@ -823,7 +808,6 @@ async def l4_transaction_atomicity_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.L4
 @pytest.mark.staging
@@ -878,7 +862,6 @@ class TestTransactionAtomicityL4:
         print(f"   • Transaction Recovery Rate: {recovery_rate:.2%}")
         print(f"   • Average Response Time: {test_metrics.average_response_time:.3f}s")
         print(f"   • Business Value: $45K MRR protection validated")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

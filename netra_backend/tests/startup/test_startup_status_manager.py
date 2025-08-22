@@ -4,17 +4,10 @@ Tests all critical paths, edge cases, and error conditions with strong typing.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -38,19 +31,15 @@ from netra_backend.app.schemas.startup_types import (
     MigrationStatus,
     ServiceConfig,
     ServiceType,
-    # Add project root to path
     StartupStatus,
 )
 
-# Add project root to path
 from netra_backend.app.startup.status_manager import StartupStatusManager
-
 
 @pytest.fixture
 def temp_status_path(tmp_path: Path) -> Path:
     """Create temporary status file path."""
     return tmp_path / "test_status.json"
-
 
 @pytest.fixture
 def mock_status_data() -> Dict:
@@ -64,12 +53,10 @@ def mock_status_data() -> Dict:
         "crash_history": [], "health_check_history": {"consecutive_failures": {}, "last_healthy": {}}
     }
 
-
 @pytest.fixture
 def status_manager(temp_status_path: Path) -> StartupStatusManager:
     """Create status manager with temporary path."""
     return StartupStatusManager(str(temp_status_path))
-
 
 class TestStartupStatusManagerInit:
     """Test initialization and basic setup."""
@@ -86,7 +73,6 @@ class TestStartupStatusManagerInit:
         manager = StartupStatusManager(str(temp_status_path))
         assert manager.status_path == temp_status_path
         assert str(manager._lock_file_path).endswith(".lock")
-
 
 class TestLoadStatus:
     """Test status loading functionality."""
@@ -113,7 +99,6 @@ class TestLoadStatus:
             await status_manager.load_status()
             mock_create.assert_called_once()
 
-
 class TestSaveStatus:
     """Test status saving functionality."""
     async def test_save_status_success(self, status_manager: StartupStatusManager) -> None:
@@ -126,7 +111,6 @@ class TestSaveStatus:
         """Test saving without loaded status raises error."""
         with pytest.raises(NetraException, match="No status to save"):
             await status_manager.save_status()
-
 
 class TestValidateStatus:
     """Test status validation functionality."""
@@ -141,7 +125,6 @@ class TestValidateStatus:
         with patch.object(status_manager, 'load_status', side_effect=Exception("error")):
             result = await status_manager.validate_status()
             assert result is False
-
 
 class TestStartupEvents:
     """Test startup event recording."""
@@ -160,7 +143,6 @@ class TestStartupEvents:
                                                    ["error1"], ["warning1"])
             assert len(status_manager.status.last_startup.errors) == 1
             assert len(status_manager.status.last_startup.warnings) == 1
-
 
 class TestCrashRecording:
     """Test crash recording functionality."""
@@ -181,7 +163,6 @@ class TestCrashRecording:
             assert crash.recovery_attempted is True
             assert crash.recovery_success is True
 
-
 class TestMigrationStatus:
     """Test migration status updates."""
     async def test_update_migration_status(self, status_manager: StartupStatusManager) -> None:
@@ -198,7 +179,6 @@ class TestMigrationStatus:
         status_manager.status.migration_status.pending_migrations = ["mig1"]
         result = await status_manager.is_migration_pending()
         assert result is True
-
 
 class TestHealthChecks:
     """Test health check functionality."""
@@ -218,7 +198,6 @@ class TestHealthChecks:
             failures = status_manager.status.health_check_history.consecutive_failures
             assert failures["postgres"] == 0
             mock_save.assert_called_once()
-
 
 class TestUtilityMethods:
     """Test utility and helper methods."""
@@ -246,7 +225,6 @@ class TestUtilityMethods:
         recent = await status_manager.get_recent_crashes(3)
         assert len(recent) == 3
 
-
 class TestFileLocking:
     """Test file locking mechanisms."""
     async def test_file_lock_context_manager(self, status_manager: StartupStatusManager) -> None:
@@ -264,7 +242,6 @@ class TestFileLocking:
                 with pytest.raises(NetraException, match="Could not acquire file lock"):
                     async with status_manager._file_lock():
                         pass
-
 
 class TestAtomicWrite:
     """Test atomic file write operations."""
@@ -298,7 +275,6 @@ class TestAtomicWrite:
                     with pytest.raises(FileError):
                         await status_manager._atomic_write(test_data)
                     mock_cleanup.assert_called_once()
-
 
 class TestEnsureStatusLoaded:
     """Test status loading helper."""

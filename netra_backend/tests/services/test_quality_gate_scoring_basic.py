@@ -4,17 +4,10 @@ This module tests basic scoring implementations including complete metrics calcu
 specificity, actionability, quantification, relevance, and completeness calculations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import re
@@ -25,16 +18,13 @@ import pytest
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
     QualityLevel,
     QualityMetrics,
     ValidationResult,
 )
-
 
 class TestCompleteMetricsCalculation:
     """Test the complete metrics calculation workflow"""
@@ -104,7 +94,6 @@ class TestCompleteMetricsCalculation:
         assert metrics.quality_level in [QualityLevel.GOOD, QualityLevel.EXCELLENT]
         assert len(metrics.suggestions) >= 0
 
-
 class TestSpecificityCalculationEdgeCases:
     """Test edge cases in specificity calculation"""
     
@@ -136,7 +125,6 @@ class TestSpecificityCalculationEdgeCases:
         )
         
         assert score < 0.2  # Should be penalized for vagueness
-
 
 class TestActionabilityEdgeCases:
     """Test edge cases in actionability calculation"""
@@ -176,7 +164,6 @@ class TestActionabilityEdgeCases:
         
         assert score > 0.6  # Should recognize code
 
-
 class TestQuantificationPatterns:
     """Test quantification pattern matching"""
     
@@ -210,7 +197,6 @@ class TestQuantificationPatterns:
         score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.4  # Should get bonus for named metrics
 
-
 class TestRelevanceCalculation:
     """Test relevance calculation with various contexts"""
     
@@ -233,7 +219,6 @@ class TestRelevanceCalculation:
         
         score = await quality_service.metrics_calculator.specialized_calculator.calculate_relevance(content, context)
         assert score >= 0  # Should handle empty request gracefully
-
 
 class TestCompletenessCalculation:
     """Test completeness calculation for all content types"""
@@ -276,7 +261,6 @@ class TestCompletenessCalculation:
                 ContentType.GENERAL
             )
             assert score > 0  # Should calculate based on general criteria
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -3,17 +3,10 @@ Common test utilities for API route tests.
 Shared fixtures and mocks for route testing.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from contextlib import asynccontextmanager
 from typing import Any, Dict
@@ -24,18 +17,13 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
 from netra_backend.app.services.security_service import KeyManager, SecurityService
-
-# Add project root to path
-
 
 @pytest.fixture
 def base_client():
     """Base FastAPI test client with minimal setup."""
     from netra_backend.app.main import app
     return TestClient(app)
-
 
 @pytest.fixture  
 def secured_client():
@@ -59,16 +47,13 @@ def secured_client():
     
     return TestClient(app)
 
-
 def create_mock_user(user_id: str, role: str = "user") -> Dict[str, Any]:
     """Create a mock user for testing."""
     return {"id": user_id, "role": role}
 
-
 def create_admin_user(user_id: str = "admin1") -> Dict[str, Any]:
     """Create a mock admin user for testing."""
     return create_mock_user(user_id, "admin")
-
 
 def setup_agent_mocks(app):
     """Set up agent service mocks for testing."""
@@ -92,18 +77,15 @@ def setup_agent_mocks(app):
     
     return app
 
-
 def clear_dependency_overrides(app):
     """Clear all dependency overrides from netra_backend.app."""
     app.dependency_overrides.clear()
-
 
 def assert_valid_response(response, expected_codes: list = None):
     """Assert response has valid status code."""
     if expected_codes is None:
         expected_codes = [200, 201]
     assert response.status_code in expected_codes
-
 
 def assert_error_response(response, expected_codes: list = None):
     """Assert response has error status code."""

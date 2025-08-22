@@ -1,16 +1,9 @@
 """Integration and edge case tests for Quality Monitoring Service"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -24,11 +17,9 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
 )
 
-# Add project root to path
 from netra_backend.app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType,
-    # Add project root to path
     QualityMonitoringService,
 )
 from netra_backend.tests.quality_monitoring_fixtures import (
@@ -42,7 +33,6 @@ from netra_backend.tests.quality_monitoring_helpers import (
     create_buffer_overflow_events,
     create_test_alert,
 )
-
 
 class TestIntegrationWithOtherServices:
     """Integration tests with other services"""
@@ -93,7 +83,6 @@ class TestIntegrationWithOtherServices:
         
         assert service.monitoring_active is False
 
-
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling"""
     async def test_empty_metrics_buffer(self, service_with_mocks):
@@ -122,7 +111,6 @@ class TestEdgeCasesAndErrorHandling:
         event = buffer["minimal_agent"][0]
         assert event["quality_score"] == 0.5
 
-
 class TestBufferAndHistoryLimits:
     """Test buffer and history size enforcement"""
     
@@ -136,7 +124,6 @@ class TestBufferAndHistoryLimits:
         """Test that alert history respects max length"""
         create_alert_history_overflow(service_with_mocks, 550)
         assert_alert_history_max_length(service_with_mocks, 500)
-
 
 class TestComplexScenarios:
     """Test complex real-world scenarios"""
@@ -220,7 +207,6 @@ class TestComplexScenarios:
             assert "resilient_agent" in buffer
         except Exception as e:
             pytest.fail(f"Service should be resilient to component failures: {e}")
-
 
 class TestServiceShutdownAndCleanup:
     """Test proper service shutdown and cleanup"""

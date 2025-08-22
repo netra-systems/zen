@@ -2,17 +2,10 @@
 Execution and async tests for SupplyResearcherAgent
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -21,15 +14,12 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
-    # Add project root to path
     SupplyResearcherAgent,
 )
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
 
 class TestSupplyResearcherAgentExecution:
     """Test suite for SupplyResearcherAgent execution functionality"""

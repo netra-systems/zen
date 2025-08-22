@@ -22,17 +22,10 @@ Mock-Real Spectrum: L4 (Production-like staging environment)
 - Real monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -54,7 +47,6 @@ from netra_backend.app.clients.auth_client import auth_client
 # Test infrastructure
 from netra_backend.app.core.config import get_settings
 
-# Add project root to path
 # Import auth types
 from netra_backend.app.schemas.auth_types import (
     AuthError,
@@ -65,7 +57,6 @@ from netra_backend.app.schemas.auth_types import (
     Token,
     TokenData,
 )
-
 
 @dataclass
 class StartupMetrics:
@@ -81,7 +72,6 @@ class StartupMetrics:
     memory_usage_mb: float = 0.0
     cpu_usage_percent: float = 0.0
 
-
 @dataclass
 class ServiceStatus:
     """Status of a single service during startup."""
@@ -93,7 +83,6 @@ class ServiceStatus:
     last_health_check: Optional[datetime] = None
     error_message: Optional[str] = None
     retry_count: int = 0
-
 
 class SystemStartupL4TestSuite:
     """L4 test suite for system startup sequences."""
@@ -236,7 +225,6 @@ class SystemStartupL4TestSuite:
         process = psutil.Process()
         self.startup_metrics.memory_usage_mb = process.memory_info().rss / 1024 / 1024
         self.startup_metrics.cpu_usage_percent = process.cpu_percent()
-
 
 @pytest.mark.integration
 @pytest.mark.l4

@@ -11,17 +11,10 @@ Tests Google Secret Manager integration, fallback mechanisms, and secret rotatio
 without disruption in staging environment.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from pathlib import Path
@@ -34,7 +27,6 @@ from dev_launcher.google_secret_manager import GoogleSecretManager
 from dev_launcher.secret_config import SecretConfig
 from dev_launcher.secret_loader import SecretLoader
 from test_framework.mock_utils import mock_justified
-
 
 class TestStagingSecretsManagerIntegration:
     """Test Google Secret Manager integration in staging environment."""

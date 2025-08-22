@@ -5,6 +5,11 @@ Business Value Justification (BVJ):
 - Business Goal: Production reliability and security
 - Value Impact: Secure, managed database connections for Cloud Run
 - Strategic Impact: Zero-downtime deployments and automatic failover
+
+Integration:
+- Uses DatabaseManager for environment detection and URL handling consistency
+- Preserves Cloud SQL specific connector logic and Unix socket connections
+- Provides centralized status monitoring with database manager integration
 """
 
 import os
@@ -20,6 +25,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 from sqlalchemy import text
 
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -39,6 +45,10 @@ class CloudSQLManager:
         if self._initialized:
             logger.debug("Cloud SQL already initialized, skipping")
             return
+        
+        # Verify we're in a Cloud SQL environment
+        if not DatabaseManager.is_cloud_sql_environment():
+            raise RuntimeError("Cloud SQL initialization called but not in Cloud SQL environment")
         
         try:
             # Import connector only when needed
@@ -72,6 +82,9 @@ class CloudSQLManager:
                 )
             
             # Create async engine with NullPool for serverless
+            # Use DatabaseManager's async URL format as template, but override with custom connector
+            template_url = DatabaseManager.get_application_url_async()
+            
             self.engine = create_async_engine(
                 "postgresql+asyncpg://",
                 creator=getconn,
@@ -183,3 +196,25 @@ async def initialize_cloud_db():
 async def close_cloud_db():
     """Close the Cloud SQL connection"""
     await cloud_db.close()
+
+
+def should_use_cloud_sql() -> bool:
+    """Check if Cloud SQL should be used based on environment detection.
+    
+    Returns:
+        True if Cloud SQL connector should be used
+    """
+    return DatabaseManager.is_cloud_sql_environment()
+
+
+def get_cloud_sql_status() -> dict:
+    """Get comprehensive Cloud SQL status for monitoring.
+    
+    Returns:
+        Status information including environment detection and connection state
+    """
+    return {
+        "cloud_sql_environment": DatabaseManager.is_cloud_sql_environment(),
+        "connection_status": cloud_db.get_connection_status(),
+        "database_manager_integration": True,
+    }

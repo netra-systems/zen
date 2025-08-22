@@ -104,6 +104,9 @@ class DatabaseConfigManager:
         # CONFIG BOOTSTRAP: Direct env access for database URL configuration
         url = os.environ.get("DATABASE_URL")
         if url:
+            # Normalize the URL to add driver if missing
+            url = self._normalize_postgres_url(url)
+            
             # Mask password but show full URL structure for debugging
             parsed = urlparse(url)
             # Handle Unix socket URLs (Cloud SQL proxy)
@@ -117,6 +120,23 @@ class DatabaseConfigManager:
             self._logger.info(f"Using default database URL for {self._environment}")
         return url
     
+    def _normalize_postgres_url(self, url: str) -> str:
+        """Normalize PostgreSQL URL to add driver if missing.
+        
+        Converts simple postgresql:// URLs to postgresql+asyncpg:// for async support.
+        """
+        parsed = urlparse(url)
+        
+        # If URL uses basic postgresql:// scheme, add asyncpg driver
+        if parsed.scheme == "postgresql" or parsed.scheme == "postgres":
+            # Replace scheme with postgresql+asyncpg for async operations
+            normalized = url.replace(f"{parsed.scheme}://", "postgresql+asyncpg://")
+            self._logger.debug(f"Normalized URL scheme from {parsed.scheme} to postgresql+asyncpg")
+            return normalized
+        
+        # URL already has a driver specified or is not PostgreSQL
+        return url
+    
     def _get_default_postgres_url(self) -> str:
         """Get default PostgreSQL URL for environment."""
         template_key = f"postgres_{self._environment}"
@@ -128,8 +148,9 @@ class DatabaseConfigManager:
         parsed = urlparse(url)
         if parsed.scheme.startswith("sqlite"):
             return  # Skip PostgreSQL-specific validation for SQLite
-        # Accept both postgresql:// and postgresql+asyncpg:// schemes
-        if parsed.scheme not in ["postgresql", "postgresql+asyncpg", "postgres"]:
+        # Accept postgresql://, postgres://, and postgresql+driver:// schemes
+        valid_schemes = ["postgresql", "postgres", "postgresql+asyncpg", "postgresql+psycopg2", "postgresql+psycopg"]
+        if not any(parsed.scheme.startswith(scheme) for scheme in ["postgresql", "postgres"]):
             return  # Skip validation for non-PostgreSQL URLs
         
         # Skip validation for Cloud SQL Unix socket connections (like auth service)
@@ -289,10 +310,13 @@ class DatabaseConfigManager:
         """Check if database URL format is valid for environment."""
         try:
             parsed = urlparse(url)
-            valid_schemes = ["postgresql", "postgresql+asyncpg"]
+            # Accept various PostgreSQL schemes including simple ones
+            valid_schemes = ["postgresql", "postgres", "postgresql+asyncpg", "postgresql+psycopg2", "postgresql+psycopg"]
             if self._environment == "testing":
                 valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
-            return parsed.scheme in valid_schemes and (bool(parsed.netloc) or parsed.scheme.startswith("sqlite"))
+            # Check if scheme is valid and has either netloc or is SQLite
+            scheme_valid = parsed.scheme in valid_schemes or parsed.scheme.startswith("postgresql")
+            return scheme_valid and (bool(parsed.netloc) or parsed.scheme.startswith("sqlite"))
         except Exception:
             return False
     

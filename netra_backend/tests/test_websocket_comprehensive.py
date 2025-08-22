@@ -21,17 +21,10 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Prevents customer churn from connection/communication failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -44,11 +37,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager
-
-# Add project root to path
-
 
 class TestWebSocketConnectionEstablishment:
     """Test 1: Connection establishment with auth"""
@@ -72,7 +61,6 @@ class TestWebSocketConnectionEstablishment:
         assert "authenticated_user_123" in conn_manager.active_connections
         
         print(f"✓ Connection established with auth for user {conn_info.user_id}")
-
 
 class TestWebSocketAuthValidation:
     """Test 2: Auth validation in handshake"""
@@ -113,7 +101,6 @@ class TestWebSocketAuthValidation:
             print(f"✓ Auth validation correctly failed: {e}")
             assert True
 
-
 class TestWebSocketMessageRouting:
     """Test 3: Message routing to correct handlers"""
     
@@ -149,7 +136,6 @@ class TestWebSocketMessageRouting:
         assert routed_messages[2]["handler"] == "data_handler"
         
         print("✓ Messages routed to correct handlers")
-
 
 class TestWebSocketBroadcasting:
     """Test 4: Broadcasting to multiple clients"""
@@ -188,7 +174,6 @@ class TestWebSocketBroadcasting:
             
         print("✓ Broadcasting to multiple clients successful")
 
-
 class TestWebSocketErrorHandling:
     """Test 5: Error handling and recovery"""
     
@@ -220,7 +205,6 @@ class TestWebSocketErrorHandling:
         websocket.send_json.assert_called_once()
         
         print("✓ Error handling and recovery working")
-
 
 class TestWebSocketReconnection:
     """Test 6: Reconnection logic"""
@@ -254,7 +238,6 @@ class TestWebSocketReconnection:
         
         print("✓ Reconnection logic working")
 
-
 class TestWebSocketRateLimiting:
     """Test 7: Rate limiting enforcement"""
     
@@ -285,7 +268,6 @@ class TestWebSocketRateLimiting:
         assert rate_limited
         
         print("✓ Rate limiting enforcement working")
-
 
 class TestWebSocketMessageOrdering:
     """Test 8: Message ordering guarantees"""
@@ -318,7 +300,6 @@ class TestWebSocketMessageOrdering:
             
         print("✓ Message ordering guarantees working")
 
-
 class TestWebSocketBinaryMessages:
     """Test 9: Binary message handling"""
     
@@ -340,7 +321,6 @@ class TestWebSocketBinaryMessages:
         websocket.send_bytes.assert_called_once_with(binary_data)
         
         print("✓ Binary message handling working")
-
 
 class TestWebSocketConnectionCleanup:
     """Test 10: Connection cleanup on disconnect"""
@@ -370,7 +350,6 @@ class TestWebSocketConnectionCleanup:
             assert conn_info not in conn_manager.active_connections["cleanup_user"]
             
         print("✓ Connection cleanup on disconnect working")
-
 
 class TestWebSocketMultiRoom:
     """Test 11: Multi-room support"""
@@ -419,7 +398,6 @@ class TestWebSocketMultiRoom:
             conn.websocket.send_json.assert_called_with(room_b_message)
             
         print("✓ Multi-room support working")
-
 
 class TestWebSocketPerformance:
     """Test 12: Performance under load"""
@@ -470,7 +448,6 @@ class TestWebSocketPerformance:
         print(f"✓ Performance test passed:")
         print(f"  Connection rate: {connection_rate:.1f} conn/sec")
         print(f"  Message rate: {message_rate:.1f} msg/sec")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

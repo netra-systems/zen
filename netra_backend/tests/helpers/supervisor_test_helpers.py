@@ -20,7 +20,6 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-
 def create_supervisor_mocks():
     """Create standard mocks for supervisor tests."""
     return {
@@ -29,7 +28,6 @@ def create_supervisor_mocks():
         'websocket_manager': AsyncMock(),
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
-
 
 def create_supervisor_agent(mocks: Dict[str, Any]) -> SupervisorAgent:
     """Create supervisor agent with mocks."""
@@ -40,12 +38,10 @@ def create_supervisor_agent(mocks: Dict[str, Any]) -> SupervisorAgent:
         mocks['tool_dispatcher']
     )
 
-
 def create_execution_context(run_id: str, **kwargs) -> AgentExecutionContext:
     """Create execution context with defaults."""
     context_params = _build_execution_context_params(run_id, kwargs)
     return AgentExecutionContext(**context_params)
-
 
 def _build_execution_context_params(run_id: str, kwargs: dict) -> dict:
     """Build execution context parameters with defaults."""
@@ -55,14 +51,12 @@ def _build_execution_context_params(run_id: str, kwargs: dict) -> dict:
         'max_retries': kwargs.get('max_retries', 3), 'started_at': kwargs.get('started_at', datetime.now(timezone.utc))
     }
 
-
 def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:
     """Create agent state with optional results."""
     state = DeepAgentState(user_request=user_request)
     for key, value in kwargs.items():
         setattr(state, key, value)
     return state
-
 
 def setup_triage_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup triage agent mock with return data."""
@@ -71,14 +65,12 @@ def setup_triage_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, 
     mock_execute = _create_triage_execute_func(triage_result)
     triage_agent.execute = mock_execute
 
-
 def setup_optimization_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup optimization agent mock with return data."""
     opt_agent = supervisor.agents.get("optimization")
     optimizations_result = _create_optimizations_result(return_data)
     mock_execute = _create_optimization_execute_func(optimizations_result)
     opt_agent.execute = mock_execute
-
 
 def setup_data_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup data agent mock with return data."""
@@ -87,12 +79,10 @@ def setup_data_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, An
     mock_execute = _create_data_execute_func(data_result)
     data_agent.execute = mock_execute
 
-
 def setup_failing_agent_mock(supervisor: SupervisorAgent, agent_name: str, error_msg: str):
     """Setup agent mock to fail with specific error."""
     agent = supervisor.agents.get(agent_name)
     agent.execute = AsyncMock(side_effect=Exception(error_msg))
-
 
 def setup_retry_agent_mock(supervisor: SupervisorAgent, agent_name: str, failures: List[str], success_data: Dict[str, Any]):
     """Setup agent mock with retry behavior."""
@@ -100,18 +90,15 @@ def setup_retry_agent_mock(supervisor: SupervisorAgent, agent_name: str, failure
     side_effects = _create_retry_side_effects(failures, agent_name, success_data)
     agent.execute = AsyncMock(side_effect=side_effects)
 
-
 def assert_agent_called(supervisor: SupervisorAgent, agent_name: str):
     """Assert that specific agent was called."""
     agent = supervisor.agents.get(agent_name)
     assert agent.execute.called, f"Agent {agent_name} was not called"
 
-
 def assert_agent_not_called(supervisor: SupervisorAgent, agent_name: str):
     """Assert that specific agent was not called."""
     agent = supervisor.agents.get(agent_name)
     assert not agent.execute.called, f"Agent {agent_name} should not have been called"
-
 
 def assert_routing_result(result: AgentExecutionResult, expected_success: bool, **kwargs):
     """Assert routing result properties."""
@@ -119,18 +106,15 @@ def assert_routing_result(result: AgentExecutionResult, expected_success: bool, 
     _assert_optional_error(result, kwargs)
     _assert_optional_state_attr(result, kwargs)
 
-
 def setup_circuit_breaker(supervisor: SupervisorAgent, threshold: int = 3):
     """Setup circuit breaker on supervisor."""
     supervisor.circuit_breaker_enabled = True
     supervisor.circuit_breaker_threshold = threshold
     supervisor.circuit_breaker_failures = {}
 
-
 def create_pipeline_config(agents: List[str], strategies: List[ExecutionStrategy]) -> List[tuple]:
     """Create pipeline configuration."""
     return list(zip(agents, strategies))
-
 
 async def execute_pipeline(supervisor: SupervisorAgent, state: DeepAgentState, context: AgentExecutionContext, pipeline: List[tuple]):
     """Execute agent pipeline with conditional logic."""
@@ -138,7 +122,6 @@ async def execute_pipeline(supervisor: SupervisorAgent, state: DeepAgentState, c
         should_execute = _should_execute_agent(strategy, state)
         if should_execute:
             await supervisor._route_to_agent(state, context, agent_name)
-
 
 # Quality testing helpers
 def create_quality_supervisor_mocks():
@@ -148,12 +131,10 @@ def create_quality_supervisor_mocks():
         'websocket_manager': AsyncMock()
     }
 
-
 def setup_quality_response_mock(llm_manager: AsyncMock, response_data: Dict[str, Any]):
     """Setup LLM manager mock for quality responses."""
     llm_manager.ask_llm = AsyncMock()
     llm_manager.ask_llm.return_value = json.dumps(response_data)
-
 
 def create_quality_response_data(quality_score: float, approved: bool, issues: List[str] = None) -> Dict[str, Any]:
     """Create quality response data structure."""
@@ -163,7 +144,6 @@ def create_quality_response_data(quality_score: float, approved: bool, issues: L
         "issues": issues or []
     }
 
-
 # Admin tool testing helpers
 def create_admin_dispatcher_mocks():
     """Create mocks for admin tool dispatcher tests."""
@@ -171,7 +151,6 @@ def create_admin_dispatcher_mocks():
         'llm_manager': AsyncMock(spec=LLMManager),
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
-
 
 def create_admin_operation(op_type: str, params: Dict[str, Any], **kwargs) -> Dict[str, Any]:
     """Create admin operation structure."""
@@ -182,12 +161,10 @@ def create_admin_operation(op_type: str, params: Dict[str, Any], **kwargs) -> Di
     operation.update(kwargs)
     return operation
 
-
 def setup_tool_dispatcher_mock(tool_dispatcher: AsyncMock, return_data: Dict[str, Any]):
     """Setup tool dispatcher mock with return data."""
     tool_dispatcher.execute_tool = AsyncMock()
     tool_dispatcher.execute_tool.return_value = return_data
-
 
 # Corpus admin testing helpers
 def create_corpus_admin_mocks():
@@ -198,14 +175,12 @@ def create_corpus_admin_mocks():
         'vector_store': AsyncMock()
     }
 
-
 def create_test_documents(count: int = 5) -> List[Dict[str, str]]:
     """Create test documents for indexing."""
     return [
         {"id": f"doc{i}", "content": f"Document {i} content"}
         for i in range(1, count + 1)
     ]
-
 
 def setup_vector_store_mock(vector_store: AsyncMock, operation: str, return_data: Any):
     """Setup vector store mock for specific operation."""
@@ -215,7 +190,6 @@ def setup_vector_store_mock(vector_store: AsyncMock, operation: str, return_data
         _setup_similarity_search_mock(vector_store, return_data)
     elif operation == "update_document":
         _setup_update_document_mock(vector_store, return_data)
-
 
 # Supply researcher testing helpers
 def create_supply_researcher_mocks():
@@ -227,14 +201,12 @@ def create_supply_researcher_mocks():
         'enrichment_service': AsyncMock()
     }
 
-
 def create_supply_data(suppliers: List[Dict[str, Any]], inventory: Dict[str, int]) -> Dict[str, Any]:
     """Create supply data structure."""
     return {
         "suppliers": suppliers,
         "inventory": inventory
     }
-
 
 def create_supplier_data(supplier_id: str, name: str, reliability: float) -> Dict[str, Any]:
     """Create supplier data structure."""
@@ -244,7 +216,6 @@ def create_supplier_data(supplier_id: str, name: str, reliability: float) -> Dic
         "reliability": reliability
     }
 
-
 # Demo service testing helpers
 def create_demo_service_mocks():
     """Create mocks for demo service tests."""
@@ -253,14 +224,12 @@ def create_demo_service_mocks():
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
 
-
 def create_demo_data(metrics: Dict[str, Any], recommendations: List[str]) -> Dict[str, Any]:
     """Create demo data structure."""
     return {
         "metrics": metrics,
         "recommendations": recommendations
     }
-
 
 # Utility testing helpers
 async def run_concurrent_tasks(tasks: List, max_concurrent: int = 5) -> List[Any]:
@@ -270,16 +239,13 @@ async def run_concurrent_tasks(tasks: List, max_concurrent: int = 5) -> List[Any
     wrapped_tasks = [run_with_semaphore(task) for task in tasks]
     return await asyncio.gather(*wrapped_tasks)
 
-
 def assert_call_count(mock_obj: AsyncMock, expected_count: int):
     """Assert mock was called expected number of times."""
     assert mock_obj.call_count == expected_count
 
-
 def assert_contains_error(error_message: str, expected_substring: str):
     """Assert error message contains expected substring."""
     assert expected_substring in error_message
-
 
 def _create_triage_result(return_data: Dict[str, Any]):
     """Create triage result from return data."""
@@ -289,14 +255,12 @@ def _create_triage_result(return_data: Dict[str, Any]):
         return _build_triage_result_from_dict(TriageResult, triage_dict)
     return triage_dict
 
-
 def _build_triage_result_from_dict(result_class, triage_dict: Dict[str, Any]):
     """Build TriageResult from dictionary."""
     return result_class(
         category=triage_dict.get('message_type', 'query'),
         confidence_score=triage_dict.get('confidence', 0.8)
     )
-
 
 def _create_triage_execute_func(triage_result):
     """Create triage execute function."""
@@ -305,13 +269,11 @@ def _create_triage_execute_func(triage_result):
         return state
     return mock_execute
 
-
 def _create_optimizations_result(return_data: Dict[str, Any]):
     """Create optimizations result from return data."""
     from netra_backend.app.agents.state import OptimizationsResult
     opt_dict = _prepare_optimizations_dict(return_data)
     return OptimizationsResult(**opt_dict)
-
 
 def _prepare_optimizations_dict(return_data: Dict[str, Any]) -> Dict[str, Any]:
     """Prepare optimizations dictionary with defaults."""
@@ -322,14 +284,12 @@ def _prepare_optimizations_dict(return_data: Dict[str, Any]) -> Dict[str, Any]:
         opt_dict['optimization_type'] = 'performance'
     return opt_dict
 
-
 def _create_optimization_execute_func(optimizations_result):
     """Create optimization execute function."""
     async def mock_execute(state, run_id, stream_updates=True):
         state.optimizations_result = optimizations_result
         return state
     return mock_execute
-
 
 def _create_data_result(return_data: Dict[str, Any]):
     """Create data result from return data."""
@@ -340,7 +300,6 @@ def _create_data_result(return_data: Dict[str, Any]):
         return _create_anomaly_detection_response(data_dict, confidence_score)
     return data_dict
 
-
 def _get_data_confidence_score(data_dict: Dict[str, Any]) -> float:
     """Get confidence score from data dict."""
     if 'analysis' in data_dict:
@@ -348,7 +307,6 @@ def _get_data_confidence_score(data_dict: Dict[str, Any]) -> float:
     elif data_dict.get('processed') is True:
         return 0.95
     return 0.8
-
 
 def _create_anomaly_detection_response(data_dict: Dict[str, Any], confidence_score: float):
     """Create anomaly detection response."""
@@ -361,14 +319,12 @@ def _create_anomaly_detection_response(data_dict: Dict[str, Any], confidence_sco
         processing_time_ms=100
     )
 
-
 def _create_data_execute_func(data_result):
     """Create data execute function."""
     async def mock_execute(state, run_id, stream_updates=True):
         state.data_result = data_result
         return state
     return mock_execute
-
 
 def _create_retry_side_effects(failures: List[str], agent_name: str, success_data: Dict[str, Any]):
     """Create side effects for retry behavior."""
@@ -377,13 +333,11 @@ def _create_retry_side_effects(failures: List[str], agent_name: str, success_dat
     side_effects.append(success_state)
     return side_effects
 
-
 def _create_success_state(agent_name: str, success_data: Dict[str, Any]):
     """Create success state for retry mock."""
     if agent_name == "triage" and 'triage_result' in success_data:
         success_data = _process_triage_success_data(success_data)
     return DeepAgentState(**success_data)
-
 
 def _process_triage_success_data(success_data: Dict[str, Any]) -> Dict[str, Any]:
     """Process triage success data."""
@@ -396,12 +350,10 @@ def _process_triage_success_data(success_data: Dict[str, Any]) -> Dict[str, Any]
         success_data['triage_result'] = triage_result
     return success_data
 
-
 def _assert_optional_error(result, kwargs):
     """Assert optional error in result."""
     if 'error' in kwargs:
         assert result.error == kwargs['error']
-
 
 def _assert_optional_state_attr(result, kwargs):
     """Assert optional state attribute in result."""
@@ -409,31 +361,26 @@ def _assert_optional_state_attr(result, kwargs):
         attr_value = getattr(result.state, kwargs['state_attr'], None)
         assert attr_value == kwargs['state_value']
 
-
 def _should_execute_agent(strategy, state) -> bool:
     """Check if agent should be executed based on strategy."""
     if strategy == ExecutionStrategy.CONDITIONAL:
         return state.triage_result and state.triage_result.get("requires_data")
     return True
 
-
 def _setup_add_documents_mock(vector_store: AsyncMock, return_data: Any):
     """Setup add documents mock."""
     vector_store.add_documents = AsyncMock()
     vector_store.add_documents.return_value = return_data
-
 
 def _setup_similarity_search_mock(vector_store: AsyncMock, return_data: Any):
     """Setup similarity search mock."""
     vector_store.similarity_search = AsyncMock()
     vector_store.similarity_search.return_value = return_data
 
-
 def _setup_update_document_mock(vector_store: AsyncMock, return_data: Any):
     """Setup update document mock."""
     vector_store.update_document = AsyncMock()
     vector_store.update_document.return_value = return_data
-
 
 def _create_semaphore_task_runner(semaphore):
     """Create task runner with semaphore."""
@@ -441,7 +388,6 @@ def _create_semaphore_task_runner(semaphore):
         async with semaphore:
             return await task
     return run_with_semaphore
-
 
 def create_timestamp_data() -> Dict[str, Any]:
     """Create data with timestamp."""

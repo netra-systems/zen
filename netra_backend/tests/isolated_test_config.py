@@ -40,7 +40,6 @@ test_db_manager = None
 
 logger = central_logger.get_logger(__name__)
 
-
 class IsolatedTestConfig:
     """Configuration for isolated database testing."""
     
@@ -187,7 +186,6 @@ class IsolatedTestConfig:
         info["snapshots"] = len(self._snapshots)
         return info
 
-
 # Pytest fixtures for isolated testing
 @pytest.fixture
 async def isolated_test_config():
@@ -199,7 +197,6 @@ async def isolated_test_config():
         if config.cleanup_on_exit:
             await config.cleanup_databases()
 
-
 @pytest.fixture
 async def isolated_postgres(isolated_test_config):
     """Pytest fixture for isolated PostgreSQL database."""
@@ -209,7 +206,6 @@ async def isolated_postgres(isolated_test_config):
     async with session_factory() as session:
         yield session, isolated_test_config
 
-
 @pytest.fixture
 async def isolated_clickhouse(isolated_test_config):
     """Pytest fixture for isolated ClickHouse database."""
@@ -218,7 +214,6 @@ async def isolated_clickhouse(isolated_test_config):
     database_name = db_config["database_name"]
     
     yield client, database_name, isolated_test_config
-
 
 @pytest.fixture
 async def isolated_full_stack(isolated_test_config):
@@ -246,7 +241,6 @@ async def isolated_full_stack(isolated_test_config):
             "snapshots": {"postgres": pg_snapshot, "clickhouse": ch_snapshot}
         }
 
-
 # Context managers for manual control
 @asynccontextmanager
 async def with_isolated_postgres(test_name: str, schema_type: str = "basic",
@@ -263,7 +257,6 @@ async def with_isolated_postgres(test_name: str, schema_type: str = "basic",
     finally:
         await config.cleanup_databases()
 
-
 @asynccontextmanager
 async def with_isolated_clickhouse(test_name: str, table_set: str = "basic",
                                  seed_scenario: str = None) -> AsyncGenerator[Any, None]:
@@ -278,7 +271,6 @@ async def with_isolated_clickhouse(test_name: str, table_set: str = "basic",
         yield client, database_name, config
     finally:
         await config.cleanup_databases()
-
 
 @asynccontextmanager
 async def with_database_snapshots(test_name: str, postgres_schema: str = "basic",
@@ -308,7 +300,6 @@ async def with_database_snapshots(test_name: str, postgres_schema: str = "basic"
             }
     finally:
         await config.cleanup_databases()
-
 
 # Performance testing utilities
 class PerformanceTestConfig:
@@ -348,7 +339,6 @@ class PerformanceTestConfig:
         """Clean up performance test resources."""
         await self._base_config.cleanup_databases()
 
-
 @pytest.fixture
 async def performance_test_config():
     """Pytest fixture for performance testing configuration."""
@@ -359,7 +349,6 @@ async def performance_test_config():
         yield databases
     finally:
         await config.cleanup()
-
 
 # Testing utilities
 async def run_database_health_check(isolated_config: IsolatedTestConfig) -> Dict[str, Any]:
@@ -377,7 +366,6 @@ async def run_database_health_check(isolated_config: IsolatedTestConfig) -> Dict
     health_results["isolation"] = db_state_validator.generate_validation_report(isolation_results)
     return health_results
 
-
 def create_test_database_url(test_id: str, db_type: str = "postgres") -> str:
     """Create test database URL for external tools."""
     if db_type == "postgres":
@@ -386,7 +374,6 @@ def create_test_database_url(test_id: str, db_type: str = "postgres") -> str:
         return f"clickhouse://default@localhost:8123/test_ch_{test_id}"
     else:
         raise ValueError(f"Unsupported database type: {db_type}")
-
 
 # Example usage patterns
 async def example_isolated_test():
@@ -408,7 +395,6 @@ async def example_isolated_test():
         # Validate database state
         validation_results = await config.validate_database_state()
         assert validation_results["postgres"]["status"] in ["passed", "warning"]
-
 
 async def example_snapshot_test():
     """Example of using database snapshots for fast resets."""

@@ -17,23 +17,15 @@ MODULES:
 - test_llm_agent_advanced_integration.py: Integration tests with ≤8 line functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 # Import all fixtures from modular structure
-from test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -64,14 +56,12 @@ from netra_backend.tests.test_llm_agent_basic import (
     test_websocket_message_streaming,
 )
 
-
 def test_refactoring_compliance():
     """Verify refactoring maintains test discovery and functionality"""
     # This test serves as a marker that refactoring is complete
     # All original tests are now imported from modular structure
     # Each module has ≤300 lines and each function has ≤8 lines
     assert True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

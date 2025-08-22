@@ -43,7 +43,7 @@ class ErrorClassifier:
     
     def _initialize_error_classifiers(self) -> Dict[Type[Exception], ErrorClassification]:
         """Initialize error classification mapping."""
-        from .agent_errors import DatabaseError, ExternalServiceError, ValidationError
+        from netra_backend.app.agents.base.agent_errors import DatabaseError, ExternalServiceError, ValidationError
         return self._build_error_classifier_mapping(ValidationError, ExternalServiceError, DatabaseError)
     
     def _build_error_classifier_mapping(self, ValidationError: Type[Exception], 

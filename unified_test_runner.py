@@ -47,8 +47,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Project root
-PROJECT_ROOT = Path(__file__).parent
-sys.path.insert(0, str(PROJECT_ROOT))
+PROJECT_ROOT = Path(__file__).parent.absolute()
 
 # Import test framework
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner

@@ -17,8 +17,6 @@ import httpx
 import pytest
 
 # Add app to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../app'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../auth_service'))
 
 # Mock classes for testing
 class AuthClient:

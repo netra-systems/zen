@@ -5,7 +5,6 @@ Provides setup, assertion, and fixture functions for validation and formatting u
 
 from typing import Any, Dict
 
-
 class ValidationTestHelpers:
     """Helper functions for validation utility testing."""
     
@@ -31,7 +30,6 @@ class ValidationTestHelpers:
     def create_invalid_user() -> Dict[str, Any]:
         """Create invalid user data."""
         return {"name": "John"}
-
 
 class FormattingTestHelpers:
     """Helper functions for formatting utility testing."""

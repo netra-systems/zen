@@ -10,38 +10,27 @@ Critical Path: Team creation -> Role assignment -> Permission validation
 Coverage: Team ownership, role-based permissions, permission inheritance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import uuid
 
 import pytest
 
-# Add project root to path
-from .integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.critical_paths.integration.test_helpers.team_collaboration_base import (
     PermissionType,
-    # Add project root to path
     TeamCollaborationManager,
     TeamPermissionMatrix,
     TeamRole,
     assert_permission_matrix,
 )
 
-
 @pytest.fixture
 async def team_manager():
     """Create team collaboration manager for testing."""
     return TeamCollaborationManager()
-
 
 class TestTeamCreationPermissions:
     """Critical path tests for team creation and permission management."""

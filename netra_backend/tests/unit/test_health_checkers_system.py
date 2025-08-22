@@ -7,28 +7,17 @@ Business Value: Ensures system resource monitoring for capacity planning
 and performance optimization to maintain service quality.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.health_checkers import check_system_resources
 from netra_backend.app.schemas.core_models import HealthCheckResult
-
-# Add project root to path
-
 
 class TestHealthCheckersSystem:
     """Test suite for system resource health checkers."""

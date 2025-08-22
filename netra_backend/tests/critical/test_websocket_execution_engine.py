@@ -7,17 +7,10 @@ execution engines and can process messages end-to-end.
 Business Value: Prevents $8K MRR loss from WebSocket failures.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -29,7 +22,6 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.websocket.connection_executor import ConnectionExecutor
 
-# Add project root to path
 from netra_backend.app.websocket.message_handler_core import (
     ModernReliableMessageHandler,
 )
@@ -37,9 +29,6 @@ from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
 from netra_backend.app.websocket.websocket_broadcast_executor import (
     WebSocketBroadcastExecutor,
 )
-
-# Add project root to path
-
 
 class TestWebSocketExecutionEngineInitialization:
     """Test that all WebSocket components have initialized execution engines."""
@@ -80,7 +69,6 @@ class TestWebSocketExecutionEngineInitialization:
         assert isinstance(executor.execution_engine, BaseExecutionEngine)
         assert executor.reliability_manager is not None
         assert executor.monitor is not None
-
 
 class TestWebSocketMessageFlow:
     """Test end-to-end WebSocket message processing flow."""
@@ -180,7 +168,6 @@ class TestWebSocketMessageFlow:
             assert result is not None
             mock_broadcast.assert_called_once()
 
-
 class TestWebSocketErrorHandling:
     """Test WebSocket error handling with execution engine."""
     
@@ -225,7 +212,6 @@ class TestWebSocketErrorHandling:
         with pytest.raises(ValueError, match="No handler available"):
             await router.route_message(message, conn_info)
 
-
 class TestCircularImportPrevention:
     """Test that circular imports are properly avoided."""
     
@@ -256,7 +242,6 @@ class TestCircularImportPrevention:
             executor.execution_engine is not None,
             conn_executor.execution_engine is not None
         ])
-
 
 class TestMetricsCollectorResilience:
     """Test that metrics collector handles None connection manager."""
@@ -295,7 +280,6 @@ class TestMetricsCollectorResilience:
             # Should return empty metrics
             assert metrics.active_connections == 0
             assert metrics.total_connections == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

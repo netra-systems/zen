@@ -4,17 +4,10 @@ Tests for file checking, config loading, endpoint validation, and main workflow.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta
@@ -32,12 +25,10 @@ from dev_launcher.config_validator import (
 )
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
-
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:
     """Create temporary config file path."""
     return tmp_path / ".dev_services.json"
-
 
 @pytest.fixture
 def mock_validation_context(temp_config_path: Path) -> ValidationContext:
@@ -49,7 +40,6 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
         cli_overrides={"REDIS_HOST": "localhost"},
         env_overrides={"POSTGRES_HOST": "db.example.com"}
     )
-
 
 @pytest.fixture
 def mock_services_config() -> ServicesConfiguration:
@@ -70,7 +60,6 @@ def mock_services_config() -> ServicesConfiguration:
     
     return config
 
-
 class TestServiceConfigValidatorInit:
     """Test service config validator initialization."""
     
@@ -79,7 +68,6 @@ class TestServiceConfigValidatorInit:
         validator = ServiceConfigValidator(mock_validation_context)
         assert validator.context == mock_validation_context
         assert validator.stale_threshold_days == 30
-
 
 class TestConfigFileChecking:
     """Test configuration file existence and age checking."""
@@ -129,7 +117,6 @@ class TestConfigFileChecking:
             assert result.status == ConfigStatus.STALE
             assert result.config_age_days == 45
 
-
 class TestConfigLoading:
     """Test configuration loading functionality."""
     
@@ -156,7 +143,6 @@ class TestConfigLoading:
                   side_effect=Exception("Load error")):
             config = validator._load_config()
             assert config is None
-
 
 class TestEndpointValidation:
     """Test service endpoint validation."""
@@ -280,7 +266,6 @@ class TestEndpointValidation:
             result = await validator._check_redis_endpoint("redis://redis.example.com:6379")
             assert result is True  # Assumes valid if can't check
 
-
 class TestValidationWorkflow:
     """Test complete validation workflow."""
     
@@ -326,7 +311,6 @@ class TestValidationWorkflow:
                 result = await validator._validate_endpoints(mock_services_config, base_result)
                 assert result.status == ConfigStatus.UNREACHABLE
                 assert len(result.unreachable_endpoints) == 1
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

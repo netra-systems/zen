@@ -23,17 +23,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -54,11 +47,9 @@ from ws_manager import get_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthProvider,
     HealthResponse,
-    # Add project root to path
     LoginRequest,
     LoginResponse,
     SessionInfo,
@@ -68,7 +59,6 @@ from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.websocket.unified import get_unified_manager
 
 logger = logging.getLogger(__name__)
-
 
 class MockOAuthService:
     """Mock OAuth service for testing purposes."""
@@ -91,7 +81,6 @@ class MockOAuthService:
         """Shutdown mock OAuth service."""
         pass
 
-
 class MockSessionManager:
     """Mock session manager for testing purposes."""
     
@@ -111,7 +100,6 @@ class MockSessionManager:
     async def shutdown(self):
         """Shutdown mock session manager."""
         pass
-
 
 class OAuthJWTWebSocketTestManager:
     """Manages OAuth→JWT→WebSocket authentication flow testing."""
@@ -424,7 +412,6 @@ class OAuthJWTWebSocketTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def oauth_jwt_ws_manager():
     """Create OAuth→JWT→WebSocket test manager."""
@@ -432,7 +419,6 @@ async def oauth_jwt_ws_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -499,7 +485,6 @@ async def test_complete_oauth_jwt_websocket_flow(oauth_jwt_ws_manager):
     total_time = time.time() - start_time
     assert total_time < 3.0, f"Total flow took {total_time:.2f}s, expected <3s"
 
-
 @pytest.mark.asyncio
 async def test_oauth_jwt_websocket_error_handling(oauth_jwt_ws_manager):
     """Test error handling across the authentication flow."""
@@ -518,7 +503,6 @@ async def test_oauth_jwt_websocket_error_handling(oauth_jwt_ws_manager):
     
     for expected in expected_tests:
         assert expected in test_names, f"Missing error test: {expected}"
-
 
 @pytest.mark.asyncio
 async def test_oauth_jwt_websocket_security_validation(oauth_jwt_ws_manager):
@@ -552,7 +536,6 @@ async def test_oauth_jwt_websocket_security_validation(oauth_jwt_ws_manager):
     # Test cross-service validation consistency
     propagation_result = await manager.test_token_propagation(access_token)
     assert propagation_result["success"], "Cross-service validation inconsistent"
-
 
 @pytest.mark.asyncio 
 async def test_oauth_jwt_websocket_performance_benchmarks(oauth_jwt_ws_manager):

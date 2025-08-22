@@ -3,24 +3,15 @@ ClickHouse Array Operations Tests
 Test proper array operations and the query fixer
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import (
     ClickHouseQueryInterceptor,
-    # Add project root to path
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
 )
@@ -28,7 +19,6 @@ from netra_backend.tests.realistic_test_fixtures import (
     create_query_interceptor_with_mock,
     validate_array_query_syntax,
 )
-
 
 class TestClickHouseArrayOperations:
     """Test proper array operations and the query fixer"""

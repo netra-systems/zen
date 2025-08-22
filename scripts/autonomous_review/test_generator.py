@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .ultra_thinking_analyzer import UltraThinkingAnalyzer
+from scripts.autonomous_review.ultra_thinking_analyzer import UltraThinkingAnalyzer
 
 
 class TestGenerator:
@@ -109,7 +109,6 @@ import sys
 from pathlib import Path
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from {module_name} import *
 

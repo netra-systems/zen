@@ -14,21 +14,10 @@ COVERAGE TARGET: 100% for message queue and state persistence functionality
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import random
@@ -38,10 +27,8 @@ import pytest
 
 from netra_backend.app.websocket.reconnection_types import ReconnectionConfig
 
-# Add project root to path
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from integration.websocket_recovery_fixtures import (
-    # Add project root to path
+from netra_backend.tests.integration.websocket_recovery_fixtures import (
 
     MockWebSocket,
 
@@ -55,12 +42,10 @@ from integration.websocket_recovery_fixtures import (
 
 )
 
-
 class TestWebSocketMessageQueueRecovery:
 
     """Message queue behavior during WebSocket disconnection and recovery tests."""
     
-
     @pytest.fixture
 
     async def queue_recovery_setup(self):
@@ -69,7 +54,6 @@ class TestWebSocketMessageQueueRecovery:
 
         return await setup_test_manager_with_helper()
     
-
     async def test_message_queue_during_disconnection(self, queue_recovery_setup):
 
         """Test message queue behavior during WebSocket disconnection."""
@@ -88,7 +72,6 @@ class TestWebSocketMessageQueueRecovery:
 
         await self._verify_message_queue_recovery(manager, user_id, queued_state)
     
-
     async def _setup_connection_with_message_queue(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Setup connection and create message queue during disconnection."""
@@ -103,14 +86,12 @@ class TestWebSocketMessageQueueRecovery:
 
         await manager.disconnect_user(user_id, websocket, 1006, "Network error")
         
-
         test_message = {"type": "agent_update", "data": "test message"}
 
         result = await manager.send_message_to_user(user_id, test_message, retry=True)
 
         return {"websocket": websocket, "message_sent": test_message, "result": result}
     
-
     async def _verify_message_queue_recovery(self, manager: UnifiedWebSocketManager, 
 
                                            user_id: str, queued_state: dict) -> None:
@@ -123,12 +104,10 @@ class TestWebSocketMessageQueueRecovery:
 
         await manager.connect_user(user_id, new_websocket)
         
-
         stats = await manager.get_transactional_stats()
 
         assert stats["pending_messages"] >= 0, "Message queue should be in valid state"
     
-
     async def test_message_priority_during_queue_recovery(self, queue_recovery_setup):
 
         """Test message priority handling during queue recovery."""
@@ -147,7 +126,6 @@ class TestWebSocketMessageQueueRecovery:
 
         await self._verify_priority_preservation(manager, user_id, priority_queue)
     
-
     async def _create_prioritized_message_queue(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Create message queue with different priority messages."""
@@ -158,7 +136,6 @@ class TestWebSocketMessageQueueRecovery:
 
         websocket.state = "disconnected"
         
-
         prioritized_messages = [
 
             {"type": "urgent_update", "priority": "high", "sequence": 1},
@@ -171,10 +148,8 @@ class TestWebSocketMessageQueueRecovery:
 
             await manager.send_message_to_user(user_id, msg, retry=True)
         
-
         return {"websocket": websocket, "queued_count": len(prioritized_messages)}
     
-
     async def _verify_priority_preservation(self, manager: UnifiedWebSocketManager,
 
                                           user_id: str, priority_queue: dict) -> None:
@@ -187,17 +162,14 @@ class TestWebSocketMessageQueueRecovery:
 
         await manager.connect_user(user_id, new_websocket)
         
-
         stats = await manager.get_transactional_stats()
 
         assert stats["pending_messages"] >= 0, "Priority messages should be handled"
-
 
 class TestWebSocketPartialMessageRecovery:
 
     """Partial message handling during WebSocket state recovery tests."""
     
-
     async def test_partial_message_handling_during_recovery(self):
 
         """Test partial message handling during WebSocket state recovery."""
@@ -214,7 +186,6 @@ class TestWebSocketPartialMessageRecovery:
 
         await self._verify_partial_message_recovery(manager, user_id, partial_state)
     
-
     async def _create_partial_message_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Create scenario with partial messages during disconnection."""
@@ -223,12 +194,10 @@ class TestWebSocketPartialMessageRecovery:
 
         await manager.connect_user(user_id, websocket)
         
-
         websocket.failure_simulation = True
 
         websocket.network_latency_ms = 100
         
-
         test_message = {"type": "agent_log", "data": "large message data" * 100}
 
         try:
@@ -239,10 +208,8 @@ class TestWebSocketPartialMessageRecovery:
 
             pass  # Expected for simulated network issues
         
-
         return {"websocket": websocket, "message": test_message}
     
-
     async def _verify_partial_message_recovery(self, manager: UnifiedWebSocketManager,
 
                                              user_id: str, partial_state: dict) -> None:
@@ -253,12 +220,10 @@ class TestWebSocketPartialMessageRecovery:
 
         await manager.connect_user(user_id, new_websocket)
         
-
         stats = await manager.get_transactional_stats()
 
         assert stats["pending_messages"] >= 0, "Partial messages should be handled"
     
-
     async def test_large_message_recovery_resilience(self):
 
         """Test recovery resilience with large message payloads."""
@@ -275,7 +240,6 @@ class TestWebSocketPartialMessageRecovery:
 
         await self._verify_large_message_stability(manager, user_id, large_message_state)
     
-
     async def _setup_large_message_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Setup scenario with large message payloads."""
@@ -286,14 +250,12 @@ class TestWebSocketPartialMessageRecovery:
 
         websocket.state = "disconnected"
         
-
         large_message = {"type": "large_data", "payload": "x" * 1000, "chunk_id": 1}
 
         result = await manager.send_message_to_user(user_id, large_message)
 
         return {"websocket": websocket, "message": large_message, "result": result}
     
-
     async def _verify_large_message_stability(self, manager: UnifiedWebSocketManager,
 
                                             user_id: str, large_message_state: dict) -> None:
@@ -304,12 +266,10 @@ class TestWebSocketPartialMessageRecovery:
 
         assert stats["telemetry"]["errors_handled"] >= 0, "Large message handling should be tracked"
 
-
 class TestWebSocketComprehensiveStateRecovery:
 
     """Comprehensive state recovery scenarios including complex workflows."""
     
-
     async def test_comprehensive_state_recovery_workflow(self):
 
         """Test comprehensive WebSocket state recovery across complex workflows."""
@@ -335,10 +295,8 @@ class TestWebSocketComprehensiveStateRecovery:
 
         await self._verify_comprehensive_recovery(manager, helper, user_id)
         
-
         await manager.shutdown()
     
-
     async def _establish_complex_workflow_state(self, manager: UnifiedWebSocketManager,
 
                                               helper: StateRecoveryTestHelper, user_id: str) -> dict:
@@ -351,7 +309,6 @@ class TestWebSocketComprehensiveStateRecovery:
 
         assert conn_info is not None, "Initial connection should be established"
         
-
         state_data = helper.create_test_state_data(user_id, "high")
 
         state_messages = [
@@ -366,10 +323,8 @@ class TestWebSocketComprehensiveStateRecovery:
 
             await manager.send_message_to_user(user_id, message)
         
-
         return helper.capture_state_snapshot(manager, user_id)
     
-
     async def _test_disconnection_with_state_preservation(self, manager: UnifiedWebSocketManager,
 
                                                         user_id: str, initial_state: dict) -> None:
@@ -396,7 +351,6 @@ class TestWebSocketComprehensiveStateRecovery:
 
             await manager.send_message_to_user(user_id, message, retry=True)
     
-
     async def _verify_comprehensive_recovery(self, manager: UnifiedWebSocketManager,
 
                                            helper: StateRecoveryTestHelper, user_id: str) -> None:
@@ -411,19 +365,16 @@ class TestWebSocketComprehensiveStateRecovery:
 
         assert reconnect_info is not None, "Comprehensive recovery should succeed"
         
-
         final_snapshot = helper.capture_state_snapshot(manager, user_id)
 
         connection_quality = final_snapshot["connection_quality"]
 
         assert connection_quality["success_rate"] > 0.7, "Connection success rate should remain high"
 
-
 class TestWebSocketZeroMessageLoss:
 
     """Critical tests ensuring zero message loss during reconnection scenarios."""
     
-
     async def test_zero_message_loss_during_reconnection(self):
 
         """Critical test ensuring zero message loss during reconnection scenarios."""

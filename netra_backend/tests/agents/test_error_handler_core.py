@@ -3,19 +3,10 @@ Tests for AgentErrorHandler core functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 # Add netra_backend to path  
-NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
-if str(NETRA_BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import asyncio
 import time
@@ -29,9 +20,7 @@ from netra_backend.app.agents.error_handler import (
     NetworkError,
 )
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import (
-    # Add project root to path
     AgentErrorHandler as ErrorHandler,
 )
 from netra_backend.app.agents.error_handler import (
@@ -39,7 +28,6 @@ from netra_backend.app.agents.error_handler import (
 )
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
-
 
 class TestErrorHandler:
     """Test AgentErrorHandler functionality."""
@@ -215,7 +203,6 @@ class TestErrorHandler:
         
         # Should maintain reasonable memory usage
         assert len(error_handler.error_history) <= 1000
-
 
 def _assert_error_statistics_format(stats: dict) -> None:
     """Assert error statistics have correct format"""

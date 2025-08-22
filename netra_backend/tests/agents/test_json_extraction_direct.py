@@ -1,27 +1,16 @@
 """Direct test for JSON extraction to debug the issue"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.utils import extract_json_from_response
-
-# Add project root to path
-
 
 def test_extract_json_with_trailing_comma():
     """Test extract_json_from_response with trailing comma"""
@@ -33,7 +22,6 @@ def test_extract_json_with_trailing_comma():
     assert isinstance(result, dict), f"Result should be dict, got {type(result)}"
     assert result.get("category") == "Test", f"Category should be 'Test', got {result.get('category')}"
     assert result.get("priority") == "high", f"Priority should be 'high', got {result.get('priority')}"
-
 
 def test_triage_agent_extract_json():
     """Test TriageSubAgent's _extract_and_validate_json method"""
@@ -50,7 +38,6 @@ def test_triage_agent_extract_json():
     assert isinstance(result, dict), f"Result should be dict, got {type(result)}"
     assert result.get("category") == "Test", f"Category should be 'Test', got {result.get('category')}"
     assert result.get("priority") == "high", f"Priority should be 'high', got {result.get('priority')}"
-
 
 if __name__ == "__main__":
     # Run the tests directly

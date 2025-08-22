@@ -6,17 +6,10 @@ ensuring proper error handling and preventing silent failures.
 Includes specific regression tests for coroutine handling in auth flow.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,13 +25,9 @@ from ws_manager import manager
 from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.schemas.websocket_models import UserMessagePayload
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handler_base import MessageHandlerBase
 from netra_backend.app.services.message_handlers import MessageHandlerService
-
-# Add project root to path
-
 
 class TestWebSocketMessageRegression:
     """Test suite for preventing WebSocket message handling regressions."""
@@ -258,7 +247,6 @@ class TestWebSocketMessageRegression:
             assert "First message" in contents
             assert "Second message" in contents
 
-
 class TestWebSocketErrorPropagation:
     """Additional tests for error propagation and user feedback."""
     
@@ -337,7 +325,6 @@ class TestWebSocketErrorPropagation:
             
             # Should log validation issues for debugging
             # Even if it handles gracefully, developers need to know
-
 
 class TestStartAgentUserMessagePayloadConsistency:
     """Tests to ensure start_agent and user_message accept same payload structure."""
@@ -488,7 +475,6 @@ class TestStartAgentUserMessagePayloadConsistency:
         }
         assert MessageHandlerBase.extract_user_request(payload4) == "query_value"
 
-
 class TestWebSocketCoroutineAuthRegression:
     """Regression tests for coroutine handling in WebSocket auth flow."""
     
@@ -569,7 +555,7 @@ class TestWebSocketCoroutineAuthRegression:
     async def test_security_service_validate_token_awaits_decode(self):
         """Test EnhancedSecurityService validate_token properly awaits decode."""
         from netra_backend.app.services.key_manager import KeyManager
-        from tests.services.security_service_test_mocks import (
+        from netra_backend.tests.services.security_service_test_mocks import (
             EnhancedSecurityService,
         )
         

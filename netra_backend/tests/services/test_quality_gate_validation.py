@@ -4,17 +4,10 @@ This module tests input validation, data class initialization, error handling,
 and caching mechanisms for the Quality Gate Service.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -26,19 +19,16 @@ import pytest
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
     QualityLevel,
     QualityMetrics,
     ValidationResult,
 )
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
 
 class TestQualityMetricsDataclass:
     """Test QualityMetrics dataclass initialization and defaults"""
@@ -88,7 +78,6 @@ class TestQualityMetricsDataclass:
         assert metrics.issues == issues
         assert metrics.suggestions == suggestions
 
-
 class TestValidationResultDataclass:
     """Test ValidationResult dataclass"""
     
@@ -120,7 +109,6 @@ class TestValidationResultDataclass:
         assert result.retry_suggested == False
         assert result.retry_prompt_adjustments == None
         assert result.fallback_response == None
-
 
 class TestCachingMechanism:
     """Test content caching functionality"""
@@ -169,7 +157,6 @@ class TestCachingMechanism:
         # Verify cache functionality - results must be identical
         assert result1.metrics.overall_score == result2.metrics.overall_score
         assert len(quality_service.validation_cache) == 1  # Confirm cache entry exists
-
 
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling in various methods"""
@@ -223,7 +210,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         with patch('app.services.quality_gate.quality_gate_core.logger') as mock_logger:
             await quality_service._store_metrics(metrics, ContentType.GENERAL)
             mock_logger.warning.assert_called()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,16 +1,9 @@
 """Metrics collection and analysis tests for Quality Monitoring Service"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,14 +19,11 @@ from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
 
-# Add project root to path
 from netra_backend.tests.quality_monitoring_fixtures import (
     actual_metrics,
-    # Add project root to path
     sample_quality_metrics,
     sla_targets,
 )
-
 
 class TestMetricsCollection:
     """Test metrics collection functionality"""
@@ -54,7 +44,6 @@ class TestMetricsCollection:
         assert event["quality_score"] == 0.75
         assert event["agent"] == "test_agent"
 
-
 class TestDashboardData:
     """Test dashboard data generation"""
     async def test_get_dashboard_data(self, sample_quality_metrics):
@@ -73,7 +62,6 @@ class TestDashboardData:
         assert "overall_stats" in dashboard_data
         assert "agent_profiles" in dashboard_data
         assert "recent_alerts" in dashboard_data
-
 
 class TestAgentReports:
     """Test agent reporting functionality"""
@@ -99,7 +87,6 @@ class TestAgentReports:
         
         # Should handle gracefully
         assert isinstance(report, dict)
-
 
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management"""

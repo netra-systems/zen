@@ -4,17 +4,10 @@ Tests for monitoring coverage and partial failure scenarios.
 Verifies 100% monitoring coverage despite individual check failures.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timezone
@@ -22,12 +15,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.websocket.performance_monitor_core import PerformanceMonitor
 from netra_backend.app.websocket.performance_monitor_types import PerformanceThresholds
-
-# Add project root to path
-
 
 class TestMonitoringCoverage:
     """Test monitoring coverage and partial failure scenarios."""
@@ -258,7 +247,6 @@ class TestMonitoringCoverage:
         assert coverage["successful_checks"] == 0
         assert coverage["failed_checks"] == 0
         assert len(coverage["check_results"]) == 0
-
 
 class TestMonitoringReliabilityPatterns:
     """Test compliance with WebSocket reliability patterns."""

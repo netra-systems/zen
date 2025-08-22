@@ -10,20 +10,10 @@ L3 Test: Real JWT refresh while maintaining active WebSocket connections.
 Tests seamless token rotation without disrupting real-time features.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -36,37 +26,28 @@ from unittest.mock import patch, AsyncMock
 
 import redis.asyncio as redis
 
-# Add project root to path
-
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
 from ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
-from integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
-
-# Add project root to path
-
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 logger = central_logger.get_logger(__name__)
-
 
 class MockSessionManager:
 
     """Mock session manager for testing JWT refresh with Redis."""
     
-
     def __init__(self, redis_client: redis.Redis):
 
         self.redis_client = redis_client
     
-
     async def create_session(self, user_id: str, token: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
 
         """Create session in Redis."""
 
         session_id = f"session_{user_id}_{uuid.uuid4().hex[:8]}"
         
-
         session_data = {
 
             "session_id": session_id,
@@ -83,12 +64,10 @@ class MockSessionManager:
 
         }
         
-
         session_key = f"session:{session_id}"
 
         await self.redis_client.set(session_key, json.dumps(session_data), ex=3600)
         
-
         return {
 
             "success": True,
@@ -97,7 +76,6 @@ class MockSessionManager:
 
         }
     
-
     async def update_session_token(self, session_id: str, new_token: str) -> Dict[str, Any]:
 
         """Update session token in Redis."""
@@ -106,7 +84,6 @@ class MockSessionManager:
 
         session_data = await self.redis_client.get(session_key)
         
-
         if session_data:
 
             session_dict = json.loads(session_data)
@@ -115,16 +92,12 @@ class MockSessionManager:
 
             session_dict["last_activity"] = datetime.now(timezone.utc).isoformat()
             
-
             await self.redis_client.set(session_key, json.dumps(session_dict), ex=3600)
             
-
             return {"success": True}
         
-
         return {"success": False, "error": "Session not found"}
     
-
     async def invalidate_session(self, session_id: str) -> Dict[str, Any]:
 
         """Invalidate session in Redis."""
@@ -133,19 +106,16 @@ class MockSessionManager:
 
         deleted = await self.redis_client.delete(session_key)
         
-
         return {
 
             "success": bool(deleted)
 
         }
 
-
 class JWTRefreshManager:
 
     """Manages JWT refresh testing scenarios."""
     
-
     def __init__(self, jwt_validator: UnifiedJWTValidator, session_manager: MockSessionManager, 
 
                  websocket_manager: WebSocketManager, redis_client):
@@ -162,7 +132,6 @@ class JWTRefreshManager:
 
         self.refresh_events = []
     
-
     async def create_authenticated_session(self, user_id: str, 
 
                                          expires_delta: Optional[timedelta] = None) -> Dict[str, Any]:
@@ -172,7 +141,6 @@ class JWTRefreshManager:
 
         expires_minutes = int((expires_delta or timedelta(hours=1)).total_seconds() / 60)
         
-
         access_token = self.jwt_validator.create_access_token(
 
             user_id=user_id,
@@ -201,7 +169,6 @@ class JWTRefreshManager:
 
         )
         
-
         if not session_result["success"]:
 
             raise ValueError(f"Session creation failed: {session_result.get('error')}")
@@ -210,7 +177,6 @@ class JWTRefreshManager:
 
         websocket = MockWebSocketForRedis(user_id)
         
-
         try:
 
             connection_info = await self.websocket_manager.connect_user(user_id, websocket)
@@ -230,12 +196,10 @@ class JWTRefreshManager:
 
             }
         
-
         if not connection_info:
 
             raise ValueError("WebSocket connection failed")
         
-
         session_data = {
 
             "user_id": user_id,
@@ -254,12 +218,10 @@ class JWTRefreshManager:
 
         }
         
-
         self.active_sessions[user_id] = session_data
 
         return session_data
     
-
     async def create_authenticated_session_with_short_refresh(self, user_id: str) -> Dict[str, Any]:
 
         """Create authenticated session with short-lived refresh token for testing expiration."""
@@ -293,7 +255,6 @@ class JWTRefreshManager:
 
         )
         
-
         if not session_result["success"]:
 
             raise ValueError(f"Session creation failed: {session_result.get('error')}")
@@ -302,7 +263,6 @@ class JWTRefreshManager:
 
         websocket = MockWebSocketForRedis(user_id)
         
-
         try:
 
             connection_info = await self.websocket_manager.connect_user(user_id, websocket)
@@ -322,12 +282,10 @@ class JWTRefreshManager:
 
             }
         
-
         if not connection_info:
 
             raise ValueError("WebSocket connection failed")
         
-
         session_data = {
 
             "user_id": user_id,
@@ -346,12 +304,10 @@ class JWTRefreshManager:
 
         }
         
-
         self.active_sessions[user_id] = session_data
 
         return session_data
     
-
     async def refresh_token_for_user(self, user_id: str) -> Dict[str, Any]:
 
         """Refresh JWT token for user and update session."""
@@ -360,7 +316,6 @@ class JWTRefreshManager:
 
             raise ValueError(f"No active session for user {user_id}")
         
-
         session_data = self.active_sessions[user_id]
 
         refresh_start = time.time()
@@ -399,7 +354,6 @@ class JWTRefreshManager:
 
         )
         
-
         if not update_result["success"]:
 
             raise ValueError(f"Session update failed: {update_result.get('error')}")
@@ -410,7 +364,6 @@ class JWTRefreshManager:
 
         session_redis_data = await self.redis_client.get(session_key)
         
-
         if session_redis_data:
 
             session_dict = json.loads(session_redis_data)
@@ -427,7 +380,6 @@ class JWTRefreshManager:
 
         session_data["refreshed_at"] = time.time()
         
-
         refresh_event = {
 
             "user_id": user_id,
@@ -442,12 +394,10 @@ class JWTRefreshManager:
 
         }
         
-
         self.refresh_events.append(refresh_event)
 
         return refresh_event
     
-
     async def cleanup(self):
 
         """Clean up all active sessions."""
@@ -481,19 +431,15 @@ class JWTRefreshManager:
 
                         cleanup_errors.append(f"Session cleanup for {user_id}: {e}")
                         
-
             except Exception as e:
 
                 cleanup_errors.append(f"General cleanup error for user {user_id}: {e}")
         
-
         if cleanup_errors:
 
             logger.warning(f"Cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
         
-
         self.active_sessions.clear()
-
 
 @pytest.mark.L3
 
@@ -503,7 +449,6 @@ class TestJWTRefreshWebSocketL3:
 
     """L3 integration test for JWT refresh during active WebSocket connections."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -518,7 +463,6 @@ class TestJWTRefreshWebSocketL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -539,7 +483,6 @@ class TestJWTRefreshWebSocketL3:
 
             logger.warning(f"Redis client cleanup error: {e}")
     
-
     @pytest.fixture
 
     async def jwt_validator(self):
@@ -550,7 +493,6 @@ class TestJWTRefreshWebSocketL3:
 
         yield validator
     
-
     @pytest.fixture
 
     async def session_manager(self, redis_client):
@@ -561,7 +503,6 @@ class TestJWTRefreshWebSocketL3:
 
         yield manager
     
-
     @pytest.fixture
 
     async def websocket_manager(self, redis_client):
@@ -572,7 +513,6 @@ class TestJWTRefreshWebSocketL3:
 
         yield manager
     
-
     @pytest.fixture
 
     async def refresh_manager(self, jwt_validator, session_manager, websocket_manager, redis_client):
@@ -585,7 +525,6 @@ class TestJWTRefreshWebSocketL3:
 
         await manager.cleanup()
     
-
     async def test_jwt_refresh_maintains_websocket_connection(self, refresh_manager):
 
         """Test JWT refresh while maintaining active WebSocket connection."""
@@ -621,7 +560,6 @@ class TestJWTRefreshWebSocketL3:
 
         }
         
-
         success = await refresh_manager.websocket_manager.send_message_to_user(
 
             user_id, pre_refresh_message
@@ -661,7 +599,6 @@ class TestJWTRefreshWebSocketL3:
 
         }
         
-
         success = await refresh_manager.websocket_manager.send_message_to_user(
 
             user_id, post_refresh_message
@@ -680,7 +617,6 @@ class TestJWTRefreshWebSocketL3:
 
         assert "agent_log" in message_types
     
-
     async def test_concurrent_jwt_refresh_multiple_users(self, refresh_manager):
 
         """Test concurrent JWT refresh for multiple users with active WebSockets."""
@@ -725,7 +661,6 @@ class TestJWTRefreshWebSocketL3:
 
                 return {"error": str(e)}
         
-
         refresh_tasks = [refresh_user(user_id) for user_id in users]
 
         refresh_results = await asyncio.gather(*refresh_tasks, return_exceptions=True)
@@ -740,14 +675,12 @@ class TestJWTRefreshWebSocketL3:
 
                 pytest.fail(f"Refresh {i} failed with exception: {result}")
             
-
             if "error" not in result:
 
                 successful_refreshes += 1
 
                 assert result["websocket_active"] is True
         
-
         assert successful_refreshes == user_count
         
         # Verify all WebSocket connections still active
@@ -766,7 +699,6 @@ class TestJWTRefreshWebSocketL3:
 
         }
         
-
         for user_id in users:
 
             success = await refresh_manager.websocket_manager.send_message_to_user(
@@ -777,7 +709,6 @@ class TestJWTRefreshWebSocketL3:
 
             assert success is True
     
-
     async def test_jwt_refresh_with_expired_refresh_token(self, refresh_manager):
 
         """Test handling of expired refresh tokens during WebSocket session."""
@@ -830,7 +761,6 @@ class TestJWTRefreshWebSocketL3:
 
             logger.info(f"Expected auth failure handled gracefully: {e}")
     
-
     async def test_jwt_refresh_performance_under_load(self, refresh_manager):
 
         """Test JWT refresh performance with high connection load."""
@@ -873,14 +803,12 @@ class TestJWTRefreshWebSocketL3:
 
         refresh_tasks = []
         
-
         for user_id in users:
 
             task = refresh_manager.refresh_token_for_user(user_id)
 
             refresh_tasks.append(task)
         
-
         refresh_results = await asyncio.gather(*refresh_tasks, return_exceptions=True)
 
         total_refresh_time = time.time() - refresh_start
@@ -891,7 +819,6 @@ class TestJWTRefreshWebSocketL3:
 
         total_refresh_duration = 0
         
-
         for result in refresh_results:
 
             if isinstance(result, Exception):
@@ -900,7 +827,6 @@ class TestJWTRefreshWebSocketL3:
 
                 continue
             
-
             if "error" not in result:
 
                 successful_refreshes += 1
@@ -913,7 +839,6 @@ class TestJWTRefreshWebSocketL3:
 
         assert total_refresh_time < 10.0  # Batch refresh under 10 seconds
         
-
         if successful_refreshes > 0:
 
             avg_refresh_time = total_refresh_duration / successful_refreshes
@@ -932,12 +857,10 @@ class TestJWTRefreshWebSocketL3:
 
         assert functional_connections >= (connection_count * 0.9)
         
-
         logger.info(f"Load test: {successful_refreshes}/{connection_count} refreshes, "
 
                    f"total time: {total_refresh_time:.2f}s, setup: {setup_time:.2f}s")
     
-
     async def test_jwt_refresh_redis_persistence(self, refresh_manager, redis_client):
 
         """Test JWT refresh updates session data in Redis correctly."""
@@ -960,7 +883,6 @@ class TestJWTRefreshWebSocketL3:
 
         assert initial_redis_data is not None
         
-
         initial_session = json.loads(initial_redis_data)
 
         assert initial_session["user_id"] == user_id
@@ -979,7 +901,6 @@ class TestJWTRefreshWebSocketL3:
 
         assert updated_redis_data is not None
         
-
         updated_session = json.loads(updated_redis_data)
 
         assert updated_session["user_id"] == user_id
@@ -1008,7 +929,6 @@ class TestJWTRefreshWebSocketL3:
 
         assert success is True
     
-
     async def test_jwt_refresh_failure_recovery(self, refresh_manager, redis_client):
 
         """Test recovery from JWT refresh failures."""
@@ -1056,7 +976,6 @@ class TestJWTRefreshWebSocketL3:
         # Should work with original token or handle gracefully
 
         assert success is True or not websocket.closed
-
 
 if __name__ == "__main__":
 

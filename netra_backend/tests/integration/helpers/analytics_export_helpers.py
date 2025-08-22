@@ -23,7 +23,6 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.db.clickhouse import ClickHouseService
 
-
 class AdvancedAnalyticsExportInfrastructure:
     """Infrastructure for advanced analytics export testing."""
     
@@ -45,7 +44,6 @@ class AdvancedAnalyticsExportInfrastructure:
         """Cleanup analytics export infrastructure."""
         if self.clickhouse_service:
             await self.clickhouse_service.close()
-
 
 class AnalyticsExportManager:
     """Manages analytics export operations."""
@@ -98,7 +96,6 @@ class AnalyticsExportManager:
             "file_size_mb": record_count * 0.001
         }
 
-
 class ExportScheduleManager:
     """Manages scheduled analytics exports."""
     
@@ -125,7 +122,6 @@ class ExportScheduleManager:
     async def get_scheduled_exports(self) -> List[Dict[str, Any]]:
         """Get all scheduled exports."""
         return list(self.scheduled_exports.values())
-
 
 class DataWarehouseSyncManager:
     """Manages data warehouse synchronization."""
@@ -156,7 +152,6 @@ class DataWarehouseSyncManager:
             "sync_timestamp": time.time()
         }
 
-
 class FormatConverterFactory:
     """Factory for creating format converters."""
     
@@ -170,14 +165,12 @@ class FormatConverterFactory:
             "xml": XMLExportConverter()
         }
 
-
 class CSVExportConverter:
     """CSV format export converter."""
     
     async def convert_to_csv(self, data: List[Dict[str, Any]]) -> str:
         """Convert data to CSV format."""
         return f"CSV data with {len(data)} records"
-
 
 class JSONExportConverter:
     """JSON format export converter."""
@@ -186,7 +179,6 @@ class JSONExportConverter:
         """Convert data to JSON format."""
         return json.dumps({"records": data[:10], "total": len(data)}, default=str)
 
-
 class ParquetExportConverter:
     """Parquet format export converter."""
     
@@ -194,14 +186,12 @@ class ParquetExportConverter:
         """Convert data to Parquet format."""
         return f"Parquet data with {len(data)} records"
 
-
 class XMLExportConverter:
     """XML format export converter."""
     
     async def convert_to_xml(self, data: List[Dict[str, Any]]) -> str:
         """Convert data to XML format."""
         return f"<export><records count='{len(data)}'>XML data</records></export>"
-
 
 class AnalyticsDataGenerator:
     """Generates analytics test data."""
@@ -219,7 +209,6 @@ class AnalyticsDataGenerator:
             }
             for i in range(size)
         ]
-
 
 class ExportConfigFactory:
     """Factory for creating export configurations."""

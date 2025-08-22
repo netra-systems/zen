@@ -14,7 +14,6 @@ import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
-
 class TestRealisticLogIngestion:
     """Test realistic log ingestion patterns"""
     

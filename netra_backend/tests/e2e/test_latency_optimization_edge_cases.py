@@ -4,27 +4,18 @@ Tests edge cases and integration scenarios for latency optimization workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.tests.latency_optimization_helpers import (
     create_3x_latency_state,
     create_already_optimized_state,
     create_caching_optimization_state,
     create_impossible_latency_state,
-    # Add project root to path
     create_latency_optimization_setup,
     execute_latency_workflow,
     validate_agent_data_flow,
@@ -33,12 +24,10 @@ from netra_backend.tests.latency_optimization_helpers import (
     validate_state_consistency,
 )
 
-
 @pytest.fixture
 def latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for latency optimization testing."""
     return create_latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher)
-
 
 class TestLatencyOptimizationEdgeCases:
     """Test edge cases in latency optimization workflows."""
@@ -56,7 +45,6 @@ class TestLatencyOptimizationEdgeCases:
         state = create_already_optimized_state()
         results = await execute_latency_workflow(setup, state)
         validate_optimized_system_handling(results)
-
 
 class TestIntegrationValidation:
     """Test integration between latency optimization agents."""

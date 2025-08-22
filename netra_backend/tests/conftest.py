@@ -3,17 +3,9 @@ Backend-specific test configuration.
 Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
 
-# Add the project root directory to Python path for imports
 import os
-import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-# Now import after path is set up
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from netra_backend.app.core.network_constants import (
     DatabaseConstants,
     HostConstants,
@@ -204,7 +196,6 @@ def pytest_configure(config):
 
     )
 
-
 try:
 
     initialize_postgres()
@@ -223,7 +214,6 @@ except Exception as e:
 #     yield loop
 #     loop.close()
 
-
 @pytest.fixture(scope="function")
 
 def ensure_db_initialized():
@@ -231,7 +221,6 @@ def ensure_db_initialized():
     """Ensure database is initialized for tests that need it."""
     from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
-
     if async_session_factory is None:
 
         try:
@@ -245,7 +234,6 @@ def ensure_db_initialized():
     # Return the session factory for convenience
 
     return async_session_factory
-
 
 @pytest.fixture(scope="function")
 
@@ -266,7 +254,6 @@ async def test_engine():
 
     await engine.dispose()
 
-
 @pytest.fixture(scope="function")
 
 async def db_session(test_engine):
@@ -277,7 +264,6 @@ async def db_session(test_engine):
 
         yield session
 
-
 @pytest.fixture(scope="function")
 
 def client(db_session):
@@ -285,7 +271,6 @@ def client(db_session):
     def override_get_db():
 
         yield db_session
-
 
     app.dependency_overrides[get_db_session] = override_get_db
 
@@ -314,7 +299,6 @@ def real_llm_manager():
 
         return _create_mock_llm_manager()
 
-
 def _create_mock_llm_manager():
 
     """Create properly configured async mock LLM manager."""
@@ -327,7 +311,6 @@ def _create_mock_llm_manager():
     _setup_performance_llm_mocks(mock_manager)
 
     return mock_manager
-
 
 @pytest.fixture(scope="function") 
 
@@ -344,7 +327,6 @@ def real_websocket_manager():
 
     return manager
 
-
 @pytest.fixture(scope="function")
 
 def real_tool_dispatcher():
@@ -357,7 +339,6 @@ def real_tool_dispatcher():
 
     return _create_mock_tool_dispatcher()
 
-
 @pytest.fixture(scope="function")
 
 def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
@@ -368,7 +349,6 @@ def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatc
 
     return _build_real_setup_dict(agents, real_llm_manager, real_websocket_manager, real_tool_dispatcher)
 
-
 def _create_real_agents(llm_manager, tool_dispatcher):
 
     """Create real agent instances with proper dependencies."""
@@ -376,7 +356,6 @@ def _create_real_agents(llm_manager, tool_dispatcher):
     agent_classes = _import_agent_classes()
 
     return _instantiate_agents(agent_classes, llm_manager, tool_dispatcher)
-
 
 def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatcher):
 
@@ -396,7 +375,6 @@ def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatch
 # Consolidated from netra_backend/tests/agents/conftest.py
 # =============================================================================
 
-
 def _setup_database_mock():
 
     """Create mock database session with standard async methods."""
@@ -413,7 +391,6 @@ def _setup_database_mock():
 
     return db_session
 
-
 async def _mock_call_llm(*args, **kwargs):
 
     """Mock LLM call returning optimization response."""
@@ -425,7 +402,6 @@ async def _mock_call_llm(*args, **kwargs):
         "tool_calls": []
 
     }
-
 
 async def _mock_ask_llm(*args, **kwargs):
 
@@ -441,7 +417,6 @@ async def _mock_ask_llm(*args, **kwargs):
         "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
 
     })
-
 
 async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
@@ -475,7 +450,6 @@ async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
         return Mock()
 
-
 def _setup_agent_llm_manager():
 
     """Create LLM manager mock with realistic response methods."""
@@ -493,7 +467,6 @@ def _setup_agent_llm_manager():
     llm_manager.get = Mock(return_value=Mock())
 
     return llm_manager
-
 
 def _setup_websocket_tool_dispatcher():
 
@@ -514,7 +487,6 @@ def _setup_websocket_tool_dispatcher():
 
     return websocket_manager, tool_dispatcher
 
-
 def _setup_core_services():
 
     """Create core business services."""
@@ -529,7 +501,6 @@ def _setup_core_services():
     corpus_service = CorpusService()
 
     return synthetic_service, quality_service, corpus_service
-
 
 def _setup_mock_services():
 
@@ -549,7 +520,6 @@ def _setup_mock_services():
 
     return state_service, apex_selector
 
-
 def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     """Create supervisor and agent service with proper configuration."""
@@ -568,7 +538,6 @@ def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     return supervisor, agent_service
 
-
 @pytest.fixture
 
 def mock_dependencies():
@@ -581,7 +550,6 @@ def mock_dependencies():
 
     return llm_manager, tool_dispatcher
 
-
 @pytest.fixture
 
 def agent(mock_dependencies):
@@ -590,7 +558,6 @@ def agent(mock_dependencies):
     from unittest.mock import patch, Mock, AsyncMock
     from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     
-
     llm_manager, tool_dispatcher = mock_dependencies
 
     with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager') as mock_redis_class:
@@ -608,7 +575,6 @@ def agent(mock_dependencies):
 
         mock_redis_class.return_value = mock_redis_instance
         
-
         agent = DataSubAgent(llm_manager, tool_dispatcher)
         # Ensure redis_manager is properly mocked
 
@@ -620,7 +586,6 @@ def agent(mock_dependencies):
 
     return agent
 
-
 @pytest.fixture
 
 def service(agent):
@@ -628,7 +593,6 @@ def service(agent):
     """Alias agent as service for integration test compatibility"""
 
     return agent
-
 
 @pytest.fixture
 
@@ -663,7 +627,6 @@ def sample_performance_data():
         }
 
     ]
-
 
 @pytest.fixture
 
@@ -703,7 +666,6 @@ def sample_anomaly_data():
 
     ]
 
-
 @pytest.fixture
 
 def sample_usage_patterns():
@@ -719,7 +681,6 @@ def sample_usage_patterns():
         {'day_of_week': 1, 'hour': 11, 'total_events': 2000, 'avg_latency': 55.0}
 
     ]
-
 
 @pytest.fixture
 
@@ -763,7 +724,6 @@ def setup_real_infrastructure():
 # Consolidated from netra_backend/tests/clickhouse/conftest.py
 # =============================================================================
 
-
 @pytest.fixture
 
 def mock_clickhouse_client():
@@ -786,7 +746,6 @@ def mock_clickhouse_client():
 
     return client
 
-
 @pytest.fixture
 
 def mock_db_session():
@@ -807,7 +766,6 @@ def mock_db_session():
     session.query = MagicMock()
 
     return session
-
 
 @pytest.fixture
 
@@ -842,7 +800,6 @@ def sample_corpus_data():
         ]
 
     }
-
 
 @pytest.fixture
 
@@ -880,7 +837,6 @@ def sample_corpus_records():
 
 # NOTE: mock_redis_manager is now provided by root conftest.py to avoid duplication
 
-
 @pytest.fixture(autouse=True)
 
 def setup_backend_test_environment(monkeypatch):
@@ -889,7 +845,6 @@ def setup_backend_test_environment(monkeypatch):
     # Backend-specific database configs (root conftest handles common env vars)
 
     monkeypatch.setenv("CLICKHOUSE_URL", "clickhouse://test:test@localhost:9000/test")
-
 
 @pytest.fixture
 
@@ -929,7 +884,6 @@ def performance_metrics_data():
 
     }
 
-
 @pytest.fixture
 
 def anomaly_detection_data():
@@ -953,7 +907,6 @@ def anomaly_detection_data():
 # Consolidated from netra_backend/tests/performance/conftest.py
 # =============================================================================
 
-
 @pytest.fixture
 
 def mock_settings():
@@ -976,7 +929,6 @@ def mock_settings():
 
     return mock_config
 
-
 @pytest.fixture
 
 def mock_performance_websocket_manager():
@@ -988,7 +940,6 @@ def mock_performance_websocket_manager():
     manager.broadcast = AsyncMock()
 
     return manager
-
 
 @pytest.fixture
 
@@ -1016,7 +967,6 @@ def performance_test_data():
 
     }
 
-
 @pytest.fixture(autouse=True)
 
 def setup_performance_environment(tmp_path, monkeypatch):
@@ -1029,7 +979,6 @@ def setup_performance_environment(tmp_path, monkeypatch):
 
     test_dir.mkdir()
     
-
     corpus_dir = test_dir / "content_corpuses"
 
     corpus_dir.mkdir()
@@ -1038,9 +987,7 @@ def setup_performance_environment(tmp_path, monkeypatch):
 
     monkeypatch.setenv("CORPUS_TEST_DIR", str(corpus_dir))
     
-
     yield test_dir
-
 
 @pytest.fixture
 
@@ -1050,14 +997,12 @@ def cleanup_performance_files():
 
     files_to_cleanup = []
     
-
     def register_cleanup(filepath: str):
 
         """Register file for cleanup"""
 
         files_to_cleanup.append(filepath)
     
-
     yield register_cleanup
     
     # Cleanup
@@ -1072,7 +1017,6 @@ def cleanup_performance_files():
 # WEBSOCKET MANAGER TESTING FIXTURES
 # Consolidated from netra_backend/tests/ws_manager/conftest.py
 # =============================================================================
-
 
 class MockWebSocket:
 
@@ -1092,18 +1036,15 @@ class MockWebSocket:
 
         self.close_calls = []
     
-
     async def mock_send_json(self, data):
 
         self.send_calls.append(data)
     
-
     async def mock_close(self, code=1000, reason=""):
 
         self.close_calls.append({"code": code, "reason": reason})
 
         self.client_state = WebSocketState.DISCONNECTED
-
 
 @pytest.fixture
 
@@ -1116,7 +1057,6 @@ def fresh_manager():
 
     WebSocketManager._initialized = False
     
-
     manager = WebSocketManager()
 
     yield manager
@@ -1125,7 +1065,6 @@ def fresh_manager():
 
     WebSocketManager._instance = None
 
-
 @pytest.fixture
 
 def mock_websocket():
@@ -1133,7 +1072,6 @@ def mock_websocket():
     """Create a mock WebSocket"""
 
     return MockWebSocket()
-
 
 @pytest.fixture
 
@@ -1147,7 +1085,6 @@ def connected_websocket():
     ws.client_state = WebSocketState.CONNECTED
 
     return ws
-
 
 @pytest.fixture
 

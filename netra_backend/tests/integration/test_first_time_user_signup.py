@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Prevents signup funnel failures that block revenue
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import httpx
 import pytest
@@ -26,19 +19,16 @@ from fastapi import status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.models.user import User
-from integration.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     assert_user_registration_success,
     auth_service,
     get_mock_provider_configs,
     simulate_oauth_callback,
-    # Add project root to path
     test_user_data,
     user_service,
     verify_user_in_database,
 )
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -65,7 +55,6 @@ async def test_user_registration_with_email_verification(
     stored_user_id = await redis_client.get(token_key)
     assert stored_user_id == str(reg_data["user_id"])
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
@@ -90,7 +79,6 @@ async def test_email_verification_activation(
         async_session, reg_data["user_id"], test_user_data["email"], should_be_active=True
     )
     assert user.email_verified is True
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -117,7 +105,6 @@ async def test_user_authentication_after_verification(
     assert "access_token" in auth_data
     assert "refresh_token" in auth_data
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(10)
@@ -134,7 +121,6 @@ async def test_duplicate_registration_prevention(
     response = await async_client.post("/auth/register", json=test_user_data)
     assert response.status_code == status.HTTP_409_CONFLICT
     assert "already exists" in response.json()["detail"].lower()
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -166,7 +152,6 @@ async def test_google_oauth_signup_flow(
         auth_result = response.json()
         assert "access_token" in auth_result
         assert auth_result["user"]["email"] == "testuser@gmail.com"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -200,7 +185,6 @@ async def test_github_oauth_signup_flow(
         )
         assert response.status_code == status.HTTP_200_OK
         assert "access_token" in response.json()
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

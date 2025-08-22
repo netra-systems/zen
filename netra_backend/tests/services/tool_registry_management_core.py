@@ -10,7 +10,6 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.services.tool_registry import ToolRegistry
 
-
 class UnifiedToolRegistry:
     """Unified registry managing multiple tool registries and orchestration"""
     
@@ -51,7 +50,6 @@ class UnifiedToolRegistry:
     def collect_metrics(self) -> Dict[str, Any]:
         """Collect metrics from all tools"""
         return self.metrics_collector.collect_all_metrics()
-
 
 class ToolOrchestrator:
     """Orchestrates tool execution and coordination"""
@@ -120,7 +118,6 @@ class ToolOrchestrator:
         self.active_chains[chain_id]['end_time'] = datetime.now(UTC)
         self.execution_history.append(self.active_chains[chain_id])
 
-
 class ToolLifecycleManager:
     """Manages tool lifecycle operations"""
     
@@ -173,7 +170,6 @@ class ToolLifecycleManager:
             return True
         return False
 
-
 class ToolHealthMonitor:
     """Monitors tool health and status"""
     
@@ -219,7 +215,6 @@ class ToolHealthMonitor:
         
         self.health_checks[tool_name] = health_status
         return health_status
-
 
 class ToolMetricsCollector:
     """Collects and aggregates tool metrics"""

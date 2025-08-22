@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Configuration change tracking and reporting
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -32,14 +25,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from integration.security.shared_fixtures import (
+from netra_backend.tests.integration.security.shared_fixtures import (
     ComplianceReportingHelper,
     compliance_helper,
-    # Add project root to path
     enterprise_security_infrastructure,
 )
-
 
 class TestComplianceReporting:
     """BVJ: Regulatory compliance report generation for SOC2/GDPR/HIPAA."""
@@ -264,7 +254,6 @@ class TestComplianceReporting:
         assert executive_dashboard["overall_compliance_score"] >= 95.0
         assert executive_dashboard["compliance_status"] == "COMPLIANT"
         assert executive_dashboard["risk_indicators"]["high_risk_items"] == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

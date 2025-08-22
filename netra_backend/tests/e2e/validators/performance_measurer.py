@@ -16,7 +16,6 @@ from netra_backend.tests.performance_metrics import (
     ThroughputMetrics,
 )
 
-
 class LatencyMeasurer:
     """Measures latency with percentile calculations."""
     
@@ -91,7 +90,6 @@ class LatencyMeasurer:
         p99 = sorted_values[min(p99_idx, len(sorted_values) - 1)]
         return p95, p99
 
-
 class ThroughputTracker:
     """Tracks throughput metrics."""
     
@@ -141,7 +139,6 @@ class ThroughputTracker:
             operations_per_minute=rates[2],
             peak_throughput=peak
         )
-
 
 class ResourceMonitor:
     """Monitors system resource usage."""

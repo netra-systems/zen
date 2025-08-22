@@ -6,17 +6,10 @@ These tests ensure the message routing fix is working end-to-end.
 ROOT CAUSE ADDRESSED: Messages were being validated but never forwarded to agent service.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,11 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from logging_config import central_logger
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.asyncio
 class TestWebSocketAgentIntegration:

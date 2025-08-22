@@ -11,17 +11,10 @@ Coverage: OpenTelemetry integration, trace context propagation, span relationshi
 L3 Realism: Tests with real distributed services and actual trace propagation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,10 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-# Add project root to path
 from netra_backend.app.core.alert_manager import HealthAlertManager
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +40,6 @@ pytestmark = [
     pytest.mark.observability,
     pytest.mark.tracing
 ]
-
 
 @dataclass
 class TraceSpan:
@@ -67,7 +56,6 @@ class TraceSpan:
     logs: List[Dict[str, Any]]
     status: str  # "ok", "error", "timeout"
 
-
 @dataclass
 class TraceContext:
     """Represents complete trace context across services."""
@@ -77,7 +65,6 @@ class TraceContext:
     service_count: int
     error_count: int
     root_service: str
-
 
 class DistributedTracingValidator:
     """Validates distributed tracing propagation with real services."""
@@ -460,7 +447,6 @@ class DistributedTracingValidator:
         except Exception as e:
             logger.error(f"Tracing cleanup failed: {e}")
 
-
 class TracingCollector:
     """Mock tracing collector for L3 testing."""
     
@@ -471,7 +457,6 @@ class TracingCollector:
     async def shutdown(self):
         """Shutdown tracing collector."""
         pass
-
 
 class ServiceRegistry:
     """Mock service registry for multi-service tracing."""
@@ -484,7 +469,6 @@ class ServiceRegistry:
         """Cleanup service registry."""
         pass
 
-
 @pytest.fixture
 async def distributed_tracing_validator():
     """Create distributed tracing validator for L3 testing."""
@@ -492,7 +476,6 @@ async def distributed_tracing_validator():
     await validator.initialize_tracing_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_trace_context_propagation_l3(distributed_tracing_validator):
@@ -522,7 +505,6 @@ async def test_trace_context_propagation_l3(distributed_tracing_validator):
     expected_services = {"api-gateway", "auth-service", "agent-service", "database-service"}
     assert propagation_results["service_coverage"] == expected_services
 
-
 @pytest.mark.asyncio
 async def test_trace_performance_analysis_l3(distributed_tracing_validator):
     """Test trace performance analysis and bottleneck identification.
@@ -549,7 +531,6 @@ async def test_trace_performance_analysis_l3(distributed_tracing_validator):
     # Verify latency breakdown includes all services
     assert len(performance_analysis["latency_breakdown"]) == 5
 
-
 @pytest.mark.asyncio
 async def test_concurrent_trace_correlation_l3(distributed_tracing_validator):
     """Test trace correlation accuracy with concurrent operations.
@@ -567,7 +548,6 @@ async def test_concurrent_trace_correlation_l3(distributed_tracing_validator):
     # Verify successful correlations
     assert correlation_results["successful_correlations"] >= 7
     assert correlation_results["correlation_errors"] <= 1
-
 
 @pytest.mark.asyncio
 async def test_trace_error_propagation_l3(distributed_tracing_validator):
@@ -604,7 +584,6 @@ async def test_trace_error_propagation_l3(distributed_tracing_validator):
     # Verify error span maintains proper context
     assert error_span.trace_id == trace_context.trace_id
     assert error_span.status == "error"
-
 
 @pytest.mark.asyncio
 async def test_trace_sampling_consistency_l3(distributed_tracing_validator):

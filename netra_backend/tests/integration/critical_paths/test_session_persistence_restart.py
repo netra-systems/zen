@@ -10,20 +10,10 @@ L3 Test: Real session persistence across service restarts with Redis/PostgreSQL.
 Tests session recovery, WebSocket reconnection, and state continuity.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -39,8 +29,6 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
-
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock
@@ -53,17 +41,14 @@ from ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.database.models import User, Session
 from netra_backend.app.logging_config import central_logger
-from integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
-
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 logger = central_logger.get_logger(__name__)
-
 
 class ServiceRestartSimulator:
 
     """Simulates service restarts for testing session persistence."""
     
-
     def __init__(self, redis_container, postgres_container=None):
 
         self.redis_container = redis_container
@@ -74,14 +59,12 @@ class ServiceRestartSimulator:
 
         self.recovery_metrics = []
     
-
     async def restart_redis(self, restart_type: str = "graceful") -> Dict[str, Any]:
 
         """Simulate Redis restart."""
 
         restart_start = time.time()
         
-
         if restart_type == "graceful":
             # Graceful restart - save data first
 
@@ -117,10 +100,8 @@ class ServiceRestartSimulator:
 
         await self.redis_container._wait_for_ready(timeout=30)
         
-
         restart_duration = time.time() - restart_start
         
-
         restart_event = {
 
             "service": "redis",
@@ -133,15 +114,12 @@ class ServiceRestartSimulator:
 
         }
         
-
         self.restart_events.append(restart_event)
         
-
         logger.info(f"Redis {restart_type} restart completed in {restart_duration:.2f}s")
 
         return restart_event
     
-
     async def restart_postgres(self, restart_type: str = "graceful") -> Dict[str, Any]:
 
         """Simulate PostgreSQL restart."""
@@ -150,12 +128,10 @@ class ServiceRestartSimulator:
 
             return {"error": "PostgreSQL container not available"}
         
-
         restart_start = time.time()
 
         container_id = self.postgres_container.container_id
         
-
         if restart_type == "graceful":
             # Graceful shutdown
 
@@ -178,10 +154,8 @@ class ServiceRestartSimulator:
 
         await self.postgres_container._wait_for_ready(timeout=60)
         
-
         restart_duration = time.time() - restart_start
         
-
         restart_event = {
 
             "service": "postgres",
@@ -194,20 +168,16 @@ class ServiceRestartSimulator:
 
         }
         
-
         self.restart_events.append(restart_event)
         
-
         logger.info(f"PostgreSQL {restart_type} restart completed in {restart_duration:.2f}s")
 
         return restart_event
-
 
 class SessionPersistenceManager:
 
     """Manages session persistence testing scenarios."""
     
-
     def __init__(self, jwt_service: JWTService, session_manager: SessionManager,
 
                  websocket_manager: WebSocketManager, redis_client, restart_simulator: ServiceRestartSimulator):
@@ -226,7 +196,6 @@ class SessionPersistenceManager:
 
         self.recovery_tests = []
     
-
     async def create_persistent_session(self, user_id: str, session_type: str = "standard") -> Dict[str, Any]:
 
         """Create a session designed to test persistence."""
@@ -244,7 +213,6 @@ class SessionPersistenceManager:
 
         )
         
-
         if not token_result["success"]:
 
             raise ValueError(f"Token generation failed: {token_result.get('error')}")
@@ -265,7 +233,6 @@ class SessionPersistenceManager:
 
         }
         
-
         session_result = await self.session_manager.create_session(
 
             user_id=user_id,
@@ -276,7 +243,6 @@ class SessionPersistenceManager:
 
         )
         
-
         if not session_result["success"]:
 
             raise ValueError(f"Session creation failed: {session_result.get('error')}")
@@ -285,7 +251,6 @@ class SessionPersistenceManager:
 
         websocket = MockWebSocketForRedis(user_id)
         
-
         with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
             mock_verify.return_value = {
@@ -298,7 +263,6 @@ class SessionPersistenceManager:
 
             }
             
-
             connection_info = await self.websocket_manager.connect_user(user_id, websocket)
         
         # Store session state for persistence verification
@@ -355,18 +319,14 @@ class SessionPersistenceManager:
 
         }
         
-
         await self.redis_client.set(state_key, json.dumps(state_data), ex=86400)  # 24 hours
         
-
         self.persistent_sessions[session_result["session_id"]] = session_state
         
-
         logger.info(f"Created persistent session {session_result['session_id']} for user {user_id}")
 
         return session_state
     
-
     async def verify_session_persistence(self, session_id: str, 
 
                                        check_type: str = "full") -> Dict[str, Any]:
@@ -377,12 +337,10 @@ class SessionPersistenceManager:
 
         verification_results = {}
         
-
         if session_id not in self.persistent_sessions:
 
             return {"error": f"Session {session_id} not in test tracking"}
         
-
         original_session = self.persistent_sessions[session_id]
 
         user_id = original_session["user_id"]
@@ -446,7 +404,6 @@ class SessionPersistenceManager:
 
                 new_websocket = MockWebSocketForRedis(f"{user_id}_reconnect")
                 
-
                 with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
                     mock_verify.return_value = {
@@ -459,10 +416,8 @@ class SessionPersistenceManager:
 
                     }
                     
-
                     reconnection_info = await self.websocket_manager.connect_user(user_id, new_websocket)
                 
-
                 verification_results["websocket_reconnection"] = {
 
                     "success": reconnection_info is not None,
@@ -485,15 +440,12 @@ class SessionPersistenceManager:
 
                     await self.websocket_manager.disconnect_user(user_id, new_websocket)
                 
-
             except Exception as e:
 
                 verification_results["websocket_reconnection"] = {"error": str(e)}
         
-
         verification_duration = time.time() - verification_start
         
-
         verification_summary = {
 
             "session_id": session_id,
@@ -510,10 +462,8 @@ class SessionPersistenceManager:
 
         }
         
-
         return verification_summary
     
-
     async def test_session_recovery_after_restart(self, restart_services: List[str], 
 
                                                  restart_type: str = "graceful") -> Dict[str, Any]:
@@ -528,7 +478,6 @@ class SessionPersistenceManager:
 
         pre_restart_sessions = {}
         
-
         for user_id in test_users:
 
             session_data = await self.create_persistent_session(user_id, "restart_test")
@@ -543,7 +492,6 @@ class SessionPersistenceManager:
 
             await self.websocket_manager.send_message_to_user(session_data["user_id"], test_message)
         
-
         logger.info(f"Created {len(pre_restart_sessions)} sessions before restart")
         
         # Perform service restarts
@@ -596,7 +544,6 @@ class SessionPersistenceManager:
 
             new_session_creation = {"success": False, "error": str(e)}
         
-
         recovery_test_duration = time.time() - recovery_test_start
         
         # Analyze recovery success
@@ -609,7 +556,6 @@ class SessionPersistenceManager:
 
         recovery_rate = successful_recoveries / total_sessions if total_sessions > 0 else 0
         
-
         recovery_test_result = {
 
             "restart_services": restart_services,
@@ -636,18 +582,14 @@ class SessionPersistenceManager:
 
         }
         
-
         self.recovery_tests.append(recovery_test_result)
         
-
         logger.info(f"Recovery test completed: {successful_recoveries}/{total_sessions} sessions recovered "
 
                    f"after {restart_type} restart of {restart_services}")
         
-
         return recovery_test_result
     
-
     async def _reinitialize_services(self):
 
         """Reinitialize service connections after restart."""
@@ -687,7 +629,6 @@ class SessionPersistenceManager:
 
             logger.error(f"JWT service reinitialization failed: {e}")
     
-
     def _evaluate_verification_success(self, verification_results: Dict[str, Any]) -> bool:
 
         """Evaluate if session verification was successful."""
@@ -713,7 +654,6 @@ class SessionPersistenceManager:
 
         return session_exists and redis_state_exists and token_valid and ws_success
     
-
     async def cleanup(self):
 
         """Clean up test sessions."""
@@ -736,9 +676,7 @@ class SessionPersistenceManager:
 
                 logger.warning(f"Cleanup error for session {session_id}: {e}")
         
-
         self.persistent_sessions.clear()
-
 
 @pytest.mark.L3
 
@@ -748,7 +686,6 @@ class TestSessionPersistenceRestartL3:
 
     """L3 integration test for session persistence after service restarts."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -763,7 +700,6 @@ class TestSessionPersistenceRestartL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -778,7 +714,6 @@ class TestSessionPersistenceRestartL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def jwt_service(self, redis_client):
@@ -787,7 +722,6 @@ class TestSessionPersistenceRestartL3:
 
         service = JWTService()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -798,7 +732,6 @@ class TestSessionPersistenceRestartL3:
 
             await service.shutdown()
     
-
     @pytest.fixture
 
     async def session_manager(self, redis_client):
@@ -807,7 +740,6 @@ class TestSessionPersistenceRestartL3:
 
         manager = SessionManager()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -818,7 +750,6 @@ class TestSessionPersistenceRestartL3:
 
             await manager.shutdown()
     
-
     @pytest.fixture
 
     async def websocket_manager(self, redis_client):
@@ -837,12 +768,10 @@ class TestSessionPersistenceRestartL3:
 
             mock_redis_mgr.get_client.return_value = redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
     
-
     @pytest.fixture
 
     async def restart_simulator(self, redis_container):
@@ -855,7 +784,6 @@ class TestSessionPersistenceRestartL3:
 
         yield simulator
     
-
     @pytest.fixture
 
     async def persistence_manager(self, jwt_service, session_manager, websocket_manager, 
@@ -874,7 +802,6 @@ class TestSessionPersistenceRestartL3:
 
         await manager.cleanup()
     
-
     async def test_redis_graceful_restart_session_persistence(self, persistence_manager):
 
         """Test session persistence through graceful Redis restart."""
@@ -884,7 +811,6 @@ class TestSessionPersistenceRestartL3:
 
         sessions = {}
         
-
         for user_id in users:
 
             session_data = await persistence_manager.create_persistent_session(user_id, "graceful_test")
@@ -928,10 +854,8 @@ class TestSessionPersistenceRestartL3:
 
             assert "test_data" in redis_state["data"]
         
-
         logger.info(f"Graceful restart test: {recovery_result['recovery_rate']:.1%} recovery rate")
     
-
     async def test_redis_crash_restart_session_recovery(self, persistence_manager):
 
         """Test session recovery after Redis crash restart."""
@@ -941,7 +865,6 @@ class TestSessionPersistenceRestartL3:
 
         sessions = {}
         
-
         for user_id in users:
 
             session_data = await persistence_manager.create_persistent_session(user_id, "crash_test")
@@ -984,10 +907,8 @@ class TestSessionPersistenceRestartL3:
 
         assert restart_events[0]["restart_type"] == "crash"
         
-
         logger.info(f"Crash restart test: {recovery_result['recovery_rate']:.1%} recovery rate")
     
-
     async def test_websocket_reconnection_after_restart(self, persistence_manager):
 
         """Test WebSocket reconnection capability after service restart."""
@@ -1048,10 +969,8 @@ class TestSessionPersistenceRestartL3:
 
         assert post_success is True
         
-
         logger.info("WebSocket reconnection after restart verified successfully")
     
-
     async def test_concurrent_sessions_restart_resilience(self, persistence_manager):
 
         """Test multiple concurrent sessions surviving restart."""
@@ -1069,12 +988,10 @@ class TestSessionPersistenceRestartL3:
 
             return await persistence_manager.create_persistent_session(user_id, "concurrent_test")
         
-
         session_tasks = [create_session(user_id) for user_id in users]
 
         session_results = await asyncio.gather(*session_tasks)
         
-
         for session_data in session_results:
 
             sessions[session_data["session_id"]] = session_data
@@ -1111,14 +1028,12 @@ class TestSessionPersistenceRestartL3:
 
         total_components = 0
         
-
         for session_id, recovery_data in recovery_result["recovery_results"].items():
 
             results = recovery_data["results"]
 
             total_components += len(results)
             
-
             for component, result in results.items():
 
                 if isinstance(result, dict) and (result.get("exists") or result.get("valid") or result.get("success")):
@@ -1139,12 +1054,10 @@ class TestSessionPersistenceRestartL3:
 
                 assert success_rate >= 0.7
         
-
         logger.info(f"Concurrent sessions restart test: {recovery_result['recovery_rate']:.1%} recovery rate "
 
                    f"for {session_count} sessions")
     
-
     async def test_session_state_data_persistence(self, persistence_manager):
 
         """Test that complex session state data persists through restart."""
@@ -1209,7 +1122,6 @@ class TestSessionPersistenceRestartL3:
 
         }
         
-
         await persistence_manager.redis_client.set(state_key, json.dumps(complex_state), ex=86400)
         
         # Perform restart
@@ -1232,7 +1144,6 @@ class TestSessionPersistenceRestartL3:
 
         assert redis_state["exists"] is True
         
-
         recovered_state = redis_state["data"]
         
         # Verify workspace data
@@ -1267,10 +1178,8 @@ class TestSessionPersistenceRestartL3:
 
         assert metrics["files_modified"] == 3
         
-
         logger.info("Complex session state data persistence verified successfully")
     
-
     async def test_restart_performance_impact(self, persistence_manager):
 
         """Test performance impact of service restart on session operations."""
@@ -1301,7 +1210,6 @@ class TestSessionPersistenceRestartL3:
 
             assert verification["overall_success"] is True
         
-
         avg_pre_restart_time = sum(pre_restart_times) / len(pre_restart_times)
         
         # Perform restart
@@ -1334,7 +1242,6 @@ class TestSessionPersistenceRestartL3:
 
             post_restart_times.append(operation_time)
         
-
         avg_post_restart_time = sum(post_restart_times) / len(post_restart_times)
         
         # Performance assertions
@@ -1349,7 +1256,6 @@ class TestSessionPersistenceRestartL3:
 
         assert performance_degradation < 3.0  # No more than 3x slower
         
-
         logger.info(f"Restart performance: total_time={total_restart_time:.2f}s, "
 
                    f"pre_restart_avg={avg_pre_restart_time:.3f}s, "
@@ -1357,7 +1263,6 @@ class TestSessionPersistenceRestartL3:
                    f"post_restart_avg={avg_post_restart_time:.3f}s, "
 
                    f"degradation={performance_degradation:.1f}x")
-
 
 if __name__ == "__main__":
 

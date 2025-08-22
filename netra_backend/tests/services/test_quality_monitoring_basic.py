@@ -1,24 +1,14 @@
 """Basic tests for Quality Monitoring Service"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import sys
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-
-# Add project root to path
-
 
 # Mock ClickHouseManager before importing the service
 sys.modules['app.db.clickhouse'] = MagicMock()
@@ -38,7 +28,6 @@ from netra_backend.tests.quality_monitoring_helpers import (
     assert_service_initialization,
     assert_service_monitoring_state,
 )
-
 
 class TestQualityMonitoringServiceBasic:
     """Test basic functionality of QualityMonitoringService"""
@@ -66,7 +55,6 @@ class TestQualityMonitoringServiceBasic:
         assert service.metrics_collector is not None
         assert service.trend_analyzer is not None
 
-
 class TestQualityThresholds:
     """Test quality threshold management"""
     
@@ -86,7 +74,6 @@ class TestQualityThresholds:
         assert AlertSeverity.ERROR in quality_thresholds
         assert AlertSeverity.CRITICAL in quality_thresholds
 
-
 class TestServiceSubscription:
     """Test subscription management"""
     async def test_subscribe_and_unsubscribe(self):
@@ -99,7 +86,6 @@ class TestServiceSubscription:
         
         await service.unsubscribe_from_updates(subscriber_id)
         assert subscriber_id not in service.subscribers
-
 
 class TestServiceConstants:
     """Test service constants and configurations"""
@@ -152,7 +138,6 @@ class TestServiceConstants:
         for metric_type, severity_thresholds in thresholds.items():
             for severity, threshold in severity_thresholds.items():
                 assert 0 <= threshold <= 1
-
 
 class TestEnumValues:
     """Test enum values used by service"""

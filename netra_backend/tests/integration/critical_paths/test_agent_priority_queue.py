@@ -10,17 +10,10 @@ Critical Path: Priority assignment -> Queue management -> Scheduling -> Executio
 Coverage: Real priority queues, scheduling algorithms, starvation prevention, monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import heapq
@@ -39,12 +32,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class PriorityLevel(Enum):
     """Priority levels for agent tasks."""
@@ -54,7 +45,6 @@ class PriorityLevel(Enum):
     LOW = 4
     BACKGROUND = 5
 
-
 class TaskStatus(Enum):
     """Status of tasks in the queue."""
     PENDING = "pending"
@@ -62,7 +52,6 @@ class TaskStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
-
 
 @dataclass
 class AgentTask:
@@ -132,7 +121,6 @@ class AgentTask:
         if self.queue_priority == other.queue_priority:
             return self.insertion_order < other.insertion_order
         return self.queue_priority < other.queue_priority
-
 
 class PriorityQueue:
     """Priority queue implementation for agent tasks."""
@@ -254,7 +242,6 @@ class PriorityQueue:
     def size(self) -> int:
         """Get current queue size."""
         return len(self.heap)
-
 
 class TaskScheduler:
     """Schedules and executes tasks from priority queue."""
@@ -439,7 +426,6 @@ class TaskScheduler:
             "running_tasks": len(self.running_tasks)
         }
 
-
 class AgentPriorityQueueManager:
     """Manages agent priority queue testing."""
     
@@ -503,7 +489,6 @@ class AgentPriorityQueueManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def priority_queue_manager():
     """Create priority queue manager for testing."""
@@ -511,7 +496,6 @@ async def priority_queue_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -545,7 +529,6 @@ async def test_basic_priority_queue_operations(priority_queue_manager):
     expected_order = [PriorityLevel.CRITICAL, PriorityLevel.HIGH, PriorityLevel.NORMAL, PriorityLevel.LOW]
     assert dequeued_priorities == expected_order
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_task_scheduling_and_execution(priority_queue_manager):
@@ -573,7 +556,6 @@ async def test_task_scheduling_and_execution(priority_queue_manager):
     assert stats["total_failed"] == 0
     assert stats["success_rate"] == 100.0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_priority_ordering_with_age_factor(priority_queue_manager):
@@ -599,7 +581,6 @@ async def test_priority_ordering_with_age_factor(priority_queue_manager):
     # Verify that age factor is considered in priority calculation
     assert old_task.queue_priority < old_task.priority.value  # Age bonus applied
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_deadline_based_priority_boost(priority_queue_manager):
@@ -620,7 +601,6 @@ async def test_deadline_based_priority_boost(priority_queue_manager):
     # Urgent task should get priority boost due to deadline
     first_task = manager.priority_queue.peek()
     assert first_task.task_id == urgent_task.task_id  # Urgent task should be first
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -647,7 +627,6 @@ async def test_starvation_prevention(priority_queue_manager):
     # Task priority should have been boosted
     updated_task = manager.priority_queue.heap[0]  # Should be the only task
     assert updated_task.priority != PriorityLevel.LOW  # Should be boosted
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -694,7 +673,6 @@ async def test_task_retry_mechanism(priority_queue_manager):
     # Verify retry behavior - task should have been retried
     # Note: In a real scenario, we'd check the actual retry logic
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_task_processing(priority_queue_manager):
@@ -729,7 +707,6 @@ async def test_concurrent_task_processing(priority_queue_manager):
     stats = manager.scheduler.get_execution_stats()
     assert stats["total_completed"] == 10
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_queue_capacity_limits(priority_queue_manager):
@@ -753,7 +730,6 @@ async def test_queue_capacity_limits(priority_queue_manager):
     # Should only enqueue up to capacity
     assert successful_enqueues == 5
     assert manager.priority_queue.size() == 5
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -783,7 +759,6 @@ async def test_priority_distribution_stats(priority_queue_manager):
     for priority, expected_count in priority_counts.items():
         assert stats["priority_distribution"][priority.name] == expected_count
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_task_removal_and_cancellation(priority_queue_manager):
@@ -811,7 +786,6 @@ async def test_task_removal_and_cancellation(priority_queue_manager):
     
     # Size should reflect removal
     assert manager.priority_queue.size() == 4
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

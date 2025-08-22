@@ -12,17 +12,10 @@ role hierarchy, developer auto-detection, and permission grants/revokes.
 Critical for protecting revenue through proper tier enforcement.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch
@@ -31,22 +24,17 @@ import pytest
 
 from netra_backend.app.db.models_postgres import User
 
-# Add project root to path
 from netra_backend.app.services.permission_service import (
     ROLE_HIERARCHY,
     ROLE_PERMISSIONS,
     PermissionService,
 )
 
-# Add project root to path
-
-
 # Test fixtures for setup
 @pytest.fixture
 def mock_db_session():
     """Mock database session."""
     return Mock()
-
 
 @pytest.fixture
 def free_tier_user():
@@ -61,7 +49,6 @@ def free_tier_user():
     user.is_superuser = False
     return user
 
-
 @pytest.fixture
 def pro_tier_user():
     """Pro tier user fixture."""
@@ -74,7 +61,6 @@ def pro_tier_user():
     user.is_developer = False
     user.is_superuser = False
     return user
-
 
 @pytest.fixture
 def developer_user():
@@ -89,7 +75,6 @@ def developer_user():
     user.is_superuser = False
     return user
 
-
 @pytest.fixture
 def admin_user():
     """Admin user fixture."""
@@ -102,7 +87,6 @@ def admin_user():
     user.is_developer = True
     user.is_superuser = False
     return user
-
 
 @pytest.fixture
 def super_admin_user():
@@ -117,37 +101,31 @@ def super_admin_user():
     user.is_superuser = True
     return user
 
-
 # Helper functions for 25-line compliance
 def assert_user_has_permission(user, permission):
     """Assert user has specific permission."""
     result = PermissionService.has_permission(user, permission)
     assert result is True
 
-
 def assert_user_lacks_permission(user, permission):
     """Assert user lacks specific permission."""
     result = PermissionService.has_permission(user, permission)
     assert result is False
-
 
 def assert_role_level_equals(role, expected_level):
     """Assert role level matches expected value."""
     level = PermissionService.get_role_level(role)
     assert level == expected_level
 
-
 def assert_user_is_admin_or_higher(user, expected):
     """Assert user admin status matches expected."""
     result = PermissionService.is_admin_or_higher(user)
     assert result == expected
 
-
 def assert_user_is_developer_or_higher(user, expected):
     """Assert user developer status matches expected."""
     result = PermissionService.is_developer_or_higher(user)
     assert result == expected
-
 
 def create_user_with_custom_permissions(additional=None, revoked=None):
     """Create user with custom permissions."""
@@ -158,7 +136,6 @@ def create_user_with_custom_permissions(additional=None, revoked=None):
     user.is_superuser = False
     return user
 
-
 def update_user_permissions_dict(user, additional=None, revoked=None):
     """Update user permissions dictionary."""
     if not user.permissions:
@@ -167,7 +144,6 @@ def update_user_permissions_dict(user, additional=None, revoked=None):
         user.permissions["additional"] = additional
     if revoked:
         user.permissions["revoked"] = revoked
-
 
 # Core permission checking tests
 class TestPermissionChecking:
@@ -221,7 +197,6 @@ class TestPermissionChecking:
         # Super admin should have comprehensive permission set
         assert len(perms) > 15  # Should have many permissions
 
-
 class TestRoleHierarchyAndLevels:
     """Test role hierarchy and level system."""
 
@@ -264,7 +239,6 @@ class TestRoleHierarchyAndLevels:
         free_tier_user.is_superuser = True
         assert_user_is_admin_or_higher(free_tier_user, True)
 
-
 class TestDeveloperAutoDetection:
     """Test developer status auto-detection - CRITICAL for free-to-paid conversion."""
 
@@ -305,7 +279,6 @@ class TestDeveloperAutoDetection:
         """Production environment doesn't grant developer status."""
         result = PermissionService.detect_developer_status(free_tier_user)
         assert result is False
-
 
 class TestUserRoleUpdates:
     """Test user role updates and elevation."""
@@ -348,7 +321,6 @@ class TestUserRoleUpdates:
             mock_db_session, free_tier_user, check_developer=False
         )
         assert result.role == original_role
-
 
 class TestCustomPermissions:
     """Test custom permission grants and revokes - CRITICAL for tier flexibility."""
@@ -401,7 +373,6 @@ class TestCustomPermissions:
         assert "bonus_perm" in perms
         assert "chat" not in perms  # Should be revoked
 
-
 class TestSetUserRole:
     """Test setting user roles and validation."""
 
@@ -428,7 +399,6 @@ class TestSetUserRole:
         # Should have changed role
         assert result.role != original_role
         assert result.role == "developer"
-
 
 class TestPermissionAggregation:
     """Test permission aggregation and complex scenarios."""
@@ -470,7 +440,6 @@ class TestPermissionAggregation:
         assert "corpus_read" in all_perms
         assert "debug_panel" in all_perms
         assert "user_management" in all_perms
-
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling scenarios."""

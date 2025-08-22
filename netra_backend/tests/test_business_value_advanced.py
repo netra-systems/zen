@@ -3,17 +3,10 @@ Business Value Advanced Tests (Tests 6-10) - Complex Business Scenarios
 Tests advanced business value scenarios for cache, resilience, reporting, and workflows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from typing import Dict, List
@@ -21,11 +14,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
-
-# Add project root to path
-
 
 class TestBusinessValueAdvanced(BusinessValueFixtures):
     """
@@ -285,7 +274,6 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
         """Verify comprehensive analysis was performed"""
         all_prompts = str(llm_manager.ask_llm.call_args_list)
         assert "cost" in all_prompts.lower() or "optimiz" in all_prompts.lower()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

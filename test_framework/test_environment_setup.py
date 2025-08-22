@@ -26,8 +26,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
-from .real_llm_config import RealLLMTestManager, get_real_llm_manager
-from .seed_data_manager import (
+from test_framework.real_llm_config import RealLLMTestManager, get_real_llm_manager
+from test_framework.seed_data_manager import (
     SeedDataManager,
     TestEnvironmentConfig,
     get_seed_data_manager,

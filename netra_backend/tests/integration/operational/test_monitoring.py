@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Performance threshold validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -33,14 +26,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from integration.operational.shared_fixtures import (
+from netra_backend.tests.integration.operational.shared_fixtures import (
     QualityMonitoringTestHelper,
-    # Add project root to path
     operational_infrastructure,
     quality_monitoring_helper,
 )
-
 
 class TestSystemMonitoring:
     """BVJ: Maintains service quality supporting customer satisfaction and retention."""
@@ -248,7 +238,6 @@ class TestSystemMonitoring:
         assert data_quality["completeness"] >= 0.95
         assert data_quality["consistency"] >= 0.95
         assert data_quality["accuracy"] >= 0.95
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

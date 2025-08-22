@@ -5,27 +5,18 @@ Previous tests for OAuth and CSRF utilities have been moved to test_pr_router_st
 or removed as the functionality no longer exists in the current implementation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
     PR_STATE_TTL,
-    # Add project root to path
     build_pr_redirect_url,
     extract_pr_from_host,
     extract_pr_number_from_request,
@@ -34,7 +25,6 @@ from netra_backend.app.auth_integration.auth import (
     route_pr_authentication,
 )
 from netra_backend.app.core.exceptions_auth import AuthenticationError
-
 
 class TestBuildPrRedirectUrl:
     """Test build_pr_redirect_url function."""
@@ -56,7 +46,6 @@ class TestBuildPrRedirectUrl:
         result = build_pr_redirect_url("789", "/app?param=value")
         expected = "https://pr-789.staging.netrasystems.ai/app?param=value"
         assert result == expected
-
 
 class TestHandlePrRoutingError:
     """Test handle_pr_routing_error function."""
@@ -86,7 +75,6 @@ class TestHandlePrRoutingError:
         assert "PR routing error for PR 456:" in call_args
         assert "Auth failed" in call_args
 
-
 class TestGetPrEnvironmentStatus:
     """Test get_pr_environment_status function."""
 
@@ -108,7 +96,6 @@ class TestGetPrEnvironmentStatus:
         assert "auth-pr-456" in status["auth_domain"]
         assert "pr-456.staging.netrasystems.ai" in status["frontend_domain"]
         assert "pr-456-api.staging.netrasystems.ai" in status["api_domain"]
-
 
 class TestExtractPrNumber:
     """Test PR number extraction functions."""
@@ -157,7 +144,6 @@ class TestExtractPrNumber:
         result = extract_pr_number_from_request(headers)
         assert result is None
 
-
 class TestRoutePrAuthentication:
     """Test route_pr_authentication function."""
 
@@ -194,7 +180,6 @@ class TestRoutePrAuthentication:
         
         assert redirect_url == "https://pr-789.staging.netrasystems.ai"
         assert config["pr_number"] == "789"
-
 
 class TestPrStateTtl:
     """Test PR state TTL constant."""

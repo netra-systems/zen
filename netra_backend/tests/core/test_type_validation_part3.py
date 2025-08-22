@@ -1,16 +1,9 @@
 """Part 3: Schema validation and integration tests - SchemaValidator class."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import tempfile
@@ -24,18 +17,15 @@ from netra_backend.app.core.exceptions_config import (
     ValidationError as NetraValidationError,
 )
 
-# Add project root to path
 from netra_backend.app.core.type_validation import (
     SchemaValidator,
     TypeCompatibilityChecker,
     TypeMismatch,
-    # Add project root to path
     TypeMismatchSeverity,
     TypeScriptParser,
     generate_validation_report,
     validate_type_consistency,
 )
-
 
 class TestSchemaValidator:
     """Test SchemaValidator class."""
@@ -281,5 +271,3 @@ class TestSchemaValidator:
         field_schema = {}
         field_type = validator._get_backend_field_type(field_schema)
         assert field_type == 'unknown'
-
-

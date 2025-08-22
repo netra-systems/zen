@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Tuple
 
-
 class RateLimiterTestHelpers:
     """Helper functions for rate limiter testing."""
     
@@ -22,7 +21,6 @@ class RateLimiterTestHelpers:
     async def assert_request_blocked(limiter):
         """Assert request is blocked."""
         assert await limiter.allow_request() == False
-
 
 class RetryTestHelpers:
     """Helper functions for retry utility testing."""
@@ -45,7 +43,6 @@ class RetryTestHelpers:
     async def always_fails():
         """Function that always fails."""
         raise ValueError("Permanent error")
-
 
 class MonitoringTestHelpers:
     """Helper functions for monitoring utility testing."""

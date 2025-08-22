@@ -205,6 +205,35 @@ CRITICAL: Always respect established directory organization patterns. Files MUST
 *   **Test Framework:** Shared test utilities in `/test_framework/`
 *   **Never Mix:** NEVER place auth_service tests in netra_backend/tests or vice versa
 
+## CRITICAL: Import Rules for All Python Files
+
+**ABSOLUTE IMPORTS ONLY - NO EXCEPTIONS**
+- **ALL Python files MUST use absolute imports** starting from the package root
+- **NEVER use relative imports** (. or ..) in ANY Python file, including tests
+- **This rule overrides any existing patterns in the codebase**
+
+**Correct Import Examples:**
+```python
+# GOOD - Absolute imports
+from netra_backend.app.services.user_service import UserService
+from netra_backend.tests.test_utils import setup_test_path
+from auth_service.auth_core.models import User
+from test_framework.fixtures import create_test_user
+```
+
+**Incorrect Import Examples:**
+```python
+# BAD - Relative imports (NEVER USE THESE)
+from ..test_utils import setup_test_path
+from .models import User
+from ...services.user_service import UserService
+```
+
+**Enforcement:**
+- Pre-commit hooks prevent relative imports from being committed
+- CI/CD pipelines will fail if relative imports are detected
+- Use `python scripts/fix_all_import_issues.py --absolute-only` to fix imports
+
 **General Directory Conventions:**
 *   **Documentation:** `/docs/` for user-facing documentation; `/SPEC/` for specifications
 *   **Scripts:** `/scripts/` for utility and automation scripts

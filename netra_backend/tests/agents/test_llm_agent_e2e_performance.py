@@ -10,17 +10,10 @@ BVJ:
 4. Revenue Impact: Maintains customer satisfaction and prevents performance-related churn
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,11 +28,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -47,13 +39,13 @@ from test_fixtures import (
     mock_websocket_manager,
     supervisor_agent,
 )
-from .fixtures.llm_agent_fixtures import (
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     create_mock_infrastructure,
     create_supervisor_with_mocks,
     setup_llm_responses,
     setup_websocket_manager,
 )
-from .helpers.performance_test_helpers import (
+from netra_backend.tests.agents.helpers.performance_test_helpers import (
     create_benchmark_supervisor,
     create_e2e_persistence_mock,
     create_flow_persistence_mock,
@@ -64,7 +56,6 @@ from .helpers.performance_test_helpers import (
     setup_e2e_responses,
     verify_performance_requirements,
 )
-
 
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
@@ -82,7 +73,6 @@ async def test_performance_metrics(supervisor_agent):
     
     # Should complete quickly with mocked components
     assert execution_time < 2.0, f"Execution took {execution_time}s, expected < 2s"
-
 
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
@@ -102,7 +92,6 @@ async def test_error_recovery(supervisor_agent):
     except Exception as e:
         assert "Pipeline error" in str(e)
 
-
 async def test_concurrent_request_handling_optimized():
     """Test handling multiple concurrent requests with optimized setup"""
     # Create optimized mock infrastructure
@@ -117,7 +106,6 @@ async def test_concurrent_request_handling_optimized():
     assert len(results) == 3
     _verify_concurrent_results(results)
 
-
 async def test_end_to_end_optimization_flow_optimized():
     """Test complete end-to-end optimization flow with optimized structure"""
     # Create infrastructure with optimized setup
@@ -129,7 +117,6 @@ async def test_end_to_end_optimization_flow_optimized():
     
     # Verify complete flow
     _verify_e2e_completion(state, supervisor)
-
 
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
@@ -150,7 +137,6 @@ async def test_complex_multi_step_flow():
     # Verify flow completion
     _verify_optimization_flow(state, supervisor)
 
-
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -164,7 +150,6 @@ async def test_flow_interruption_and_recovery():
     recovered_state = await mock_persistence.load_agent_state("thread123", "user123")
     _verify_recovery_state(recovered_state)
 
-
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""
     performance_metrics = []
@@ -175,7 +160,6 @@ async def test_flow_performance_benchmarks():
     
     # Verify performance is reasonable
     _verify_performance_metrics(performance_metrics)
-
 
 async def test_high_load_scenarios():
     """Test system behavior under high load"""
@@ -197,7 +181,6 @@ async def test_high_load_scenarios():
     assert success_count >= task_count * 0.8  # 80% success rate
     assert execution_time < 10.0  # Should complete within 10 seconds
 
-
 def _create_concurrent_supervisors(count):
     """Create supervisors for concurrent testing"""
     supervisors = []
@@ -206,7 +189,6 @@ def _create_concurrent_supervisors(count):
         supervisor = _create_lightweight_supervisor(infrastructure)
         supervisors.append(supervisor)
     return supervisors
-
 
 def _create_concurrent_tasks(supervisors):
     """Create concurrent execution tasks"""
@@ -220,13 +202,11 @@ def _create_concurrent_tasks(supervisors):
         for i, supervisor in enumerate(supervisors)
     ]
 
-
 def _verify_concurrent_results(results):
     """Verify concurrent execution results"""
     for result in results:
         if not isinstance(result, Exception):
             assert isinstance(result, DeepAgentState)
-
 
 def _create_e2e_infrastructure():
     """Create infrastructure for end-to-end testing"""
@@ -234,7 +214,6 @@ def _create_e2e_infrastructure():
     llm_manager = Mock(spec=LLMManager)
     ws_manager = Mock()
     return (db_session, llm_manager, ws_manager)
-
 
 def _create_e2e_supervisor(infrastructure):
     """Create supervisor for end-to-end testing"""
@@ -245,7 +224,6 @@ def _create_e2e_supervisor(infrastructure):
     mock_persistence = _create_e2e_persistence_mock()
     return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
 
-
 async def _execute_e2e_flow(supervisor):
     """Execute end-to-end optimization flow"""
     return await supervisor.run(
@@ -255,18 +233,15 @@ async def _execute_e2e_flow(supervisor):
         str(uuid.uuid4())
     )
 
-
 def _verify_e2e_completion(state, supervisor):
     """Verify end-to-end flow completion"""
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
 
-
 def _setup_complex_flow_responses(llm_manager, ws_manager):
     """Setup complex flow responses"""
     setup_llm_responses(llm_manager)
     setup_websocket_manager(ws_manager)
-
 
 def _create_flow_persistence_mock():
     """Create persistence mock for flow testing"""
@@ -277,7 +252,6 @@ def _create_flow_persistence_mock():
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return mock_persistence
 
-
 async def _execute_optimization_flow(supervisor):
     """Execute optimization flow and return result"""
     return await supervisor.run(
@@ -287,12 +261,10 @@ async def _execute_optimization_flow(supervisor):
         str(uuid.uuid4())
     )
 
-
 def _verify_optimization_flow(state, supervisor):
     """Verify optimization flow completed successfully"""
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
-
 
 def _create_interrupted_state():
     """Create interrupted state for testing"""
@@ -304,7 +276,6 @@ def _create_interrupted_state():
     interrupted_state.triage_result = {"category": "optimization", "step": "analysis"}
     return interrupted_state
 
-
 def _create_recovery_persistence_mock(interrupted_state):
     """Create recovery persistence mock"""
     mock_persistence = AsyncMock()
@@ -313,12 +284,10 @@ def _create_recovery_persistence_mock(interrupted_state):
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return mock_persistence
 
-
 def _verify_recovery_state(recovered_state):
     """Verify recovered state"""
     assert recovered_state.user_request == "Interrupted optimization"
     assert recovered_state.triage_result["step"] == "analysis"
-
 
 async def _run_performance_benchmark(concurrency_level):
     """Run performance benchmark for given concurrency level"""
@@ -341,13 +310,11 @@ async def _run_performance_benchmark(concurrency_level):
         "success_rate": len([r for r in results if not isinstance(r, Exception)]) / len(results)
     }
 
-
 def _verify_performance_metrics(performance_metrics):
     """Verify performance metrics meet requirements"""
     for metric in performance_metrics:
         assert metric["execution_time"] < 5.0  # Should complete within 5 seconds
         assert metric["success_rate"] >= 0.8  # At least 80% success rate
-
 
 def _create_mock_infrastructure_light():
     """Create lightweight mock infrastructure"""
@@ -356,31 +323,25 @@ def _create_mock_infrastructure_light():
     ws_manager = Mock()
     return (db_session, llm_manager, ws_manager)
 
-
 def _create_lightweight_infrastructure():
     """Create lightweight infrastructure for testing"""
     return _create_mock_infrastructure_light()
-
 
 def _create_lightweight_supervisor(infrastructure):
     """Create lightweight supervisor"""
     return create_lightweight_supervisor(infrastructure)
 
-
 async def _execute_lightweight_flow(supervisor):
     """Execute lightweight flow"""
     return await execute_lightweight_flow(supervisor)
-
 
 def _create_benchmark_infrastructure():
     """Create benchmark infrastructure"""
     return create_mock_infrastructure()
 
-
 def _create_benchmark_supervisor(infrastructure, index):
     """Create benchmark supervisor"""
     return create_benchmark_supervisor(infrastructure, index)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

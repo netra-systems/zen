@@ -8,12 +8,6 @@ from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 from typing import Any, Dict, Optional
 from datetime import datetime
@@ -21,7 +15,6 @@ from datetime import datetime
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType
 from netra_backend.app.schemas.Agent import SubAgentState
-
 
 class TestRunner:
     """Runs individual test cases for example prompts"""
@@ -136,3 +129,55 @@ class TestRunner:
         ]
         
         return await asyncio.gather(*tasks, return_exceptions=True)
+    
+    def analyze_test_results(self, results: list) -> Dict[str, Any]:
+        """
+        Analyze a batch of test results and provide summary statistics
+        
+        Args:
+            results: List of test result dictionaries
+            
+        Returns:
+            Dictionary containing analysis metrics
+        """
+        if not results:
+            return {
+                "total_tests": 0,
+                "successful_tests": 0,
+                "failed_tests": 0,
+                "success_rate": 0.0,
+                "average_quality_score": 0.0,
+                "average_execution_time": 0.0
+            }
+        
+        # Count successes and failures
+        successful_tests = [r for r in results if r.get("success", False)]
+        failed_tests = [r for r in results if not r.get("success", False)]
+        
+        # Calculate quality scores
+        quality_scores = []
+        execution_times = []
+        
+        for result in successful_tests:
+            validation = result.get("validation", {})
+            if validation.get("score") is not None:
+                quality_scores.append(validation["score"])
+            
+            metrics = result.get("metrics", {})
+            if metrics.get("execution_time") is not None:
+                execution_times.append(metrics["execution_time"])
+        
+        # Calculate averages
+        avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0.0
+        avg_execution_time = sum(execution_times) / len(execution_times) if execution_times else 0.0
+        
+        return {
+            "total_tests": len(results),
+            "successful_tests": len(successful_tests),
+            "failed_tests": len(failed_tests),
+            "success_rate": len(successful_tests) / len(results),
+            "average_quality_score": avg_quality,
+            "average_execution_time": avg_execution_time,
+            "quality_score_count": len(quality_scores),
+            "execution_time_count": len(execution_times)
+        }

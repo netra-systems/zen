@@ -1,28 +1,19 @@
 """Core reliability tests for AgentReliabilityMixin - execution and error handling."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 # Import the components we're testing
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentError
 from netra_backend.app.core.error_codes import ErrorSeverity
-
 
 class MockAgent(AgentReliabilityMixin):
     """Mock agent for testing the reliability mixin."""
@@ -30,7 +21,6 @@ class MockAgent(AgentReliabilityMixin):
     def __init__(self, name: str = "TestAgent"):
         self.name = name
         super().__init__()
-
 
 class TestAgentReliabilityMixinExecution:
     """Test core execution and reliability functionality."""
@@ -158,7 +148,6 @@ class TestAgentReliabilityMixinExecution:
             assert result is None
             mock_logger.error.assert_called_once()
 
-
 class TestAgentReliabilityMixinErrorHandling:
     """Test error handling and classification."""
     
@@ -220,7 +209,6 @@ class TestAgentReliabilityMixinErrorHandling:
         mock_logger.error.assert_called_once()
         mock_logger.warning.assert_called_once()
         mock_logger.info.assert_called_once()
-
 
 class TestDefaultRecoveryStrategies:
     """Test default recovery strategies."""

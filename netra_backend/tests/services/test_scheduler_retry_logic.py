@@ -4,17 +4,10 @@ Tests retry mechanisms, exponential backoff, and circuit breaker patterns
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -28,14 +21,11 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 @pytest.fixture
 def scheduler_with_redis():
@@ -53,7 +43,6 @@ def scheduler_with_redis():
         )
         scheduler.redis_manager = mock_redis
         return scheduler, mock_redis
-
 
 class TestSupplyResearchSchedulerRetryLogic:
     """Test retry logic and failure handling"""
@@ -149,7 +138,6 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert len(sleep_times) == 1
         assert 0.5 <= sleep_times[0] <= 1.5
 
-
 def _create_backoff_schedule():
     """Create schedule for backoff testing."""
     return ResearchSchedule(
@@ -157,7 +145,6 @@ def _create_backoff_schedule():
         frequency=ScheduleFrequency.DAILY,
         research_type=ResearchType.MODEL_UPDATES
     )
-
 
 def _create_persistent_schedule():
     """Create schedule for persistence testing."""
@@ -167,7 +154,6 @@ def _create_persistent_schedule():
         research_type=ResearchType.PERFORMANCE_BENCHMARKS
     )
 
-
 def _create_circuit_schedule():
     """Create schedule for circuit breaker testing."""
     return ResearchSchedule(
@@ -176,7 +162,6 @@ def _create_circuit_schedule():
         research_type=ResearchType.PROVIDER_COMPARISON
     )
 
-
 def _create_jitter_schedule():
     """Create schedule for jitter testing."""
     return ResearchSchedule(
@@ -184,7 +169,6 @@ def _create_jitter_schedule():
         frequency=ScheduleFrequency.HOURLY,
         research_type=ResearchType.COST_ANALYSIS
     )
-
 
 def _assert_redis_retry_operations(mock_redis, schedule):
     """Assert Redis retry operations are called correctly."""

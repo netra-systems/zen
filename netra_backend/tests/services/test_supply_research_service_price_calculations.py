@@ -3,17 +3,10 @@ Price calculation tests for SupplyResearchService
 Tests price change calculations, provider comparisons, and anomaly detection
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -25,11 +18,7 @@ import pytest
 
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
-# Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_db_session():
@@ -40,7 +29,6 @@ def mock_db_session():
 def service(mock_db_session):
     """Create SupplyResearchService instance with mock database"""
     return SupplyResearchService(mock_db_session)
-
 
 @pytest.fixture
 def sample_openai_item() -> AISupplyItem:
@@ -54,7 +42,6 @@ def sample_openai_item() -> AISupplyItem:
     item.last_updated = datetime.now(UTC)
     return item
 
-
 @pytest.fixture
 def sample_anthropic_item() -> AISupplyItem:
     """Create Anthropic sample item for comparisons"""
@@ -66,7 +53,6 @@ def sample_anthropic_item() -> AISupplyItem:
     item.context_window = 100000
     item.last_updated = datetime.now(UTC)
     return item
-
 
 class TestPriceChangeCalculations:
     """Test price change calculation algorithms"""
@@ -182,7 +168,6 @@ class TestPriceChangeCalculations:
         chain = mock_query.return_value.filter.return_value.join.return_value.filter.return_value
         chain.all.return_value = logs
 
-
 class TestProviderComparison:
     """Test provider comparison and analysis functionality"""
     
@@ -234,7 +219,6 @@ class TestProviderComparison:
         """Helper to verify analysis results"""
         assert analysis["cheapest_input"]["provider"] == "anthropic"
         assert analysis["cheapest_input"]["price"] == 0.025
-
 
 class TestAnomalyDetection:
     """Test anomaly detection algorithms"""
@@ -299,7 +283,6 @@ class TestAnomalyDetection:
         assert anomaly["provider"] == "openai"
         assert anomaly["severity"] == "low"
 
-
 class TestCacheIntegration:
     """Test Redis cache integration functionality"""
     
@@ -316,7 +299,6 @@ class TestCacheIntegration:
                 mock_query.return_value.all.return_value = []
                 result = service.get_supply_items()
                 assert result == []
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

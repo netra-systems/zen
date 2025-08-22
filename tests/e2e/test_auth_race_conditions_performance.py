@@ -11,7 +11,6 @@ import time
 import psutil
 
 # Add auth_service to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "auth_service"))
 
 
 async def test_race_condition_suite_performance_benchmark(isolated_auth_environment):

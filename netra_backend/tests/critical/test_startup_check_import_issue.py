@@ -19,8 +19,6 @@ Business Value Justification (BVJ):
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -28,8 +26,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 
 class TestStartupCheckResultImportIssue:
     """Test that exposes the critical StartupCheckResult import issue"""
@@ -142,7 +138,6 @@ class TestStartupCheckResultImportIssue:
         from pathlib import Path
         
         # Get the startup_checks directory
-        startup_checks_dir = Path(__file__).parent.parent.parent / "app" / "startup_checks"
         
         # Check each Python file in the directory
         failed_modules = []
@@ -183,7 +178,6 @@ class TestStartupCheckResultImportIssue:
         if failed_modules:
             import json
             pytest.fail(f"Modules with wrong StartupCheckResult import:\n{json.dumps(failed_modules, indent=2)}")
-
 
 class TestStartupCheckIntegration:
     """Integration tests to ensure startup checks work correctly"""
@@ -237,7 +231,6 @@ class TestStartupCheckIntegration:
                     if "unexpected keyword argument 'name'" in str(e):
                         pytest.fail(f"Startup checks failed due to wrong StartupCheckResult import: {e}")
                     raise
-
 
 if __name__ == "__main__":
     # Run the tests directly

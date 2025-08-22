@@ -6,17 +6,10 @@ fallback mechanisms, retry logic, and model switching.
 Maximum 300 lines, functions ≤8 lines per architecture requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,7 +19,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.llm.llm_response_processing import (
-    # Add project root to path
     attempt_json_fallback_parse,
     create_llm_response,
     extract_response_content,
@@ -39,7 +31,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.llm_response_types import LLMResponse
 
-
 class ResponseModel(BaseModel):
     """Test model for structured LLM responses."""
     category: str
@@ -47,14 +38,12 @@ class ResponseModel(BaseModel):
     recommendations: List[Dict[str, Any]] = Field(default_factory=list)
     metadata: Optional[Dict[str, Any]] = None
 
-
 class ComplexNestedModel(BaseModel):
     """Complex model with deeply nested structures."""
     analysis_id: str
     results: Dict[str, Any]
     tool_configs: List[Dict[str, str]]
     performance_metrics: Dict[str, float]
-
 
 @pytest.fixture
 def test_llm_config():
@@ -76,7 +65,6 @@ def test_llm_config():
         }
     )
 
-
 @pytest.fixture
 def llm_manager(test_llm_config):
     """Create LLM manager for testing with mocked API calls."""
@@ -86,7 +74,6 @@ def llm_manager(test_llm_config):
     manager = LLMManager(test_llm_config)
     return manager
 
-
 def _create_mock_openai_llm():
     """Create mock OpenAI LLM with proper response format."""
     mock_llm = AsyncMock()
@@ -94,7 +81,6 @@ def _create_mock_openai_llm():
     mock_llm.ainvoke.return_value = mock_response
     mock_llm.with_structured_output.return_value = mock_llm
     return mock_llm
-
 
 def _create_mock_openai_response(content: str = "Mock response"):
     """Create mock response matching OpenAI format."""
@@ -104,7 +90,6 @@ def _create_mock_openai_response(content: str = "Mock response"):
     mock_response.completion_tokens = 25
     mock_response.total_tokens = 75
     return mock_response
-
 
 class TestRealResponsePatterns:
     """Test real-world LLM response patterns and edge cases."""
@@ -178,7 +163,6 @@ class TestRealResponsePatterns:
         assert isinstance(parsed["results"]["metrics"], dict)
         assert parsed["results"]["metrics"]["latency"] == 50
 
-
 class TestRetryMechanisms:
     """Test LLM retry logic and backoff strategies."""
     async def test_exponential_backoff_rate_limit(self, llm_manager):
@@ -212,7 +196,6 @@ class TestRetryMechanisms:
             
             with pytest.raises(asyncio.TimeoutError):
                 await llm_manager.ask_llm("test prompt", "primary")
-
 
 class TestCostOptimization:
     """Test cost optimization through intelligent model selection."""
@@ -254,7 +237,6 @@ class TestCostOptimization:
             result = await llm_manager.ask_llm(complex_prompt, "primary")
             assert "analysis" in result.lower()
 
-
 class TestStructuredGenerationEdgeCases:
     """Test edge cases in structured generation."""
     async def test_structured_output_with_string_fallback(self, llm_manager):
@@ -291,7 +273,6 @@ class TestStructuredGenerationEdgeCases:
         
         with pytest.raises((ValidationError, Exception)):
             attempt_json_fallback_parse(invalid_json, ResponseModel)
-
 
 class TestTokenUsageMonitoring:
     """Test token usage tracking and optimization."""
@@ -331,7 +312,6 @@ class TestTokenUsageMonitoring:
             assert isinstance(result, LLMResponse)
             assert result.usage.total_tokens == 75
 
-
 class TestProviderSwitching:
     """Test switching between different LLM providers."""
     async def test_openai_to_anthropic_fallback(self, llm_manager):
@@ -353,7 +333,6 @@ class TestProviderSwitching:
             # Test would require actual provider switching logic
             # For now, just verify the mock setup works
             assert mock_ask_full is not None
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

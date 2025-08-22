@@ -19,17 +19,10 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from typing import Any, Dict, Optional
@@ -44,7 +37,6 @@ from config_loader import (
     load_config_from_environment,
     validate_required_config,
 )
-
 
 class TestCloudEnvironmentDetection:
     """Test cloud environment detection functionality"""
@@ -150,7 +142,6 @@ class TestCloudEnvironmentDetection:
         # Assert - Cloud Run should take precedence
         assert result == "production"
         assert detector.cloud_platform == "cloud_run"
-
 
 class TestConfigurationLoading:
     """Test configuration loading from various sources"""
@@ -307,7 +298,6 @@ class TestConfigurationLoading:
         assert result['port'] == 9000  # Overridden by environment
         assert result['debug'] is True  # Overridden by environment
 
-
 class TestConfigurationValidation:
     """Test configuration validation functionality"""
 
@@ -411,7 +401,6 @@ class TestConfigurationValidation:
         
         assert "Validation failed" in str(exc_info.value)
 
-
 class TestConfigurationFallbackMechanisms:
     """Test configuration fallback and error recovery"""
 
@@ -505,7 +494,6 @@ class TestConfigurationFallbackMechanisms:
         assert result['critical'] == 'critical_value'
         assert 'optional' not in result
 
-
 class TestConfigLoaderErrorHandling:
     """Test error handling and edge cases"""
 
@@ -573,7 +561,6 @@ class TestConfigLoaderErrorHandling:
         
         assert "Circular reference detected" in str(exc_info.value)
 
-
 class TestConfigLoaderPerformance:
     """Test performance characteristics of config loader"""
 
@@ -632,7 +619,6 @@ class TestConfigLoaderPerformance:
             assert result1 == result2 == result3 == "production"
             # Verify caching is working (implementation detail)
             assert hasattr(detector, '_cached_result')
-
 
 # Helper functions that would be in the actual config_loader module
 def resolve_config_references(config: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,25 +1,14 @@
 """Test database connectivity and initialization."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
-
-# Add project root to path
-
-
 
 @pytest.mark.asyncio
 async def test_database_connectivity_check_success():
@@ -41,7 +30,6 @@ async def test_database_connectivity_check_success():
     assert result is True
     mock_conn.execute.assert_called_once()
 
-
 @pytest.mark.asyncio
 async def test_database_connectivity_check_failure():
     """Test failed database connectivity check."""
@@ -57,7 +45,6 @@ async def test_database_connectivity_check_failure():
     result = await SchemaValidationService.check_database_connectivity(mock_engine)
     assert result is False
 
-
 @pytest.mark.asyncio
 async def test_database_connectivity_with_none_engine():
     """Test database connectivity check with None engine."""
@@ -68,7 +55,6 @@ async def test_database_connectivity_with_none_engine():
     # Test with None engine should raise AttributeError
     with pytest.raises(AttributeError):
         await SchemaValidationService.check_database_connectivity(None)
-
 
 @pytest.mark.asyncio
 async def test_startup_schema_validation_with_uninitialized_engine():
@@ -84,7 +70,6 @@ async def test_startup_schema_validation_with_uninitialized_engine():
             # Should not raise error, just log warning
             await validate_schema(logger)
             mock_init.assert_called_once()
-
 
 @pytest.mark.asyncio
 async def test_comprehensive_validation_with_engine():

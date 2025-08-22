@@ -1,16 +1,9 @@
 """Alerting and real-time functionality tests for Quality Monitoring Service"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -20,11 +13,9 @@ import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType
 
-# Add project root to path
 from netra_backend.app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType,
-    # Add project root to path
     QualityMonitoringService,
 )
 from netra_backend.tests.quality_monitoring_fixtures import (
@@ -45,7 +36,6 @@ from netra_backend.tests.quality_monitoring_helpers import (
     setup_monitoring_mocks,
     start_and_stop_monitoring,
 )
-
 
 class TestAlerting:
     """Test alerting functionality"""
@@ -73,7 +63,6 @@ class TestAlerting:
         buffer = service.metrics_collector.get_buffer()
         assert "failing_agent" in buffer
         assert len(buffer["failing_agent"]) == 1
-
 
 class TestRealTimeMonitoring:
     """Test real-time monitoring functionality"""
@@ -115,7 +104,6 @@ class TestRealTimeMonitoring:
             assert_dashboard_data_structure,
         )
         assert_dashboard_data_structure(dashboard_data)
-
 
 class TestAlertManagement:
     """Test alert management functionality"""
@@ -162,7 +150,6 @@ class TestAlertManagement:
         
         assert alert is None
 
-
 class TestMonitoringWithMocks:
     """Test monitoring functionality with mocks"""
     async def test_monitoring_with_no_data(self):
@@ -178,7 +165,6 @@ class TestMonitoringWithMocks:
         
         # Verify monitoring stopped cleanly
         assert service.monitoring_active is False
-
 
 class TestDataClasses:
     """Test the data classes used by QualityMonitoringService"""

@@ -1,20 +1,9 @@
 """Utilities Tests - Split from test_critical_integration.py"""
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,7 +25,6 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
@@ -54,13 +42,9 @@ from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 class TestSyntaxFix:
 
     """Test class for orphaned methods"""
-
 
     def _setup_supervisor_with_database(self, db_setup, infra, test_entities):
 
@@ -74,7 +58,6 @@ class TestSyntaxFix:
 
         return supervisor
 
-
     def _verify_agent_result(self, result):
 
         """Verify the agent execution result"""
@@ -82,7 +65,6 @@ class TestSyntaxFix:
         assert result != None
 
         assert "optimization" in str(result).lower()
-
 
     def _verify_state_persistence(self):
 
@@ -94,7 +76,6 @@ class TestSyntaxFix:
 
         assert len(save_calls) >= 3  # At least triage, data, and optimization agents
 
-
     def _verify_websocket_messages(self, mock_websocket):
 
         """Verify WebSocket messages were sent correctly"""
@@ -104,7 +85,6 @@ class TestSyntaxFix:
         ws_messages = [call.args[0] for call in mock_websocket.send_json.call_args_list]
 
         self._verify_agent_lifecycle_messages(ws_messages)
-
 
     def _verify_agent_lifecycle_messages(self, ws_messages):
 
@@ -118,7 +98,6 @@ class TestSyntaxFix:
 
         assert has_started and has_updates and has_completed, "Missing required lifecycle messages"
 
-
     def _verify_supervisor_configuration(self, supervisor, test_entities):
 
         """Verify supervisor was configured correctly"""
@@ -126,7 +105,6 @@ class TestSyntaxFix:
         assert supervisor.thread_id == test_entities["thread"].id
 
         assert supervisor.user_id == test_entities["user_id"]
-
 
     def _verify_message_sending(self, mock_websocket):
 
@@ -142,7 +120,6 @@ class TestSyntaxFix:
 
         assert mock_websocket.send_json.call_count >= 2
 
-
     def _create_state_service(self, session):
 
         """Create state persistence service with database session"""
@@ -152,7 +129,6 @@ class TestSyntaxFix:
         state_service.db_session = session
 
         return state_service
-
 
     def _get_triage_output(self):
 

@@ -14,7 +14,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.service_discovery import ServiceDiscovery

@@ -5,33 +5,23 @@ Tests the core functionality of the LLM testing framework including
 model support, caching, and intelligent fallback mechanisms.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
-from ..e2e.infrastructure import (
+from netra_backend.tests.e2e.infrastructure.e2e.infrastructure import (
     LLMTestConfig,
-    # Add project root to path
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,
     LLMTestResponse,
 )
-
 
 @pytest.fixture
 def test_config():
@@ -43,12 +33,10 @@ def test_config():
         timeout_seconds=10
     )
 
-
 @pytest.fixture
 def llm_manager(test_config):
     """Create LLM test manager with test configuration."""
     return LLMTestManager(test_config)
-
 
 @pytest.fixture
 def sample_request():
@@ -59,7 +47,6 @@ def sample_request():
         temperature=0.7,
         use_cache=True
     )
-
 
 class TestLLMTestManager:
     """Test suite for LLM Test Manager."""
@@ -133,7 +120,6 @@ class TestLLMTestManager:
         assert response.response_time_ms > 0
         assert isinstance(response.response_time_ms, int)
 
-
 class TestLLMTestRequest:
     """Test suite for LLM Test Request model."""
     
@@ -154,7 +140,6 @@ class TestLLMTestRequest:
                 prompt="Test",
                 model="invalid-model"
             )
-
 
 class TestLLMTestResponse:
     """Test suite for LLM Test Response model."""

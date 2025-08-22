@@ -5,17 +5,10 @@ Comprehensive tests for audit logging, search, filtering, and reporting function
 Follows 450-line limit and async patterns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
@@ -34,15 +27,12 @@ from netra_backend.app.schemas.registry import (
     CorpusAuditStatus,
 )
 
-# Add project root to path
 from netra_backend.app.services.audit.corpus_audit import (
-    # Add project root to path
     CorpusAuditLogger,
     create_audit_logger,
 )
 from netra_backend.app.services.audit.repository import CorpusAuditRepository
 from netra_backend.app.services.audit.utils import AuditTimer
-
 
 class TestCorpusAuditRepository:
     """Test corpus audit repository functionality."""
@@ -126,7 +116,6 @@ class TestCorpusAuditRepository:
         
         assert stats["create_success"] == 10
         assert stats["update_failure"] == 2
-
 
 class TestCorpusAuditLogger:
     """Test corpus audit logger functionality."""
@@ -236,7 +225,6 @@ class TestCorpusAuditLogger:
         with pytest.raises(NetraException):
             await audit_logger.search_audit_logs(mock_db, filters)
 
-
 class TestAuditTimer:
     """Test audit timer context manager."""
 
@@ -256,7 +244,6 @@ class TestAuditTimer:
         timer = AuditTimer()
         duration = timer.get_duration()
         assert duration is None
-
 
 class TestAuditIntegration:
     """Integration tests for audit system."""
@@ -313,7 +300,6 @@ class TestAuditIntegration:
         assert report.total_records == 1
         assert len(report.records) == 1
         assert report.records[0].user_id == "user-123"
-
 
 # Performance and edge case tests
 class TestAuditPerformance:
@@ -372,7 +358,6 @@ class TestAuditPerformance:
         )
         
         assert isinstance(result.metadata, CorpusAuditMetadata)
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

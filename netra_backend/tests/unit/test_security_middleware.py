@@ -14,17 +14,10 @@ Target Coverage:
 - IP tracking and authentication attempt monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import time
 from datetime import datetime, timedelta
@@ -38,16 +31,13 @@ from starlette.datastructures import URL, Headers
 
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import (
     InputValidator,
     RateLimitTracker,
     SecurityConfig,
-    # Add project root to path
     SecurityMiddleware,
     create_security_middleware,
 )
-
 
 class TestSecurityConfig:
     """Test suite for SecurityConfig constants."""
@@ -80,7 +70,6 @@ class TestSecurityConfig:
         assert headers["X-Content-Type-Options"] == "nosniff"
         assert headers["X-Frame-Options"] == "DENY"
         assert "max-age=31536000" in headers["Strict-Transport-Security"]
-
 
 class TestRateLimitTracker:
     """Test suite for RateLimitTracker functionality."""
@@ -155,7 +144,6 @@ class TestRateLimitTracker:
         is_limited = rate_limiter.is_rate_limited(identifier, limit)
         assert is_limited is True
 
-
 class TestInputValidator:
     """Test suite for InputValidator functionality."""
     
@@ -208,7 +196,6 @@ class TestInputValidator:
         
         # Safe headers should be preserved (implementation dependent)
         assert isinstance(sanitized, dict)
-
 
 class TestSecurityMiddleware:
     """Test suite for SecurityMiddleware functionality."""
@@ -397,7 +384,6 @@ class TestSecurityMiddleware:
             await middleware.dispatch(mock_request, failing_call_next)
         
         assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-
 
 class TestSecurityMiddlewareFactory:
     """Test suite for security middleware factory function."""

@@ -3,17 +3,10 @@ CRUD tests for SupplyResearchService - create, update, and delete operations
 Tests supply item creation, updates, and update log operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -24,11 +17,7 @@ import pytest
 
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
-# Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_db_session():
@@ -39,7 +28,6 @@ def mock_db_session():
 def service(mock_db_session):
     """Create SupplyResearchService instance with mock database"""
     return SupplyResearchService(mock_db_session)
-
 
 @pytest.fixture
 def sample_supply_item() -> AISupplyItem:
@@ -54,7 +42,6 @@ def sample_supply_item() -> AISupplyItem:
     item.last_updated = datetime.now(UTC)
     return item
 
-
 @pytest.fixture
 def sample_update_log() -> SupplyUpdateLog:
     """Create compact sample SupplyUpdateLog fixture"""
@@ -66,7 +53,6 @@ def sample_update_log() -> SupplyUpdateLog:
     log.new_value = "0.03"
     log.updated_at = datetime.now(UTC)
     return log
-
 
 class TestSupplyItemCreate:
     """Test supply item creation operations"""
@@ -118,7 +104,6 @@ class TestSupplyItemCreate:
                     result = service.create_or_update_supply_item("openai", "gpt-4", data)
             
             assert result == mock_item
-
 
 class TestSupplyItemUpdate:
     """Test supply item update operations"""
@@ -178,7 +163,6 @@ class TestSupplyItemUpdate:
         
         assert result == item
         assert item.pricing_input == expected_pricing
-
 
 class TestUpdateLogOperations:
     """Test update log retrieval and filtering"""
@@ -258,7 +242,6 @@ class TestUpdateLogOperations:
                      .order_by.return_value.limit.return_value)
         mock_chain.all.return_value = return_logs
 
-
 class TestTransactionHandling:
     """Test database transaction handling and error recovery"""
     
@@ -278,7 +261,6 @@ class TestTransactionHandling:
         with patch.object(service.db, 'query', side_effect=Exception("DB Error")):
             with pytest.raises(Exception):
                 service.create_or_update_supply_item("openai", "test", {})
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

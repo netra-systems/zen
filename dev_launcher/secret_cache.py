@@ -11,9 +11,9 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple
 
 try:
-    from .cache_entry import CacheEntry, ContentHasher
-    from .cache_manager import CacheManager
-    from .secret_cache_validation import SecretValidationCache
+    from dev_launcher.cache_entry import CacheEntry, ContentHasher
+    from dev_launcher.cache_manager import CacheManager
+    from dev_launcher.secret_cache_validation import SecretValidationCache
 except ImportError:
     # Support standalone execution
     from cache_entry import CacheEntry, ContentHasher

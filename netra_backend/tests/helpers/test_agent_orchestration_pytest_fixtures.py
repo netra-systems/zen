@@ -4,38 +4,27 @@ Pytest fixtures for agent orchestration tests.
 Contains pytest fixture definitions for agent service testing.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.tests.test_agent_orchestration_fixtures import (
     AgentOrchestrator,
-    # Add project root to path
     MockSupervisorAgent,
 )
-
 
 @pytest.fixture
 def mock_supervisor():
     """Create mock supervisor agent."""
     return MockSupervisorAgent()
-
 
 @pytest.fixture
 def mock_thread_service():
@@ -46,7 +35,6 @@ def mock_thread_service():
     service.create_thread = AsyncMock()
     service.delete_thread = AsyncMock()
     return service
-
 
 @pytest.fixture
 def mock_message_handler():
@@ -61,7 +49,6 @@ def mock_message_handler():
     handler.handle_delete_thread = AsyncMock()
     handler.handle_list_threads = AsyncMock()
     return handler
-
 
 @pytest.fixture
 def agent_service(mock_supervisor):
@@ -78,12 +65,10 @@ def agent_service(mock_supervisor):
     service.message_handler.handle_stop_agent = AsyncMock()
     return service
 
-
 @pytest.fixture
 def orchestrator():
     """Create agent orchestrator."""
     return AgentOrchestrator()
-
 
 @pytest.fixture
 def resilient_orchestrator():

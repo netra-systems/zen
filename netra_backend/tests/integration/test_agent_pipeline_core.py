@@ -10,21 +10,13 @@ Business Value Justification (BVJ):
 Core agent response pipeline tests including complete pipeline and routing accuracy.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 
-# Add project root to path
 # Set testing environment
 import os
 import time
@@ -42,10 +34,9 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 from logging_config import central_logger
 
 from netra_backend.app.agents.state import DeepAgentState
-from tests.agent_pipeline_mocks import AgentPipelineMocks
+from netra_backend.tests.agent_pipeline_mocks import AgentPipelineMocks
 
 logger = central_logger.get_logger(__name__)
-
 
 class TestAgentResponsePipelineCore:
     """Core agent response pipeline tests."""

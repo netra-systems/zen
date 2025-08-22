@@ -3,33 +3,23 @@ Tests for AsyncBatchProcessor - batch processing functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_batch_processor import AsyncBatchProcessor
 from helpers.async_utils_helpers import (
     assert_batch_results,
     assert_progress_tracking,
-    # Add project root to path
     create_dummy_processor,
     create_progress_tracker,
     create_sum_processor,
 )
-
 
 class TestAsyncBatchProcessor:
     """Test AsyncBatchProcessor for batch processing"""
@@ -77,7 +67,6 @@ class TestAsyncBatchProcessor:
             raise ValueError("Processing failed")
         with pytest.raises(ValueError, match="Processing failed"):
             await batch_processor.process_items(items, failing_processor)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

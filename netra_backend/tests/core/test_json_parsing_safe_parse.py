@@ -3,27 +3,16 @@ Tests for safe JSON parsing functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import json
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.json_parsing_utils import safe_json_parse
-
-# Add project root to path
-
 
 class TestSafeJsonParse:
     """Test the safe_json_parse function."""

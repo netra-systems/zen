@@ -15,8 +15,6 @@ This test validates the entire multi-agent collaboration system.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import os
@@ -33,10 +31,6 @@ import aiohttp
 import pytest
 import websockets
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -51,7 +45,6 @@ class AgentType(Enum):
     REVIEWER = "reviewer"
     ORCHESTRATOR = "orchestrator"
 
-
 @dataclass
 class AgentInfo:
     """Information about an agent."""
@@ -61,7 +54,6 @@ class AgentInfo:
     capabilities: List[str]
     current_task: Optional[str] = None
     sub_agents: List[str] = None
-
 
 class AgentCollaborationTester:
     """Test agent collaboration workflow."""
@@ -863,7 +855,6 @@ class AgentCollaborationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -906,7 +897,6 @@ async def test_agent_collaboration_workflow():
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -930,7 +920,6 @@ async def main():
         critical_passed = all(results.get(test, False) for test in critical_tests)
         
         return 0 if critical_passed else 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

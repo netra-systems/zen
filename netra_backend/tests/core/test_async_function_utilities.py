@@ -4,17 +4,10 @@ Tests timeout functions, retry decorators, and global utility functions
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -22,16 +15,13 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_utils import (
-    # Add project root to path
     async_timeout,
     shutdown_async_utils,
     with_retry,
     with_timeout,
 )
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
-
 
 class TestTimeoutFunctionsComplete:
     """Complete tests for timeout functions."""
@@ -130,7 +120,6 @@ class TestTimeoutFunctionsComplete:
         execution_time = time.time() - start_time
         # Should timeout close to the specified time (with some tolerance)
         assert 0.25 <= execution_time <= 0.4
-
 
 class TestRetryDecoratorComplete:
     """Complete tests for retry decorator."""
@@ -248,7 +237,6 @@ class TestRetryDecoratorComplete:
         
         assert result == "success"
         assert 0.18 <= total_time <= 0.3  # Should include delay
-
 
 class TestGlobalFunctionsComplete:
     """Complete tests for global utility functions."""

@@ -3,17 +3,10 @@ Common test fixtures and utilities for route testing.
 Shared components extracted from oversized test file to maintain 450-line architecture limit.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -26,11 +19,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.config import get_config
 from netra_backend.app.services.key_manager import KeyManager
 
-# Add project root to path
 from netra_backend.app.services.security_service import SecurityService
-
-# Add project root to path
-
 
 class MockDBSession:
     """Mock database session for testing."""
@@ -42,7 +31,6 @@ class MockDBSession:
     async def get_session(self):
         """Async context manager for mock database session."""
         yield self.mock_session
-
 
 class MockDependencyManager:
     """Manages mock dependencies for FastAPI testing."""
@@ -164,7 +152,6 @@ class MockDependencyManager:
         """Clear all dependency overrides."""
         app.dependency_overrides.clear()
 
-
 class MockAppStateManager:
     """Manages application state setup for testing."""
     
@@ -203,14 +190,12 @@ class MockAppStateManager:
         if not hasattr(app.state, 'corpus_service'):
             app.state.corpus_service = Mock()
 
-
 @pytest.fixture
 def basic_test_client():
     """Basic FastAPI test client with minimal setup."""
     from netra_backend.app.main import app
     MockAppStateManager.setup_app_state(app)
     return TestClient(app)
-
 
 @pytest.fixture
 def authenticated_test_client(ensure_db_initialized):
@@ -226,7 +211,6 @@ def authenticated_test_client(ensure_db_initialized):
     finally:
         MockDependencyManager.clear_overrides(app)
 
-
 @pytest.fixture  
 def configured_test_client():
     """Test client with core dependencies mocked."""
@@ -239,7 +223,6 @@ def configured_test_client():
         return TestClient(app)
     finally:
         MockDependencyManager.clear_overrides(app)
-
 
 @pytest.fixture
 def agent_test_client():
@@ -254,7 +237,6 @@ def agent_test_client():
         return TestClient(app)
     finally:
         MockDependencyManager.clear_overrides(app)
-
 
 class CommonResponseValidators:
     """Common response validation patterns."""
@@ -304,7 +286,6 @@ class CommonResponseValidators:
             return True
         return False
 
-
 class MockServiceFactory:
     """Factory for creating mock service instances."""
     
@@ -345,7 +326,6 @@ class MockServiceFactory:
         })
         mock_service.clear_cache = Mock(return_value=50)
         return mock_service
-
 
 # Common test data constants
 TEST_USER_DATA = {

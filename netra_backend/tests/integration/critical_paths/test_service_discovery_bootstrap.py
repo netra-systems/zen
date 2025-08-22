@@ -13,17 +13,10 @@ This L3 test uses real Redis as service registry with multiple service instances
 testing actual registration/discovery flow during system bootstrap.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -39,13 +32,9 @@ import pytest
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class ServiceInstance:
@@ -61,7 +50,6 @@ class ServiceInstance:
     registration_time: Optional[float] = None
     last_heartbeat: Optional[float] = None
 
-
 @dataclass
 class BootstrapMetrics:
     """Bootstrap performance metrics."""
@@ -73,7 +61,6 @@ class BootstrapMetrics:
     health_check_time_ms: float = 0.0
     load_balancing_time_ms: float = 0.0
     errors: List[str] = field(default_factory=list)
-
 
 class ServiceRegistry:
     """Redis-based service registry for L3 testing."""
@@ -240,7 +227,6 @@ class ServiceRegistry:
             logger.error(f"Failed to unregister service: {e}")
             return False
 
-
 class LoadBalancer:
     """Simple load balancer for testing."""
     
@@ -265,7 +251,6 @@ class LoadBalancer:
         
         # Default to first healthy instance
         return healthy_instances[0]
-
 
 class ServiceDiscoveryBootstrapL3:
     """L3 Service Discovery Bootstrap test manager."""
@@ -543,7 +528,6 @@ class ServiceDiscoveryBootstrapL3:
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
 
-
 @pytest.fixture
 async def service_discovery_bootstrap():
     """Fixture for service discovery bootstrap testing."""
@@ -551,7 +535,6 @@ async def service_discovery_bootstrap():
     await manager.initialize()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -621,7 +604,6 @@ async def test_service_discovery_during_initial_bootstrap_l3(service_discovery_b
     critical_errors = [e for e in metrics.errors if "failed" in e.lower()]
     assert len(critical_errors) <= 1  # Allow 1 non-critical error
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_service_registration_within_time_limits_l3(service_discovery_bootstrap):
@@ -642,7 +624,6 @@ async def test_service_registration_within_time_limits_l3(service_discovery_boot
     assert total_time < 5000
     assert metrics.successful_registrations == 5
     assert metrics.registration_time_ms < 5000
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -677,7 +658,6 @@ async def test_service_discovery_returns_correct_endpoints_l3(service_discovery_
     assert instance["health_endpoint"] == "/api/health"
     assert instance["version"] == "2.0.0"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_health_status_propagation_l3(service_discovery_bootstrap):
@@ -709,7 +689,6 @@ async def test_health_status_propagation_l3(service_discovery_bootstrap):
     
     instance = discovery_result["instances"][0]
     assert instance["status"] == "unhealthy"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -745,7 +724,6 @@ async def test_failed_services_removed_from_discovery_l3(service_discovery_boots
     healthy_instance_ids = [i["instance_id"] for i in healthy_instances]
     assert all(instance_id in healthy_instance_ids for instance_id in selected_instances)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_load_balancing_works_correctly_l3(service_discovery_bootstrap):
@@ -777,7 +755,6 @@ async def test_load_balancing_works_correctly_l3(service_discovery_bootstrap):
     # No instance should get more than 60% of requests (allows for some imbalance)
     max_usage = max(usage_values)
     assert max_usage <= 9  # 60% of 15 requests
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

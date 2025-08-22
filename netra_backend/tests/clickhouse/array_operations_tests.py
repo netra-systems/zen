@@ -13,7 +13,6 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     validate_clickhouse_query,
 )
 
-
 class TestClickHouseArrayOperations:
     """Test proper array operations and the query fixer"""
     

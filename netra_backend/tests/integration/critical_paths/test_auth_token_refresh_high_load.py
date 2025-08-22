@@ -21,17 +21,10 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 - Simulated concurrent users
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import random
@@ -51,18 +44,15 @@ from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.monitoring import metrics_collector
 from netra_backend.app.db.redis_manager import get_redis_manager
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     LoginRequest,
     LoginResponse,
     RefreshRequest,
     RefreshResponse,
     SessionInfo,
-    # Add project root to path
     Token,
     TokenData,
 )
-
 
 @dataclass
 class LoadTestMetrics:
@@ -93,7 +83,6 @@ class LoadTestMetrics:
         sorted_times = sorted(self.response_times)
         index = int(len(sorted_times) * 0.95)
         return sorted_times[index] if index < len(sorted_times) else sorted_times[-1]
-
 
 class TestAuthTokenRefreshHighLoad:
     """Test suite for auth token refresh under high load"""

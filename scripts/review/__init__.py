@@ -4,9 +4,9 @@ Code Review System Package
 Implements SPEC/review.xml for automated code quality validation.
 """
 
-from .cli import CLIHandler, DisplayFormatter
-from .core import ReviewConfig, ReviewData, create_review_config, create_review_data
-from .orchestrator import CodeReviewer
+from scripts.review.cli import CLIHandler, DisplayFormatter
+from scripts.review.core import ReviewConfig, ReviewData, create_review_config, create_review_data
+from scripts.review.orchestrator import CodeReviewer
 
 __all__ = [
     'ReviewConfig',

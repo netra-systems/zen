@@ -3,30 +3,20 @@ Tests for JSON fix utility functions.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.json_parsing_utils import (
     comprehensive_json_fix,
     fix_list_recommendations,
-    # Add project root to path
     fix_tool_parameters,
 )
-
 
 class TestFixToolParameters:
     """Test the fix_tool_parameters function."""
@@ -91,7 +81,6 @@ class TestFixToolParameters:
         result = fix_tool_parameters(params_str)
         assert result == {}
 
-
 class TestFixListRecommendations:
     """Test the fix_list_recommendations function."""
     
@@ -144,7 +133,6 @@ class TestFixListRecommendations:
         result = fix_list_recommendations(rec_str)
         expected = ["single_recommendation"]
         assert result == expected
-
 
 class TestComprehensiveJsonFix:
     """Test the comprehensive_json_fix function."""

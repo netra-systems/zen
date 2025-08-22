@@ -14,28 +14,17 @@ REQUIREMENTS:
 - Provider failover handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
-from integration.llm.shared_fixtures import mock_llm_manager, mock_llm_provider
-
-# Add project root to path
-
+from netra_backend.tests.integration.llm.shared_fixtures import mock_llm_manager, mock_llm_provider
 
 class TestLLMErrorRecovery:
     """BVJ: Validates error recovery mechanisms for LLM failures."""
@@ -177,7 +166,6 @@ class TestLLMErrorRecovery:
         
         assert response is not None
         assert response["provider"] == "azure"  # Last fallback
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

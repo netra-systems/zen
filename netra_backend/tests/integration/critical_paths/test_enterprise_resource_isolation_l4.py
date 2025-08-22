@@ -14,17 +14,10 @@ Critical Path: Enterprise tenant provisioning -> Resource allocation ->
 Isolation verification -> Noisy neighbor simulation -> Performance validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,10 +38,8 @@ import psutil
 import pytest
 import redis.asyncio as redis
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
@@ -72,7 +63,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class EnterpriseResource:
     """Represents an enterprise resource with isolation requirements."""
@@ -88,7 +78,6 @@ class EnterpriseResource:
     isolation_level: str = "enterprise"
     created_at: datetime = field(default_factory=datetime.utcnow)
 
-
 @dataclass
 class IsolationViolation:
     """Represents a resource isolation violation."""
@@ -100,7 +89,6 @@ class IsolationViolation:
     severity: str
     timestamp: datetime
     details: Dict[str, Any] = field(default_factory=dict)
-
 
 @dataclass
 class ResourceUsageMetrics:
@@ -115,7 +103,6 @@ class ResourceUsageMetrics:
     response_time_ms: float
     throughput_requests_per_sec: float
     timestamp: datetime = field(default_factory=datetime.utcnow)
-
 
 class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
     """L4 test for enterprise-grade resource isolation in staging environment."""
@@ -1397,7 +1384,6 @@ class EnterpriseResourceIsolationL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.error(f"Enterprise test cleanup failed: {e}")
 
-
 # Pytest integration
 @pytest.fixture
 async def enterprise_isolation_test():
@@ -1407,7 +1393,6 @@ async def enterprise_isolation_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.L4
 @pytest.mark.enterprise
@@ -1436,7 +1421,6 @@ async def test_enterprise_resource_isolation_comprehensive(enterprise_isolation_
                f"{test_metrics.success_rate:.1f}% success rate, "
                f"{test_metrics.average_response_time:.3f}s avg response time")
 
-
 @pytest.mark.L4
 @pytest.mark.enterprise
 @pytest.mark.staging
@@ -1459,7 +1443,6 @@ async def test_enterprise_noisy_neighbor_isolation(enterprise_isolation_test):
     isolation_validation = await enterprise_isolation_test._validate_resource_isolation()
     assert isolation_validation["success"] is True, "Resource isolation validation failed"
     assert isolation_validation["isolation_success_rate"] >= 95.0, "Isolation success rate too low under noisy neighbor conditions"
-
 
 @pytest.mark.L4
 @pytest.mark.enterprise
@@ -1487,7 +1470,6 @@ async def test_enterprise_performance_sla_compliance(enterprise_isolation_test):
     
     sla_compliance = await enterprise_isolation_test.validate_business_metrics(business_metrics)
     assert sla_compliance is True, "Enterprise SLA compliance validation failed"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

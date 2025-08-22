@@ -136,7 +136,7 @@ class TestCoverageAnalyzer:
     
     def check_test_coverage(self) -> "TestCoverageStatus":
         """Check test coverage status"""
-        from .status_types import TestCoverageStatus
+        from scripts.status_types import TestCoverageStatus
         backend = self._check_backend_coverage()
         frontend = self._check_frontend_coverage()
         
@@ -147,7 +147,7 @@ class TestCoverageAnalyzer:
     
     def _check_backend_coverage(self) -> "TestCoverageInfo":
         """Check backend test coverage"""
-        from .status_types import TestCoverageInfo
+        from scripts.status_types import TestCoverageInfo
         test_files = self._count_backend_test_files()
         current_coverage = self._check_backend_coverage_report()
         
@@ -173,7 +173,7 @@ class TestCoverageAnalyzer:
     
     def _check_frontend_coverage(self) -> "TestCoverageInfo":
         """Check frontend test coverage"""
-        from .status_types import TestCoverageInfo
+        from scripts.status_types import TestCoverageInfo
         test_files = self._count_frontend_test_files()
         current_coverage = self._check_frontend_coverage_report()
         
@@ -212,7 +212,7 @@ class HealthScoreCalculator:
     
     def _deduct_component_issues(self, score: int, component_health: Dict) -> int:
         """Deduct points for component issues"""
-        from .status_types import ComponentHealthData
+        from scripts.status_types import ComponentHealthData
         for component in component_health.values():
             if isinstance(component, ComponentHealthData):
                 issues = component.issues_found

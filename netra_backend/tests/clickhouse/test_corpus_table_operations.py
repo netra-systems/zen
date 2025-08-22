@@ -3,32 +3,22 @@ Corpus Table Operations Tests
 Test corpus table creation and management
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 
 import pytest
 from logging_config import central_logger as logger
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.tests.clickhouse_test_fixtures import (
     build_corpus_create_query,
-    # Add project root to path
     check_table_create_permission,
     cleanup_test_table,
 )
-
 
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""

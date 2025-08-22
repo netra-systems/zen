@@ -1,16 +1,9 @@
 """Core Tests - Split from test_message_flow_auth.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -24,14 +17,10 @@ import pytest
 from logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import validate_websocket_token
 
-from tests.test_unified_message_flow import MessageFlowTracker
-from tests.test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.test_unified_message_flow import MessageFlowTracker
+from netra_backend.tests.test_ws_connection_mocks import MockWebSocket
 
-# Add project root to path
-from tests.jwt_token_helpers import JWTTestHelper
-
-# Add project root to path
-
+from netra_backend.tests.jwt_token_helpers import JWTTestHelper
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

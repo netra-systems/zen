@@ -9,10 +9,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .failure_patterns import FailurePatternAnalyzer
-from .test_discovery import TestDiscovery
-from .test_execution_engine import execute_test_suite
-from .test_insights import TestInsightGenerator
+from test_framework.archived.duplicates.failure_patterns import FailurePatternAnalyzer
+from test_framework.archived.duplicates.test_discovery import TestDiscovery
+from test_framework.archived.duplicates.test_execution_engine import execute_test_suite
+from test_framework.archived.duplicates.test_insights import TestInsightGenerator
 from .test_profile_models import (
     TestPriority,
     TestProfile,

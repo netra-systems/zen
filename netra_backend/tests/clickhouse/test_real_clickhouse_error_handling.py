@@ -3,29 +3,18 @@ Real ClickHouse Error Handling Tests
 Test error handling and recovery for real ClickHouse connections
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 from logging_config import central_logger as logger
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.tests.clickhouse_test_fixtures import get_clickhouse_config
-
-# Add project root to path
-
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""

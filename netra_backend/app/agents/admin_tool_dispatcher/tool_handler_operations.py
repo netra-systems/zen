@@ -56,7 +56,7 @@ async def _execute_corpus_creation(params: Dict[str, Any], db: AsyncSession) -> 
 
 def _create_corpus_response(result: Any) -> Dict[str, Any]:
     """Create corpus success response"""
-    from .tool_handler_helpers import create_corpus_success_response
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_corpus_success_response
     return create_corpus_success_response(result)
 
 
@@ -69,14 +69,14 @@ def _create_synthetic_service(db: AsyncSession):
 
 def _create_synthetic_response(result: Any) -> Dict[str, Any]:
     """Create synthetic success response"""
-    from .tool_handler_helpers import create_synthetic_success_response
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_synthetic_success_response
     return create_synthetic_success_response(result)
 
 
 # Helper functions for user operations
 def _prepare_user_create_params(kwargs: Dict[str, Any], db: AsyncSession) -> Dict[str, Any]:
     """Prepare user creation parameters"""
-    from .tool_handler_helpers import build_user_create_params
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import build_user_create_params
     params = build_user_create_params(kwargs)
     params["db"] = db
     return params
@@ -90,7 +90,7 @@ async def _execute_user_creation(params: Dict[str, Any]) -> Any:
 
 def _create_user_response(result: Any) -> Dict[str, Any]:
     """Create user success response"""
-    from .tool_handler_helpers import create_user_success_response
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_user_success_response
     return create_user_success_response(result)
 
 
@@ -110,7 +110,7 @@ async def _grant_user_permission(user_email: str, permission: str, db: AsyncSess
 
 def _create_permission_response(success: bool) -> Dict[str, Any]:
     """Create permission grant response"""
-    from .tool_handler_helpers import create_permission_grant_response
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_permission_grant_response
     return create_permission_grant_response(success)
 
 
@@ -119,7 +119,7 @@ async def _execute_debug_analysis(db: AsyncSession, user: User) -> dict:
     """Execute debug analysis with service"""
     from netra_backend.app.services.debug_service import DebugService
 
-    from .tool_handler_helpers import build_debug_service_params
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import build_debug_service_params
     service = DebugService(db)
     service_params = build_debug_service_params(user)
     return await service.get_debug_info(**service_params)
@@ -127,5 +127,5 @@ async def _execute_debug_analysis(db: AsyncSession, user: User) -> dict:
 
 def _create_log_analysis_response(query: str, time_range: str, result: dict) -> Dict[str, Any]:
     """Create log analysis response"""
-    from .tool_handler_helpers import create_log_analysis_result
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_log_analysis_result
     return create_log_analysis_result(query, time_range, result)

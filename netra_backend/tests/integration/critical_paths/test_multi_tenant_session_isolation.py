@@ -12,8 +12,6 @@ This test ensures complete isolation between different tenant sessions.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import random
@@ -27,10 +25,6 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 import websockets
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
@@ -58,7 +52,6 @@ TENANT_CONFIGS = [
         "org_id": "org_003"
     }
 ]
-
 
 class TenantSession:
     """Represents a single tenant session."""
@@ -119,7 +112,6 @@ class TenantSession:
             await self.ws_connection.close()
         if self.session:
             await self.session.close()
-
 
 class MultiTenantIsolationTester:
     """Test multi-tenant session isolation."""
@@ -522,7 +514,6 @@ class MultiTenantIsolationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -556,7 +547,6 @@ async def test_multi_tenant_session_isolation():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -574,7 +564,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

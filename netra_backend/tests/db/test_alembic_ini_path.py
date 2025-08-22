@@ -1,16 +1,9 @@
 """Test alembic.ini path configuration to expose issues."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -21,7 +14,6 @@ from netra_backend.app.db.migration_utils import (
     _get_alembic_ini_path,
     create_alembic_config,
 )
-
 
 class TestAlembicIniPath:
     """Test suite to expose alembic.ini path configuration issues."""
@@ -42,7 +34,6 @@ class TestAlembicIniPath:
     
     def test_single_alembic_ini_location(self):
         """Test that only one alembic.ini exists in the correct location."""
-        project_root = Path(__file__).parent.parent.parent.parent
         
         # Should NOT exist at root (removed duplicate)
         root_alembic = project_root / "alembic.ini"
@@ -70,11 +61,9 @@ class TestAlembicIniPath:
     def test_correct_path_calculation_for_alembic_ini(self):
         """Test what the correct path calculation should be."""
         # Current incorrect calculation
-        project_root = Path(__file__).parent.parent.parent  # Goes to netra_backend
         incorrect_path = project_root / "config" / "alembic.ini"
         
         # Correct calculation should be
-        correct_project_root = Path(__file__).parent.parent.parent.parent  # Goes to project root
         correct_path = correct_project_root / "config" / "alembic.ini"
         
         assert not Path(incorrect_path).exists(), \

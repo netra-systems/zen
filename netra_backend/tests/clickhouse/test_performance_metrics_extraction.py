@@ -3,27 +3,14 @@ Performance Metrics Extraction Tests
 Test performance metrics extraction from ClickHouse
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import (
-    # Add project root to path
 
     fix_clickhouse_array_syntax,
 
@@ -32,12 +19,10 @@ from netra_backend.app.db.clickhouse_query_fixer import (
 )
 from netra_backend.tests.realistic_test_fixtures import validate_array_query_syntax
 
-
 class TestPerformanceMetricsWithClickHouse:
 
     """Test performance metrics extraction from ClickHouse"""
     
-
     def test_metrics_extraction_with_arrays(self):
 
         """Test extracting metrics from nested arrays"""
@@ -108,7 +93,6 @@ class TestPerformanceMetricsWithClickHouse:
 
         assert "metrics.value[" not in fixed_query
 
-
     def test_system_resource_metrics(self):
 
         """Test system resource metrics extraction"""
@@ -171,11 +155,9 @@ class TestPerformanceMetricsWithClickHouse:
 
         """
         
-
         is_valid, error = validate_clickhouse_query(resource_query)
 
         assert is_valid, f"Resource metrics query failed: {error}"
-
 
     def test_performance_threshold_monitoring(self):
 
@@ -271,11 +253,9 @@ class TestPerformanceMetricsWithClickHouse:
 
         """
         
-
         is_valid, error = validate_clickhouse_query(threshold_query)
 
         assert is_valid, f"Threshold monitoring query failed: {error}"
-
 
     def test_performance_correlation_analysis(self):
 
@@ -335,11 +315,9 @@ class TestPerformanceMetricsWithClickHouse:
 
         """
         
-
         is_valid, error = validate_clickhouse_query(correlation_query)
 
         assert is_valid, f"Correlation analysis query failed: {error}"
-
 
     def test_performance_baseline_calculation(self):
 
@@ -417,7 +395,6 @@ class TestPerformanceMetricsWithClickHouse:
 
         """
         
-
         is_valid, error = validate_clickhouse_query(baseline_query)
 
         assert is_valid, f"Baseline calculation query failed: {error}"

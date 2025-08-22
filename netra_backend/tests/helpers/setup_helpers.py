@@ -1,6 +1,5 @@
 """Content setup helper functions for Quality Gate Service tests"""
 
-
 def setup_large_optimization_content():
     """Create comprehensive optimization content for testing"""
     return """
@@ -29,7 +28,6 @@ def setup_large_optimization_content():
     Trade-offs: 0.5% accuracy loss acceptable for 3x performance gain.
     """
 
-
 def setup_specificity_test_content():
     """Create content with all specificity indicators"""
     return """
@@ -39,7 +37,6 @@ def setup_specificity_test_content():
     Set context_window=4096, max_tokens=2048, num_beams=4.
     """
 
-
 def setup_actionability_test_content():
     """Create content with file paths and URLs"""
     return """
@@ -47,7 +44,6 @@ def setup_actionability_test_content():
     2. Download weights from https://models.example.com/weights.bin
     3. Run the script at C:\\Users\\model\\optimize.py
     """
-
 
 def setup_code_block_content():
     """Create content with code blocks"""
@@ -59,7 +55,6 @@ def setup_code_block_content():
     ```
     Then run: `python train.py --epochs 10`
     """
-
 
 def setup_quantification_patterns_content():
     """Create content with all quantification patterns"""
@@ -73,13 +68,11 @@ def setup_quantification_patterns_content():
     Cost decreased by 40% monthly.
     """
 
-
 def setup_relevance_test_context():
     """Create context for relevance testing"""
     return {
         "user_request": "How to speed up neural network training with multiple graphics cards"
     }
-
 
 def setup_completeness_report_content():
     """Create content for completeness testing"""
@@ -91,7 +84,6 @@ def setup_completeness_report_content():
     Metrics: Latency 200ms, throughput 1000 QPS.
     """
 
-
 def setup_completeness_general_content():
     """Create general content for completeness testing"""
     return """
@@ -99,7 +91,6 @@ def setup_completeness_general_content():
     This is because performance improvements may affect accuracy.
     We have analyzed the situation thoroughly.
     """
-
 
 def setup_poor_content_for_improvement():
     """Create poor content for improvement cycle testing"""
@@ -109,7 +100,6 @@ def setup_poor_content_for_improvement():
     To improve performance, improve the performance.
     Generally speaking, things could be better.
     """
-
 
 def setup_improved_content_after_adjustments():
     """Create improved content based on prompt adjustments"""
@@ -122,21 +112,17 @@ def setup_improved_content_after_adjustments():
     Expected results: 200ms latency reduction, $500/month cost savings
     """
 
-
 def create_very_long_sentence():
     """Create sentence with 50+ words for clarity testing"""
     return " ".join(["word"] * 50) + "."
-
 
 def create_excessive_acronyms_content():
     """Create content with many unexplained acronyms"""
     return "Use API, SDK, CLI, GUI, REST, SOAP, XML, JSON, YAML, CSV for integration."
 
-
 def create_nested_parentheses_content():
     """Create content with nested parentheses"""
     return "The system (which includes components (like cache (Redis) and database)) is complex."
-
 
 def create_high_overlap_content():
     """Create content with high word overlap for redundancy testing"""
@@ -146,7 +132,6 @@ def create_high_overlap_content():
     Performance optimization system significantly improves results today.
     """
 
-
 def create_multiple_impossible_claims_content():
     """Create content with multiple impossible claims"""
     return """
@@ -155,11 +140,9 @@ def create_multiple_impossible_claims_content():
     No cost solution with unlimited scaling.
     """
 
-
 def create_claims_with_evidence_content():
     """Create content with evidence-based claims"""
     return "Studies show improvement according to Smith et al. (2023) [1]."
-
 
 def create_context_with_data_source():
     """Create context with data source for hallucination testing"""

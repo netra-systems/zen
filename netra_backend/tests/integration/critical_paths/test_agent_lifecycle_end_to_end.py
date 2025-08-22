@@ -12,8 +12,6 @@ This test runs against the actual dev environment to ensure agent system works e
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import os
@@ -29,10 +27,6 @@ import aiohttp
 import pytest
 import websockets
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
 DEV_WEBSOCKET_URL = "ws://localhost:8000/websocket"
@@ -42,7 +36,6 @@ AGENT_API_URL = f"{DEV_BACKEND_URL}/api/v1/agents"
 # Test credentials
 TEST_USER_EMAIL = "agent_test@example.com"
 TEST_USER_PASSWORD = "agenttest123"
-
 
 class AgentLifecycleTester:
     """Test the complete agent lifecycle flow."""
@@ -561,7 +554,6 @@ class AgentLifecycleTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -595,7 +587,6 @@ async def test_agent_lifecycle_end_to_end():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -612,7 +603,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

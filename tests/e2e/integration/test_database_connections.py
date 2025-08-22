@@ -22,8 +22,6 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager

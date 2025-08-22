@@ -54,7 +54,6 @@ class StartupTestHelper:
             self.services_started.append(service)
         return results
 
-
 class RealServiceTestValidator:
     """Validator for testing real service integrations."""
     

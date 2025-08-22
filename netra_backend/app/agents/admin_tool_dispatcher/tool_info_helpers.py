@@ -21,13 +21,13 @@ def list_all_tools(dispatcher) -> List[AdminToolInfo]:
 
 def get_base_tool_info(dispatcher) -> List[AdminToolInfo]:
     """Get information about base tools"""
-    from .dispatcher_helpers import get_base_tools_list
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import get_base_tools_list
     return get_base_tools_list(dispatcher)
 
 
 def get_admin_tool_info(dispatcher) -> List[AdminToolInfo]:
     """Get information about admin tools"""
-    from .dispatcher_helpers import get_admin_tools_list
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import get_admin_tools_list
     return get_admin_tools_list(dispatcher)
 
 
@@ -62,7 +62,7 @@ def get_admin_tool_info_detail(dispatcher, tool_name: str) -> AdminToolInfo:
 
 def create_admin_tool_info(dispatcher, tool_name: str, admin_tool_type: AdminToolType) -> AdminToolInfo:
     """Create admin tool info object."""
-    from .dispatcher_helpers import create_admin_tool_info
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import create_admin_tool_info
     return create_admin_tool_info(
         tool_name, admin_tool_type, dispatcher.user, dispatcher.admin_tools_enabled
     )
@@ -70,14 +70,14 @@ def create_admin_tool_info(dispatcher, tool_name: str, admin_tool_type: AdminToo
 
 def get_base_tool_info_detail(dispatcher, tool_name: str) -> AdminToolInfo:
     """Get detailed information about a base tool"""
-    from .dispatcher_helpers import create_base_tool_info
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import create_base_tool_info
     tool = dispatcher.tools[tool_name]
     return create_base_tool_info(tool_name, tool)
 
 
 def get_not_found_tool_info(tool_name: str) -> AdminToolInfo:
     """Get information for a tool that was not found"""
-    from .dispatcher_helpers import create_not_found_tool_info
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import create_not_found_tool_info
     return create_not_found_tool_info(tool_name)
 
 
@@ -90,7 +90,7 @@ def get_dispatcher_stats(dispatcher) -> Dict[str, Any]:
 
 def build_base_stats(dispatcher) -> Dict[str, Any]:
     """Build base dispatcher statistics."""
-    from .dispatcher_helpers import build_dispatcher_stats_base
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import build_dispatcher_stats_base
     return build_dispatcher_stats_base()
 
 
@@ -112,5 +112,5 @@ def add_user_specific_stats(dispatcher, stats: Dict[str, Any]) -> None:
 
 def add_system_health_stats(stats: Dict[str, Any]) -> None:
     """Add system health statistics."""
-    from .dispatcher_helpers import add_system_health_to_stats
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import add_system_health_to_stats
     add_system_health_to_stats(stats)

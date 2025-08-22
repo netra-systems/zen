@@ -11,7 +11,7 @@ Architecture:
 """
 
 # Core monitoring components
-from .alert_evaluator import AlertEvaluator
+from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
 
 # Alert management system
 from .alert_manager_compact import (
@@ -24,13 +24,13 @@ from .alert_models import (
     AlertRule,
     NotificationChannel,
 )
-from .alert_notifications import NotificationDeliveryManager
+from netra_backend.app.monitoring.alert_notifications import NotificationDeliveryManager
 from .dashboard import (
     OperationMeasurement,
     PerformanceDashboard,
     SystemOverview,
 )
-from .health_calculator import HealthScoreCalculator
+from netra_backend.app.monitoring.health_calculator import HealthScoreCalculator
 from .metrics_collector import (
     PerformanceMetric,
     SystemResourceMetrics,
@@ -48,8 +48,8 @@ from .models import (
     MetricUnit,
     MonitoringDashboard,
 )
-from .performance_alerting import PerformanceAlertManager
-from .performance_monitor import PerformanceMonitor
+from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor
 from .system_monitor import (
     MonitoringManager,
     SystemPerformanceMonitor,

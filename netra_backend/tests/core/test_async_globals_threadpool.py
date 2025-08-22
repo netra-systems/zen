@@ -3,17 +3,10 @@ Tests for global instances, threadpool, and shutdown functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -21,9 +14,7 @@ from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_resource_manager import (
-    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
     get_global_resource_manager,
@@ -31,7 +22,6 @@ from netra_backend.app.core.async_resource_manager import (
     run_in_threadpool,
     shutdown_async_utils,
 )
-
 
 class TestGlobalInstances:
     """Test global instance management"""
@@ -49,7 +39,6 @@ class TestGlobalInstances:
         assert isinstance(pool, AsyncTaskPool)
         pool2 = get_global_task_pool()
         assert pool is pool2
-
 
 class TestRunInThreadpool:
     """Test thread pool execution"""
@@ -77,7 +66,6 @@ class TestRunInThreadpool:
         assert thread_id2 != None
         assert hasattr(run_in_threadpool, '_executor')
 
-
 class TestShutdownAsyncUtils:
     """Test shutdown functionality"""
     async def test_shutdown_async_utils(self):
@@ -97,7 +85,6 @@ class TestShutdownAsyncUtils:
         assert result == "result"
         assert hasattr(run_in_threadpool, '_executor')
         await shutdown_async_utils()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -128,7 +128,7 @@ async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
     """Legacy function"""
     from netra_backend.app.core.configuration.services import corpus_service
 
-    from .tool_handler_helpers import create_corpus_list_response
+    from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_corpus_list_response
     corpora = await corpus_service.list_corpora(db)
     return create_corpus_list_response(corpora)
 

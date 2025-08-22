@@ -100,7 +100,7 @@ class CorpusManager:
 
     def _create_clone_metadata(self, source_corpus: models.Corpus) -> str:
         """Create metadata for cloned corpus"""
-        from .base import ContentSource
+        from netra_backend.app.services.corpus.base import ContentSource
         metadata = {
             "content_source": ContentSource.IMPORT.value, "cloned_from": source_corpus.id,
             "created_at": datetime.now(UTC).isoformat(), "version": 1
@@ -110,7 +110,7 @@ class CorpusManager:
     def _create_corpus_model(self, corpus_id: str, table_name: str, new_name: str, 
                            source_corpus: models.Corpus, user_id: str, metadata: str) -> models.Corpus:
         """Create corpus model instance"""
-        from .base import CorpusStatus
+        from netra_backend.app.services.corpus.base import CorpusStatus
         return models.Corpus(
             id=corpus_id, name=new_name, description=f"Clone of {source_corpus.name}",
             table_name=table_name, status=CorpusStatus.CREATING.value, created_by_id=user_id,

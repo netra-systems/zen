@@ -8,17 +8,10 @@ CRITICAL: Real JWT libraries (PyJWT) with actual cross-service communication
 Maximum 300 lines enforced - focuses on core JWT flows only
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -30,11 +23,7 @@ import httpx
 import jwt
 import pytest
 
-# Add project root to path
 from netra_backend.tests.test_harness import UnifiedTestHarness
-
-# Add project root to path
-
 
 class JWTTestHelper:
     """Simplified JWT helper for backend testing."""
@@ -141,7 +130,6 @@ class JWTTestHelper:
         except Exception:
             return False
 
-
 class TestJWTCreationAndSigning:
     """Test JWT creation with proper claims and signing."""
     
@@ -202,7 +190,6 @@ class TestJWTCreationAndSigning:
         assert decoded["service"] == "netra-backend"
         assert decoded["token_type"] == "service"
 
-
 class TestCrossServiceJWTValidation:
     """Test JWT validation across services."""
     
@@ -260,7 +247,6 @@ class TestCrossServiceJWTValidation:
         rejection_codes = [400, 401, 422, 500]
         assert auth_result["status"] in rejection_codes
         assert backend_result["status"] in rejection_codes
-
 
 class TestSessionManagementUnified:
     """Test session consistency across services."""
@@ -320,7 +306,6 @@ class TestSessionManagementUnified:
         
         # Token should still be valid
         assert decoded1["exp"] == decoded2["exp"]
-
 
 class TestTokenExpirationHandling:
     """Test token expiry scenarios."""
@@ -409,7 +394,6 @@ class TestTokenExpirationHandling:
         rejection_codes = [400, 401, 422, 500]
         assert auth_result["status"] in rejection_codes
         assert backend_result["status"] in rejection_codes
-
 
 # Business Value Justification: $15K MRR Impact from JWT Security
 """

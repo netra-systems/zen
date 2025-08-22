@@ -3,17 +3,10 @@ ClickHouse Permission Helpers
 Centralized permission checking utilities for ClickHouse tests
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 
@@ -21,17 +14,12 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
-
-# Add project root to path
-
 
 def _get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""
     return get_config().clickhouse_https
-
 
 def _create_clickhouse_client(config):
     """Create ClickHouse client with given configuration"""
@@ -39,7 +27,6 @@ def _create_clickhouse_client(config):
         host=config.host, port=config.port, user=config.user,
         password=config.password, database=config.database, secure=True
     )
-
 
 async def _check_system_metrics_permission(client):
     """Check if user has permission to access system.metrics"""
@@ -50,7 +37,6 @@ async def _check_system_metrics_permission(client):
         if "Not enough privileges" in str(e) or "ACCESS_DENIED" in str(e):
             return False
         raise
-
 
 async def _check_table_insert_permission(client, table_name):
     """Check if user has INSERT permission on table"""
@@ -66,7 +52,6 @@ async def _check_table_insert_permission(client, table_name):
         return True
     return True
 
-
 async def _check_table_create_permission(client):
     """Check if user has CREATE TABLE permission"""
     test_table = f"temp_permission_test_{uuid.uuid4().hex[:8]}"
@@ -79,7 +64,6 @@ async def _check_table_create_permission(client):
             return False
         return True
 
-
 def skip_if_no_system_permissions(client):
     """Decorator to skip test if no system permissions"""
     async def decorator(test_func):
@@ -89,7 +73,6 @@ def skip_if_no_system_permissions(client):
         return await test_func()
     return decorator
 
-
 def skip_if_no_insert_permissions(client, table_name):
     """Decorator to skip test if no insert permissions"""
     async def decorator(test_func):
@@ -98,7 +81,6 @@ def skip_if_no_insert_permissions(client, table_name):
             pytest.skip(f"development_user lacks INSERT privileges for {table_name}")
         return await test_func()
     return decorator
-
 
 @pytest.fixture
 def real_clickhouse_client():

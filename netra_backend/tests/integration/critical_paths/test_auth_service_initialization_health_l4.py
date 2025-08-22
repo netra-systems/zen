@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: 100% - no auth means no access, no revenue
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -31,9 +24,6 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-
-# Add project root to path
-
 
 # Set test environment before imports
 os.environ["ENVIRONMENT"] = "testing"
@@ -48,7 +38,6 @@ from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.db.postgres import AsyncSessionLocal
 from netra_backend.app.services.auth_service import AuthService
 
-
 @dataclass
 class AuthServiceDependencies:
     """Track auth service dependencies."""
@@ -57,7 +46,6 @@ class AuthServiceDependencies:
     config: bool = False
     certificates: bool = False
     external_auth: bool = False
-
 
 class TestAuthServiceInitializationHealth:
     """Test auth service initialization and health monitoring."""

@@ -11,17 +11,10 @@ Coverage: Log collection accuracy, aggregation performance, structured logging, 
 L3 Realism: Tests with real log aggregation services and actual log volumes
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -46,7 +39,6 @@ pytestmark = [
     pytest.mark.logging
 ]
 
-
 class LogLevel(Enum):
     """Log severity levels."""
     DEBUG = "debug"
@@ -54,7 +46,6 @@ class LogLevel(Enum):
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
-
 
 @dataclass
 class LogEntry:
@@ -77,7 +68,6 @@ class LogEntry:
         if self.structured_data is None:
             self.structured_data = {}
 
-
 @dataclass
 class LogAggregationMetrics:
     """Metrics for log aggregation performance."""
@@ -88,7 +78,6 @@ class LogAggregationMetrics:
     peak_throughput_logs_per_second: float
     storage_efficiency_percentage: float
     query_response_time_ms: float
-
 
 class LogAggregationValidator:
     """Validates log aggregation pipeline with real infrastructure."""
@@ -490,7 +479,6 @@ class LogAggregationValidator:
         except Exception as e:
             logger.error(f"Log aggregation cleanup failed: {e}")
 
-
 class LogCollector:
     """Mock log collector for L3 testing."""
     
@@ -506,7 +494,6 @@ class LogCollector:
     async def shutdown(self):
         """Shutdown log collector."""
         pass
-
 
 class LogAggregator:
     """Mock log aggregator for L3 testing."""
@@ -530,7 +517,6 @@ class LogAggregator:
         """Shutdown log aggregator."""
         pass
 
-
 class LogStorage:
     """Mock log storage for L3 testing."""
     
@@ -553,7 +539,6 @@ class LogStorage:
         """Shutdown log storage."""
         pass
 
-
 class AuditTracker:
     """Mock audit tracker for compliance testing."""
     
@@ -568,7 +553,6 @@ class AuditTracker:
             "details": details
         })
 
-
 @pytest.fixture
 async def log_aggregation_validator():
     """Create log aggregation validator for L3 testing."""
@@ -576,7 +560,6 @@ async def log_aggregation_validator():
     await validator.initialize_log_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_log_aggregation_pipeline_performance_l3(log_aggregation_validator):
@@ -601,7 +584,6 @@ async def test_log_aggregation_pipeline_performance_l3(log_aggregation_validator
     assert metrics.average_processing_time_ms <= 100.0
     assert metrics.query_response_time_ms <= 200.0
 
-
 @pytest.mark.asyncio
 async def test_log_audit_compliance_l3(log_aggregation_validator):
     """Test log audit compliance and data governance.
@@ -621,7 +603,6 @@ async def test_log_audit_compliance_l3(log_aggregation_validator):
     assert len(audit_results["sensitive_data_exposure"]) == 0
     assert audit_results["retention_compliance"] is True
     assert audit_results["immutability_verification"] is True
-
 
 @pytest.mark.asyncio
 async def test_cross_service_log_correlation_l3(log_aggregation_validator):
@@ -646,7 +627,6 @@ async def test_cross_service_log_correlation_l3(log_aggregation_validator):
     complete_trace_ratio = correlation_results["complete_traces"] / max(1, correlation_results["total_traces"])
     assert complete_trace_ratio >= 0.7
 
-
 @pytest.mark.asyncio
 async def test_log_structured_data_integrity_l3(log_aggregation_validator):
     """Test structured data integrity through aggregation pipeline.
@@ -670,7 +650,6 @@ async def test_log_structured_data_integrity_l3(log_aggregation_validator):
     
     # Verify data integrity maintained
     assert metrics.successful_aggregations >= len(log_stream) * 0.95
-
 
 @pytest.mark.asyncio
 async def test_log_error_handling_resilience_l3(log_aggregation_validator):

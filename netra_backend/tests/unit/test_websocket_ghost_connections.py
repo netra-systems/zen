@@ -7,17 +7,10 @@ Business Value: Ensures connection limits work properly, preventing
 resource exhaustion that could impact all users ($50K+ MRR protection).
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock, patch
@@ -27,11 +20,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager
-
-# Add project root to path
-
 
 class TestGhostConnectionPrevention:
     """Test suite for ghost connection prevention and cleanup."""

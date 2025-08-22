@@ -20,21 +20,10 @@ ARCHITECTURE COMPLIANCE:
 - Type safety: Full typing with recovery models
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -50,7 +39,6 @@ import pytest
 
 from dev_launcher.crash_detector import CrashDetector
 
-# Add project root to path
 # Dev launcher recovery imports
 from dev_launcher.crash_recovery import CrashRecoveryManager
 from dev_launcher.crash_recovery_models import (
@@ -85,12 +73,10 @@ from netra_backend.tests.startup_check_helpers import (
 
 )
 
-
 class TestServiceRecoveryBase:
 
     """Base class for service recovery tests."""
     
-
     @pytest.fixture
 
     def recovery_config(self):
@@ -109,7 +95,6 @@ class TestServiceRecoveryBase:
 
         )
     
-
     @pytest.fixture
 
     def service_config(self):
@@ -130,7 +115,6 @@ class TestServiceRecoveryBase:
 
         )
     
-
     @pytest.fixture
 
     def mock_process_manager(self):
@@ -147,7 +131,6 @@ class TestServiceRecoveryBase:
 
         return manager
     
-
     @pytest.fixture
 
     def recovery_manager(self, recovery_config, mock_process_manager):
@@ -162,7 +145,6 @@ class TestServiceRecoveryBase:
 
         )
 
-
 @pytest.mark.critical
 
 @pytest.mark.asyncio
@@ -171,7 +153,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
     """Business Value: $15K MRR - System reliability through failure recovery"""
     
-
     async def test_startup_failure_recovery(self, recovery_manager, service_config):
 
         """Test recovery from startup failures"""
@@ -201,7 +182,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         await self._verify_recovery_stages_completed(crash_report)
     
-
     async def _simulate_startup_failure_recovery(self, manager, service_name: str, config):
 
         """Simulate startup failure and recovery process."""
@@ -237,10 +217,8 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         crash_report.resolved = True
         
-
         return crash_report
     
-
     async def _verify_recovery_stages_completed(self, crash_report: CrashReport):
 
         """Verify all recovery stages were completed."""
@@ -253,7 +231,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
             assert attempt.stage is not None, "Recovery stage not set"
     
-
     async def test_auth_service_startup_failure_specific(self, recovery_manager):
 
         """Test auth service specific startup failure recovery"""
@@ -283,7 +260,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         assert recovery_success, "Auth service recovery failed"
     
-
     async def _create_auth_failure_scenario(self):
 
         """Create auth service failure scenario."""
@@ -300,7 +276,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         }
     
-
     async def _attempt_auth_recovery(self, failure_scenario: Dict):
 
         """Attempt auth service recovery."""
@@ -316,10 +291,8 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
                 await asyncio.sleep(0.1)  # Simulate restart
         
-
         return True  # Mock successful recovery
     
-
     async def test_backend_dependency_failure_recovery(self, recovery_manager):
 
         """Test backend recovery when auth dependency fails"""
@@ -353,7 +326,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         assert recovery_chain["recovery_order"] == ["auth_service", "backend_service"]
     
-
     async def _simulate_dependency_failure(self, dependency_service: str):
 
         """Simulate dependency service failure."""
@@ -368,7 +340,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         }
     
-
     async def _execute_dependency_recovery_chain(self, failure_info: Dict):
 
         """Execute recovery chain for dependency failures."""
@@ -383,7 +354,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         recovery_order.extend(failure_info["dependent_services"])
         
-
         return {
 
             "auth_recovered": True,
@@ -394,7 +364,6 @@ class TestStartupFailureRecovery(TestServiceRecoveryBase):
 
         }
 
-
 @pytest.mark.critical
 
 @pytest.mark.asyncio
@@ -403,7 +372,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
     """Business Value: $10K MRR - Partial system availability during issues"""
     
-
     async def test_individual_service_restart(self, recovery_manager, mock_process_manager):
 
         """Test restarting a single service without affecting others"""
@@ -429,7 +397,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         await self._verify_service_isolation(restart_result)
     
-
     async def _restart_single_service(self, manager, target: str, all_services: List[str]):
 
         """Restart single service while preserving others."""
@@ -447,7 +414,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         await asyncio.sleep(0.1)
         
-
         return {
 
             "target_restarted": True,
@@ -460,7 +426,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         }
     
-
     async def _verify_service_isolation(self, restart_result: Dict):
 
         """Verify service restart isolation worked correctly."""
@@ -469,7 +434,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         assert len(restart_result["other_services"]) == 2, "Wrong number of other services"
     
-
     async def test_backend_service_hot_restart(self, recovery_manager):
 
         """Test backend hot restart preserves connections"""
@@ -489,7 +453,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         assert connections_preserved, "Connections not preserved"
     
-
     async def _setup_mock_active_connections(self):
 
         """Setup mock active connections for testing."""
@@ -504,7 +467,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         }
     
-
     async def _execute_hot_restart(self, service_name: str):
 
         """Execute hot restart procedure."""
@@ -516,10 +478,8 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         await asyncio.sleep(0.1)
         
-
         return True  # Mock successful restart
     
-
     async def _verify_connections_preserved(self, original_connections: Dict):
 
         """Verify connections were preserved during restart."""
@@ -527,7 +487,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         return True  # In real test, would verify actual connections
     
-
     async def test_frontend_service_zero_downtime_restart(self, recovery_manager):
 
         """Test frontend restart with zero user-facing downtime"""
@@ -547,7 +506,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         await self._verify_session_continuity(user_sessions, restart_metrics)
     
-
     async def _setup_mock_user_sessions(self):
 
         """Setup mock user sessions for testing."""
@@ -562,7 +520,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         }
     
-
     async def _execute_zero_downtime_restart(self):
 
         """Execute zero-downtime restart strategy."""
@@ -581,10 +538,8 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         await asyncio.sleep(0.05)
         
-
         end_time = time.time()
         
-
         return {
 
             "downtime_seconds": end_time - start_time,
@@ -595,7 +550,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
 
         }
     
-
     async def _verify_session_continuity(self, sessions: Dict, metrics: Dict):
 
         """Verify user session continuity during restart."""
@@ -603,7 +557,6 @@ class TestIndividualServiceRestart(TestServiceRecoveryBase):
         assert sessions["active_sessions"] > 0, "No sessions to test"
 
         assert metrics["restart_successful"], "Restart was not successful"
-
 
 @pytest.mark.critical
 
@@ -613,7 +566,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
     """Business Value: $20K MRR - Proactive crash detection prevents downtime"""
     
-
     async def test_crash_detection_and_recovery(self, recovery_manager, service_config):
 
         """Test crash detection mechanisms and automatic recovery"""
@@ -649,7 +601,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         assert recovery_success, "Recovery failed after crash detection"
     
-
     async def _simulate_crash_detection(self, detector, service_name: str):
 
         """Simulate crash detection process."""
@@ -665,10 +616,8 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         await asyncio.sleep(0.1)
         
-
         return True  # Mock crash detected
     
-
     async def _execute_crash_recovery(self, manager, service_name: str):
 
         """Execute crash recovery procedure."""
@@ -684,10 +633,8 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         await asyncio.sleep(0.2)
         
-
         return True  # Mock successful recovery
     
-
     async def test_process_monitoring_crash_detection(self, recovery_manager):
 
         """Test process-level crash detection"""
@@ -709,7 +656,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         await self._verify_crash_detection_accuracy(mock_process)
     
-
     async def _check_process_crash_status(self, process):
 
         """Check if process has crashed."""
@@ -721,7 +667,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         return return_code is not None and return_code != 0
     
-
     async def _verify_crash_detection_accuracy(self, process):
 
         """Verify crash detection accuracy."""
@@ -730,7 +675,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         assert process.poll() != 0, "Process should show non-zero exit code"
     
-
     async def test_health_endpoint_failure_detection(self, recovery_manager):
 
         """Test health endpoint failure detection"""
@@ -760,7 +704,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         await self._verify_failure_detection(health_results, failed_services)
     
-
     async def _check_health_endpoint_with_timeout(self, endpoint: str):
 
         """Check health endpoint with timeout detection."""
@@ -776,7 +719,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
             return {"healthy": False, "response_time": None}
     
-
     async def _verify_failure_detection(self, results: Dict, failed_services: List):
 
         """Verify health failure detection worked correctly."""
@@ -792,7 +734,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         assert len(healthy_services) >= 0, "At least some services should be healthy"
     
-
     async def test_log_pattern_crash_detection(self, recovery_manager):
 
         """Test crash detection through log pattern analysis"""
@@ -826,7 +767,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         ]
         
-
         crash_detected = await self._analyze_logs_for_crashes(test_logs, crash_patterns)
         
         # Assert - Crash patterns detected in logs
@@ -835,7 +775,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         await self._verify_log_analysis_accuracy(test_logs, crash_patterns)
     
-
     async def _analyze_logs_for_crashes(self, logs: List[str], patterns: List[str]):
 
         """Analyze logs for crash patterns."""
@@ -850,7 +789,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         return False
     
-
     async def _verify_log_analysis_accuracy(self, logs: List[str], patterns: List[str]):
 
         """Verify log analysis detected crashes accurately."""
@@ -865,7 +803,6 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
 
         assert fatal_found, "Expected FATAL ERROR pattern not found"
 
-
 @pytest.mark.critical
 
 @pytest.mark.asyncio
@@ -874,7 +811,6 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
     """Business Value: $5K MRR - Fast recovery minimizes revenue impact"""
     
-
     async def test_recovery_time_performance_targets(self, recovery_manager):
 
         """Test recovery completes within performance targets"""
@@ -898,7 +834,6 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
         await self._verify_recovery_performance(recovery_metrics, recovery_targets)
     
-
     async def _execute_timed_recovery_cycle(self):
 
         """Execute full recovery cycle with timing measurements."""
@@ -921,10 +856,8 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
         recovery_time = time.time() - recovery_start
         
-
         total_time = time.time() - start_time
         
-
         return {
 
             "detection_time": detection_time,
@@ -937,7 +870,6 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
         }
     
-
     async def _verify_recovery_performance(self, metrics: Dict, targets: Dict):
 
         """Verify recovery performance meets targets."""
@@ -950,7 +882,6 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
         assert metrics["recovery_success"], "Recovery was not successful"
     
-
     async def test_exponential_backoff_effectiveness(self, recovery_manager, recovery_config):
 
         """Test exponential backoff prevents rapid retry failures"""
@@ -968,14 +899,12 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
         await self._verify_backoff_compliance(attempt_timings, backoff_delays)
     
-
     async def _execute_backoff_attempts(self, delays: List[float], max_attempts: int):
 
         """Execute recovery attempts with exponential backoff."""
 
         attempt_timings = []
         
-
         for attempt in range(max_attempts):
 
             attempt_start = time.time()
@@ -992,7 +921,6 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
                 await asyncio.sleep(delay / 10)  # Scaled for test speed
                 
-
             attempt_timings.append({
 
                 "attempt": attempt + 1,
@@ -1003,17 +931,14 @@ class TestRecoveryPerformanceMetrics(TestServiceRecoveryBase):
 
             })
         
-
         return attempt_timings
     
-
     async def _verify_backoff_compliance(self, timings: List[Dict], expected_delays: List[float]):
 
         """Verify exponential backoff was applied correctly."""
 
         assert len(timings) <= len(expected_delays), "Too many attempts"
         
-
         for i, timing in enumerate(timings):
 
             assert timing["attempt"] == i + 1, f"Wrong attempt number: {timing['attempt']}"

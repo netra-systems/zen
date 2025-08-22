@@ -3,18 +3,10 @@ Test that exposes the LLM health check issue in the health route.
 This test demonstrates why the 'settings' is not defined error occurs.
 """
 
-# Add project root to path
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -28,13 +20,11 @@ os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
 
-
 @pytest.fixture
 def client():
     """Create test client with proper app setup"""
     from netra_backend.app.main import app
     return TestClient(app)
-
 
 def test_llm_health_check_missing_method(client):
     """
@@ -52,7 +42,6 @@ def test_llm_health_check_missing_method(client):
     
     assert "is_healthy" in str(exc_info.value)
 
-
 def test_health_ready_endpoint_with_llm_check_fails(client):
     """
     Test that the /health/ready endpoint fails when LLM health check is invoked.
@@ -69,7 +58,6 @@ def test_health_ready_endpoint_with_llm_check_fails(client):
     # The error should be caught and logged but not exposed to the client
     data = response.json()
     assert data["detail"] == "Service Unavailable"
-
 
 def test_health_standard_level_with_llm_dependency():
     """
@@ -99,7 +87,6 @@ def test_health_standard_level_with_llm_dependency():
     finally:
         loop.close()
 
-
 def test_dependency_health_checker_llm_check_directly():
     """
     Test the DependencyHealthChecker's LLM check directly to expose the issue.
@@ -123,7 +110,6 @@ def test_dependency_health_checker_llm_check_directly():
         assert not result.details.get("success", False)
     finally:
         loop.close()
-
 
 def test_llm_manager_instantiation_without_settings():
     """
@@ -153,7 +139,6 @@ def test_llm_manager_instantiation_without_settings():
     # And it doesn't have is_healthy() method
     assert not hasattr(llm_no_settings, 'is_healthy')
 
-
 @patch('netra_backend.app.core.health.checks.llm_manager')
 def test_health_check_with_mocked_llm_manager(mock_llm_manager):
     """
@@ -181,7 +166,6 @@ def test_health_check_with_mocked_llm_manager(mock_llm_manager):
         assert result.details.get("success", False)
     finally:
         loop.close()
-
 
 if __name__ == "__main__":
     # Run tests individually to see which ones fail

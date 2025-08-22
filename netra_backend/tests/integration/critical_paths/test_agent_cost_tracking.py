@@ -10,17 +10,10 @@ Critical Path: Usage tracking -> Cost calculation -> Budget monitoring -> Alerts
 Coverage: Real cost tracking, budget management, usage analytics, cost optimization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class CostCategory(Enum):
     """Categories for cost tracking."""
@@ -58,7 +49,6 @@ class CostCategory(Enum):
     COMPUTE = "compute"
     BANDWIDTH = "bandwidth"
 
-
 class BudgetPeriod(Enum):
     """Budget period types."""
     DAILY = "daily"
@@ -67,14 +57,12 @@ class BudgetPeriod(Enum):
     QUARTERLY = "quarterly"
     YEARLY = "yearly"
 
-
 class AlertSeverity(Enum):
     """Alert severity levels."""
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
     EMERGENCY = "emergency"
-
 
 @dataclass
 class CostEntry:
@@ -133,7 +121,6 @@ class CostEntry:
             metadata=data.get("metadata", {})
         )
 
-
 @dataclass
 class Budget:
     """Represents a budget configuration."""
@@ -186,7 +173,6 @@ class Budget:
             created_at=datetime.fromisoformat(data["created_at"])
         )
 
-
 @dataclass
 class CostAlert:
     """Represents a cost alert."""
@@ -213,7 +199,6 @@ class CostAlert:
             "triggered_at": self.triggered_at.isoformat(),
             "acknowledged": self.acknowledged
         }
-
 
 class ProviderPricing:
     """Manages pricing information for different providers."""
@@ -259,7 +244,6 @@ class ProviderPricing:
         total_cost = input_cost + output_cost
         
         return input_cost, output_cost, total_cost
-
 
 class CostTracker:
     """Tracks and manages AI operation costs."""
@@ -529,7 +513,6 @@ class CostTracker:
             "last_updated": datetime.now().isoformat()
         }
 
-
 class BudgetManager:
     """Manages budgets and cost alerts."""
     
@@ -693,7 +676,6 @@ class BudgetManager:
             "forecast_confidence": min(1.0, len(daily_costs) / 30.0)  # Confidence based on data availability
         }
 
-
 class CostOptimizer:
     """Provides cost optimization recommendations."""
     
@@ -781,7 +763,6 @@ class CostOptimizer:
             "summary": usage_summary["summary"]
         }
 
-
 class CostTrackingManager:
     """Manages cost tracking testing."""
     
@@ -848,7 +829,6 @@ class CostTrackingManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def cost_manager():
     """Create cost tracking test manager."""
@@ -856,7 +836,6 @@ async def cost_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -883,7 +862,6 @@ async def test_basic_cost_tracking(cost_manager):
     
     # Verify cost calculation
     assert len(manager.cost_tracker.pending_entries) == 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -915,7 +893,6 @@ async def test_provider_pricing_calculation(cost_manager):
     assert input_cost == expected_input
     assert output_cost == expected_output
     assert total_cost == expected_total
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -951,7 +928,6 @@ async def test_cost_summary_generation(cost_manager):
     assert len(summary["provider_breakdown"]) >= 1
     assert len(summary["model_breakdown"]) >= 1
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_realtime_cache_updates(cost_manager):
@@ -974,7 +950,6 @@ async def test_realtime_cache_updates(cost_manager):
     assert realtime_data["agent_id"] == "cache_test_agent"
     assert realtime_data["total_cost"] > 0
     assert realtime_data["total_tokens"] == 300
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1015,7 +990,6 @@ async def test_budget_creation_and_monitoring(cost_manager):
     assert budget_status["current_usage"] > 0
     assert budget_status["usage_percentage"] >= 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_budget_alert_thresholds(cost_manager):
@@ -1052,7 +1026,6 @@ async def test_budget_alert_thresholds(cost_manager):
     assert budget_status["usage_percentage"] > 0.5
     assert len(budget_status["alerts_triggered"]) > 0
     assert budget_status["is_over_budget"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1096,7 +1069,6 @@ async def test_budget_forecasting(cost_manager):
     assert "forecasted_cost" in forecast
     assert "forecast_confidence" in forecast
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_cost_optimization_analysis(cost_manager):
@@ -1135,7 +1107,6 @@ async def test_cost_optimization_analysis(cost_manager):
     recommendations = analysis["recommendations"]
     assert len(recommendations) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_cost_tracking(cost_manager):
@@ -1169,7 +1140,6 @@ async def test_concurrent_cost_tracking(cost_manager):
     )
     
     assert summary["summary"]["total_requests"] >= 50
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

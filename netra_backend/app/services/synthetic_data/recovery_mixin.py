@@ -200,7 +200,7 @@ class RecoveryMixin:
     
     def get_circuit_breaker(self) -> 'CircuitBreaker':
         """Get circuit breaker instance"""
-        from .circuit_breaker import CircuitBreaker, CircuitConfig
+        from netra_backend.app.services.synthetic_data.circuit_breaker import CircuitBreaker, CircuitConfig
         config = CircuitConfig(name="synthetic_data_recovery")
         return CircuitBreaker(config)
     
@@ -227,7 +227,7 @@ class RecoveryMixin:
     
     async def begin_transaction(self) -> 'Transaction':
         """Begin transaction"""
-        from .transaction import Transaction
+        from netra_backend.app.services.synthetic_data.transaction import Transaction
         return Transaction()
     
     async def query_records(self) -> List[Dict]:

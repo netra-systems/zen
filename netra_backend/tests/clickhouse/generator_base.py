@@ -6,7 +6,6 @@ Provides common constants and utilities for data generation
 import random
 from typing import List, Optional
 
-
 class DataGeneratorBase:
     """Base class with common configuration for data generators"""
     

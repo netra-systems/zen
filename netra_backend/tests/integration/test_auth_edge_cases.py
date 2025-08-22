@@ -20,17 +20,10 @@ Test Coverage:
 - Resource exhaustion
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -49,9 +42,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import jwt
 import pytest
 
-# Add project root to path
-
-
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
@@ -66,7 +56,6 @@ from netra_backend.app.schemas.auth_types import (
     TokenData,
 )
 
-
 @dataclass
 class SecurityTestCase:
     """Security test case definition."""
@@ -75,7 +64,6 @@ class SecurityTestCase:
     payload: Any
     expected_result: str
     severity: str  # "critical", "high", "medium", "low"
-
 
 class AuthEdgeCasesTestSuite:
     """Test suite for authentication edge cases and errors."""
@@ -170,7 +158,6 @@ class AuthEdgeCasesTestSuite:
             return bytes(random.randint(0, 255) for _ in range(100))
         else:
             return None
-
 
 @pytest.mark.integration
 @pytest.mark.l3

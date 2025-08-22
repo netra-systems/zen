@@ -30,9 +30,6 @@ import pytest
 import websockets
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.token_lifecycle_helpers import (
     PerformanceBenchmark,

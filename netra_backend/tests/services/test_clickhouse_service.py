@@ -1,16 +1,9 @@
 """Test ClickHouse service for time-series data and analytics with real API."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -28,15 +21,12 @@ from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
-    # Add project root to path
     create_workload_events_table_if_missing,
     verify_workload_events_table,
 )
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 
-# Add project root to path
 from netra_backend.app.services.clickhouse_service import list_corpus_tables
-
 
 @pytest.fixture(scope="function")
 def clickhouse_client():
@@ -59,7 +49,6 @@ def clickhouse_client():
             return client
     
     return _get_client
-
 
 @pytest.fixture
 def real_clickhouse_client(event_loop):
@@ -99,7 +88,6 @@ def real_clickhouse_client(event_loop):
         event_loop.run_until_complete(client.disconnect())
     except Exception as e:
         pytest.skip(f"Could not connect to ClickHouse: {e}")
-
 
 class TestClickHouseConnection:
     """Test ClickHouse connection management."""
@@ -293,7 +281,6 @@ class TestBasicOperations:
             f"SHOW TABLES LIKE '{test_table}'"
         )
         assert len(tables_after) == 0
-
 
 @pytest.fixture
 def ensure_workload_table(event_loop):

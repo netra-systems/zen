@@ -12,7 +12,6 @@ import time
 from typing import Optional
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 async def test_e2e_flow():
     """Test the complete end-to-end model processing flow"""

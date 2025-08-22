@@ -4,17 +4,10 @@ Tests lifecycle state transitions, health monitoring, and metrics collection
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from enum import Enum
@@ -26,18 +19,13 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-
-# Add project root to path
-
 
 class ToolStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive" 
     DEPRECATED = "deprecated"
     MAINTENANCE = "maintenance"
-
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with lifecycle management"""
@@ -70,7 +58,6 @@ class MockAdvancedTool(BaseTool):
     def mark_deprecated(self):
         self.status = ToolStatus.DEPRECATED
 
-
 class ToolLifecycleManager:
     """Manages tool lifecycle operations"""
     
@@ -99,7 +86,6 @@ class ToolLifecycleManager:
         if tool_name:
             return [h for h in self.lifecycle_history if h['tool'] == tool_name]
         return self.lifecycle_history.copy()
-
 
 class ToolHealthMonitor:
     """Monitors health status of tools"""
@@ -136,7 +122,6 @@ class ToolHealthMonitor:
         self.health_history.append(health_record)
         
         return is_healthy
-
 
 class ToolMetricsCollector:
     """Collects and aggregates tool metrics"""
@@ -177,7 +162,6 @@ class ToolMetricsCollector:
         
         return metrics
 
-
 class UnifiedToolRegistry:
     """Unified registry with lifecycle and health management"""
     
@@ -198,7 +182,6 @@ class UnifiedToolRegistry:
     def collect_metrics(self) -> Dict[str, Any]:
         """Collect metrics from all tools"""
         return self.metrics_collector.collect_all_metrics()
-
 
 class TestToolLifecycleAndHealth:
     """Test tool lifecycle and health management functionality"""

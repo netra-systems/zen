@@ -17,7 +17,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-
 class SAMLAssertionValidator:
     """Production-grade SAML assertion validation for enterprise SSO"""
     
@@ -49,7 +48,6 @@ class SAMLAssertionValidator:
             "permissions": attrs.get("permissions", []),
             "mfa_verified": attrs.get("mfa_verified", False)
         }
-
 
 class EnterpriseTokenManager:
     """Manages enterprise SSO tokens with multi-tenant isolation"""
@@ -98,7 +96,6 @@ class EnterpriseTokenManager:
         
         return token_data
 
-
 class EnterpriseSessionManager:
     """Enterprise session management with cross-service persistence"""
     
@@ -141,7 +138,6 @@ class EnterpriseSessionManager:
             return False
         
         return session["tenant_id"] == tenant_id
-
 
 class MockIdPErrorGenerator:
     """Generates realistic IdP error scenarios for testing"""

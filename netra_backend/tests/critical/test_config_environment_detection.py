@@ -8,17 +8,10 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum config reliability p
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from typing import Dict, Type
@@ -26,7 +19,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 # Core configuration environment components
 from config_environment import ConfigEnvironment
 from config_loader import detect_cloud_run_environment
@@ -38,7 +30,6 @@ from netra_backend.app.schemas.Config import (
     ProductionConfig,
     StagingConfig,
 )
-
 
 @pytest.mark.critical
 class TestEnvironmentDetection:
@@ -108,7 +99,6 @@ class TestEnvironmentDetection:
                 # Assert - Defaults to development
                 assert environment == "development"
 
-
 @pytest.mark.critical
 class TestConfigurationCreation:
     """Business Value: Ensures correct configuration objects created for each environment"""
@@ -173,7 +163,6 @@ class TestConfigurationCreation:
         assert isinstance(config, DevelopmentConfig)
         assert isinstance(config, AppConfig)
 
-
 @pytest.mark.critical
 class TestWebSocketUrlConfiguration:
     """Business Value: Ensures WebSocket configuration for real-time features"""
@@ -222,7 +211,6 @@ class TestWebSocketUrlConfiguration:
                 assert "9000" in log_call
                 assert "WebSocket URL" in log_call
 
-
 @pytest.mark.critical
 class TestCloudRunDetection:
     """Business Value: Ensures proper Cloud Run environment detection for deployments"""
@@ -261,7 +249,6 @@ class TestCloudRunDetection:
             
             # Assert - Environment detected (may be staging or empty)
             assert isinstance(environment, (str, type(None)))
-
 
 @pytest.mark.critical  
 class TestConfigurationClassMapping:
@@ -302,7 +289,6 @@ class TestConfigurationClassMapping:
             config = config_env._init_config(config_classes, env)
             assert isinstance(config, config_class)
             assert isinstance(config, AppConfig)
-
 
 @pytest.mark.critical
 class TestEnvironmentDetectionResilience:

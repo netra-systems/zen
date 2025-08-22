@@ -3,25 +3,16 @@ Tests for ClickHouse array syntax fixing functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 from netra_backend.tests.clickhouse_query_fixtures import get_all_test_queries
 from netra_backend.tests.clickhouse_test_helpers import (
-    # Add project root to path
     assert_array_syntax_fixed,
     assert_complex_query_fixes,
     assert_multiple_replacements,
@@ -29,12 +20,10 @@ from netra_backend.tests.clickhouse_test_helpers import (
     get_nested_array_patterns,
 )
 
-
 @pytest.fixture
 def test_queries():
     """Get all test query fixtures"""
     return get_all_test_queries()
-
 
 class TestClickHouseArraySyntaxFixer:
     """Test ClickHouse array syntax fixing functionality"""
@@ -91,7 +80,6 @@ class TestClickHouseArraySyntaxFixer:
         
         _assert_large_query_fixes(fixed_query)
 
-
 def _assert_basic_fix(original_query: str, fixed_query: str) -> None:
     """Assert basic array syntax fix"""
     assert_array_syntax_fixed(
@@ -101,12 +89,10 @@ def _assert_basic_fix(original_query: str, fixed_query: str) -> None:
         'arrayElement(metrics.value, 1)'
     )
 
-
 def _assert_basic_structure(fixed_query: str) -> None:
     """Assert basic query structure is preserved"""
     required_elements = ['SELECT', 'FROM performance_data', "timestamp > '2023-01-01'"]
     assert_query_structure_preserved(fixed_query, required_elements)
-
 
 def _get_correct_syntax_query() -> str:
     """Get query with correct syntax"""
@@ -118,7 +104,6 @@ def _get_correct_syntax_query() -> str:
         WHERE timestamp > '2023-01-01'
     """
 
-
 def _get_mixed_syntax_query() -> str:
     """Get query with mixed syntax"""
     return """
@@ -129,7 +114,6 @@ def _get_mixed_syntax_query() -> str:
         FROM test_table
     """
 
-
 def _assert_mixed_syntax_fixes(fixed_query: str) -> None:
     """Assert mixed syntax fixes are correct"""
     # Should keep correct syntax
@@ -139,7 +123,6 @@ def _assert_mixed_syntax_fixes(fixed_query: str) -> None:
     # Should fix incorrect syntax
     assert 'metrics.incorrect[2]' not in fixed_query
     assert 'toFloat64OrZero(arrayElement(metrics.incorrect, 2))' in fixed_query
-
 
 def _get_nested_function_query() -> str:
     """Get query with nested function array access"""
@@ -153,14 +136,12 @@ def _get_nested_function_query() -> str:
         FROM system_data
     """
 
-
 def _assert_nested_function_fixes(fixed_query: str) -> None:
     """Assert nested function array fixes"""
     assert 'metrics.status[idx]' not in fixed_query
     assert 'metrics.value[idx]' not in fixed_query
     assert 'arrayElement(metrics.status, idx)' in fixed_query
     assert 'arrayElement(metrics.value, idx)' in fixed_query
-
 
 def _generate_large_query() -> str:
     """Generate large query with many array accesses"""
@@ -173,7 +154,6 @@ def _generate_large_query() -> str:
         FROM large_dataset
         WHERE timestamp > now() - INTERVAL 1 DAY
     """
-
 
 def _assert_large_query_fixes(fixed_query: str) -> None:
     """Assert large query array fixes"""

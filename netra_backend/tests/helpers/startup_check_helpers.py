@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.startup_checks import StartupCheckResult
 
-
 def create_mock_app():
     """Create a mock app with required state."""
     app = Mock()
@@ -44,7 +43,6 @@ def create_mock_app():
     
     return app
 
-
 def create_success_check_result(name="test_check"):
     """Create a successful check result."""
     return StartupCheckResult(
@@ -53,7 +51,6 @@ def create_success_check_result(name="test_check"):
         message="Success",
         critical=True
     )
-
 
 def create_failure_check_result(name="test_check", critical=True):
     """Create a failed check result."""
@@ -64,26 +61,21 @@ def create_failure_check_result(name="test_check", critical=True):
         critical=critical
     )
 
-
 async def mock_successful_check(checker):
     """Mock successful check function."""
     checker.results.append(create_success_check_result())
-
 
 async def mock_critical_failure_check(checker):
     """Mock critical failure check function."""
     checker.results.append(create_failure_check_result("critical_check", True))
 
-
 async def mock_non_critical_failure_check(checker):
     """Mock non-critical failure check function."""
     checker.results.append(create_failure_check_result("non_critical_check", False))
 
-
 async def mock_exception_check():
     """Mock check that raises exception."""
     raise RuntimeError("Unexpected error")
-
 
 def setup_all_check_mocks(checker, check_function):
     """Setup all checker methods with the same mock function."""
@@ -98,7 +90,6 @@ def setup_all_check_mocks(checker, check_function):
     checker.system_checker.check_network_connectivity = AsyncMock(side_effect=check_function)
     checker.db_checker.check_or_create_assistant = AsyncMock(side_effect=check_function)
 
-
 def verify_check_results(results, expected_total=10, expected_passed=10, 
                         expected_failed_critical=0, expected_failed_non_critical=0):
     """Verify check results match expectations."""
@@ -108,30 +99,25 @@ def verify_check_results(results, expected_total=10, expected_passed=10,
     assert results["failed_non_critical"] == expected_failed_non_critical
     assert results["duration_ms"] > 0
 
-
 def setup_env_vars_production(monkeypatch):
     """Setup environment variables for production testing."""
     monkeypatch.setenv("ENVIRONMENT", "production")
     monkeypatch.setenv("DATABASE_URL", "postgresql://localhost/test")
     monkeypatch.setenv("SECRET_KEY", "test-secret-key")
 
-
 def setup_env_vars_development(monkeypatch):
     """Setup environment variables for development testing."""
     monkeypatch.setenv("ENVIRONMENT", "development")
-
 
 def clear_required_env_vars(monkeypatch):
     """Clear required environment variables."""
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delenv("SECRET_KEY", raising=False)
 
-
 def clear_optional_env_vars(monkeypatch):
     """Clear optional environment variables."""
     monkeypatch.delenv("REDIS_URL", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-
 
 def setup_temp_directory_test():
     """Setup temporary directory for file permission tests."""
@@ -140,18 +126,15 @@ def setup_temp_directory_test():
     os.chdir(tmpdir.name)
     return tmpdir, original_cwd
 
-
 def verify_directories_created():
     """Verify required directories were created."""
     assert Path("logs").exists()
     assert Path("uploads").exists()
     assert Path("temp").exists()
 
-
 def create_mock_database_session(mock_app):
     """Get database session from mock app."""
     return mock_app.state.db_session_factory.return_value
-
 
 def setup_successful_db_queries(db_session):
     """Setup successful database query mocks."""
@@ -165,7 +148,6 @@ def setup_successful_db_queries(db_session):
     
     db_session.execute = AsyncMock(side_effect=[select_result] + [table_result] * 4)
 
-
 def setup_missing_table_db_queries(db_session):
     """Setup database queries with missing table."""
     select_result = Mock()
@@ -175,7 +157,6 @@ def setup_missing_table_db_queries(db_session):
     table_result.scalar_one = Mock(return_value=False)
     
     db_session.execute = AsyncMock(side_effect=[select_result, table_result])
-
 
 def setup_redis_read_write_test(redis_manager):
     """Setup Redis read/write test mocks."""
@@ -188,14 +169,12 @@ def setup_redis_read_write_test(redis_manager):
     redis_manager.set = AsyncMock(side_effect=mock_set)
     redis_manager.get = AsyncMock(side_effect=mock_get)
 
-
 def verify_redis_operations(redis_manager):
     """Verify Redis operations were called."""
     redis_manager.connect.assert_called_once()
     redis_manager.set.assert_called_once()
     redis_manager.get.assert_called_once()
     redis_manager.delete.assert_called_once()
-
 
 def create_mock_clickhouse_client(tables):
     """Create mock ClickHouse client with specified tables."""
@@ -206,7 +185,6 @@ def create_mock_clickhouse_client(tables):
     mock_client.__aexit__ = AsyncMock(return_value=None)
     return mock_client
 
-
 def create_mock_memory_info(total_gb, available_gb):
     """Create mock memory info."""
     mock_memory = Mock()
@@ -214,13 +192,11 @@ def create_mock_memory_info(total_gb, available_gb):
     mock_memory.available = available_gb * (1024**3)
     return mock_memory
 
-
 def create_mock_disk_info(free_gb):
     """Create mock disk info."""
     mock_disk = Mock()
     mock_disk.free = free_gb * (1024**3)
     return mock_disk
-
 
 def setup_socket_mock(mock_socket_class, return_value=0):
     """Setup socket mock for network connectivity tests."""
@@ -229,13 +205,11 @@ def setup_socket_mock(mock_socket_class, return_value=0):
     mock_socket_class.return_value = mock_socket
     return mock_socket
 
-
 def create_mock_assistant_query_result(assistant=None):
     """Create mock result for assistant query."""
     mock_result = Mock()
     mock_result.scalar_one_or_none = Mock(return_value=assistant)
     return mock_result
-
 
 class StartupTestHelper:
     """Helper class for startup testing with real service interactions."""
@@ -358,7 +332,6 @@ class StartupTestHelper:
                 callback()
             except Exception as e:
                 print(f"Cleanup callback error: {e}")
-
 
 class RealServiceTestValidator:
     """Validator for real service testing scenarios."""

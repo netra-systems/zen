@@ -131,7 +131,7 @@ class AuthTestBase(AsyncTestBase):
                 permissions
             )
         else:
-            from ..factories.permission_factory import RoleFactory
+            from auth_service.tests.factories.permission_factory import RoleFactory
             user_permissions = RoleFactory.create_role_permissions(
                 user_data["id"],
                 role

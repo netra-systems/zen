@@ -6,9 +6,9 @@ Generates human-readable reports for architecture compliance violations.
 
 from typing import Dict, List, Tuple
 
-from .core import ComplianceResults, Violation
-from .reporter_stats import StatisticsCalculator
-from .reporter_utils import ReporterUtils
+from scripts.compliance.core import ComplianceResults, Violation
+from scripts.compliance.reporter_stats import StatisticsCalculator
+from scripts.compliance.reporter_utils import ReporterUtils
 
 
 class ComplianceReporter:

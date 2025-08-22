@@ -4,17 +4,10 @@ Tests basic agent initialization and core functionality
 Split from oversized test_llm_agent_e2e_real.py
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -29,11 +22,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from .fixtures.llm_agent_fixtures import (
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -42,14 +34,12 @@ from .fixtures.llm_agent_fixtures import (
     supervisor_agent,
 )
 
-
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
     assert supervisor_agent.thread_id is not None
     assert supervisor_agent.user_id is not None
     assert len(supervisor_agent.agents) > 0
-
 
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
@@ -69,7 +59,6 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     assert state.user_request == user_request
     assert state.chat_thread_id == supervisor_agent.thread_id
     assert state.user_id == supervisor_agent.user_id
-
 
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
@@ -93,7 +82,6 @@ async def test_llm_response_parsing(mock_llm_manager):
         assert False, "Should have raised JSON decode error"
     except json.JSONDecodeError:
         pass  # Expected
-
 
 async def test_agent_state_transitions(supervisor_agent):
     """Test agent state transitions through pipeline"""
@@ -131,7 +119,6 @@ async def test_agent_state_transitions(supervisor_agent):
     assert state.optimizations_result is not None
     assert "recommendations" in state.optimizations_result
 
-
 async def test_websocket_message_streaming(supervisor_agent, mock_websocket_manager):
     """Test WebSocket message streaming during execution"""
     messages_sent = []
@@ -153,7 +140,6 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     # Should have sent at least completion message
     assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
 
-
 async def test_multi_agent_coordination(supervisor_agent):
     """Test coordination between multiple sub-agents"""
     # Verify all expected agents are registered
@@ -164,7 +150,6 @@ async def test_multi_agent_coordination(supervisor_agent):
     for expected in expected_agents:
         assert any(expected in name.lower() for name in agent_names), \
             f"Missing expected agent: {expected}"
-
 
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
@@ -182,7 +167,6 @@ async def test_performance_metrics(supervisor_agent):
     
     # Should complete quickly with mocked components
     assert execution_time < 2.0, f"Execution took {execution_time}s, expected < 2s"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

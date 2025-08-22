@@ -8,17 +8,10 @@ Tests critical paths including resource cleanup, task concurrency limits,
 background task handling, and shutdown procedures.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -27,9 +20,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_resource_manager import (
-    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
     get_global_resource_manager,
@@ -39,19 +30,16 @@ from netra_backend.app.core.async_resource_manager import (
 )
 from netra_backend.app.core.exceptions_service import ServiceError
 
-
 # Test fixtures for setup
 @pytest.fixture
 def resource_manager():
     """Fresh AsyncResourceManager instance."""
     return AsyncResourceManager()
 
-
 @pytest.fixture
 def task_pool():
     """AsyncTaskPool with small limit for testing."""
     return AsyncTaskPool(max_concurrent_tasks=3)
-
 
 @pytest.fixture
 def mock_resource():
@@ -60,57 +48,47 @@ def mock_resource():
     resource.cleanup = AsyncMock()
     return resource
 
-
 @pytest.fixture
 async def cleanup_callback():
     """Mock cleanup callback."""
     callback = AsyncMock()
     return callback
 
-
 # Helper functions for 25-line compliance
 def assert_resource_count(manager, expected):
     """Assert resource manager has expected resource count."""
     assert manager.resource_count == expected
 
-
 def assert_shutting_down(manager, expected):
     """Assert manager shutdown state matches expected."""
     assert manager.is_shutting_down == expected
-
 
 def assert_task_count(pool, expected):
     """Assert task pool has expected active task count.""" 
     assert pool.active_task_count == expected
 
-
 def assert_available_slots(pool, expected):
     """Assert task pool has expected available slots."""
     assert pool.available_slots == expected
 
-
 def assert_max_concurrent(pool, expected):
     """Assert task pool has expected max concurrent limit."""
     assert pool.max_concurrent_tasks == expected
-
 
 async def create_simple_task():
     """Simple async task for testing."""
     await asyncio.sleep(0.01)
     return "task_result"
 
-
 async def create_slow_task():
     """Slow async task for testing."""
     await asyncio.sleep(0.1)
     return "slow_result"
 
-
 def create_sync_task():
     """Simple sync task for testing."""
     time.sleep(0.01)
     return "sync_result"
-
 
 # Core resource manager functionality tests
 class TestAsyncResourceManagerBasics:
@@ -160,7 +138,6 @@ class TestAsyncResourceManagerBasics:
         await resource_manager.cleanup_all()  # Should not raise
         assert_shutting_down(resource_manager, True)
 
-
 class TestAsyncTaskPoolBasics:
     """Test basic AsyncTaskPool functionality."""
 
@@ -208,7 +185,6 @@ class TestAsyncTaskPoolBasics:
         with pytest.raises(ServiceError, match="Task pool is shutting down"):
             task_pool.submit_background_task(create_simple_task())
 
-
 class TestConcurrencyControl:
     """Test task pool concurrency control."""
 
@@ -247,7 +223,6 @@ class TestConcurrencyControl:
         # Brief wait for cleanup
         await asyncio.sleep(0.01)
         assert_task_count(task_pool, 0)
-
 
 class TestShutdownProcedures:
     """Test shutdown and cleanup procedures."""
@@ -290,7 +265,6 @@ class TestShutdownProcedures:
         await task_pool.shutdown()  # Should not raise
         assert task_pool._shutting_down is True
 
-
 class TestGlobalInstances:
     """Test global resource manager and task pool instances."""
 
@@ -320,7 +294,6 @@ class TestGlobalInstances:
         # This tests the global shutdown function
         await shutdown_async_utils()
         # Should complete without error
-
 
 class TestThreadPoolExecution:
     """Test thread pool execution functionality."""
@@ -365,7 +338,6 @@ class TestThreadPoolExecution:
         executor1 = _get_thread_pool_executor()
         executor2 = _get_thread_pool_executor()
         assert executor1 is executor2
-
 
 class TestErrorHandling:
     """Test error handling and edge cases."""
@@ -416,7 +388,6 @@ class TestErrorHandling:
         # When resource goes out of scope, it should be cleaned up automatically
         del mock_resource
         # Force garbage collection in test would be needed for full verification
-
 
 class TestPerformanceAndScaling:
     """Test performance characteristics and scaling."""

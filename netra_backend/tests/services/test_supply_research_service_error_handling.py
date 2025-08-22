@@ -3,17 +3,10 @@ Error handling and edge case tests for SupplyResearchService
 Tests unusual scenarios, boundary conditions, and error recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -24,14 +17,10 @@ import pytest
 
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
-# Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def service():
@@ -39,7 +28,6 @@ def service():
     from unittest.mock import MagicMock
     mock_db = MagicMock()
     return SupplyResearchService(mock_db)
-
 
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling and recovery scenarios - extends shared error handling."""
@@ -113,7 +101,6 @@ class TestErrorHandling(SharedTestErrorHandling):
     def _setup_price_query_mock(self, mock_query, logs: List[SupplyUpdateLog]):
         """Helper to setup price query mock"""
         mock_query.return_value.join.return_value.order_by.return_value.all.return_value = logs
-
 
 class TestEdgeCaseScenarios:
     """Test unusual scenarios and boundary conditions"""
@@ -266,7 +253,6 @@ class TestEdgeCaseScenarios:
         """Helper to setup price query mock"""
         mock_query.return_value.join.return_value.order_by.return_value.all.return_value = logs
 
-
 class TestDataConsistency:
     """Test data consistency and integrity scenarios"""
     
@@ -313,7 +299,6 @@ class TestDataConsistency:
             "confidence_score": 0.8             # Unchanged
         }
 
-
 class TestPerformanceBoundaries:
     """Test performance with boundary conditions"""
     
@@ -340,7 +325,6 @@ class TestPerformanceBoundaries:
             result: List[SupplyUpdateLog] = service.get_update_logs(limit=50)
             
             assert len(result) == 50
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

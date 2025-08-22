@@ -21,8 +21,6 @@ BVJ:
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import concurrent.futures
 import json
@@ -37,10 +35,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import aiohttp
 import pytest
 import websockets
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Service URLs
 AUTH_SERVICE_URL = "http://localhost:8081"
@@ -99,7 +93,6 @@ THREAD_TEST_CASES = [
         "context_requirements": ["frontend", "backend", "database"]
     }
 ]
-
 
 class ChatInitializationTester:
     """Test comprehensive chat thread initialization flows."""
@@ -758,7 +751,6 @@ class ChatInitializationTester:
         
         return all_results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
@@ -831,7 +823,6 @@ async def test_dev_environment_chat_initialization():
         
         print("\n[SUCCESS] Chat initialization tests completed!")
 
-
 async def main():
     """Run the test standalone."""
     if sys.platform == "win32":
@@ -862,7 +853,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

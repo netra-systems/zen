@@ -3,27 +3,18 @@ Tool Permission Service - Rate Limiting Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.tests.tool_permission_helpers import (
-    # Add project root to path
     MockRedisClient,
     assert_rate_limits_within_bounds,
     assert_redis_usage_count,
@@ -35,24 +26,20 @@ from netra_backend.tests.tool_permission_helpers import (
     setup_redis_usage,
 )
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
-
 
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
 
-
 @pytest.fixture
 def service_with_redis(mock_redis):
     """Create ToolPermissionService with Redis"""
     return ToolPermissionService(mock_redis)
-
 
 @pytest.fixture
 def sample_context():
@@ -173,7 +160,6 @@ class TestRateLimitEdgeCases:
         await run_concurrent_usage_recording(service_with_redis, user_id, tool_name, 10)
         count = await service_with_redis._get_usage_count(user_id, tool_name, "day")
         assert_redis_usage_count(count, 10)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

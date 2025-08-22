@@ -5,21 +5,10 @@ Components: Auth Service → Backend → WebSocket Manager
 Critical: Users can't interact without successful auth→WS flow
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -31,11 +20,7 @@ import jwt
 import pytest
 from netra_backend.app.schemas import User
 
-# Add project root to path
 from netra_backend.app.config import get_config
-
-# Add project root to path
-
 
 @pytest.mark.asyncio
 
@@ -43,7 +28,6 @@ class TestAuthToWebSocketFlow:
 
     """Test complete authentication to WebSocket connection establishment."""
     
-
     @pytest.fixture
 
     async def auth_token(self):
@@ -62,7 +46,6 @@ class TestAuthToWebSocketFlow:
 
         return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
     
-
     @pytest.fixture
 
     async def mock_user(self):
@@ -83,7 +66,6 @@ class TestAuthToWebSocketFlow:
 
         )
     
-
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
 
         """Test successful auth flow leading to WS connection."""
@@ -96,7 +78,6 @@ class TestAuthToWebSocketFlow:
 
         auth_service.validate_token = AsyncMock(return_value=mock_user)
         
-
         ws_manager = WebSocketManager()
 
         mock_websocket = Mock()
@@ -133,20 +114,16 @@ class TestAuthToWebSocketFlow:
 
         })
         
-
         mock_websocket.send_json.assert_called()
     
-
     async def test_invalid_token_blocks_websocket(self):
 
         """Test invalid token prevents WS connection."""
         
-
         auth_service = Mock(spec=AuthService)
 
         auth_service.validate_token = AsyncMock(side_effect=ValueError("Invalid token"))
         
-
         ws_manager = WebSocketManager()
 
         mock_websocket = Mock()
@@ -161,7 +138,6 @@ class TestAuthToWebSocketFlow:
 
         assert len(ws_manager.active_connections) == 0
     
-
     async def test_expired_token_handling(self):
 
         """Test expired token gracefully handled."""
@@ -184,8 +160,6 @@ class TestAuthToWebSocketFlow:
 
         )
         
-        
-
         auth_service = Mock(spec=AuthService)
 
         auth_service.validate_token = AsyncMock(
@@ -194,18 +168,15 @@ class TestAuthToWebSocketFlow:
 
         )
         
-
         with pytest.raises(jwt.ExpiredSignatureError):
 
             await auth_service.validate_token_jwt(expired_token)
     
-
     async def test_auth_service_unavailable_fallback(self):
 
         """Test fallback when auth service is unavailable."""
         from netra_backend.app.core.circuit_breaker import CircuitBreaker
         
-
         circuit_breaker = CircuitBreaker(
 
             failure_threshold=3,
@@ -214,7 +185,6 @@ class TestAuthToWebSocketFlow:
 
         )
         
-
         auth_service = Mock(spec=AuthService)
 
         auth_service.validate_token = AsyncMock(
@@ -235,7 +205,6 @@ class TestAuthToWebSocketFlow:
 
                 pass
         
-
         assert circuit_breaker.state == "open"
         
         # Verify circuit prevents further calls
@@ -244,12 +213,10 @@ class TestAuthToWebSocketFlow:
 
             await circuit_breaker.call(auth_service.validate_token, "token")
     
-
     async def test_concurrent_auth_requests(self, auth_token, mock_user):
 
         """Test system handles concurrent auth requests."""
         
-
         auth_service = Mock(spec=AuthService)
 
         auth_service.validate_token = AsyncMock(return_value=mock_user)
@@ -268,28 +235,23 @@ class TestAuthToWebSocketFlow:
 
             user_id = f"user_{i}"
             
-
             async def connect_user(ws, uid):
 
                 await ws_manager.connect(ws, uid)
             
-
             tasks.append(connect_user(mock_ws, user_id))
         
-
         await asyncio.gather(*tasks)
         
         # Verify all connections established
 
         assert len(ws_manager.active_connections) == 10
     
-
     async def test_auth_to_websocket_with_redis_session(self, auth_token, mock_user):
 
         """Test auth flow with Redis session storage."""
         from netra_backend.app.services.redis_manager import RedisManager
         
-
         redis_manager = Mock(spec=RedisManager)
 
         redis_manager.set = AsyncMock(return_value=True)
@@ -324,12 +286,10 @@ class TestAuthToWebSocketFlow:
 
         assert json.loads(session_data)["user_id"] == mock_user.id
     
-
     async def test_websocket_auth_header_validation(self, auth_token):
 
         """Test WebSocket connection validates auth headers."""
         
-
         ws_manager = WebSocketManager()
 
         mock_websocket = Mock()
@@ -344,7 +304,6 @@ class TestAuthToWebSocketFlow:
 
         assert auth_header.startswith("Bearer ")
         
-
         token = auth_header.split(" ")[1]
 
         assert token == auth_token

@@ -26,9 +26,9 @@ from .dev_launcher_monitoring import (
     validate_backend_health,
     validate_frontend_health,
 )
-from .dev_launcher_processes import ProcessMonitor, cleanup_process
-from .dev_launcher_secrets import EnhancedSecretLoader
-from .dev_launcher_service import ServiceManager
+from scripts.dev_launcher_processes import ProcessMonitor, cleanup_process
+from scripts.dev_launcher_secrets import EnhancedSecretLoader
+from scripts.dev_launcher_service import ServiceManager
 
 
 class DevLauncher:

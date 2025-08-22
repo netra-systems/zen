@@ -19,17 +19,10 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from unittest.mock import MagicMock, Mock, patch
@@ -37,16 +30,13 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from config_environment import ConfigEnvironment
 
-# Add project root to path
 from netra_backend.app.schemas.Config import (
-    # Add project root to path
     AppConfig,
     DevelopmentConfig,
     NetraTestingConfig,
     ProductionConfig,
     StagingConfig,
 )
-
 
 class TestConfigEnvironmentDetection:
     """Core environment detection functionality tests"""
@@ -148,7 +138,6 @@ class TestConfigEnvironmentDetection:
             # Cloud detection should not be called when TESTING is set
             mock_detect.assert_not_called()
 
-
 class TestConfigObjectCreation:
     """Test configuration object creation for different environments"""
 
@@ -216,7 +205,6 @@ class TestConfigObjectCreation:
             # Assert
             assert isinstance(config, DevelopmentConfig)
 
-
 class TestEnvironmentValidation:
     """Test environment validation and error handling"""
 
@@ -256,7 +244,6 @@ class TestEnvironmentValidation:
             with patch.object(config_env, 'get_environment', return_value=env_name):
                 config = config_env.create_config()
                 assert isinstance(config, config_class)
-
 
 class TestCloudEnvironmentDetection:
     """Test cloud-specific environment detection"""
@@ -307,7 +294,6 @@ class TestCloudEnvironmentDetection:
             # Assert
             assert result == "production"
 
-
 class TestConfigurationLogging:
     """Test configuration-related logging functionality"""
 
@@ -342,7 +328,6 @@ class TestConfigurationLogging:
                 
                 # Assert
                 assert mock_logger.debug.called or mock_logger.info.called
-
 
 class TestPerformanceAndEdgeCases:
     """Performance and edge case testing"""

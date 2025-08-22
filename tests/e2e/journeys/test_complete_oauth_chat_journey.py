@@ -44,9 +44,6 @@ os.environ["TESTING"] = "1"
 os.environ["USE_REAL_SERVICES"] = "true"
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.helpers.core.chat_helpers import (
     ChatInteractionHelper,

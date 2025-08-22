@@ -5,17 +5,10 @@ Tests database performance under load, including bulk operations,
 concurrent access, and ClickHouse optimization patterns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -25,13 +18,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.generation_service import (
     get_corpus_from_clickhouse,
-    # Add project root to path
     save_corpus_to_clickhouse,
 )
-
 
 class TestDatabasePerformance:
     """Test database performance under load"""
@@ -180,7 +170,6 @@ class TestDatabasePerformance:
                     # Query time should be reasonable regardless of table size
                     assert duration < 5.0  # Under 5 seconds for any query
                     assert len(result) > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

@@ -3,17 +3,10 @@ Integration and performance tests for Data Sub Agent
 Focuses on integration with other components and performance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime
@@ -23,13 +16,9 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )
-
-# Add project root to path
-
 
 class TestIntegration(SharedTestIntegration):
     """Integration tests with other components"""
@@ -91,7 +80,6 @@ class TestIntegration(SharedTestIntegration):
         assert result["status"] == "completed"
         supervisor_request["callback"].assert_called_once()
 
-
 class TestPerformance:
     """Performance and optimization tests"""
     async def test_concurrent_processing(self):
@@ -127,7 +115,6 @@ class TestPerformance:
             results.extend(chunk_result)
             
         assert len(results) == 10000
-
 
 class TestStateManagement:
     """Test state management and persistence"""

@@ -7,17 +7,10 @@ critical for maintaining data integrity during deployments.
 Tests database migration and rollback with real PostgreSQL containers.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -28,7 +21,6 @@ import docker
 import pytest
 from netra_backend.app.database.migration_manager import MigrationManager
 from netra_backend.app.database.postgres_connection import PostgresConnection
-
 
 @pytest.mark.L3
 class TestDatabaseMigrationRollbackL3:

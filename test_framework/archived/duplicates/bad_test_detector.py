@@ -368,7 +368,7 @@ class BadTestDetector:
             Number of fake tests detected
         """
         try:
-            from .fake_test_detector import FakeTestDetector
+            from test_framework.archived.duplicates.fake_test_detector import FakeTestDetector
             # This would be set by the test runner when fake tests are detected
             return getattr(self, '_fake_tests_count', 0)
         except ImportError:

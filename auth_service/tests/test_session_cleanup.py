@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import pytest_asyncio
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -89,7 +90,7 @@ class SessionCleanupService:
 class TestSessionCleanupJob:
     """Test automated session cleanup job functionality"""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def cleanup_service(self):
         """Create session cleanup service"""
         return SessionCleanupService()

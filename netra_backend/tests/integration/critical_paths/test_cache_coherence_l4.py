@@ -11,17 +11,10 @@ L4 Realism: Real Redis cluster, real cache operations, real service interactions
 Performance Requirements: Cache hit rate > 90%, invalidation propagation < 50ms, TTL accuracy 99.9%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,7 +33,6 @@ from unittest.mock import AsyncMock
 import pytest
 import redis.asyncio as aioredis
 
-# Add project root to path
 # from app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
 from netra_backend.app.services.cache.cache_manager import (
     LLMCacheManager as CacheManager,
@@ -48,11 +40,10 @@ from netra_backend.app.services.cache.cache_manager import (
 
 # SessionCache = AsyncMock  # Class may not exist, commented out
 # from app.services.database.user_repository import UserRepository  # Class may not exist, commented out
-from tests.config import TEST_CONFIG  # Comment out since config structure may vary
+from netra_backend.tests.config import TEST_CONFIG  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class CacheMetrics:
@@ -102,7 +93,6 @@ class CacheMetrics:
     def ttl_accuracy(self) -> float:
         """Calculate TTL accuracy percentage."""
         return (self.ttl_accurate_count / self.ttl_accuracy_checks * 100) if self.ttl_accuracy_checks > 0 else 0.0
-
 
 class CacheCoherenceL4Manager:
     """L4 cache coherence test manager with real Redis cluster and distributed operations."""
@@ -560,7 +550,6 @@ class CacheCoherenceL4Manager:
         except Exception as e:
             logger.error(f"L4 cache cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cache_l4_manager():
     """Create L4 cache coherence manager."""
@@ -568,7 +557,6 @@ async def cache_l4_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -591,7 +579,6 @@ async def test_cache_hit_rate_under_load(cache_l4_manager):
     
     logger.info(f"Cache hit rate test completed: {read_result['hit_rate']:.2f}% hit rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 async def test_distributed_cache_invalidation_coherence(cache_l4_manager):
@@ -612,7 +599,6 @@ async def test_distributed_cache_invalidation_coherence(cache_l4_manager):
     
     logger.info(f"Invalidation coherence test completed: {invalidation_result['coherence_rate']:.2f}% coherence rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 async def test_ttl_accuracy_and_eviction_policies(cache_l4_manager):
@@ -628,7 +614,6 @@ async def test_ttl_accuracy_and_eviction_policies(cache_l4_manager):
     assert performance["sla_compliance"]["ttl_accuracy_above_99"], "TTL accuracy SLA violation"
     
     logger.info(f"TTL accuracy test completed: {ttl_result['ttl_accuracy']:.2f}% accuracy")
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -647,7 +632,6 @@ async def test_concurrent_cache_operations_coherence(cache_l4_manager):
     
     logger.info(f"Concurrent operations test completed: {concurrent_result['operations_per_second']:.1f} ops/s")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 async def test_session_cache_coherence_across_services(cache_l4_manager):
@@ -663,7 +647,6 @@ async def test_session_cache_coherence_across_services(cache_l4_manager):
     assert session_result["coherent_invalidations"] >= session_result["total_users"] * 0.99, "Session invalidation coherence below 99%"
     
     logger.info(f"Session cache coherence test completed: {session_result['session_coherence_rate']:.2f}% coherence")
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4

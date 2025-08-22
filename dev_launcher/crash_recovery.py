@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.service_types import ServiceHealthCheck, ServiceStatus
 
-from .crash_detector import CrashDetector
+from dev_launcher.crash_detector import CrashDetector
 
 # Import modular components
 from .crash_recovery_models import (
@@ -39,8 +39,8 @@ from .crash_recovery_models import (
     RecoveryStage,
     ServiceConfig,
 )
-from .crash_reporter import CrashReporter
-from .recovery_manager import RecoveryManager
+from dev_launcher.crash_reporter import CrashReporter
+from dev_launcher.recovery_manager import RecoveryManager
 
 logger = logging.getLogger(__name__)
 

@@ -10,17 +10,10 @@ Critical Path: Quality metrics -> Threshold checks -> Gate decisions -> Feedback
 Coverage: Real quality assessment, automated gates, performance monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -42,12 +35,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class QualityMetricType(Enum):
     """Types of quality metrics."""
@@ -62,7 +53,6 @@ class QualityMetricType(Enum):
     HALLUCINATION_RATE = "hallucination_rate"
     COMPLETENESS = "completeness"
 
-
 class QualityGateStatus(Enum):
     """Quality gate status values."""
     PASSED = "passed"
@@ -71,14 +61,12 @@ class QualityGateStatus(Enum):
     PENDING = "pending"
     BYPASSED = "bypassed"
 
-
 class QualityGateSeverity(Enum):
     """Severity levels for quality gate failures."""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 @dataclass
 class QualityMetric:
@@ -112,7 +100,6 @@ class QualityMetric:
             "measured_at": self.measured_at.isoformat(),
             "metadata": self.metadata
         }
-
 
 @dataclass
 class QualityAssessment:
@@ -153,7 +140,6 @@ class QualityAssessment:
             "created_at": self.created_at.isoformat()
         }
 
-
 @dataclass
 class QualityGateRule:
     """Defines a quality gate rule."""
@@ -177,7 +163,6 @@ class QualityGateRule:
             return False
         
         return True
-
 
 class QualityMetricCalculator:
     """Calculates various quality metrics for AI outputs."""
@@ -386,7 +371,6 @@ class QualityMetricCalculator:
             metadata={"positive_indicators": positive_count, "negative_indicators": negative_count}
         )
 
-
 class QualityGateEngine:
     """Main quality gate engine that evaluates assessments."""
     
@@ -553,7 +537,6 @@ class QualityGateEngine:
             if assessment.agent_id == agent_id
         ]
 
-
 class QualityGateOrchestrator:
     """Orchestrates quality gates for multiple agents."""
     
@@ -632,7 +615,6 @@ class QualityGateOrchestrator:
         }
         return messages.get(status, "Unknown status")
 
-
 class QualityGateManager:
     """Manages quality gate testing."""
     
@@ -710,7 +692,6 @@ class QualityGateManager:
         if self.redis_service:
             await self.redis_service.shutdown()
 
-
 @pytest.fixture
 async def quality_manager():
     """Create quality gate test manager."""
@@ -718,7 +699,6 @@ async def quality_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -748,7 +728,6 @@ async def test_quality_metric_calculation(quality_manager):
     assert 0.0 <= relevance_metric.value <= 1.0
     assert 0.0 <= safety_metric.value <= 1.0
     assert 0.0 <= coherence_metric.value <= 1.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -788,7 +767,6 @@ async def test_quality_gate_rule_evaluation(quality_manager):
     
     assert test_rule.evaluate(failing_metric) is False
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_complete_quality_assessment(quality_manager):
@@ -809,7 +787,6 @@ async def test_complete_quality_assessment(quality_manager):
     assert len(assessment.metrics) > 0
     assert 0.0 <= assessment.overall_score <= 1.0
     assert assessment.gate_status in QualityGateStatus
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -842,7 +819,6 @@ async def test_quality_gate_pass_scenario(quality_manager):
     assert result["allowed"] is True
     assert result["gate_status"] in ["passed", "warning"]
     assert result["overall_score"] is not None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -883,7 +859,6 @@ async def test_quality_gate_fail_scenario(quality_manager):
     assert result["allowed"] is False
     assert result["gate_status"] == "failed"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_quality_gate_bypass(quality_manager):
@@ -916,7 +891,6 @@ async def test_quality_gate_bypass(quality_manager):
     assert result["allowed"] is True
     assert result["gate_status"] == "bypassed"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_safety_metric_detection(quality_manager):
@@ -944,7 +918,6 @@ async def test_safety_metric_detection(quality_manager):
     assert unsafe_safety_metric is not None
     assert unsafe_safety_metric.value < 0.5  # Should be flagged as unsafe
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_hallucination_detection(quality_manager):
@@ -971,7 +944,6 @@ async def test_hallucination_detection(quality_manager):
     hallucinating_metric = next((m for m in hallucinating_metrics if m.metric_type == QualityMetricType.HALLUCINATION_RATE), None)
     assert hallucinating_metric is not None
     assert hallucinating_metric.value > 0.5  # High hallucination
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1001,7 +973,6 @@ async def test_quality_trends_tracking(quality_manager):
     assert today_data is not None
     assert today_data["assessments"] == 5
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_recent_assessments_retrieval(quality_manager):
@@ -1029,7 +1000,6 @@ async def test_recent_assessments_retrieval(quality_manager):
     for assessment_id in assessment_ids:
         assert assessment_id in retrieved_ids
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_quality_assessments(quality_manager):
@@ -1052,7 +1022,6 @@ async def test_concurrent_quality_assessments(quality_manager):
     assert len(assessments) == 20
     assert all(assessment.assessment_id is not None for assessment in assessments)
     assert all(0.0 <= assessment.overall_score <= 1.0 for assessment in assessments)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 try:
-    from .categorizer_enhanced import CategorizedLiteral
+    from scripts.string_literals.categorizer_enhanced import CategorizedLiteral
 except ImportError:
     # Handle direct execution
     from categorizer_enhanced import CategorizedLiteral

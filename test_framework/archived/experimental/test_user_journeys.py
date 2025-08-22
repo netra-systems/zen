@@ -34,9 +34,6 @@ import websockets
 from netra_backend.app.logging_config import central_logger
 from test_framework.decorators import integration_only, performance_test
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
 
 
 logger = central_logger.get_logger(__name__)

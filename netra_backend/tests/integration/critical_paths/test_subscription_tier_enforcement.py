@@ -11,17 +11,10 @@ Coverage: Real tier limits, actual billing events, cross-service enforcement, up
 L3 Realism: Tests against real database constraints, Redis rate limiting, ClickHouse analytics
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -37,7 +30,6 @@ import pytest
 from netra_backend.app.core.rate_limiting.tier_enforcer import TierEnforcementService
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
 from netra_backend.app.services.audit_service import AuditService
 from netra_backend.app.services.database.session_manager import SessionManager
@@ -45,10 +37,7 @@ from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCol
 from netra_backend.app.services.user_service import user_service as UserService
 from test_framework.test_config import configure_dedicated_test_environment
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class TierEnforcementMetrics:
@@ -66,7 +55,6 @@ class TierEnforcementMetrics:
     def __post_init__(self):
         if self.enforcement_response_times is None:
             self.enforcement_response_times = []
-
 
 class SubscriptionTierEnforcementL3Manager:
     """L3 subscription tier enforcement test manager with real service integration."""
@@ -618,7 +606,6 @@ class SubscriptionTierEnforcementL3Manager:
         except Exception as e:
             logger.error(f"L3 tier enforcement cleanup failed: {e}")
 
-
 @pytest.fixture
 async def tier_enforcement_l3():
     """Create L3 tier enforcement manager."""
@@ -626,7 +613,6 @@ async def tier_enforcement_l3():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -645,7 +631,6 @@ async def test_free_tier_monthly_limit_enforcement(tier_enforcement_l3):
     assert result["upgrade_prompts_count"] > 0, "No upgrade prompts generated"
     assert result["avg_response_time"] < 0.1, "Enforcement response time too slow"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -662,7 +647,6 @@ async def test_mid_tier_concurrent_limit_enforcement(tier_enforcement_l3):
     assert result["allowed_requests"] <= 20, "Too many concurrent requests allowed"
     assert result["denied_requests"] >= 5, "Not enough requests denied"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -677,7 +661,6 @@ async def test_enterprise_unlimited_access_verification(tier_enforcement_l3):
     # Verify unlimited access
     assert result["unlimited_access_verified"], f"Enterprise unlimited access failed: {result}"
     assert result["denied_requests"] == 0, "Enterprise requests incorrectly denied"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -695,7 +678,6 @@ async def test_tier_downgrade_immediate_enforcement(tier_enforcement_l3):
     # Verify immediate enforcement
     assert result["downgrade_successful"], f"Tier downgrade failed: {result}"
     assert result["immediate_enforcement"], "Tier limits not immediately enforced after downgrade"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -716,7 +698,6 @@ async def test_cross_service_tier_validation_consistency(tier_enforcement_l3):
     # Verify all tiers tested
     assert len(test_results) == 3, "Not all tiers tested"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -735,7 +716,6 @@ async def test_billing_event_generation_accuracy(tier_enforcement_l3):
     
     # Verify comprehensive billing testing
     assert len(billing_results) == 3, "Not all tiers tested for billing"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3

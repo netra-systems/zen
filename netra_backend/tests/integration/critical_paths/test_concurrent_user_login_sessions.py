@@ -20,17 +20,10 @@ Mock-Real Spectrum: L3 (Real auth with simulated users)
 - Simulated concurrent users
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -50,17 +43,14 @@ from netra_backend.app.core.monitoring import metrics_collector
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.redis_manager import get_redis_manager
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthError,
-    # Add project root to path
     LoginRequest,
     LoginResponse,
     RateLimitError,
     SessionInfo,
     UserProfile,
 )
-
 
 @dataclass
 class ConcurrentLoginMetrics:
@@ -88,7 +78,6 @@ class ConcurrentLoginMetrics:
     @property
     def max_login_time(self) -> float:
         return max(self.login_times) if self.login_times else 0.0
-
 
 class TestConcurrentUserLoginSessions:
     """Test suite for concurrent user login sessions"""

@@ -6,19 +6,10 @@ Maximum 300 lines, functions ≤8 lines.
 
 # Import all test modules to ensure they're discovered by pytest
 
-# Add project root to path
-
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from netra_backend.tests.test_capacity_planning import TestCapacityPlanningWorkflows
 from netra_backend.tests.test_rate_limit_analysis import TestRateLimitImpactAnalysis
@@ -28,8 +19,6 @@ from netra_backend.tests.test_scaling_metrics import TestScalingMetricsValidatio
 from netra_backend.tests.test_usage_increase_analysis import (
     TestUsageIncreaseAnalysis,
 )
-
-# Add project root to path
 
 # Re-export test classes for backward compatibility
 __all__ = [

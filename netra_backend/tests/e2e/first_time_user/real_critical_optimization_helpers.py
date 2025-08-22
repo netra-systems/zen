@@ -19,7 +19,6 @@ from unittest.mock import AsyncMock, Mock
 # Import from the auth helpers module
 from netra_backend.tests.real_critical_auth_helpers import CriticalUserJourneyHelpers
 
-
 class OptimizationHelpers:
     """Optimization analysis testing helpers (≤8 lines each)"""
     
@@ -81,7 +80,6 @@ class OptimizationHelpers:
         }
         assert savings_result["roi_percentage"] > 0, "ROI should be positive"
         return verification_data
-
 
 class ConcurrentTestHelpers:
     """Concurrent user testing helpers (≤8 lines each)"""
@@ -148,7 +146,6 @@ class ConcurrentTestHelpers:
         }
         return recovery_mechanisms
 
-
 class PerformanceTestHelpers:
     """Performance testing helpers for critical user journeys (≤8 lines each)"""
     
@@ -201,7 +198,6 @@ class PerformanceTestHelpers:
                 })
         return {"validation_results": validation_results, "all_passed": all(r["passed"] for r in validation_results)}
 
-
 class ValueDemonstrationHelpers:
     """Value demonstration testing helpers (≤8 lines each)"""
     
@@ -220,7 +216,6 @@ class ValueDemonstrationHelpers:
         """Generate personalized optimization recommendations"""
         recommendations = [{"optimization_type": "model_selection", "estimated_savings": 240}]
         return {"recommendations": recommendations, "total_savings": 420}
-
 
 class ErrorRecoveryHelpers:
     """Error recovery testing helpers (≤8 lines each)"""

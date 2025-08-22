@@ -20,17 +20,10 @@ Mock-Real Spectrum: L4 (Production audit infrastructure)
 - Real retention policies
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -48,7 +41,6 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from netra_backend.app.clients.auth_client import auth_client
 
-# Add project root to path
 # from app.schemas.auth_types import (
 # # # #     AuditEvent, AuditQuery, ComplianceReport,  # Class may not exist, commented out  # Class may not exist, commented out  # Class may not exist, commented out
 # # #     ForensicAnalysis, IntegrityCheck  # Class may not exist, commented out  # Class may not exist, commented out
@@ -59,7 +51,6 @@ from netra_backend.app.db.postgres import get_async_db
 
 # from app.core.audit_logger import AuditLogger  # May not exist, commenting out
 # from app.core.monitoring import metrics_collector  # May not exist, commenting out
-
 
 @dataclass
 class AuditRecord:
@@ -78,7 +69,6 @@ class AuditRecord:
     integrity_hash: str
     signature: Optional[bytes] = None
     previous_hash: Optional[str] = None  # For blockchain-style chaining
-
 
 @dataclass
 class AuditMetrics:
@@ -103,7 +93,6 @@ class AuditMetrics:
         if self.events_captured == 0:
             return 0
         return ((self.events_captured - self.integrity_violations) / self.events_captured) * 100
-
 
 class TestAuthAuditTrailIntegrity:
     """Test suite for auth audit trail integrity"""

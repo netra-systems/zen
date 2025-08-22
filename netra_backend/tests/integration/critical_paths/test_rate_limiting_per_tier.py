@@ -24,17 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -51,16 +44,13 @@ import redis.asyncio as aioredis
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthProvider,
     SessionInfo,
-    # Add project root to path
     TokenData,
 )
 
 logger = logging.getLogger(__name__)
-
 
 class TierResolver:
     """Real tier resolution component."""
@@ -104,7 +94,6 @@ class TierResolver:
         # Cache for 10 minutes
         await self.redis_client.setex(tier_key, 600, json.dumps(tier_data))
         return tier_data
-
 
 class QuotaManager:
     """Real quota management component."""
@@ -189,7 +178,6 @@ class QuotaManager:
             "retry_after": self.quota_window
         }
 
-
 class RateLimitEnforcer:
     """Real rate limiting enforcement component."""
     
@@ -262,7 +250,6 @@ class RateLimitEnforcer:
             logger.error(f"Failed to update tier limits: {e}")
             return False
 
-
 class LoadBalancer:
     """Real load balancing component for fair queuing."""
     
@@ -323,7 +310,6 @@ class LoadBalancer:
             "processed_count": len(processed),
             "processed_items": processed
         }
-
 
 class RateLimitingPerTierTestManager:
     """Manages tier-based rate limiting testing."""
@@ -603,7 +589,6 @@ class RateLimitingPerTierTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def rate_limiting_manager():
     """Create rate limiting test manager."""
@@ -611,7 +596,6 @@ async def rate_limiting_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -645,7 +629,6 @@ async def test_tier_based_rate_limiting_differentiation(rate_limiting_manager):
     total_time = time.time() - start_time
     assert total_time < 3.0, f"Total test took {total_time:.2f}s, expected <3s"
 
-
 @pytest.mark.asyncio
 async def test_burst_allowance_handling(rate_limiting_manager):
     """Test burst allowance handling for tier limits."""
@@ -670,7 +653,6 @@ async def test_burst_allowance_handling(rate_limiting_manager):
     expected_total = burst_result["expected_regular"] + burst_result["expected_burst"]
     assert total_allowed >= expected_total * 0.9, "Burst allowance not properly additional"
 
-
 @pytest.mark.asyncio
 async def test_dynamic_tier_limit_updates(rate_limiting_manager):
     """Test dynamic tier limit updates."""
@@ -684,7 +666,6 @@ async def test_dynamic_tier_limit_updates(rate_limiting_manager):
     assert update_result["updated_limit"] > update_result["initial_limit"], "Updated limit not higher"
     assert update_result["test_requests_allowed"] > 0, "No requests allowed with new limits"
     assert update_result["update_test_time"] < 0.5, "Dynamic update too slow"
-
 
 @pytest.mark.asyncio
 async def test_fair_queuing_tier_prioritization(rate_limiting_manager):
@@ -704,7 +685,6 @@ async def test_fair_queuing_tier_prioritization(rate_limiting_manager):
         # First few should be enterprise or high priority
         high_priority_first = processed_tiers[0] in ["enterprise", "mid"]
         assert high_priority_first, f"High priority tier not processed first: {processed_tiers[:3]}"
-
 
 @pytest.mark.asyncio 
 async def test_rate_limiting_performance_under_load(rate_limiting_manager):

@@ -11,17 +11,10 @@ Coverage: Sampling rate accuracy, statistical validity, performance impact, cost
 L3 Realism: Tests with real tracing infrastructure and actual sampling algorithms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -47,7 +40,6 @@ pytestmark = [
     pytest.mark.tracing
 ]
 
-
 @dataclass
 class TraceSpan:
     """Represents a trace span with sampling information."""
@@ -67,7 +59,6 @@ class TraceSpan:
         if self.trace_state is None:
             self.trace_state = {}
 
-
 @dataclass
 class SamplingRule:
     """Defines trace sampling rules."""
@@ -84,7 +75,6 @@ class SamplingRule:
         if self.conditions is None:
             self.conditions = {}
 
-
 @dataclass
 class SamplingAnalysis:
     """Analysis results for trace sampling."""
@@ -96,7 +86,6 @@ class SamplingAnalysis:
     sampling_accuracy: float
     statistical_confidence: float
     cost_efficiency_score: float
-
 
 class TraceSamplingValidator:
     """Validates trace sampling accuracy with real tracing infrastructure."""
@@ -600,7 +589,6 @@ class TraceSamplingValidator:
         except Exception as e:
             logger.error(f"Trace sampling cleanup failed: {e}")
 
-
 class TraceCollector:
     """Mock trace collector for L3 testing."""
     
@@ -611,7 +599,6 @@ class TraceCollector:
     async def shutdown(self):
         """Shutdown trace collector."""
         pass
-
 
 class TraceSamplingEngine:
     """Mock trace sampling engine for L3 testing."""
@@ -681,7 +668,6 @@ class TraceSamplingEngine:
         """Shutdown sampling engine."""
         pass
 
-
 class TracingCostCalculator:
     """Calculator for tracing infrastructure costs."""
     
@@ -694,7 +680,6 @@ class TracingCostCalculator:
         
         return base_cost + ingestion_cost + storage_cost
 
-
 @pytest.fixture
 async def trace_sampling_validator():
     """Create trace sampling validator for L3 testing."""
@@ -702,7 +687,6 @@ async def trace_sampling_validator():
     await validator.initialize_sampling_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_sampling_rate_accuracy_l3(trace_sampling_validator):
@@ -733,7 +717,6 @@ async def test_sampling_rate_accuracy_l3(trace_sampling_validator):
         avg_latency = sum(sampling_results["sampling_latency_ms"]) / len(sampling_results["sampling_latency_ms"])
         assert avg_latency <= 1.0  # Should be very fast
 
-
 @pytest.mark.asyncio
 async def test_sampling_consistency_l3(trace_sampling_validator):
     """Test consistency of sampling decisions across multiple iterations.
@@ -751,7 +734,6 @@ async def test_sampling_consistency_l3(trace_sampling_validator):
     assert len(consistency_results["stable_rules"]) >= 3  # Most rules should be stable
     assert len(consistency_results["unstable_rules"]) <= 2  # Few unstable rules allowed
 
-
 @pytest.mark.asyncio
 async def test_sampling_performance_impact_l3(trace_sampling_validator):
     """Test performance impact of sampling decisions under load.
@@ -766,7 +748,6 @@ async def test_sampling_performance_impact_l3(trace_sampling_validator):
     assert performance_results["throughput_decisions_per_second"] >= 1000  # High throughput
     assert performance_results["cpu_impact_percentage"] <= 50.0  # Reasonable CPU usage
     assert performance_results["memory_overhead_mb"] <= 10.0  # Low memory overhead
-
 
 @pytest.mark.asyncio
 async def test_priority_based_sampling_l3(trace_sampling_validator):
@@ -792,7 +773,6 @@ async def test_priority_based_sampling_l3(trace_sampling_validator):
     assert critical_sampling_rate > normal_sampling_rate  # Critical should be sampled more
     assert critical_sampling_rate >= 0.5  # High sampling for critical traces
     assert normal_sampling_rate <= 0.15   # Lower sampling for normal traces
-
 
 @pytest.mark.asyncio
 async def test_cost_aware_sampling_l3(trace_sampling_validator):
@@ -822,7 +802,6 @@ async def test_cost_aware_sampling_l3(trace_sampling_validator):
     
     # Verify cost is reasonable
     assert monthly_cost <= 200.0  # Should keep costs under $200/month for this volume
-
 
 @pytest.mark.asyncio
 async def test_sampling_rule_coverage_l3(trace_sampling_validator):

@@ -3,17 +3,10 @@ Parameterized Example Prompts E2E Tests with Real LLM Calls
 Replaces 90 individual test methods with parameterized testing
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -23,16 +16,13 @@ import pytest_asyncio
 
 from netra_backend.app.services.quality_gate_service import ContentType
 
-# Add project root to path
-from netra_backend.tests.test_example_prompts_base import (
-    # Add project root to path
+from netra_backend.tests.agents.test_example_prompts_base import (
     EXAMPLE_PROMPTS,
     ExamplePromptsTestBase,
     setup_real_infrastructure,
 )
-from netra_backend.tests.test_example_prompts_contexts import ContextGenerator
-from netra_backend.tests.test_example_prompts_runner import TestRunner
-
+from netra_backend.tests.agents.test_example_prompts_contexts import ContextGenerator
+from netra_backend.tests.agents.test_example_prompts_runner import TestRunner
 
 @pytest_asyncio.fixture
 async def real_infrastructure():
@@ -41,7 +31,6 @@ async def real_infrastructure():
     yield infrastructure
     # Cleanup async resources to prevent pending task warnings
     await _cleanup_infrastructure_global(infrastructure)
-
 
 async def _cleanup_infrastructure_global(infrastructure: Dict[str, Any]) -> None:
     """Global cleanup function for infrastructure"""
@@ -63,7 +52,6 @@ async def _cleanup_infrastructure_global(infrastructure: Dict[str, Any]) -> None
         # Log cleanup errors but don't fail the test
         print(f"Warning: Error during infrastructure cleanup: {e}")
 
-
 async def _cancel_pending_tasks_global() -> None:
     """Global function to cancel any remaining pending tasks"""
     try:
@@ -83,7 +71,6 @@ async def _cancel_pending_tasks_global() -> None:
         # Silently handle any cancellation errors
         pass
 
-
 # Map prompts to their context types
 PROMPT_CONTEXT_MAPPING = {
     0: "cost_reduction",      # Cost reduction prompt
@@ -96,7 +83,6 @@ PROMPT_CONTEXT_MAPPING = {
     7: "tool_migration",      # Tool migration prompt
     8: "rollback_analysis",   # Rollback analysis prompt
 }
-
 
 @pytest.mark.real_llm
 @pytest.mark.real_services
@@ -226,7 +212,6 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         
         if analysis["failed_tests"]:
             print(f"  Failed tests: {analysis['failed_tests']}")
-
 
 # Additional focused test groups for specific scenarios
 @pytest.mark.real_llm

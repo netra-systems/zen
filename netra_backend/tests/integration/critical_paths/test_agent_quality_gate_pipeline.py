@@ -11,17 +11,10 @@ L3 Test: Uses real quality gate service with multi-dimensional validation.
 Quality target: ≥0.6 quality score threshold with real-time monitoring.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,7 +33,6 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.exceptions_base import NetraException, QualityGateException
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -54,10 +46,7 @@ from netra_backend.app.services.quality_gate.quality_gate_models import (
 )
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class QualityGateTestManager:
     """Manager for quality gate pipeline testing."""
@@ -110,7 +99,6 @@ class QualityGateTestManager:
         if total_attempts == 0:
             return 0.0
         return len(self.quality_failures) / total_attempts
-
 
 class MockQualityAwareAgent(BaseSubAgent):
     """Mock agent that integrates with quality gate pipeline."""
@@ -177,7 +165,6 @@ class MockQualityAwareAgent(BaseSubAgent):
             return f"Specifically addressing your request: {original} This provides more targeted and relevant information."
         else:
             return f"Improved version: {original} With enhanced clarity and structure."
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -524,7 +511,6 @@ class TestAgentQualityGatePipelineL3:
         scores = [r.overall_score for r in validation_results]
         assert max(scores) > 0.7  # Should have some high quality
         assert min(scores) >= 0.0  # All scores should be valid
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

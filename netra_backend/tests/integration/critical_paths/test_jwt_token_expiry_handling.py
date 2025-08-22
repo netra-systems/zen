@@ -20,17 +20,10 @@ Mock-Real Spectrum: L3 (Real JWT with time manipulation)
 - Simulated time progression
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -49,17 +42,14 @@ from netra_backend.app.core.monitoring import metrics_collector
 from netra_backend.app.core.token_manager import TokenManager
 from netra_backend.app.db.redis_manager import get_redis_manager
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     RefreshRequest,
     RefreshResponse,
-    # Add project root to path
     Token,
     TokenData,
     TokenExpiryNotification,
     TokenStatus,
 )
-
 
 @dataclass
 class TokenLifecycle:
@@ -73,7 +63,6 @@ class TokenLifecycle:
     auto_refreshed: bool = False
     notifications_sent: List[str] = field(default_factory=list)
     final_status: str = "active"  # active, expired, refreshed, revoked
-
 
 @dataclass
 class ExpiryTestMetrics:
@@ -93,7 +82,6 @@ class ExpiryTestMetrics:
         if total_attempts == 0:
             return 0
         return (self.auto_refresh_success / total_attempts) * 100
-
 
 class TestJWTTokenExpiryHandling:
     """Test suite for JWT token expiry handling"""

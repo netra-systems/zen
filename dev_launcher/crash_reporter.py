@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .crash_recovery_models import CrashReport, CrashSeverity, DetectionMethod
+from dev_launcher.crash_recovery_models import CrashReport, CrashSeverity, DetectionMethod
 
 logger = logging.getLogger(__name__)
 

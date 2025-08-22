@@ -5,28 +5,17 @@ Tests to prevent:
 2. Error handler IndexError when logging SQLAlchemy errors
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
-
-# Add project root to path
-
 
 @pytest.mark.asyncio
 async def test_user_creation_with_defaults():
@@ -60,7 +49,6 @@ async def test_user_creation_with_defaults():
     assert isinstance(user.feature_flags, dict)
     assert isinstance(user.tool_permissions, dict)
 
-
 @pytest.mark.asyncio
 async def test_user_creation_datetime_defaults():
     """Test that datetime defaults are properly callable."""
@@ -79,7 +67,6 @@ async def test_user_creation_datetime_defaults():
     # Note: The defaults won't be set until the object is saved to database
     # For unit test, we just verify the model structure is correct
 
-
 @pytest.mark.asyncio 
 async def test_tool_usage_log_datetime_defaults():
     """Test that ToolUsageLog datetime defaults are properly callable."""
@@ -96,7 +83,6 @@ async def test_tool_usage_log_datetime_defaults():
     # Note: The defaults won't be set until the object is saved to database
     # For unit test, we just verify the model structure is correct
 
-
 @pytest.mark.asyncio
 async def test_secret_datetime_defaults():
     """Test that Secret datetime defaults are properly callable."""
@@ -112,5 +98,3 @@ async def test_secret_datetime_defaults():
     
     # Note: The defaults won't be set until the object is saved to database
     # For unit test, we just verify the model structure is correct
-
-

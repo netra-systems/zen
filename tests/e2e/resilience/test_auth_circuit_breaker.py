@@ -30,8 +30,6 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from netra_backend.app.clients.auth_client_cache import (
     AuthCircuitBreakerManager,

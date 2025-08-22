@@ -5,28 +5,19 @@ Tests the Unit of Work pattern with comprehensive mocking to ensure
 transaction management works correctly without requiring a real database.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import asyncio
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
 from netra_backend.tests.database_repository_helpers import (
     assert_thread_created_correctly,
     create_test_message,
-    # Add project root to path
     create_test_thread,
 )
 

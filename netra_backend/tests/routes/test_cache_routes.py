@@ -9,30 +9,20 @@ Business Value Justification (BVJ):
 - Revenue Impact: Direct cost savings translate to higher profit margins
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
-    # Add project root to path
     basic_test_client,
 )
-
 
 class TestLLMCacheRoute:
     """Test cache management, metrics, and invalidation functionality."""

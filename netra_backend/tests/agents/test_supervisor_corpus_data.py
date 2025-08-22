@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestCorpusAdminDocumentManagement, TestSupplyResearcherDataCollection, TestDemoServiceWorkflow
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,11 +28,9 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -59,7 +50,6 @@ from netra_backend.tests.supervisor_test_helpers import (
     create_timestamp_data,
     setup_vector_store_mock,
 )
-
 
 # Mock classes for testing (would normally be imported)
 class CorpusAdminSubAgent:
@@ -81,7 +71,6 @@ class CorpusAdminSubAgent:
         """Update existing document"""
         return await self.vector_store.update_document(document)
 
-
 class SupplyResearcherSubAgent:
     """Mock SupplyResearcherSubAgent for testing"""
     def __init__(self, llm_manager, tool_dispatcher):
@@ -95,7 +84,6 @@ class SupplyResearcherSubAgent:
     
     async def validate_and_enrich(self, raw_data):
         return await self.enrichment_service.enrich(raw_data)
-
 
 class DemoService:
     """Mock demo service for testing"""
@@ -136,7 +124,6 @@ class DemoService:
         import random
         random.seed(self.random_seed)
         return self._create_metrics_dict(random)
-
 
 class TestCorpusAdminDocumentManagement:
     """Test 5: Test document indexing and retrieval"""
@@ -222,7 +209,6 @@ class TestCorpusAdminDocumentManagement:
         result = await corpus_admin.update_document(update)
         self._assert_update_results(result, corpus_admin, update)
 
-
 class TestSupplyResearcherDataCollection:
     """Test 6: Test supply chain data research capabilities"""
     def _setup_supply_collection_test(self):
@@ -294,7 +280,6 @@ class TestSupplyResearcherDataCollection:
         self._mock_enrichment_service(supply_researcher)
         result = await supply_researcher.validate_and_enrich(raw_data)
         self._assert_validation_results(result)
-
 
 class TestDemoServiceWorkflow:
     """Test 7: Test demo service scenario execution"""

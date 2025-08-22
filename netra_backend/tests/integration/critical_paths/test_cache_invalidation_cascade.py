@@ -15,8 +15,6 @@ This test ensures cache consistency across all service layers.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import hashlib
 import json
@@ -30,10 +28,6 @@ from typing import Any, Dict, List, Optional, Set
 import aiohttp
 import pytest
 import redis.asyncio as redis
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
@@ -49,7 +43,6 @@ CACHE_ENDPOINTS = {
 # Test credentials
 TEST_USER_EMAIL = "cache_test@example.com"
 TEST_USER_PASSWORD = "cachetest123"
-
 
 class CacheLayer:
     """Represents a single cache layer."""
@@ -115,7 +108,6 @@ class CacheLayer:
             "invalidations": self.invalidation_count,
             "current_keys": len(self.data)
         }
-
 
 class CacheInvalidationTester:
     """Test cache invalidation cascade flow."""
@@ -665,7 +657,6 @@ class CacheInvalidationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -704,7 +695,6 @@ async def test_cache_invalidation_cascade():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -721,7 +711,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

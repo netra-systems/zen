@@ -4,27 +4,16 @@ All functions are ≤8 lines (MANDATORY COMPLIANCE)
 File is ≤300 lines (MANDATORY COMPLIANCE)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.core_test_helpers import create_mock_config
-
-# Add project root to path
-
 
 class TestConfigValidator:
     """Test configuration validation with ≤8 line functions."""
@@ -53,7 +42,6 @@ class TestConfigValidator:
         with pytest.raises(ConfigurationValidationError):
             validator.validate_config(config)
 
-
 class TestErrorContext:
     """Test error context with ≤8 line functions."""
     
@@ -77,7 +65,6 @@ class TestErrorContext:
         """Assert trace ID is valid - helper ≤8 lines."""
         assert trace_id is not None
         assert context.get_trace_id() == trace_id
-
 
 class TestCustomExceptions:
     """Test exceptions with ≤8 line functions."""
@@ -103,7 +90,6 @@ class TestCustomExceptions:
         assert hasattr(error_code_enum, 'INTERNAL_ERROR')
         assert hasattr(error_code_enum, 'VALIDATION_ERROR')
 
-
 class TestUnifiedLogging:
     """Test logging with ≤8 line functions."""
     
@@ -126,7 +112,6 @@ class TestUnifiedLogging:
         """Assert logger valid - helper ≤8 lines."""
         assert logger is not None
         assert hasattr(logger, '__init__')
-
 
 class TestArchitecturalCompliance:
     """Verify architectural compliance requirements."""
@@ -159,7 +144,6 @@ class TestArchitecturalCompliance:
         """Assert helper works - helper ≤8 lines."""
         assert mock_config is not None
         assert hasattr(mock_config, 'database_url')
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

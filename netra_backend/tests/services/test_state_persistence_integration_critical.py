@@ -4,17 +4,10 @@ Tests for state persistence service with Redis and PostgreSQL.
 Focuses on async session usage and datetime serialization issues.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import uuid
@@ -33,11 +26,7 @@ from netra_backend.app.agents.state import (
 )
 from netra_backend.app.db.models_postgres import Reference, Run
 
-# Add project root to path
 from netra_backend.app.services.state_persistence import state_persistence_service
-
-# Add project root to path
-
 
 class TestStatePersistenceCritical:
     """Test state persistence with actual service patterns"""
@@ -215,7 +204,6 @@ class TestStatePersistenceCritical:
         assert len(runs) == 3
         assert runs[0]["has_state"] is True
         assert runs[1]["has_state"] is False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])

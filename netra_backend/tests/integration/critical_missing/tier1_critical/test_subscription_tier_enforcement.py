@@ -10,17 +10,10 @@ Business Value Justification:
 - Strategic Impact: Essential for subscription business model integrity
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
@@ -39,16 +32,13 @@ from netra_backend.app.services.tool_permissions.tool_permission_service_main im
 )
 
 # Import from shared infrastructure
-from integration.critical_missing.shared_infrastructure.containerized_services import (
+from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import (
     ServiceOrchestrator,
 )
-
-# Add project root to path
 
 # Define test-specific exception
 class AuthorizationError(NetraException):
     pass
-
 
 @pytest.fixture(scope="module")
 async def l2_services():
@@ -58,14 +48,12 @@ async def l2_services():
     yield orchestrator, connections
     await orchestrator.stop_all()
 
-
 @pytest.fixture
 async def permission_service(l2_services):
     """Tool permission service with mock Redis"""
     orchestrator, connections = l2_services
     # Use mock Redis client for testing
     return ToolPermissionService(None)
-
 
 @pytest.fixture
 async def test_users():
@@ -89,13 +77,11 @@ async def test_users():
         )
     }
 
-
 @pytest.fixture
 async def reset_services(l2_services):
     """Reset services for test isolation"""
     orchestrator, _ = l2_services
     await orchestrator.reset_for_test()
-
 
 class TestSubscriptionTierEnforcement:
     """Test subscription tier enforcement across service boundaries"""

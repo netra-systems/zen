@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Foundation for advanced optimization features
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -30,14 +23,11 @@ import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from integration.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     get_mock_optimization_request,
-    # Add project root to path
     get_mock_provider_configs,
     simulate_oauth_callback,
 )
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -69,7 +59,6 @@ async def test_openai_provider_connection(
     assert test_result["connection_valid"] is True
     assert "models_available" in test_result
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -91,7 +80,6 @@ async def test_anthropic_provider_connection(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["provider"] == "anthropic"
     assert response.json()["status"] == "connected"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -118,7 +106,6 @@ async def test_provider_listing_and_management(
     assert len(providers) >= 2
     assert any(p["name"] == "openai" for p in providers)
     assert any(p["name"] == "anthropic" for p in providers)
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -149,7 +136,6 @@ async def test_provider_settings_update(
     )
     assert response.status_code == status.HTTP_200_OK
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -174,7 +160,6 @@ async def test_provider_key_rotation(
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["message"] == "API key rotated successfully"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -201,7 +186,6 @@ async def test_provider_disconnection(
     providers = response.json()
     anthropic_providers = [p for p in providers if p["name"] == "anthropic"]
     assert len(anthropic_providers) == 0 or anthropic_providers[0]["status"] == "disconnected"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -238,7 +222,6 @@ async def test_google_oauth_provider_flow(
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["provider"] == "google"
         assert response.json()["status"] == "connected"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -287,7 +270,6 @@ async def test_optimization_workflow_with_providers(
         await asyncio.sleep(2)
     
     assert analysis_complete
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -345,7 +327,6 @@ async def test_optimization_results_validation(
         assert results["cost_analysis"]["savings_amount"] > 0
         assert "quality_assessment" in results
         assert results["quality_assessment"]["projected_quality_score"] >= 0.95
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

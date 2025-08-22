@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Core revenue protection and expansion mechanism
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -31,14 +24,11 @@ import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from integration.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     assert_billing_metrics,
     track_usage_and_verify,
-    # Add project root to path
     usage_service,
 )
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -74,7 +64,6 @@ async def test_free_tier_usage_limits_enforcement(
     assert "warning" in data
     assert "80%" in data["warning"] or "limit" in data["warning"].lower()
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -101,7 +90,6 @@ async def test_daily_limit_exceeded_blocking(
     data = response.json()
     assert "daily limit" in data["detail"].lower()
     assert "upgrade" in data["detail"].lower()
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -130,7 +118,6 @@ async def test_premium_features_access_control(
         headers=headers
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -173,7 +160,6 @@ async def test_usage_tracking_accuracy(
     assert current_usage["messages_sent"] > baseline_usage["messages_sent"]
     assert current_usage["api_calls"] > baseline_usage["api_calls"]
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -194,7 +180,6 @@ async def test_usage_reset_daily_cycle(
     response = await async_client.get("/api/v1/usage/current", headers=headers)
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["messages_used_today"] == 0
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -242,7 +227,6 @@ async def test_upgrade_to_pro_plan_flow(
         assert upgrade_result["success"] is True
         assert upgrade_result["new_plan"] == "pro"
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -273,7 +257,6 @@ async def test_pro_plan_benefits_activation(
         )
         assert response.status_code == status.HTTP_200_OK
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -302,7 +285,6 @@ async def test_billing_invoice_generation(
         billing = response.json()
         assert "total_cost" in billing
         assert billing["total_cost"] >= 0
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

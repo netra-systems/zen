@@ -11,17 +11,10 @@ L3 Test: Uses real ClickHouse container to validate partition creation, rotation
 pruning, and query performance across partitioned data.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -36,7 +29,6 @@ from testcontainers.clickhouse import ClickHouseContainer
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 class ClickHousePartitionManager:
     """Manages ClickHouse partition testing with real containers."""
@@ -544,7 +536,6 @@ class ClickHousePartitionManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def partition_manager():
     """Create ClickHouse partition manager for testing."""
@@ -552,7 +543,6 @@ async def partition_manager():
     await manager.setup_clickhouse_container()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -632,7 +622,6 @@ class TestDatabasePartitionManagementL3:
         for query_type, metrics in optimization_result["query_performance"].items():
             if "error" not in metrics:
                 assert metrics["performance_acceptable"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

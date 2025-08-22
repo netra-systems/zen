@@ -19,7 +19,7 @@ try:
         CacheValidator,
         ContentHasher,
     )
-    from .cache_warmer import CacheWarmer
+    from dev_launcher.cache_warmer import CacheWarmer
 except ImportError:
     # Support standalone execution
     from cache_entry import (

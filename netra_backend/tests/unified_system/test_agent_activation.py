@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for delivering accurate AI optimization recommendations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -36,14 +29,10 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Config import AppConfig
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class AgentActivationEvent:
@@ -54,7 +43,6 @@ class AgentActivationEvent:
     duration: Optional[float] = None
     success: bool = True
     error: Optional[str] = None
-
 
 class MockAnalysisAgent(BaseSubAgent):
     """Mock analysis agent for testing."""
@@ -91,7 +79,6 @@ class MockAnalysisAgent(BaseSubAgent):
         
         return execution_data
 
-
 class MockDebugAgent(BaseSubAgent):
     """Mock debug agent for testing."""
     
@@ -126,7 +113,6 @@ class MockDebugAgent(BaseSubAgent):
         
         return execution_data
 
-
 class MockOptimizationAgent(BaseSubAgent):
     """Mock optimization agent for testing."""
     
@@ -160,7 +146,6 @@ class MockOptimizationAgent(BaseSubAgent):
         state.messages.append({"type": "agent_response", "data": response_data})
         
         return execution_data
-
 
 class AgentActivationTestHelper:
     """Helper for testing agent activation and routing."""
@@ -207,7 +192,6 @@ class AgentActivationTestHelper:
             max_time = max(times)
             assert max_time < max_seconds, f"Agent activation took {max_time}s, exceeds {max_seconds}s limit"
 
-
 @pytest.fixture
 def mock_agent_registry():
     """Fixture providing mock agent registry with test agents."""
@@ -229,12 +213,10 @@ def mock_agent_registry():
     
     return registry, analysis_agent, debug_agent, optimization_agent
 
-
 @pytest.fixture
 def activation_helper():
     """Fixture providing agent activation test helper."""
     return AgentActivationTestHelper()
-
 
 @pytest.fixture
 async def supervisor_with_registry(mock_agent_registry):
@@ -266,7 +248,6 @@ async def supervisor_with_registry(mock_agent_registry):
     supervisor.registry = registry
     
     return supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager
-
 
 @pytest.mark.asyncio
 class TestAgentActivation:
@@ -677,7 +658,6 @@ class TestAgentActivation:
             assert avg_time < 1.0, f"Average agent activation time {avg_time:.2f}s should be under 1s"
             
             logger.info(f"✅ Overall performance: {len(activation_times)} activations, avg {avg_time:.2f}s")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -1,7 +1,11 @@
 /**
  * Secure API Configuration
  * Ensures HTTPS URLs in production environments to prevent mixed content errors
+ * Now supports dynamic port discovery in development environments
  */
+
+import { serviceDiscovery } from './service-discovery';
+import { logger } from './logger';
 
 export interface ApiConfig {
   apiUrl: string;
@@ -9,6 +13,7 @@ export interface ApiConfig {
   authUrl: string;
   environment: string;
   forceHttps: boolean;
+  dynamic: boolean; // Whether URLs were discovered dynamically
 }
 
 /**
@@ -45,7 +50,7 @@ const secureUrl = (url: string, isWebSocket = false): string => {
 };
 
 /**
- * Gets the API configuration with security enforcements
+ * Gets the API configuration with security enforcements (synchronous fallback)
  */
 export const getSecureApiConfig = (): ApiConfig => {
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
@@ -65,7 +70,7 @@ export const getSecureApiConfig = (): ApiConfig => {
     : 'wss://api.staging.netrasystems.ai/ws/secure';
 
   const defaultAuthUrl = environment === 'development' 
-    ? 'http://localhost:8001' 
+    ? 'http://localhost:8081' 
     : environment === 'production'
     ? 'https://auth.netrasystems.ai'
     : 'https://auth.staging.netrasystems.ai';
@@ -81,7 +86,39 @@ export const getSecureApiConfig = (): ApiConfig => {
     authUrl: secureUrl(rawAuthUrl),
     environment,
     forceHttps,
+    dynamic: false,
   };
+};
+
+/**
+ * Gets the API configuration with dynamic service discovery (async)
+ */
+export const getSecureApiConfigAsync = async (): Promise<ApiConfig> => {
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
+  const forceHttps = isSecureEnvironment();
+
+  try {
+    // Only use service discovery in development
+    if (environment === 'development') {
+      logger.debug('Attempting dynamic service discovery for development environment');
+      
+      const discoveredUrls = await serviceDiscovery.discoverUrls();
+      
+      return {
+        apiUrl: secureUrl(discoveredUrls.apiUrl),
+        wsUrl: secureUrl(discoveredUrls.wsUrl, true),
+        authUrl: secureUrl(discoveredUrls.authUrl),
+        environment,
+        forceHttps,
+        dynamic: true,
+      };
+    }
+  } catch (error) {
+    logger.warn('Dynamic service discovery failed, falling back to static config:', error);
+  }
+
+  // Fall back to static config for production/staging or if discovery fails
+  return getSecureApiConfig();
 };
 
 /**
@@ -101,12 +138,18 @@ export const getBaseUrl = (): string => {
            : 'http://localhost:3000');
 };
 
-// Export singleton instance
+// Export singleton instance (synchronous fallback)
 export const secureApiConfig = getSecureApiConfig();
 
 // For backward compatibility
 export const API_BASE_URL = secureApiConfig.apiUrl;
 export const WS_BASE_URL = secureApiConfig.wsUrl;
 export const AUTH_BASE_URL = secureApiConfig.authUrl;
+
+// Export async config getter for components that can handle promises
+export { getSecureApiConfigAsync };
+
+// Export service discovery for direct access
+export { serviceDiscovery };
 
 export default secureApiConfig;

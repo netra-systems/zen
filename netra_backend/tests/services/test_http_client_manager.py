@@ -1,31 +1,21 @@
 """Tests for HTTPClientManager functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.external_api_client import (
-    # Add project root to path
     HTTPClientManager,
     ResilientHTTPClient,
     RetryableHTTPClient,
     get_http_client,
     http_client_manager,
 )
-
 
 class TestHTTPClientManager:
     """Test HTTPClientManager functionality."""
@@ -131,7 +121,6 @@ class TestHTTPClientManager:
         mock_clients["client2"].close.assert_called_once()
         assert manager._clients == {}
 
-
 class TestGetHTTPClient:
     """Test get_http_client context manager."""
     async def test_get_http_client_context_manager(self):
@@ -151,7 +140,6 @@ class TestGetHTTPClient:
         mock_manager.get_client.assert_called_once_with(
             "test", "https://api.test.com", {"Auth": "token"}, True
         )
-
 
 class TestGlobalClientManager:
     """Test global http_client_manager instance."""

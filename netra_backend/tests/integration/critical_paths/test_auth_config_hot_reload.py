@@ -12,14 +12,8 @@ Coverage: Auth config hot reload, session maintenance, validation, rollback, con
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -33,16 +27,11 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 
-# Add project root to path
-
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.logging_config import central_logger
-from integration.helpers.redis_l3_helpers import RedisContainer
-
-# Add project root to path
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
 
 logger = central_logger.get_logger(__name__)
-
 
 class AuthConfigType(Enum):
     OAUTH_SETTINGS = "oauth_settings"
@@ -136,7 +125,6 @@ class AuthServiceContainer:
                 pass
             await asyncio.sleep(1.0)
         raise RuntimeError("Auth service failed to become ready")
-
 
 class AuthConfigHotReloader:
     """Manages auth configuration hot reload operations."""
@@ -331,7 +319,6 @@ async def auth_service_container(redis_container):
 async def auth_hot_reloader(auth_service_container):
     _, service_url = auth_service_container
     yield AuthConfigHotReloader(service_url)
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

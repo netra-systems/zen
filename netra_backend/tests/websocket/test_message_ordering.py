@@ -3,17 +3,10 @@ WebSocket message ordering and protocol testing module.
 Tests message sequencing, protocol version handling, and binary data transmission.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -26,7 +19,6 @@ from unittest.mock import AsyncMock
 
 import pytest
 import websockets
-
 
 class OrderedWebSocket:
     def __init__(self, client_id: str):
@@ -63,7 +55,6 @@ class OrderedWebSocket:
         curr_seq = message['sequence']
         assert curr_seq == prev_seq + 1, f"Out of order: expected {prev_seq + 1}, got {curr_seq}"
 
-
 async def _create_message_router(clients: List[OrderedWebSocket], message_queue: asyncio.Queue) -> int:
     """Route messages maintaining order per client"""
     client_queues: Dict[str, List[Dict]] = {}
@@ -77,7 +68,6 @@ async def _create_message_router(clients: List[OrderedWebSocket], message_queue:
             break
     return out_of_order_count
 
-
 async def _process_message(message: Dict, client_queues: Dict, clients: List) -> int:
     client_id = message['client_id']
     if client_id not in client_queues:
@@ -88,7 +78,6 @@ async def _process_message(message: Dict, client_queues: Dict, clients: List) ->
     await _deliver_message_to_client(message, clients)
     return out_of_order
 
-
 def _check_message_order(message: Dict, client_queue: List[Dict]) -> int:
     if client_queue:
         last_seq = client_queue[-1]['sequence']
@@ -96,13 +85,11 @@ def _check_message_order(message: Dict, client_queue: List[Dict]) -> int:
             return 1
     return 0
 
-
 async def _deliver_message_to_client(message: Dict, clients: List):
     for client in clients:
         if client.client_id == message['client_id']:
             await client.receive_message(message)
             break
-
 
 async def _client_sender(client: OrderedWebSocket, message_queue: asyncio.Queue, messages_per_client: int):
     for i in range(messages_per_client):
@@ -111,14 +98,12 @@ async def _client_sender(client: OrderedWebSocket, message_queue: asyncio.Queue,
         if i % 10 == 0:
             await asyncio.sleep(0.01)
 
-
 def _verify_message_results(clients: List[OrderedWebSocket], num_clients: int, messages_per_client: int, out_of_order_count: int):
     total_sent = sum(len(c.sent_messages) for c in clients)
     total_received = sum(len(c.received_messages) for c in clients)
     assert total_sent == num_clients * messages_per_client
     assert total_received >= total_sent * 0.99, "Should receive at least 99% of messages"
     assert out_of_order_count == 0, f"Found {out_of_order_count} out-of-order messages"
-
 
 def _verify_per_client_ordering(clients: List[OrderedWebSocket]):
     for client in clients:

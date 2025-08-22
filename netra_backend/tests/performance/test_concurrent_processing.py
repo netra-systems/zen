@@ -5,17 +5,10 @@ Tests for concurrent generation requests, resource sharing, and thread efficienc
 Validates system behavior under concurrent load conditions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -28,11 +21,7 @@ import pytest
 
 from netra_backend.app.schemas.Generation import ContentGenParams
 
-# Add project root to path
 from netra_backend.app.services.generation_service import run_content_generation_job
-
-# Add project root to path
-
 
 class TestConcurrentProcessing:
     """Test concurrent generation requests and resource sharing"""
@@ -178,7 +167,6 @@ class TestConcurrentProcessing:
         for i, processing_time in enumerate(processing_times):
             expected_max_time = queue_sizes[i] * 0.02  # Allow some overhead
             assert processing_time < expected_max_time
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

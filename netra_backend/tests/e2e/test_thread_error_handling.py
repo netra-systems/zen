@@ -2,17 +2,10 @@
 Tests comprehensive error scenarios and recovery mechanisms for thread operations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -33,11 +26,7 @@ from netra_backend.app.db.models_postgres import Message, Run, Thread
 from netra_backend.app.schemas.agent_state import RecoveryType, StateRecoveryRequest
 from netra_backend.app.services.state_persistence import state_persistence_service
 
-# Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
-
 
 class ThreadDatabaseErrorTests:
     """Tests for database error scenarios in thread operations."""
@@ -119,7 +108,6 @@ class ThreadDatabaseErrorTests:
         assert result is None
         db_session.rollback.assert_called_once()
 
-
 class ThreadStateErrorTests:
     """Tests for state persistence error scenarios."""
     async def test_state_persistence_failure_recovery(self, mock_db_session: AsyncSession):
@@ -188,7 +176,6 @@ class ThreadStateErrorTests:
             
             assert not success
             assert recovery_id is None
-
 
 class ThreadConcurrencyErrorTests:
     """Tests for concurrency-related error scenarios."""
@@ -273,7 +260,6 @@ class ThreadConcurrencyErrorTests:
         
         return cross_thread_op
 
-
 class ThreadResourceErrorTests:
     """Tests for resource-related error scenarios."""
     async def test_memory_exhaustion_scenarios(self, mock_db_session: AsyncSession):
@@ -355,7 +341,6 @@ class ThreadResourceErrorTests:
         # System should maintain functionality even with connection pressure
         assert len(successful_ops) >= len(results) * 0.8  # 80% success rate
 
-
 class ThreadRecoveryTests:
     """Tests for thread operation recovery mechanisms."""
     async def test_automatic_error_recovery(self, mock_db_session: AsyncSession):
@@ -422,7 +407,6 @@ class ThreadRecoveryTests:
             new_thread = await service.get_or_create_thread(f"{user_id}_recovery", db_session)
             assert new_thread is not None
 
-
 @pytest.fixture
 def mock_db_session():
     """Mock database session with error simulation capabilities."""
@@ -435,7 +419,6 @@ def mock_db_session():
     session.refresh = AsyncMock()
     session.execute = AsyncMock()
     return session
-
 
 @pytest.fixture
 def thread_service():

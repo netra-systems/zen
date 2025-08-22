@@ -10,17 +10,10 @@ Critical Path: Transaction initiation -> Service coordination -> Consistency che
 Coverage: Distributed transactions, eventual consistency, conflict resolution, data reconciliation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -36,7 +29,6 @@ import pytest
 from netra_backend.app.services.data.conflict_resolver import ConflictResolver
 from netra_backend.app.services.data.consistency_manager import ConsistencyManager
 
-# Add project root to path
 from netra_backend.app.services.data.transaction_coordinator import (
     TransactionCoordinator,
 )
@@ -44,17 +36,13 @@ from netra_backend.app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class TransactionStatus(Enum):
     PENDING = "pending"
     COMMITTED = "committed"
     ABORTED = "aborted"
     COMPENSATED = "compensated"
-
 
 class DataConsistencyManager:
     """Manages data consistency testing across distributed services."""
@@ -575,7 +563,6 @@ class DataConsistencyManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def consistency_manager():
     """Create data consistency manager for testing."""
@@ -583,7 +570,6 @@ async def consistency_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_distributed_transaction_success(consistency_manager):
@@ -602,7 +588,6 @@ async def test_distributed_transaction_success(consistency_manager):
     assert result["transaction_time"] < 5.0
     assert len(result["services_involved"]) == 3
 
-
 @pytest.mark.asyncio
 async def test_distributed_transaction_rollback(consistency_manager):
     """Test distributed transaction rollback on service failure."""
@@ -619,7 +604,6 @@ async def test_distributed_transaction_rollback(consistency_manager):
     assert result["status"] == TransactionStatus.ABORTED
     assert "failed_services" in result
     assert "failing_service" in result["failed_services"]
-
 
 @pytest.mark.asyncio
 async def test_data_consistency_monitoring(consistency_manager):
@@ -642,7 +626,6 @@ async def test_data_consistency_monitoring(consistency_manager):
     assert len(consistency_result["consistency_results"]) == 3
     for service in services:
         assert service in consistency_result["consistency_results"]
-
 
 @pytest.mark.asyncio
 async def test_conflict_resolution_mechanisms(consistency_manager):
@@ -671,7 +654,6 @@ async def test_conflict_resolution_mechanisms(consistency_manager):
         assert "resolution_strategy" in result
         assert result["resolution_time"] < 1.0
 
-
 @pytest.mark.asyncio
 async def test_eventual_consistency_convergence(consistency_manager):
     """Test eventual consistency convergence."""
@@ -692,7 +674,6 @@ async def test_eventual_consistency_convergence(consistency_manager):
     
     # Verify convergence happened within reasonable time
     assert consistency_result["convergence_time"] < 5.0
-
 
 @pytest.mark.asyncio
 async def test_concurrent_distributed_transactions(consistency_manager):
@@ -720,7 +701,6 @@ async def test_concurrent_distributed_transactions(consistency_manager):
     # Verify transaction isolation
     successful_transactions = [r for r in results if r["success"]]
     assert len(successful_transactions) >= 4  # At least 80% success rate
-
 
 @pytest.mark.asyncio
 async def test_consistency_performance_requirements(consistency_manager):
@@ -759,7 +739,6 @@ async def test_consistency_performance_requirements(consistency_manager):
     
     avg_check_time = sum(consistency_times) / len(consistency_times)
     assert avg_check_time < 0.5  # Average < 500ms
-
 
 @pytest.mark.asyncio
 async def test_data_consistency_metrics_collection(consistency_manager):
@@ -806,7 +785,6 @@ async def test_data_consistency_metrics_collection(consistency_manager):
     assert "overall_status" in health
     assert health["overall_status"] in ["healthy", "degraded"]
 
-
 @pytest.mark.asyncio
 async def test_transaction_compensation_patterns(consistency_manager):
     """Test transaction compensation patterns for failure scenarios."""
@@ -833,7 +811,6 @@ async def test_transaction_compensation_patterns(consistency_manager):
         # Should handle compensation
         assert result["success"] is False
         assert result["status"] == TransactionStatus.ABORTED
-
 
 @pytest.mark.asyncio
 async def test_data_reconciliation_across_services(consistency_manager):

@@ -14,7 +14,6 @@ import redis.asyncio as redis
 
 from netra_backend.app.redis_manager import RedisManager
 
-
 class MockRedisClient:
     """Mock Redis client for testing"""
     
@@ -96,7 +95,6 @@ class MockRedisClient:
         self.should_fail = should_fail
         self.failure_type = failure_type
 
-
 class RedisConnectionPool:
     """Mock Redis connection pool for testing"""
     
@@ -132,7 +130,6 @@ class RedisConnectionPool:
             await connection.close()
         self.connections.clear()
         self.active_connections = 0
-
 
 class EnhancedRedisManager(RedisManager):
     """Enhanced Redis manager with additional features for testing"""
@@ -248,14 +245,12 @@ class EnhancedRedisManager(RedisManager):
             'cache_misses': 0
         }
 
-
 # Pytest Fixtures
 
 @pytest.fixture
 def mock_redis_client():
     """Create mock Redis client"""
     return MockRedisClient()
-
 
 @pytest.fixture
 def redis_manager(mock_redis_client):
@@ -265,18 +260,15 @@ def redis_manager(mock_redis_client):
     manager.enabled = True
     return manager
 
-
 @pytest.fixture
 def enhanced_redis_manager():
     """Create enhanced Redis manager"""
     return EnhancedRedisManager()
 
-
 @pytest.fixture
 def connection_pool():
     """Create connection pool"""
     return RedisConnectionPool(max_connections=5)
-
 
 @pytest.fixture
 def enhanced_redis_manager_with_retry():
@@ -284,7 +276,6 @@ def enhanced_redis_manager_with_retry():
     manager = EnhancedRedisManager()
     manager.enabled = True
     return manager
-
 
 @pytest.fixture
 def performance_redis_manager():

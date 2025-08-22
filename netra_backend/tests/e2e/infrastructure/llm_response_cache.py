@@ -14,7 +14,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
-
 class CacheEntry(BaseModel):
     """Cache entry structure."""
     key: str
@@ -24,7 +23,6 @@ class CacheEntry(BaseModel):
     access_count: int = 0
     last_accessed: Optional[datetime] = None
 
-
 class CacheStatistics(BaseModel):
     """Cache statistics structure."""
     total_entries: int = 0
@@ -33,7 +31,6 @@ class CacheStatistics(BaseModel):
     expired_entries: int = 0
     total_size_bytes: int = 0
     hit_rate: float = 0.0
-
 
 class LLMResponseCache:
     """SQLite-based cache for LLM responses with TTL management."""

@@ -3,32 +3,19 @@ Tests for error handler enumerations and context.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 # Add netra_backend to path  
-NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
-if str(NETRA_BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import ErrorCategory, ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestErrorContext as SharedTestErrorContext,
 )
-
-# Add project root to path
-
 
 class TestErrorEnums:
     """Test error enumerations."""
@@ -57,7 +44,6 @@ class TestErrorEnums:
         assert ErrorRecoveryStrategy.FALLBACK.value == "fallback"
         assert ErrorRecoveryStrategy.ABORT.value == "abort"
         assert ErrorRecoveryStrategy.IGNORE.value == "ignore"
-
 
 class TestErrorContext(SharedTestErrorContext):
     """Test error context functionality with inheritance."""

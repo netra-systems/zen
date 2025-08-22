@@ -21,17 +21,10 @@ This test validates end-to-end compliance audit trail functionality in staging e
 ensuring enterprise customers maintain regulatory compliance.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -48,7 +41,6 @@ from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenTy
 from netra_backend.app.schemas.registry import (
     CorpusAuditAction,
     CorpusAuditMetadata,
-    # Add project root to path
     CorpusAuditRecord,
     CorpusAuditReport,
     CorpusAuditSearchFilter,
@@ -61,12 +53,10 @@ from netra_backend.app.services.audit_service import (
     log_admin_action,
 )
 
-# Add project root to path
-from tests.l4_staging_critical_base import (
+from netra_backend.tests.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-
 
 @dataclass
 class ComplianceAuditMetrics:
@@ -81,7 +71,6 @@ class ComplianceAuditMetrics:
     soc2_compliance_score: float = 0.0
     audit_trail_immutability_verified: bool = False
     access_control_logs_count: int = 0
-
 
 class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
     """L4 test for compliance audit trail functionality in staging environment."""
@@ -1015,7 +1004,6 @@ class L4ComplianceAuditTrailTest(L4StagingCriticalPathTestBase):
         except Exception as e:
             print(f"Compliance test cleanup warning: {e}")
 
-
 # Pytest test implementation
 @pytest.mark.asyncio
 async def test_l4_compliance_audit_trail_critical_path():
@@ -1071,7 +1059,6 @@ L4 Compliance Audit Trail Test Results:
     finally:
         # Ensure cleanup happens
         await test_instance.cleanup_l4_resources()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

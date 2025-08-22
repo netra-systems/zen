@@ -14,11 +14,8 @@ import sys
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 
-
 # Add parent directory to path for imports
-sys.path.insert(0, str(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
-
 
 @pytest.mark.asyncio
 async def test_redis_connection_fails_with_python312():
@@ -47,7 +44,6 @@ async def test_redis_connection_fails_with_python312():
     assert result is False, "Redis connection should fail with aioredis 2.0.1 on Python 3.12"
     assert redis_conn.last_error is not None
     assert "Redis connection failed" in redis_conn.last_error or "TimeoutError" in redis_conn.last_error
-
 
 @pytest.mark.asyncio
 async def test_dev_launcher_database_validation_fails():
@@ -85,7 +81,6 @@ async def test_dev_launcher_database_validation_fails():
             assert redis_conn.status == ConnectionStatus.FAILED
             assert redis_conn.last_error is not None
 
-
 def test_aioredis_import_fails_on_python312():
     """
     Test that directly importing aioredis fails on Python 3.12.
@@ -108,7 +103,6 @@ def test_aioredis_import_fails_on_python312():
     except ImportError:
         # aioredis not installed
         pytest.skip("aioredis not installed")
-
 
 if __name__ == "__main__":
     # Run the tests

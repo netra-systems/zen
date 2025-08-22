@@ -3,17 +3,10 @@ Tool Permission Service - Tool Availability and Upgrade Path Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import patch
 
@@ -21,10 +14,8 @@ import pytest
 
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.tests.tool_permission_helpers import (
-    # Add project root to path
     MockRedisClient,
     assert_tool_availability,
     assert_tool_registry_availability,
@@ -34,18 +25,15 @@ from netra_backend.tests.tool_permission_helpers import (
     setup_mock_user_plan,
 )
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
 
-
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
-
 
 @pytest.fixture
 def service_with_redis(mock_redis):
@@ -96,7 +84,6 @@ class TestGetUserToolAvailability:
         availability = await service.get_user_tool_availability("test_user", {})
         assert availability == []
 
-
 class TestUpgradePath:
     """Test upgrade path determination"""
     
@@ -145,7 +132,6 @@ class TestUpgradePath:
         user_plan = create_user_plan(PlanTier.ENTERPRISE)
         upgrade_path = service._get_upgrade_path_for_rate_limits(user_plan)
         assert upgrade_path is None
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

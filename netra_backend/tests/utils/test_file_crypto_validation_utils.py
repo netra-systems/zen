@@ -3,17 +3,10 @@ Tests for file, crypto, and validation utilities (Tests 89-91).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -22,16 +15,13 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.json_file_crypto_test_helpers import (
     CryptoTestHelpers,
-    # Add project root to path
     FileTestHelpers,
 )
 from netra_backend.tests.validation_formatting_test_helpers import (
     ValidationTestHelpers,
 )
-
 
 # Test 89: File utils operations
 class TestFileUtilsOperations:
@@ -95,7 +85,6 @@ class TestFileUtilsOperations:
         content = await utils.read_file(target_file)
         assert content == "atomic content"
 
-
 # Test 90: Crypto utils hashing
 class TestCryptoUtilsHashing:
     """test_crypto_utils_hashing - Test hashing algorithms and salt generation"""
@@ -147,7 +136,6 @@ class TestCryptoUtilsHashing:
         hash1 = utils.hash_password(password, salt1)
         hash2 = utils.hash_password(password, salt2)
         assert hash1 != hash2
-
 
 # Test 91: Validation utils schemas
 class TestValidationUtilsSchemas:

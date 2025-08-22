@@ -7,17 +7,10 @@ Business Value: Ensures accurate compensation in distributed operations,
 preventing double billing or lost revenue scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from datetime import datetime, timezone
@@ -29,15 +22,12 @@ import pytest
 from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.services.compensation_engine_core import CompensationEngine
 from netra_backend.app.services.compensation_models import (
     BaseCompensationHandler,
-    # Add project root to path
     CompensationAction,
     CompensationState,
 )
-
 
 class TestCompensationEngine:
     """Test suite for CompensationEngine revenue calculation accuracy."""

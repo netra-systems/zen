@@ -11,20 +11,10 @@ L3 Test: Uses real Redis for message compression/decompression validation.
 Compression target: 70%+ reduction for large payloads with <50ms processing time.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -44,11 +34,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
-from integration.helpers.redis_l3_helpers import (
-
-# Add project root to path
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     RedisContainer, 
 
@@ -58,12 +44,10 @@ from integration.helpers.redis_l3_helpers import (
 
 )
 
-
 class MessageCompressor:
 
     """Handle message compression for WebSocket communications."""
     
-
     def __init__(self):
 
         self.compression_threshold = 1024  # Compress messages larger than 1KB
@@ -88,49 +72,42 @@ class MessageCompressor:
 
         }
     
-
     def _gzip_compress(self, data: bytes) -> bytes:
 
         """Compress data using gzip."""
 
         return gzip.compress(data)
     
-
     def _gzip_decompress(self, data: bytes) -> bytes:
 
         """Decompress gzip data."""
 
         return gzip.decompress(data)
     
-
     def _zlib_compress(self, data: bytes) -> bytes:
 
         """Compress data using zlib."""
 
         return zlib.compress(data)
     
-
     def _zlib_decompress(self, data: bytes) -> bytes:
 
         """Decompress zlib data."""
 
         return zlib.decompress(data)
     
-
     def _no_compression(self, data: bytes) -> bytes:
 
         """No compression."""
 
         return data
     
-
     def _no_decompression(self, data: bytes) -> bytes:
 
         """No decompression."""
 
         return data
     
-
     def compress_message(self, message: Dict[str, Any], method: str = "gzip") -> Dict[str, Any]:
 
         """Compress a message if it exceeds threshold."""
@@ -139,24 +116,20 @@ class MessageCompressor:
 
         message_bytes = message_str.encode('utf-8')
         
-
         if len(message_bytes) < self.compression_threshold:
 
             return message
         
-
         if method not in self.compression_methods:
 
             method = "gzip"
         
-
         start_time = time.time()
 
         compressed_data = self.compression_methods[method](message_bytes)
 
         compression_time = time.time() - start_time
         
-
         compressed_message = {
 
             "compressed": True,
@@ -177,10 +150,8 @@ class MessageCompressor:
 
         }
         
-
         return compressed_message
     
-
     def decompress_message(self, compressed_message: Dict[str, Any]) -> Dict[str, Any]:
 
         """Decompress a compressed message."""
@@ -189,31 +160,25 @@ class MessageCompressor:
 
             return compressed_message
         
-
         method = compressed_message.get("method", "gzip")
 
         if method not in self.decompression_methods:
 
             raise ValueError(f"Unsupported compression method: {method}")
         
-
         compressed_data = base64.b64decode(compressed_message["data"].encode('utf-8'))
         
-
         start_time = time.time()
 
         decompressed_data = self.decompression_methods[method](compressed_data)
 
         decompression_time = time.time() - start_time
         
-
         original_message = json.loads(decompressed_data.decode('utf-8'))
 
         original_message["decompression_time"] = decompression_time
         
-
         return original_message
-
 
 @pytest.mark.L3
 
@@ -223,7 +188,6 @@ class TestWebSocketMessageCompressionL3:
 
     """L3 integration tests for WebSocket message compression."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -238,7 +202,6 @@ class TestWebSocketMessageCompressionL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -253,7 +216,6 @@ class TestWebSocketMessageCompressionL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def ws_manager(self, redis_container):
@@ -262,7 +224,6 @@ class TestWebSocketMessageCompressionL3:
 
         _, redis_url = redis_container
         
-
         with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -275,15 +236,12 @@ class TestWebSocketMessageCompressionL3:
 
             mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
             
-
             await test_redis_mgr.redis_client.close()
     
-
     @pytest.fixture
 
     def message_compressor(self):
@@ -292,7 +250,6 @@ class TestWebSocketMessageCompressionL3:
 
         return MessageCompressor()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -319,14 +276,12 @@ class TestWebSocketMessageCompressionL3:
 
         ]
     
-
     def create_large_message(self, size_kb: int = 5) -> Dict[str, Any]:
 
         """Create a large message for compression testing."""
 
         large_content = "x" * (size_kb * 1024)  # Create content of specified size
         
-
         return create_test_message(
 
             "large_message",
@@ -351,7 +306,6 @@ class TestWebSocketMessageCompressionL3:
 
         )
     
-
     async def test_basic_message_compression(self, message_compressor):
 
         """Test basic message compression and decompression."""
@@ -397,7 +351,6 @@ class TestWebSocketMessageCompressionL3:
 
         assert decompressed_message["decompression_time"] < 0.1  # Should be fast
     
-
     async def test_compression_methods_comparison(self, message_compressor):
 
         """Test different compression methods."""
@@ -408,7 +361,6 @@ class TestWebSocketMessageCompressionL3:
 
         compression_results = {}
         
-
         for method in methods:
             # Compress with each method
 
@@ -450,7 +402,6 @@ class TestWebSocketMessageCompressionL3:
 
         assert compression_results["zlib"]["compression_time"] < 0.2
     
-
     async def test_compression_threshold_handling(self, message_compressor):
 
         """Test compression threshold behavior."""
@@ -478,7 +429,6 @@ class TestWebSocketMessageCompressionL3:
 
         assert compressed_large["original_size"] > message_compressor.compression_threshold
     
-
     async def test_compressed_message_redis_storage(self, redis_client, message_compressor, test_users):
 
         """Test storing and retrieving compressed messages in Redis."""
@@ -525,7 +475,6 @@ class TestWebSocketMessageCompressionL3:
 
         await redis_client.delete(message_key)
     
-
     async def test_websocket_compression_integration(self, ws_manager, redis_client, message_compressor, test_users):
 
         """Test compression integration with WebSocket messaging."""
@@ -582,7 +531,6 @@ class TestWebSocketMessageCompressionL3:
 
         }
         
-
         await redis_client.publish(channel, json.dumps(notification))
         
         # Simulate receiving and decompressing
@@ -603,7 +551,6 @@ class TestWebSocketMessageCompressionL3:
 
         await redis_client.delete(storage_key)
     
-
     async def test_compression_performance_under_load(self, message_compressor):
 
         """Test compression performance with multiple concurrent operations."""
@@ -622,7 +569,6 @@ class TestWebSocketMessageCompressionL3:
 
         compression_tasks = []
         
-
         for message in messages:
             # Use asyncio to simulate concurrent compression
 
@@ -634,7 +580,6 @@ class TestWebSocketMessageCompressionL3:
 
             compression_tasks.append(task)
         
-
         compressed_messages = await asyncio.gather(*compression_tasks)
 
         compression_time = time.time() - compression_start
@@ -645,7 +590,6 @@ class TestWebSocketMessageCompressionL3:
 
         total_compression_ratio = 0
         
-
         for compressed in compressed_messages:
 
             if compressed.get("compressed", False):
@@ -654,7 +598,6 @@ class TestWebSocketMessageCompressionL3:
 
                 total_compression_ratio += compressed["compression_ratio"]
         
-
         avg_compression_ratio = total_compression_ratio / successful_compressions
         
         # Performance assertions
@@ -671,7 +614,6 @@ class TestWebSocketMessageCompressionL3:
 
         decompression_tasks = []
         
-
         for compressed in compressed_messages:
 
             if compressed.get("compressed", False):
@@ -684,12 +626,10 @@ class TestWebSocketMessageCompressionL3:
 
                 decompression_tasks.append(task)
         
-
         decompressed_messages = await asyncio.gather(*decompression_tasks, return_exceptions=True)
 
         decompression_time = time.time() - decompression_start
         
-
         successful_decompressions = sum(1 for msg in decompressed_messages 
 
                                       if not isinstance(msg, Exception))
@@ -700,7 +640,6 @@ class TestWebSocketMessageCompressionL3:
 
         assert successful_decompressions >= len(decompression_tasks) * 0.95  # 95% success rate
     
-
     @mock_justified("L3: Message compression testing with real Redis storage")
 
     async def test_compression_bandwidth_savings(self, redis_client, message_compressor, test_users):
@@ -719,14 +658,12 @@ class TestWebSocketMessageCompressionL3:
 
         ]
         
-
         total_original_size = 0
 
         total_compressed_size = 0
 
         bandwidth_savings = []
         
-
         for scenario in test_scenarios:
             # Create message of specified size
 
@@ -750,7 +687,6 @@ class TestWebSocketMessageCompressionL3:
 
             bandwidth_savings.append(savings_ratio)
             
-
             total_original_size += original_size
 
             total_compressed_size += compressed_size
@@ -761,7 +697,6 @@ class TestWebSocketMessageCompressionL3:
 
             compressed_key = f"compressed:{user.id}:{scenario['size_kb']}kb"
             
-
             await redis_client.set(original_key, original_data, ex=300)
 
             await redis_client.set(compressed_key, compressed_data, ex=300)
@@ -787,7 +722,6 @@ class TestWebSocketMessageCompressionL3:
         assert avg_savings >= 0.6      # Consistent savings across scenarios
 
         assert min(bandwidth_savings) >= 0.3  # Even small files save 30%
-
 
 if __name__ == "__main__":
 

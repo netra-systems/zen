@@ -6,17 +6,10 @@ Validates all critical functionality for reliable data insights.
 Business Value: Ensures 15-30% cost savings identification works reliably.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta
@@ -32,7 +25,6 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
 
-# Add project root to path
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
@@ -44,9 +36,6 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
-
-# Add project root to path
-
 
 class TestDataSubAgentConsolidated:
     """Test suite for consolidated DataSubAgent implementation."""
@@ -464,7 +453,6 @@ class TestDataSubAgentConsolidated:
         # Verify trend analyzer was called
         data_sub_agent.performance_analyzer.analyze_trends.assert_called_once()
 
-
 class TestClickHouseClient:
     """Test ClickHouse client functionality."""
     
@@ -511,7 +499,6 @@ class TestClickHouseClient:
         # Test stale connection
         clickhouse_client._health_status["last_check"] = datetime.utcnow() - timedelta(minutes=10)
         assert clickhouse_client.is_healthy() is False
-
 
 class TestDataValidator:
     """Test data validation functionality."""

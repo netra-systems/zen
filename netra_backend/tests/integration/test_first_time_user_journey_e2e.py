@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 End-to-end first-time user journey tests from onboarding to complete value delivery.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import tempfile
 import uuid
@@ -34,11 +27,7 @@ from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app.db.base import Base
 
-# Add project root to path
 from netra_backend.app.db.models_user import User
-
-# Add project root to path
-
 
 class TestFirstTimeUserJourneyE2E:
     """End-to-end first-time user journey tests."""

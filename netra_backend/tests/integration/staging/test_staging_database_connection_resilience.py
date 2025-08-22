@@ -11,17 +11,10 @@ Tests PostgreSQL, ClickHouse, and Redis connection handling, pooling, failover,
 migration execution, and recovery mechanisms in staging environment.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -32,7 +25,7 @@ import pytest
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from integration.database_test_fixtures import (
+from netra_backend.tests.integration.database_test_fixtures import (
     DatabaseErrorSimulator,
     MockConnectionPool,
     async_session_mock,
@@ -40,10 +33,8 @@ from integration.database_test_fixtures import (
     transaction_session_mock,
 )
 
-# Add project root to path
 # Individual test methods will use @pytest.mark.asyncio decorator
 from test_framework.mock_utils import mock_justified
-
 
 class StagingDatabaseResilience:
     """Simulates staging database resilience scenarios."""
@@ -82,12 +73,10 @@ class StagingDatabaseResilience:
             "timestamp": str(time.time())
         }
 
-
 @pytest.fixture
 def staging_db_resilience():
     """Create staging database resilience tester."""
     return StagingDatabaseResilience()
-
 
 class TestStagingDatabaseConnectionResilience:
     """Test database connection resilience in staging environment."""

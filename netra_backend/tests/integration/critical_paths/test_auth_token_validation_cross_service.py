@@ -10,21 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical - security incidents destroy customer trust
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import os
@@ -38,8 +27,6 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
-
-# Add project root to path
 
 # Set test environment before imports
 
@@ -56,12 +43,10 @@ from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.utils.jwt_utils import JWTUtils
 
-
 class TestAuthTokenValidationCrossService:
 
     """Test auth token validation across different services."""
     
-
     @pytest.fixture
 
     def valid_jwt_token(self):
@@ -92,7 +77,6 @@ class TestAuthTokenValidationCrossService:
 
         return token
     
-
     @pytest.fixture
 
     def expired_jwt_token(self):
@@ -113,14 +97,12 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-
         secret_key = settings.SECRET_KEY if hasattr(settings, 'SECRET_KEY') else "test_secret_key"
 
         token = jwt.encode(payload, secret_key, algorithm="HS256")
 
         return token
     
-
     @pytest.fixture
 
     async def async_client(self):
@@ -133,7 +115,6 @@ class TestAuthTokenValidationCrossService:
 
             yield ac
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -150,14 +131,12 @@ class TestAuthTokenValidationCrossService:
 
             with patch('app.services.auth_service.AuthService.validate_token', return_value=True):
                 
-
                 response = await async_client.get("/api/user/profile", headers=headers)
                 
                 # Should not return 401/403
 
                 assert response.status_code not in [401, 403], f"Valid token rejected with {response.status_code}"
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -168,19 +147,16 @@ class TestAuthTokenValidationCrossService:
 
         headers = {"Authorization": f"Bearer {expired_jwt_token}"}
         
-
         response = await async_client.get("/api/user/profile", headers=headers)
         
         # Should return 401 Unauthorized
 
         assert response.status_code == 401
         
-
         data = response.json()
 
         assert "expired" in data.get("detail", "").lower()
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -201,19 +177,16 @@ class TestAuthTokenValidationCrossService:
 
         ]
         
-
         for malformed_token in test_cases:
 
             headers = {"Authorization": f"Bearer {malformed_token}"}
             
-
             response = await async_client.get("/api/user/profile", headers=headers)
             
             # Should return 401 Unauthorized
 
             assert response.status_code == 401, f"Malformed token '{malformed_token}' was not rejected"
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -237,27 +210,22 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-
         wrong_secret = "wrong_secret_key"
 
         invalid_token = jwt.encode(payload, wrong_secret, algorithm="HS256")
         
-
         headers = {"Authorization": f"Bearer {invalid_token}"}
         
-
         response = await async_client.get("/api/user/profile", headers=headers)
         
         # Should return 401 Unauthorized
 
         assert response.status_code == 401
         
-
         data = response.json()
 
         assert "invalid" in data.get("detail", "").lower() or "signature" in data.get("detail", "").lower()
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -284,7 +252,6 @@ class TestAuthTokenValidationCrossService:
 
             return await mock_service_b.call_api(headers=headers)
         
-
         mock_service_b.call_api.return_value = {"status": "success"}
         
         # Execute service-to-service call
@@ -301,7 +268,6 @@ class TestAuthTokenValidationCrossService:
 
         assert call_args.kwargs["headers"]["Authorization"] == f"Bearer {token}"
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -313,7 +279,6 @@ class TestAuthTokenValidationCrossService:
 
         headers = {"Authorization": f"Bearer {valid_jwt_token}"}
         
-
         with patch('app.websocket.manager.WebSocketManager.validate_token', return_value=True) as mock_validate:
             # Mock WebSocket connection attempt
 
@@ -323,12 +288,10 @@ class TestAuthTokenValidationCrossService:
 
             is_valid = mock_validate(valid_jwt_token)
             
-
             assert is_valid == True
 
             mock_validate.assert_called_with(valid_jwt_token)
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -354,12 +317,10 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-
         secret_key = settings.SECRET_KEY if hasattr(settings, 'SECRET_KEY') else "test_secret_key"
 
         limited_token = jwt.encode(payload, secret_key, algorithm="HS256")
         
-
         headers = {"Authorization": f"Bearer {limited_token}"}
         
         # Try to access write endpoint
@@ -372,7 +333,6 @@ class TestAuthTokenValidationCrossService:
 
             assert response.status_code in [403, 401, 404]  # 404 if endpoint doesn't exist
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -421,7 +381,6 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-
         with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=refreshed_payload):
             # Verify user context is maintained
 
@@ -431,7 +390,6 @@ class TestAuthTokenValidationCrossService:
 
             assert refreshed_payload["email"] == original_payload["email"]
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -470,7 +428,6 @@ class TestAuthTokenValidationCrossService:
 
         assert success_count >= 8, f"Only {success_count}/10 requests succeeded"
     
-
     @pytest.mark.integration
 
     @pytest.mark.L3
@@ -482,19 +439,16 @@ class TestAuthTokenValidationCrossService:
 
         blacklisted_token = valid_jwt_token
         
-
         with patch('app.services.auth_service.AuthService.is_token_blacklisted', return_value=True):
 
             headers = {"Authorization": f"Bearer {blacklisted_token}"}
             
-
             response = await async_client.get("/api/user/profile", headers=headers)
             
             # Should return 401 Unauthorized
 
             assert response.status_code == 401
             
-
             data = response.json()
 
             assert "revoked" in data.get("detail", "").lower() or "blacklisted" in data.get("detail", "").lower()

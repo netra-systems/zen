@@ -3,17 +3,10 @@ Unit tests for User Service
 Tests user CRUD operations including password hashing
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
@@ -25,11 +18,7 @@ from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.schemas.User import UserUpdate
 
-# Add project root to path
 from netra_backend.app.services.user_service import CRUDUser, pwd_context, user_service
-
-# Add project root to path
-
 
 class TestUserService:
     """Test suite for User Service"""
@@ -316,7 +305,6 @@ class TestUserService:
         assert user_service != None
         assert isinstance(user_service, CRUDUser)
         assert user_service._model_class == User
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

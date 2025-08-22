@@ -10,7 +10,7 @@ import time
 from typing import List, Optional, Tuple
 
 try:
-    from .progress_core import Phase, PhaseStatus, ProgressCalculator, SpinnerAnimation
+    from dev_launcher.progress_core import Phase, PhaseStatus, ProgressCalculator, SpinnerAnimation
 except ImportError:
     from progress_core import Phase, PhaseStatus, ProgressCalculator, SpinnerAnimation
 

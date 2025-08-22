@@ -4,17 +4,10 @@ Tests for batch processing and WebSocket message batching functionality.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -23,16 +16,13 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.performance_optimization_manager import BatchProcessor
 from netra_backend.app.websocket.batch_message_handler import (
     BatchConfig,
     BatchingStrategy,
     LoadMonitor,
-    # Add project root to path
     MessageBatcher,
 )
-
 
 class TestBatchProcessor:
     """Test batch processing functionality."""
@@ -102,7 +92,6 @@ class TestBatchProcessor:
         assert len(processed_batches["batch1"][0]) == 2  # item1, item3
         assert len(processed_batches["batch2"][0]) == 1  # item2
 
-
 class TestMessageBatcher:
     """Test WebSocket message batching."""
     
@@ -167,7 +156,6 @@ class TestMessageBatcher:
         # Should have batched due to adaptive strategy
         conn_mock = mock_connection_manager.get_connection_by_id.return_value
         assert conn_mock.websocket.send_text.called
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

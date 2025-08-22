@@ -22,7 +22,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .crash_recovery_models import DiagnosisResult
+from dev_launcher.crash_recovery_models import DiagnosisResult
 
 logger = logging.getLogger(__name__)
 

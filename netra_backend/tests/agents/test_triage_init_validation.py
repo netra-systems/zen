@@ -3,17 +3,10 @@ Tests for TriageSubAgent initialization and validation
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import patch
 
@@ -21,39 +14,32 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.tests.triage_test_helpers import (
     AssertionHelpers,
-    # Add project root to path
     TriageMockHelpers,
     ValidationHelpers,
 )
-
 
 @pytest.fixture
 def mock_llm_manager():
     """Create enhanced mock LLM manager"""
     return TriageMockHelpers.create_mock_llm_manager()
 
-
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
     return TriageMockHelpers.create_mock_tool_dispatcher()
-
 
 @pytest.fixture
 def mock_redis_manager():
     """Create mock Redis manager"""
     return TriageMockHelpers.create_mock_redis()
 
-
 @pytest.fixture
 def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Create TriageSubAgent with mocked dependencies"""
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
-
 
 class TestAdvancedInitialization:
     """Test advanced initialization scenarios"""
@@ -78,7 +64,6 @@ class TestAdvancedInitialization:
         
         assert agent.triage_core.cache_ttl == 7200
         assert agent.triage_core.max_retries == 5
-
 
 class TestValidationPatterns:
     """Test validation pattern matching"""
@@ -118,7 +103,6 @@ class TestValidationPatterns:
             validation = triage_agent.triage_core.validator.validate_request(request)
             assert validation.is_valid == True
             assert len(validation.validation_errors) == 0
-
 
 class TestSecurityAndValidation:
     """Test security and validation features"""
@@ -172,7 +156,6 @@ class TestSecurityAndValidation:
         assert max_validation.is_valid == True
         assert over_validation.is_valid == False
         assert any("exceeds maximum length" in error for error in over_validation.validation_errors)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

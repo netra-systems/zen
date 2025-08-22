@@ -3,21 +3,10 @@
 This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import json
 from typing import Any, Dict, List
@@ -61,7 +50,6 @@ from netra_backend.app.agents.state import (
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.models import (
 
     Complexity,
@@ -73,7 +61,6 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     ToolRecommendation,
 
     TriageMetadata,
-    # Add project root to path
 
     TriageResult,
 
@@ -82,12 +69,10 @@ from netra_backend.app.agents.triage_sub_agent.models import (
 )
 from netra_backend.app.llm.llm_manager import LLMManager
 
-
 class TestPydanticValidationCritical:
 
     """Test Pydantic validation issues seen in production"""
     
-
     @pytest.fixture
 
     def mock_llm_manager(self):
@@ -98,7 +83,6 @@ class TestPydanticValidationCritical:
 
         return llm
     
-
     @pytest.fixture
 
     def mock_tool_dispatcher(self):
@@ -458,7 +442,6 @@ class TestPydanticValidationCritical:
 
             json.loads(truncated_json)
     
-
     def _create_string_to_dict_recovery(self, data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Recovery function for string-to-dict conversion"""
@@ -525,12 +508,10 @@ class TestPydanticValidationCritical:
 
         state = DeepAgentState(user_request="test")
         
-
         await agent.execute(state, "test_run", False)
         # Should call at least 2 times (first fails, second succeeds)
 
         assert mock_llm_manager.ask_structured_llm.call_count >= 2
-
 
 if __name__ == "__main__":
 

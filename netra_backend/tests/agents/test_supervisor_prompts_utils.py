@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestAgentPromptsTemplateRendering, TestEnhancedPromptsContextBuilding, TestAgentUtilsHelperFunctions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,15 +28,12 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
 
 # Mock classes for testing (would normally be imported)
 class AgentPrompts:
@@ -63,7 +53,6 @@ class AgentPrompts:
         for key, value in variables.items():
             result = result.replace(f"{{{key}}}", str(value))
         return result
-
 
 class EnhancedPrompts:
     """Mock enhanced prompts for testing"""
@@ -98,7 +87,6 @@ class EnhancedPrompts:
         if len(history) > max_messages:
             return history[-max_messages:]
         return history
-
 
 class AgentUtils:
     """Mock agent utils for testing"""
@@ -141,7 +129,6 @@ class AgentUtils:
             merged.optimizations_result = state2.optimizations_result
         
         return merged
-
 
 class TestAgentPromptsTemplateRendering:
     """Test 8: Test prompt template generation"""
@@ -195,7 +182,6 @@ class TestAgentPromptsTemplateRendering:
         
         assert "method" in str(exc.value)
 
-
 class TestEnhancedPromptsContextBuilding:
     """Test 9: Test enhanced context construction"""
     async def test_enhanced_context_construction(self):
@@ -248,7 +234,6 @@ class TestEnhancedPromptsContextBuilding:
         assert len(managed_context) < len(large_history)
         # Should keep most recent messages
         assert managed_context[-1] == large_history[-1]
-
 
 class TestAgentUtilsHelperFunctions:
     """Test 10: Test utility helper functions"""

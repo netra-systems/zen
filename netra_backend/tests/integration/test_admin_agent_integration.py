@@ -5,21 +5,10 @@ Tests the integration between triage, corpus admin, and tool dispatcher agents.
 All functions maintain 25-line limit with single responsibility.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -29,7 +18,6 @@ import pytest_asyncio
 
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
-# Add project root to path
 from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.agents.supervisor_consolidated import (
 
@@ -39,14 +27,10 @@ from netra_backend.app.agents.supervisor_consolidated import (
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 class TestAdminAgentIntegration:
 
     """Integration tests for admin agents"""
     
-
     @pytest.fixture
 
     def mock_supervisor(self):
@@ -69,7 +53,6 @@ class TestAdminAgentIntegration:
 
         return supervisor
     
-
     @pytest.fixture
 
     def mock_websocket(self):
@@ -84,7 +67,6 @@ class TestAdminAgentIntegration:
 
         return ws_manager
     
-
     async def test_agent_routing(self, mock_supervisor):
 
         """Test triage to corpus admin routing"""
@@ -105,7 +87,6 @@ class TestAdminAgentIntegration:
 
         assert result["parameters"]["domain"] == "fintech"
     
-
     async def test_tool_execution(self, mock_supervisor):
 
         """Test tool dispatcher integration"""
@@ -126,7 +107,6 @@ class TestAdminAgentIntegration:
 
         assert result["result"]["corpus_id"] == "test_123"
     
-
     async def _execute_tool_dispatch(self, supervisor):
 
         """Execute tool dispatch operation"""
@@ -143,7 +123,6 @@ class TestAdminAgentIntegration:
 
         )
     
-
     async def test_websocket_communication(self, mock_supervisor, mock_websocket):
 
         """Test real-time updates via WebSocket"""
@@ -162,7 +141,6 @@ class TestAdminAgentIntegration:
 
         assert mock_websocket.send_message.call_args[0][1]["data"]["progress"] == 50
     
-
     async def test_agent_chain_execution(self, mock_supervisor):
 
         """Test complete agent chain execution"""
@@ -175,7 +153,6 @@ class TestAdminAgentIntegration:
 
         assert result["corpus_id"] == "corpus_456"
     
-
     async def _setup_agent_chain_mocks(self, supervisor):
 
         """Setup mocks for agent chain"""
@@ -194,7 +171,6 @@ class TestAdminAgentIntegration:
 
         }
     
-
     async def _execute_agent_chain(self, supervisor):
 
         """Execute complete agent chain"""
@@ -205,7 +181,6 @@ class TestAdminAgentIntegration:
 
         return {"status": "completed", "corpus_id": corpus_result["corpus_id"]}
     
-
     async def test_error_propagation(self, mock_supervisor):
 
         """Test error propagation through agents"""
@@ -218,7 +193,6 @@ class TestAdminAgentIntegration:
 
         assert "Processing error" in str(exc_info.value)
     
-
     async def test_concurrent_agent_operations(self, mock_supervisor):
 
         """Test concurrent agent operations"""
@@ -229,7 +203,6 @@ class TestAdminAgentIntegration:
 
         assert all(r["success"] for r in results)
     
-
     async def _execute_concurrent_operations(self, supervisor):
 
         """Execute multiple concurrent operations"""
@@ -247,12 +220,10 @@ class TestAdminAgentIntegration:
 
         return await asyncio.gather(*tasks)
 
-
 class TestAgentStateManagement:
 
     """Test agent state management integration"""
     
-
     async def test_state_persistence(self):
 
         """Test state persistence across agent calls"""
@@ -267,7 +238,6 @@ class TestAgentStateManagement:
 
         assert state["corpus_count"] == 2
     
-
     async def _update_state(self, state: Dict, action: str) -> Dict:
 
         """Update agent state based on action"""
@@ -282,7 +252,6 @@ class TestAgentStateManagement:
 
         return state
     
-
     async def test_state_recovery(self):
 
         """Test state recovery after error"""
@@ -295,7 +264,6 @@ class TestAgentStateManagement:
 
         assert recovered_state["checkpoint"] == "step_2"
     
-
     async def _recover_state(self, state: Dict) -> Dict:
 
         """Recover state from checkpoint"""
@@ -310,12 +278,10 @@ class TestAgentStateManagement:
 
         }
 
-
 class TestAgentCommunication:
 
     """Test inter-agent communication"""
     
-
     async def test_message_passing(self):
 
         """Test message passing between agents"""
@@ -328,7 +294,6 @@ class TestAgentCommunication:
 
         assert response["processed"] is True
     
-
     async def _process_message(self, message: Dict) -> Dict:
 
         """Process inter-agent message"""
@@ -345,7 +310,6 @@ class TestAgentCommunication:
 
         }
     
-
     async def test_broadcast_updates(self):
 
         """Test broadcasting updates to multiple agents"""
@@ -358,7 +322,6 @@ class TestAgentCommunication:
 
         assert all(r["received"] for r in results)
     
-
     async def _broadcast_to_agents(self, update: Dict) -> list:
 
         """Broadcast update to all agents"""

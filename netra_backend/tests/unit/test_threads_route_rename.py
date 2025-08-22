@@ -1,31 +1,22 @@
 """Tests for auto_rename_thread endpoint - split from test_threads_route.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
-# Add project root to path
 from netra_backend.app.routes.threads_route import auto_rename_thread
-from netra_backend.tests.thread_test_helpers import (
+from netra_backend.tests.helpers.thread_test_helpers import (
     assert_http_exception,
     assert_ws_notification,
     clean_llm_title,
     create_access_denied_thread,
     create_mock_message,
-    # Add project root to path
     create_mock_thread,
     create_thread_update_scenario,
     setup_llm_manager_mock,
@@ -36,12 +27,10 @@ from netra_backend.tests.thread_test_helpers import (
     setup_ws_manager_mock,
 )
 
-
 @pytest.fixture
 def mock_db():
     """Mock database session"""
     return AsyncMock(commit=AsyncMock())
-
 
 @pytest.fixture
 def mock_user():
@@ -50,7 +39,6 @@ def mock_user():
     user.id = "test_user_123"
     user.email = "test@example.com"
     return user
-
 
 class TestAutoRenameThread:
     """Test cases for POST /{thread_id}/auto-rename endpoint"""

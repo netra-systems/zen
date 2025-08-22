@@ -9,10 +9,6 @@ from pathlib import Path
 import sys
 
 # Add parent directories to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 
 class L3IntegrationTest:
     """Base class for L3 integration tests."""
@@ -69,7 +65,6 @@ class L3IntegrationTest:
         """Cleanup test data."""
         # Implementation depends on your cleanup needs
         pass
-
 
 class IntegrationTestBase:
     """Base class for integration tests."""

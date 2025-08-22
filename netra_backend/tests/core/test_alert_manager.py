@@ -1,16 +1,9 @@
 """Tests for alert manager functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -19,17 +12,14 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.alert_manager import HealthAlertManager
 from netra_backend.app.core.health_types import (
     AlertSeverity,
     ComponentHealth,
     HealthStatus,
     RecoveryAction,
-    # Add project root to path
     SystemAlert,
 )
-
 
 class TestHealthAlertManager:
     """Test AlertManager class."""

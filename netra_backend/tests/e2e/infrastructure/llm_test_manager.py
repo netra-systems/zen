@@ -16,7 +16,6 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.llm_config_types import LLMConfig
 from netra_backend.app.schemas.llm_response_types import LLMResponse
 
-
 class LLMTestModel(str, Enum):
     """Supported LLM models for testing."""
     GPT_4 = "gpt-4"
@@ -24,7 +23,6 @@ class LLMTestModel(str, Enum):
     CLAUDE_3_OPUS = "claude-3-opus"
     CLAUDE_3_SONNET = "claude-3-sonnet"
     GEMINI_PRO = "gemini-pro"
-
 
 class LLMTestConfig(BaseModel):
     """Configuration for LLM test manager."""
@@ -35,7 +33,6 @@ class LLMTestConfig(BaseModel):
     max_retries: int = Field(default=3)
     fallback_to_mock: bool = Field(default=True)
 
-
 class LLMTestRequest(BaseModel):
     """Request structure for LLM testing."""
     prompt: str = Field(..., description="Prompt text")
@@ -43,7 +40,6 @@ class LLMTestRequest(BaseModel):
     temperature: float = Field(default=0.7)
     max_tokens: Optional[int] = Field(default=None)
     use_cache: bool = Field(default=True)
-
 
 class LLMTestResponse(BaseModel):
     """Response structure from LLM testing."""
@@ -53,7 +49,6 @@ class LLMTestResponse(BaseModel):
     response_time_ms: int = Field(..., description="Response time in milliseconds")
     tokens_used: Optional[int] = Field(default=None)
     success: bool = Field(default=True)
-
 
 class LLMTestManager:
     """Main manager for real LLM testing with intelligent fallback."""
@@ -88,7 +83,7 @@ class LLMTestManager:
             
     def _initialize_cache(self):
         """Initialize response cache if enabled."""
-        from .llm_response_cache import LLMResponseCache
+        from netra_backend.tests.e2e.infrastructure.llm_response_cache import LLMResponseCache
         self._cache = LLMResponseCache()
         
     def _initialize_real_clients(self):
@@ -147,7 +142,7 @@ class LLMTestManager:
             
     def _initialize_mock_clients(self):
         """Initialize mock clients for fallback."""
-        from .llm_mock_client import LLMTestMockClient
+        from netra_backend.tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient
         for model in self.config.models:
             if model not in self._clients:
                 self._clients[model] = LLMTestMockClient(model)
@@ -247,7 +242,7 @@ class LLMTestManager:
         
     async def _generate_mock_response(self, request: LLMTestRequest, start_time: float) -> LLMTestResponse:
         """Generate mock response when real clients unavailable."""
-        from .llm_mock_client import LLMTestMockClient
+        from netra_backend.tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient
         mock_client = LLMTestMockClient(request.model)
         content = await mock_client.generate(request.prompt)
         response_time = int((time.time() - start_time) * 1000)

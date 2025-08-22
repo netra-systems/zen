@@ -16,17 +16,10 @@ L3 Integration Test Level:
 - Tests long-running job monitoring and status persistence
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +35,6 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
-# Add project root to path
 from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
@@ -50,10 +42,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class ProgressStage(Enum):
     """Progress tracking stages for long-running jobs."""
@@ -64,7 +53,6 @@ class ProgressStage(Enum):
     FINALIZING = "finalizing"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 @dataclass
 class JobProgress:
@@ -79,7 +67,6 @@ class JobProgress:
     last_update_time: float = field(default_factory=time.time)
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
-
 
 class JobProgressTrackingL3Manager:
     """Manages L3 job progress tracking tests with real infrastructure."""
@@ -517,7 +504,6 @@ class JobProgressTrackingL3Manager:
         except Exception as e:
             logger.error(f"Progress tracking test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def progress_tracking_manager():
     """Create progress tracking manager for L3 testing."""
@@ -525,7 +511,6 @@ async def progress_tracking_manager():
     await manager.initialize_test_infrastructure()
     yield manager
     await manager.cleanup_test_infrastructure()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -568,7 +553,6 @@ async def test_basic_progress_tracking_l3(progress_tracking_manager):
     assert final_progress is not None, "Final progress not stored in Redis"
     assert final_progress["stage"] == "completed", "Job should be completed"
     assert final_progress["percentage"] == 100.0, "Final percentage should be 100%"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -616,7 +600,6 @@ async def test_iterative_progress_tracking_l3(progress_tracking_manager):
     validation = await progress_tracking_manager.validate_progress_accuracy(job_id)
     assert validation["valid"], f"Iterative progress issues: {validation['issues']}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_batch_processing_progress_l3(progress_tracking_manager):
@@ -662,7 +645,6 @@ async def test_batch_processing_progress_l3(progress_tracking_manager):
     final_progress = await progress_tracking_manager.get_job_progress(job_id)
     assert final_progress["stage"] == "completed", "Batch job should complete"
     assert final_progress["percentage"] == 100.0, "Final percentage should be 100%"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -718,7 +700,6 @@ async def test_concurrent_progress_tracking_l3(progress_tracking_manager):
             completed_jobs += 1
     
     assert completed_jobs >= 3, f"Insufficient concurrent job completions: {completed_jobs}/4"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -777,7 +758,6 @@ async def test_progress_broadcast_functionality_l3(progress_tracking_manager):
         assert "percentage" in progress_data, "Broadcast should include percentage"
         assert "timestamp" in progress_data, "Broadcast should include timestamp"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_progress_persistence_and_recovery_l3(progress_tracking_manager):
@@ -823,7 +803,6 @@ async def test_progress_persistence_and_recovery_l3(progress_tracking_manager):
     # Test progress recovery (simulate restart)
     recovered_progress = await progress_tracking_manager.get_job_progress(job_id)
     assert recovered_progress == final_progress, "Progress should be recoverable from Redis"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

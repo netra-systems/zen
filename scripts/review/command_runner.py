@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 
-from .core import ReviewConfig
+from scripts.review.core import ReviewConfig
 
 
 class CommandRunner:

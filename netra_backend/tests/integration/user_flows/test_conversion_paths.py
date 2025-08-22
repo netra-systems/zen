@@ -11,14 +11,8 @@ BVJ (Business Value Justification):
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -33,17 +27,12 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-# Add project root to path
-
 from netra_backend.app.models.user import User
 from netra_backend.app.models.conversion_event import ConversionEvent
 from netra_backend.app.services.user_service import UserService as UsageService
 
-from tests.user_flow_base import UserFlowTestBase
-from tests.user_journey_data import UserTestData
-
-# Add project root to path
-
+from netra_backend.tests.user_flow_base import UserFlowTestBase
+from netra_backend.tests.user_journey_data import UserTestData
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -133,7 +122,6 @@ async def test_complete_free_to_enterprise_conversion_journey(
     )
     assert response.status_code != status.HTTP_403_FORBIDDEN
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
@@ -170,9 +158,6 @@ async def test_usage_based_conversion_triggers(
     error_data = response.json()
     assert "upgrade" in error_data["detail"].lower()
     assert "early" in error_data["detail"].lower() or "pro" in error_data["detail"].lower()
-
-
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -227,9 +212,6 @@ async def test_conversion_analytics_tracking(
     ).all()
     assert len(conversion_events) > 0
 
-
-
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -261,7 +243,6 @@ async def test_trial_and_retention_mechanisms(
     assert response.status_code == status.HTTP_200_OK
     retention_data = response.json()
     assert "retention_offers" in retention_data
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

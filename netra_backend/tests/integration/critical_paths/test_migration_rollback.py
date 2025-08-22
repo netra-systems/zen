@@ -10,17 +10,10 @@ Critical Path: Migration execution -> Failure detection -> Rollback initiation -
 Coverage: Migration safety, rollback mechanisms, data integrity, recovery validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -34,7 +27,6 @@ from sqlalchemy.sql import text
 
 from netra_backend.app.db.postgres_core import initialize_postgres
 
-# Add project root to path
 from netra_backend.app.services.database.rollback_manager_core import (
     RollbackManager,
     RollbackState,
@@ -42,10 +34,7 @@ from netra_backend.app.services.database.rollback_manager_core import (
 )
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class MigrationRollbackManager:
     """Manages database migration and rollback testing."""
@@ -282,7 +271,6 @@ class MigrationRollbackManager:
         
         # Database connections are managed by the session context manager
 
-
 @pytest.fixture
 async def migration_rollback_manager():
     """Create migration rollback manager for testing."""
@@ -290,7 +278,6 @@ async def migration_rollback_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -317,7 +304,6 @@ async def test_migration_with_backup_creation(migration_rollback_manager):
     assert execution_result["execution_time"] < 10.0
     assert "backup_name" in execution_result
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_migration_failure_rollback_recovery(migration_rollback_manager):
@@ -341,7 +327,6 @@ async def test_migration_failure_rollback_recovery(migration_rollback_manager):
     
     # Rollback should succeed
     assert rollback_result["rollback_success"] is True or "error" not in rollback_result
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -369,7 +354,6 @@ async def test_data_integrity_validation_after_rollback(migration_rollback_manag
     assert integrity_result["passed_checks"] >= 1
     assert integrity_result["integrity_percentage"] >= 50.0
     assert integrity_result["validation_time"] < 5.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

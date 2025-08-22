@@ -8,14 +8,15 @@ from typing import AsyncGenerator
 from unittest.mock import patch
 
 import pytest
+import pytest_asyncio
 
 # Set auth-specific environment variables (common ones handled by root conftest)
-os.environ["ENVIRONMENT"] = "development"  # Use development so database gets initialized
+os.environ["ENVIRONMENT"] = "test"  # Use test environment for proper test setup
 os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
 os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
 os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
 os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///test_auth.db"
 os.environ["REDIS_URL"] = "redis://localhost:6379/1"
 
 @pytest.fixture(scope="session")
@@ -83,6 +84,36 @@ def test_user_data():
         "name": "Test User",
         "provider": "google"
     }
+
+@pytest_asyncio.fixture(scope="function")
+async def test_db_session():
+    """Create async database session for tests with fresh tables"""
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.models import Base
+    
+    # Force a fresh database connection for each test
+    if auth_db._initialized:
+        await auth_db.close()
+        auth_db._initialized = False
+    
+    # Initialize database
+    await auth_db.initialize()
+    
+    # Explicitly create all tables
+    async with auth_db.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    # Create session directly without auto-commit context manager
+    session = auth_db.async_session_maker()
+    try:
+        yield session
+    finally:
+        # Clean rollback to prevent any pending transactions
+        try:
+            await session.rollback()
+        except:
+            pass
+        await session.close()
 
 @pytest.fixture
 def clean_environment():

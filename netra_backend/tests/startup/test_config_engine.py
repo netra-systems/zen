@@ -4,17 +4,10 @@ Tests for decision engine, utility functions, and main validation entry point.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from pathlib import Path
@@ -35,12 +28,10 @@ from dev_launcher.config_validator import (
 )
 from dev_launcher.service_config import ServicesConfiguration
 
-
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:
     """Create temporary config file path."""
     return tmp_path / ".dev_services.json"
-
 
 @pytest.fixture
 def mock_validation_context(temp_config_path: Path) -> ValidationContext:
@@ -52,7 +43,6 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
         cli_overrides={"REDIS_HOST": "localhost"},
         env_overrides={"POSTGRES_HOST": "db.example.com"}
     )
-
 
 class TestConfigDecisionEngine:
     """Test configuration decision engine."""
@@ -128,7 +118,6 @@ class TestConfigDecisionEngine:
         action = engine.get_fallback_action(result)
         assert action == "use_existing"
 
-
 class TestUtilityFunctions:
     """Test utility functions."""
     
@@ -169,7 +158,6 @@ class TestUtilityFunctions:
             config, returned_result = await _handle_fallback_action("prompt_user", mock_validation_context, result)
             assert config == mock_config
             mock_load.assert_called_once_with(interactive=True)
-
 
 class TestMainValidationFunction:
     """Test main validation entry point."""
@@ -216,7 +204,6 @@ class TestMainValidationFunction:
                 # Verify context was created with correct overrides
                 call_args = mock_validator_class.call_args[0][0]
                 assert call_args.cli_overrides == cli_overrides
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

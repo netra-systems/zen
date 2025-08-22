@@ -33,11 +33,11 @@ from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 # LEGACY IMPORTS - Deprecated, will be removed in next phase
 # Kept temporarily for backward compatibility during migration
 try:
-    from .agent import DataSubAgent as LegacyDataSubAgent
-    from .analysis_engine import AnalysisEngine
-    from .data_operations import DataOperations
-    from .execution_engine import ExecutionEngine
-    from .query_builder import QueryBuilder
+    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent as LegacyDataSubAgent
+    from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
+    from netra_backend.app.agents.data_sub_agent.data_operations import DataOperations
+    from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 except ImportError:
     # Legacy imports may fail as we clean up fragmented files
     LegacyDataSubAgent = None

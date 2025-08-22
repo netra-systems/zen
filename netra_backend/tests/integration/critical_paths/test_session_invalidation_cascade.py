@@ -10,20 +10,10 @@ L3 Test: Real cross-service session invalidation with PostgreSQL, Redis, ClickHo
 Tests complete logout propagation and audit trail persistence.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -38,8 +28,6 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
-
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock
@@ -53,17 +41,14 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.database.models import User, Session
 from security.audit_compliance import SecurityAuditLogger
 from netra_backend.app.logging_config import central_logger
-from integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
-
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 logger = central_logger.get_logger(__name__)
-
 
 class ClickHouseContainer:
 
     """Manages ClickHouse Docker container for L3 testing."""
     
-
     def __init__(self, port: int = 8125):
 
         self.port = port
@@ -74,18 +59,15 @@ class ClickHouseContainer:
 
         self.connection_url = f"clickhouse://localhost:{port}/default"
     
-
     async def start(self) -> str:
 
         """Start ClickHouse container."""
         import subprocess
         
-
         try:
 
             await self._cleanup_existing()
             
-
             cmd = [
 
                 "docker", "run", "-d",
@@ -104,31 +86,26 @@ class ClickHouseContainer:
 
             ]
             
-
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
 
             if result.returncode != 0:
 
                 raise RuntimeError(f"Failed to start ClickHouse container: {result.stderr}")
             
-
             self.container_id = result.stdout.strip()
 
             await self._wait_for_ready()
             
-
             logger.info(f"ClickHouse container started: {self.container_name}")
 
             return self.connection_url
             
-
         except Exception as e:
 
             await self.stop()
 
             raise RuntimeError(f"ClickHouse container startup failed: {e}")
     
-
     async def stop(self) -> None:
 
         """Stop ClickHouse container."""
@@ -152,7 +129,6 @@ class ClickHouseContainer:
 
                 self.container_id = None
     
-
     async def _cleanup_existing(self) -> None:
 
         """Clean up existing container."""
@@ -167,7 +143,6 @@ class ClickHouseContainer:
 
             pass
     
-
     async def _wait_for_ready(self, timeout: int = 90) -> None:
 
         """Wait for ClickHouse to be ready."""
@@ -175,7 +150,6 @@ class ClickHouseContainer:
 
         start_time = time.time()
         
-
         while time.time() - start_time < timeout:
 
             try:
@@ -192,15 +166,12 @@ class ClickHouseContainer:
 
                 await asyncio.sleep(2)
         
-
         raise RuntimeError("ClickHouse container failed to become ready")
-
 
 class SessionInvalidationCascade:
 
     """Manages session invalidation cascade testing."""
     
-
     def __init__(self, jwt_service: JWTService, session_manager: SessionManager,
 
                  websocket_manager: WebSocketManager, redis_client, 
@@ -221,7 +192,6 @@ class SessionInvalidationCascade:
 
         self.invalidation_events = []
     
-
     async def create_multi_service_session(self, user_id: str, 
 
                                          services: List[str] = None) -> Dict[str, Any]:
@@ -242,7 +212,6 @@ class SessionInvalidationCascade:
 
         )
         
-
         if not token_result["success"]:
 
             raise ValueError(f"Token generation failed: {token_result.get('error')}")
@@ -267,12 +236,10 @@ class SessionInvalidationCascade:
 
         )
         
-
         if not session_result["success"]:
 
             raise ValueError(f"Session creation failed: {session_result.get('error')}")
         
-
         session_id = session_result["session_id"]
 
         token = token_result["token"]
@@ -301,7 +268,6 @@ class SessionInvalidationCascade:
 
             }
             
-
             await self.redis_client.set(service_key, json.dumps(service_data), ex=3600)
 
             service_sessions[service] = service_data
@@ -314,7 +280,6 @@ class SessionInvalidationCascade:
 
             websocket = MockWebSocketForRedis(user_id)
             
-
             with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
                 mock_verify.return_value = {
@@ -327,10 +292,8 @@ class SessionInvalidationCascade:
 
                 }
                 
-
                 connection_info = await self.websocket_manager.connect_user(user_id, websocket)
             
-
             if not connection_info:
 
                 raise ValueError("WebSocket connection failed")
@@ -355,7 +318,6 @@ class SessionInvalidationCascade:
 
         }
         
-
         self.active_sessions[session_id] = session_data
         
         # Log session creation
@@ -372,10 +334,8 @@ class SessionInvalidationCascade:
 
         )
         
-
         return session_data
     
-
     async def invalidate_session_cascade(self, session_id: str, 
 
                                        invalidation_reason: str = "user_logout") -> Dict[str, Any]:
@@ -386,14 +346,12 @@ class SessionInvalidationCascade:
 
             raise ValueError(f"Session {session_id} not found")
         
-
         session_data = self.active_sessions[session_id]
 
         user_id = session_data["user_id"]
 
         services = session_data["services"]
         
-
         invalidation_start = time.time()
 
         invalidation_results = {}
@@ -466,7 +424,6 @@ class SessionInvalidationCascade:
 
             ]
             
-
             cache_cleared = 0
 
             for key in cache_keys:
@@ -475,7 +432,6 @@ class SessionInvalidationCascade:
 
                 cache_cleared += deleted
             
-
             invalidation_results["cache_cleanup"] = {"success": True, "keys_cleared": cache_cleared}
 
         except Exception as e:
@@ -516,7 +472,6 @@ class SessionInvalidationCascade:
 
         }
         
-
         self.invalidation_events.append(invalidation_event)
         
         # Log invalidation event
@@ -549,10 +504,8 @@ class SessionInvalidationCascade:
 
         del self.active_sessions[session_id]
         
-
         return invalidation_event
     
-
     async def verify_complete_invalidation(self, session_id: str) -> Dict[str, Any]:
 
         """Verify that session is completely invalidated across all services."""
@@ -615,17 +568,14 @@ class SessionInvalidationCascade:
 
             user_id = self.active_sessions[session_id]["user_id"]
         
-
         if user_id:
 
             ws_active = user_id in self.websocket_manager.active_connections
 
             verification_results["websocket_connection"] = {"active": ws_active}
         
-
         return verification_results
     
-
     async def cleanup(self):
 
         """Clean up all sessions."""
@@ -640,7 +590,6 @@ class SessionInvalidationCascade:
 
                 logger.warning(f"Cleanup error for session {session_id}: {e}")
 
-
 @pytest.mark.L3
 
 @pytest.mark.integration
@@ -649,7 +598,6 @@ class TestSessionInvalidationCascadeL3:
 
     """L3 integration test for session invalidation cascade across services."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -664,7 +612,6 @@ class TestSessionInvalidationCascadeL3:
 
         await container.stop()
     
-
     @pytest.fixture(scope="class")
 
     async def clickhouse_container(self):
@@ -679,7 +626,6 @@ class TestSessionInvalidationCascadeL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -694,7 +640,6 @@ class TestSessionInvalidationCascadeL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def jwt_service(self, redis_client):
@@ -703,7 +648,6 @@ class TestSessionInvalidationCascadeL3:
 
         service = JWTService()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -714,7 +658,6 @@ class TestSessionInvalidationCascadeL3:
 
             await service.shutdown()
     
-
     @pytest.fixture
 
     async def session_manager(self, redis_client):
@@ -723,7 +666,6 @@ class TestSessionInvalidationCascadeL3:
 
         manager = SessionManager()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -734,7 +676,6 @@ class TestSessionInvalidationCascadeL3:
 
             await manager.shutdown()
     
-
     @pytest.fixture
 
     async def websocket_manager(self, redis_client):
@@ -753,12 +694,10 @@ class TestSessionInvalidationCascadeL3:
 
             mock_redis_mgr.get_client.return_value = redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
     
-
     @pytest.fixture
 
     async def audit_logger(self, clickhouse_container):
@@ -767,7 +706,6 @@ class TestSessionInvalidationCascadeL3:
 
         _, connection_url = clickhouse_container
         
-
         logger = SecurityAuditLogger()
         
         # Mock ClickHouse connection
@@ -778,14 +716,12 @@ class TestSessionInvalidationCascadeL3:
 
             mock_ch.return_value = mock_client
             
-
             await logger.initialize()
 
             yield logger
 
             await logger.shutdown()
     
-
     @pytest.fixture
 
     async def cascade_manager(self, jwt_service, session_manager, websocket_manager, 
@@ -804,7 +740,6 @@ class TestSessionInvalidationCascadeL3:
 
         await manager.cleanup()
     
-
     async def test_complete_session_invalidation_cascade(self, cascade_manager):
 
         """Test complete session invalidation across all services."""
@@ -875,7 +810,6 @@ class TestSessionInvalidationCascadeL3:
 
         assert session_id not in cascade_manager.active_sessions
     
-
     async def test_concurrent_session_invalidations(self, cascade_manager):
 
         """Test concurrent invalidation of multiple sessions."""
@@ -916,7 +850,6 @@ class TestSessionInvalidationCascadeL3:
 
             )
         
-
         invalidation_tasks = [invalidate_session(session) for session in sessions]
 
         invalidation_results = await asyncio.gather(*invalidation_tasks, return_exceptions=True)
@@ -931,12 +864,10 @@ class TestSessionInvalidationCascadeL3:
 
                 pytest.fail(f"Invalidation {i} failed: {result}")
             
-
             assert result["successful_steps"] >= 3  # At least main, auth, websocket
 
             successful_invalidations += 1
         
-
         assert successful_invalidations == user_count
         
         # Verify no sessions remain active
@@ -949,7 +880,6 @@ class TestSessionInvalidationCascadeL3:
 
         assert active_ws == 0
     
-
     async def test_partial_invalidation_failure_handling(self, cascade_manager):
 
         """Test handling of partial invalidation failures."""
@@ -972,7 +902,6 @@ class TestSessionInvalidationCascadeL3:
 
         delete_call_count = 0
         
-
         async def failing_delete(key):
 
             nonlocal delete_call_count
@@ -985,7 +914,6 @@ class TestSessionInvalidationCascadeL3:
 
             return await original_delete(key)
         
-
         with patch.object(cascade_manager.redis_client, 'delete', side_effect=failing_delete):
 
             invalidation_event = await cascade_manager.invalidate_session_cascade(
@@ -1012,7 +940,6 @@ class TestSessionInvalidationCascadeL3:
 
         assert latest_event["successful_steps"] < latest_event["total_steps"]
     
-
     async def test_session_invalidation_audit_trail(self, cascade_manager):
 
         """Test complete audit trail for session invalidation."""
@@ -1065,7 +992,6 @@ class TestSessionInvalidationCascadeL3:
 
         assert stored_event["reason"] == "security_incident"
     
-
     async def test_websocket_immediate_disconnection(self, cascade_manager):
 
         """Test immediate WebSocket disconnection during invalidation."""
@@ -1130,7 +1056,6 @@ class TestSessionInvalidationCascadeL3:
 
         assert success is False  # Should fail - no connection
     
-
     async def test_invalidation_idempotency(self, cascade_manager):
 
         """Test that multiple invalidation calls are idempotent."""
@@ -1188,7 +1113,6 @@ class TestSessionInvalidationCascadeL3:
         assert len(user_invalidations) == 1
 
         assert user_invalidations[0]["reason"] == "first_logout"
-
 
 if __name__ == "__main__":
 

@@ -11,17 +11,10 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -37,17 +30,13 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import SecurityMiddleware
 from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class TestErrorPropagationThroughLayers:
     """Test error propagation through middleware layers."""
@@ -98,7 +87,6 @@ class TestErrorPropagationThroughLayers:
     def _create_security_middleware(self) -> SecurityMiddleware:
         """Create security middleware instance for testing."""
         return SecurityMiddleware(None)
-
 
 class TestRecoveryCoordinationAcrossLayers:
     """Test recovery coordination across different layers."""
@@ -205,7 +193,6 @@ class TestRecoveryCoordinationAcrossLayers:
         state = DeepAgentState(user_request="test request")
         state.triage_result = {'summary': 'test summary'}
         return state
-
 
 class TestRealWorkflowIntegration:
     """Test real workflow integration points."""

@@ -11,17 +11,10 @@ Coverage: Real service mesh patterns, load balancing algorithms, timeout/retry p
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,14 +35,11 @@ from netra_backend.app.services.service_mesh.circuit_breaker import (
     CircuitBreakerService,
 )
 
-# Add project root to path
 from netra_backend.app.services.service_mesh.discovery_service import (
     ServiceDiscoveryService,
 )
 from netra_backend.app.services.service_mesh.load_balancer import LoadBalancerService
 from netra_backend.app.services.service_mesh.retry_policy import RetryPolicyService
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +50,6 @@ pytestmark = [
     pytest.mark.service_mesh,
     pytest.mark.slow
 ]
-
 
 class ServiceMeshL4Manager:
     """Manages L4 service mesh testing with real microservices infrastructure."""
@@ -1346,7 +1335,6 @@ class ServiceMeshL4Manager:
         except Exception as e:
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 async def service_mesh_l4():
     """Create L4 service mesh manager for staging tests."""
@@ -1354,7 +1342,6 @@ async def service_mesh_l4():
     await manager.initialize_staging_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_service_discovery_l4_staging(service_mesh_l4):
@@ -1380,7 +1367,6 @@ async def test_service_discovery_l4_staging(service_mesh_l4):
     # Verify cache performance improvement
     avg_cache_improvement = sum(r["cache_performance_improvement"] for r in successful_discoveries) / len(successful_discoveries)
     assert avg_cache_improvement > 50.0, f"Cache performance improvement insufficient: {avg_cache_improvement}%"
-
 
 @pytest.mark.asyncio
 async def test_load_balancing_algorithms_l4_staging(service_mesh_l4):
@@ -1412,7 +1398,6 @@ async def test_load_balancing_algorithms_l4_staging(service_mesh_l4):
     successful_lb_tests = [r for r in load_balancing_results if r["success"]]
     assert len(successful_lb_tests) > 0, "No successful load balancing tests"
 
-
 @pytest.mark.asyncio
 async def test_circuit_breaker_patterns_l4_staging(service_mesh_l4):
     """Test circuit breaker patterns with L4 realism."""
@@ -1438,7 +1423,6 @@ async def test_circuit_breaker_patterns_l4_staging(service_mesh_l4):
     # Verify timeout behavior
     if cb_tests["timeout_behavior"]["success"]:
         assert cb_tests["timeout_behavior"]["timeout_occurred"], "Circuit breaker timeout not working"
-
 
 @pytest.mark.asyncio
 async def test_retry_policies_l4_staging(service_mesh_l4):
@@ -1469,7 +1453,6 @@ async def test_retry_policies_l4_staging(service_mesh_l4):
     # Verify jitter is working
     if retry_tests["jitter"]["success"]:
         assert retry_tests["jitter"]["delay_variance"], "Retry jitter not providing variance"
-
 
 @pytest.mark.asyncio
 async def test_service_mesh_performance_l4_staging(service_mesh_l4):
@@ -1519,7 +1502,6 @@ async def test_service_mesh_performance_l4_staging(service_mesh_l4):
     
     logger.info(f"Service mesh performance: {len(successful_operations)}/{len(performance_results)} operations successful, "
                f"{success_rate:.1f}% success rate, {throughput:.2f} ops/sec")
-
 
 @pytest.mark.asyncio
 async def test_service_mesh_resilience_l4_staging(service_mesh_l4):

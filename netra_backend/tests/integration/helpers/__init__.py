@@ -5,7 +5,7 @@ BVJ: Supporting infrastructure for critical integration tests
 
 # Import helpers that exist
 try:
-    from .critical_integration_helpers import (
+from netra_backend.tests.integration.helpers.critical_integration_helpers import (
         AgentTestHelpers,
         AuthenticationTestHelpers,
         DatabaseTestHelpers,
@@ -20,7 +20,7 @@ except ImportError:
 
 # Check if the new user flow helpers exist before importing
 try:
-    from ..test_helpers.user_flow_base import UserFlowAssertions, UserFlowTestBase
+    from netra_backend.tests.integration.test_helpers.user_flow_base import UserFlowAssertions, UserFlowTestBase
     USER_FLOW_HELPERS_AVAILABLE = True
 except ImportError:
     USER_FLOW_HELPERS_AVAILABLE = False

@@ -5,7 +5,6 @@ Tests log clustering algorithms and pattern mining
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
-
 class TestLogClusteringAlgorithms:
     """Test log clustering and pattern mining"""
     

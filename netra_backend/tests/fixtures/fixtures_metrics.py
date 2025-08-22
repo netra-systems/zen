@@ -14,7 +14,6 @@ from netra_backend.app.services.realistic_test_data_service import (
     RealisticTestDataService,
 )
 
-
 class MetricsFixtures:
     """Generator for metrics and data-related test fixtures"""
     
@@ -245,13 +244,11 @@ class MetricsFixtures:
             "endpoints": random.randint(0, 5)
         }
 
-
 # Pytest fixtures
 @pytest.fixture
 def metrics_fixtures():
     """Provide metrics test fixtures"""
     return MetricsFixtures()
-
 
 @pytest.fixture
 def error_cascade_logs(metrics_fixtures):
@@ -263,7 +260,6 @@ def error_cascade_logs(metrics_fixtures):
         volume=1000
     )
 
-
 @pytest.fixture
 def memory_leak_logs(metrics_fixtures):
     """Generate memory leak log pattern"""
@@ -273,7 +269,6 @@ def memory_leak_logs(metrics_fixtures):
         duration_hours=48,
         volume=2000
     )
-
 
 @pytest.fixture
 def performance_metrics(metrics_fixtures):

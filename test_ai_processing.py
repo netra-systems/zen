@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 
 # Add paths for imports
-sys.path.insert(0, str(Path(__file__).parent / "netra_backend"))
 os.environ['PYTHONPATH'] = str(Path(__file__).parent / "netra_backend")
 
 # Load environment variables from .env

@@ -11,21 +11,10 @@ L2 Test: Real internal connection pool components with mocked external services.
 Performance target: <10ms pool operations, 95% resource utilization efficiency.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +31,6 @@ from netra_backend.app.schemas import User
 
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
-
 
 @dataclass
 
@@ -64,7 +52,6 @@ class ConnectionMetrics:
 
     is_active: bool = True
 
-
 @dataclass
 
 class PoolConfig:
@@ -85,12 +72,10 @@ class PoolConfig:
 
     burst_capacity: int = 50  # Additional connections for burst
 
-
 class WebSocketConnectionPool:
 
     """Manage pool of WebSocket connections."""
     
-
     def __init__(self, config: PoolConfig = None):
 
         self.config = config or PoolConfig()
@@ -123,7 +108,6 @@ class WebSocketConnectionPool:
 
         self.last_cleanup = time.time()
     
-
     async def acquire_connection(self, user_id: str, websocket: Any = None) -> Optional[str]:
 
         """Acquire a connection from the pool."""
@@ -140,7 +124,6 @@ class WebSocketConnectionPool:
 
             return reused_connection
         
-
         self.pool_stats["pool_misses"] += 1
         
         # Check pool capacity
@@ -155,7 +138,6 @@ class WebSocketConnectionPool:
 
         connection_id = str(uuid4())
         
-
         self.active_connections[connection_id] = websocket or MockWebSocket()
 
         self.connection_metrics[connection_id] = ConnectionMetrics(
@@ -166,7 +148,6 @@ class WebSocketConnectionPool:
 
         )
         
-
         self.user_connections[user_id].add(connection_id)
 
         self.pool_stats["total_created"] += 1
@@ -179,10 +160,8 @@ class WebSocketConnectionPool:
 
             self.pool_stats["peak_connections"] = current_count
         
-
         return connection_id
     
-
     async def _try_reuse_connection(self, user_id: str) -> Optional[str]:
 
         """Try to reuse an existing idle connection for user."""
@@ -191,7 +170,6 @@ class WebSocketConnectionPool:
 
         idle_user_connections = user_connection_ids.intersection(self.idle_connections)
         
-
         if idle_user_connections:
             # Reuse most recently used idle connection
 
@@ -203,20 +181,16 @@ class WebSocketConnectionPool:
 
             )
             
-
             self.idle_connections.remove(best_connection)
 
             self.connection_metrics[best_connection].last_used = time.time()
 
             self.connection_metrics[best_connection].is_active = True
             
-
             return best_connection
         
-
         return None
     
-
     def _can_create_connection(self) -> bool:
 
         """Check if new connection can be created."""
@@ -227,10 +201,8 @@ class WebSocketConnectionPool:
 
         max_allowed = self.config.max_connections + self.config.burst_capacity
         
-
         return current_count < max_allowed
     
-
     async def release_connection(self, connection_id: str, force_close: bool = False) -> bool:
 
         """Release connection back to pool or close it."""
@@ -239,10 +211,8 @@ class WebSocketConnectionPool:
 
             return False
         
-
         current_time = time.time()
         
-
         if force_close or not self._should_keep_connection(connection_id):
 
             return await self._close_connection(connection_id)
@@ -259,10 +229,8 @@ class WebSocketConnectionPool:
 
         await self._cleanup_excess_idle_connections()
         
-
         return True
     
-
     def _should_keep_connection(self, connection_id: str) -> bool:
 
         """Determine if connection should be kept in pool."""
@@ -281,10 +249,8 @@ class WebSocketConnectionPool:
 
             return False
         
-
         return True
     
-
     async def _close_connection(self, connection_id: str) -> bool:
 
         """Close and remove connection from pool."""
@@ -319,12 +285,10 @@ class WebSocketConnectionPool:
 
                 pass  # Ignore close errors
         
-
         self.pool_stats["total_destroyed"] += 1
 
         return True
     
-
     async def _cleanup_excess_idle_connections(self) -> None:
 
         """Cleanup excess idle connections."""
@@ -351,7 +315,6 @@ class WebSocketConnectionPool:
 
             await self._close_connection(sorted_idle[i])
     
-
     async def cleanup_expired_connections(self) -> int:
 
         """Cleanup expired idle connections."""
@@ -362,7 +325,6 @@ class WebSocketConnectionPool:
 
         expired_connections = []
         
-
         for connection_id in list(self.idle_connections):
 
             metrics = self.connection_metrics.get(connection_id)
@@ -383,12 +345,10 @@ class WebSocketConnectionPool:
 
                 self.pool_stats["idle_timeouts"] += 1
         
-
         self.last_cleanup = current_time
 
         return closed_count
     
-
     def record_connection_activity(self, connection_id: str, bytes_sent: int = 0, 
 
                                  bytes_received: int = 0, error: bool = False) -> None:
@@ -399,7 +359,6 @@ class WebSocketConnectionPool:
 
             return
         
-
         metrics = self.connection_metrics[connection_id]
 
         metrics.last_used = time.time()
@@ -410,12 +369,10 @@ class WebSocketConnectionPool:
 
         metrics.bytes_received += bytes_received
         
-
         if error:
 
             metrics.error_count += 1
     
-
     def get_pool_status(self) -> Dict[str, Any]:
 
         """Get current pool status."""
@@ -432,7 +389,6 @@ class WebSocketConnectionPool:
 
             ages.append(age)
         
-
         avg_age = sum(ages) / len(ages) if ages else 0
         
         # Calculate utilization
@@ -441,7 +397,6 @@ class WebSocketConnectionPool:
 
         utilization = (active_count / self.config.max_connections) * 100 if self.config.max_connections > 0 else 0
         
-
         return {
 
             "total_connections": len(self.active_connections),
@@ -470,14 +425,12 @@ class WebSocketConnectionPool:
 
         }
     
-
     def get_user_connections(self, user_id: str) -> Dict[str, Any]:
 
         """Get connection information for specific user."""
 
         user_conn_ids = self.user_connections.get(user_id, set())
         
-
         connections_info = []
 
         for conn_id in user_conn_ids:
@@ -508,7 +461,6 @@ class WebSocketConnectionPool:
 
                 })
         
-
         return {
 
             "user_id": user_id,
@@ -519,12 +471,10 @@ class WebSocketConnectionPool:
 
         }
 
-
 class MockWebSocket:
 
     """Mock WebSocket for testing."""
     
-
     def __init__(self):
 
         self.closed = False
@@ -533,7 +483,6 @@ class MockWebSocket:
 
         self.received_messages = []
     
-
     async def send(self, message: str) -> None:
 
         """Send message through mock WebSocket."""
@@ -544,7 +493,6 @@ class MockWebSocket:
 
         self.sent_messages.append(message)
     
-
     async def receive(self) -> str:
 
         """Receive message from mock WebSocket."""
@@ -559,26 +507,22 @@ class MockWebSocket:
 
         raise asyncio.TimeoutError("No message available")
     
-
     async def close(self) -> None:
 
         """Close mock WebSocket."""
 
         self.closed = True
     
-
     def add_received_message(self, message: str) -> None:
 
         """Add message to received queue."""
 
         self.received_messages.append(message)
 
-
 class ConnectionReaper:
 
     """Manage cleanup of stale connections."""
     
-
     def __init__(self, pool: WebSocketConnectionPool):
 
         self.pool = pool
@@ -595,14 +539,12 @@ class ConnectionReaper:
 
         self.running = False
     
-
     async def start_reaper(self) -> None:
 
         """Start the connection reaper."""
 
         self.running = True
         
-
         while self.running:
 
             try:
@@ -617,7 +559,6 @@ class ConnectionReaper:
 
                 await asyncio.sleep(5.0)  # Short delay on error
     
-
     async def _reaper_cycle(self) -> None:
 
         """Perform one reaper cleanup cycle."""
@@ -634,7 +575,6 @@ class ConnectionReaper:
 
         await self._health_check_connections()
     
-
     async def _health_check_connections(self) -> None:
 
         """Perform health checks on connections."""
@@ -642,7 +582,6 @@ class ConnectionReaper:
 
         problematic_connections = []
         
-
         for conn_id, metrics in self.pool.connection_metrics.items():
 
             if metrics.error_count > 20:  # Too many errors
@@ -661,20 +600,17 @@ class ConnectionReaper:
 
             self.reaper_stats["connections_reaped"] += 1
     
-
     def stop_reaper(self) -> None:
 
         """Stop the connection reaper."""
 
         self.running = False
     
-
     def get_reaper_stats(self) -> Dict[str, Any]:
 
         """Get reaper statistics."""
 
         return self.reaper_stats.copy()
-
 
 @pytest.mark.L2
 
@@ -684,7 +620,6 @@ class TestConnectionPoolManagement:
 
     """L2 integration tests for connection pool management."""
     
-
     @pytest.fixture
 
     def pool_config(self):
@@ -707,7 +642,6 @@ class TestConnectionPoolManagement:
 
         )
     
-
     @pytest.fixture
 
     def connection_pool(self, pool_config):
@@ -716,7 +650,6 @@ class TestConnectionPoolManagement:
 
         return WebSocketConnectionPool(pool_config)
     
-
     @pytest.fixture
 
     def connection_reaper(self, connection_pool):
@@ -725,7 +658,6 @@ class TestConnectionPoolManagement:
 
         return ConnectionReaper(connection_pool)
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -752,7 +684,6 @@ class TestConnectionPoolManagement:
 
         ]
     
-
     async def test_basic_connection_acquisition(self, connection_pool, test_users):
 
         """Test basic connection acquisition and release."""
@@ -793,7 +724,6 @@ class TestConnectionPoolManagement:
 
         assert connection_id in connection_pool.idle_connections
         
-
         status = connection_pool.get_pool_status()
 
         assert status["total_connections"] == 1
@@ -802,7 +732,6 @@ class TestConnectionPoolManagement:
 
         assert status["idle_connections"] == 1
     
-
     async def test_connection_reuse(self, connection_pool, test_users):
 
         """Test connection reuse functionality."""
@@ -829,7 +758,6 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["total_created"] == 1  # Only one connection created
     
-
     async def test_pool_capacity_limits(self, connection_pool, test_users):
 
         """Test pool capacity enforcement."""
@@ -883,7 +811,6 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["capacity_exceeded"] >= 0
     
-
     async def test_idle_connection_cleanup(self, connection_pool, test_users):
 
         """Test cleanup of idle connections."""
@@ -926,7 +853,6 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["idle_timeouts"] == 1
     
-
     async def test_connection_activity_tracking(self, connection_pool, test_users):
 
         """Test tracking of connection activity."""
@@ -949,7 +875,6 @@ class TestConnectionPoolManagement:
 
         )
         
-
         connection_pool.record_connection_activity(
 
             connection_id, 
@@ -980,7 +905,6 @@ class TestConnectionPoolManagement:
 
         assert len(user_info["connections"]) == 1
         
-
         conn_info = user_info["connections"][0]
 
         assert conn_info["message_count"] == 2
@@ -989,7 +913,6 @@ class TestConnectionPoolManagement:
 
         assert conn_info["error_count"] == 1
     
-
     async def test_multiple_user_connections(self, connection_pool, test_users):
 
         """Test managing connections for multiple users."""
@@ -1044,7 +967,6 @@ class TestConnectionPoolManagement:
 
         assert status["user_count"] == len(test_users)
     
-
     async def test_connection_reaper_functionality(self, connection_pool, connection_reaper, test_users):
 
         """Test connection reaper cleanup functionality."""
@@ -1095,7 +1017,6 @@ class TestConnectionPoolManagement:
 
         assert status["total_connections"] == 1  # Only active connection remains
     
-
     @mock_justified("L2: Connection pool management with real internal components")
 
     async def test_websocket_integration_with_pool(self, connection_pool, test_users):
@@ -1158,7 +1079,6 @@ class TestConnectionPoolManagement:
 
         assert connection_id not in connection_pool.active_connections
     
-
     async def test_concurrent_pool_operations(self, connection_pool, test_users):
 
         """Test concurrent pool operations."""
@@ -1167,12 +1087,10 @@ class TestConnectionPoolManagement:
 
         results = []
         
-
         async def concurrent_acquire_release(operation_id: int):
 
             user = test_users[operation_id % len(test_users)]
             
-
             try:
                 # Acquire connection
 
@@ -1194,7 +1112,6 @@ class TestConnectionPoolManagement:
 
                 return "success" if released else "release_failed"
                 
-
             except Exception as e:
 
                 return f"error: {str(e)}"
@@ -1223,7 +1140,6 @@ class TestConnectionPoolManagement:
 
         assert status["total_connections"] >= 0  # Pool should be in valid state
     
-
     async def test_pool_performance_benchmarks(self, connection_pool, test_users):
 
         """Test connection pool performance benchmarks."""
@@ -1238,7 +1154,6 @@ class TestConnectionPoolManagement:
 
         acquired_connections = []
         
-
         for _ in range(operation_count):
 
             conn_id = await connection_pool.acquire_connection(user.id)
@@ -1253,7 +1168,6 @@ class TestConnectionPoolManagement:
 
                 await connection_pool.release_connection(acquired_connections[-1])
         
-
         acquisition_time = time.time() - start_time
         
         # Should handle operations quickly
@@ -1264,14 +1178,12 @@ class TestConnectionPoolManagement:
 
         start_time = time.time()
         
-
         for conn_id in acquired_connections[:100]:  # Test on subset
 
             for _ in range(10):
 
                 connection_pool.record_connection_activity(conn_id, bytes_sent=100)
         
-
         activity_time = time.time() - start_time
         
         # Should record activity very quickly
@@ -1294,7 +1206,6 @@ class TestConnectionPoolManagement:
 
             )
         
-
         cleaned_count = await connection_pool.cleanup_expired_connections()
 
         cleanup_time = time.time() - start_time
@@ -1320,7 +1231,6 @@ class TestConnectionPoolManagement:
             hit_rate = (stats["pool_hits"] / total_requests) * 100
 
             assert hit_rate > 80  # At least 80% hit rate
-
 
 if __name__ == "__main__":
 

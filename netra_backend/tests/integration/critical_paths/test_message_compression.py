@@ -11,21 +11,10 @@ L2 Test: Real internal compression components with mocked external services.
 Performance target: >50% compression ratio, <10ms compression latency.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -47,7 +36,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class CompressionAlgorithm(Enum):
 
     """Supported compression algorithms."""
@@ -59,7 +47,6 @@ class CompressionAlgorithm(Enum):
     DEFLATE = "deflate"
 
     LZ4 = "lz4"
-
 
 @dataclass
 
@@ -79,12 +66,10 @@ class CompressionStats:
 
     algorithm: CompressionAlgorithm
 
-
 class MessageCompressor:
 
     """Handle message compression for WebSocket communications."""
     
-
     def __init__(self):
 
         self.compression_threshold = 1024  # 1KB - compress messages larger than this
@@ -105,7 +90,6 @@ class MessageCompressor:
 
         self.compression_level = 6  # Good balance of speed vs. ratio
         
-
         self.stats = {
 
             "total_messages": 0,
@@ -124,7 +108,6 @@ class MessageCompressor:
 
         }
     
-
     def should_compress_message(self, message_data: bytes) -> bool:
 
         """Determine if message should be compressed."""
@@ -146,10 +129,8 @@ class MessageCompressor:
 
             return False
         
-
         return True
     
-
     def _appears_compressed(self, data: bytes) -> bool:
 
         """Check if data appears to already be compressed."""
@@ -174,12 +155,10 @@ class MessageCompressor:
 
         ]
         
-
         data_start = data[:4]
 
         return any(data_start.startswith(header) for header in compression_headers)
     
-
     def negotiate_compression(self, client_algorithms: List[str]) -> CompressionAlgorithm:
 
         """Negotiate compression algorithm with client."""
@@ -201,7 +180,6 @@ class MessageCompressor:
 
                 continue
         
-
         if not client_supported:
 
             return CompressionAlgorithm.NONE
@@ -218,17 +196,14 @@ class MessageCompressor:
 
         ]
         
-
         for preferred in preference_order:
 
             if preferred in client_supported:
 
                 return preferred
         
-
         return client_supported[0]
     
-
     async def compress_message(self, message: Dict[str, Any], algorithm: CompressionAlgorithm = None) -> Dict[str, Any]:
 
         """Compress a message using specified algorithm."""
@@ -237,7 +212,6 @@ class MessageCompressor:
 
             algorithm = self.default_algorithm
         
-
         self.stats["total_messages"] += 1
         
         # Serialize message to bytes
@@ -248,7 +222,6 @@ class MessageCompressor:
 
         original_size = len(message_bytes)
         
-
         self.stats["total_original_bytes"] += original_size
         
         # Check if compression should be applied
@@ -287,19 +260,16 @@ class MessageCompressor:
 
         start_time = time.time()
         
-
         try:
 
             compressed_data = await self._compress_data(message_bytes, algorithm)
 
             compression_time = time.time() - start_time
             
-
             compressed_size = len(compressed_data)
 
             compression_ratio = (1 - compressed_size / original_size) * 100
             
-
             self.stats["compressed_messages"] += 1
 
             self.stats["total_compressed_bytes"] += compressed_size
@@ -312,7 +282,6 @@ class MessageCompressor:
 
             encoded_data = base64.b64encode(compressed_data).decode('utf-8')
             
-
             return {
 
                 "compressed": True,
@@ -345,7 +314,6 @@ class MessageCompressor:
 
             }
         
-
         except Exception as e:
             # Fall back to uncompressed on compression failure
 
@@ -379,7 +347,6 @@ class MessageCompressor:
 
             }
     
-
     async def _compress_data(self, data: bytes, algorithm: CompressionAlgorithm) -> bytes:
 
         """Compress data using specified algorithm."""
@@ -388,22 +355,18 @@ class MessageCompressor:
 
             return gzip.compress(data, compresslevel=self.compression_level)
         
-
         elif algorithm == CompressionAlgorithm.DEFLATE:
 
             return zlib.compress(data, level=self.compression_level)
         
-
         elif algorithm == CompressionAlgorithm.LZ4:
 
             return lz4.frame.compress(data, compression_level=self.compression_level)
         
-
         else:
 
             raise ValueError(f"Unsupported compression algorithm: {algorithm}")
     
-
     async def decompress_message(self, compressed_message: Dict[str, Any]) -> Dict[str, Any]:
 
         """Decompress a compressed message."""
@@ -425,7 +388,6 @@ class MessageCompressor:
 
             return data
         
-
         algorithm = CompressionAlgorithm(compressed_message["algorithm"])
 
         encoded_data = compressed_message["data"]
@@ -434,17 +396,14 @@ class MessageCompressor:
 
         compressed_data = base64.b64decode(encoded_data)
         
-
         start_time = time.time()
         
-
         try:
 
             decompressed_data = await self._decompress_data(compressed_data, algorithm)
 
             decompression_time = time.time() - start_time
             
-
             self.stats["decompression_time_total"] += decompression_time
             
             # Parse JSON
@@ -453,15 +412,12 @@ class MessageCompressor:
 
             message = json.loads(message_json)
             
-
             return message
         
-
         except Exception as e:
 
             raise ValueError(f"Decompression failed: {str(e)}")
     
-
     async def _decompress_data(self, data: bytes, algorithm: CompressionAlgorithm) -> bytes:
 
         """Decompress data using specified algorithm."""
@@ -470,34 +426,28 @@ class MessageCompressor:
 
             return gzip.decompress(data)
         
-
         elif algorithm == CompressionAlgorithm.DEFLATE:
 
             return zlib.decompress(data)
         
-
         elif algorithm == CompressionAlgorithm.LZ4:
 
             return lz4.frame.decompress(data)
         
-
         else:
 
             raise ValueError(f"Unsupported decompression algorithm: {algorithm}")
     
-
     def get_compression_stats(self) -> Dict[str, Any]:
 
         """Get comprehensive compression statistics."""
 
         stats = self.stats.copy()
         
-
         if stats["total_messages"] > 0:
 
             stats["compression_rate"] = (stats["compressed_messages"] / stats["total_messages"]) * 100
             
-
             if stats["total_original_bytes"] > 0:
 
                 overall_ratio = (1 - stats["total_compressed_bytes"] / stats["total_original_bytes"]) * 100
@@ -506,22 +456,18 @@ class MessageCompressor:
 
                 stats["bytes_saved"] = stats["total_original_bytes"] - stats["total_compressed_bytes"]
             
-
             if stats["compressed_messages"] > 0:
 
                 stats["avg_compression_time"] = stats["compression_time_total"] / stats["compressed_messages"]
 
                 stats["avg_decompression_time"] = stats["decompression_time_total"] / stats["compressed_messages"]
         
-
         return stats
-
 
 class CompressionNegotiator:
 
     """Handle compression negotiation during WebSocket handshake."""
     
-
     def __init__(self, compressor: MessageCompressor):
 
         self.compressor = compressor
@@ -538,7 +484,6 @@ class CompressionNegotiator:
 
         }
     
-
     def parse_compression_header(self, header_value: str) -> List[str]:
 
         """Parse compression extensions from WebSocket header."""
@@ -552,7 +497,6 @@ class CompressionNegotiator:
 
         extensions = []
         
-
         for extension in header_value.split(','):
 
             extension = extension.strip()
@@ -583,10 +527,8 @@ class CompressionNegotiator:
 
                 extensions.append("lz4")
         
-
         return extensions
     
-
     def negotiate_compression(self, client_extensions: str) -> Dict[str, Any]:
 
         """Negotiate compression with client."""
@@ -601,7 +543,6 @@ class CompressionNegotiator:
 
         selected_algorithm = self.compressor.negotiate_compression(client_algorithms)
         
-
         if selected_algorithm != CompressionAlgorithm.NONE:
 
             self.negotiation_stats["successful_negotiations"] += 1
@@ -626,10 +567,8 @@ class CompressionNegotiator:
 
         }
         
-
         return response
     
-
     def _create_server_response(self, algorithm: CompressionAlgorithm) -> str:
 
         """Create server response header for compression negotiation."""
@@ -650,29 +589,24 @@ class CompressionNegotiator:
 
             return ""
     
-
     def get_negotiation_stats(self) -> Dict[str, Any]:
 
         """Get compression negotiation statistics."""
 
         stats = self.negotiation_stats.copy()
         
-
         if stats["negotiations"] > 0:
 
             stats["success_rate"] = (stats["successful_negotiations"] / stats["negotiations"]) * 100
 
             stats["fallback_rate"] = (stats["fallback_to_none"] / stats["negotiations"]) * 100
         
-
         return stats
-
 
 class PerformanceAnalyzer:
 
     """Analyze compression performance across different scenarios."""
     
-
     def __init__(self, compressor: MessageCompressor):
 
         self.compressor = compressor
@@ -695,7 +629,6 @@ class PerformanceAnalyzer:
 
         }
     
-
     async def analyze_compression_performance(self, messages: List[Dict[str, Any]], 
 
                                            algorithm: CompressionAlgorithm) -> Dict[str, Any]:
@@ -704,7 +637,6 @@ class PerformanceAnalyzer:
 
         results = []
         
-
         for message in messages:
             # Compress message
 
@@ -750,15 +682,12 @@ class PerformanceAnalyzer:
 
             }
             
-
             results.append(performance_record)
 
             self._categorize_performance_data(performance_record, message)
         
-
         return self._calculate_performance_summary(results, algorithm)
     
-
     def _categorize_performance_data(self, performance_record: Dict[str, Any], 
 
                                    original_message: Dict[str, Any]) -> None:
@@ -796,7 +725,6 @@ class PerformanceAnalyzer:
 
         self.performance_data["by_message_type"][message_type].append(performance_record)
     
-
     def _calculate_performance_summary(self, results: List[Dict[str, Any]], 
 
                                      algorithm: CompressionAlgorithm) -> Dict[str, Any]:
@@ -807,7 +735,6 @@ class PerformanceAnalyzer:
 
             return {}
         
-
         compression_ratios = [r["compression_ratio"] for r in results if r["compression_ratio"] > 0]
 
         compression_times = [r["compression_time"] for r in results]
@@ -818,7 +745,6 @@ class PerformanceAnalyzer:
 
         compressed_sizes = [r["compressed_size"] for r in results]
         
-
         return {
 
             "algorithm": algorithm.value,
@@ -849,7 +775,6 @@ class PerformanceAnalyzer:
 
         }
     
-
     def get_performance_analysis(self) -> Dict[str, Any]:
 
         """Get comprehensive performance analysis."""
@@ -894,10 +819,8 @@ class PerformanceAnalyzer:
 
         analysis["recommendations"] = self._generate_recommendations(analysis)
         
-
         return analysis
     
-
     def _analyze_dataset(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
         """Analyze a dataset of performance records."""
@@ -906,12 +829,10 @@ class PerformanceAnalyzer:
 
             return {}
         
-
         compression_ratios = [d["compression_ratio"] for d in data if d["compression_ratio"] > 0]
 
         compression_times = [d["compression_time"] for d in data]
         
-
         return {
 
             "count": len(data),
@@ -924,7 +845,6 @@ class PerformanceAnalyzer:
 
         }
     
-
     def _calculate_efficiency_score(self, ratios: List[float], times: List[float]) -> float:
 
         """Calculate efficiency score balancing compression ratio and speed."""
@@ -933,7 +853,6 @@ class PerformanceAnalyzer:
 
             return 0.0
         
-
         avg_ratio = sum(ratios) / len(ratios)
 
         avg_time = sum(times) / len(times)
@@ -945,10 +864,8 @@ class PerformanceAnalyzer:
 
         time_score = max(0, 1 - avg_time * 1000)  # Convert to milliseconds and invert
         
-
         return ratio_score * 0.7 + time_score * 0.3
     
-
     def _generate_recommendations(self, analysis: Dict[str, Any]) -> List[str]:
 
         """Generate performance recommendations."""
@@ -961,7 +878,6 @@ class PerformanceAnalyzer:
 
         best_score = 0
         
-
         for algorithm, data in analysis["by_algorithm"].items():
 
             if data and data["efficiency_score"] > best_score:
@@ -970,7 +886,6 @@ class PerformanceAnalyzer:
 
                 best_algorithm = algorithm
         
-
         if best_algorithm:
 
             recommendations.append(f"Use {best_algorithm} algorithm for best overall performance")
@@ -983,14 +898,11 @@ class PerformanceAnalyzer:
 
             recommendations.append("Consider disabling compression for small messages (<5KB)")
         
-
         if "large" in size_analysis and size_analysis["large"]["avg_compression_time"] > 0.1:
 
             recommendations.append("Consider async compression for large messages (>50KB)")
         
-
         return recommendations
-
 
 @pytest.mark.L2
 
@@ -1000,7 +912,6 @@ class TestMessageCompression:
 
     """L2 integration tests for message compression."""
     
-
     @pytest.fixture
 
     def message_compressor(self):
@@ -1009,7 +920,6 @@ class TestMessageCompression:
 
         return MessageCompressor()
     
-
     @pytest.fixture
 
     def compression_negotiator(self, message_compressor):
@@ -1018,7 +928,6 @@ class TestMessageCompression:
 
         return CompressionNegotiator(message_compressor)
     
-
     @pytest.fixture
 
     def performance_analyzer(self, message_compressor):
@@ -1027,7 +936,6 @@ class TestMessageCompression:
 
         return PerformanceAnalyzer(message_compressor)
     
-
     @pytest.fixture
 
     def test_messages(self):
@@ -1088,7 +996,6 @@ class TestMessageCompression:
 
         ]
     
-
     async def test_basic_compression_functionality(self, message_compressor, test_messages):
 
         """Test basic message compression and decompression."""
@@ -1125,7 +1032,6 @@ class TestMessageCompression:
 
         assert stats.compression_time < 0.01  # Should be fast (<10ms)
     
-
     async def test_compression_algorithm_comparison(self, message_compressor, test_messages):
 
         """Test comparison of different compression algorithms."""
@@ -1134,10 +1040,8 @@ class TestMessageCompression:
 
         algorithms = [CompressionAlgorithm.GZIP, CompressionAlgorithm.DEFLATE, CompressionAlgorithm.LZ4]
         
-
         results = {}
         
-
         for algorithm in algorithms:
 
             compressed = await message_compressor.compress_message(large_message, algorithm)
@@ -1148,7 +1052,6 @@ class TestMessageCompression:
 
             assert decompressed == large_message
             
-
             results[algorithm.value] = {
 
                 "compression_ratio": compressed["compression_ratio"],
@@ -1177,7 +1080,6 @@ class TestMessageCompression:
 
         ) * 1.5  # Allow some variance
     
-
     async def test_compression_threshold_behavior(self, message_compressor, test_messages):
 
         """Test compression threshold behavior."""
@@ -1202,7 +1104,6 @@ class TestMessageCompression:
 
         assert large_compressed["algorithm"] != CompressionAlgorithm.NONE.value
     
-
     async def test_compression_negotiation(self, compression_negotiator):
 
         """Test compression negotiation during handshake."""
@@ -1210,10 +1111,8 @@ class TestMessageCompression:
 
         client_extensions = "permessage-deflate; client_max_window_bits=15, permessage-gzip"
         
-
         negotiation = compression_negotiator.negotiate_compression(client_extensions)
         
-
         assert negotiation["supported"] is True
 
         assert negotiation["algorithm"] in ["deflate", "gzip"]
@@ -1226,7 +1125,6 @@ class TestMessageCompression:
 
         no_support_negotiation = compression_negotiator.negotiate_compression("")
         
-
         assert no_support_negotiation["supported"] is False
 
         assert no_support_negotiation["algorithm"] == CompressionAlgorithm.NONE.value
@@ -1241,7 +1139,6 @@ class TestMessageCompression:
 
         assert stats["fallback_to_none"] == 1
     
-
     async def test_compression_performance_analysis(self, performance_analyzer, test_messages):
 
         """Test compression performance analysis."""
@@ -1279,7 +1176,6 @@ class TestMessageCompression:
 
         full_analysis = performance_analyzer.get_performance_analysis()
         
-
         assert "by_algorithm" in full_analysis
 
         assert "by_size_range" in full_analysis
@@ -1288,7 +1184,6 @@ class TestMessageCompression:
 
         assert len(full_analysis["recommendations"]) > 0
     
-
     async def test_compression_with_already_compressed_data(self, message_compressor):
 
         """Test handling of already compressed data."""
@@ -1314,7 +1209,6 @@ class TestMessageCompression:
 
         assert "algorithm" in result
     
-
     async def test_compression_error_handling(self, message_compressor):
 
         """Test compression error handling."""
@@ -1340,7 +1234,6 @@ class TestMessageCompression:
 
         assert "algorithm" in result
         
-
         if result["compressed"]:
             # If compressed, should decompress correctly
 
@@ -1348,7 +1241,6 @@ class TestMessageCompression:
 
             assert decompressed == problematic_message
     
-
     @mock_justified("L2: Message compression with real internal components")
 
     async def test_websocket_integration_with_compression(self, message_compressor, compression_negotiator, test_messages):
@@ -1360,7 +1252,6 @@ class TestMessageCompression:
 
         negotiation = compression_negotiator.negotiate_compression(client_extensions)
         
-
         assert negotiation["supported"] is True
 
         selected_algorithm = CompressionAlgorithm(negotiation["algorithm"])
@@ -1371,7 +1262,6 @@ class TestMessageCompression:
 
         received_messages = []
         
-
         for message in test_messages:
             # Compress outgoing message
 
@@ -1400,7 +1290,6 @@ class TestMessageCompression:
 
         total_compressed = sum(msg.get("compressed_size", msg["original_size"]) for msg in sent_messages)
         
-
         overall_compression = (1 - total_compressed / total_original) * 100
 
         assert overall_compression > 30  # Should achieve >30% overall compression
@@ -1413,7 +1302,6 @@ class TestMessageCompression:
 
         assert stats["overall_compression_ratio"] > 30
     
-
     async def test_concurrent_compression_operations(self, message_compressor, test_messages):
 
         """Test concurrent compression operations."""
@@ -1430,7 +1318,6 @@ class TestMessageCompression:
 
             algorithm = [CompressionAlgorithm.GZIP, CompressionAlgorithm.LZ4][i % 2]
             
-
             task = message_compressor.compress_message(message, algorithm)
 
             compression_tasks.append((task, message))
@@ -1453,7 +1340,6 @@ class TestMessageCompression:
 
         )
         
-
         assert successful_compressions == concurrent_count
 
         assert total_time < 5.0  # Should complete within 5 seconds
@@ -1476,7 +1362,6 @@ class TestMessageCompression:
 
                 ))
         
-
         decompressed_results = await asyncio.gather(
 
             *[task for task, _ in decompression_tasks], 
@@ -1495,7 +1380,6 @@ class TestMessageCompression:
 
                 assert decompressed == original
     
-
     async def test_compression_performance_benchmarks(self, message_compressor, test_messages):
 
         """Test compression performance benchmarks."""
@@ -1506,24 +1390,20 @@ class TestMessageCompression:
 
         large_message = test_messages[3]  # Very large message
         
-
         start_time = time.time()
 
         for _ in range(benchmark_count):
 
             await message_compressor.compress_message(large_message, CompressionAlgorithm.GZIP)
         
-
         gzip_time = time.time() - start_time
         
-
         start_time = time.time()
 
         for _ in range(benchmark_count):
 
             await message_compressor.compress_message(large_message, CompressionAlgorithm.LZ4)
         
-
         lz4_time = time.time() - start_time
         
         # LZ4 should be faster
@@ -1540,7 +1420,6 @@ class TestMessageCompression:
 
         compression_test = await message_compressor.compress_message(large_message, CompressionAlgorithm.GZIP)
         
-
         assert compression_test["compression_ratio"] > 50  # Should achieve >50% compression
 
         assert compression_test["stats"].compression_time < 0.01  # Should be fast
@@ -1551,11 +1430,9 @@ class TestMessageCompression:
 
         assert stats["avg_compression_time"] < 0.01  # Average should be fast
         
-
         if stats["total_original_bytes"] > 0:
 
             assert stats["overall_compression_ratio"] > 40  # Should achieve good overall ratio
-
 
 if __name__ == "__main__":
 

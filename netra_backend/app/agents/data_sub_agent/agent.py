@@ -100,7 +100,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.redis_manager = self.core.redis_manager
         self.cache_ttl = self.core.cache_ttl
         # Import and setup extended operations for test compatibility
-        from .extended_operations import ExtendedOperations
+        from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
         self.extended_ops = ExtendedOperations(self)
         
     # Modern BaseExecutionInterface Implementation

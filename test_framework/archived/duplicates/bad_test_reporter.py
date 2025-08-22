@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .bad_test_detector import BadTestDetector
+from test_framework.archived.duplicates.bad_test_detector import BadTestDetector
 
 
 def main():

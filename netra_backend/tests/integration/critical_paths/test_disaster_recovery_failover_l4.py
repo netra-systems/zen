@@ -22,17 +22,10 @@ cascade failure, region failover simulation, data corruption recovery, backup in
 validation, and service resurrection orchestration.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -63,15 +56,12 @@ from netra_backend.app.core.health_checkers import (
 )
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 # Mock disaster recovery components for L4 testing
 class DatabaseBackupManager:
@@ -82,7 +72,6 @@ class DatabaseBackupManager:
     async def close(self):
         pass
 
-
 class DisasterMonitor:
     """Mock disaster monitor for disaster recovery testing."""
     async def detect_disaster(self, service: str) -> Dict[str, Any]:
@@ -91,7 +80,6 @@ class DisasterMonitor:
     async def close(self):
         pass
 
-
 class FailoverOrchestrator:
     """Mock failover orchestrator for disaster recovery testing."""
     async def initiate_failover(self, scenario: str) -> Dict[str, Any]:
@@ -99,7 +87,6 @@ class FailoverOrchestrator:
     
     async def close(self):
         pass
-
 
 class DisasterType(Enum):
     """Types of disaster scenarios to test."""
@@ -110,7 +97,6 @@ class DisasterType(Enum):
     NETWORK_PARTITION = "network_partition"
     STORAGE_FAILURE = "storage_failure"
     MULTI_COMPONENT_FAILURE = "multi_component_failure"
-
 
 class RecoveryPhase(Enum):
     """Phases of disaster recovery process."""
@@ -123,7 +109,6 @@ class RecoveryPhase(Enum):
     CONSISTENCY_VERIFICATION = "consistency_verification"
     HEALTH_VALIDATION = "health_validation"
     FAILOVER_COMPLETE = "failover_complete"
-
 
 @dataclass
 class DisasterScenario:
@@ -172,7 +157,6 @@ class DisasterScenario:
         # Simulate data loss window calculation
         return min(self.rpo_target.total_seconds(), 300)  # Max 5 minutes
 
-
 @dataclass
 class BackupMetadata:
     """Metadata for disaster recovery backups."""
@@ -192,7 +176,6 @@ class BackupMetadata:
         """Check if backup is valid and within retention."""
         age = datetime.now() - self.created_at
         return age <= timedelta(days=self.retention_days)
-
 
 class L4DisasterRecoveryFailoverTest(L4StagingCriticalPathTestBase):
     """L4 critical path test for disaster recovery failover."""
@@ -1148,7 +1131,6 @@ class L4DisasterRecoveryFailoverTest(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.error(f"Test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_disaster_recovery_test():
     """Fixture for L4 disaster recovery test."""
@@ -1158,7 +1140,6 @@ async def l4_disaster_recovery_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.L4
 @pytest.mark.staging
@@ -1232,7 +1213,6 @@ class TestDisasterRecoveryFailoverL4:
         print(f"   • RTO Violations: {rto_violations}/{total_scenarios}")
         print(f"   • RPO Violations: {rpo_violations}/{total_scenarios}")
         print(f"   • Business Value: $75K MRR protection validated")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

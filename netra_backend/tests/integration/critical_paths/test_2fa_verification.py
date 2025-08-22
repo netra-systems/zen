@@ -24,17 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -53,18 +46,15 @@ import redis.asyncio as aioredis
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthError,
     AuthProvider,
     SessionInfo,
-    # Add project root to path
     TokenData,
     UserPermission,
 )
 
 logger = logging.getLogger(__name__)
-
 
 class MockSMSProvider:
     """Mock SMS provider for testing - external service simulation."""
@@ -102,7 +92,6 @@ class MockSMSProvider:
     def get_sent_messages(self) -> List[Dict[str, Any]]:
         """Get list of sent messages for testing."""
         return self.sent_messages.copy()
-
 
 class TOTPGenerator:
     """Real TOTP (Time-based One-Time Password) generator component."""
@@ -319,7 +308,6 @@ class TOTPGenerator:
             await self.redis_client.incr(rate_key)
             await self.redis_client.expire(rate_key, self.rate_limit_window)
 
-
 class SMSFallbackHandler:
     """Real SMS fallback handler component."""
     
@@ -463,7 +451,6 @@ class SMSFallbackHandler:
         sms_rate_key = f"sms_rate_limit:{user_id}"
         await self.redis_client.incr(sms_rate_key)
         await self.redis_client.expire(sms_rate_key, 3600)  # 1 hour
-
 
 class TwoFactorAuthManager:
     """Real 2FA management and coordination component."""
@@ -649,7 +636,6 @@ class TwoFactorAuthManager:
                 "success": False,
                 "error": str(e)
             }
-
 
 class TwoFactorAuthTestManager:
     """Manages 2FA verification testing."""
@@ -937,7 +923,6 @@ class TwoFactorAuthTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def tfa_verification_manager():
     """Create 2FA verification test manager."""
@@ -945,7 +930,6 @@ async def tfa_verification_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -987,7 +971,6 @@ async def test_complete_totp_setup_and_verification_flow(tfa_verification_manage
     total_time = time.time() - start_time
     assert total_time < 2.0, f"Total TOTP test took {total_time:.2f}s, expected <2s"
 
-
 @pytest.mark.asyncio
 async def test_sms_fallback_verification_flow(tfa_verification_manager):
     """Test SMS fallback verification flow."""
@@ -1014,7 +997,6 @@ async def test_sms_fallback_verification_flow(tfa_verification_manager):
     assert complete_result["success"], "SMS verification completion failed"
     assert complete_result["verification_result"]["success"], "SMS code verification failed"
 
-
 @pytest.mark.asyncio
 async def test_2fa_rate_limiting_enforcement(tfa_verification_manager):
     """Test 2FA rate limiting enforcement."""
@@ -1029,7 +1011,6 @@ async def test_2fa_rate_limiting_enforcement(tfa_verification_manager):
     assert rate_limit_result["rate_limited"], "Rate limiting not triggered"
     assert rate_limit_result["rate_limit_triggered"], "Rate limit threshold not reached"
     assert rate_limit_result["rate_limit_time"] < 1.0, "Rate limiting test too slow"
-
 
 @pytest.mark.asyncio
 async def test_session_enhancement_after_2fa(tfa_verification_manager):
@@ -1053,7 +1034,6 @@ async def test_session_enhancement_after_2fa(tfa_verification_manager):
     assert status_result["success"], "2FA status check failed"
     assert status_result["status"]["totp_setup"], "TOTP not marked as setup"
     assert status_result["status"]["recently_verified"], "Recent verification not recorded"
-
 
 @pytest.mark.asyncio
 async def test_cross_method_2fa_verification(tfa_verification_manager):

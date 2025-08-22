@@ -10,17 +10,10 @@ L3 Test: Real Redis session store with JWT token validation, session storage,
 refresh flows, and revocation testing with actual auth service integration.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,18 +27,14 @@ import pytest
 import redis.asyncio as redis
 from logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
 from netra_backend.app.redis_manager import RedisManager
-from integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class MockSessionManager:
     """Mock session manager for testing JWT with Redis."""
@@ -98,7 +87,6 @@ class MockSessionManager:
         return {
             "success": bool(deleted)
         }
-
 
 class AuthJWTRedisManager:
     """Manages JWT authentication testing with Redis session store."""
@@ -464,7 +452,6 @@ class AuthJWTRedisManager:
             }
         }
 
-
 @pytest.mark.L3
 @pytest.mark.integration
 class TestAuthJWTRedisSessionL3:
@@ -605,7 +592,6 @@ class TestAuthJWTRedisSessionL3:
         assert summary["test_artifacts"]["tokens_tracked"] >= 25, "Insufficient token artifacts"
         
         logger.info(f"Comprehensive auth-Redis integration test completed in {total_time:.2f}s: {summary}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

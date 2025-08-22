@@ -277,7 +277,7 @@ class EnhancedInputValidator:
     
     def _check_validation_level_constraints(self, input_value: str, result: BaseValidationResult) -> None:
         """Check validation level specific constraints."""
-        from .validation_rules import ValidationLevel
+        from netra_backend.app.core.validation_rules import ValidationLevel
         
         if self.validation_level == ValidationLevel.STRICT:
             self._check_strict_html_content(input_value, result)

@@ -4,17 +4,10 @@ Tests ClickHouse connection pooling, migration safety, and health checks
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -22,13 +15,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.health_checks import DatabaseHealthChecker
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
-
-# Add project root to path
-
 
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
@@ -81,7 +70,6 @@ class TestClickHouseConnectionPool:
             with pytest.raises(asyncio.TimeoutError):
                 await db.execute_query("SELECT sleep(10)")
 
-
 class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
     
@@ -112,7 +100,6 @@ class TestMigrationRunnerSafety:
         # Verify transaction was used
         assert mock_session.begin.called
         assert mock_session.commit.called
-
 
 class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
@@ -155,7 +142,6 @@ class TestDatabaseHealthChecks:
         assert pool_alert["alert"] == True
         assert pool_alert["usage"] == 95
 
-
 def _create_test_db():
     """Create test database configuration."""
     return ClickHouseDatabase(
@@ -164,7 +150,6 @@ def _create_test_db():
         database="test",
         pool_size=5
     )
-
 
 def _create_failing_migration():
     """Create migration that fails."""
@@ -177,7 +162,6 @@ def _create_failing_migration():
     
     return FailingMigration()
 
-
 def _create_test_migration():
     """Create test migration."""
     class TestMigration:
@@ -186,7 +170,6 @@ def _create_test_migration():
             await session.execute("INSERT INTO test_table VALUES (1)")
     
     return TestMigration()
-
 
 def _setup_slow_query_mock(mock_session):
     """Setup slow query mock."""

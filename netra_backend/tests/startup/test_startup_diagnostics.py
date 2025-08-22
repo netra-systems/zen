@@ -4,17 +4,10 @@ Tests system error collection, automatic fixes, and CLI interface.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,7 +28,6 @@ from netra_backend.app.schemas.diagnostic_types import (
     StartupPhase,
 )
 from scripts.startup_diagnostics import (
-    # Add project root to path
     StartupDiagnostics,
     apply_fixes,
     apply_single_fix,
@@ -53,7 +45,6 @@ from scripts.startup_diagnostics import (
     main,
 )
 
-
 @pytest.fixture
 def mock_diagnostic_error() -> DiagnosticError:
     """Create mock diagnostic error."""
@@ -66,12 +57,10 @@ def mock_diagnostic_error() -> DiagnosticError:
         can_auto_fix=True
     )
 
-
 @pytest.fixture
 def startup_diagnostics() -> StartupDiagnostics:
     """Create startup diagnostics instance."""
     return StartupDiagnostics()
-
 
 class TestStartupDiagnosticsInit:
     """Test initialization and setup."""
@@ -81,7 +70,6 @@ class TestStartupDiagnosticsInit:
         assert len(startup_diagnostics.errors) == 0
         assert len(startup_diagnostics.fixes_applied) == 0
         assert isinstance(startup_diagnostics.start_time, datetime)
-
 
 class TestSystemErrorCollection:
     """Test system error collection functionality."""
@@ -109,7 +97,6 @@ class TestSystemErrorCollection:
         mock_env.assert_called_once()
         mock_migrations.assert_called_once()
 
-
 class TestPortConflictChecking:
     """Test port conflict detection."""
     @patch('scripts.startup_diagnostics.is_port_in_use')
@@ -134,7 +121,6 @@ class TestPortConflictChecking:
         errors = await check_port_conflicts()
         assert len(errors) == 1
         mock_create_error.assert_called_once_with(8000)
-
 
 class TestDatabaseConnectionChecking:
     """Test database connection checking."""
@@ -167,7 +153,6 @@ class TestDatabaseConnectionChecking:
         
         errors = await check_database_connection()
         assert len(errors) == 1
-
 
 class TestDependencyChecking:
     """Test dependency checking functionality."""
@@ -209,7 +194,6 @@ class TestDependencyChecking:
         assert len(errors) == 1
         mock_create_error.assert_called_with("Node")
 
-
 class TestEnvironmentVariableChecking:
     """Test environment variable checking."""
     @patch('os.getenv')
@@ -230,7 +214,6 @@ class TestEnvironmentVariableChecking:
         
         errors = await check_environment_variables()
         assert len(errors) == 2  # DATABASE_URL and SECRET_KEY
-
 
 class TestMigrationChecking:
     """Test migration status checking."""
@@ -264,7 +247,6 @@ class TestMigrationChecking:
         errors = await check_migrations()
         assert len(errors) == 1
 
-
 class TestFixApplication:
     """Test automatic fix application."""
     async def test_apply_fixes_empty_list(self) -> None:
@@ -288,7 +270,6 @@ class TestFixApplication:
         
         fixes = await apply_fixes([mock_diagnostic_error])
         assert len(fixes) == 1
-
 
 class TestSingleFixApplication:
     """Test individual fix application."""
@@ -330,7 +311,6 @@ class TestSingleFixApplication:
             assert result.attempted is True
             assert result.successful is False
             assert "fix failed" in result.message.lower()
-
 
 class TestSpecificFixes:
     """Test specific fix implementations."""
@@ -377,7 +357,6 @@ class TestSpecificFixes:
         result = await fix_migrations(mock_diagnostic_error)
         assert result.successful is False
 
-
 class TestDiagnoseStartup:
     """Test main diagnosis functionality."""
     @patch('scripts.startup_diagnostics.collect_system_errors')
@@ -409,7 +388,6 @@ class TestDiagnoseStartup:
         assert result.success is False
         assert len(result.errors) == 1
 
-
 class TestRecommendationGeneration:
     """Test recommendation generation."""
     
@@ -435,7 +413,6 @@ class TestRecommendationGeneration:
         
         recommendations = generate_recommendations(errors)
         assert any("system cleanup" in r.lower() for r in recommendations)
-
 
 class TestCLIInterface:
     """Test command-line interface."""

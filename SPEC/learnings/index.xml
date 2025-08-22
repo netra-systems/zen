@@ -242,6 +242,14 @@
             <critical-takeaway>Verify IP addresses in secrets match actual Cloud SQL instances</critical-takeaway>
         </category>
         
+        <category name="Database/URLSimplification" path="SPEC/learnings/postgres_url_simplification.xml" keywords="PostgreSQL, Database URL, Simplification, Driver Normalization, Migration, Staging">
+            <critical-takeaway>Use simplified postgresql:// URLs and let system add drivers automatically at runtime</critical-takeaway>
+            <critical-takeaway>DatabaseConfigManager normalizes URLs: postgresql:// becomes postgresql+asyncpg:// for async operations</critical-takeaway>
+            <critical-takeaway>Migration utils convert any PostgreSQL URL to postgresql+psycopg2:// for Alembic compatibility</critical-takeaway>
+            <critical-takeaway>Store simplified URLs in Secret Manager - avoid complex driver prefixes like postgresql+psycopg2://</critical-takeaway>
+            <critical-takeaway>URL validation accepts multiple schemes: postgresql://, postgres://, and driver-specific variants</critical-takeaway>
+        </category>
+        
         <category name="Frontend URL Configuration" path="SPEC/frontend_base_url_configuration.xml" keywords="Base URL, URL Construction, apiClientWrapper, Invalid URL, Frontend Config">
             <critical-takeaway>NEVER use empty string as base URL - use window.location.origin in browser contexts</critical-takeaway>
             <critical-takeaway>Base URL must always be a valid URL for the JavaScript URL constructor</critical-takeaway>

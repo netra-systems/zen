@@ -13,17 +13,10 @@ Invoice generation -> Payment processing -> Usage analytics
 Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integrity, quota enforcement
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,14 +33,10 @@ from netra_backend.app.services.billing.cost_calculator import CostCalculator
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
-# Add project root to path
-from tests.l4_staging_critical_base import (
+from netra_backend.tests.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-
-# Add project root to path
-
 
 @dataclass
 class BillingTestScenario:
@@ -57,7 +46,6 @@ class BillingTestScenario:
     cost_per_token: Decimal
     expected_operations: int
     test_duration_seconds: int
-
 
 @dataclass
 class UsageOperation:
@@ -69,7 +57,6 @@ class UsageOperation:
     model_used: str
     cost_usd: Decimal
     timestamp: datetime
-
 
 class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
     """L4 test for cost tracking and billing pipeline in staging environment."""
@@ -809,7 +796,6 @@ class CostTrackingBillingL4Test(L4StagingCriticalPathTestBase):
                 except Exception:
                     pass
 
-
 # Pytest fixtures and test functions
 @pytest.fixture
 async def cost_tracking_billing_test():
@@ -818,7 +804,6 @@ async def cost_tracking_billing_test():
     await test.initialize_l4_environment()
     yield test
     await test.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -845,7 +830,6 @@ async def test_cost_tracking_billing_pipeline_l4(cost_tracking_billing_test):
     print(f"  Service Calls: {metrics.service_calls}")
     print(f"  Total Operations: {len(cost_tracking_billing_test.usage_operations)}")
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_billing_accuracy_validation_l4(cost_tracking_billing_test):
@@ -864,7 +848,6 @@ async def test_billing_accuracy_validation_l4(cost_tracking_billing_test):
     for result in accuracy_results["validation_results"]:
         if result.get("success"):
             assert result["accuracy"] >= 0.99, f"Accuracy too low for user {result['user_id']}: {result['accuracy']}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

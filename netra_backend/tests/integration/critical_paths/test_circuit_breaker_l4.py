@@ -12,17 +12,10 @@ Service health monitoring -> Failure threshold detection -> Circuit breaker acti
 Coverage: Real service failures, circuit breaker state transitions, cascade prevention, staging environment validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -33,15 +26,13 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-# Add project root to path
 from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import (
     CircuitBreakerManager,
 )
@@ -53,13 +44,11 @@ from netra_backend.app.services.circuit_breaker.service_health_monitor import (
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 
-
 class CircuitBreakerState(Enum):
     """Circuit breaker states."""
     CLOSED = "closed"
     OPEN = "open" 
     HALF_OPEN = "half_open"
-
 
 @dataclass
 class ServiceHealthMetrics:
@@ -72,7 +61,6 @@ class ServiceHealthMetrics:
     circuit_breaker_state: CircuitBreakerState
     failure_count: int
     recovery_time: Optional[float] = None
-
 
 class CircuitBreakerL4TestSuite:
     """L4 test suite for circuit breaker cascade prevention in staging environment."""
@@ -787,7 +775,6 @@ class CircuitBreakerL4TestSuite:
         except Exception as e:
             print(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def circuit_breaker_l4_suite():
     """Create L4 circuit breaker test suite."""
@@ -795,7 +782,6 @@ async def circuit_breaker_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -818,7 +804,6 @@ async def test_circuit_breaker_activation_on_service_failure_l4(circuit_breaker_
     # Check if circuit breaker went through expected states
     states_seen = [transition[1] for transition in state_transitions]
     assert CircuitBreakerState.OPEN in states_seen, "Circuit breaker never opened"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -845,7 +830,6 @@ async def test_cascade_failure_prevention_auth_service_l4(circuit_breaker_l4_sui
     auth_failure = cascade_result["auth_failure_result"]
     assert auth_failure["circuit_breaker_triggered"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_cascade_failure_prevention_backend_service_l4(circuit_breaker_l4_suite):
@@ -865,7 +849,6 @@ async def test_cascade_failure_prevention_backend_service_l4(circuit_breaker_l4_
     
     assert auth_health.success_rate >= 0.9, f"Auth service affected by backend failure: {auth_health.success_rate}"
     assert websocket_health.success_rate >= 0.8, f"WebSocket service affected by backend failure: {websocket_health.success_rate}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
@@ -891,7 +874,6 @@ async def test_multiple_service_failure_cascade_prevention_l4(circuit_breaker_l4
     # Validate emergency protocols
     assert system_degradation["emergency_protocols_active"] is True, "Emergency protocols not activated"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_circuit_breaker_recovery_monitoring_l4(circuit_breaker_l4_suite):
@@ -909,7 +891,6 @@ async def test_circuit_breaker_recovery_monitoring_l4(circuit_breaker_l4_suite):
     
     # Validate metrics
     assert circuit_breaker_l4_suite.test_metrics["service_recoveries"] >= 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -957,7 +938,6 @@ async def test_circuit_breaker_half_open_state_behavior_l4(circuit_breaker_l4_su
     # Validate limited request processing worked
     assert successful_requests >= 2, f"Too few successful requests in half-open: {successful_requests}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_service_health_monitoring_accuracy_l4(circuit_breaker_l4_suite):
@@ -993,7 +973,6 @@ async def test_service_health_monitoring_accuracy_l4(circuit_breaker_l4_suite):
     # Validate overall system health
     total_requests = sum(metrics.request_count for metrics in service_health_results.values())
     assert total_requests >= 80, f"Insufficient total monitoring requests: {total_requests}"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

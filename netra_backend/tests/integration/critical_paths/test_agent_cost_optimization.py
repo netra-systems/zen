@@ -10,17 +10,10 @@ Critical Path: Cost prediction -> Model selection -> Response caching -> Token o
 Coverage: LLM cost tracking, model selection algorithms, caching strategies, token optimization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -35,14 +28,10 @@ import pytest
 from netra_backend.app.services.analytics.cost_tracker import CostTracker
 from netra_backend.app.services.cache.response_cache import ResponseCache
 
-# Add project root to path
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.services.llm.model_selector import ModelSelector
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class AgentCostOptimizationManager:
     """Manages agent cost optimization testing."""
@@ -287,7 +276,6 @@ class AgentCostOptimizationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cost_optimization_manager():
     """Create cost optimization manager for testing."""
@@ -295,7 +283,6 @@ async def cost_optimization_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_basic_cost_optimization(cost_optimization_manager):
@@ -308,7 +295,6 @@ async def test_basic_cost_optimization(cost_optimization_manager):
     assert "cost_saved" in result
     assert result["cost_saved"] >= 0
     assert "response" in result
-
 
 @pytest.mark.asyncio
 async def test_cache_effectiveness(cost_optimization_manager):
@@ -324,7 +310,6 @@ async def test_cache_effectiveness(cost_optimization_manager):
     assert second_result["optimized"] is True
     assert second_result["method"] == "cache_hit"
     assert second_result["cost_saved"] > 0
-
 
 @pytest.mark.asyncio
 async def test_model_selection_optimization(cost_optimization_manager):
@@ -346,7 +331,6 @@ async def test_model_selection_optimization(cost_optimization_manager):
     # Should show cost savings
     assert all(r.get("cost_saved", 0) >= 0 for r in results)
 
-
 @pytest.mark.asyncio
 async def test_cost_optimization_effectiveness(cost_optimization_manager):
     """Test overall effectiveness of cost optimization."""
@@ -363,7 +347,6 @@ async def test_cost_optimization_effectiveness(cost_optimization_manager):
     assert effectiveness_result["optimization_success_rate"] >= 80.0  # 80% should be optimized
     assert effectiveness_result["savings_percentage"] > 0  # Should show savings
     assert effectiveness_result["total_savings"] > 0
-
 
 @pytest.mark.asyncio
 async def test_concurrent_optimization_performance(cost_optimization_manager):
@@ -385,7 +368,6 @@ async def test_concurrent_optimization_performance(cost_optimization_manager):
     success_rate = len(successful_optimizations) / len(results) * 100
     
     assert success_rate >= 80.0  # 80% success rate under load
-
 
 @pytest.mark.asyncio
 async def test_cost_optimization_metrics(cost_optimization_manager):
@@ -415,7 +397,6 @@ async def test_cost_optimization_metrics(cost_optimization_manager):
     assert methods["cache_hits"] >= 1  # At least one cache hit
     assert methods["full_optimizations"] >= 3  # At least three full optimizations
 
-
 @pytest.mark.asyncio
 async def test_quality_preservation_during_optimization(cost_optimization_manager):
     """Test that optimization maintains response quality."""
@@ -432,7 +413,6 @@ async def test_quality_preservation_during_optimization(cost_optimization_manage
     if "optimization_details" in result:
         # Quality should be maintained even with optimization
         assert result["cost_saved"] >= 0  # Should still save some cost
-
 
 @pytest.mark.asyncio
 async def test_optimization_performance_requirements(cost_optimization_manager):

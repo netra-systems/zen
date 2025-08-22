@@ -38,11 +38,8 @@ import sys
 import time
 import uuid
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState

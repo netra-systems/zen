@@ -4,17 +4,10 @@ Tests message queries and pagination functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
@@ -24,11 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.schemas.registry import Message, MessageType
 
-# Add project root to path
 from netra_backend.app.services.database.message_repository import MessageRepository
-
-# Add project root to path
-
 
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
@@ -92,14 +81,12 @@ class TestMessageRepositoryQueries:
         )
         assert len(recent_messages) == 1
 
-
 def _create_test_messages(count):
     """Create test messages for pagination."""
     return [
         Message(id=f"msg{i}", content=f"Message {i}", type=MessageType.USER, thread_id="thread1")
         for i in range(count)
     ]
-
 
 def _setup_search_mock(mock_session):
     """Setup search functionality mock."""
@@ -108,13 +95,11 @@ def _setup_search_mock(mock_session):
         Message(id="2", content="Hello there", type=MessageType.USER)
     ]
 
-
 def _get_date_range():
     """Get date range for testing."""
     start_date = datetime.now(timezone.utc) - timedelta(days=7)
     end_date = datetime.now(timezone.utc)
     return start_date, end_date
-
 
 def _setup_date_range_mock(mock_session):
     """Setup date range query mock."""

@@ -10,7 +10,6 @@ import pytest
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 
-
 class TestModelEffectivenessAnalysis:
     """Test model effectiveness analysis workflows."""
     
@@ -30,7 +29,6 @@ class TestModelEffectivenessAnalysis:
         results = await _execute_model_selection_workflow(setup, state)
         _validate_comparative_analysis_results(results)
 
-
 def _create_model_effectiveness_state() -> DeepAgentState:
     """Create state for model effectiveness analysis."""
     return DeepAgentState(
@@ -38,14 +36,12 @@ def _create_model_effectiveness_state() -> DeepAgentState:
         metadata=AgentMetadata(custom_fields={'test_type': 'model_effectiveness', 'candidate_models': 'gpt-4o,claude-3-sonnet'})
     )
 
-
 def _create_comparative_analysis_state() -> DeepAgentState:
     """Create state for comparative model analysis."""
     return DeepAgentState(
         user_request="Compare performance characteristics of GPT-4, Claude-3, and Gemini models for our workload.",
         metadata={'test_type': 'comparative_analysis', 'models': ['gpt-4', 'claude-3', 'gemini']}
     )
-
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
@@ -57,7 +53,6 @@ async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) 
         results.append(step_result)
     
     return results
-
 
 async def _execute_model_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
     """Execute single model selection workflow step."""
@@ -74,7 +69,6 @@ async def _execute_model_step(setup: Dict, step_name: str, state: DeepAgentState
     execution_result = await agent.run(state, setup['run_id'], True)
     return _create_model_result(step_name, agent, state, execution_result)
 
-
 def _create_model_result(step_name: str, agent, state: DeepAgentState, result) -> Dict:
     """Create model selection result dictionary."""
     return {
@@ -83,7 +77,6 @@ def _create_model_result(step_name: str, agent, state: DeepAgentState, result) -
         'agent_type': type(agent).__name__
     }
 
-
 def _validate_model_effectiveness_results(results: List[Dict], state: DeepAgentState):
     """Validate model effectiveness analysis results."""
     assert len(results) == 5, "All 5 workflow steps must execute"
@@ -91,13 +84,11 @@ def _validate_model_effectiveness_results(results: List[Dict], state: DeepAgentS
     _validate_current_setup_analysis(results[1], state)
     _validate_effectiveness_optimization(results[2], state)
 
-
 def _validate_model_identification(result: Dict, state: DeepAgentState):
     """Validate identification of target models."""
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
     assert 'gpt-4o' in state.user_request or 'claude-3-sonnet' in state.user_request
     assert 'effective' in state.user_request
-
 
 def _validate_current_setup_analysis(result: Dict, state: DeepAgentState):
     """Validate current setup analysis for model compatibility."""
@@ -105,14 +96,12 @@ def _validate_current_setup_analysis(result: Dict, state: DeepAgentState):
     assert result['state_updated']
     assert result['agent_type'] == 'DataSubAgent'
 
-
 def _validate_effectiveness_optimization(result: Dict, state: DeepAgentState):
     """Validate effectiveness optimization recommendations."""
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
     # For model selection workflows, accept completed agents even with None results (fallback scenarios)
     assert result['agent_state'] in [SubAgentLifecycle.COMPLETED]
     assert result['agent_type'] == 'OptimizationsCoreSubAgent'
-
 
 def _validate_comparative_analysis_results(results: List[Dict]):
     """Validate comparative model analysis results."""

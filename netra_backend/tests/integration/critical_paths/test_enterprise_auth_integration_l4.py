@@ -15,15 +15,12 @@ This test validates complete enterprise authentication capabilities.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import base64
 import hashlib
 import json
 import secrets
 
-# Add project root to path
 import sys
 import time
 from datetime import datetime, timedelta
@@ -37,9 +34,6 @@ import websockets
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 BASE_URL = "http://localhost:8000"
@@ -78,7 +72,6 @@ ENTERPRISE_CONFIG = {
         "backup_codes_enabled": True
     }
 }
-
 
 class EnterpriseAuthTester:
     """Test enterprise authentication integration."""
@@ -666,7 +659,6 @@ class EnterpriseAuthTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
@@ -719,7 +711,6 @@ async def test_enterprise_auth_integration():
         critical_passed = all(results.get(test, False) for test in critical_tests)
         assert critical_passed, f"Critical auth tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*80)
@@ -736,7 +727,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

@@ -3,17 +3,10 @@ Tests for pagination, rate limiting, and retry utilities (Tests 95-97).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -21,16 +14,13 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.network_pagination_test_helpers import (
     PaginationTestHelpers,
 )
 from netra_backend.tests.rate_retry_monitoring_test_helpers import (
-    # Add project root to path
     RateLimiterTestHelpers,
     RetryTestHelpers,
 )
-
 
 # Test 95: Pagination utils cursors
 class TestPaginationUtilsCursors:
@@ -87,7 +77,6 @@ class TestPaginationUtilsCursors:
         decoded = utils.decode_cursor(invalid_cursor)
         assert decoded == None or decoded == {}
 
-
 # Test 96: Rate limiter throttling
 class TestRateLimiterThrottling:
     """test_rate_limiter_throttling - Test rate limiting and bucket algorithms"""
@@ -121,7 +110,6 @@ class TestRateLimiterThrottling:
             rate=10, per=60.0, algorithm="leaky_bucket", burst_size=5
         )
         await RateLimiterTestHelpers.assert_burst_allowed(limiter, 5)
-
 
 # Test 97: Retry utils backoff
 class TestRetryUtilsBackoff:

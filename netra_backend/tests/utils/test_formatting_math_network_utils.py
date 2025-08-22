@@ -3,17 +3,10 @@ Tests for formatting, math, and network utilities (Tests 92-94).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import socket
@@ -27,13 +20,9 @@ from netra_backend.tests.network_pagination_test_helpers import (
     NetworkTestHelpers,
 )
 
-# Add project root to path
 from netra_backend.tests.validation_formatting_test_helpers import (
     FormattingTestHelpers,
 )
-
-# Add project root to path
-
 
 # Test 92: Formatting utils display
 class TestFormattingUtilsDisplay:
@@ -96,7 +85,6 @@ class TestFormattingUtilsDisplay:
         assert "January" in utils_us.format_date(date, "long")
         assert "Januar" in utils_de.format_date(date, "long")
 
-
 # Test 93: Math utils calculations
 class TestMathUtilsCalculations:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
@@ -149,7 +137,6 @@ class TestMathUtilsCalculations:
         """Assert financial rounding methods."""
         assert utils.round_financial(2.345) == Decimal("2.35")
         assert utils.round_financial(2.344) == Decimal("2.34")
-
 
 # Test 94: Network utils requests
 class TestNetworkUtilsRequests:

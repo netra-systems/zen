@@ -3,17 +3,10 @@ Core functionality tests for Data Sub Agent
 Focuses on initialization, data processing, and validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
@@ -22,13 +15,9 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 # Test fixtures for shared test classes
 @pytest.fixture
@@ -39,14 +28,12 @@ def service():
     agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     return agent
 
-
 # Helper function to create DataSubAgent with mocks
 def create_test_agent():
     """Create a DataSubAgent instance with mocked dependencies"""
     mock_llm_manager = Mock()
     mock_tool_dispatcher = Mock()
     return DataSubAgent(mock_llm_manager, mock_tool_dispatcher), mock_llm_manager, mock_tool_dispatcher
-
 
 class TestDataSubAgentInitialization:
     """Test DataSubAgent initialization and configuration"""
@@ -81,7 +68,6 @@ class TestDataSubAgentInitialization:
         
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         assert agent.query_builder != None
-
 
 class TestDataProcessing:
     """Test data processing capabilities"""
@@ -137,7 +123,6 @@ class TestDataProcessing:
             
         assert len(results) == 3
         assert mock_process.call_count == 3
-
 
 class TestDataValidation:
     """Test data validation functionality"""

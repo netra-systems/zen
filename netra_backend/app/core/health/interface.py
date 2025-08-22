@@ -244,7 +244,7 @@ class HealthInterface:
     
     def _create_development_warning_result(self, component_name: str, error_msg: str) -> HealthCheckResult:
         """Create a warning result for optional development services."""
-        from ..health_types import HealthCheckResult
+        from netra_backend.app.core.health_types import HealthCheckResult
         details = self._build_development_warning_details(component_name, error_msg)
         return HealthCheckResult(
             status="healthy",

@@ -22,7 +22,6 @@ from netra_backend.app.services.realistic_test_data_service import (
     RealisticTestDataService,
 )
 
-
 class CoreTestFixtures:
     """Generator for core realistic test fixtures"""
     
@@ -192,25 +191,21 @@ class CoreTestFixtures:
             "ip_whitelist": []
         }
 
-
 # Pytest fixtures using the core generator
 @pytest.fixture
 def core_fixtures():
     """Provide core test fixtures"""
     return CoreTestFixtures()
 
-
 @pytest.fixture
 def small_core_data(core_fixtures):
     """Small-scale core data for development"""
     return core_fixtures.generate_production_seed_data("small")
 
-
 @pytest.fixture
 def medium_core_data(core_fixtures):
     """Medium-scale core data for staging"""
     return core_fixtures.generate_production_seed_data("medium")
-
 
 @pytest.fixture
 def large_core_data(core_fixtures):

@@ -13,8 +13,6 @@ This test ensures background jobs are properly orchestrated.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import sys
@@ -26,15 +24,10 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
 JOBS_API_URL = f"{DEV_BACKEND_URL}/api/v1/jobs"
 AUTH_SERVICE_URL = "http://localhost:8081"
-
 
 class BackgroundJobOrchestrationTester:
     """Test background job orchestration flow."""
@@ -389,7 +382,6 @@ class BackgroundJobOrchestrationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -412,7 +404,6 @@ async def test_background_job_orchestration():
         print(f"Jobs failed: {len(tester.failed_jobs)}")
         
         assert all(results.values()), f"Some tests failed: {results}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_background_job_orchestration())

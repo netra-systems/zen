@@ -3,33 +3,23 @@ Tests for AsyncResourceManager - resource lifecycle management
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_resource_manager import AsyncResourceManager
 from netra_backend.tests.async_utils_helpers import (
     assert_callbacks_called,
     assert_resource_manager_state,
     create_failing_callback,
-    # Add project root to path
     create_mock_resources,
     register_test_resources,
 )
-
 
 class TestAsyncResourceManager:
     """Test AsyncResourceManager for resource lifecycle management"""
@@ -93,7 +83,6 @@ class TestAsyncResourceManager:
         await resource_manager.cleanup_all()
         failing_callback.assert_called_once()
         success_callback.assert_called_once()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

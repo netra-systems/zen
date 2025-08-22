@@ -10,17 +10,10 @@ Critical Path: Migration validation -> Backup creation -> Schema changes -> Data
 Coverage: Schema migration safety, data integrity, rollback mechanisms, multi-database coordination
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -40,13 +33,9 @@ from netra_backend.app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
-# Add project root to path
 from netra_backend.app.services.database.migration_service import MigrationService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class DatabaseMigrationManager:
     """Manages database migration testing with rollback validation."""
@@ -746,7 +735,6 @@ class DatabaseMigrationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def migration_manager():
     """Create database migration manager for testing."""
@@ -754,7 +742,6 @@ async def migration_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_safe_schema_migration_with_rollback(migration_manager):
@@ -778,7 +765,6 @@ async def test_safe_schema_migration_with_rollback(migration_manager):
     assert rollback_result["success"] is True
     assert rollback_result["rollback_time"] < 5.0
     assert rollback_result["verification"]["passed"] is True
-
 
 @pytest.mark.asyncio
 async def test_data_integrity_preservation(migration_manager):
@@ -811,7 +797,6 @@ async def test_data_integrity_preservation(migration_manager):
     assert snapshot_check is not None
     assert snapshot_check["passed"] is True
 
-
 @pytest.mark.asyncio
 async def test_migration_validation_prevents_dangerous_operations(migration_manager):
     """Test that migration validation prevents dangerous operations."""
@@ -833,7 +818,6 @@ async def test_migration_validation_prevents_dangerous_operations(migration_mana
     # Should fail validation
     assert migration_result["success"] is False
     assert "validation failed" in migration_result["error"].lower()
-
 
 @pytest.mark.asyncio
 async def test_concurrent_migration_safety(migration_manager):
@@ -860,7 +844,6 @@ async def test_concurrent_migration_safety(migration_manager):
     for result in successful_results:
         assert result["verification"]["passed"] is True
 
-
 @pytest.mark.asyncio
 async def test_clickhouse_migration_support(migration_manager):
     """Test migration support for ClickHouse database."""
@@ -878,7 +861,6 @@ async def test_clickhouse_migration_support(migration_manager):
     
     assert rollback_result["success"] is True
     assert rollback_result["verification"]["passed"] is True
-
 
 @pytest.mark.asyncio
 async def test_migration_dependency_validation(migration_manager):
@@ -903,7 +885,6 @@ async def test_migration_dependency_validation(migration_manager):
     dependent_result_2 = await migration_manager.execute_migration(dependent_migration)
     assert dependent_result_2["success"] is True
 
-
 @pytest.mark.asyncio
 async def test_rollback_safety_validation(migration_manager):
     """Test rollback safety validation prevents unsafe rollbacks."""
@@ -923,7 +904,6 @@ async def test_rollback_safety_validation(migration_manager):
     # Should either fail or handle gracefully
     if not rollback_result["success"]:
         assert "dependent" in rollback_result["error"].lower() or "safety" in rollback_result["error"].lower()
-
 
 @pytest.mark.asyncio
 async def test_migration_performance_requirements(migration_manager):

@@ -17,17 +17,10 @@ L4 Requirements:
 - Cross-service coordination
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -47,16 +40,12 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
-from tests.l4_staging_critical_base import (
+from netra_backend.tests.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AutoScalingMetrics:
@@ -83,7 +72,6 @@ class AutoScalingMetrics:
         """Calculate resource utilization efficiency gain."""
         return self.resource_utilization_after - self.resource_utilization_before
 
-
 @dataclass
 class LoadTestConfig:
     """Configuration for load testing scenarios."""
@@ -96,7 +84,6 @@ class LoadTestConfig:
     concurrent_users: int = 50
     target_endpoints: List[str] = field(default_factory=list)
     scaling_triggers: Dict[str, Any] = field(default_factory=dict)
-
 
 class AutoScalingOrchestrator:
     """Orchestrates auto-scaling operations for L4 testing."""
@@ -317,7 +304,6 @@ class AutoScalingOrchestrator:
             "thresholds": self.performance_thresholds,
             "analysis_timestamp": datetime.utcnow().isoformat()
         }
-
 
 class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
     """L4 peak load auto-scaling critical path test implementation."""
@@ -1020,7 +1006,6 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.error(f"Auto-scaling test cleanup failed: {e}")
 
-
 # Pytest fixtures and test functions
 
 @pytest.fixture
@@ -1031,7 +1016,6 @@ async def peak_load_autoscaling_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1055,7 +1039,6 @@ async def test_peak_load_autoscaling_10x_traffic_spike(peak_load_autoscaling_tes
     performance_results = test_metrics.details.get("performance_results", {})
     assert performance_results.get("success_rate", 0) >= 95.0, "Success rate below 95% during peak load"
     assert performance_results.get("avg_response_time", 0) <= 3.0, "Average response time exceeds 3.0s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1083,7 +1066,6 @@ async def test_horizontal_scaling_effectiveness(peak_load_autoscaling_test):
     cost_efficiency = scaling_results.get("cost_efficiency_ratio", 1.0)
     assert cost_efficiency <= 3.0, f"Cost efficiency ratio {cost_efficiency} exceeds acceptable limit"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L4
@@ -1107,7 +1089,6 @@ async def test_service_discovery_updates_during_scaling(peak_load_autoscaling_te
     for update in discovery_data:
         assert "propagation_delay" in update, "Propagation delay not recorded"
         assert update.get("instance_count", 0) > 0, "Invalid instance count in discovery update"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1139,7 +1120,6 @@ async def test_cost_optimization_scale_down(peak_load_autoscaling_test):
     scale_down_latency = scaling_metrics.scale_down_latency
     if scale_down_latency > 0:
         assert scale_down_latency <= 120.0, f"Scale-down latency {scale_down_latency}s exceeds limit"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

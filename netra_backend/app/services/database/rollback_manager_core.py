@@ -70,7 +70,7 @@ class RollbackManager:
     
     def __init__(self):
         """Initialize rollback manager with executors and resolver."""
-        from .rollback_manager_recovery import DependencyResolver
+        from netra_backend.app.services.database.rollback_manager_recovery import DependencyResolver
         from .rollback_manager_transactions import (
             ClickHouseRollbackExecutor,
             PostgresRollbackExecutor,
@@ -157,7 +157,7 @@ class RollbackManager:
         execution_batches: List[List[RollbackOperation]]
     ) -> Dict[str, Any]:
         """Execute all operation batches and track results."""
-        from .rollback_manager_execution import BatchExecutor
+        from netra_backend.app.services.database.rollback_manager_execution import BatchExecutor
         executor = BatchExecutor(self.postgres_executor, self.clickhouse_executor)
         return await executor.execute_all_batches(session_id, execution_batches)
 

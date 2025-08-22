@@ -14,17 +14,10 @@ REQUIREMENTS:
 - MCP protocol compliance validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -32,14 +25,11 @@ from datetime import datetime, timedelta
 
 import pytest
 
-# Add project root to path
-from integration.operational.shared_fixtures import (
+from netra_backend.tests.integration.operational.shared_fixtures import (
     MCPToolsTestHelper,
     mcp_test_helper,
-    # Add project root to path
     operational_infrastructure,
 )
-
 
 class TestMCPTools:
     """BVJ: Enables $30K MRR from advanced tool integrations."""
@@ -200,7 +190,6 @@ class TestMCPTools:
         assert discovery_result["all_tools_available"] is False
         assert "error" in discovery_result
         assert discovery_result["discovery_time_ms"] > 500
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

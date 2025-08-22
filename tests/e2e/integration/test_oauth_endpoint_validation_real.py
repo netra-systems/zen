@@ -37,9 +37,6 @@ import pytest_asyncio
 import websockets
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.oauth_test_providers import (

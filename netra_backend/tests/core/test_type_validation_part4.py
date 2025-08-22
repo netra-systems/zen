@@ -1,16 +1,9 @@
 """Part 4: Edge cases, error handling, and module-level functions."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import tempfile
@@ -24,25 +17,21 @@ from netra_backend.app.core.exceptions_config import (
     ValidationError as NetraValidationError,
 )
 
-# Add project root to path
 from netra_backend.app.core.type_validation import (
     SchemaValidator,
     TypeCompatibilityChecker,
     TypeMismatch,
-    # Add project root to path
     TypeMismatchSeverity,
     TypeScriptParser,
     generate_validation_report,
     validate_type_consistency,
 )
 
-
 def _create_temp_typescript_file(content: str) -> str:
     """Create temporary TypeScript file with content."""
     with tempfile.NamedTemporaryFile(mode='w', suffix='.ts', delete=False) as f:
         f.write(content)
         return f.name
-
 
 class TestValidationFunctions:
     """Test module-level validation functions."""
@@ -67,7 +56,6 @@ class TestValidationFunctions:
             name: string;
         }
         """
-
 
     def _create_test_backend_schemas(self) -> Dict[str, Any]:
         """Create test backend schemas."""
@@ -204,7 +192,6 @@ class TestValidationFunctions:
         """Assert that certain severities are excluded."""
         assert "🚨 CRITICAL" not in report
         assert "ℹ️ INFO" not in report
-
 
 class TestEdgeCases:
     """Test edge cases and complex scenarios."""

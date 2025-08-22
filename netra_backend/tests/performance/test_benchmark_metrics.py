@@ -5,17 +5,10 @@ Tests for throughput measurement, latency profiling, and resource monitoring.
 Provides comprehensive performance metrics and benchmark data.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -28,11 +21,7 @@ import pytest
 
 from netra_backend.app.schemas.Generation import ContentGenParams
 
-# Add project root to path
 from netra_backend.app.services.generation_service import run_content_generation_job
-
-# Add project root to path
-
 
 class TestBenchmarkMetrics:
     """Test benchmarking and metrics collection"""
@@ -204,7 +193,6 @@ class TestBenchmarkMetrics:
         for metric in performance_metrics[1:]:
             throughput_ratio = metric['throughput'] / baseline_throughput
             assert throughput_ratio > 0.5  # Should maintain >50% of baseline
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

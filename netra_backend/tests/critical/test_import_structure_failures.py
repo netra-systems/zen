@@ -6,17 +6,10 @@ These tests validate that imports are correctly structured
 and that modules are in expected locations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import sys
 from pathlib import Path
@@ -24,7 +17,6 @@ from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 
 class TestImportStructureFailures:
     """Tests that expose import structure failures in the codebase"""
@@ -178,7 +170,6 @@ class TestImportStructureFailures:
         startup_checker = StartupChecker(app)
         assert hasattr(startup_checker, 'run_all_checks')
 
-
 class TestImportErrorConsequences:
     """Tests that demonstrate the consequences of the import error"""
     
@@ -256,7 +247,6 @@ class TestImportErrorConsequences:
             
             # Error should indicate the module path
             assert "netra_backend.app.checker" in error_msg
-
 
 class TestCorrectImportStructure:
     """Tests that validate the correct import structure after fix"""

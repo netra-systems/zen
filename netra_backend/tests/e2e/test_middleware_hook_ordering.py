@@ -11,17 +11,10 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -34,16 +27,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from netra_backend.app.middleware.metrics_middleware import AgentMetricsMiddleware
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import (
     RateLimitTracker,
     SecurityMiddleware,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class TestMiddlewareOrdering:
     """Test middleware ordering and execution sequence."""
@@ -143,7 +132,6 @@ class TestMiddlewareOrdering:
         request.body = AsyncMock(return_value=b'')
         return request
 
-
 class TestHookExecutionSequence:
     """Test hook execution sequence and coordination."""
     
@@ -224,7 +212,6 @@ class TestHookExecutionSequence:
         request.body = AsyncMock(return_value=b'')
         return request
 
-
 class TestMixinComposition:
     """Test mixin composition within middleware systems."""
     
@@ -273,7 +260,6 @@ class TestMixinComposition:
     def _create_security_middleware(self) -> SecurityMiddleware:
         """Create security middleware instance for testing."""
         return SecurityMiddleware(None)
-
 
 class TestMetricsMiddlewareIntegration:
     """Test metrics middleware integration with other components."""

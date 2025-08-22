@@ -42,7 +42,6 @@ from netra_backend.app.services.audit_service import (
     log_admin_action,
 )
 
-
 class MockSecurityInfrastructure:
     """Mock security infrastructure for testing."""
     
@@ -76,7 +75,6 @@ class MockSecurityInfrastructure:
             "compliance_reporter": self.compliance_reporter,
             "tamper_detector": self.tamper_detector
         }
-
 
 class AuthenticationAuditHelper:
     """Helper for authentication audit testing."""
@@ -164,7 +162,6 @@ class AuthenticationAuditHelper:
             assert not audit_entry.success
             assert audit_entry.error_message is not None
 
-
 class DataAccessAuditHelper:
     """Helper for data access audit testing."""
     
@@ -235,7 +232,6 @@ class DataAccessAuditHelper:
         
         return audit_record
 
-
 class ComplianceReportingHelper:
     """Helper for compliance reporting testing."""
     
@@ -278,25 +274,21 @@ class ComplianceReportingHelper:
         infrastructure["compliance_reporter"].generate_reports.return_value = compliance_reports
         return compliance_reports
 
-
 @pytest.fixture
 async def enterprise_security_infrastructure():
     """Setup comprehensive enterprise security audit infrastructure."""
     mock_infra = MockSecurityInfrastructure()
     return mock_infra.to_dict()
 
-
 @pytest.fixture
 def auth_audit_helper():
     """Create authentication audit helper."""
     return AuthenticationAuditHelper()
 
-
 @pytest.fixture
 def data_access_helper():
     """Create data access audit helper."""
     return DataAccessAuditHelper()
-
 
 @pytest.fixture
 def compliance_helper():

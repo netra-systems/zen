@@ -3,17 +3,10 @@ Business Value Core Tests (Tests 1-5) - Essential Business Functionality
 Tests fundamental business value scenarios for cost optimization and performance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from typing import Dict, List
@@ -21,11 +14,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
-
-# Add project root to path
-
 
 class TestBusinessValueCore(BusinessValueFixtures):
     """
@@ -200,7 +189,6 @@ class TestBusinessValueCore(BusinessValueFixtures):
         """Verify test 5 specific results"""
         assert result_state != None
         self._verify_batch_optimization(infra["llm_manager"])
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

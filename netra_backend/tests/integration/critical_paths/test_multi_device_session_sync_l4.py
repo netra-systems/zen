@@ -12,17 +12,10 @@ Device login -> Session sync -> Real-time updates -> Preferences sync -> Activit
 Coverage: Multi-device session state sync, real-time propagation, preference sync, activity tracking, auth state consistency
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,8 +25,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import httpx
@@ -42,7 +34,6 @@ import websockets
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-
 
 @dataclass
 class DeviceSessionMetrics:
@@ -55,7 +46,6 @@ class DeviceSessionMetrics:
     auth_consistency_checks: int
     average_sync_time: float
 
-
 @dataclass
 class DeviceInfo:
     """Device information for session testing."""
@@ -65,7 +55,6 @@ class DeviceInfo:
     session_id: str
     access_token: str
     websocket_connection: Optional[object] = None
-
 
 class MultiDeviceSessionL4TestSuite:
     """L4 test suite for multi-device session synchronization."""
@@ -289,7 +278,6 @@ class MultiDeviceSessionL4TestSuite:
         self.devices.clear()
         self.session_state.clear()
 
-
 @pytest.fixture
 async def multi_device_l4_suite():
     """Create L4 multi-device session test suite."""
@@ -297,7 +285,6 @@ async def multi_device_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_devices()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -315,7 +302,6 @@ async def test_multi_device_session_sync_l4(multi_device_l4_suite):
     for device_id in device_ids:
         assert device_id in suite.session_state or device_id == devices[0].device_id
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_real_time_updates_propagation_l4(multi_device_l4_suite):
@@ -331,7 +317,6 @@ async def test_real_time_updates_propagation_l4(multi_device_l4_suite):
     assert len(update_result["broadcast_results"]) == len(device_ids)
     successful_updates = sum(1 for r in update_result["broadcast_results"].values() if r.get("success"))
     assert successful_updates >= len(device_ids) * 0.8
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -349,7 +334,6 @@ async def test_preferences_sync_across_devices_l4(multi_device_l4_suite):
     prefs = pref_result["preferences"]
     assert all(key in prefs for key in ["theme", "notifications", "display"])
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_activity_tracking_sync_l4(multi_device_l4_suite):
@@ -366,7 +350,6 @@ async def test_activity_tracking_sync_l4(multi_device_l4_suite):
     for activity_entry in activity_result["activity_data"]:
         assert all(key in activity_entry for key in ["device_id", "activity", "tracked"])
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_auth_consistency_across_devices_l4(multi_device_l4_suite):
@@ -382,7 +365,6 @@ async def test_auth_consistency_across_devices_l4(multi_device_l4_suite):
     assert len(auth_result["consistency_results"]) == len(device_ids)
     for device_id, result in auth_result["consistency_results"].items():
         assert result.get("consistent") is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -401,7 +383,6 @@ async def test_concurrent_multi_device_operations_l4(multi_device_l4_suite):
     for i, result in enumerate(results):
         if isinstance(result, Exception):
             pytest.fail(f"Operation {i} failed with exception: {result}")
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -424,7 +405,6 @@ async def test_multi_device_performance_metrics_l4(multi_device_l4_suite):
         successful_syncs = len([e for e in suite.sync_events if e["success"]])
         success_rate = successful_syncs / metrics.sync_operations
         assert success_rate >= 0.9
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging  

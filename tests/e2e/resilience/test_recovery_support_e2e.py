@@ -17,9 +17,6 @@ from pathlib import Path
 
 from tests.e2e.test_helpers import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
 
 setup_test_path()
 

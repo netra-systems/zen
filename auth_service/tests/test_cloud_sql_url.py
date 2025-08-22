@@ -22,7 +22,7 @@ async def test_cloud_sql_url_format():
     
     for original_url in test_urls:
         with patch.dict(os.environ, {"DATABASE_URL": original_url, "ENVIRONMENT": "staging"}):
-            with patch("auth_core.database.connection.create_async_engine") as mock_engine:
+            with patch("sqlalchemy.ext.asyncio.create_async_engine") as mock_engine:
                 mock_engine.return_value = MagicMock()
                 
                 db = AuthDatabase()
@@ -49,7 +49,7 @@ async def test_regular_postgres_url_with_ssl():
     test_url = "postgresql://user:pass@localhost:5432/dbname?sslmode=require"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "staging"}):
-        with patch("auth_core.database.connection.create_async_engine") as mock_engine:
+        with patch("sqlalchemy.ext.asyncio.create_async_engine") as mock_engine:
             mock_engine.return_value = MagicMock()
             
             db = AuthDatabase()
@@ -72,7 +72,7 @@ async def test_regular_postgres_url():
     test_url = "postgresql://user:pass@localhost:5432/dbname"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "development"}):
-        with patch("auth_core.database.connection.create_async_engine") as mock_engine:
+        with patch("sqlalchemy.ext.asyncio.create_async_engine") as mock_engine:
             mock_engine.return_value = MagicMock()
             
             db = AuthDatabase()
@@ -93,7 +93,7 @@ async def test_heroku_style_url():
     test_url = "postgres://user:pass@host.com:5432/dbname"
     
     with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "production"}):
-        with patch("auth_core.database.connection.create_async_engine") as mock_engine:
+        with patch("sqlalchemy.ext.asyncio.create_async_engine") as mock_engine:
             mock_engine.return_value = MagicMock()
             
             db = AuthDatabase()

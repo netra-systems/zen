@@ -19,7 +19,6 @@ from netra_backend.app.db.base import Base
 # Mock services - simplified for testing
 from unittest.mock import AsyncMock, MagicMock
 
-
 class MockLLMService:
     """Mock LLM service for testing."""
     def __init__(self, model_name: str):
@@ -30,7 +29,6 @@ class MockLLMService:
         
     async def stop(self):
         pass
-
 
 class MockOAuthProvider:
     """Mock OAuth provider for testing."""
@@ -49,7 +47,6 @@ class MockOAuthProvider:
     async def stop(self):
         pass
 
-
 class MockWebSocketServer:
     """Mock WebSocket server for testing."""
     def __init__(self, host: str, port: int):
@@ -61,7 +58,6 @@ class MockWebSocketServer:
         
     async def stop(self):
         pass
-
 
 class ServiceRegistry:
     """Mock service registry for testing."""
@@ -86,7 +82,6 @@ class ServiceRegistry:
     async def stop_all_services(self):
         pass
 
-
 class UnifiedTestHarness:
     """Mock test harness for testing."""
     async def start_all_services(self):
@@ -101,7 +96,6 @@ class UnifiedTestHarness:
     async def stop_all_services(self):
         pass
 
-
 @dataclass
 class TestUser:
     """Test user data structure."""
@@ -111,14 +105,12 @@ class TestUser:
     access_token: Optional[str] = None
     is_authenticated: bool = False
 
-
 @dataclass
 class WebSocketClient:
     """WebSocket client for testing."""
     connection: websockets.WebSocketServerProtocol
     url: str
     is_connected: bool = True
-
 
 @pytest.fixture(scope="function")
 async def unified_services() -> AsyncGenerator[Dict[str, Any], None]:
@@ -150,7 +142,6 @@ async def unified_services() -> AsyncGenerator[Dict[str, Any], None]:
         await harness.stop_all_services()
         await service_registry.stop_all_services()
 
-
 @pytest.fixture(scope="function")
 def test_user() -> TestUser:
     """Provide test user for authentication flows."""
@@ -159,7 +150,6 @@ def test_user() -> TestUser:
         email="test@example.com",
         username="testuser"
     )
-
 
 @pytest.fixture(scope="function")
 async def test_database() -> AsyncGenerator[AsyncSession, None]:
@@ -206,7 +196,6 @@ async def test_database() -> AsyncGenerator[AsyncSession, None]:
             # Log but don't fail on engine disposal error
             print(f"Warning: Engine disposal error: {e}")
 
-
 @pytest.fixture(scope="function")
 async def websocket_client(unified_services) -> AsyncGenerator[WebSocketClient, None]:
     """Provide WebSocket client for testing real-time features."""
@@ -223,7 +212,6 @@ async def websocket_client(unified_services) -> AsyncGenerator[WebSocketClient, 
         if client.is_connected:
             await connection.close()
 
-
 @pytest.fixture(scope="function")
 async def authenticated_user(test_user, unified_services) -> TestUser:
     """Provide authenticated test user with valid token."""
@@ -238,7 +226,6 @@ async def authenticated_user(test_user, unified_services) -> TestUser:
     test_user.is_authenticated = True
     
     return test_user
-
 
 @pytest.fixture(scope="function")
 async def mock_llm_responses() -> Dict[str, Any]:
@@ -255,7 +242,6 @@ async def mock_llm_responses() -> Dict[str, Any]:
             "request."
         ]
     }
-
 
 @pytest.fixture(scope="function")
 async def test_conversation_history() -> List[Dict[str, Any]]:
@@ -283,7 +269,6 @@ async def test_conversation_history() -> List[Dict[str, Any]]:
         }
     ]
 
-
 async def _setup_mock_services(registry: ServiceRegistry) -> None:
     """Setup all mock services in the registry."""
     # OAuth providers
@@ -307,14 +292,12 @@ async def _setup_mock_services(registry: ServiceRegistry) -> None:
     # Start all services
     await registry.start_all_services()
 
-
 @pytest.fixture(scope="function")
 async def real_http_client():
     """Provide HTTP client for making real API requests."""
     import httpx
     async with httpx.AsyncClient() as client:
         yield client
-
 
 @pytest.fixture(scope="function")
 def service_timeouts() -> Dict[str, int]:
@@ -326,7 +309,6 @@ def service_timeouts() -> Dict[str, int]:
         "websocket_connect_timeout": 10,
         "test_execution_timeout": 120
     }
-
 
 @pytest.fixture(scope="function") 
 async def clean_database_state(test_database):
@@ -345,7 +327,6 @@ async def clean_database_state(test_database):
             # Log but don't fail on cleanup error
             print(f"Warning: Database cleanup error: {e}")
 
-
 async def _clean_all_tables(session: AsyncSession) -> None:
     """Clean all tables in the test database."""
     # Check if session is still valid
@@ -359,7 +340,6 @@ async def _clean_all_tables(session: AsyncSession) -> None:
     
     for table_name in table_names:
         await _truncate_table(session, table_name)
-
 
 async def _truncate_table(session: AsyncSession, table_name: str) -> None:
     """Truncate a specific table."""
@@ -377,7 +357,6 @@ async def _truncate_table(session: AsyncSession, table_name: str) -> None:
         except Exception:
             # Session might already be closed, ignore rollback error
             pass
-
 
 @pytest.fixture(scope="function")
 def test_environment_config() -> Dict[str, str]:

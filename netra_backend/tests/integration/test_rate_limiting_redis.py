@@ -10,17 +10,10 @@ L3 Test: Real Redis backend for rate limiting with request limits, sliding windo
 burst handling, and per-user rate limiting validation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,17 +30,13 @@ from logging_config import central_logger
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
-from integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class RateLimitConfig:
@@ -57,7 +46,6 @@ class RateLimitConfig:
     burst_capacity: int
     window_size_seconds: int
     user_tier: str
-
 
 class RateLimitingManager:
     """Manages rate limiting testing with real Redis backend."""
@@ -483,7 +471,6 @@ class RateLimitingManager:
             "rate_limit_configs_tested": list(self.rate_limit_configs.keys())
         }
 
-
 @pytest.mark.L3
 @pytest.mark.integration
 class TestRateLimitingRedisL3:
@@ -663,7 +650,6 @@ class TestRateLimitingRedisL3:
         assert fresh_request_allowed, "Fresh request should be allowed after expiration"
         
         logger.info(f"Rate limiting Redis consistency test completed: redis_count={redis_count}, allowed_count={allowed_count}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

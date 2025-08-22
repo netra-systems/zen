@@ -3,31 +3,21 @@ Tests for TriageSubAgent entity extraction and intent determination
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
 from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.tests.triage_test_helpers import (
     EntityExtractionHelpers,
     IntentHelpers,
-    # Add project root to path
     TriageMockHelpers,
 )
-
 
 @pytest.fixture
 def triage_agent():
@@ -36,7 +26,6 @@ def triage_agent():
     mock_tool = TriageMockHelpers.create_mock_tool_dispatcher()
     mock_redis = TriageMockHelpers.create_mock_redis()
     return TriageSubAgent(mock_llm, mock_tool, mock_redis)
-
 
 class TestAdvancedEntityExtraction:
     """Test advanced entity extraction functionality"""
@@ -122,7 +111,6 @@ class TestAdvancedEntityExtraction:
         for provider in cloud_providers:
             assert provider in request_lower
 
-
 class TestAdvancedIntentDetermination:
     """Test advanced intent determination"""
     
@@ -172,7 +160,6 @@ class TestAdvancedIntentDetermination:
         """Assert intent matches expected"""
         assert (intent.primary_intent == expected_intent or 
                 expected_intent in intent.secondary_intents)
-
 
 class TestAdvancedToolRecommendation:
     """Test advanced tool recommendation logic"""
@@ -236,7 +223,6 @@ class TestAdvancedToolRecommendation:
         assert len(tools) >= 0
         if tools:
             assert all(tool.relevance_score <= 0.5 for tool in tools)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

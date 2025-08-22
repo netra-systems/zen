@@ -38,9 +38,6 @@ import httpx
 import pytest
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
@@ -491,8 +488,6 @@ if __name__ == "__main__":
     import os
     
     # Add project root to path
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    sys.path.insert(0, project_root)
     
     # Run the tests
     pytest.main([__file__, "-v", "-s"])

@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher

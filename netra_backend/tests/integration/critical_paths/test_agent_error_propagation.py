@@ -10,17 +10,10 @@ Critical Path: Error capture -> Enrichment -> Propagation -> Aggregation -> Repo
 Coverage: Real error collectors, enrichment pipeline, routing logic, aggregation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class ErrorSeverity(Enum):
     """Error severity levels."""
@@ -53,7 +44,6 @@ class ErrorSeverity(Enum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class ErrorCategory(Enum):
     """Error categories for classification."""
@@ -65,7 +55,6 @@ class ErrorCategory(Enum):
     VALIDATION = "validation"
     TIMEOUT = "timeout"
     RESOURCE = "resource"
-
 
 @dataclass
 class ErrorEvent:
@@ -90,7 +79,6 @@ class ErrorEvent:
         data["severity"] = self.severity.value
         data["timestamp"] = self.timestamp.isoformat()
         return data
-
 
 class ErrorCollector:
     """Collects errors from various sources."""
@@ -178,7 +166,6 @@ class ErrorCollector:
             
         return details
 
-
 class ErrorEnricher:
     """Enriches errors with additional context and metadata."""
     
@@ -217,7 +204,6 @@ class ErrorEnricher:
         # This would typically query a more sophisticated storage
         # For testing, we'll return empty list
         return []
-
 
 class ErrorPropagator:
     """Propagates errors to appropriate handlers."""
@@ -264,7 +250,6 @@ class ErrorPropagator:
             await handler(error_event)
         else:
             handler(error_event)
-
 
 class ErrorAggregator:
     """Aggregates errors for analysis and reporting."""
@@ -329,7 +314,6 @@ class ErrorAggregator:
             "time_window_seconds": time_window_seconds
         }
 
-
 class ErrorReporter:
     """Reports errors to external systems."""
     
@@ -357,7 +341,6 @@ class ErrorReporter:
             "timestamp": datetime.now().isoformat()
         }
         self.reports_sent.append(report)
-
 
 class AgentErrorPropagationManager:
     """Manages agent error propagation testing."""
@@ -445,7 +428,6 @@ class AgentErrorPropagationManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def error_propagation_manager():
     """Create error propagation manager for testing."""
@@ -453,7 +435,6 @@ async def error_propagation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -484,7 +465,6 @@ async def test_error_collection_and_classification(error_propagation_manager):
         elif error_type == "network":
             assert error_event.category == ErrorCategory.NETWORK
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_error_enrichment_pipeline(error_propagation_manager):
@@ -502,7 +482,6 @@ async def test_error_enrichment_pipeline(error_propagation_manager):
     assert "process_id" in enriched_error.context
     assert "agent_history" in enriched_error.context
     assert enriched_error.error_id == error_event.error_id
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -532,7 +511,6 @@ async def test_error_propagation_routing(error_propagation_manager):
     # Verify routing
     assert validation_error.error_id in routed_errors
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_critical_error_reporting(error_propagation_manager):
@@ -552,7 +530,6 @@ async def test_critical_error_reporting(error_propagation_manager):
     
     assert len(critical_reports) > 0
     assert critical_reports[0]["error_id"] == critical_error.error_id
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -577,7 +554,6 @@ async def test_error_aggregation_rules(error_propagation_manager):
     assert summary["unique_error_types"] >= 1
     assert "medium" in summary["severity_breakdown"]  # Validation errors are medium severity
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_error_severity_classification(error_propagation_manager):
@@ -596,7 +572,6 @@ async def test_error_severity_classification(error_propagation_manager):
     for error_type, expected_severity in test_cases:
         error_event = manager.simulate_agent_error(error_type, context)
         assert error_event.severity == expected_severity
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -626,7 +601,6 @@ async def test_concurrent_error_processing(error_propagation_manager):
     summary = manager.error_aggregator.get_error_summary(3600)
     assert summary["total_errors"] >= 20
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_error_context_preservation(error_propagation_manager):
@@ -650,7 +624,6 @@ async def test_error_context_preservation(error_propagation_manager):
     assert error_event.context["session_id"] == "session_456"
     assert error_event.context["request_id"] == "req_789"
     assert error_event.context["custom_data"]["key"] == "value"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -677,7 +650,6 @@ async def test_error_pipeline_resilience(error_propagation_manager):
     # Aggregation should still work
     summary = manager.error_aggregator.get_error_summary(3600)
     assert summary["total_errors"] >= 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

@@ -4,26 +4,17 @@ Tests complex multi-objective optimization scenarios.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from typing import Dict, List
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
     create_quality_cost_latency_state,
     create_triple_constraint_state,
@@ -35,13 +26,11 @@ from netra_backend.tests.multi_constraint_test_helpers import (
     validate_multi_objective_analysis,
 )
 
-
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestComplexMultiObjectiveOptimization:
     """Test complex multi-objective optimization scenarios."""
@@ -86,7 +75,6 @@ class TestComplexMultiObjectiveOptimization:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_weighted_optimization_results(results, state)
 
-
 def validate_triple_constraint_results(results: List[Dict], state) -> None:
     """Validate triple constraint optimization results."""
     validate_basic_workflow_execution(results)
@@ -94,13 +82,11 @@ def validate_triple_constraint_results(results: List[Dict], state) -> None:
     validate_multi_objective_analysis(results[2], state)
     validate_compromise_recommendations(results[3], state)
 
-
 def validate_quality_cost_latency_results(results: List[Dict]) -> None:
     """Validate quality vs cost vs latency tradeoff results."""
     validate_basic_workflow_execution(results)
     completed_results = [r for r in results if r['agent_state'].name == 'COMPLETED']
     assert len(completed_results) >= 3, "Core workflow should complete"
-
 
 def validate_conflict_resolution_results(results: List[Dict], state) -> None:
     """Validate constraint conflict resolution results."""
@@ -108,13 +94,11 @@ def validate_conflict_resolution_results(results: List[Dict], state) -> None:
     assert state.metadata.get('conflict_resolution') == 'weighted_priority'
     validate_completed_or_fallback_states(results)
 
-
 def validate_pareto_analysis_results(results: List[Dict], state) -> None:
     """Validate Pareto frontier analysis results."""
     validate_basic_workflow_execution(results)
     assert state.metadata.get('analysis_type') == 'pareto_frontier'
     validate_completed_or_fallback_states(results)
-
 
 def validate_weighted_optimization_results(results: List[Dict], state) -> None:
     """Validate weighted optimization results."""

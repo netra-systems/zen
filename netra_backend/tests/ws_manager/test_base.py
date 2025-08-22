@@ -2,21 +2,10 @@
 Base fixtures and utilities for WebSocketManager tests
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timezone
@@ -25,7 +14,6 @@ from unittest.mock import AsyncMock
 import pytest
 from starlette.websockets import WebSocketState
 
-# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import (
 
     ConnectionInfo,
@@ -33,9 +21,6 @@ from netra_backend.app.services.websocket.ws_manager import (
     WebSocketManager,
 
 )
-
-# Add project root to path
-
 
 class MockWebSocket:
 
@@ -53,18 +38,15 @@ class MockWebSocket:
 
         self.close_calls = []
     
-
     async def mock_send_json(self, data):
 
         self.send_calls.append(data)
     
-
     async def mock_close(self, code=1000, reason=""):
 
         self.close_calls.append({"code": code, "reason": reason})
 
         self.client_state = WebSocketState.DISCONNECTED
-
 
 @pytest.fixture
 
@@ -77,7 +59,6 @@ def fresh_manager():
 
     WebSocketManager._initialized = False
     
-
     manager = WebSocketManager()
 
     yield manager
@@ -86,7 +67,6 @@ def fresh_manager():
 
     WebSocketManager._instance = None
 
-
 @pytest.fixture
 
 def mock_websocket():
@@ -94,7 +74,6 @@ def mock_websocket():
     """Create a mock WebSocket"""
 
     return MockWebSocket()
-
 
 @pytest.fixture
 
@@ -108,7 +87,6 @@ def connected_websocket():
 
     return ws
 
-
 @pytest.fixture
 
 def disconnected_websocket():
@@ -121,12 +99,10 @@ def disconnected_websocket():
 
     return ws
 
-
 class WebSocketTestBase:
 
     """Base class with common test utilities"""
     
-
     @staticmethod
 
     def create_connection_info(connection_id: str = "test-123") -> ConnectionInfo:
@@ -147,7 +123,6 @@ class WebSocketTestBase:
 
         )
     
-
     @staticmethod
 
     async def wait_for_condition(condition_func, timeout: float = 1.0, interval: float = 0.01):
@@ -166,7 +141,6 @@ class WebSocketTestBase:
 
         return False
     
-
     @staticmethod
 
     def assert_message_sent(websocket: MockWebSocket, expected_type: str):
@@ -183,7 +157,6 @@ class WebSocketTestBase:
 
         return message
     
-
     @staticmethod
 
     def assert_no_message_sent(websocket: MockWebSocket):
@@ -192,7 +165,6 @@ class WebSocketTestBase:
 
         assert not websocket.send_json.called
     
-
     @staticmethod
 
     def reset_manager_singleton():

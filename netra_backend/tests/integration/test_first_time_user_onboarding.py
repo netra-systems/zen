@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Critical for user activation and retention
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -33,17 +26,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.models.message import Message
 
-# Add project root to path
 from netra_backend.app.models.thread import Thread
-from integration.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     agent_dispatcher,
     assert_websocket_message_flow,
     verify_user_in_database,
     wait_for_agent_response,
-    # Add project root to path
     websocket_manager,
 )
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -76,7 +66,6 @@ async def test_first_chat_session_initialization(
         response = await wait_for_agent_response(websocket)
         assert "cost" in response["content"].lower()
         assert "optimization" in response["content"].lower()
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -111,7 +100,6 @@ async def test_chat_thread_persistence(
         usage_key = f"usage:{user_id}:daily"
         usage_count = await redis_client.get(usage_key)
         assert int(usage_count or 0) >= 1
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -154,7 +142,6 @@ async def test_websocket_connection_lifecycle(
         assert recovery["type"] == "state_recovered"
         assert "missed_messages" in recovery
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -190,7 +177,6 @@ async def test_websocket_concurrent_messages(
                 continue
         
         assert acks_received == 10
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -235,7 +221,6 @@ async def test_session_persistence_across_refresh(
     assert response.status_code == status.HTTP_200_OK
     restored_session = response.json()
     assert thread_id in [t["id"] for t in restored_session["threads"]]
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

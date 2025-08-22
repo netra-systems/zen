@@ -4,21 +4,10 @@ Components: AuthService → JWT Refresh → WebSocket → Session Continuity
 Critical: Seamless token refresh without disrupting active conversations
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -29,13 +18,9 @@ import jwt
 import pytest
 from netra_backend.app.schemas import User
 
-# Add project root to path
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 @pytest.mark.asyncio
 
@@ -43,7 +28,6 @@ class TestWebSocketAuthTokenRefresh:
 
     """Test token refresh during active WebSocket sessions."""
     
-
     @pytest.fixture
 
     async def auth_service(self):
@@ -52,7 +36,6 @@ class TestWebSocketAuthTokenRefresh:
 
         return AuthService()
     
-
     @pytest.fixture
 
     async def ws_manager(self):
@@ -61,7 +44,6 @@ class TestWebSocketAuthTokenRefresh:
 
         return WebSocketManager()
     
-
     @pytest.fixture
 
     async def test_user(self):
@@ -82,7 +64,6 @@ class TestWebSocketAuthTokenRefresh:
 
         )
     
-
     async def test_token_near_expiry_detection(self, auth_service):
 
         """Test detection of tokens near expiry."""
@@ -108,12 +89,10 @@ class TestWebSocketAuthTokenRefresh:
 
         time_until_expiry = (exp_time - datetime.now(timezone.utc)).total_seconds()
         
-
         needs_refresh = time_until_expiry < 600  # 10 minute threshold
 
         assert needs_refresh is True
     
-
     async def test_seamless_token_refresh_flow(self, auth_service, ws_manager, test_user):
 
         """Test seamless token refresh without disconnection."""
@@ -161,7 +140,6 @@ class TestWebSocketAuthTokenRefresh:
 
         assert connection.auth_token == "new_token_xyz"
     
-
     async def test_message_continuity_during_refresh(self, ws_manager, test_user):
 
         """Test message flow continues during token refresh."""
@@ -199,7 +177,6 @@ class TestWebSocketAuthTokenRefresh:
 
         assert calls[1][0][0]["content"] == "After refresh"
     
-
     async def test_concurrent_refresh_handling(self, auth_service, ws_manager):
 
         """Test handling concurrent refresh requests."""
@@ -225,7 +202,6 @@ class TestWebSocketAuthTokenRefresh:
 
             users.append(user)
             
-
             mock_ws = Mock()
 
             mock_ws.client_state = "CONNECTED"
@@ -242,7 +218,6 @@ class TestWebSocketAuthTokenRefresh:
 
             return f"new_token_for_{user_id}"
         
-
         tasks = [refresh_user_token(user.id) for user in users]
 
         new_tokens = await asyncio.gather(*tasks)
@@ -263,7 +238,6 @@ class TestWebSocketAuthTokenRefresh:
 
             assert connection.auth_token == f"new_token_for_{user.id}"
     
-
     async def test_refresh_failure_handling(self, ws_manager, test_user):
 
         """Test handling of token refresh failures."""

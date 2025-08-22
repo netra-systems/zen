@@ -3,17 +3,10 @@ Business Value Test Fixtures - Mock Setup and Data Generation
 Provides all fixtures and mock configurations for business value critical tests
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import random
@@ -25,7 +18,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
@@ -34,9 +26,6 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
-
-# Add project root to path
-
 
 class BusinessValueFixtures:
     """Centralized fixture provider for business value tests"""

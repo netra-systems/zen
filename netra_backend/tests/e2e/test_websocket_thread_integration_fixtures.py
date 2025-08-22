@@ -1,16 +1,9 @@
 """Fixtures Tests - Split from test_websocket_thread_integration.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -25,10 +18,7 @@ from ws_manager import manager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.services.agent_service import AgentService
 
-# Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
 
 def mock_websocket_manager():
     """Mock WebSocket manager for testing."""

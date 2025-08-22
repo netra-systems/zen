@@ -20,17 +20,10 @@ Critical Security Requirements:
 - Protection against token replay attacks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -48,15 +41,12 @@ import websockets
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class JWTTokenData:
@@ -74,7 +64,6 @@ class JWTTokenData:
     audience_valid: bool = False
     issuer_valid: bool = False
 
-
 @dataclass
 class TokenPropagationResult:
     """Results from token propagation testing across services."""
@@ -85,7 +74,6 @@ class TokenPropagationResult:
     security_validations_passed: int
     total_response_time: float
     token_integrity_maintained: bool
-
 
 class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
     """L4 test suite for JWT token propagation across service boundaries."""
@@ -989,7 +977,6 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.warning(f"JWT cleanup error: {e}")
 
-
 @pytest.mark.L4
 @pytest.mark.critical_path
 @pytest.mark.staging
@@ -1044,7 +1031,6 @@ class TestJWTTokenPropagationL4:
         assert crypto_validation.get("issuer_valid", False), "JWT issuer must be validated"
         
         logger.info("Enterprise JWT security requirements validated successfully")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

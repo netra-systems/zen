@@ -3,17 +3,10 @@
 Tests focused on connection resilience, error recovery, and network instability scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -24,14 +17,11 @@ import pytest
 
 from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 
-# Add project root to path
 from netra_backend.app.routes.websocket_secure import (
-    # Add project root to path
     get_secure_websocket_manager,
     handle_websocket_message_enhanced,
     send_error_message,
 )
-
 
 @pytest.mark.asyncio
 class TestWebSocketConnectionResilience:
@@ -130,7 +120,6 @@ class TestWebSocketConnectionResilience:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
 
-
 @pytest.mark.asyncio
 class TestWebSocketNetworkInstability:
     """Test WebSocket behavior under network instability."""
@@ -202,7 +191,6 @@ class TestWebSocketNetworkInstability:
         except Exception as e:
             # If cleanup fails, ensure it doesn't crash the system
             assert False, f"Cleanup should handle missing metadata gracefully: {e}"
-
 
 @pytest.mark.asyncio
 class TestWebSocketErrorRecovery:
@@ -324,7 +312,6 @@ class TestWebSocketErrorRecovery:
             finally:
                 await connection_manager.remove_connection(user_id, conn_id)
 
-
 @pytest.mark.asyncio 
 class TestWebSocketConcurrencyResilience:
     """Test WebSocket resilience under concurrent load."""
@@ -415,7 +402,6 @@ class TestWebSocketConcurrencyResilience:
                 except:
                     pass  # May have been auto-removed by limit enforcement
 
-
 @pytest.mark.asyncio
 class TestWebSocketCORSResilience:
     """Test CORS resilience and security."""
@@ -472,7 +458,6 @@ class TestWebSocketCORSResilience:
         # Mock WebSocket with invalid origin
         mock_websocket.headers = {"origin": "http://malicious.com"}
         assert validate_websocket_origin(mock_websocket, cors_handler) is False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

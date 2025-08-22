@@ -15,7 +15,6 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 
 # Add scripts directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
 
 from workflow_introspection import (
     OutputFormatter,

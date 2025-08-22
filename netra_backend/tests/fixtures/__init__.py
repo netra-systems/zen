@@ -18,7 +18,7 @@ from netra_backend.tests.unified_system.fixtures import (
 )
 
 # Import from other fixture files
-from .test_fixtures import mock_cache, mock_database
+from netra_backend.tests.fixtures.test_fixtures import mock_cache, mock_database
 
 __all__ = [
     # Core test fixtures

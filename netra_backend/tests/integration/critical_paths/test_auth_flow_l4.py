@@ -12,17 +12,10 @@ OAuth initiation -> JWT generation -> WebSocket authentication -> Token refresh 
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, token refresh, cross-service session validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,7 +25,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -65,7 +57,6 @@ RedisSessionManager = AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 
-
 @dataclass
 class AuthFlowMetrics:
     """Metrics container for authentication flow testing."""
@@ -77,7 +68,6 @@ class AuthFlowMetrics:
     session_validations: int
     logout_operations: int
     average_auth_time: float
-
 
 class AuthFlowL4TestSuite:
     """L4 test suite for authentication flow in staging environment."""
@@ -798,7 +788,6 @@ class AuthFlowL4TestSuite:
         except Exception as e:
             print(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def auth_flow_l4_suite():
     """Create L4 authentication flow test suite."""
@@ -806,7 +795,6 @@ async def auth_flow_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -851,7 +839,6 @@ async def test_complete_oauth_flow_enterprise_user_l4(auth_flow_l4_suite):
     assert cross_service_auth["success"] is True
     assert cross_service_auth["successful_authentications"] >= 2
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_oauth_flow_free_tier_user_l4(auth_flow_l4_suite):
@@ -874,7 +861,6 @@ async def test_oauth_flow_free_tier_user_l4(auth_flow_l4_suite):
     # Validate cross-service authentication works with limited permissions
     cross_service_auth = flow_result["cross_service_auth"]
     assert cross_service_auth["successful_authentications"] >= 1, "At least basic authentication should work"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -914,7 +900,6 @@ async def test_token_refresh_flow_l4(auth_flow_l4_suite):
     auth_test = refresh_result["auth_test"]
     assert auth_test["success"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_websocket_authentication_flow_l4(auth_flow_l4_suite):
@@ -939,7 +924,6 @@ async def test_websocket_authentication_flow_l4(auth_flow_l4_suite):
     
     # Validate metrics
     assert auth_flow_l4_suite.test_metrics.websocket_authentications >= 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -981,7 +965,6 @@ async def test_session_consistency_across_services_l4(auth_flow_l4_suite):
     
     assert successful_concurrent >= 2, f"Only {successful_concurrent}/3 concurrent authentications succeeded"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_logout_flow_complete_l4(auth_flow_l4_suite):
@@ -1012,7 +995,6 @@ async def test_logout_flow_complete_l4(auth_flow_l4_suite):
     # Verify session is gone
     post_logout_session = await auth_flow_l4_suite._test_session_validation(session_id)
     assert post_logout_session["success"] is False, "Session should be removed after logout"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -1048,7 +1030,6 @@ async def test_concurrent_authentication_flows_l4(auth_flow_l4_suite):
     # Validate metrics
     assert auth_flow_l4_suite.test_metrics.successful_authentications >= 2
     assert auth_flow_l4_suite.test_metrics.total_auth_attempts >= 3
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

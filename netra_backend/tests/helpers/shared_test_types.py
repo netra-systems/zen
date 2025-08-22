@@ -10,7 +10,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-
 class TestErrorHandling:
     """Standard error handling test class with common test patterns.
     
@@ -78,7 +77,6 @@ class TestErrorHandling:
                 assert result["success"] == True
                 assert mock_process.call_count == 3
 
-
 class TestIntegrationScenarios:
     """Standard integration test scenarios for testing multiple features.
     
@@ -125,7 +123,6 @@ class TestIntegrationScenarios:
         elif hasattr(service, 'handle_request'):
             result = await service.handle_request(test_data)
             assert result is not None
-
 
 class TestIntegration:
     """Basic integration test class for service integration testing.
@@ -177,7 +174,6 @@ class TestIntegration:
                 # Method might require parameters
                 assert True
 
-
 class TestErrorContext:
     """Test error context preservation and management.
     
@@ -225,7 +221,6 @@ class TestErrorContext:
         else:
             pytest.skip("ErrorContext.log_error not implemented")
 
-
 class BaseTestMixin:
     """Base mixin providing common test utilities and fixtures."""
     
@@ -259,7 +254,6 @@ class BaseTestMixin:
         llm_mock = MagicMock()
         llm_mock.ask_llm = AsyncMock(return_value="Test response")
         return llm_mock
-
 
 # Common test data and constants
 TEST_USER_ID = "test_user_123"

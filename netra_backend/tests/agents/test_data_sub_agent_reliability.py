@@ -3,17 +3,10 @@ Reliability and system tests for Data Sub Agent
 Focuses on error handling and caching
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -22,13 +15,9 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 # Test fixtures for shared test classes
 @pytest.fixture
@@ -45,7 +34,6 @@ def db_session():
     db_mock = Mock()
     db_mock.query = Mock()
     return db_mock
-
 
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling and recovery - extends shared error handling."""
@@ -125,7 +113,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert results[0]["status"] == "success"
         assert results[1]["status"] == "error"
         assert results[2]["status"] == "success"
-
 
 class TestCaching:
     """Test caching functionality"""

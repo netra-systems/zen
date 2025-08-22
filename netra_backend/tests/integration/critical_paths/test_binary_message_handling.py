@@ -11,21 +11,10 @@ L2 Test: Real internal components with mocked external services.
 Performance target: <2s upload time for 5MB files, <5% corruption rate.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -43,12 +32,10 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class BinaryMessageProcessor:
 
     """Process binary messages for WebSocket transmission."""
     
-
     def __init__(self):
 
         self.chunk_size = 1024 * 32  # 32KB chunks
@@ -67,7 +54,6 @@ class BinaryMessageProcessor:
 
         self.compression_threshold = 1024 * 100  # 100KB
     
-
     def validate_file_upload(self, data: bytes, content_type: str, filename: str) -> Dict[str, Any]:
 
         """Validate binary file for upload."""
@@ -112,10 +98,8 @@ class BinaryMessageProcessor:
 
         validation_result["metadata"]["signature_valid"] = signature_check
         
-
         return validation_result
     
-
     def _validate_file_signature(self, data: bytes, content_type: str) -> bool:
 
         """Validate file signature matches content type."""
@@ -124,7 +108,6 @@ class BinaryMessageProcessor:
 
             return False
         
-
         signature = data[:8]
         
         # Common file signatures
@@ -143,7 +126,6 @@ class BinaryMessageProcessor:
 
         }
         
-
         if content_type in signatures:
 
             for sig in signatures[content_type]:
@@ -154,10 +136,8 @@ class BinaryMessageProcessor:
 
             return False
         
-
         return True  # Allow unknown types
     
-
     def create_upload_chunks(self, data: bytes, upload_id: str) -> List[Dict[str, Any]]:
 
         """Create upload chunks with metadata."""
@@ -166,14 +146,12 @@ class BinaryMessageProcessor:
 
         total_chunks = (len(data) + self.chunk_size - 1) // self.chunk_size
         
-
         for i in range(0, len(data), self.chunk_size):
 
             chunk_data = data[i:i + self.chunk_size]
 
             chunk_index = i // self.chunk_size
             
-
             chunk = {
 
                 "upload_id": upload_id,
@@ -194,10 +172,8 @@ class BinaryMessageProcessor:
 
             chunks.append(chunk)
         
-
         return chunks
     
-
     def reconstruct_from_chunks(self, chunks: List[Dict[str, Any]]) -> bytes:
 
         """Reconstruct binary data from chunks."""
@@ -231,20 +207,16 @@ class BinaryMessageProcessor:
 
                 raise ValueError(f"Chunk {chunk['chunk_index']} corruption detected")
             
-
             data_parts.append(chunk_data)
         
-
         return b''.join(data_parts)
     
-
     def create_progress_update(self, upload_id: str, chunks_received: int, total_chunks: int) -> Dict[str, Any]:
 
         """Create progress update message."""
 
         progress = (chunks_received / total_chunks) * 100 if total_chunks > 0 else 0
         
-
         return {
 
             "type": "upload_progress",
@@ -261,12 +233,10 @@ class BinaryMessageProcessor:
 
         }
 
-
 class ChunkProgressTracker:
 
     """Track upload progress and handle resume capability."""
     
-
     def __init__(self):
 
         self.active_uploads = {}
@@ -275,7 +245,6 @@ class ChunkProgressTracker:
 
         self.failed_uploads = {}
     
-
     def start_upload(self, upload_id: str, total_chunks: int, file_info: Dict[str, Any]) -> None:
 
         """Start tracking upload progress."""
@@ -298,7 +267,6 @@ class ChunkProgressTracker:
 
         }
     
-
     def record_chunk(self, upload_id: str, chunk_index: int) -> Dict[str, Any]:
 
         """Record received chunk and return progress."""
@@ -307,14 +275,12 @@ class ChunkProgressTracker:
 
             raise ValueError(f"Upload {upload_id} not found")
         
-
         upload = self.active_uploads[upload_id]
 
         upload["received_chunks"].add(chunk_index)
 
         upload["last_update"] = time.time()
         
-
         progress = {
 
             "upload_id": upload_id,
@@ -329,15 +295,12 @@ class ChunkProgressTracker:
 
         }
         
-
         if progress["is_complete"]:
 
             self.complete_upload(upload_id)
         
-
         return progress
     
-
     def get_missing_chunks(self, upload_id: str) -> List[int]:
 
         """Get list of missing chunk indices."""
@@ -346,7 +309,6 @@ class ChunkProgressTracker:
 
             return []
         
-
         upload = self.active_uploads[upload_id]
 
         all_chunks = set(range(upload["total_chunks"]))
@@ -355,7 +317,6 @@ class ChunkProgressTracker:
 
         return sorted(list(missing))
     
-
     def complete_upload(self, upload_id: str) -> None:
 
         """Mark upload as completed."""
@@ -370,7 +331,6 @@ class ChunkProgressTracker:
 
             self.completed_uploads[upload_id] = upload
     
-
     def fail_upload(self, upload_id: str, error: str) -> None:
 
         """Mark upload as failed."""
@@ -387,7 +347,6 @@ class ChunkProgressTracker:
 
             self.failed_uploads[upload_id] = upload
     
-
     def get_upload_status(self, upload_id: str) -> Optional[Dict[str, Any]]:
 
         """Get current upload status."""
@@ -406,7 +365,6 @@ class ChunkProgressTracker:
 
         return None
 
-
 @pytest.mark.L2
 
 @pytest.mark.integration
@@ -415,7 +373,6 @@ class TestBinaryMessageHandling:
 
     """L2 integration tests for binary message handling."""
     
-
     @pytest.fixture
 
     def ws_manager(self):
@@ -428,7 +385,6 @@ class TestBinaryMessageHandling:
 
             return WebSocketManager()
     
-
     @pytest.fixture
 
     def binary_processor(self):
@@ -437,7 +393,6 @@ class TestBinaryMessageHandling:
 
         return BinaryMessageProcessor()
     
-
     @pytest.fixture
 
     def progress_tracker(self):
@@ -446,7 +401,6 @@ class TestBinaryMessageHandling:
 
         return ChunkProgressTracker()
     
-
     @pytest.fixture
 
     def test_user(self):
@@ -467,7 +421,6 @@ class TestBinaryMessageHandling:
 
         )
     
-
     def create_test_file_data(self, size_kb: int, file_type: str = "text") -> Tuple[bytes, str, str]:
 
         """Create test file data with specified type."""
@@ -493,7 +446,6 @@ class TestBinaryMessageHandling:
 
             return data[:size_kb * 1024], "text/plain", "test_file.txt"
     
-
     async def test_file_upload_validation(self, binary_processor):
 
         """Test file upload validation logic."""
@@ -503,7 +455,6 @@ class TestBinaryMessageHandling:
 
         validation = binary_processor.validate_file_upload(valid_data, content_type, filename)
         
-
         assert validation["valid"] is True
 
         assert len(validation["errors"]) == 0
@@ -516,7 +467,6 @@ class TestBinaryMessageHandling:
 
         large_validation = binary_processor.validate_file_upload(large_data, "text/plain", "large.txt")
         
-
         assert large_validation["valid"] is False
 
         assert any("exceeds limit" in error for error in large_validation["errors"])
@@ -529,12 +479,10 @@ class TestBinaryMessageHandling:
 
         )
         
-
         assert invalid_filename_validation["valid"] is False
 
         assert any("Invalid filename" in error for error in invalid_filename_validation["errors"])
     
-
     async def test_chunked_upload_creation(self, binary_processor):
 
         """Test creation of upload chunks."""
@@ -543,7 +491,6 @@ class TestBinaryMessageHandling:
 
         upload_id = str(uuid4())
         
-
         chunks = binary_processor.create_upload_chunks(test_data, upload_id)
         
         # Verify chunk structure
@@ -574,7 +521,6 @@ class TestBinaryMessageHandling:
 
         assert reconstructed == test_data
     
-
     async def test_progress_tracking_functionality(self, progress_tracker):
 
         """Test upload progress tracking."""
@@ -591,7 +537,6 @@ class TestBinaryMessageHandling:
 
         status = progress_tracker.get_upload_status(upload_id)
         
-
         assert status["upload_id"] == upload_id
 
         assert status["total_chunks"] == total_chunks
@@ -630,7 +575,6 @@ class TestBinaryMessageHandling:
 
         assert "completed_at" in final_status
     
-
     async def test_chunk_corruption_detection(self, binary_processor):
 
         """Test detection of corrupted chunks."""
@@ -639,7 +583,6 @@ class TestBinaryMessageHandling:
 
         upload_id = str(uuid4())
         
-
         chunks = binary_processor.create_upload_chunks(test_data, upload_id)
         
         # Corrupt one chunk
@@ -660,7 +603,6 @@ class TestBinaryMessageHandling:
 
             binary_processor.reconstruct_from_chunks(chunks)
     
-
     async def test_resume_capability(self, binary_processor, progress_tracker):
 
         """Test upload resume capability."""
@@ -669,7 +611,6 @@ class TestBinaryMessageHandling:
 
         upload_id = str(uuid4())
         
-
         chunks = binary_processor.create_upload_chunks(test_data, upload_id)
 
         total_chunks = len(chunks)
@@ -704,7 +645,6 @@ class TestBinaryMessageHandling:
 
         assert final_status["status"] == "completed"
     
-
     @mock_justified("L2: Binary message handling with real internal components")
 
     async def test_websocket_binary_transmission(self, ws_manager, binary_processor, test_user):
@@ -756,7 +696,6 @@ class TestBinaryMessageHandling:
 
         }
         
-
         success = await ws_manager.send_message_to_user(test_user.id, init_message)
 
         assert success is True
@@ -779,7 +718,6 @@ class TestBinaryMessageHandling:
 
         await ws_manager.disconnect_user(test_user.id, mock_websocket)
     
-
     async def test_large_file_performance(self, binary_processor, progress_tracker):
 
         """Test performance with large file uploads."""
@@ -797,7 +735,6 @@ class TestBinaryMessageHandling:
 
         chunking_time = time.time() - start_time
         
-
         assert chunking_time < 2.0  # Should chunk within 2 seconds
 
         assert len(chunks) > 100  # Should be many chunks
@@ -808,15 +745,12 @@ class TestBinaryMessageHandling:
 
         progress_tracker.start_upload(upload_id, len(chunks), {"filename": filename})
         
-
         for i in range(len(chunks)):
 
             progress_tracker.record_chunk(upload_id, i)
         
-
         tracking_time = time.time() - start_time
         
-
         assert tracking_time < 1.0  # Should track quickly
         
         # Test reconstruction performance
@@ -827,7 +761,6 @@ class TestBinaryMessageHandling:
 
         reconstruction_time = time.time() - start_time
         
-
         assert reconstruction_time < 1.5  # Should reconstruct quickly
 
         assert reconstructed == large_data
@@ -838,7 +771,6 @@ class TestBinaryMessageHandling:
 
         assert final_status["status"] == "completed"
     
-
     async def test_concurrent_uploads(self, binary_processor, progress_tracker):
 
         """Test handling of concurrent file uploads."""
@@ -855,36 +787,30 @@ class TestBinaryMessageHandling:
 
             upload_id = f"upload_{i}_{uuid4()}"
             
-
             chunks = binary_processor.create_upload_chunks(test_data, upload_id)
 
             progress_tracker.start_upload(upload_id, len(chunks), {"filename": f"file_{i}.txt"})
             
-
             upload_tasks.append((upload_id, chunks, test_data))
         
         # Process all uploads concurrently
 
         start_time = time.time()
         
-
         async def process_upload(upload_id, chunks, original_data):
 
             for i, chunk in enumerate(chunks):
 
                 progress_tracker.record_chunk(upload_id, i)
             
-
             reconstructed = binary_processor.reconstruct_from_chunks(chunks)
 
             return reconstructed == original_data
         
-
         tasks = [process_upload(uid, chunks, data) for uid, chunks, data in upload_tasks]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-
         processing_time = time.time() - start_time
         
         # Performance and correctness assertions
@@ -902,7 +828,6 @@ class TestBinaryMessageHandling:
             status = progress_tracker.get_upload_status(upload_id)
 
             assert status["status"] == "completed"
-
 
 if __name__ == "__main__":
 

@@ -325,12 +325,12 @@ async def dev_login(
     
     import uuid
 
-    from ..database.connection import auth_db
-    from ..database.repository import AuthUserRepository
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.repository import AuthUserRepository
     
     try:
         # Sync to main database first to get/create the user
-        from ..database.models import AuthUser
+        from auth_service.auth_core.database.models import AuthUser
         
         # Create temporary auth user for sync
         temp_user = AuthUser(
@@ -447,8 +447,8 @@ async def oauth_callback(
 
     from fastapi.responses import RedirectResponse
 
-    from ..database.connection import auth_db
-    from ..database.repository import AuthUserRepository
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.repository import AuthUserRepository
     
     logger.info(f"OAuth callback received - code: {code[:10]}..., state: {state[:10]}...")
     
@@ -563,8 +563,8 @@ async def oauth_callback_post(
     import uuid
     from fastapi import HTTPException
     
-    from ..database.connection import auth_db
-    from ..database.repository import AuthUserRepository
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.repository import AuthUserRepository
     
     logger.info(f"OAuth POST callback received - code: {request.code[:10]}..., state: {request.state[:10]}...")
     

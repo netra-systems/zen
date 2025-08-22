@@ -15,17 +15,10 @@ OAuth initiation → User authorization → Token exchange → JWT validation �
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session persistence, token refresh, cross-service validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -36,7 +29,6 @@ import time
 import uuid
 from typing import Any, Dict, Optional
 
-# Add project root to path
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -45,8 +37,7 @@ import httpx
 import pytest
 import websockets
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
 )
 
@@ -67,7 +58,6 @@ SessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
     """L4 test for complete OAuth → JWT → WebSocket authentication flow."""
@@ -409,7 +399,6 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
         if self.session_manager:
             await self.session_manager.shutdown()
 
-
 @pytest.fixture
 async def oauth_jwt_websocket_l4_test():
     """Create OAuth JWT WebSocket L4 test instance."""
@@ -417,7 +406,6 @@ async def oauth_jwt_websocket_l4_test():
     await test_instance.initialize_l4_environment()
     yield test_instance
     await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -428,7 +416,6 @@ async def test_complete_oauth_jwt_websocket_flow_l4(oauth_jwt_websocket_l4_test)
     assert test_metrics.success is True, f"Critical path failed: {test_metrics.errors}"
     assert test_metrics.duration < 60.0, f"Test took too long: {test_metrics.duration:.2f}s"
     assert test_metrics.service_calls >= 12, "Expected at least 12 service calls"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -441,7 +428,6 @@ async def test_oauth_websocket_message_flow_l4(oauth_jwt_websocket_l4_test):
     
     assert ws_data["auth_successful"] is True
     assert ws_data["ws_connected"] is True
-
 
 @pytest.mark.asyncio  
 @pytest.mark.staging
@@ -456,7 +442,6 @@ async def test_oauth_token_refresh_session_persistence_l4(oauth_jwt_websocket_l4
     assert session_id in oauth_jwt_websocket_l4_test.active_sessions
     assert refresh_data["new_token"] != jwt_data["access_token"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging 
 @pytest.mark.L4
@@ -468,7 +453,6 @@ async def test_oauth_cross_service_auth_consistency_l4(oauth_jwt_websocket_l4_te
     validation_data = await oauth_jwt_websocket_l4_test._execute_validation_flow(refresh_data)
     
     assert validation_data["validation_success"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

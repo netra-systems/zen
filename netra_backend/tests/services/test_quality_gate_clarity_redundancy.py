@@ -1,29 +1,19 @@
 """Tests for Quality Gate Service clarity and redundancy calculations"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.tests.quality_gate_comprehensive_helpers import (
     create_excessive_acronyms_content,
     create_high_overlap_content,
     create_nested_parentheses_content,
-    # Add project root to path
     create_very_long_sentence,
 )
-
 
 class TestClarityCalculation:
     """Test clarity calculation edge cases"""
@@ -55,7 +45,6 @@ class TestClarityCalculation:
         
         score = await quality_service.metrics_calculator.core_calculator.calculate_clarity(content)
         assert score >= 0  # Should handle gracefully
-
 
 class TestRedundancyCalculation:
     """Test redundancy calculation edge cases"""

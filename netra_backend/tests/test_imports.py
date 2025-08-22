@@ -7,8 +7,6 @@ no import errors exist in the codebase.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import sys
 from pathlib import Path
 from typing import List, Tuple
@@ -16,10 +14,8 @@ from typing import List, Tuple
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from test_framework.import_tester import ImportResult, ImportTester
-
 
 class TestImports:
     """Test class for module imports"""
@@ -195,7 +191,6 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             
             pytest.fail(error_msg)
 
-
 @pytest.mark.fast
 class TestFastFailImports:
     """Fast-fail import tests for CI/CD"""
@@ -237,7 +232,6 @@ Troubleshooting steps:
                     error_msg += "\nTry: pip install " + " ".join(result.missing_dependencies)
                 
                 pytest.fail(error_msg)
-
 
 def test_import_performance():
     """Test that imports complete within reasonable time"""

@@ -16,17 +16,10 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,9 +33,6 @@ import jwt
 import pytest
 import websockets
 
-# Add project root to path
-
-
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
@@ -53,14 +43,12 @@ from clients.auth_client import auth_client
 
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 
-
 @pytest.fixture
 def mock_postgres():
     """Mock PostgreSQL for testing."""
     mock_db = MagicMock()
     mock_db.get_connection_url = MagicMock(return_value="postgresql://test_user:test_password@localhost/test_db")
     return mock_db
-
 
 @pytest.fixture
 def mock_redis():
@@ -69,7 +57,6 @@ def mock_redis():
     mock_redis.get_container_host_ip = MagicMock(return_value="localhost")
     mock_redis.get_exposed_port = MagicMock(return_value=6379)
     return mock_redis
-
 
 @pytest.fixture
 async def auth_service_config(mock_postgres, mock_redis):
@@ -81,7 +68,6 @@ async def auth_service_config(mock_postgres, mock_redis):
         "jwt_secret": "test_jwt_secret_key"
     }
     yield auth_config
-
 
 @pytest.fixture
 async def test_jwt_token(auth_service_config):
@@ -95,7 +81,6 @@ async def test_jwt_token(auth_service_config):
     secret = auth_service_config["jwt_secret"]
     return jwt.encode(payload, secret, algorithm="HS256")
 
-
 @pytest.fixture
 async def expired_jwt_token(auth_service_config):
     """Generate an expired JWT token for testing."""
@@ -107,7 +92,6 @@ async def expired_jwt_token(auth_service_config):
     }
     secret = auth_service_config["jwt_secret"]
     return jwt.encode(payload, secret, algorithm="HS256")
-
 
 class TestWebSocketAuthColdStartL3:
     """L3 Integration tests for WebSocket authentication during cold start."""

@@ -3,24 +3,16 @@ Tests for Redis Manager retry logic and failover mechanisms
 Tests transient failures, retry exhaustion, exponential backoff, and failover
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import time
 
 import pytest
 import redis.asyncio as redis
 
-# Add project root to path
 from netra_backend.tests.redis_test_fixtures import (
     MockRedisClient,
     enhanced_redis_manager_with_retry,
@@ -30,11 +22,9 @@ from netra_backend.tests.redis_test_helpers import (
     setup_fallback_cache,
     setup_persistent_failure_mock,
     setup_timing_failure_mock,
-    # Add project root to path
     setup_transient_failure_mock,
     verify_exponential_backoff,
 )
-
 
 class TestRedisManagerRetryAndFailover:
     """Test Redis retry logic and failover mechanisms"""

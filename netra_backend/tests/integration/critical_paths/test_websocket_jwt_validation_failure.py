@@ -3,17 +3,10 @@ Test case for WebSocket JWT validation failure scenario.
 Reproduces the authentication failure when auth service rejects the JWT token.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -23,10 +16,6 @@ import pytest
 import websockets
 from fastapi import WebSocketDisconnect
 from fastapi.testclient import TestClient
-
-# Add project root to path
-
-
 
 @pytest.mark.asyncio
 async def test_websocket_jwt_validation_failure():
@@ -74,7 +63,6 @@ async def test_websocket_jwt_validation_failure():
                 
             # Verify auth validation was attempted
             mock_validate.assert_called_once_with(invalid_jwt)
-
 
 @pytest.mark.asyncio 
 async def test_websocket_auth_service_401_response():
@@ -126,7 +114,6 @@ async def test_websocket_auth_service_401_response():
             call_args = mock_client.post.call_args
             assert "/auth/validate" in call_args[0][0]
 
-
 @pytest.mark.asyncio
 async def test_websocket_no_token_provided():
     """
@@ -148,7 +135,6 @@ async def test_websocket_no_token_provided():
         except (WebSocketDisconnect, Exception) as e:
             # Should get authentication required error
             assert "Authentication required" in str(e) or "No secure JWT token" in str(e)
-
 
 @pytest.mark.asyncio
 async def test_websocket_auth_token_validation_flow():
@@ -193,7 +179,6 @@ async def test_websocket_auth_token_validation_flow():
                 mock_logger.info.assert_any_call("WebSocket auth via Sec-WebSocket-Protocol")
                 mock_logger.error.assert_any_call("WebSocket connection denied: Invalid JWT token")
 
-
 @pytest.mark.asyncio
 async def test_websocket_successful_auth_dev_environment():
     """
@@ -235,7 +220,6 @@ async def test_websocket_successful_auth_dev_environment():
                         
                 except Exception as e:
                     pytest.fail(f"Dev environment connection should succeed: {e}")
-
 
 @pytest.mark.asyncio
 async def test_websocket_successful_valid_oauth_token():
@@ -304,7 +288,6 @@ async def test_websocket_successful_valid_oauth_token():
             except Exception as e:
                 pytest.fail(f"Valid OAuth token should allow connection: {e}")
 
-
 @pytest.mark.asyncio
 async def test_websocket_auth_with_authorization_header():
     """
@@ -343,7 +326,6 @@ async def test_websocket_auth_with_authorization_header():
                     
             except Exception as e:
                 pytest.fail(f"Authorization header auth should work: {e}")
-
 
 @pytest.mark.asyncio
 async def test_websocket_token_refresh_during_connection():
@@ -395,7 +377,6 @@ async def test_websocket_token_refresh_during_connection():
                     
             except Exception as e:
                 pytest.fail(f"Token refresh should be handled gracefully: {e}")
-
 
 if __name__ == "__main__":
     # Run the tests

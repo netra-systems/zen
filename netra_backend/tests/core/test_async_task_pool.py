@@ -3,17 +3,10 @@ Tests for AsyncTaskPool - task management and concurrency control
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -21,16 +14,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_resource_manager import AsyncTaskPool
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.tests.async_utils_helpers import (
-    # Add project root to path
     assert_task_pool_state,
     create_quick_operation,
     measure_timing,
 )
-
 
 class TestAsyncTaskPool:
     """Test AsyncTaskPool for task management"""
@@ -128,7 +118,6 @@ class TestAsyncTaskPool:
         """Test shutdown with no active tasks"""
         await task_pool.shutdown()
         assert_task_pool_state(task_pool, 3, True, 0)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

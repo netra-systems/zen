@@ -3,17 +3,10 @@ Tests for datetime, string, and JSON utilities (Tests 86-88).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -24,14 +17,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.datetime_string_test_helpers import (
-    # Add project root to path
     DatetimeTestHelpers,
     StringTestHelpers,
 )
 from netra_backend.tests.json_file_crypto_test_helpers import JsonTestHelpers
-
 
 # Test 86: Datetime utils timezone
 class TestDatetimeUtilsTimezone:
@@ -80,7 +70,6 @@ class TestDatetimeUtilsTimezone:
         ambiguous = DatetimeTestHelpers.create_dst_fall_time()
         resolved = utils.resolve_ambiguous_time(ambiguous, "America/New_York", is_dst=False)
         assert resolved != None
-
 
 # Test 87: String utils sanitization
 class TestStringUtilsSanitization:
@@ -144,7 +133,6 @@ class TestStringUtilsSanitization:
         """Assert length truncation works."""
         truncated = utils.truncate("x" * 1000, max_length=100)
         assert len(truncated) <= 100
-
 
 # Test 88: JSON utils serialization
 class TestJsonUtilsSerialization:

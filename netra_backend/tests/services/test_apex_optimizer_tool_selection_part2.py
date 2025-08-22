@@ -3,17 +3,10 @@ Comprehensive tests for Apex Optimizer tool selection - Part 2: Advanced Tool Se
 Tests advanced tool selection scenarios, edge cases, and error handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,20 +25,17 @@ from netra_backend.app.services.apex_optimizer_agent.tools.base import (
     ToolMetadata,
 )
 
-# Add project root to path
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
 from netra_backend.app.services.context import ToolContext
 
-# Add project root to path
 # Import helper classes from part 1
 from netra_backend.tests.test_apex_optimizer_tool_selection_part1 import (
     MockLLMConnector,
     MockOptimizationTool,
     OptimizationCategory,
 )
-
 
 class TestApexOptimizerAdvancedToolSelection:
     """Test advanced Apex optimizer tool selection scenarios"""

@@ -4,17 +4,10 @@ Tests complete agent workflow with real LLM calls and proper state transitions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -27,7 +20,6 @@ from netra_backend.app.agents.data_sub_agent.models import (
     DataAnalysisResponse,
 )
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 from netra_backend.app.schemas import SubAgentLifecycle
@@ -35,9 +27,6 @@ from netra_backend.tests.state_validation_utils import (
     StateIntegrityChecker,
     StateValidationReporter,
 )
-
-# Add project root to path
-
 
 class TestRealAgentOrchestration:
     """Test real agent orchestration with actual LLM calls."""
@@ -79,7 +68,6 @@ class TestRealAgentOrchestration:
         integrity_checker = StateIntegrityChecker()
         integrity_checker.check_data_completion_integrity(state)
 
-
 class TestRealAgentArtifactValidation:
     """Test artifact validation between real agent handoffs."""
     
@@ -115,7 +103,6 @@ class TestRealAgentArtifactValidation:
         integrity_checker = StateIntegrityChecker()
         integrity_checker.check_triage_to_data_handoff_integrity(state, triage_input)
 
-
 class TestRealAgentErrorHandling:
     """Test real agent error handling and recovery."""
     
@@ -144,7 +131,6 @@ class TestRealAgentErrorHandling:
         ]
         # Should not crash or throw unhandled exceptions
         assert 'success' in result or 'error' in result
-
 
 class TestRealAgentConcurrency:
     """Test real agent concurrent execution scenarios."""
@@ -176,7 +162,6 @@ class TestRealAgentConcurrency:
             if isinstance(result, Exception):
                 # Exception should be a known agent exception, not system crash
                 assert "agent" in str(result).lower() or "llm" in str(result).lower()
-
 
 class TestRealAgentPipelineIntegration:
     """Test real agent pipeline integration and flow control."""
@@ -212,7 +197,6 @@ class TestRealAgentPipelineIntegration:
         assert state.triage_result is not None
         assert state.data_result is not None
         assert state.step_count >= 2
-
 
 class TestRealAgentInterimArtifactValidation:
     """Test comprehensive interim artifact validation between agents."""
@@ -254,7 +238,6 @@ class TestRealAgentInterimArtifactValidation:
         assert summary['total_validations'] >= 3, "Should have triage, data, and handoff validations"
         assert summary['success_rate'] == 1.0, "All validations should succeed"
         assert len(summary['details']) >= 3, "Should have detailed validation results"
-
 
 class TestRealAgentTypeValidation:
     """Test type validation in real agent workflows."""

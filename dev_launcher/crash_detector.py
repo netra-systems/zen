@@ -22,7 +22,7 @@ from typing import List, Optional
 
 import requests
 
-from .crash_recovery_models import DetectionMethod, DetectionResult
+from dev_launcher.crash_recovery_models import DetectionMethod, DetectionResult
 
 logger = logging.getLogger(__name__)
 

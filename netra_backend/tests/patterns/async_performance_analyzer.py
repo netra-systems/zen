@@ -8,7 +8,6 @@ import asyncio
 import time
 from typing import Any, Dict, List
 
-
 class AsyncPerformanceAnalyzer:
     """Analyze async test performance"""
     

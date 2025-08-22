@@ -4,17 +4,10 @@ Suite 1: Authentication Error Propagation
 Ensures all auth failures are loud and properly propagated.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -23,13 +16,11 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from fastapi import WebSocket
 from netra_backend.app.routes.utils.websocket_helpers import (
-    # Add project root to path
     authenticate_websocket_user,
     decode_token_payload,
     validate_user_id_in_payload,
 )
 from starlette.websockets import WebSocketState
-
 
 class TestAuthenticationErrorPropagation:
     """Suite 1: Verify all authentication errors are raised and logged."""
@@ -80,7 +71,6 @@ class TestAuthenticationErrorPropagation:
             
             assert "Database unavailable" in str(exc_info.value)
             websocket.close.assert_called_once()
-
 
 class TestUserLookupFailures:
     """Suite 2: Verify user lookup failures are explicit."""
@@ -155,7 +145,6 @@ class TestUserLookupFailures:
             mock_session.rollback.assert_called_once()
             assert security_service.get_user_by_id.call_count == 2
 
-
 class TestWebSocketMessageHandling:
     """Suite 3: Verify message processing failures are explicit."""
     
@@ -214,7 +203,6 @@ class TestWebSocketMessageHandling:
         
         assert result is True  # Should continue despite error
         manager.handle_message.assert_called_once()
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -10,17 +10,10 @@ Critical Path: Tool request -> Tool loading -> Execution -> Result processing ->
 Coverage: Real tool execution, mocked LLM responses, error handling, performance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -34,13 +27,11 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.schemas.Tool import BaseTool
 
-# Add project root to path
 # Real components for L2-L3 testing
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.tool_registry import AgentToolConfigRegistry
 
 logger = logging.getLogger(__name__)
-
 
 class MockTool(BaseTool):
     """Mock tool for testing execution pipeline."""
@@ -61,7 +52,6 @@ class MockTool(BaseTool):
             "execution_time": self.execution_time,
             "call_count": self.call_count
         }
-
 
 class ToolExecutionManager:
     """Manages agent tool execution testing."""
@@ -166,7 +156,6 @@ class ToolExecutionManager:
         if self.llm_manager:
             await self.llm_manager.shutdown()
 
-
 @pytest.fixture
 async def tool_execution_manager():
     """Create tool execution manager for testing."""
@@ -174,7 +163,6 @@ async def tool_execution_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -197,7 +185,6 @@ async def test_single_tool_execution_pipeline(tool_execution_manager):
     calculator_tool = manager.mock_tools["calculator"]
     assert calculator_tool.call_count == 1
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_tool_execution_error_handling(tool_execution_manager):
@@ -219,7 +206,6 @@ async def test_tool_execution_error_handling(tool_execution_manager):
     
     # Should handle gracefully
     assert "result" in result
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -247,7 +233,6 @@ async def test_concurrent_tool_execution_performance(tool_execution_manager):
     for tool_name in ["file_reader", "calculator", "web_scraper", "database_query"]:
         tool = manager.mock_tools[tool_name]
         assert tool.call_count == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -285,7 +270,6 @@ async def test_tool_result_processing_pipeline(tool_execution_manager):
     await manager.db_manager.return_connection(conn)
     assert db_result is not None
     assert db_result["success"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

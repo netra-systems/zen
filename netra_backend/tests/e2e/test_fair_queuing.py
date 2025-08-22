@@ -4,17 +4,10 @@ Tests fair queuing of requests under load.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -22,14 +15,11 @@ import time
 import aiohttp
 import pytest
 
-# Add project root to path
 from netra_backend.tests.concurrent_load_helpers import (
-    # Add project root to path
     ConcurrentUserLoadTest,
     create_priority_user_request,
     validate_fair_queuing_results,
 )
-
 
 class TestFairQueuing:
     """Test fair queuing mechanism"""

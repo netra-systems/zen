@@ -10,31 +10,21 @@ Critical Path: Team isolation -> Cross-team access prevention -> Security valida
 Coverage: Multi-tenant isolation, edge case handling, security boundaries
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import uuid
 
 import pytest
 
-# Add project root to path
-from .integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.critical_paths.integration.test_helpers.team_collaboration_base import (
     PermissionType,
-    # Add project root to path
     TeamCollaborationManager,
     TeamRole,
     validate_audit_trail,
 )
-
 
 @pytest.fixture
 async def multi_team_environment():
@@ -66,7 +56,6 @@ async def multi_team_environment():
         "manager": manager,
         "teams": teams_data
     }
-
 
 class TestTeamIsolationSecurity:
     """Critical path tests for team isolation and security boundaries."""

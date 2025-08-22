@@ -13,8 +13,6 @@ Comprehensive test for API gateway load distribution:
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import os
@@ -29,16 +27,12 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:8080")
 BACKEND_URLS = [
     "http://localhost:8001",
     "http://localhost:8002",
     "http://localhost:8003"
 ]
-
 
 class APIGatewayTester:
     """Test API gateway load distribution."""
@@ -355,7 +349,6 @@ class APIGatewayTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -381,7 +374,6 @@ async def test_api_gateway_load_distribution():
         critical_tests = ["gateway_health", "load_balancing", "failover_handling"]
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_api_gateway_load_distribution())

@@ -11,17 +11,10 @@ L3 Realism: Real Redis with various serialization formats, actual data types, pe
 Performance Requirements: Serialization overhead < 10%, throughput > 10K ops/s, latency < 5ms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import gzip
@@ -42,15 +35,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.critical_paths.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class SerializationMetrics:
@@ -114,7 +103,6 @@ class SerializationMetrics:
     def avg_throughput(self) -> float:
         """Calculate average throughput."""
         return statistics.mean(self.throughput_samples) if self.throughput_samples else 0.0
-
 
 class CacheSerializationPerformanceL3Manager:
     """L3 cache serialization performance test manager with real Redis and multiple serialization formats."""
@@ -627,7 +615,6 @@ class CacheSerializationPerformanceL3Manager:
         except Exception as e:
             logger.error(f"Serialization performance cleanup failed: {e}")
 
-
 @pytest.fixture
 async def serialization_performance_manager():
     """Create L3 serialization performance manager."""
@@ -635,7 +622,6 @@ async def serialization_performance_manager():
     await manager.setup_redis_for_serialization_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -654,7 +640,6 @@ async def test_json_serialization_performance(serialization_performance_manager)
     
     logger.info(f"JSON serialization: {result['throughput']:.1f} ops/s, {result['errors']} errors")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -668,7 +653,6 @@ async def test_concurrent_serialization_performance(serialization_performance_ma
     assert result["successful_workers"] >= result["concurrent_workers"] * 0.9, f"Too many failed workers: {result['successful_workers']}/{result['concurrent_workers']}"
     
     logger.info(f"Concurrent serialization: {result['concurrent_throughput']:.1f} ops/s, {result['error_rate']:.1f}% error rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -685,7 +669,6 @@ async def test_large_data_serialization_performance(serialization_performance_ma
                 assert metrics["compression_ratio"] > 0.5, f"Poor compression ratio for {size_category}/{data_type}: {metrics['compression_ratio']:.2f}"
     
     logger.info(f"Large data serialization tested for sizes: {result['tested_sizes']}")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -710,7 +693,6 @@ async def test_serialization_format_comparison(serialization_performance_manager
     assert len(high_performance_formats) > 0, "At least one format should meet high performance standards"
     
     logger.info(f"Format comparison: best throughput={result['best_performers']['throughput']}, best speed={result['best_performers']['speed']}")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

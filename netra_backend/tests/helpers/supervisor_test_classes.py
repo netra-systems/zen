@@ -12,7 +12,6 @@ from unittest.mock import AsyncMock
 
 from netra_backend.app.agents.state import DeepAgentState
 
-
 class QualitySupervisor:
     """Mock QualitySupervisor for testing."""
     
@@ -26,11 +25,9 @@ class QualitySupervisor:
         result = await self.llm_manager.ask_llm("validate", "quality")
         return json.loads(result)
 
-
 # Import real AdminToolDispatcher - tests should use actual implementation
 # If mocking is needed, use unittest.mock.Mock or pytest fixtures
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
-
 
 class MockAdminToolDispatcher:
     """Mock AdminToolDispatcher for testing with required methods"""
@@ -70,7 +67,6 @@ class MockAdminToolDispatcher:
         }
         return mapping.get(operation_type, "default_admin_tool")
 
-
 class CorpusAdminSubAgent:
     """Mock CorpusAdminSubAgent for testing."""
     
@@ -91,7 +87,6 @@ class CorpusAdminSubAgent:
         """Update document in vector store."""
         return await self.vector_store.update_document(update)
 
-
 class SupplyResearcherSubAgent:
     """Mock SupplyResearcherSubAgent for testing."""
     
@@ -108,7 +103,6 @@ class SupplyResearcherSubAgent:
     async def validate_and_enrich(self, raw_data):
         """Validate and enrich data."""
         return await self.enrichment_service.enrich(raw_data)
-
 
 class DemoService:
     """Mock DemoService for testing."""
@@ -138,7 +132,6 @@ class DemoService:
             "value": random.random()
         }
 
-
 class AgentPrompts:
     """Mock AgentPrompts for testing."""
     
@@ -154,7 +147,6 @@ class AgentPrompts:
             key = key.split("}")[0]
             if key and key not in variables:
                 raise KeyError(key)
-
 
 class EnhancedPrompts:
     """Mock EnhancedPrompts for testing."""
@@ -181,7 +173,6 @@ class EnhancedPrompts:
     def manage_context_window(self, history):
         """Manage context window size."""
         return history[-5:]  # Simple truncation
-
 
 class AgentUtils:
     """Mock AgentUtils for testing."""
@@ -267,7 +258,6 @@ class AgentUtils:
         if both_dicts:
             return {**existing_value, **new_value}
         return new_value
-
 
 class PermissionError(Exception):
     """Permission error for testing."""

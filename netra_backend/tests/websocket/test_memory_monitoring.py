@@ -3,17 +3,10 @@ WebSocket memory monitoring and performance testing module.
 Tests memory leaks, long-running connections, and resource management.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import gc
@@ -26,7 +19,6 @@ from unittest.mock import AsyncMock
 import psutil
 import pytest
 
-
 async def _create_test_connections(num_connections: int) -> List:
     """Create test connections for memory monitoring (<=8 lines)"""
     connections = []
@@ -35,7 +27,6 @@ async def _create_test_connections(num_connections: int) -> List:
         connections.append(conn)
         conn.record_memory_checkpoint()
     return connections
-
 
 async def _simulate_message_traffic(connections: List, test_duration: int, messages_per_sec: int):
     """Simulate message traffic for memory monitoring (<=8 lines)"""
@@ -48,7 +39,6 @@ async def _simulate_message_traffic(connections: List, test_duration: int, messa
         await asyncio.gather(*tasks)
         await asyncio.sleep(1.0 / messages_per_sec)
 
-
 def _validate_memory_trends(connections: List):
     """Validate memory growth trends (<=8 lines)"""
     for conn in connections:
@@ -59,7 +49,6 @@ def _validate_memory_trends(connections: List):
             if time_delta > 0:
                 growth_rate = (last['rss_mb'] - first['rss_mb']) / time_delta
                 assert growth_rate < 1.0, f"Memory growing too fast: {growth_rate:.2f} MB/s"
-
 
 class MemoryMonitoredWebSocket:
     def __init__(self, connection_id: str):
@@ -104,7 +93,6 @@ async def test_memory_leak_detection_long_connections():
     await _simulate_message_traffic(connections, TEST_DURATION_SECONDS, MESSAGES_PER_SECOND)
     await _finalize_memory_test(connections, initial_memory, NUM_CONNECTIONS, MESSAGES_PER_SECOND, TEST_DURATION_SECONDS)
 
-
 async def _finalize_memory_test(connections: List, initial_memory: float, num_conn: int, msgs_per_sec: int, duration: int):
     """Finalize memory test with validation (<=8 lines)"""
     for conn in connections:
@@ -113,7 +101,6 @@ async def _finalize_memory_test(connections: List, initial_memory: float, num_co
     await asyncio.sleep(0.5)
     _validate_memory_trends(connections)
     await _validate_cleanup_and_processing(connections, initial_memory, num_conn, msgs_per_sec, duration)
-
 
 async def _validate_cleanup_and_processing(connections: List, initial_memory: float, num_conn: int, msgs_per_sec: int, duration: int):
     """Validate cleanup and message processing (<=8 lines)"""
@@ -125,7 +112,6 @@ async def _validate_cleanup_and_processing(connections: List, initial_memory: fl
     gc.collect()
     await _validate_memory_cleanup(initial_memory, final_memory)
 
-
 async def _validate_memory_cleanup(initial_memory: float, final_memory: float):
     """Validate memory cleanup after test (<=8 lines)"""
     await asyncio.sleep(0.5)
@@ -135,7 +121,6 @@ async def _validate_memory_cleanup(initial_memory: float, final_memory: float):
     if memory_growth > 1.0:
         release_ratio = memory_released / memory_growth
         assert release_ratio > 0.1, f"Should release >10% memory: {release_ratio:.1%}"
-
 
 def _create_test_message(msg_id: int) -> Dict[str, Any]:
     """Helper function to create test message (<=8 lines)"""
@@ -147,7 +132,6 @@ def _create_test_message(msg_id: int) -> Dict[str, Any]:
         'type': 'test_message'
     }
 
-
 def _calculate_memory_metrics(initial_mb: float, final_mb: float, duration: float) -> Dict[str, float]:
     """Helper function to calculate memory metrics (<=8 lines)"""
     growth = final_mb - initial_mb
@@ -157,7 +141,6 @@ def _calculate_memory_metrics(initial_mb: float, final_mb: float, duration: floa
         'growth_rate_mb_per_sec': growth_rate,
         'growth_percentage': (growth / initial_mb * 100) if initial_mb > 0 else 0.0
     }
-
 
 def _validate_memory_checkpoint(checkpoint: Dict[str, Any], max_buffer_size: int) -> bool:
     """Helper function to validate memory checkpoint (<=8 lines)"""
@@ -169,7 +152,6 @@ def _validate_memory_checkpoint(checkpoint: Dict[str, Any], max_buffer_size: int
         return False
     
     return checkpoint['rss_mb'] > 0 and checkpoint['total_processed'] >= 0
-
 
 async def _process_message_batch(connections: List, batch_size: int, message_factory) -> int:
     """Helper function to process message batch (<=8 lines)"""

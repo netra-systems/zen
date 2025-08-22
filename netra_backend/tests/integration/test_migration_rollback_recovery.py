@@ -11,17 +11,10 @@ This test validates database migration failure scenarios and automatic rollback 
 using real PostgreSQL containers (L3 realism) to catch production-level issues.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -36,14 +29,10 @@ from logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-# Add project root to path
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.postgres_core import Database
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.integration
 class TestMigrationRollbackRecovery:
@@ -404,7 +393,6 @@ class TestMigrationRollbackRecovery:
             time.sleep(2)
         
         raise TimeoutError(f"PostgreSQL container {container_name} not ready within {max_wait}s")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

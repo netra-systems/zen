@@ -18,7 +18,7 @@ class TriageExecutionHelpers:
     
     def ensure_triage_result_type(self, result):
         """Ensure result is proper TriageResult object."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         if isinstance(result, TriageResult):
             return result
         elif isinstance(result, dict):
@@ -28,7 +28,7 @@ class TriageExecutionHelpers:
     
     def _convert_dict_to_triage_result(self, result_dict: dict):
         """Convert dictionary to TriageResult with error handling."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         try:
             return TriageResult(**result_dict)
         except Exception as e:
@@ -37,7 +37,7 @@ class TriageExecutionHelpers:
     
     def _create_default_triage_result(self):
         """Create default TriageResult for error cases."""
-        from .models import TriageMetadata, TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata, TriageResult
         return TriageResult(
             category="unknown", 
             confidence_score=0.5,
@@ -46,14 +46,14 @@ class TriageExecutionHelpers:
     
     def create_error_result(self, error_message: str):
         """Create result object for error cases."""
-        from .models import TriageMetadata, TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata, TriageResult
         error_metadata = self._create_error_metadata(error_message)
         params = self._build_error_result_params(error_metadata)
         return TriageResult(**params)
     
     def _create_error_metadata(self, error_message: str):
         """Create metadata for error result."""
-        from .models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         return TriageMetadata(
             triage_duration_ms=0,
             error_details=error_message,
@@ -70,14 +70,14 @@ class TriageExecutionHelpers:
     
     def create_emergency_fallback_result(self):
         """Create basic emergency fallback response."""
-        from .models import Priority, TriageMetadata, TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import Priority, TriageMetadata, TriageResult
         metadata = self._create_emergency_metadata()
         params = self._build_emergency_fallback_params(metadata)
         return TriageResult(**params)
     
     def _create_emergency_metadata(self):
         """Create metadata for emergency fallback."""
-        from .models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         return TriageMetadata(
             triage_duration_ms=0,
             fallback_used=True,
@@ -86,7 +86,7 @@ class TriageExecutionHelpers:
     
     def _build_emergency_fallback_params(self, metadata) -> dict:
         """Build parameters for emergency fallback result."""
-        from .models import Priority
+        from netra_backend.app.agents.triage_sub_agent.models import Priority
         return {
             "category": "General Inquiry",
             "confidence_score": 0.3,
@@ -112,7 +112,7 @@ class TriageExecutionHelpers:
     
     def create_validation_error_result(self, validation):
         """Create validation error result."""
-        from .models import TriageMetadata, TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata, TriageResult
         validation_metadata = TriageMetadata(triage_duration_ms=0, fallback_used=True)
         params = self._build_validation_error_params(validation, validation_metadata)
         return TriageResult(**params)

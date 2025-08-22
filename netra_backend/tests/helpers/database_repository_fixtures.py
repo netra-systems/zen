@@ -13,14 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
 
-
 @pytest.fixture
 def mock_session():
     """Create a mock database session."""
     session = AsyncMock(spec=AsyncSession)
     _setup_session_methods(session)
     return session
-
 
 def _setup_session_methods(session):
     """Setup mock methods for database session."""
@@ -33,12 +31,10 @@ def _setup_session_methods(session):
     session.execute = AsyncMock()
     session.scalar = AsyncMock()
 
-
 async def _mock_refresh(entity):
     """Mock refresh to update entity with ID."""
     if hasattr(entity, 'id') and not entity.id:
         entity.id = "test_id_123"
-
 
 @pytest.fixture
 def mock_models():
@@ -50,7 +46,6 @@ def mock_models():
         'Reference': _create_reference_mock
     }
 
-
 def _create_thread_mock(**kwargs):
     """Create mock thread object."""
     return AsyncMock(
@@ -60,7 +55,6 @@ def _create_thread_mock(**kwargs):
         created_at=kwargs.get('created_at', datetime.now()),
         updated_at=kwargs.get('updated_at', datetime.now())
     )
-
 
 def _create_message_mock(**kwargs):
     """Create mock message object."""
@@ -72,7 +66,6 @@ def _create_message_mock(**kwargs):
         created_at=kwargs.get('created_at', datetime.now())
     )
 
-
 def _create_run_mock(**kwargs):
     """Create mock run object."""
     return AsyncMock(
@@ -81,7 +74,6 @@ def _create_run_mock(**kwargs):
         status=kwargs.get('status', 'completed'),
         created_at=kwargs.get('created_at', datetime.now())
     )
-
 
 def _create_reference_mock(**kwargs):
     """Create mock reference object."""
@@ -92,11 +84,10 @@ def _create_reference_mock(**kwargs):
         content=kwargs.get('content')
     )
 
-
 @pytest.fixture
 def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked repositories."""
-    from tests.helpers.database_repository_helpers import (
+    from netra_backend.tests.helpers.database_repository_helpers import (
         setup_message_mock_behavior,
         setup_reference_mock_behavior,
         setup_run_mock_behavior,

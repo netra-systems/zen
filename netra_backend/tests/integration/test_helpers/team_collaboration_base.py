@@ -19,7 +19,6 @@ os.environ.update({
     "GOOGLE_CLIENT_SECRET": "test-secret", "CLICKHOUSE_DEFAULT_PASSWORD": "test-pass"
 })
 
-
 class TeamRole(Enum):
     """Team role definitions for permissions testing."""
     OWNER = "owner"
@@ -27,7 +26,6 @@ class TeamRole(Enum):
     MEMBER = "member"
     GUEST = "guest"
     VIEWER = "viewer"
-
 
 class PermissionType(Enum):
     """Permission types for resource access."""
@@ -38,7 +36,6 @@ class PermissionType(Enum):
     INVITE_USERS = "invite_users"
     MANAGE_PERMISSIONS = "manage_permissions"
     ACCESS_BILLING = "access_billing"
-
 
 @dataclass
 class TeamPermissionMatrix:
@@ -67,7 +64,6 @@ class TeamPermissionMatrix:
         """Get permissions for a specific role."""
         return getattr(self, role.value)
 
-
 @dataclass
 class TeamMember:
     """Team member representation with permissions."""
@@ -81,7 +77,6 @@ class TeamMember:
     workspace_access: Set[str] = field(default_factory=set)
     custom_permissions: Set[PermissionType] = field(default_factory=set)
 
-
 @dataclass
 class TeamWorkspace:
     """Team workspace with resources and permissions."""
@@ -94,7 +89,6 @@ class TeamWorkspace:
     access_members: Set[str] = field(default_factory=set)
     is_shared: bool = False
     sharing_permissions: Dict[str, Set[PermissionType]] = field(default_factory=dict)
-
 
 @dataclass
 class CollaborationTeam:
@@ -125,7 +119,6 @@ class CollaborationTeam:
         
         # Combine with custom permissions
         return base_permissions.union(member.custom_permissions)
-
 
 class TeamCollaborationManager:
     """Manages team collaboration features and permissions."""
@@ -291,7 +284,6 @@ class TeamCollaborationManager:
             "details": details
         })
 
-
 # Test validation helpers
 def assert_permission_matrix(manager: TeamCollaborationManager, team_id: str, 
                            user_id: str, role: str, expected_permissions: Dict[PermissionType, bool]):
@@ -301,7 +293,6 @@ def assert_permission_matrix(manager: TeamCollaborationManager, team_id: str,
         has_permission = asyncio.run(manager.check_permission(team_id, user_id, permission))
         assert has_permission == should_have, \
             f"{role} should {'have' if should_have else 'not have'} {permission.value} permission"
-
 
 def assert_performance_benchmark(manager: TeamCollaborationManager, team_id: str, 
                                user_id: str, iterations: int = 100, max_avg_ms: float = 50):
@@ -318,7 +309,6 @@ def assert_performance_benchmark(manager: TeamCollaborationManager, team_id: str
         return avg_time
     
     return asyncio.run(run_benchmark())
-
 
 def validate_audit_trail(manager: TeamCollaborationManager, expected_actions: List[str]):
     """Validate audit trail contains expected actions."""

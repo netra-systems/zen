@@ -15,8 +15,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import psutil
 
-from .priority_engine import PriorityEngine
-from .smart_cache import SmartCache
+from test_framework.archived.executors.priority_engine import PriorityEngine
+from test_framework.archived.executors.smart_cache import SmartCache
 
 
 class MemoryMonitor:

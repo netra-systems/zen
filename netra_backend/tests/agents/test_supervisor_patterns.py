@@ -4,17 +4,10 @@ Tests for advanced workflow patterns, resource management, and coordination stra
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timezone
@@ -25,12 +18,10 @@ from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
-    # Add project root to path
     AgentExecutionContext,
     AgentExecutionResult,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -50,7 +41,6 @@ from netra_backend.tests.supervisor_test_helpers import (
 
 # Install extension methods for testing
 install_supervisor_extensions()
-
 
 class TestWorkflowPatterns:
     """Test common workflow patterns and coordination strategies"""
@@ -189,7 +179,6 @@ class TestWorkflowPatterns:
         assert current_state.optimizations_result["quality_score"] >= 0.9
         assert iteration_count <= 3  # Should converge quickly
 
-
 class TestResourceManagement:
     """Test resource management and coordination"""
     
@@ -244,7 +233,6 @@ class TestResourceManagement:
         assert all(result.success for result in results)
         assert "completed" in results[0].state.data_result["resource_usage"]
         assert "completed" in results[1].state.optimizations_result["resource_usage"]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

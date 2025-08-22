@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 This test validates free tier limits and paid conversion flows.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -30,13 +23,10 @@ from unittest.mock import AsyncMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from .integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
     MockUsageService,
-    # Add project root to path
     generate_test_user_data,
 )
-
 
 class TestUserTierManagement:
     """Test user tier management and conversion flows"""

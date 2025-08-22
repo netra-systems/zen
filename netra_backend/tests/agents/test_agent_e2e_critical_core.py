@@ -3,19 +3,10 @@ Core critical end-to-end tests for agent lifecycle, WebSocket streaming, and orc
 Tests 1-3: Complete agent lifecycle, WebSocket real-time streaming, supervisor orchestration.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 # Add netra_backend to path  
-NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
-if str(NETRA_BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import asyncio
 import uuid
@@ -23,12 +14,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.state_persistence import state_persistence_service
-from .test_agent_e2e_critical_setup import AgentE2ETestBase
-
-# Add project root to path
-
+from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 class TestAgentE2ECriticalCore(AgentE2ETestBase):
     """Critical core tests for agent lifecycle and orchestration"""

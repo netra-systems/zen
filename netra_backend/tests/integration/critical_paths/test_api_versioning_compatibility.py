@@ -10,17 +10,10 @@ Critical Path: Version detection -> Route mapping -> Compatibility layer -> Resp
 Coverage: API versioning, backward compatibility, version negotiation, deprecation handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -33,7 +26,6 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ApiVersion:
     """API version configuration."""
@@ -43,7 +35,6 @@ class ApiVersion:
     sunset_date: Optional[str]
     supported_features: List[str]
     breaking_changes: List[str]
-
 
 class ApiVersioningManager:
     """Manages L3 API versioning tests with real version routing."""
@@ -384,7 +375,6 @@ class ApiVersioningManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def versioning_manager():
     """Create versioning manager for L3 testing."""
@@ -392,7 +382,6 @@ async def versioning_manager():
     await manager.initialize_versioning()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -422,7 +411,6 @@ async def test_url_based_versioning(versioning_manager):
             assert "users" in body
             assert "pagination" in body
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -439,7 +427,6 @@ async def test_header_based_versioning(versioning_manager):
     body = result["body"]
     assert "data" in body
     assert "meta" in body
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -458,7 +445,6 @@ async def test_accept_header_versioning(versioning_manager):
     assert "users" in body
     assert "pagination" in body
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -472,7 +458,6 @@ async def test_deprecated_version_warnings(versioning_manager):
     assert result["headers"]["API-Status"] == "deprecated"
     assert "Deprecation" in result["headers"]
     assert "Sunset" in result["headers"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -505,7 +490,6 @@ async def test_version_compatibility_matrix(versioning_manager):
         assert test_result["compatibility_score"] >= 80
         assert test_result["result"]["status_code"] == 200
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -518,7 +502,6 @@ async def test_unsupported_version_handling(versioning_manager):
     assert result["status_code"] == 400
     assert "error" in result["body"]
     assert "Unsupported API version" in result["body"]["error"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -543,7 +526,6 @@ async def test_concurrent_version_requests(versioning_manager):
     # Should have used all three versions
     versions_used = set(r["headers"]["API-Version"] for r in successful_results)
     assert versions_used == {"v1", "v2", "v3"}
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

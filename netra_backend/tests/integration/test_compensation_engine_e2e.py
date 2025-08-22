@@ -12,17 +12,10 @@ Tests the complete compensation engine workflow from cost tracking to fee captur
 Critical for revenue generation and customer trust.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import tempfile
@@ -40,10 +33,8 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_user import ToolUsageLog, User
 
-# Add project root to path
 from netra_backend.app.services.factory_status.business_core import (
     BusinessObjective,
-    # Add project root to path
     BusinessValueScore,
     ROIEstimate,
     ValueCategory,
@@ -53,7 +44,6 @@ from netra_backend.app.services.factory_status.business_core import (
 # from app.services.factory_status.value_calculator import ValueCalculator
 from netra_backend.app.services.factory_status.metrics_roi import ROICalculator
 from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
-
 
 class TestCompensationEngineE2E:
     """E2E tests for compensation engine revenue capture"""
@@ -313,7 +303,6 @@ class TestCompensationEngineE2E:
             "minimum_savings": Decimal('500'),
             "billing_frequency": "monthly"
         }
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

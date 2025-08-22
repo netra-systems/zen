@@ -409,7 +409,6 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
             import sys
             # Add project root to path for standalone execution
             if 'app' not in sys.modules:
-                sys.path.insert(0, os.path.abspath('.'))
             
             from netra_backend.app.routes.demo import demo_websocket_endpoint
             

@@ -10,17 +10,10 @@ Critical Path: Request ingress -> Schema validation -> Transformation rules -> D
 Coverage: Request/response transformation, data mapping, schema evolution, legacy support
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -38,16 +31,12 @@ import pytest
 from netra_backend.app.services.api_gateway.data_converter import DataConverter
 from netra_backend.app.services.api_gateway.schema_mapper import SchemaMapper
 
-# Add project root to path
 from netra_backend.app.services.api_gateway.transformation_engine import (
     TransformationEngine,
 )
 from netra_backend.app.services.validation.schema_validator import SchemaValidator
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class TransformationRule:
@@ -59,7 +48,6 @@ class TransformationRule:
     transformation_type: str  # field_mapping, data_conversion, schema_evolution
     rules: Dict[str, Any]  # Transformation rules
     enabled: bool = True
-
 
 class ApiTransformationManager:
     """Manages L3 API transformation tests with real data transformation."""
@@ -959,7 +947,6 @@ class ApiTransformationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def transformation_manager():
     """Create transformation manager for L3 testing."""
@@ -967,7 +954,6 @@ async def transformation_manager():
     await manager.initialize_transformation()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1002,7 +988,6 @@ async def test_field_mapping_transformation(transformation_manager):
     assert "name" in result["response_data"]
     assert "email" in result["response_data"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -1029,7 +1014,6 @@ async def test_legacy_thread_transformation(transformation_manager):
     assert "thread_content" in response_data
     assert "user_uuid" in response_data
     assert response_data["thread_title"] == "Legacy Thread"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1064,7 +1048,6 @@ async def test_agent_config_data_conversion(transformation_manager):
     assert "capabilities" in response_data
     assert isinstance(response_data["capabilities"], list)
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -1094,7 +1077,6 @@ async def test_metrics_schema_evolution(transformation_manager):
     # Check nested structure
     assert isinstance(response_data["results"], list)
     assert isinstance(response_data["aggregated_stats"], dict)
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1127,7 +1109,6 @@ async def test_webhook_payload_standardization(transformation_manager):
     assert "origin" in response_data  # source_system -> origin
     assert response_data["processed"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -1150,7 +1131,6 @@ async def test_transformation_error_handling(transformation_manager):
     if result["status_code"] != 200:
         # Check error response format
         assert "error" in result["body"] or "details" in result["body"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1181,7 +1161,6 @@ async def test_concurrent_transformations(transformation_manager):
     for result in successful_results:
         assert "body" in result
         assert isinstance(result["body"], dict)
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -1228,7 +1207,6 @@ async def test_transformation_performance(transformation_manager):
     
     successful_concurrent = [r for r in concurrent_results if r["status_code"] == 200]
     assert len(successful_concurrent) >= 8  # Most should succeed
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

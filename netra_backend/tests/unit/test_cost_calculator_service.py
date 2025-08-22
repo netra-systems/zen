@@ -11,17 +11,10 @@ Tests ALL cost calculation scenarios for business-critical accuracy.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from decimal import ROUND_HALF_UP, Decimal
 from unittest.mock import Mock, patch
@@ -30,10 +23,8 @@ import pytest
 
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
-# Add project root to path
 from netra_backend.app.services.cost_calculator import (
     BudgetManager,
-    # Add project root to path
     CostCalculatorService,
     CostTier,
     ModelCostInfo,
@@ -42,7 +33,6 @@ from netra_backend.app.services.cost_calculator import (
     create_cost_calculator,
     optimize_model_selection,
 )
-
 
 # Global fixtures for token usage scenarios (shared across test classes)
 @pytest.fixture
@@ -59,7 +49,6 @@ def mid_tier_usage():
 def free_tier_usage():
     """Free tier approaching limits."""
     return TokenUsage(prompt_tokens=7000, completion_tokens=3000, total_tokens=10000)
-
 
 class TestCostCalculatorService:
     """Revenue-critical tests for cost calculation accuracy."""
@@ -150,7 +139,6 @@ class TestCostCalculatorService:
         assert openai_cost == Decimal("3.9")  # Most expensive
         assert google_cost < Decimal("1")     # Most economical
 
-
 class TestBudgetManager:
     """Tests for budget management and spending tracking."""
     
@@ -219,7 +207,6 @@ class TestBudgetManager:
         budget_manager.reset_daily_spending()
         assert budget_manager.current_spending == Decimal("0.00")
 
-
 class TestCostOptimizationUtilities:
     """Tests for cost optimization utility functions."""
     
@@ -249,7 +236,6 @@ class TestCostOptimizationUtilities:
         expected_optimized = Decimal("0.0021")  # Gemini Flash cost
         assert abs(savings - (expected_original - expected_optimized)) < Decimal("0.01")
 
-
 class TestFactoryFunctions:
     """Tests for factory functions."""
 
@@ -270,7 +256,6 @@ class TestFactoryFunctions:
         custom_budget = Decimal("500.00")
         manager = create_budget_manager(custom_budget)
         assert manager.daily_budget == custom_budget
-
 
 # Edge case and error handling tests
 class TestEdgeCasesAndErrorHandling:

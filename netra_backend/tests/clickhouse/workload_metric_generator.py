@@ -10,7 +10,6 @@ from typing import List, Optional
 from netra_backend.tests.data_models import WorkloadMetric
 from netra_backend.tests.generator_base import DataGeneratorBase
 
-
 class WorkloadMetricGenerator(DataGeneratorBase):
     """Generate realistic workload metrics"""
     

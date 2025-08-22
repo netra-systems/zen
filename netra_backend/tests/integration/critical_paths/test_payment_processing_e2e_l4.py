@@ -20,17 +20,10 @@ Test Coverage:
 - Payment state transitions and error recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -46,21 +39,17 @@ import pytest
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 
-# Add project root to path
-from .integration.critical_paths.test_base import (
+from netra_backend.tests.integration.critical_paths.integration.critical_paths.test_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-from ..e2e.clickhouse_billing_helper import (
+from netra_backend.tests.integration.critical_paths.e2e.clickhouse_billing_helper import (
     ClickHouseBillingHelper,
 )
-from ..e2e.payment_flow_manager import (
+from netra_backend.tests.integration.critical_paths.e2e.payment_flow_manager import (
     MockPaymentProvider,
     PaymentFlowManager,
 )
-
-# Add project root to path
-
 
 class PaymentWebhookProcessor:
     """Processes payment webhooks with retry and validation."""
@@ -191,7 +180,6 @@ class PaymentWebhookProcessor:
             "customer_notified": True
         }
 
-
 class PaymentIdempotencyManager:
     """Manages payment idempotency and duplicate detection."""
     
@@ -222,7 +210,6 @@ class PaymentIdempotencyManager:
         """Store payment result for idempotency checking."""
         if idempotency_key:
             self.idempotency_keys[idempotency_key] = result
-
 
 class PaymentProcessingE2EL4Test(L4StagingCriticalPathTestBase):
     """L4 Payment Processing End-to-End Test Implementation."""
@@ -901,7 +888,6 @@ class PaymentProcessingE2EL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             print(f"Payment test cleanup warning: {e}")
 
-
 # Pytest integration
 @pytest.mark.L4
 @pytest.mark.staging
@@ -940,7 +926,6 @@ class TestPaymentProcessingE2EL4:
             
         finally:
             await test_instance.cleanup_l4_resources()
-
 
 if __name__ == "__main__":
     # Allow running test directly

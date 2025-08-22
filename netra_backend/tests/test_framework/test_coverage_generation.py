@@ -13,17 +13,12 @@ Business Value Justification (BVJ):
 
 from netra_backend.tests.test_utils import setup_test_path
 
-setup_test_path()
-
 import json
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
-
-# Add project root to path  
-
 
 class TestCoverageGeneration:
     """Test coverage generation compliance across test levels."""
@@ -151,7 +146,6 @@ class TestCoverageGeneration:
             sys.executable, "-c", f"""
 import sys
 from pathlib import Path
-sys.path.insert(0, r'{PROJECT_ROOT}')
 from unified_test_runner import configure_speed_options
 
 # Create a mock args object with no_coverage=True
@@ -230,7 +224,6 @@ print("SUCCESS: --no-coverage flag properly sets speed_opts['no_coverage'] = Tru
             sys.executable, "-c", f"""
 import sys
 from pathlib import Path
-sys.path.insert(0, r'{PROJECT_ROOT}')
 from test_framework.test_runners import _apply_speed_optimizations
 
 # Create a mock command for backend runner with --coverage
@@ -258,7 +251,6 @@ print("SUCCESS: Speed optimizations properly remove --coverage flag for backend 
         
         assert result.returncode == 0, f"Speed optimization test failed: {result.stderr}"
         assert "SUCCESS" in result.stdout, "Coverage removal should work correctly"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

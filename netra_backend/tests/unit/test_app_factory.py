@@ -8,17 +8,10 @@ Tests critical paths including middleware setup, route registration,
 error handling, and security configurations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import MagicMock, Mock, patch
 
@@ -26,10 +19,8 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
-# Add project root to path
 from netra_backend.app.core.app_factory import (
     create_app,
-    # Add project root to path
     create_fastapi_app,
     initialize_oauth,
     register_api_routes,
@@ -40,7 +31,6 @@ from netra_backend.app.core.app_factory import (
     setup_security_middleware,
 )
 from netra_backend.app.core.exceptions_base import NetraException
-
 
 # Test fixtures for setup
 @pytest.fixture
@@ -54,19 +44,16 @@ def mock_app():
     app.get = Mock()
     return app
 
-
 @pytest.fixture
 def real_app():
     """Real FastAPI application for integration tests."""
     return FastAPI()
-
 
 @pytest.fixture
 def mock_lifespan():
     """Mock lifespan manager."""
     with patch('app.core.app_factory.lifespan') as mock:
         yield mock
-
 
 # Helper functions for 25-line compliance
 def assert_exception_handler_added(app, exception_type):
@@ -75,22 +62,18 @@ def assert_exception_handler_added(app, exception_type):
                                              None if not hasattr(app.add_exception_handler, 'call_args_list') 
                                              else app.add_exception_handler.call_args_list)
 
-
 def assert_middleware_added(app, middleware_type):
     """Assert middleware was added to app."""
     calls = app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
     assert any("http" in str(call) for call in calls) or app.middleware.called
 
-
 def get_handler_calls(app):
     """Get exception handler calls from netra_backend.app."""
     return app.add_exception_handler.call_args_list
 
-
 def get_middleware_calls(app):
     """Get middleware calls from netra_backend.app."""
     return app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
-
 
 def assert_router_included(app, expected_count=None):
     """Assert routers were included in app."""
@@ -99,11 +82,9 @@ def assert_router_included(app, expected_count=None):
     else:
         assert app.include_router.called
 
-
 def create_mock_router():
     """Create a mock router for testing."""
     return Mock()
-
 
 # Core app factory functionality tests
 class TestFastAPIAppCreation:
@@ -136,7 +117,6 @@ class TestFastAPIAppCreation:
                     create_app()
                     mock_handlers.assert_called_once_with(mock_app)
                     mock_routes.assert_called_once_with(mock_app)
-
 
 class TestErrorHandlerRegistration:
     """Test error handler registration."""
@@ -173,7 +153,6 @@ class TestErrorHandlerRegistration:
         calls = get_handler_calls(mock_app)
         exception_types = [call[0][0] for call in calls]
         assert Exception in exception_types
-
 
 class TestSecurityMiddleware:
     """Test security middleware setup."""
@@ -215,7 +194,6 @@ class TestSecurityMiddleware:
                 _add_security_headers_middleware(mock_app)
                 mock_app.add_middleware.assert_called_once()
 
-
 class TestRequestMiddleware:
     """Test request middleware setup."""
 
@@ -240,7 +218,6 @@ class TestRequestMiddleware:
                 setup_middleware(mock_app)
                 mock_security.assert_called_once_with(mock_app)
                 mock_request.assert_called_once_with(mock_app)
-
 
 class TestRouteRegistration:
     """Test API route registration."""
@@ -285,7 +262,6 @@ class TestRouteRegistration:
         _register_route_modules(mock_app, routes_config)
         assert mock_app.include_router.call_count == 2
 
-
 class TestRootEndpoint:
     """Test root endpoint setup."""
 
@@ -308,7 +284,6 @@ class TestRootEndpoint:
         # Verify that setup completed (logger will be called when endpoint is invoked)
         mock_app.get.assert_called_once_with("/")
 
-
 class TestOAuthInitialization:
     """Test OAuth initialization."""
 
@@ -323,7 +298,6 @@ class TestOAuthInitialization:
         # Test that the function acknowledges auth service handles OAuth
         result = initialize_oauth(mock_app)
         assert result is None  # Should return None (no-op)
-
 
 class TestConfigurationMethods:
     """Test configuration helper methods."""
@@ -349,7 +323,6 @@ class TestConfigurationMethods:
                 _configure_app_routes(mock_app)
                 mock_routes.assert_called_once_with(mock_app)
                 mock_root.assert_called_once_with(mock_app)
-
 
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""

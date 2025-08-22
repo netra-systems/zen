@@ -13,17 +13,10 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 - Tests failure recovery and compensating transactions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,7 +30,6 @@ from unittest.mock import MagicMock, patch
 
 import clickhouse_connect
 
-# Add project root to path
 # Docker container management
 import docker
 import psycopg2
@@ -51,7 +43,6 @@ from netra_backend.app.services.transaction_manager import TransactionManager
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class ContainerConfig:
     """Configuration for database containers."""
@@ -59,7 +50,6 @@ class ContainerConfig:
     clickhouse_port: int
     postgres_container: Optional[Any] = None
     clickhouse_container: Optional[Any] = None
-
 
 @dataclass
 class TransactionTestData:
@@ -70,7 +60,6 @@ class TransactionTestData:
     postgres_data: Dict[str, Any]
     clickhouse_data: Dict[str, Any]
     expected_rollback: bool = False
-
 
 class DatabaseTransactionCoordinatorL3:
     """L3 test coordinator for database transaction testing with real containers."""
@@ -588,7 +577,6 @@ class DatabaseTransactionCoordinatorL3:
         except Exception as e:
             logger.warning(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def db_transaction_coordinator_l3():
     """Fixture for L3 database transaction coordinator."""
@@ -597,7 +585,6 @@ async def db_transaction_coordinator_l3():
     await coordinator.create_test_schemas()
     yield coordinator
     await coordinator.cleanup_containers()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -617,7 +604,6 @@ async def test_dual_write_success_l3(db_transaction_coordinator_l3):
     # Validate data consistency
     consistency_result = await db_transaction_coordinator_l3.validate_data_consistency([test_data])
     assert consistency_result[test_data.user_id]["overall_consistent"] is True
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -640,7 +626,6 @@ async def test_postgres_failure_rollback_l3(db_transaction_coordinator_l3):
     # Data should not exist in either database after rollback
     assert not user_consistency["postgres_consistent"], "PostgreSQL should not have partial data"
     assert not user_consistency["clickhouse_consistent"], "ClickHouse should not have partial data"
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -676,7 +661,6 @@ async def test_concurrent_transactions_l3(db_transaction_coordinator_l3):
         for test_data in successful_test_data:
             assert consistency_results[test_data.user_id]["overall_consistent"] is True
 
-
 @pytest.mark.L3  
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -703,7 +687,6 @@ async def test_transaction_performance_l3(db_transaction_coordinator_l3):
     
     assert avg_execution_time < 2.0, f"Average transaction time too high: {avg_execution_time}s"
     assert max_execution_time < 5.0, f"Maximum transaction time too high: {max_execution_time}s"
-
 
 @pytest.mark.L3
 @pytest.mark.integration  

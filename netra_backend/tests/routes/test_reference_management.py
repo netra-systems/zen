@@ -1,14 +1,7 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -16,11 +9,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-# Add project root to path
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.main import app
-
-# Add project root to path
 
 class TestReferenceManagement:
     

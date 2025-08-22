@@ -31,7 +31,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class MockLLMProvider:
     """Mock LLM provider for testing LLM manager integration."""
     
@@ -92,7 +91,22 @@ class MockLLMProvider:
             return "Data analysis results: Query latency improved from 450ms to 180ms (60% improvement)."
         else:
             return "I understand your request and I'm here to help with AI workload optimization."
-
+    
+    def simulate_failure_mode(self, failure_type: str):
+        """Simulate specific failure modes for testing error recovery."""
+        self.failure_modes[failure_type] = True
+        if failure_type == "rate_limit":
+            self.error_rate = 1.0  # Force rate limit errors
+        elif failure_type == "timeout":
+            self.error_rate = 1.0  # Force timeout errors
+        elif failure_type == "clear":
+            self.failure_modes.clear()
+            self.error_rate = 0.0
+    
+    def clear_failure_modes(self):
+        """Clear all failure modes and reset error rate."""
+        self.failure_modes.clear()
+        self.error_rate = 0.0
 
 class MockLLMManagerWithIntegration(LLMManager):
     """Mock LLM manager with provider integration and fallback handling."""
@@ -134,24 +148,40 @@ class MockLLMManagerWithIntegration(LLMManager):
         self.request_metrics["failed_requests"] += 1
         raise Exception("All LLM providers failed")
 
-
 @pytest.fixture
 def mock_llm_provider():
     """Create mock LLM provider."""
     return MockLLMProvider("test_provider")
-
 
 @pytest.fixture
 def mock_llm_manager():
     """Create mock LLM manager with integration."""
     return MockLLMManagerWithIntegration()
 
-
 @pytest.fixture
 def llm_test_agent(mock_llm_manager):
     """Create test agent with LLM manager."""
+    from netra_backend.app.agents.base.interface import ExecutionContext
+    
     class TestAgent(BaseSubAgent):
         def __init__(self, llm_manager):
             super().__init__(llm_manager, name="test_agent")
+        
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            """Execute test agent core logic."""
+            return {
+                "status": "success",
+                "result": "Test agent execution completed",
+                "context_id": context.run_id
+            }
+        
+        async def validate_preconditions(self, context: ExecutionContext) -> bool:
+            """Validate test agent preconditions."""
+            return True
+        
+        async def execute(self, state, run_id: str, stream_updates: bool = False) -> None:
+            """Execute test agent."""
+            # Simple test execution - just update state
+            pass
     
     return TestAgent(mock_llm_manager)

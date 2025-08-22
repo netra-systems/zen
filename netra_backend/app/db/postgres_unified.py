@@ -45,13 +45,13 @@ class UnifiedPostgresDB:
             if self.is_cloud_run or self.is_staging or self.is_production:
                 # Use Cloud SQL for Cloud Run, staging, and production
                 logger.info("Initializing Cloud SQL manager for cloud environment")
-                from .postgres_cloud import cloud_db
+                from netra_backend.app.db.postgres_cloud import cloud_db
                 self.manager = cloud_db
                 await self.manager.initialize_cloud_run()
             else:
                 # Use local async for development and testing
                 logger.info("Initializing async manager for local environment")
-                from .postgres_async import async_db
+                from netra_backend.app.db.postgres_async import async_db
                 self.manager = async_db
                 await self.manager.initialize_local()
             

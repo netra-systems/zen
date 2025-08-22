@@ -2,17 +2,10 @@
 Tests for corpus metrics collection system
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -22,11 +15,7 @@ import pytest
 
 from netra_backend.app.schemas.Metrics import ExportFormat, QualityMetrics
 
-# Add project root to path
 from netra_backend.app.services.metrics import CorpusMetricsCollector
-
-# Add project root to path
-
 
 class TestCorpusMetricsCollector:
     """Test corpus metrics collector functionality"""
@@ -185,7 +174,6 @@ class TestCorpusMetricsCollector:
         await metrics_collector.stop_monitoring()
         await metrics_collector.stop_monitoring()  # Should not fail
 
-
 class TestCoreMetricsCollector:
     """Test core metrics collector individually"""
     async def test_operation_timing(self):
@@ -207,7 +195,6 @@ class TestCoreMetricsCollector:
         assert metrics.duration_ms > 0
         assert metrics.records_processed == 100
         assert metrics.throughput_per_second is not None
-
 
 class TestQualityMetricsCollector:
     """Test quality metrics collector individually"""
@@ -237,7 +224,6 @@ class TestQualityMetricsCollector:
         assert distribution["min"] == 0.5
         assert distribution["max"] == 0.9
         assert distribution["mean"] == 0.7  # Average of 0.5-0.9
-
 
 class TestMetricsExporter:
     """Test metrics exporter functionality"""

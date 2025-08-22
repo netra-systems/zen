@@ -10,17 +10,10 @@ that are no longer exposed. Tests should focus on public interfaces.
 import pytest
 pytestmark = pytest.mark.skip(reason="Private function imports not available - tests need refactoring to use public interfaces")
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -34,9 +27,7 @@ from netra_backend.app.routes.websocket_secure import (
     secure_websocket_health,
 )
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager
-
 
 @pytest.fixture
 def mock_websocket():
@@ -45,7 +36,6 @@ def mock_websocket():
     ws.client_state = WebSocketState.CONNECTING
     ws.application_state = WebSocketState.CONNECTING
     return ws
-
 
 @pytest.fixture
 def mock_connected_websocket():
@@ -56,12 +46,10 @@ def mock_connected_websocket():
     ws.close = AsyncMock()
     return ws
 
-
 @pytest.fixture
 def connection_manager():
     """Create a ConnectionManager instance."""
     return ConnectionManager()
-
 
 @pytest.mark.asyncio
 async def test_close_websocket_safely_with_unconnected_socket(connection_manager, mock_websocket):
@@ -73,7 +61,6 @@ async def test_close_websocket_safely_with_unconnected_socket(connection_manager
     # WebSocket.close should not be called if not connected
     assert not hasattr(mock_websocket.close, 'called') or not mock_websocket.close.called
 
-
 @pytest.mark.asyncio
 async def test_close_websocket_safely_with_connected_socket(connection_manager, mock_connected_websocket):
     """Test that closing a connected WebSocket works properly."""
@@ -82,7 +69,6 @@ async def test_close_websocket_safely_with_connected_socket(connection_manager, 
     )
     # WebSocket.close should be called when connected
     mock_connected_websocket.close.assert_called_once_with(code=1000, reason="Normal closure")
-
 
 @pytest.mark.asyncio
 async def test_close_websocket_safely_with_no_state_attributes(connection_manager):
@@ -98,7 +84,6 @@ async def test_close_websocket_safely_with_no_state_attributes(connection_manage
     # Close should not be called when state attributes are missing
     ws.close.assert_not_called()
 
-
 # Tests for private functions are disabled - test public interfaces instead
 
 @pytest.mark.skip(reason="Private functions not exposed for testing")
@@ -106,9 +91,6 @@ async def test_close_websocket_safely_with_no_state_attributes(connection_manage
 async def test_websocket_private_functions_disabled():
     """Private function tests disabled - use public interface tests instead."""
     pass
-        # Should not call general exception handler for ValueError
-        mock_handler.assert_not_called()
-
 
 @pytest.mark.asyncio
 async def test_connection_manager_disconnect_with_missing_websocket():
@@ -124,7 +106,6 @@ async def test_connection_manager_disconnect_with_missing_websocket():
     # Should handle gracefully without errors
     # close should not be called for non-existent connection
     mock_ws.close.assert_not_called()
-
 
 @pytest.mark.asyncio
 async def test_websocket_state_transitions():

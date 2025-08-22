@@ -11,14 +11,8 @@ BVJ (Business Value Justification):
 
 from test_framework import setup_test_path
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -32,16 +26,11 @@ import httpx
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
 from netra_backend.app.models.team import Team
 from netra_backend.app.services.user_service import UserService as UsageService
 
-from tests.user_flow_base import UserFlowTestBase
-from tests.user_journey_data import BillingTestData
-
-# Add project root to path
-
+from netra_backend.tests.user_flow_base import UserFlowTestBase
+from netra_backend.tests.user_journey_data import BillingTestData
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -84,7 +73,6 @@ async def test_early_to_mid_tier_upgrade_with_team_setup(
     # Verify team created in database
     team = await async_session.get(Team, team_data["team_id"])
     assert team.name == "AI Engineering Team"
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -129,7 +117,6 @@ async def test_mid_tier_team_member_management(
     assert response.status_code == status.HTTP_200_OK
     members = response.json()
     assert len(members) >= 1  # Owner
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -178,7 +165,6 @@ async def test_mid_tier_shared_analytics_workspace(
     cost_center = response.json()
     assert "total_cost" in cost_center
     assert "breakdown_by_member" in cost_center
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -239,11 +225,6 @@ async def test_mid_tier_bulk_optimization_operations(
     assert "completed_operations" in status_data
     assert "total_operations" in status_data
 
-
-
-
-
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -278,7 +259,6 @@ async def test_mid_tier_integrations_and_dashboards(
         headers=headers
     )
     assert response.status_code == status.HTTP_201_CREATED
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

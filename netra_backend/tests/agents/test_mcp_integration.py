@@ -4,17 +4,10 @@ Tests the MCP context manager, intent detector, and agent bridge.
 Follows strict 25-line function design for testability.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
@@ -22,10 +15,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from mcp_client import MCPTool
 
-# Add project root to path
 from netra_backend.app.agents.mcp_integration.context_manager import (
     MCPAgentContext,
-    # Add project root to path
     MCPContextManager,
     MCPPermissionContext,
 )
@@ -33,7 +24,6 @@ from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
     MCPIntentDetector,
 )
 from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
-
 
 @pytest.fixture
 def mock_mcp_service():
@@ -46,24 +36,20 @@ def mock_mcp_service():
     service.execute_tool.return_value = {"status": "success", "result": "test"}
     return service
 
-
 @pytest.fixture
 def mcp_context_manager(mock_mcp_service):
     """MCP context manager with mock service."""
     return MCPContextManager(mock_mcp_service)
-
 
 @pytest.fixture
 def mcp_intent_detector():
     """MCP intent detector instance."""
     return MCPIntentDetector()
 
-
 @pytest.fixture
 def agent_mcp_bridge(mock_mcp_service):
     """Agent MCP bridge with mock service."""
     return AgentMCPBridge(mock_mcp_service)
-
 
 @pytest.fixture
 def sample_agent_context():
@@ -79,7 +65,6 @@ def sample_agent_context():
         user_id="test_user",
         permission_context=permission_ctx
     )
-
 
 class TestMCPContextManager:
     """Test MCP context manager functionality."""
@@ -136,7 +121,6 @@ class TestMCPContextManager:
         
         assert run_id not in mcp_context_manager.active_contexts
 
-
 class TestMCPIntentDetector:
     """Test MCP intent detection functionality."""
     
@@ -182,7 +166,6 @@ class TestMCPIntentDetector:
         assert should_route
         assert server == "system"
         assert tool in ["command", "ls"]
-
 
 class TestAgentMCPBridge:
     """Test agent-MCP bridge functionality."""
@@ -238,7 +221,6 @@ class TestAgentMCPBridge:
         
         health = await agent_mcp_bridge.health_check("test_server")
         assert health is False
-
 
 class TestMCPIntegrationEndToEnd:
     """End-to-end integration tests."""

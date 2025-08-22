@@ -15,8 +15,7 @@ from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
-from ..e2e.state_validation_utils import StateIntegrityChecker
-
+from netra_backend.tests.e2e.e2e.state_validation_utils import StateIntegrityChecker
 
 class TypeSafetyResult(BaseModel):
     """Result of type safety verification."""
@@ -24,7 +23,6 @@ class TypeSafetyResult(BaseModel):
     type_violations: List[str] = Field(default_factory=list)
     stage_name: str
     validated_types: List[str] = Field(default_factory=list)
-
 
 class DataFlowResult(BaseModel):
     """Result of data flow tracking."""
@@ -34,14 +32,12 @@ class DataFlowResult(BaseModel):
     flow_violations: List[str] = Field(default_factory=list)
     data_transformations: List[str] = Field(default_factory=list)
 
-
 class ReferentialIntegrityResult(BaseModel):
     """Result of referential integrity checks."""
     integrity_maintained: bool = Field(default=False)
     broken_references: List[str] = Field(default_factory=list)
     orphaned_data: List[str] = Field(default_factory=list)
     reference_chain_valid: bool = Field(default=False)
-
 
 class AuditTrailResult(BaseModel):
     """Result of audit trail validation."""
@@ -50,14 +46,12 @@ class AuditTrailResult(BaseModel):
     trail_entries: List[Dict[str, Any]] = Field(default_factory=list)
     timestamp_consistency: bool = Field(default=False)
 
-
 class StateConsistencyResult(BaseModel):
     """Result of state consistency verification."""
     state_consistent: bool = Field(default=False)
     consistency_violations: List[str] = Field(default_factory=list)
     step_count_valid: bool = Field(default=False)
     result_progression_valid: bool = Field(default=False)
-
 
 class DataIntegrityValidationResult(BaseModel):
     """Comprehensive data integrity validation result."""
@@ -67,7 +61,6 @@ class DataIntegrityValidationResult(BaseModel):
     audit_trail: AuditTrailResult
     state_consistency: StateConsistencyResult
     overall_integrity: bool = Field(default=False)
-
 
 class TypeSafetyValidator:
     """Validates type safety at each stage."""
@@ -137,7 +130,6 @@ class TypeSafetyValidator:
         if before.triage_result and after.triage_result:
             if type(before.triage_result) != type(after.triage_result):
                 violations.append("Triage result type changed during transition")
-
 
 class DataFlowTracker:
     """Tracks data flow to detect loss or corruption."""
@@ -243,7 +235,6 @@ class DataFlowTracker:
             transformations.append("Created data analysis result")
         return transformations
 
-
 class ReferentialIntegrityChecker:
     """Checks referential integrity between related data."""
     
@@ -283,7 +274,6 @@ class ReferentialIntegrityChecker:
         if state.step_count < expected_steps:
             broken_refs.append("Step count inconsistent with completed stages")
         return broken_refs, orphaned
-
 
 class AuditTrailValidator:
     """Validates complete audit trail."""
@@ -360,7 +350,6 @@ class AuditTrailValidator:
                 return False
         return True
 
-
 class StateConsistencyValidator:
     """Validates overall state consistency."""
     
@@ -386,7 +375,6 @@ class StateConsistencyValidator:
             violations.append(str(e))
             result.state_consistent = False
         return violations
-
 
 class DataIntegrityValidator:
     """Comprehensive data integrity validation framework."""

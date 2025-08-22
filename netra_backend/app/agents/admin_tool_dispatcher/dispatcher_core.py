@@ -68,7 +68,7 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     def _set_manager_properties(self, llm_manager, tool_dispatcher, db, user) -> None:
         """Set manager properties and initialize state"""
-        from .dispatcher_helpers import initialize_dispatcher_state
+        from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import initialize_dispatcher_state
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
         self.db = db
@@ -93,14 +93,14 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
 
     def _initialize_admin_access(self) -> None:
         """Initialize admin tools based on user permissions"""
-        from .dispatcher_helpers import check_user_and_db
+        from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import check_user_and_db
         if not check_user_and_db(self):
             return
         self._enable_admin_tools_if_authorized()
     
     def _enable_admin_tools_if_authorized(self) -> None:
         """Enable admin tools if user has proper permissions"""
-        from .dispatcher_helpers import enable_admin_tools, log_no_admin_permissions
+        from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import enable_admin_tools, log_no_admin_permissions
         if PermissionService.is_developer_or_higher(self.user):
             enable_admin_tools(self)
             self._log_available_admin_tools()
@@ -109,7 +109,7 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     def _log_available_admin_tools(self) -> None:
         """Log available admin tools for the current user"""
-        from .dispatcher_helpers import log_available_admin_tools
+        from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_helpers import log_available_admin_tools
         log_available_admin_tools(self.user)
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
@@ -149,7 +149,7 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
                                         tool_input: ToolInput,
                                         **kwargs) -> ToolResponse:
         """Safely dispatch admin tool with validation"""
-        from .admin_tool_execution import dispatch_admin_tool
+        from netra_backend.app.agents.admin_tool_dispatcher.admin_tool_execution import dispatch_admin_tool
         return await dispatch_admin_tool(self, tool_name, tool_input, **kwargs)
     
     async def _dispatch_base_tool(self, tool_name: str, **kwargs) -> ToolResponse:
@@ -231,7 +231,7 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     def get_dispatcher_stats(self) -> Dict[str, Any]:
         """Get comprehensive statistics for the admin tool dispatcher"""
-        from .tool_info_helpers import get_dispatcher_stats
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_info_helpers import get_dispatcher_stats
         return get_dispatcher_stats(self)
     
     def has_admin_access(self) -> bool:
@@ -240,12 +240,12 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     def list_all_tools(self) -> List[AdminToolInfo]:
         """List all available tools including admin tools"""
-        from .tool_info_helpers import list_all_tools
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_info_helpers import list_all_tools
         return list_all_tools(self)
     
     def get_tool_info(self, tool_name: str) -> AdminToolInfo:
         """Get information about a specific tool"""
-        from .tool_info_helpers import get_tool_info
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_info_helpers import get_tool_info
         return get_tool_info(self, tool_name)
     
     def _merge_response_params(self, base_params: Dict[str, Any], 
@@ -255,42 +255,42 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     async def dispatch_admin_operation(self, operation: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatch admin operation based on operation type"""
-        from .operation_helpers import dispatch_admin_operation
+        from netra_backend.app.agents.admin_tool_dispatcher.operation_helpers import dispatch_admin_operation
         return await dispatch_admin_operation(self, operation)
     
     def _has_valid_tool_dispatcher(self) -> bool:
         """Check if tool dispatcher is available and valid."""
-        from .operation_helpers import has_valid_tool_dispatcher
+        from netra_backend.app.agents.admin_tool_dispatcher.operation_helpers import has_valid_tool_dispatcher
         return has_valid_tool_dispatcher(self)
     
     def _has_valid_audit_logger(self) -> bool:
         """Check if audit logger is available and valid."""
-        from .operation_helpers import has_valid_audit_logger
+        from netra_backend.app.agents.admin_tool_dispatcher.operation_helpers import has_valid_audit_logger
         return has_valid_audit_logger(self)
     
     # Modern execution pattern helper methods
     
     def _create_dispatch_context(self, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
         """Create execution context for tool dispatch."""
-        from .modern_execution_helpers import create_dispatch_context
+        from netra_backend.app.agents.admin_tool_dispatcher.modern_execution_helpers import create_dispatch_context
         return create_dispatch_context(self, tool_name, kwargs)
         
     def _validate_tool_access(self, tool_name: str) -> bool:
         """Validate user has access to the specified tool."""
-        from .modern_execution_helpers import validate_tool_access
+        from netra_backend.app.agents.admin_tool_dispatcher.modern_execution_helpers import validate_tool_access
         return validate_tool_access(self, tool_name)
         
     def _convert_response_to_dict(self, response: ToolResponse) -> Dict[str, Any]:
         """Convert ToolResponse to dictionary format."""
-        from .modern_execution_helpers import convert_response_to_dict
+        from netra_backend.app.agents.admin_tool_dispatcher.modern_execution_helpers import convert_response_to_dict
         return convert_response_to_dict(response)
         
     def _convert_result_to_response(self, result: ExecutionResult, tool_name: str) -> ToolResponse:
         """Convert ExecutionResult back to ToolResponse format."""
-        from .modern_execution_helpers import convert_result_to_response
+        from netra_backend.app.agents.admin_tool_dispatcher.modern_execution_helpers import convert_result_to_response
         return convert_result_to_response(self, result, tool_name)
         
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive health status including modern components."""
-        from .modern_execution_helpers import get_modern_health_status
+        from netra_backend.app.agents.admin_tool_dispatcher.modern_execution_helpers import get_modern_health_status
         return get_modern_health_status(self)

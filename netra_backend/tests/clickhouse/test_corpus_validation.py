@@ -4,28 +4,17 @@ Tests validation and safety measures, plus corpus cloning functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import CorpusService
-
-# Add project root to path
-
 
 class TestValidationAndSafety:
     """Test validation and safety measures"""
@@ -73,7 +62,6 @@ class TestValidationAndSafety:
         db.query().filter.assert_called()
         filter_call = db.query().filter.call_args
         assert filter_call != None
-
 
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
@@ -125,7 +113,6 @@ class TestCorpusCloning:
             assert "INSERT INTO dest_table" in query
             assert "SELECT * FROM source_table" in query
 
-
 def _get_validation_test_cases():
     """Get test cases for field validation."""
     return [
@@ -134,7 +121,6 @@ def _get_validation_test_cases():
         ({"response": "r"}, ["missing 'prompt'", "missing 'workload_type'"]),
         ({"workload_type": "test"}, ["missing 'prompt'", "missing 'response'"])
     ]
-
 
 def _create_source_corpus():
     """Create source corpus for cloning."""

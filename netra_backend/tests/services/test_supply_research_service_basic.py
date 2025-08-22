@@ -3,17 +3,10 @@ Basic tests for SupplyResearchService - initialization and retrieval operations
 Tests service initialization, Redis handling, and supply item retrieval methods
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -24,11 +17,7 @@ import pytest
 
 from netra_backend.app.db.models_postgres import AISupplyItem, ResearchSession
 
-# Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
-# Add project root to path
-
 
 @pytest.fixture
 def service():
@@ -36,7 +25,6 @@ def service():
     from unittest.mock import MagicMock
     mock_db = MagicMock()
     return SupplyResearchService(mock_db)
-
 
 @pytest.fixture
 def sample_supply_item() -> AISupplyItem:
@@ -51,7 +39,6 @@ def sample_supply_item() -> AISupplyItem:
     item.availability_status = "available"
     item.last_updated = datetime.now(UTC)
     return item
-
 
 class TestServiceInitialization:
     """Test service initialization with and without Redis"""
@@ -77,7 +64,6 @@ class TestServiceInitialization:
             
             assert service.db == mock_db
             assert service.redis_manager is None
-
 
 class TestSupplyItemRetrieval:
     """Test supply item retrieval methods with various filters"""
@@ -154,7 +140,6 @@ class TestSupplyItemRetrieval:
             
             assert result is None
 
-
 class TestResearchSessionRetrieval:
     """Test research session retrieval operations"""
     
@@ -203,7 +188,6 @@ class TestResearchSessionRetrieval:
         session.id = session_id
         session.status = status
         return session
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

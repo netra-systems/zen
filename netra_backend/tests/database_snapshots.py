@@ -33,7 +33,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class SnapshotMetadata:
     """Metadata for database snapshots."""
@@ -47,7 +46,6 @@ class SnapshotMetadata:
     created_at: datetime
     compressed: bool
     checksum: str
-
 
 class DatabaseSnapshotManager:
     """Manages database snapshots for fast test resets."""
@@ -497,7 +495,6 @@ class DatabaseSnapshotManager:
             "database_types": db_type_counts,
             "storage_path": str(self.storage_path)
         }
-
 
 # Global snapshot manager instance
 snapshot_manager = DatabaseSnapshotManager()

@@ -2,13 +2,11 @@
 
 from enum import Enum
 
-
 class TestTier(str, Enum):
     """Test tiers for rate limiting and billing tests."""
     FREE = "free"
     PRO = "pro"
     ENTERPRISE = "enterprise"
-
 
 # Test configuration settings
 TEST_CONFIG = {

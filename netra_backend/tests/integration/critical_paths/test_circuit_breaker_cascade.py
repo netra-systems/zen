@@ -11,17 +11,10 @@ Coverage: Real circuit breaker states, cascade protection, auto-recovery, failur
 Level: L2-L3 (Real SUT with Real Internal Dependencies + Real Local Services)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,7 +25,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 # Real services for L2-L3 testing
 from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
@@ -49,7 +41,6 @@ from netra_backend.app.services.websocket.connection_manager import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 class CircuitBreakerCascadeManager:
     """Manages L2-L3 circuit breaker cascade testing with real services."""
@@ -209,7 +200,6 @@ class CircuitBreakerCascadeManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def circuit_cascade_manager():
     """Create circuit breaker cascade manager for L2-L3 testing."""
@@ -217,7 +207,6 @@ async def circuit_cascade_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -250,7 +239,6 @@ async def test_circuit_breaker_state_transitions(circuit_cascade_manager):
     # Circuit breaker should allow test calls in half-open state
     assert circuit_breaker.state.value in ["open", "half_open"]
 
-
 @pytest.mark.asyncio 
 @pytest.mark.l3_realism
 async def test_cascade_failure_prevention(circuit_cascade_manager):
@@ -273,7 +261,6 @@ async def test_cascade_failure_prevention(circuit_cascade_manager):
         assert service_result["protected_calls"] < 3  # Not all calls should succeed
         
     assert cascade_result["cascade_time"] < 3.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -313,7 +300,6 @@ async def test_circuit_breaker_recovery_detection(circuit_cascade_manager):
     assert success_count > 0
     # State should be closed or at least half-open (progressing toward closed)
     assert circuit_breaker.state.value in ["closed", "half_open"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

@@ -23,7 +23,6 @@ from netra_backend.app.services.websocket.ws_manager import (
     get_manager as get_ws_manager,
 )
 
-
 class CriticalUserJourneyHelpers:
     """Core helper methods for critical user journey validation (≤8 lines each)"""
     
@@ -96,7 +95,6 @@ class CriticalUserJourneyHelpers:
             "invalid_credentials": {"status": 401, "type": "auth"}
         }
 
-
 class OAuthFlowHelpers:
     """OAuth flow testing helpers (≤8 lines each)"""
     
@@ -146,7 +144,6 @@ class OAuthFlowHelpers:
         }
         assert session_result["validated"], "User session should be validated"
         return welcome_data
-
 
 class AIProviderHelpers:
     """AI provider connection testing helpers (≤8 lines each)"""
@@ -200,7 +197,6 @@ class AIProviderHelpers:
             "cost_alerts": True
         }
         return tracking_config
-
 
 class WebSocketHelpers:
     """WebSocket testing helpers (≤8 lines each)"""

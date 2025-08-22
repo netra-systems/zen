@@ -11,21 +11,10 @@ L2 Test: Real internal health check components with mocked external monitoring.
 Performance target: <10s health check cycles, 99.5% uptime detection accuracy.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +31,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class HealthStatus(Enum):
 
     """Health status enumeration."""
@@ -55,12 +43,10 @@ class HealthStatus(Enum):
 
     UNKNOWN = "unknown"
 
-
 class WebSocketHealthChecker:
 
     """Health checker for WebSocket connections and services."""
     
-
     def __init__(self):
 
         self.check_interval = 30  # seconds
@@ -75,7 +61,6 @@ class WebSocketHealthChecker:
 
         self.service_dependencies = ['redis', 'database', 'auth_service']
     
-
     async def check_connection_health(self, user_id: str, connection_id: str) -> Dict[str, Any]:
 
         """Check health of a specific WebSocket connection."""
@@ -96,7 +81,6 @@ class WebSocketHealthChecker:
 
         }
         
-
         try:
             # Check connection responsiveness
 
@@ -124,7 +108,6 @@ class WebSocketHealthChecker:
 
             health_data["status"] = self._calculate_health_status(health_data["metrics"])
             
-
         except Exception as e:
 
             health_data["status"] = HealthStatus.UNHEALTHY.value
@@ -135,24 +118,20 @@ class WebSocketHealthChecker:
 
         self._update_health_history(user_id, connection_id, health_data)
         
-
         return health_data
     
-
     async def _ping_connection(self, user_id: str, connection_id: str) -> Dict[str, Any]:
 
         """Ping WebSocket connection to check responsiveness."""
 
         start_time = time.time()
         
-
         try:
             # Simulate ping by checking connection state
             # In real implementation, would send ping frame
 
             await asyncio.sleep(0.01)  # Simulate network latency
             
-
             latency = (time.time() - start_time) * 1000  # Convert to ms
 
             return {
@@ -177,7 +156,6 @@ class WebSocketHealthChecker:
 
             }
     
-
     async def _check_message_queue_health(self, user_id: str) -> Dict[str, Any]:
 
         """Check message queue health for user."""
@@ -193,7 +171,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     async def _check_resource_usage(self, connection_id: str) -> Dict[str, Any]:
 
         """Check resource usage for connection."""
@@ -213,7 +190,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     def _calculate_health_status(self, metrics: Dict[str, Any]) -> str:
 
         """Calculate overall health status from metrics."""
@@ -250,7 +226,6 @@ class WebSocketHealthChecker:
 
             issues += 1
         
-
         if issues == 0:
 
             return HealthStatus.HEALTHY.value
@@ -263,19 +238,16 @@ class WebSocketHealthChecker:
 
             return HealthStatus.UNHEALTHY.value
     
-
     def _update_health_history(self, user_id: str, connection_id: str, health_data: Dict[str, Any]) -> None:
 
         """Update health history for connection."""
 
         key = f"{user_id}:{connection_id}"
         
-
         if key not in self.health_history:
 
             self.health_history[key] = []
         
-
         self.health_history[key].append(health_data)
         
         # Keep only last 100 health checks
@@ -284,7 +256,6 @@ class WebSocketHealthChecker:
 
             self.health_history[key] = self.health_history[key][-100:]
     
-
     async def check_service_dependencies(self) -> Dict[str, Any]:
 
         """Check health of service dependencies."""
@@ -293,7 +264,6 @@ class WebSocketHealthChecker:
 
         overall_healthy = True
         
-
         for service in self.service_dependencies:
 
             try:
@@ -302,12 +272,10 @@ class WebSocketHealthChecker:
 
                 dependency_health[service] = service_health
                 
-
                 if service_health["status"] != HealthStatus.HEALTHY.value:
 
                     overall_healthy = False
                     
-
             except Exception as e:
 
                 dependency_health[service] = {
@@ -322,7 +290,6 @@ class WebSocketHealthChecker:
 
                 overall_healthy = False
         
-
         return {
 
             "overall_healthy": overall_healthy,
@@ -333,7 +300,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     async def _check_service_health(self, service_name: str) -> Dict[str, Any]:
 
         """Check health of a specific service."""
@@ -349,12 +315,10 @@ class WebSocketHealthChecker:
 
         }
         
-
         if service_name in health_checks:
 
             return await health_checks[service_name]()
         
-
         return {
 
             "status": HealthStatus.UNKNOWN.value,
@@ -363,7 +327,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     async def _check_redis_health(self) -> Dict[str, Any]:
 
         """Check Redis health."""
@@ -383,7 +346,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     async def _check_database_health(self) -> Dict[str, Any]:
 
         """Check database health."""
@@ -403,7 +365,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     async def _check_auth_service_health(self) -> Dict[str, Any]:
 
         """Check auth service health."""
@@ -423,19 +384,16 @@ class WebSocketHealthChecker:
 
         }
     
-
     def get_health_summary(self, user_id: str, connection_id: str) -> Dict[str, Any]:
 
         """Get health summary for connection."""
 
         key = f"{user_id}:{connection_id}"
         
-
         if key not in self.health_history:
 
             return {"error": "No health data available"}
         
-
         history = self.health_history[key]
 
         recent_checks = history[-10:]  # Last 10 checks
@@ -446,10 +404,8 @@ class WebSocketHealthChecker:
 
                           if check["status"] == HealthStatus.HEALTHY.value)
         
-
         avg_ping = sum(check["metrics"].get("ping_ms", 0) for check in recent_checks) / len(recent_checks)
         
-
         return {
 
             "total_checks": len(history),
@@ -466,7 +422,6 @@ class WebSocketHealthChecker:
 
         }
     
-
     def _calculate_health_trend(self, recent_checks: List[Dict[str, Any]]) -> str:
 
         """Calculate health trend from recent checks."""
@@ -481,7 +436,6 @@ class WebSocketHealthChecker:
 
                         for check in recent_checks[-3:]]
         
-
         if sum(recent_health) == 3:
 
             return "improving"
@@ -494,12 +448,10 @@ class WebSocketHealthChecker:
 
             return "stable"
 
-
 class MetricCollector:
 
     """Collect and aggregate WebSocket health metrics."""
     
-
     def __init__(self):
 
         self.metrics = {}
@@ -508,7 +460,6 @@ class MetricCollector:
 
         self.collection_interval = 60  # seconds
     
-
     def record_health_metric(self, metric_name: str, value: float, labels: Dict[str, str] = None) -> None:
 
         """Record a health metric."""
@@ -517,15 +468,12 @@ class MetricCollector:
 
             labels = {}
         
-
         metric_key = f"{metric_name}:{json.dumps(labels, sort_keys=True)}"
         
-
         if metric_key not in self.metrics:
 
             self.metrics[metric_key] = []
         
-
         self.metrics[metric_key].append({
 
             "value": value,
@@ -542,7 +490,6 @@ class MetricCollector:
 
             self.metrics[metric_key] = self.metrics[metric_key][-1000:]
     
-
     def get_metric_summary(self, metric_name: str, time_window: int = 300) -> Dict[str, Any]:
 
         """Get metric summary for time window."""
@@ -551,7 +498,6 @@ class MetricCollector:
 
         matching_metrics = []
         
-
         for key, values in self.metrics.items():
 
             if key.startswith(f"{metric_name}:"):
@@ -560,15 +506,12 @@ class MetricCollector:
 
                 matching_metrics.extend(recent_values)
         
-
         if not matching_metrics:
 
             return {"error": "No metrics found"}
         
-
         values = [m["value"] for m in matching_metrics]
         
-
         return {
 
             "count": len(values),
@@ -585,7 +528,6 @@ class MetricCollector:
 
         }
     
-
     def aggregate_metrics(self) -> Dict[str, Any]:
 
         """Aggregate all metrics for reporting."""
@@ -598,7 +540,6 @@ class MetricCollector:
 
         metric_names = ["ping_latency", "queue_size", "memory_usage", "cpu_usage"]
         
-
         for metric_name in metric_names:
 
             summary = self.get_metric_summary(metric_name, 300)  # 5 minute window
@@ -607,14 +548,11 @@ class MetricCollector:
 
                 aggregation[metric_name] = summary
         
-
         aggregation["timestamp"] = current_time
 
         aggregation["collection_interval"] = self.collection_interval
         
-
         return aggregation
-
 
 @pytest.mark.L2
 
@@ -624,7 +562,6 @@ class TestWebSocketHealthCheck:
 
     """L2 integration tests for WebSocket health checking."""
     
-
     @pytest.fixture
 
     def ws_manager(self):
@@ -637,7 +574,6 @@ class TestWebSocketHealthCheck:
 
             return WebSocketManager()
     
-
     @pytest.fixture
 
     def health_checker(self):
@@ -646,7 +582,6 @@ class TestWebSocketHealthCheck:
 
         return WebSocketHealthChecker()
     
-
     @pytest.fixture
 
     def metric_collector(self):
@@ -655,7 +590,6 @@ class TestWebSocketHealthCheck:
 
         return MetricCollector()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -682,7 +616,6 @@ class TestWebSocketHealthCheck:
 
         ]
     
-
     async def test_basic_connection_health_check(self, ws_manager, health_checker, test_users):
 
         """Test basic connection health checking."""
@@ -733,7 +666,6 @@ class TestWebSocketHealthCheck:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_service_dependency_health_checks(self, health_checker):
 
         """Test health checks for service dependencies."""
@@ -754,7 +686,6 @@ class TestWebSocketHealthCheck:
 
         expected_services = health_checker.service_dependencies
         
-
         for service in expected_services:
 
             assert service in services
@@ -793,7 +724,6 @@ class TestWebSocketHealthCheck:
 
         assert "error_rate" in auth_health
     
-
     async def test_health_history_tracking(self, ws_manager, health_checker, test_users):
 
         """Test health history tracking functionality."""
@@ -850,7 +780,6 @@ class TestWebSocketHealthCheck:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_metric_collection_and_aggregation(self, metric_collector):
 
         """Test metric collection and aggregation."""
@@ -862,7 +791,6 @@ class TestWebSocketHealthCheck:
 
         metric_collector.record_health_metric("ping_latency", 32.1, {"user": "test1"})
         
-
         metric_collector.record_health_metric("queue_size", 5, {"service": "websocket"})
 
         metric_collector.record_health_metric("queue_size", 12, {"service": "websocket"})
@@ -903,7 +831,6 @@ class TestWebSocketHealthCheck:
 
         assert "timestamp" in aggregated
     
-
     async def test_unhealthy_connection_detection(self, ws_manager, health_checker, test_users):
 
         """Test detection of unhealthy connections."""
@@ -924,7 +851,6 @@ class TestWebSocketHealthCheck:
 
             return {"success": False, "latency": -1, "timestamp": time.time()}
         
-
         health_checker._ping_connection = unhealthy_ping
         
         # Perform health check
@@ -941,7 +867,6 @@ class TestWebSocketHealthCheck:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_concurrent_health_checks(self, ws_manager, health_checker, test_users):
 
         """Test concurrent health checking for multiple connections."""
@@ -966,14 +891,12 @@ class TestWebSocketHealthCheck:
 
         health_tasks = []
         
-
         for user, _, connection_info in connections:
 
             task = health_checker.check_connection_health(user.id, connection_info.connection_id)
 
             health_tasks.append(task)
         
-
         health_results = await asyncio.gather(*health_tasks, return_exceptions=True)
 
         check_duration = time.time() - start_time
@@ -1008,7 +931,6 @@ class TestWebSocketHealthCheck:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
-
     @mock_justified("L2: WebSocket health checking with real internal components")
 
     async def test_health_check_integration_flow(self, ws_manager, health_checker, metric_collector, test_users):
@@ -1029,7 +951,6 @@ class TestWebSocketHealthCheck:
 
         monitoring_cycles = 3
         
-
         for cycle in range(monitoring_cycles):
             # Perform health check
 
@@ -1057,7 +978,6 @@ class TestWebSocketHealthCheck:
 
                 metric_collector.record_health_metric(f"service_{service}_health", status_numeric)
             
-
             await asyncio.sleep(0.1)  # Small delay between cycles
         
         # Get health summary
@@ -1088,7 +1008,6 @@ class TestWebSocketHealthCheck:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_health_check_performance_benchmarks(self, health_checker, test_users):
 
         """Test health check performance benchmarks."""
@@ -1115,12 +1034,10 @@ class TestWebSocketHealthCheck:
 
         start_time = time.time()
         
-
         for _ in range(check_count):
 
             await health_checker.check_connection_health(user.id, connection_id)
         
-
         multiple_checks_time = time.time() - start_time
 
         avg_check_time = multiple_checks_time / check_count
@@ -1144,7 +1061,6 @@ class TestWebSocketHealthCheck:
         assert dependency_check_time < 2.0  # Less than 2 seconds
 
         assert dependency_health["overall_healthy"] is not None
-
 
 if __name__ == "__main__":
 

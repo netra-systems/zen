@@ -16,8 +16,6 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 
 from netra_backend.tests.test_utils import setup_test_path
 
-setup_test_path()
-
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -29,7 +27,6 @@ import pytest
 import pytest_asyncio
 
 # Import the staging error monitor components
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 from netra_backend.app.schemas.monitoring_schemas import (
     ErrorResponse,
     ErrorSeverity,
@@ -48,7 +45,6 @@ from scripts.staging_error_monitor import (
     load_config_from_args,
     parse_deployment_time,
 )
-
 
 class TestErrorAnalyzer:
     """Test suite for ErrorAnalyzer deployment error analysis."""
@@ -127,7 +123,6 @@ class TestErrorAnalyzer:
             last_seen=first_seen + timedelta(seconds=30)
         )
 
-
 class TestConsoleFormatter:
     """Test suite for ConsoleFormatter output generation."""
     
@@ -200,7 +195,6 @@ class TestConsoleFormatter:
             last_seen=datetime.now(timezone.utc)
         )
 
-
 class TestDeploymentDecision:
     """Test suite for DeploymentDecision logic."""
     
@@ -271,7 +265,6 @@ class TestDeploymentDecision:
         error.severity = severity
         return error
 
-
 class TestNotificationSender:
     """Test suite for NotificationSender functionality."""
     
@@ -312,7 +305,6 @@ class TestNotificationSender:
         result = await sender.send_notification("Test message")
         
         assert result is False
-
 
 class TestStagingErrorMonitor:
     """Test suite for StagingErrorMonitor main orchestrator."""
@@ -434,7 +426,6 @@ class TestStagingErrorMonitor:
             "error_score": 0,
             "response": self._create_mock_error_response()
         }
-
 
 class TestConfigurationHelpers:
     """Test suite for configuration helper functions."""

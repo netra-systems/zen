@@ -3,17 +3,10 @@ L4 Integration Test: Cross-Service Auth Propagation Complete
 Tests auth propagation between API Gateway, Auth Service, Backend, and WebSocket
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -21,7 +14,6 @@ import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
-# Add project root to path
 # from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -30,13 +22,11 @@ import pytest
 
 from netra_backend.app.services.api_gateway_service import APIGatewayService
 
-# Add project root to path
 from netra_backend.app.services.auth_service import AuthService
 
 WebSocketService = AsyncMock
 from netra_backend.app.config import get_config
 from netra_backend.app.services.backend_service import BackendService
-
 
 class TestCrossServiceAuthPropagationCompleteL4:
     """Complete cross-service authentication propagation testing"""

@@ -11,17 +11,10 @@ Coverage: Real LLM integration, actual agent coordination, production billing ev
 L4 Realism: Tests against real staging services, actual LLM providers, production-like agent workflows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -33,7 +26,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
 # from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 # from app.services.websocket_service import WebSocketService
@@ -43,7 +35,6 @@ import pytest
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.audit_service import AuditService
 from netra_backend.app.services.llm_cache_service import LLMCacheService
@@ -56,7 +47,6 @@ StateManager = AsyncMock
 from test_framework.test_config import configure_dedicated_test_environment
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class RevenuePathMetrics:
@@ -79,7 +69,6 @@ class RevenuePathMetrics:
             self.agent_response_times = []
         if self.revenue_amounts is None:
             self.revenue_amounts = []
-
 
 class AgentOrchestrationRevenuePathL4Manager:
     """L4 agent orchestration revenue path test manager with real LLM and billing integration."""
@@ -891,7 +880,6 @@ class AgentOrchestrationRevenuePathL4Manager:
         except Exception as e:
             logger.error(f"L4 agent orchestration cleanup failed: {e}")
 
-
 @pytest.fixture
 async def agent_revenue_path_l4():
     """Create L4 agent orchestration revenue path manager."""
@@ -899,7 +887,6 @@ async def agent_revenue_path_l4():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -920,7 +907,6 @@ async def test_complete_agent_revenue_workflow_high_value(agent_revenue_path_l4)
     assert result["revenue_generated"] > 0, "No revenue generated from high-value workflow"
     assert result["customer_value_score"] >= 70.0, "Customer value score below threshold"
     assert result["execution_time"] < 60.0, "Workflow execution time too slow"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -948,7 +934,6 @@ async def test_multi_agent_collaboration_revenue_chain(agent_revenue_path_l4):
     total_revenue = sum(r.get("revenue_generated", 0) for r in successful_workflows)
     assert total_revenue > 0, "No revenue generated across multi-agent workflows"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.critical
@@ -965,7 +950,6 @@ async def test_concurrent_agent_orchestration_scalability(agent_revenue_path_l4)
     assert result["total_revenue_generated"] > 0, "No revenue generated from concurrent workflows"
     assert result["avg_workflow_time"] < 45.0, "Average workflow time too slow under load"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.critical
@@ -979,7 +963,6 @@ async def test_failure_recovery_revenue_protection(agent_revenue_path_l4):
     # Verify recovery effectiveness
     assert result["recovery_rate"] >= 70.0, f"Recovery rate too low: {result}"
     assert result["revenue_protected"] > 0, "No revenue protected during failures"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -1009,7 +992,6 @@ async def test_comprehensive_revenue_path_metrics(agent_revenue_path_l4):
     assert metrics["sla_compliance"]["response_time_under_30s"] >= 80.0, "SLA response time not met"
     
     logger.info(f"Revenue path metrics: {metrics}")
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4

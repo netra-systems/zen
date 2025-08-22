@@ -11,17 +11,10 @@ L3 Test: Uses real PostgreSQL via Testcontainers to validate connection pool beh
 Tests pool exhaustion, recovery mechanisms, and connection lifecycle management.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -37,16 +30,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_async_db, get_postgres_session
 from netra_backend.app.db.postgres_core import Database, async_engine
 from netra_backend.app.db.postgres_pool import close_async_db, get_pool_status
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class PostgresPoolExhaustionManager:
     """Manages PostgreSQL connection pool testing with real containers."""
@@ -330,7 +319,6 @@ class PostgresPoolExhaustionManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def pool_manager():
     """Create PostgreSQL pool manager for testing."""
@@ -338,7 +326,6 @@ async def pool_manager():
     await manager.setup_postgres_container()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -419,7 +406,6 @@ class TestPostgresConnectionPoolExhaustionL3:
                     await session.close()
                 except:
                     pass
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

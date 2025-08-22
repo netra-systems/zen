@@ -2,17 +2,10 @@
 Tests comprehensive thread lifecycle, persistence, and isolation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -31,15 +24,12 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 
-# Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.tests.thread_test_helpers import (
-    # Add project root to path
+from netra_backend.tests.helpers.thread_test_helpers import (
     create_mock_thread,
     setup_thread_repo_mock,
     setup_ws_manager_mock,
 )
-
 
 class TestThreadCreation:
     """Tests for thread creation with unique IDs."""
@@ -81,7 +71,6 @@ class TestThreadCreation:
         assert thread.metadata_.get("user_id") == user_id
         assert thread.object == "thread"
         assert thread.created_at > 0
-
 
 class TestThreadSwitching:
     """Tests for thread switching and context maintenance."""
@@ -136,7 +125,6 @@ class TestThreadSwitching:
         assert messages1[0].thread_id == thread1_id
         assert messages2[0].thread_id == thread2_id
 
-
 class TestThreadPersistence:
     """Tests for thread persistence to database."""
     async def test_thread_database_persistence(self, db_session: AsyncSession):
@@ -186,7 +174,6 @@ class TestThreadPersistence:
         assert success
         assert snapshot_id is not None
 
-
 class TestThreadExpiration:
     """Tests for thread expiration and cleanup."""
     async def test_thread_expiration_after_timeout(self, db_session: AsyncSession):
@@ -215,7 +202,6 @@ class TestThreadExpiration:
         """Verify thread expiration cleanup."""
         assert thread.metadata_.get("status") == "expired"
         assert thread.metadata_.get("expired_at") is not None
-
 
 class TestConcurrentThread:
     """Tests for concurrent thread operations."""
@@ -267,7 +253,6 @@ class TestConcurrentThread:
         
         assert len(successful_messages) > 0
 
-
 class TestThreadIsolation:
     """Tests for thread isolation and cross-contamination prevention."""
     async def test_thread_data_isolation(self, db_session: AsyncSession):
@@ -313,7 +298,6 @@ class TestThreadIsolation:
         thread1_content = {msg.content[0]["text"]["value"] for msg in msgs1}
         thread2_content = {msg.content[0]["text"]["value"] for msg in msgs2}
         assert thread1_content.isdisjoint(thread2_content)
-
 
 @pytest.fixture
 async def db_session():

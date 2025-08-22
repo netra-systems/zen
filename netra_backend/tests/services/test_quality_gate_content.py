@@ -3,25 +3,16 @@ Content-specific validation tests for Quality Gate Service
 Tests validation for different content types and scenarios
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import ContentType
 from netra_backend.tests.quality_gate_content import (
     get_complete_action_plan_content,
-    # Add project root to path
     get_data_analysis_content,
     get_domain_specific_content,
     get_good_error_message_content,
@@ -44,7 +35,6 @@ from netra_backend.tests.quality_gate_helpers import (
     assert_retry_suggestions_provided,
     assert_triage_content_metrics,
 )
-
 
 class TestQualityGateContent:
     """Test suite for content-specific QualityGateService validation"""

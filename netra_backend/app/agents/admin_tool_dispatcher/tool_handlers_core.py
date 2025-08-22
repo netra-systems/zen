@@ -101,7 +101,7 @@ class CorpusManagerHandler(ModernToolHandler):
         """Handle corpus listing"""
         from netra_backend.app.core.configuration.services import corpus_service
 
-        from .tool_handler_helpers import create_corpus_list_response
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_corpus_list_response
         corpora = await corpus_service.list_corpora(db)
         return create_corpus_list_response(corpora)
     
@@ -160,7 +160,7 @@ class SyntheticGeneratorHandler(ModernToolHandler):
             SyntheticDataService,
         )
 
-        from .tool_handler_helpers import create_presets_list_response
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import create_presets_list_response
         synthetic_service = SyntheticDataService(db)
         presets = await synthetic_service.list_presets()
         return create_presets_list_response(presets)
@@ -198,7 +198,7 @@ class UserAdminHandler(ModernToolHandler):
     
     async def _handle_user_create(self, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle user creation"""
-        from .tool_handler_helpers import check_email_required
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import check_email_required
         email = kwargs.get('email')
         check_email_required(email)
         params = _prepare_user_create_params(kwargs, db)
@@ -207,7 +207,7 @@ class UserAdminHandler(ModernToolHandler):
     
     async def _handle_user_grant_permission(self, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle granting user permissions"""
-        from .tool_handler_helpers import check_user_permission_params
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import check_user_permission_params
         user_email, permission = _extract_permission_params(kwargs)
         check_user_permission_params(user_email, permission)
         success = await _grant_user_permission(user_email, permission, db)
@@ -270,7 +270,7 @@ class LogAnalyzerHandler(ModernToolHandler):
     
     async def _handle_log_analyze(self, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle log analysis"""
-        from .tool_handler_helpers import extract_log_analysis_params
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_helpers import extract_log_analysis_params
         query, time_range = extract_log_analysis_params(kwargs)
         result = await _execute_debug_analysis(db, user)
         return _create_log_analysis_response(query, time_range, result)

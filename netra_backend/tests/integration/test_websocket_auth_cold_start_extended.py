@@ -16,17 +16,10 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization under stress
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import base64
@@ -49,9 +42,6 @@ import jwt
 import pytest
 import websockets
 
-# Add project root to path
-
-
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
@@ -61,7 +51,6 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 from clients.auth_client import auth_client
 
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
-
 
 class TestWebSocketAuthColdStartExtendedL3:
     """Extended L3 Integration tests for WebSocket authentication during cold start."""

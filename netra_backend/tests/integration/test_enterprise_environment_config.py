@@ -4,17 +4,10 @@ BVJ: Custom environment configuration enables enterprise compliance requirements
 Revenue Impact: Unlocks regulated industry customers requiring custom env configs
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from datetime import datetime
@@ -22,17 +15,14 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from integration.deployment_config_fixtures import (
+from netra_backend.tests.integration.deployment_config_fixtures import (
     assert_enterprise_success,
     create_enterprise_customer_config,
     create_service_startup_config,
     create_validation_rules,
-    # Add project root to path
     enterprise_deployment_infrastructure,
     validate_single_env_var,
 )
-
 
 class TestEnterpriseEnvironmentConfig:
     """Enterprise environment variable injection and validation tests"""

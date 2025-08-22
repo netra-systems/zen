@@ -4,28 +4,17 @@ Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for basic JWT manager setup and utility functions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import JWTTokenManager
 from netra_backend.app.core.exceptions_auth import AuthenticationError
-
-# Add project root to path
-
 
 # Test fixtures
 @pytest.fixture
@@ -34,7 +23,6 @@ def mock_config():
     config = Mock()
     config.jwt_secret_key = "test_secret_key_12345"
     return config
-
 
 @pytest.fixture
 def mock_redis_manager():
@@ -46,7 +34,6 @@ def mock_redis_manager():
     redis.set = AsyncMock()
     return redis
 
-
 @pytest.fixture
 def jwt_manager(mock_config, mock_redis_manager):
     """JWT token manager instance with mocked dependencies."""
@@ -55,12 +42,10 @@ def jwt_manager(mock_config, mock_redis_manager):
     manager.redis_manager = mock_redis_manager
     return manager
 
-
 # Helper functions for 25-line compliance
 def assert_revocation_key_format(key, expected_jti):
     """Assert revocation key follows expected format."""
     assert key == f"revoked_token:{expected_jti}"
-
 
 # Test class for JWT Token Manager Core Functions
 class TestJWTTokenManagerCore:

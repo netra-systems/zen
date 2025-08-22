@@ -16,17 +16,10 @@ L3 Integration Test Level:
 - Tests scheduling under various load conditions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -41,7 +34,6 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
-# Add project root to path
 from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
@@ -49,10 +41,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class ScheduledJob:
@@ -63,7 +52,6 @@ class ScheduledJob:
     completion_time: Optional[float] = None
     timing_accuracy: Optional[float] = None
     status: str = "scheduled"
-
 
 class JobSchedulingAccuracyL3Manager:
     """Manages L3 job scheduling accuracy tests with real infrastructure."""
@@ -374,7 +362,6 @@ class JobSchedulingAccuracyL3Manager:
         except Exception as e:
             logger.error(f"Scheduling test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def scheduling_accuracy_manager():
     """Create scheduling accuracy manager for L3 testing."""
@@ -382,7 +369,6 @@ async def scheduling_accuracy_manager():
     await manager.initialize_test_infrastructure()
     yield manager
     await manager.cleanup_test_infrastructure()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -421,7 +407,6 @@ async def test_basic_job_scheduling_accuracy_l3(scheduling_accuracy_manager):
     assert timing_results["total_jobs"] >= 3, "Not all scheduled jobs executed"
     assert timing_results["accuracy_percentage"] >= 80.0, f"Poor timing accuracy: {timing_results['accuracy_percentage']}%"
     assert timing_results["average_timing_accuracy"] < 0.5, f"Average timing accuracy too poor: {timing_results['average_timing_accuracy']}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -462,7 +447,6 @@ async def test_high_precision_scheduling_l3(scheduling_accuracy_manager):
     # Check individual job precision
     for event in scheduling_accuracy_manager.execution_events:
         assert event["timing_accuracy"] < 0.3, f"Job {event['job_id']} exceeded precision tolerance: {event['timing_accuracy']}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -509,7 +493,6 @@ async def test_concurrent_scheduled_jobs_l3(scheduling_accuracy_manager):
         time_diff = sorted_events[i + 1]["actual_execution_time"] - sorted_events[i]["actual_execution_time"]
         # Should be roughly 300ms apart (allowing for processing variance)
         assert time_diff >= 0.1, f"Jobs executing too close together: {time_diff}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -570,7 +553,6 @@ async def test_scheduling_under_system_load_l3(scheduling_accuracy_manager):
     assert len(scheduled_events) >= 3, "Not all scheduled jobs executed under load"
     for event in scheduled_events:
         assert event["timing_accuracy"] < 1.0, f"Scheduled job timing too poor under load: {event['timing_accuracy']}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

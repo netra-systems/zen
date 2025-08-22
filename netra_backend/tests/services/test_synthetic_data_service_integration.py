@@ -3,17 +3,10 @@ Integration Test Suite for Synthetic Data Service
 Testing end-to-end integration scenarios
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -25,19 +18,15 @@ import pytest
 from netra_backend.app import schemas
 from netra_backend.app.services.corpus_service import CorpusService
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )
 from netra_backend.tests.test_synthetic_data_service_basic import (
     ClickHouseService,
     GenerationConfig,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def full_stack():
@@ -49,7 +38,6 @@ def full_stack():
         "websocket": ws_manager
     }
     return services
-
 
 # ==================== Test Suite: Integration Testing ====================
 
@@ -273,7 +261,6 @@ class TestIntegration(SharedTestIntegration):
         
         # Verify cleanup (would need to mock time for actual test)
         # This is a placeholder for the cleanup verification
-
 
 # ==================== Test Runner ====================
 

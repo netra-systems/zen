@@ -10,17 +10,10 @@ Critical Path: Request processing -> Failure detection -> Circuit state manageme
 Coverage: Per-endpoint circuit breakers, failure thresholds, recovery mechanisms, fallback strategies
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -34,7 +27,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
 from netra_backend.app.services.api_gateway.circuit_breaker_manager import (
     CircuitBreakerManager,
@@ -44,17 +36,13 @@ from netra_backend.app.services.metrics.circuit_breaker_metrics import (
     CircuitBreakerMetricsService,
 )
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class CircuitState(Enum):
     """Circuit breaker states."""
     CLOSED = "closed"       # Normal operation
     OPEN = "open"          # Failing, blocking requests
     HALF_OPEN = "half_open" # Testing recovery
-
 
 @dataclass
 class CircuitBreakerConfig:
@@ -66,7 +54,6 @@ class CircuitBreakerConfig:
     rolling_window_seconds: int # Failure counting window
     error_percentage: float     # Error percentage to open circuit
     minimum_requests: int       # Minimum requests before opening
-
 
 class ApiCircuitBreakerManager:
     """Manages L3 API circuit breaker tests with real failure simulation."""
@@ -676,7 +663,6 @@ class ApiCircuitBreakerManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def circuit_breaker_manager():
     """Create circuit breaker manager for L3 testing."""
@@ -684,7 +670,6 @@ async def circuit_breaker_manager():
     await manager.initialize_circuit_breakers()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -705,7 +690,6 @@ async def test_circuit_breaker_opens_on_failures(circuit_breaker_manager):
     
     # Should have some successful requests before circuit opens
     assert test_result["successful_requests"] < test_result["total_requests"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -729,7 +713,6 @@ async def test_circuit_breaker_fallback_responses(circuit_breaker_manager):
     assert result["circuit_state"] in ["open", "half_open"]
     assert "fallback" in result["body"]
     assert result["body"]["fallback"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -775,7 +758,6 @@ async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
     finally:
         config.timeout_seconds = original_timeout
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -804,7 +786,6 @@ async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
     assert len(user_fallbacks) > 0  # User service should fail
     assert len(agent_fallbacks) == 0  # Agent service should work
     assert len(thread_fallbacks) == 0  # Thread service should work
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -841,7 +822,6 @@ async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
         circuit_breaker_manager.failure_injections["health_service"]["active"] = False
         await asyncio.sleep(0.5)
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -871,7 +851,6 @@ async def test_circuit_breaker_concurrent_requests(circuit_breaker_manager):
     # Circuit should be in open or half-open state
     final_states = set(r["circuit_state"] for r in results)
     assert "open" in final_states or "half_open" in final_states
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -909,7 +888,6 @@ async def test_circuit_breaker_metrics_accuracy(circuit_breaker_manager):
     for endpoint_data in metrics["endpoint_breakdown"].values():
         assert "current_state" in endpoint_data
         assert endpoint_data["current_state"] in ["closed", "open", "half_open"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

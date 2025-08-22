@@ -6,7 +6,7 @@ Handles violation sorting, limits, and severity markers.
 
 from typing import List
 
-from .core import Violation
+from scripts.compliance.core import Violation
 
 
 class ReporterUtils:

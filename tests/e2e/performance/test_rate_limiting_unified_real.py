@@ -36,9 +36,6 @@ import redis.asyncio as redis
 import websockets
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.rate_limiting_core import (
     MessageSender,

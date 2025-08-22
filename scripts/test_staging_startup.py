@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.configuration.secrets import SecretManager

@@ -14,17 +14,10 @@ Tests cover:
 7. Memory leak detection for long connections
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 
@@ -60,7 +53,6 @@ __all__ = [
     'test_rapid_connect_disconnect_cycles',
     'test_connection_pool_exhaustion_recovery'
 ]
-
 
 # Optional: Add integration test that uses multiple modules
 @pytest.mark.integration

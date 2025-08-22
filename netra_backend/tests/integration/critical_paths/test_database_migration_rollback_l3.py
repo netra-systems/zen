@@ -15,8 +15,6 @@ This test ensures database migrations are safe and reversible.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import hashlib
 import json
@@ -31,10 +29,6 @@ import aiohttp
 import asyncpg
 import pytest
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
 AUTH_SERVICE_URL = "http://localhost:8081"
@@ -43,7 +37,6 @@ DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/netra_test"
 # Test credentials
 TEST_USER_EMAIL = "migration_test@example.com"
 TEST_USER_PASSWORD = "migrationtest123"
-
 
 class DatabaseMigrationTester:
     """Test database migration and rollback flow."""
@@ -629,7 +622,6 @@ class DatabaseMigrationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -668,7 +660,6 @@ async def test_database_migration_rollback():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -685,7 +676,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

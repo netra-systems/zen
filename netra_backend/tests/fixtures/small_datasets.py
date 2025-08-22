@@ -27,7 +27,6 @@ from netra_backend.app.schemas.Performance import Performance
 from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
 from netra_backend.app.schemas.Supply import ModelIdentifier, SupplyOption
 
-
 class SmallTestDatasets:
     """Generator for small, fast-loading test datasets"""
     
@@ -171,7 +170,6 @@ class SmallTestDatasets:
             {"threshold": 0.999, "scenario": "near_max_threshold"},
             {"threshold": 0.001, "scenario": "near_min_threshold"}
         ]
-
 
 # Singleton instance for global access
 small_datasets = SmallTestDatasets()

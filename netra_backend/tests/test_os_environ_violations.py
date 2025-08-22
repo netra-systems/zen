@@ -11,17 +11,10 @@ os.environ calls outside of the central configuration system,
 unless explicitly @marked with justification.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import ast
 import json
@@ -31,7 +24,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 import pytest
-
 
 class OSEnvironAnalyzer(ast.NodeVisitor):
     """AST analyzer to detect os.environ usage patterns."""
@@ -133,14 +125,12 @@ class OSEnvironAnalyzer(ast.NodeVisitor):
                 self.getenv_violations + 
                 self.environ_get_violations)
 
-
 class TestOSEnvironViolations:
     """Test Suite 2: Detect and Validate OS Environment Access"""
     
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
-        return Path(__file__).parent.parent.parent
         
     @pytest.fixture
     def allowed_files(self):

@@ -10,21 +10,10 @@ Business Value Justification (BVJ):
 This test validates first chat session and profile setup flows.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,26 +25,22 @@ import pytest
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from .integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
 
     MockAuthService,
 
     MockWebSocketManager,
 
     generate_test_thread_data,
-    # Add project root to path
 
     generate_test_user_data,
 
 )
 
-
 class TestUserOnboardingFlow:
 
     """Test user onboarding and first session flow"""
     
-
     @pytest.mark.asyncio
 
     async def test_first_chat_session_initialization(self, 
@@ -71,7 +56,6 @@ class TestUserOnboardingFlow:
 
         user_data["verified"] = True
         
-
         mock_auth = MockAuthService()
 
         mock_ws = MockWebSocketManager()
@@ -96,7 +80,6 @@ class TestUserOnboardingFlow:
 
         assert session_result["onboarding_state"] == "chat_initialized"
     
-
     @pytest.mark.asyncio
 
     async def test_user_profile_setup_and_preferences(self, test_session: AsyncSession):
@@ -119,7 +102,6 @@ class TestUserOnboardingFlow:
 
         assert "notification_preferences" in profile_setup["profile_data"]
     
-
     @pytest.mark.asyncio
 
     async def test_onboarding_progress_tracking(self, test_session: AsyncSession):
@@ -168,7 +150,6 @@ class TestUserOnboardingFlow:
 
         assert progress["completion_percentage"] >= 60  # Based on total steps
     
-
     @pytest.mark.asyncio
 
     async def test_onboarding_tutorial_flow(self, test_session: AsyncSession):
@@ -193,7 +174,6 @@ class TestUserOnboardingFlow:
 
         assert tutorial_result["user_engagement_score"] >= 0.7
     
-
     @pytest.mark.asyncio
 
     async def test_onboarding_skip_options(self, test_session: AsyncSession):
@@ -218,7 +198,6 @@ class TestUserOnboardingFlow:
 
         assert skip_result["can_complete_later"] is True
     
-
     async def _initialize_first_chat_session(self, user_id: str, 
 
                                            mock_ws: MockWebSocketManager) -> Dict[str, Any]:
@@ -236,7 +215,6 @@ class TestUserOnboardingFlow:
 
         ws_connected = await mock_ws.connect(user_id, None)
         
-
         if ws_connected:
             # Send welcome message
 
@@ -252,10 +230,8 @@ class TestUserOnboardingFlow:
 
             }
             
-
             await mock_ws.send_message(user_id, welcome_message)
             
-
             return {
 
                 "success": True,
@@ -268,10 +244,8 @@ class TestUserOnboardingFlow:
 
             }
         
-
         return {"success": False, "error": "WebSocket connection failed"}
     
-
     async def _complete_profile_setup(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Complete user profile setup"""
@@ -312,7 +286,6 @@ class TestUserOnboardingFlow:
 
         await asyncio.sleep(0.1)  # Simulate API call
         
-
         return {
 
             "profile_completed": True,
@@ -323,7 +296,6 @@ class TestUserOnboardingFlow:
 
         }
     
-
     async def _execute_onboarding_tutorial(self, user_data: Dict[str, Any],
 
                                          mock_ws: MockWebSocketManager) -> Dict[str, Any]:
@@ -344,31 +316,25 @@ class TestUserOnboardingFlow:
 
         ]
         
-
         completed_steps = []
 
         user_interactions = 0
         
-
         for step in tutorial_steps:
             # Simulate user interaction
 
             interaction_result = await self._simulate_tutorial_interaction(step)
             
-
             if interaction_result["completed"]:
 
                 completed_steps.append(step["step"])
 
                 user_interactions += interaction_result.get("interactions", 1)
             
-
             await asyncio.sleep(0.1)  # Simulate step duration
         
-
         engagement_score = min(1.0, user_interactions / len(tutorial_steps))
         
-
         return {
 
             "tutorial_started": True,
@@ -383,7 +349,6 @@ class TestUserOnboardingFlow:
 
         }
     
-
     async def _simulate_tutorial_interaction(self, step: Dict[str, str]) -> Dict[str, Any]:
 
         """Simulate user interaction with tutorial step"""
@@ -391,7 +356,6 @@ class TestUserOnboardingFlow:
 
         success_rate = 0.9
         
-
         if step["step"] in ["welcome", "view_response"]:
             # Passive steps - always succeed
 
@@ -408,7 +372,6 @@ class TestUserOnboardingFlow:
 
             }
     
-
     async def _test_onboarding_skip(self, skip_type: str, 
 
                                   user_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -439,15 +402,12 @@ class TestUserOnboardingFlow:
 
             }
         
-
         return {"skipped": False, "error": "Unknown skip type"}
-
 
 class OnboardingProgressTracker:
 
     """Track user onboarding progress"""
     
-
     def __init__(self, user_id: str):
 
         self.user_id = user_id
@@ -458,21 +418,18 @@ class OnboardingProgressTracker:
 
                            "first_chat", "tutorial_completion"]
     
-
     async def mark_step_complete(self, step: str):
 
         """Mark onboarding step as complete"""
 
         self.completed_steps.add(step)
     
-
     async def get_progress(self) -> Dict[str, Any]:
 
         """Get current onboarding progress"""
 
         completion_percentage = (len(self.completed_steps) / len(self.total_steps)) * 100
         
-
         return {
 
             "user_id": self.user_id,

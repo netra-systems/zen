@@ -5,8 +5,6 @@ Ensures both services use the same JWT secret for token validation.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import os
 import sys
 from unittest.mock import MagicMock, patch
@@ -15,13 +13,11 @@ import httpx
 import pytest
 
 # Add auth_service to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "auth_service"))
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.schemas.Config import AppConfig
-
 
 class TestJWTSecretConsistency:
     """Test JWT secret consistency across services."""
@@ -168,7 +164,6 @@ class TestJWTSecretConsistency:
             # Should raise ValueError in production without secrets
             with pytest.raises(ValueError, match="JWT secret not configured for production environment"):
                 AuthSecretLoader.get_jwt_secret()
-
 
 @pytest.mark.asyncio
 class TestJWTSecretIntegration:

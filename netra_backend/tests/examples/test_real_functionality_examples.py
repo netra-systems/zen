@@ -20,17 +20,10 @@ Examples include:
 All examples follow CLAUDE.md requirements: ≤8 lines per function, ≤300 lines per file.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,7 +38,6 @@ from logging_config import central_logger
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.models.thread import Thread
 
-# Add project root to path
 # Real imports - not mocked unless external API
 from netra_backend.app.models.user import User
 from netra_backend.app.services.thread_service import ThreadService
@@ -53,7 +45,6 @@ from netra_backend.app.services.user_service import UserService
 from netra_backend.app.websocket.connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
-
 
 # =============================================================================
 # UNIT TEST EXAMPLE - Minimal Mocking
@@ -97,7 +88,6 @@ class TestUnitTestMinimalMocking:
         # Test real service behavior with mocked external dependency
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
-
 
 # =============================================================================
 # INTEGRATION TEST EXAMPLE - Real Child Components
@@ -151,7 +141,6 @@ class TestIntegrationRealComponents:
         
         assert result["status"] == "success"
         mock_session.add.assert_called()
-
 
 # =============================================================================
 # E2E TEST EXAMPLE - Real Backend
@@ -213,7 +202,6 @@ class TestE2ERealBackend:
             # Verify real data persistence
             assert thread.user_id == user.id
             assert message.thread_id == thread.id
-
 
 # =============================================================================
 # EXTERNAL API MOCKING EXAMPLES - Correct Techniques
@@ -287,7 +275,6 @@ class TestExternalAPIMocking:
         assert result.success is False
         assert "timeout" in result.error_message.lower()
 
-
 # =============================================================================
 # ANTI-PATTERN EXAMPLES - What NOT to Do
 # =============================================================================
@@ -346,7 +333,6 @@ class TestAntiPatternsWhatNotToDo:
             # All components are mocked, so no real interaction is tested
             pass
 
-
 # =============================================================================
 # HELPER FUNCTIONS - Real Utilities for Testing
 # =============================================================================
@@ -386,7 +372,6 @@ async def setup_test_data() -> Dict[str, Any]:
             "session": session
         }
 
-
 # =============================================================================
 # FIXTURES - Real Data Factories
 # =============================================================================
@@ -409,7 +394,6 @@ async def database_session():
     async with get_database_session() as session:
         yield session
         # Cleanup happens automatically with async context manager
-
 
 # =============================================================================
 # SUMMARY COMMENTS

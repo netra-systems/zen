@@ -5,17 +5,10 @@ quality gate validation, and performance measurement.
 Maximum 300 lines, functions ≤8 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -25,21 +18,17 @@ from unittest.mock import AsyncMock
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
 )
-from ..infrastructure.llm_test_manager import (
+from netra_backend.tests.e2e.infrastructure.llm_test_manager import (
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 async def real_llm_workflow_setup(real_agent_setup):
@@ -54,9 +43,6 @@ async def real_llm_workflow_setup(real_agent_setup):
     })
     return setup
 
-
-
-
 def _create_performance_tracker():
     """Create performance tracking utilities."""
     return {
@@ -65,7 +51,6 @@ def _create_performance_tracker():
         'llm_call_count': 0,
         'quality_checks': []
     }
-
 
 @pytest.mark.real_llm
 class TestRealLLMWorkflow:
@@ -79,7 +64,6 @@ class TestRealLLMWorkflow:
         await self._execute_full_workflow_with_tracking(setup, state)
         await self._validate_workflow_quality_and_performance(setup, state)
 
-
     async def _execute_full_workflow_with_tracking(self, setup: Dict, state: DeepAgentState):
         """Execute full workflow with performance and quality tracking."""
         setup['performance_tracker']['start_time'] = time.time()
@@ -87,7 +71,6 @@ class TestRealLLMWorkflow:
         await self._execute_triage_with_real_llm(setup, state)
         await self._execute_data_analysis_with_real_llm(setup, state)
         await self._validate_multi_agent_coordination(setup, state)
-
 
     async def _execute_triage_with_real_llm(self, setup: Dict, state: DeepAgentState):
         """Execute triage agent with real LLM and quality validation."""
@@ -100,7 +83,6 @@ class TestRealLLMWorkflow:
         setup['performance_tracker']['agent_times']['triage'] = time.time() - start_time
         
         await self._validate_triage_quality_gates(setup, state)
-
 
     async def _validate_triage_quality_gates(self, setup: Dict, state: DeepAgentState):
         """Validate triage results through quality gates."""
@@ -117,7 +99,6 @@ class TestRealLLMWorkflow:
                 f"Score: {quality_result.metrics.overall_score}, "
                 f"Suggestions: {quality_result.metrics.suggestions}"
             )
-
 
     async def _execute_data_analysis_with_real_llm(self, setup: Dict, state: DeepAgentState):
         """Execute data analysis agent with real LLM and quality validation."""
@@ -136,7 +117,6 @@ class TestRealLLMWorkflow:
         
         await self._validate_data_quality_gates(setup, state)
 
-
     async def _validate_data_quality_gates(self, setup: Dict, state: DeepAgentState):
         """Validate data analysis results through quality gates."""
         if state.data_result:
@@ -152,9 +132,6 @@ class TestRealLLMWorkflow:
                 f"Score: {quality_result.metrics.overall_score}"
             )
 
-
-
-
     async def _validate_multi_agent_coordination(self, setup: Dict, state: DeepAgentState):
         """Validate multi-agent coordination and state transitions."""
         assert state.triage_result is not None, "Triage must complete successfully"
@@ -165,7 +142,6 @@ class TestRealLLMWorkflow:
         # Validate that agents attempted to coordinate even if some failed
         tracker = setup['performance_tracker']
         assert len(tracker['agent_times']) >= 1, "At least one agent should be tracked"
-
 
     async def _validate_workflow_quality_and_performance(self, setup: Dict, state: DeepAgentState):
         """Validate overall workflow quality and performance metrics."""
@@ -184,7 +160,6 @@ class TestRealLLMWorkflow:
                              if check[1].metrics.quality_level == QualityLevel.UNACCEPTABLE]
         assert len(unacceptable_levels) == 0, f"Found unacceptable quality responses: {unacceptable_levels}"
 
-
 @pytest.mark.real_llm
 class TestRealLLMConcurrentWorkflow:
     """Test concurrent real LLM workflows for performance and stability."""
@@ -195,7 +170,6 @@ class TestRealLLMConcurrentWorkflow:
         concurrent_tasks = await self._create_concurrent_workflow_tasks(setup)
         results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
         await self._validate_concurrent_workflow_results(results)
-
 
     async def _create_concurrent_workflow_tasks(self, setup: Dict) -> List:
         """Create concurrent workflow tasks for load testing."""
@@ -211,7 +185,6 @@ class TestRealLLMConcurrentWorkflow:
             task = asyncio.create_task(self._execute_workflow_task(setup, state, i))
             tasks.append(task)
         return tasks
-
 
     async def _execute_workflow_task(self, setup: Dict, state: DeepAgentState, task_id: int):
         """Execute individual workflow task with tracking."""
@@ -231,7 +204,6 @@ class TestRealLLMConcurrentWorkflow:
             'state': state
         }
 
-
     async def _validate_concurrent_workflow_results(self, results: List):
         """Validate concurrent workflow execution results."""
         assert len(results) == 3, "All concurrent tasks should complete"
@@ -242,7 +214,6 @@ class TestRealLLMConcurrentWorkflow:
         for result in successful_results:
             assert result['success'], f"Task {result['task_id']} should succeed"
             assert result['duration'] < 30, f"Task {result['task_id']} too slow: {result['duration']}s"
-
 
 @pytest.mark.real_llm  
 class TestRealLLMErrorHandling:
@@ -255,7 +226,6 @@ class TestRealLLMErrorHandling:
         
         result = await self._execute_with_timeout_simulation(setup, state)
         await self._validate_timeout_handling(result)
-
 
     async def _execute_with_timeout_simulation(self, setup: Dict, state: DeepAgentState):
         """Execute workflow with potential timeout conditions."""
@@ -272,7 +242,6 @@ class TestRealLLMErrorHandling:
         except asyncio.TimeoutError:
             return {'success': False, 'error': 'timeout', 'agent_state': agent.state}
 
-
     async def _validate_timeout_handling(self, result: Dict):
         """Validate proper timeout handling."""
         if result['success']:
@@ -281,7 +250,6 @@ class TestRealLLMErrorHandling:
             # Should fail gracefully, not crash
             assert result['error'] == 'timeout'
             assert result['agent_state'] in [SubAgentLifecycle.FAILED, SubAgentLifecycle.RUNNING]
-
 
 @pytest.mark.real_llm
 class TestRealLLMQualityGates:
@@ -294,7 +262,6 @@ class TestRealLLMQualityGates:
         
         await self._execute_workflow_with_quality_focus(setup, state)
         await self._validate_comprehensive_quality_metrics(setup, state)
-
 
     async def _execute_workflow_with_quality_focus(self, setup: Dict, state: DeepAgentState):
         """Execute workflow with focus on quality validation."""
@@ -313,7 +280,6 @@ class TestRealLLMQualityGates:
             )
             setup['performance_tracker']['quality_checks'].append(('triage', quality_result))
 
-
     async def _validate_response_quality_metrics(self, setup: Dict, state: DeepAgentState):
         """Validate quality metrics for real LLM responses."""
         if state.triage_result:
@@ -327,7 +293,6 @@ class TestRealLLMQualityGates:
             assert quality_result.metrics.specificity_score >= 0.0, "Invalid specificity score"
             assert quality_result.metrics.actionability_score >= 0.0, "Invalid actionability score"
             assert not quality_result.metrics.circular_reasoning_detected, "Response has circular reasoning"
-
 
     async def _validate_comprehensive_quality_metrics(self, setup: Dict, state: DeepAgentState):
         """Validate comprehensive quality metrics across workflow."""

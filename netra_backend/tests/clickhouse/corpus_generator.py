@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.tests.generator_base import DataGeneratorBase
 
-
 class CorpusGenerator(DataGeneratorBase):
     """Generate realistic corpus data"""
     

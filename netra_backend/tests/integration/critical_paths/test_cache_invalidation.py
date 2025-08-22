@@ -10,17 +10,10 @@ Critical Path: Data update -> Cache invalidation -> Cross-service notification -
 Coverage: Redis cache management, service coordination, consistency validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,13 +28,9 @@ from netra_backend.app.core.database_connection_manager import DatabaseConnectio
 from netra_backend.app.services.cache.cache_manager import CacheManager
 from netra_backend.app.services.notification_service import NotificationService
 
-# Add project root to path
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class CacheInvalidationManager:
     """Manages cache invalidation testing across services."""
@@ -267,7 +256,6 @@ class CacheInvalidationManager:
         if self.notification_service:
             await self.notification_service.shutdown()
 
-
 @pytest.fixture
 async def cache_invalidation_manager():
     """Create cache invalidation manager for testing."""
@@ -275,7 +263,6 @@ async def cache_invalidation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -307,7 +294,6 @@ async def test_single_cache_invalidation_flow(cache_invalidation_manager):
     assert consistency["db_consistent"] is True
     assert consistency["cache_consistent"] is True  # Should be None (invalidated) or updated
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_concurrent_cache_invalidation(cache_invalidation_manager):
@@ -330,7 +316,6 @@ async def test_concurrent_cache_invalidation(cache_invalidation_manager):
     # Verify all cache operations succeeded
     assert all(r["success"] for r in test_result["create_results"])
     assert all(r.get("cache_invalidated", False) for r in test_result["invalidation_results"])
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -360,7 +345,6 @@ async def test_cache_invalidation_error_handling(cache_invalidation_manager):
     
     # Should handle invalid service gracefully
     assert error_result.get("cache_invalidated") is True  # Cache part should work
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -394,7 +378,6 @@ async def test_cache_consistency_validation(cache_invalidation_manager):
     # Verify circuit breaker state
     assert manager.circuit_breaker.failure_count < 3
     assert manager.circuit_breaker.state.value == "closed"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

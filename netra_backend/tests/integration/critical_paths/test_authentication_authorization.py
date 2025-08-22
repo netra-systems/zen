@@ -10,17 +10,10 @@ Critical Path: User authentication -> Token generation -> Authorization checks -
 Coverage: OAuth/JWT flows, permission validation, session persistence, token refresh
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -33,7 +26,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import jwt
 import pytest
 from auth_integration import (
-    # Add project root to path
     AuthServiceProtocol,
     LoginRequest,
     LoginResponse,
@@ -48,7 +40,6 @@ from auth_integration import (
 from netra_backend.app.services.user_service import user_service as UserService
 
 logger = logging.getLogger(__name__)
-
 
 class AuthenticationManager:
     """Manages authentication and authorization testing."""
@@ -172,7 +163,6 @@ class AuthenticationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def auth_manager():
     """Create authentication manager for testing."""
@@ -180,7 +170,6 @@ async def auth_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_password_authentication_flow(auth_manager):
@@ -198,7 +187,6 @@ async def test_password_authentication_flow(auth_manager):
     assert "session_id" in session_data
     assert "token" in session_data
     assert "user_id" in session_data
-
 
 @pytest.mark.asyncio
 async def test_authentication_security_controls(auth_manager):

@@ -4,21 +4,10 @@ Components: StreamProcessor → WebSocket → UI Updates → Response Assembly
 Critical: Streaming responses provide immediate feedback for better UX
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -31,13 +20,9 @@ from netra_backend.app.schemas import LLMStreamChunk, User
 
 from netra_backend.app.services.agent_service_core import AgentService
 
-# Add project root to path
 from netra_backend.app.services.streaming_service import TextStreamProcessor
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 @pytest.mark.asyncio
 
@@ -45,7 +30,6 @@ class TestFirstMessageStreaming:
 
     """Test streaming response for first user message."""
     
-
     @pytest.fixture
 
     async def stream_processor(self):
@@ -54,7 +38,6 @@ class TestFirstMessageStreaming:
 
         return TextStreamProcessor()
     
-
     @pytest.fixture
 
     async def ws_manager(self):
@@ -67,7 +50,6 @@ class TestFirstMessageStreaming:
 
         return manager
     
-
     @pytest.fixture
 
     async def mock_websocket(self):
@@ -84,7 +66,6 @@ class TestFirstMessageStreaming:
 
         return ws
     
-
     @pytest.fixture
 
     async def test_user(self):
@@ -105,7 +86,6 @@ class TestFirstMessageStreaming:
 
         )
     
-
     async def test_token_streaming_to_websocket(
 
         self, stream_processor, ws_manager, mock_websocket, test_user
@@ -167,7 +147,6 @@ class TestFirstMessageStreaming:
 
         assert mock_websocket.send_json.call_count == 8
     
-
     async def test_progressive_ui_updates(
 
         self, ws_manager, mock_websocket, test_user
@@ -184,7 +163,6 @@ class TestFirstMessageStreaming:
 
         ui_updates = []
         
-
         async def send_ui_update(update_type: str, content: str):
 
             update = {
@@ -219,7 +197,6 @@ class TestFirstMessageStreaming:
 
         ]
         
-
         for i, part in enumerate(response_parts):
 
             await send_ui_update(
@@ -240,7 +217,6 @@ class TestFirstMessageStreaming:
 
         assert ui_updates[-1]["update_type"] == "complete"
     
-
     async def test_response_assembly_from_stream(
 
         self, stream_processor
@@ -255,7 +231,6 @@ class TestFirstMessageStreaming:
 
         complete_response = ""
         
-
         async def stream_response() -> AsyncGenerator[str, None]:
 
             parts = [
@@ -292,7 +267,6 @@ class TestFirstMessageStreaming:
 
         assert "35%" in complete_response
     
-
     async def test_streaming_with_markdown_formatting(
 
         self, stream_processor, mock_websocket
@@ -319,7 +293,6 @@ Your AI costs can be reduced by **40%**
 
    - Use quantization techniques
    
-
 2. **Caching Strategy**
 
    - Implement response caching
@@ -344,7 +317,6 @@ Your AI costs can be reduced by **40%**
 
             formatted_parts.append(formatted)
             
-
             await mock_websocket.send_json({
 
                 "type": "markdown_chunk",
@@ -363,7 +335,6 @@ Your AI costs can be reduced by **40%**
 
         assert "### Recommendations:" in complete_markdown
     
-
     async def test_stream_error_handling(
 
         self, stream_processor, mock_websocket, test_user
@@ -389,7 +360,6 @@ Your AI costs can be reduced by **40%**
 
         error_handled = False
         
-
         try:
 
             async for token in faulty_stream():
@@ -427,7 +397,6 @@ Your AI costs can be reduced by **40%**
 
         assert "Starting analysis" in "".join(received_tokens)
     
-
     async def test_streaming_performance_metrics(
 
         self, stream_processor
@@ -456,7 +425,6 @@ Your AI costs can be reduced by **40%**
 
         metrics["start_time"] = datetime.now(timezone.utc)
         
-
         async def metered_stream() -> AsyncGenerator[str, None]:
 
             tokens = ["Optimizing", " ", "your", " ", "AI", " ", "workload..."]
@@ -467,22 +435,18 @@ Your AI costs can be reduced by **40%**
 
                     metrics["first_token_time"] = datetime.now(timezone.utc)
                 
-
                 metrics["total_tokens"] += 1
 
                 metrics["bytes_streamed"] += len(token.encode('utf-8'))
                 
-
                 yield token
 
                 await asyncio.sleep(0.01)
         
-
         async for _ in metered_stream():
 
             pass
         
-
         metrics["end_time"] = datetime.now(timezone.utc)
         
         # Calculate performance
@@ -509,7 +473,6 @@ Your AI costs can be reduced by **40%**
 
         assert total_time < 1.0  # Reasonable total time
     
-
     async def test_complete_response_confirmation(
 
         self, ws_manager, mock_websocket, test_user
@@ -526,7 +489,6 @@ Your AI costs can be reduced by **40%**
 
         response_chunks = []
         
-
         async def stream_complete_response():
 
             chunks = [

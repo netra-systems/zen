@@ -11,17 +11,10 @@ Tests the ToolPermissionRateLimiter that enforces free tier rate limits,
 usage tracking, and upgrade prompts. Critical for conversion funnel and cost control.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -32,13 +25,9 @@ import redis
 
 from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
 
-# Add project root to path
 from netra_backend.app.services.tool_permissions.rate_limiter import (
     ToolPermissionRateLimiter,
 )
-
-# Add project root to path
-
 
 # Test fixtures for setup
 @pytest.fixture
@@ -47,18 +36,15 @@ def mock_redis():
     redis_mock = AsyncMock(spec=redis.Redis)
     return redis_mock
 
-
 @pytest.fixture
 def rate_limiter(mock_redis):
     """Rate limiter with mock Redis."""
     return ToolPermissionRateLimiter(redis_client=mock_redis)
 
-
 @pytest.fixture
 def rate_limiter_no_redis():
     """Rate limiter without Redis client."""
     return ToolPermissionRateLimiter(redis_client=None)
-
 
 @pytest.fixture
 def free_tier_context():
@@ -69,7 +55,6 @@ def free_tier_context():
     context.plan_tier = "free"
     return context
 
-
 @pytest.fixture
 def pro_tier_context():
     """Pro tier execution context."""
@@ -78,7 +63,6 @@ def pro_tier_context():
     context.tool_name = "advanced_analyzer"
     context.plan_tier = "pro"
     return context
-
 
 @pytest.fixture
 def free_tier_permission_definitions():
@@ -95,7 +79,6 @@ def free_tier_permission_definitions():
         "free_tool_access": permission_def
     }
 
-
 @pytest.fixture
 def pro_tier_permission_definitions():
     """Pro tier permission definitions with higher limits."""
@@ -110,7 +93,6 @@ def pro_tier_permission_definitions():
     return {
         "pro_tool_access": permission_def
     }
-
 
 @pytest.fixture
 def unlimited_permission_definitions():
@@ -127,7 +109,6 @@ def unlimited_permission_definitions():
         "unlimited_access": permission_def
     }
 
-
 # Helper functions for 25-line compliance
 def create_mock_permission_def(per_minute=None, per_hour=None, per_day=None):
     """Create mock permission definition with rate limits."""
@@ -139,12 +120,10 @@ def create_mock_permission_def(per_minute=None, per_hour=None, per_day=None):
     permission_def.rate_limits = rate_limits
     return permission_def
 
-
 def assert_rate_limit_allowed(result):
     """Assert rate limit check result is allowed."""
     assert result["allowed"] is True
     assert "limits" in result
-
 
 def assert_rate_limit_exceeded(result, expected_limit):
     """Assert rate limit check result shows exceeded limit."""
@@ -152,23 +131,19 @@ def assert_rate_limit_exceeded(result, expected_limit):
     assert result["limit"] == expected_limit
     assert "message" in result
 
-
 def assert_usage_key_format(key, user_id, tool_name, pattern):
     """Assert usage key has correct format."""
     assert user_id in key
     assert tool_name in key
     assert pattern in key
 
-
 def setup_redis_usage_count(mock_redis, count):
     """Setup Redis to return specific usage count."""
     mock_redis.get.return_value = str(count) if count else None
 
-
 def setup_redis_error(mock_redis, error_message):
     """Setup Redis to raise error."""
     mock_redis.get.side_effect = Exception(error_message)
-
 
 # Core rate limiting functionality tests
 class TestRateLimitChecking:
@@ -271,7 +246,6 @@ class TestRateLimitChecking:
         # Should be blocked by strict limit
         assert_rate_limit_exceeded(result, 1)
 
-
 class TestUsageKeyGeneration:
     """Test usage key generation for different time periods."""
 
@@ -304,7 +278,6 @@ class TestUsageKeyGeneration:
         now = datetime.now(UTC)
         key = rate_limiter._build_usage_key("user123", "tool_name", "day", now)
         assert key.startswith("usage:")
-
 
 class TestUsageTracking:
     """Test usage tracking and recording."""
@@ -370,7 +343,6 @@ class TestUsageTracking:
         # Should not raise exception
         await rate_limiter.record_tool_usage("user123", "tool", 500, "success")
 
-
 class TestPermissionDefinitionProcessing:
     """Test permission definition processing and rate limit extraction."""
 
@@ -417,7 +389,6 @@ class TestPermissionDefinitionProcessing:
         )
         assert limits == {}
 
-
 class TestResponseBuilding:
     """Test response building for allowed and exceeded scenarios."""
 
@@ -459,7 +430,6 @@ class TestResponseBuilding:
             free_tier_context.user_id, free_tier_context.tool_name, "day"
         )
 
-
 class TestPeriodKeyAndTTL:
     """Test period key and TTL generation."""
 
@@ -494,7 +464,6 @@ class TestPeriodKeyAndTTL:
         
         assert key is None
         assert ttl is None
-
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling scenarios."""
@@ -561,7 +530,6 @@ class TestEdgeCasesAndErrorHandling:
         )
         assert_rate_limit_exceeded(result, 5)  # Should be blocked
         assert result["current_usage"] == 999999
-
 
 class TestIntegrationScenarios:
     """Test realistic integration scenarios for business cases."""

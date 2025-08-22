@@ -13,17 +13,10 @@ Coverage: Intrusion detection, threat response, access control validation, rate 
 security event logging, incident response orchestration, multi-stage attack simulation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -46,14 +39,10 @@ from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket.rate_limiter import RateLimiter
 
-# Add project root to path
-from tests.l4_staging_critical_base import (
+from netra_backend.tests.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-
-# Add project root to path
-
 
 @dataclass
 class SecurityBreachMetrics:
@@ -87,7 +76,6 @@ class SecurityBreachMetrics:
             return 0.0
         return (self.false_positives / total_validations) * 100.0
 
-
 @dataclass
 class AttackVector:
     """Configuration for attack vector simulation."""
@@ -97,7 +85,6 @@ class AttackVector:
     expected_response: str
     severity: str
     validation_criteria: Dict[str, Any]
-
 
 class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
     """L4 test suite for security breach detection and response in staging environment."""
@@ -1751,7 +1738,6 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
         except Exception as e:
             print(f"Security cleanup warning: {e}")
 
-
 # Pytest fixtures and test functions
 @pytest.fixture
 async def security_breach_l4_test():
@@ -1760,7 +1746,6 @@ async def security_breach_l4_test():
     await test_suite.initialize_l4_environment()
     yield test_suite
     await test_suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -1792,7 +1777,6 @@ async def test_brute_force_attack_detection_l4(security_breach_l4_test):
     assert attack_data["blocked_attempts"] > 0, "Some brute force attempts should be blocked"
     assert attack_data["total_attempts"] >= 3, "Multiple attempts should be made"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_sql_injection_prevention_l4(security_breach_l4_test):
@@ -1822,7 +1806,6 @@ async def test_sql_injection_prevention_l4(security_breach_l4_test):
         assert attack_data["blocked"] is True, "SQL injection request should be blocked"
         assert len(attack_data["patterns_detected"]) > 0, "SQL injection patterns should be detected"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_xss_attack_sanitization_l4(security_breach_l4_test):
@@ -1850,7 +1833,6 @@ async def test_xss_attack_sanitization_l4(security_breach_l4_test):
     attack_data = attack_result["attack_result"]
     assert len(attack_data["patterns_detected"]) > 0, "XSS patterns should be detected"
     assert attack_data["response_sanitized"] is True, "Response should be sanitized"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -1883,7 +1865,6 @@ async def test_ddos_mitigation_l4(security_breach_l4_test):
     # Validate metrics tracking
     assert security_breach_l4_test.security_metrics.rate_limit_triggers > 0, "Rate limit triggers should be recorded"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_session_hijacking_prevention_l4(security_breach_l4_test):
@@ -1911,7 +1892,6 @@ async def test_session_hijacking_prevention_l4(security_breach_l4_test):
     attack_data = attack_result["attack_result"]
     assert attack_data["access_blocked"] is True, "Access should be blocked"
     assert attack_data["session_rejected"] is True, "Invalid session should be rejected"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -1949,7 +1929,6 @@ async def test_multi_stage_attack_defense_l4(security_breach_l4_test):
     assert privilege_escalation.get("skipped", False) is True or privilege_escalation.get("elevated_access", True) is False
     assert data_exfiltration.get("skipped", False) is True or data_exfiltration.get("data_extracted", True) is False
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_concurrent_attack_handling_l4(security_breach_l4_test):
@@ -1975,7 +1954,6 @@ async def test_concurrent_attack_handling_l4(security_breach_l4_test):
     attack_vectors = concurrent_result.get("attack_vectors", 0)
     assert attack_vectors >= 3, f"At least 3 attack vectors should be tested concurrently, got {attack_vectors}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_incident_escalation_procedures_l4(security_breach_l4_test):
@@ -2000,7 +1978,6 @@ async def test_incident_escalation_procedures_l4(security_breach_l4_test):
     
     # Validate metrics tracking
     assert security_breach_l4_test.security_metrics.incident_escalations > 0, "Incident escalations should be tracked"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -2030,7 +2007,6 @@ async def test_security_recovery_procedures_l4(security_breach_l4_test):
     
     # Validate metrics tracking
     assert security_breach_l4_test.security_metrics.recovery_validations > 0, "Recovery validations should be tracked"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

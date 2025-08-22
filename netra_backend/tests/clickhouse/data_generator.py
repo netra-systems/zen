@@ -12,7 +12,6 @@ from netra_backend.tests.llm_event_generator import LLMEventGenerator
 from netra_backend.tests.log_entry_generator import LogEntryGenerator
 from netra_backend.tests.workload_metric_generator import WorkloadMetricGenerator
 
-
 class RealisticDataGenerator:
     """Generate realistic test data for ClickHouse"""
     

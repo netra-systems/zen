@@ -3,17 +3,10 @@ Comprehensive repository tests (76-85) from top 100 missing tests.
 Tests database operations, queries, and repository patterns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -24,9 +17,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# Add project root to path
-
 
 # Test 76: Thread repository operations
 class TestThreadRepositoryOperations:
@@ -114,7 +104,6 @@ class TestThreadRepositoryOperations:
         active_threads = await repo.get_active_threads(mock_session, "user123")
         assert len([t for t in active_threads if t.deleted_at == None]) == 1
 
-
 # Test 77: Message repository queries
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
@@ -195,7 +184,6 @@ class TestMessageRepositoryQueries:
         )
         assert len(recent_messages) == 1
 
-
 # Test 78: User repository authentication
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
@@ -262,7 +250,6 @@ class TestUserRepositoryAuth:
             password="wrong_password"
         )
         assert authenticated == None
-
 
 # Test 79: Optimization repository storage
 class TestOptimizationRepositoryStorage:
@@ -331,7 +318,6 @@ class TestOptimizationRepositoryStorage:
         assert history[0].version == 1
         assert history[-1].version == 3
 
-
 # Test 80: Metric repository aggregation
 class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
@@ -397,7 +383,6 @@ class TestMetricRepositoryAggregation:
         assert len(time_series) == 4
         assert time_series[-1][1] == 65.0
 
-
 # Test 81: ClickHouse connection pool
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
@@ -457,7 +442,6 @@ class TestClickHouseConnectionPool:
             with pytest.raises(asyncio.TimeoutError):
                 await db.execute_query("SELECT sleep(10)")
 
-
 # Test 82: Migration runner safety
 class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
@@ -504,7 +488,6 @@ class TestMigrationRunnerSafety:
         assert mock_session.begin.called
         assert mock_session.commit.called
 
-
 # Test 83: Database health checks
 class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
@@ -550,6 +533,5 @@ class TestDatabaseHealthChecks:
         pool_alert = await checker.check_connection_pool(threshold_percent=80)
         assert pool_alert["alert"] == True
         assert pool_alert["usage"] == 95
-
 
 # Test 84 and 85 removed - cache_service and session_service don't exist

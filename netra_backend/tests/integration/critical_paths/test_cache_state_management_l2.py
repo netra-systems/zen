@@ -4,17 +4,10 @@ Tests for Redis cache, state synchronization, and memory management.
 Total MRR Protection: $60K
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -30,7 +23,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 @dataclass
 class CacheEntry:
     """Represents a cache entry with metadata."""
@@ -39,7 +31,6 @@ class CacheEntry:
     ttl: int
     version: int
     created_at: datetime
-
 
 class MockRedisClient:
     """Mock Redis client for L2 testing."""
@@ -76,7 +67,6 @@ class MockRedisClient:
         if channel not in self.pub_sub_channels:
             self.pub_sub_channels[channel] = []
         self.pub_sub_channels[channel].append(message)
-
 
 class TestCacheStateManagementL2:
     """L2 tests for cache and state management (Tests 66-75)."""

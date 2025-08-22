@@ -22,11 +22,9 @@ from netra_backend.app.db.clickhouse_init import (
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
 
-
 def get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""
     return get_config().clickhouse_https
-
 
 def create_clickhouse_client(config):
     """Create ClickHouse client with given configuration"""
@@ -34,7 +32,6 @@ def create_clickhouse_client(config):
         host=config.host, port=config.port, user=config.user,
         password=config.password, database=config.database, secure=True
     )
-
 
 async def check_system_metrics_permission(client):
     """Check if user has permission to access system.metrics"""
@@ -45,7 +42,6 @@ async def check_system_metrics_permission(client):
         if "Not enough privileges" in str(e) or "ACCESS_DENIED" in str(e):
             return False
         raise
-
 
 async def check_table_insert_permission(client, table_name):
     """Check if user has INSERT permission on table"""
@@ -61,7 +57,6 @@ async def check_table_insert_permission(client, table_name):
         return True
     return True
 
-
 async def check_table_create_permission(client):
     """Check if user has CREATE TABLE permission"""
     test_table = f"temp_permission_test_{uuid.uuid4().hex[:8]}"
@@ -75,7 +70,6 @@ async def check_table_create_permission(client):
             return False
         return True
 
-
 async def ensure_workload_table():
     """Create workload table if missing and verify access"""
     success = await create_workload_events_table_if_missing()
@@ -84,7 +78,6 @@ async def ensure_workload_table():
     exists = await verify_workload_events_table()
     if not exists:
         pytest.skip("workload_events table not accessible")
-
 
 def generate_test_workload_events(count=10):
     """Generate test workload events for insertion"""
@@ -104,14 +97,12 @@ def generate_test_workload_events(count=10):
         test_events.append(event)
     return test_events
 
-
 def build_workload_insert_query():
     """Build workload events insert query"""
     return """INSERT INTO workload_events (event_id, timestamp, user_id,
     workload_id, event_type, event_category, dimensions, metadata) 
     VALUES (%(event_id)s, %(timestamp)s, %(user_id)s, %(workload_id)s, 
     %(event_type)s, %(event_category)s, %(dimensions)s, %(metadata)s)"""
-
 
 async def insert_with_permission_check(client, query, params):
     """Execute insert with permission error handling"""
@@ -121,7 +112,6 @@ async def insert_with_permission_check(client, query, params):
         if "Not enough privileges" in str(e):
             pytest.skip(f"INSERT permission denied: {e}")
         raise
-
 
 def build_corpus_create_query(table_name):
     """Build CREATE TABLE query for corpus table"""
@@ -135,7 +125,6 @@ def build_corpus_create_query(table_name):
     ) ENGINE = MergeTree() PARTITION BY toYYYYMM(created_at)
     ORDER BY (workload_id, created_at, record_id)"""
 
-
 async def cleanup_test_table(client, table_name):
     """Cleanup test table safely"""
     try:
@@ -143,7 +132,6 @@ async def cleanup_test_table(client, table_name):
         logger.info(f"Cleaned up test table: {table_name}")
     except Exception as e:
         logger.warning(f"Failed to cleanup table {table_name}: {e}")
-
 
 @pytest.fixture
 def real_clickhouse_client():
@@ -153,7 +141,6 @@ def real_clickhouse_client():
     interceptor = ClickHouseQueryInterceptor(client)
     yield interceptor
     # Note: Disconnect handled by the test itself or auto-cleanup
-
 
 @pytest.fixture
 def setup_workload_table(event_loop):
@@ -170,7 +157,6 @@ def setup_workload_table(event_loop):
     event_loop.run_until_complete(_setup_table())
     yield
     # Cleanup test data (optional) - kept for analysis
-
 
 @pytest.fixture
 def batch_workload_events():

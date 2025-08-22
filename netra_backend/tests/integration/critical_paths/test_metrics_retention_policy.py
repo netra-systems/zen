@@ -11,17 +11,10 @@ Coverage: Retention rule enforcement, automated cleanup, cost impact analysis, c
 L3 Realism: Tests with real storage systems and actual retention policies
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -45,7 +38,6 @@ pytestmark = [
     pytest.mark.retention
 ]
 
-
 class DataType(Enum):
     """Types of monitoring data."""
     METRICS = "metrics"
@@ -53,14 +45,12 @@ class DataType(Enum):
     LOGS = "logs"
     ALERTS = "alerts"
 
-
 class RetentionClass(Enum):
     """Data retention classes based on business importance."""
     CRITICAL = "critical"      # Long-term retention for compliance
     OPERATIONAL = "operational"  # Medium-term for troubleshooting
     DIAGNOSTIC = "diagnostic"    # Short-term for immediate debugging
     EPHEMERAL = "ephemeral"     # Very short-term for real-time monitoring
-
 
 @dataclass
 class RetentionPolicy:
@@ -75,7 +65,6 @@ class RetentionPolicy:
     cost_tier: str  # "hot", "warm", "cold", "archive"
     compliance_required: bool = False
     business_justification: str = ""
-
 
 @dataclass
 class StoredDataItem:
@@ -95,7 +84,6 @@ class StoredDataItem:
         if self.business_metadata is None:
             self.business_metadata = {}
 
-
 @dataclass
 class RetentionAnalysis:
     """Analysis of retention policy effectiveness."""
@@ -106,7 +94,6 @@ class RetentionAnalysis:
     cost_savings_projected: float
     compliance_violations: int
     policy_violations: List[str]
-
 
 class MetricsRetentionValidator:
     """Validates metrics retention policies with real storage infrastructure."""
@@ -661,7 +648,6 @@ class MetricsRetentionValidator:
         except Exception as e:
             logger.error(f"Retention cleanup failed: {e}")
 
-
 class StorageManager:
     """Mock storage manager for L3 testing."""
     
@@ -672,7 +658,6 @@ class StorageManager:
     async def shutdown(self):
         """Shutdown storage manager."""
         pass
-
 
 class RetentionEngine:
     """Mock retention engine for L3 testing."""
@@ -688,7 +673,6 @@ class RetentionEngine:
     async def shutdown(self):
         """Shutdown retention engine."""
         pass
-
 
 class StorageCostCalculator:
     """Calculator for storage costs by tier."""
@@ -712,7 +696,6 @@ class StorageCostCalculator:
         cost_per_gb = tier_costs.get(storage_tier, 0.023)
         return size_gb * cost_per_gb
 
-
 class ComplianceTracker:
     """Mock compliance tracker for L3 testing."""
     
@@ -720,10 +703,8 @@ class ComplianceTracker:
         """Track retention-related compliance event."""
         pass
 
-
 # Import random for realistic data generation
 import random
-
 
 @pytest.fixture
 async def metrics_retention_validator():
@@ -732,7 +713,6 @@ async def metrics_retention_validator():
     await validator.initialize_retention_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_retention_policy_enforcement_l3(metrics_retention_validator):
@@ -756,7 +736,6 @@ async def test_retention_policy_enforcement_l3(metrics_retention_validator):
     
     # Verify policy coverage
     assert len(retention_analysis.policy_violations) <= 5  # Minimal policy gaps
-
 
 @pytest.mark.asyncio
 async def test_automated_cleanup_process_l3(metrics_retention_validator):
@@ -783,7 +762,6 @@ async def test_automated_cleanup_process_l3(metrics_retention_validator):
     # Verify cost savings
     assert cleanup_results["cost_savings_realized"] > 0
 
-
 @pytest.mark.asyncio
 async def test_compliance_tracking_l3(metrics_retention_validator):
     """Test compliance tracking and audit trail maintenance.
@@ -805,7 +783,6 @@ async def test_compliance_tracking_l3(metrics_retention_validator):
     
     # Verify violation tracking
     assert len(compliance_results["retention_violations"]) <= 2  # Minimal violations allowed
-
 
 @pytest.mark.asyncio
 async def test_cost_optimization_impact_l3(metrics_retention_validator):
@@ -830,7 +807,6 @@ async def test_cost_optimization_impact_l3(metrics_retention_validator):
     # Verify cost distribution
     total_tier_cost = sum(cost_analysis["cost_by_tier"].values())
     assert abs(total_tier_cost - cost_analysis["current_monthly_cost"]) < 0.01  # Should match
-
 
 @pytest.mark.asyncio
 async def test_data_lifecycle_management_l3(metrics_retention_validator):
@@ -857,7 +833,6 @@ async def test_data_lifecycle_management_l3(metrics_retention_validator):
                              retention_analysis.items_to_migrate)
     
     assert total_lifecycle_actions >= len(historical_data) * 0.3  # At least 30% of data should need lifecycle actions
-
 
 @pytest.mark.asyncio
 async def test_retention_policy_validation_l3(metrics_retention_validator):

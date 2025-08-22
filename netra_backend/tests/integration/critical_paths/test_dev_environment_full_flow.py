@@ -11,8 +11,6 @@ This test runs against the actual dev environment to ensure everything works end
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import os
@@ -27,10 +25,6 @@ import aiohttp
 import pytest
 import websockets
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
 DEV_FRONTEND_URL = "http://localhost:3000"
@@ -40,7 +34,6 @@ AUTH_SERVICE_URL = "http://localhost:8081"
 # Test credentials
 TEST_USER_EMAIL = "test@example.com"
 TEST_USER_PASSWORD = "testpassword123"
-
 
 class DevEnvironmentTester:
     """Test the complete dev environment flow."""
@@ -408,7 +401,6 @@ class DevEnvironmentTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_dev_environment_full_flow():
@@ -441,7 +433,6 @@ async def test_dev_environment_full_flow():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     # Set UTF-8 encoding for Windows
@@ -467,7 +458,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

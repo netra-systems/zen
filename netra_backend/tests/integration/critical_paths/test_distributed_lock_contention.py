@@ -11,17 +11,10 @@ L3 Realism: Real Redis distributed locks, actual contention simulation, lock per
 Performance Requirements: Lock acquisition < 50ms under contention, deadlock detection < 100ms, throughput > 1000 locks/s
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,15 +33,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.critical_paths.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class LockContentionMetrics:
@@ -97,7 +86,6 @@ class LockContentionMetrics:
     def avg_deadlock_resolution_time(self) -> float:
         """Calculate average deadlock resolution time."""
         return statistics.mean(self.deadlock_resolution_times) if self.deadlock_resolution_times else 0.0
-
 
 class DistributedLockContentionL3Manager:
     """L3 distributed lock contention test manager with real Redis distributed locks."""
@@ -668,7 +656,6 @@ class DistributedLockContentionL3Manager:
         except Exception as e:
             logger.error(f"Distributed lock cleanup failed: {e}")
 
-
 @pytest.fixture
 async def lock_contention_manager():
     """Create L3 distributed lock contention manager."""
@@ -676,7 +663,6 @@ async def lock_contention_manager():
     await manager.setup_redis_for_lock_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -693,7 +679,6 @@ async def test_high_contention_lock_performance(lock_contention_manager):
     assert result["successful_workers"] >= result["worker_count"] * 0.9, f"Too many failed workers: {result['failed_workers']}"
     
     logger.info(f"High contention test: {result['lock_success_rate']:.1f}% success rate, {result['operations_per_second']:.1f} ops/s")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -713,7 +698,6 @@ async def test_circular_wait_deadlock_detection(lock_contention_manager):
     
     logger.info(f"Circular deadlock test: {result['deadlocks_count']} deadlocks, {result['successful_completions']} completions")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -728,7 +712,6 @@ async def test_resource_ordering_deadlock_prevention(lock_contention_manager):
     
     logger.info(f"Resource ordering test: {result['success_rate']:.1f}% success rate, deadlocks prevented: {result['deadlocks_prevented']}")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -742,7 +725,6 @@ async def test_timeout_based_deadlock_resolution(lock_contention_manager):
     assert result["timeout_resolutions"] > 0, "Should have timeout-based resolutions"
     
     logger.info(f"Timeout resolution test: {result['timeout_resolutions']} timeouts, {result['resolution_time']:.1f}s resolution time")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -759,7 +741,6 @@ async def test_sustained_lock_performance_under_load(lock_contention_manager):
     assert result["avg_acquisition_time"] < 0.1, f"Average acquisition time {result['avg_acquisition_time']*1000:.1f}ms too high under load"
     
     logger.info(f"Sustained load test: {result['throughput_ops_per_second']:.1f} ops/s, {result['success_rate']:.1f}% success rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

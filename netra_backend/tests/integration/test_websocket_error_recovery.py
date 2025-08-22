@@ -14,21 +14,10 @@ COVERAGE TARGET: 100% for error recovery and performance scenarios
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import random
@@ -36,10 +25,8 @@ import time
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from integration.websocket_recovery_fixtures import (
-    # Add project root to path
+from netra_backend.tests.integration.websocket_recovery_fixtures import (
 
     MockWebSocket,
 
@@ -53,12 +40,10 @@ from integration.websocket_recovery_fixtures import (
 
 )
 
-
 class TestWebSocketPerformanceUnderLoad:
 
     """Performance tests for WebSocket state recovery operations under load."""
     
-
     async def test_websocket_performance_under_connection_load(self):
 
         """Test WebSocket performance under high connection load."""
@@ -83,7 +68,6 @@ class TestWebSocketPerformanceUnderLoad:
 
         await manager.shutdown()
     
-
     async def _create_rapid_connections(self, manager: UnifiedWebSocketManager, count: int) -> list:
 
         """Create multiple connections rapidly for load testing."""
@@ -102,7 +86,6 @@ class TestWebSocketPerformanceUnderLoad:
 
         return connections
     
-
     async def _simulate_mass_disconnection_performance(self, manager: UnifiedWebSocketManager, 
 
                                                      connections: list) -> None:
@@ -115,7 +98,6 @@ class TestWebSocketPerformanceUnderLoad:
 
             await manager.disconnect_user(conn["user_id"], conn["websocket"], 1001, "Load test")
     
-
     def _verify_load_performance_metrics(self, manager: UnifiedWebSocketManager, 
 
                                        start_time: float, connections: list) -> None:
@@ -130,7 +112,6 @@ class TestWebSocketPerformanceUnderLoad:
 
         assert manager.telemetry["connections_closed"] >= len(connections), "Disconnections should be tracked"
     
-
     async def test_message_queue_performance_under_load(self):
 
         """Test message queue recovery performance with large queues."""
@@ -149,7 +130,6 @@ class TestWebSocketPerformanceUnderLoad:
 
         await self._verify_queue_processing_performance(manager, queue_size)
     
-
     async def _create_large_message_queue(self, manager: UnifiedWebSocketManager, user_id: str) -> int:
 
         """Create large message queue for performance testing."""
@@ -160,17 +140,14 @@ class TestWebSocketPerformanceUnderLoad:
 
         websocket.state = "disconnected"
         
-
         for i in range(100):
 
             msg = {"type": "perf_test", "sequence": i, "data": f"test_data_{i}"}
 
             await manager.send_message_to_user(user_id, msg, retry=True)
         
-
         return 100
     
-
     async def _verify_queue_processing_performance(self, manager: UnifiedWebSocketManager, 
 
                                                  expected_size: int) -> None:
@@ -181,12 +158,10 @@ class TestWebSocketPerformanceUnderLoad:
 
         assert stats["pending_messages"] <= expected_size, "Queue size should be managed efficiently"
 
-
 class TestWebSocketErrorScenarios:
 
     """Error scenario tests for WebSocket state recovery resilience."""
     
-
     async def test_recovery_with_corrupted_state_data(self):
 
         """Test recovery behavior with corrupted state data."""
@@ -205,7 +180,6 @@ class TestWebSocketErrorScenarios:
 
         await self._verify_graceful_error_recovery(manager, user_id, invalid_state)
     
-
     async def _create_invalid_state_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Create scenario with invalid state data."""
@@ -214,7 +188,6 @@ class TestWebSocketErrorScenarios:
 
         await manager.connect_user(user_id, websocket)
         
-
         invalid_message = {"type": "invalid", "malformed_data": None}
 
         try:
@@ -225,10 +198,8 @@ class TestWebSocketErrorScenarios:
 
             return {"websocket": websocket, "error": str(e), "handled": True}
         
-
         return {"websocket": websocket, "error": None, "handled": False}
     
-
     async def _verify_graceful_error_recovery(self, manager: UnifiedWebSocketManager,
 
                                             user_id: str, invalid_state: dict) -> None:
@@ -239,13 +210,11 @@ class TestWebSocketErrorScenarios:
 
         assert stats["telemetry"]["errors_handled"] >= 0, "Error handling should be tracked"
         
-
         valid_message = {"type": "recovery_test", "data": "valid"}
 
         result = await manager.send_message_to_user(user_id, valid_message)
         # Result should be handled gracefully (True or False, not exception)
     
-
     async def test_concurrent_race_condition_stability(self):
 
         """Test recovery behavior under concurrent connection race conditions."""
@@ -264,7 +233,6 @@ class TestWebSocketErrorScenarios:
 
         await self._verify_race_condition_stability(manager, race_results)
     
-
     async def _create_concurrent_race_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> list:
 
         """Create concurrent connection race condition."""
@@ -279,10 +247,8 @@ class TestWebSocketErrorScenarios:
 
             tasks.append(task)
         
-
         return await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _verify_race_condition_stability(self, manager: UnifiedWebSocketManager, race_results: list) -> None:
 
         """Verify system stability despite race conditions."""
@@ -293,12 +259,10 @@ class TestWebSocketErrorScenarios:
 
         assert connections_opened >= 0, "Connection tracking should remain consistent"
 
-
 class TestWebSocketNetworkConditionRecovery:
 
     """Network condition simulation and recovery tests."""
     
-
     async def test_recovery_under_intermittent_connectivity(self):
 
         """Test recovery behavior under intermittent network connectivity."""
@@ -317,7 +281,6 @@ class TestWebSocketNetworkConditionRecovery:
 
         await self._verify_intermittent_recovery(manager, user_id, intermittent_state)
     
-
     async def _setup_intermittent_connectivity_scenario(self, manager: UnifiedWebSocketManager, 
 
                                                       user_id: str) -> dict:
@@ -328,10 +291,8 @@ class TestWebSocketNetworkConditionRecovery:
 
         await manager.connect_user(user_id, websocket)
         
-
         NetworkConditionSimulator.simulate_intermittent_connectivity(websocket, 0.5)
         
-
         test_message = {"type": "network_test", "data": "intermittent test"}
 
         try:
@@ -342,10 +303,8 @@ class TestWebSocketNetworkConditionRecovery:
 
             pass  # Expected under intermittent conditions
         
-
         return {"websocket": websocket, "network_condition": "intermittent"}
     
-
     async def _verify_intermittent_recovery(self, manager: UnifiedWebSocketManager,
 
                                           user_id: str, intermittent_state: dict) -> None:
@@ -356,7 +315,6 @@ class TestWebSocketNetworkConditionRecovery:
 
         assert stats["telemetry"]["errors_handled"] >= 0, "Network error handling should be tracked"
     
-
     async def test_recovery_under_high_latency_conditions(self):
 
         """Test recovery behavior under high latency network conditions."""
@@ -375,7 +333,6 @@ class TestWebSocketNetworkConditionRecovery:
 
         await self._verify_high_latency_recovery(manager, user_id, latency_state)
     
-
     async def _setup_high_latency_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Setup scenario with high network latency."""
@@ -384,20 +341,16 @@ class TestWebSocketNetworkConditionRecovery:
 
         await manager.connect_user(user_id, websocket)
         
-
         NetworkConditionSimulator.simulate_high_latency_network(websocket, 1500)
         
-
         start_time = time.time()
 
         test_message = {"type": "latency_test", "timestamp": start_time}
 
         result = await manager.send_message_to_user(user_id, test_message)
         
-
         return {"websocket": websocket, "latency_ms": 1500, "start_time": start_time}
     
-
     async def _verify_high_latency_recovery(self, manager: UnifiedWebSocketManager,
 
                                           user_id: str, latency_state: dict) -> None:
@@ -409,12 +362,10 @@ class TestWebSocketNetworkConditionRecovery:
 
         assert stats["active_connections"] >= 0, "Connection tracking should remain stable"
 
-
 class TestWebSocketCircuitBreakerRecovery:
 
     """Circuit breaker pattern tests for WebSocket error recovery."""
     
-
     async def test_circuit_breaker_activation_and_recovery(self):
 
         """Test circuit breaker activation during error scenarios and recovery."""
@@ -433,7 +384,6 @@ class TestWebSocketCircuitBreakerRecovery:
 
         await self._verify_circuit_breaker_recovery(manager, user_id, circuit_state)
     
-
     async def _setup_circuit_breaker_scenario(self, manager: UnifiedWebSocketManager, user_id: str) -> dict:
 
         """Setup scenario to trigger circuit breaker activation."""
@@ -458,10 +408,8 @@ class TestWebSocketCircuitBreakerRecovery:
 
                 pass  # Expected failures
         
-
         return {"websocket": websocket, "failure_count": 5}
     
-
     async def _verify_circuit_breaker_recovery(self, manager: UnifiedWebSocketManager,
 
                                              user_id: str, circuit_state: dict) -> None:

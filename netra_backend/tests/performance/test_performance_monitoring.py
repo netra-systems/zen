@@ -4,17 +4,10 @@ Tests for performance monitoring, database optimization, and integration tests.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -28,18 +21,15 @@ from netra_backend.app.monitoring.performance_monitor import (
     PerformanceMonitor,
 )
 
-# Add project root to path
 from netra_backend.app.core.performance_optimization_manager import (
     BatchProcessor,
     MemoryCache,
-    # Add project root to path
     PerformanceOptimizationManager,
 )
 from netra_backend.app.db.index_optimizer import (
     DatabaseIndexManager,
     PostgreSQLIndexOptimizer,
 )
-
 
 class TestPerformanceMonitoring:
     """Test performance monitoring functionality."""
@@ -104,7 +94,6 @@ class TestPerformanceMonitoring:
         assert len(alerts) == 1
         assert alerts[0]["name"] == "test_alert"
 
-
 class TestDatabaseIndexOptimization:
     """Test database index optimization."""
     
@@ -142,7 +131,6 @@ class TestDatabaseIndexOptimization:
         # Check that table name is extracted correctly
         for rec in recommendations:
             assert rec.table_name == "users"
-
 
 @pytest.mark.integration
 class TestPerformanceOptimizationIntegration:
@@ -222,7 +210,6 @@ class TestPerformanceOptimizationIntegration:
             
         finally:
             await monitor.stop_monitoring()
-
 
 if __name__ == "__main__":
     # Run performance benchmarks

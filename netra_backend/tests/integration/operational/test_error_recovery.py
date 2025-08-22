@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Data integrity preservation during failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime
@@ -32,14 +25,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from integration.operational.shared_fixtures import (
+from netra_backend.tests.integration.operational.shared_fixtures import (
     ErrorRecoveryTestHelper,
     error_recovery_helper,
-    # Add project root to path
     operational_infrastructure,
 )
-
 
 class TestErrorRecovery:
     """BVJ: Maintains $18K MRR through fault tolerance."""
@@ -179,7 +169,6 @@ class TestErrorRecovery:
         assert "websocket_service" in affected_systems
         assert "analytics_service" in affected_systems
         assert len(affected_systems) == 3
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

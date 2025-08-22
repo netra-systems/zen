@@ -10,7 +10,6 @@ from netra_backend.app.schemas.unified_tools import TokenPayload
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
 
-
 class MockUser:
     """Mock user model for testing"""
     
@@ -72,7 +71,6 @@ class MockUser:
         if not self.account_locked_until:
             return False
         return datetime.now(UTC) < self.account_locked_until
-
 
 class EnhancedSecurityService(SecurityService):
     """Enhanced security service with additional features"""
@@ -300,7 +298,6 @@ class EnhancedSecurityService(SecurityService):
         
         self.rate_limit_cache[identifier].append(datetime.now(UTC))
 
-
 def create_test_user(user_id: str = "test_user", email: str = "test@example.com") -> MockUser:
     """Create test user with default values"""
     return MockUser(
@@ -310,7 +307,6 @@ def create_test_user(user_id: str = "test_user", email: str = "test@example.com"
         hashed_password="hashed_test_password"
     )
 
-
 def create_admin_user(user_id: str = "admin_user", email: str = "admin@example.com") -> MockUser:
     """Create admin user with admin role"""
     user = create_test_user(user_id, email)
@@ -319,14 +315,12 @@ def create_admin_user(user_id: str = "admin_user", email: str = "admin@example.c
     user.add_permission("user_management")
     return user
 
-
 def create_locked_user(user_id: str = "locked_user", email: str = "locked@example.com") -> MockUser:
     """Create locked user account"""
     user = create_test_user(user_id, email)
     user.lock_account(30)
     user.failed_login_attempts = 5
     return user
-
 
 def create_oauth_user(user_id: str = "oauth_user", email: str = "oauth@example.com") -> MockUser:
     """Create OAuth user"""
@@ -335,19 +329,16 @@ def create_oauth_user(user_id: str = "oauth_user", email: str = "oauth@example.c
     user.add_role("oauth_user")
     return user
 
-
 def assert_authentication_success(result: Dict[str, Any]) -> None:
     """Assert authentication was successful"""
     assert result.get('success') is True
     assert 'token' in result
     assert 'user' in result
 
-
 def assert_authentication_failure(result: Dict[str, Any]) -> None:
     """Assert authentication failed"""
     assert result.get('success') is False
     assert 'error' in result
-
 
 def create_test_token_payload(user_id: str, exp_minutes: int = 60) -> Dict[str, Any]:
     """Create test token payload"""

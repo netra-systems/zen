@@ -1,28 +1,18 @@
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
 
 @pytest.fixture
 def mock_db_session():

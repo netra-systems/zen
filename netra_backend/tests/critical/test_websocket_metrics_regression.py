@@ -6,17 +6,10 @@ especially when connection stats are missing or malformed.
 Business Value: Prevents metrics collection failures from impacting monitoring.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -26,12 +19,8 @@ import pytest
 from monitoring import WebSocketMetrics
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-# Add project root to path
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-
-# Add project root to path
-
 
 class TestWebSocketMetricsRegression:
     """Critical regression tests for WebSocket metrics collection."""

@@ -13,8 +13,6 @@ This test ensures the system correctly detects and handles cascading failures.
 
 from test_framework import setup_test_path
 
-setup_test_path()
-
 import asyncio
 import json
 import sys
@@ -24,10 +22,6 @@ from typing import Any, Dict, List, Optional
 
 import aiohttp
 import pytest
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
@@ -39,7 +33,6 @@ SERVICES = {
     "cache": f"{DEV_BACKEND_URL}/api/v1/health/cache",
     "websocket": f"{DEV_BACKEND_URL}/api/v1/health/ws"
 }
-
 
 class HealthCheckCascadeTester:
     """Test health check cascade failure flow."""
@@ -195,7 +188,6 @@ class HealthCheckCascadeTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -215,7 +207,6 @@ async def test_health_check_cascade_failure():
         print("="*60)
         
         assert all(results.values()), f"Some tests failed: {results}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_health_check_cascade_failure())

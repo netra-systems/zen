@@ -23,17 +23,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -49,13 +42,9 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import TokenData, UserInfo
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class PasswordResetTokenManager:
     """Real password reset token management component."""
@@ -145,7 +134,6 @@ class PasswordResetTokenManager:
         
         return invalidated
 
-
 class EmailService:
     """Mock email service for external communication."""
     
@@ -164,7 +152,6 @@ class EmailService:
             "sent_at": time.time()
         })
         return True
-
 
 class PasswordResetFlowManager:
     """Comprehensive password reset flow coordinator."""
@@ -258,7 +245,6 @@ class PasswordResetFlowManager:
         
         return cleaned
 
-
 @pytest.fixture
 async def redis_client():
     """Setup Redis client for testing."""
@@ -284,13 +270,11 @@ async def redis_client():
         client.delete = AsyncMock()
         yield client
 
-
 @pytest.fixture
 async def reset_manager(redis_client):
     """Create password reset flow manager."""
     manager = PasswordResetFlowManager(redis_client)
     yield manager
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -306,7 +290,6 @@ async def test_token_generation_and_storage(reset_manager):
     assert "token" in result
     assert len(result["token"]) > 30  # Secure token length
     assert reset_manager.metrics["tokens_generated"] == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -330,7 +313,6 @@ async def test_token_validation_and_consumption(reset_manager):
     assert result2["success"] is False
     assert result2["error"] == "invalid_token"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
@@ -349,7 +331,6 @@ async def test_rate_limiting_enforcement(reset_manager):
     assert result["error"] == "rate_limited"
     assert "retry_after" in result
     assert reset_manager.metrics["rate_limited"] == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -373,7 +354,6 @@ async def test_token_expiration_handling(reset_manager):
     result = await reset_manager.complete_reset(token, "new_password")
     assert result["success"] is False
     assert result["error"] == "token_expired"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -399,7 +379,6 @@ async def test_multi_device_token_invalidation(reset_manager):
         result = await reset_manager.complete_reset(token, "another_password")
         assert result["success"] is False
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
@@ -410,7 +389,6 @@ async def test_email_service_failure_handling(reset_manager):
     result = await reset_manager.initiate_reset("user_fail", "fail@example.com")
     assert result["success"] is False
     assert result["error"] == "email_failed"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -431,7 +409,6 @@ async def test_concurrent_token_operations(reset_manager):
     assert successful == 5
     assert reset_manager.metrics["tokens_generated"] == 5
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
@@ -450,7 +427,6 @@ async def test_cleanup_expired_tokens_performance(reset_manager):
     assert cleanup_time < 1.0  # Should complete quickly
     assert cleaned >= 0  # Non-negative cleanup count
     
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism

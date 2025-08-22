@@ -34,7 +34,6 @@ from netra_backend.app.services.unified_tool_registry.registry import (
     UnifiedToolRegistry,
 )
 
-
 class MockOperationalInfrastructure:
     """Mock operational infrastructure for testing."""
     
@@ -62,7 +61,6 @@ class MockOperationalInfrastructure:
             "rbac_service": self.rbac_service,
             "pool_manager": self.pool_manager
         }
-
 
 class MCPToolsTestHelper:
     """Helper for MCP tools testing."""
@@ -107,7 +105,6 @@ class MCPToolsTestHelper:
         
         infra["mcp_registry"].discover_tools = AsyncMock(return_value=discovery_result)
         return await infra["mcp_registry"].discover_tools(scenario)
-
 
 class SupplyResearchTestHelper:
     """Helper for supply research testing."""
@@ -154,7 +151,6 @@ class SupplyResearchTestHelper:
         infra["research_scheduler"].schedule_research_jobs = AsyncMock(return_value=scheduling_result)
         return await infra["research_scheduler"].schedule_research_jobs(scenario)
 
-
 class ErrorRecoveryTestHelper:
     """Helper for error recovery testing."""
     
@@ -188,7 +184,6 @@ class ErrorRecoveryTestHelper:
         infra["error_handler"].detect_errors = AsyncMock(return_value=detected_errors)
         return await infra["error_handler"].detect_errors(scenario)
 
-
 class QualityMonitoringTestHelper:
     """Helper for quality monitoring testing."""
     
@@ -221,31 +216,26 @@ class QualityMonitoringTestHelper:
         infra["quality_monitor"].measure_quality = AsyncMock(return_value=measurement_result)
         return await infra["quality_monitor"].measure_quality(scenario)
 
-
 @pytest.fixture
 async def operational_infrastructure():
     """Setup operational systems infrastructure."""
     mock_infra = MockOperationalInfrastructure()
     return mock_infra.to_dict()
 
-
 @pytest.fixture
 def mcp_test_helper():
     """Create MCP tools test helper."""
     return MCPToolsTestHelper()
-
 
 @pytest.fixture
 def supply_research_helper():
     """Create supply research test helper."""
     return SupplyResearchTestHelper()
 
-
 @pytest.fixture
 def error_recovery_helper():
     """Create error recovery test helper."""
     return ErrorRecoveryTestHelper()
-
 
 @pytest.fixture
 def quality_monitoring_helper():

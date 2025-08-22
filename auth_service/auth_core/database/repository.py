@@ -10,7 +10,10 @@ from typing import Dict, List, Optional
 from sqlalchemy import and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
+try:
+    from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
+except ImportError:
+    from .models import AuthAuditLog, AuthSession, AuthUser
 
 logger = logging.getLogger(__name__)
 

@@ -95,7 +95,7 @@ async def _handle_async_transaction_error(session: AsyncSession, e: Exception):
     # Track connection health for resilience manager
     if isinstance(e, (OperationalError, DatabaseError, DisconnectionError)):
         try:
-            from .postgres_resilience import postgres_resilience
+            from netra_backend.app.db.postgres_resilience import postgres_resilience
             postgres_resilience.set_connection_health(False)
             logger.warning(f"PostgreSQL connection marked unhealthy due to: {e}")
         except ImportError:
@@ -146,7 +146,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
                 yield result
             # Mark connection as healthy on successful completion
             try:
-                from .postgres_resilience import postgres_resilience
+                from netra_backend.app.db.postgres_resilience import postgres_resilience
                 postgres_resilience.set_connection_health(True)
             except ImportError:
                 pass  # Resilience module not available

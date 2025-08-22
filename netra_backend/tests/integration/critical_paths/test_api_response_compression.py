@@ -10,17 +10,10 @@ Critical Path: Response generation -> Compression evaluation -> Compression appl
 Coverage: Gzip compression, content negotiation, compression thresholds, performance optimization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import gzip
@@ -35,7 +28,6 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class CompressionConfig:
     """Compression configuration for endpoints."""
@@ -45,7 +37,6 @@ class CompressionConfig:
     min_size_bytes: int  # Minimum response size to compress
     compression_level: int  # 1-9 for gzip
     content_types: List[str]  # Content types to compress
-
 
 class ApiCompressionManager:
     """Manages L3 API response compression tests with real compression."""
@@ -566,7 +557,6 @@ class ApiCompressionManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def compression_manager():
     """Create compression manager for L3 testing."""
@@ -574,7 +564,6 @@ async def compression_manager():
     await manager.initialize_compression()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -594,7 +583,6 @@ async def test_gzip_compression_enabled(compression_manager):
     # Should have Vary header for caching
     assert "Vary" in result["headers"]
     assert "Accept-Encoding" in result["headers"]["Vary"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -624,7 +612,6 @@ async def test_compression_content_negotiation(compression_manager):
             assert result["is_compressed"] is True
             assert result["compression_type"] == expected_encoding
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -642,7 +629,6 @@ async def test_compression_size_threshold(compression_manager):
     # Note: Our test endpoints all generate relatively large responses
     # In a real scenario, you'd test with endpoints that return small responses
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -658,7 +644,6 @@ async def test_compression_disabled_for_images(compression_manager):
     
     # Should not have Content-Encoding header
     assert "Content-Encoding" not in result["headers"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -690,7 +675,6 @@ async def test_compression_effectiveness(compression_manager):
             # Large JSON data should compress well
             if "large-data" in result["endpoint"]:
                 assert result["compression_ratio"] > 60  # Should compress >60%
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -730,7 +714,6 @@ async def test_compression_performance_impact(compression_manager):
     assert avg_compressed_time < 0.5  # Less than 500ms
     assert avg_uncompressed_time < 0.5  # Less than 500ms
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -759,7 +742,6 @@ async def test_concurrent_compression_requests(compression_manager):
     # Most responses should be compressed
     compressed_results = [r for r in successful_results if r["is_compressed"]]
     assert len(compressed_results) >= 10  # Most should be compressed
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -790,7 +772,6 @@ async def test_compression_headers_correctness(compression_manager):
         # Content-Type should be preserved
         assert "Content-Type" in headers
         assert "application/json" in headers["Content-Type"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

@@ -10,17 +10,10 @@ Critical Path: Tool discovery -> Validation -> Loading -> Registry -> Availabili
 Coverage: Real tool loader, registry, dependency resolution, performance tracking
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -35,12 +28,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class MockTool:
     """Mock tool for testing loading pipeline."""
@@ -61,7 +52,6 @@ class MockTool:
     def validate(self) -> bool:
         """Validate tool configuration."""
         return len(self.name) > 0 and self.version is not None
-
 
 class ToolRegistry:
     """Tool registry for managing loaded tools."""
@@ -89,7 +79,6 @@ class ToolRegistry:
         """List all registered tool names."""
         return list(self.tools.keys())
 
-
 class DependencyResolver:
     """Resolves tool dependencies and loading order."""
     
@@ -114,7 +103,6 @@ class DependencyResolver:
                 raise ValueError(f"Cannot resolve dependencies for: {[t.name for t in pending]}")
                 
         return resolved
-
 
 class ToolLoader:
     """Manages tool loading process."""
@@ -158,7 +146,6 @@ class ToolLoader:
             "load_time_ms": self.load_stats["load_time_ms"],
             "tools": self.registry.list_tools()
         }
-
 
 class AgentToolLoadingManager:
     """Manages agent tool loading testing."""
@@ -208,7 +195,6 @@ class AgentToolLoadingManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def tool_loading_manager():
     """Create tool loading manager for testing."""
@@ -216,7 +202,6 @@ async def tool_loading_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -241,7 +226,6 @@ async def test_basic_tool_loading(tool_loading_manager):
     assert "calculator" in result["tools"]
     assert "web_scraper" in result["tools"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_dependency_resolution(tool_loading_manager):
@@ -265,7 +249,6 @@ async def test_dependency_resolution(tool_loading_manager):
     assert load_order.index("basic_tool") < load_order.index("utility_tool")
     assert load_order.index("utility_tool") < load_order.index("advanced_tool")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_tool_validation_failures(tool_loading_manager):
@@ -285,7 +268,6 @@ async def test_tool_validation_failures(tool_loading_manager):
     assert "good_tool" in result["tools"]
     assert len(manager.tool_loader.registry.validation_errors) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_circular_dependency_detection(tool_loading_manager):
@@ -303,7 +285,6 @@ async def test_circular_dependency_detection(tool_loading_manager):
         await manager.test_dynamic_loading(tools)
     
     assert "Cannot resolve dependencies" in str(exc_info.value)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -328,7 +309,6 @@ async def test_version_compatibility_checking(tool_loading_manager):
     v1_tools = [r for r in result["results"] if r["version"].startswith("1.")]
     assert len(v1_tools) == 2
     assert all(r["compatible"] for r in v1_tools)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -359,7 +339,6 @@ async def test_concurrent_tool_loading(tool_loading_manager):
     # Performance check - concurrent should be faster than sequential
     assert total_time < 1.0  # Should complete quickly with concurrency
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_tool_registry_persistence(tool_loading_manager):
@@ -379,7 +358,6 @@ async def test_tool_registry_persistence(tool_loading_manager):
     # Tool should be cached in Redis
     assert cached_tool is not None
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_tool_loading_circuit_breaker(tool_loading_manager):
@@ -395,7 +373,6 @@ async def test_tool_loading_circuit_breaker(tool_loading_manager):
     
     # Circuit breaker should be in open state after failures
     assert manager.circuit_breaker.failure_count >= 3
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

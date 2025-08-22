@@ -11,17 +11,10 @@ Tests the UsageTracker that monitors tool usage, enforces limits,
 calculates costs, and triggers upgrade prompts. Core conversion engine.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
@@ -30,12 +23,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.models_postgres import ToolUsageLog, User
 from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
-
-# Add project root to path
-
 
 # Mock UsageTracker class (would be implemented in real system)
 class MockUsageTracker:
@@ -133,25 +122,21 @@ class MockUsageTracker:
             "tools_used": 15
         }
 
-
 # Test fixtures for setup
 @pytest.fixture
 def mock_db_session():
     """Mock database session."""
     return Mock()
 
-
 @pytest.fixture
 def mock_redis():
     """Mock Redis client."""
     return AsyncMock()
 
-
 @pytest.fixture
 def usage_tracker(mock_db_session, mock_redis):
     """Usage tracker with mock dependencies."""
     return MockUsageTracker(db_session=mock_db_session, redis_client=mock_redis)
-
 
 @pytest.fixture
 def free_tier_user():
@@ -165,7 +150,6 @@ def free_tier_user():
     user.payment_status = "active"
     return user
 
-
 @pytest.fixture
 def pro_tier_user():
     """Pro tier user fixture."""
@@ -177,7 +161,6 @@ def pro_tier_user():
     user.auto_renew = True
     user.payment_status = "active"
     return user
-
 
 @pytest.fixture
 def enterprise_user():
@@ -191,7 +174,6 @@ def enterprise_user():
     user.payment_status = "active"
     return user
 
-
 @pytest.fixture
 def heavy_usage_free_user():
     """Free tier user with heavy usage pattern."""
@@ -204,7 +186,6 @@ def heavy_usage_free_user():
     user.payment_status = "active"
     return user
 
-
 # Helper functions for 25-line compliance
 def assert_usage_recorded_successfully(result):
     """Assert usage was recorded successfully."""
@@ -212,29 +193,24 @@ def assert_usage_recorded_successfully(result):
     assert "daily_usage" in result
     assert "monthly_usage" in result
 
-
 def assert_usage_within_limits(result):
     """Assert usage is within limits."""
     assert result["allowed"] is True
     assert result["remaining"] > 0
-
 
 def assert_usage_exceeds_limits(result):
     """Assert usage exceeds limits."""
     assert result["allowed"] is False
     assert result["remaining"] == 0
 
-
 def assert_upgrade_prompt_should_show(result):
     """Assert upgrade prompt should be shown."""
     assert result["show_prompt"] is True
     assert "savings_preview" in result
 
-
 def assert_upgrade_prompt_should_not_show(result):
     """Assert upgrade prompt should not be shown."""
     assert result["show_prompt"] is False
-
 
 def create_mock_tool_usage_log(user_id, tool_name, status="success", cost_cents=10):
     """Create mock tool usage log entry."""
@@ -246,13 +222,11 @@ def create_mock_tool_usage_log(user_id, tool_name, status="success", cost_cents=
     log.created_at = datetime.now(timezone.utc)
     return log
 
-
 def setup_usage_tracker_with_high_usage(tracker, user_id):
     """Setup usage tracker to return high usage."""
     async def mock_get_current_usage(uid, period):
         return 45 if period == "daily" else 900  # Near limits
     tracker._get_current_usage = mock_get_current_usage
-
 
 # Core usage tracking tests
 class TestUsageTracking:
@@ -331,7 +305,6 @@ class TestUsageTracking:
         assert_usage_recorded_successfully(result_free)
         assert_usage_recorded_successfully(result_pro)
 
-
 class TestUsageLimitChecking:
     """Test usage limit checking for different plan tiers."""
 
@@ -385,7 +358,6 @@ class TestUsageLimitChecking:
         # Should include usage from all tools, not just one
         assert "current_usage" in result
         assert result["current_usage"] >= 0
-
 
 class TestUpgradeSavingsCalculation:
     """Test upgrade savings calculation - CRITICAL for conversion."""
@@ -459,7 +431,6 @@ class TestUpgradeSavingsCalculation:
         assert result["projected_savings_pro"] == 0
         assert result["projected_savings_enterprise"] == 0
 
-
 class TestUsageAnalytics:
     """Test usage analytics for business insights."""
 
@@ -528,7 +499,6 @@ class TestUsageAnalytics:
         
         # Both should have same structure
         assert set(result_7d.keys()) == set(result_30d.keys())
-
 
 class TestUpgradePromptLogic:
     """Test upgrade prompt logic - CRITICAL for conversion funnel."""
@@ -600,7 +570,6 @@ class TestUpgradePromptLogic:
         if result["show_prompt"]:
             assert result["prompt_type"] != "usage_limit"
 
-
 class TestPlanLimitConfiguration:
     """Test plan limit configuration and enforcement."""
 
@@ -654,7 +623,6 @@ class TestPlanLimitConfiguration:
         
         assert free_limits["cost_limit_cents"] < pro_limits["cost_limit_cents"]
         assert pro_limits["cost_limit_cents"] < enterprise_limits["cost_limit_cents"]
-
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling scenarios."""

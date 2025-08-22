@@ -11,17 +11,10 @@ L3 Realism: Real Redis instances simulating different regions, actual sync mecha
 Performance Requirements: Sync latency < 200ms, consistency accuracy 99.9%, conflict resolution < 500ms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -39,15 +32,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.critical_paths.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class RegionalConsistencyMetrics:
@@ -93,7 +82,6 @@ class RegionalConsistencyMetrics:
         if self.cross_region_reads == 0:
             return 100.0
         return (self.cross_region_hits / self.cross_region_reads) * 100.0
-
 
 class CacheConsistencyAcrossRegionsL3Manager:
     """L3 cache consistency across regions test manager with simulated regional Redis instances."""
@@ -608,7 +596,6 @@ class CacheConsistencyAcrossRegionsL3Manager:
         except Exception as e:
             logger.error(f"Regional consistency cleanup failed: {e}")
 
-
 @pytest.fixture
 async def regional_consistency_manager():
     """Create L3 regional cache consistency manager."""
@@ -616,7 +603,6 @@ async def regional_consistency_manager():
     await manager.setup_multi_region_redis()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -642,7 +628,6 @@ async def test_multi_region_cache_sync(regional_consistency_manager):
     
     logger.info(f"Multi-region sync: {sync_result['successful_syncs']} successful, {sync_result['sync_latency']*1000:.1f}ms latency")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -657,7 +642,6 @@ async def test_eventual_consistency_convergence(regional_consistency_manager):
     
     logger.info(f"Eventual consistency: {result['eventually_consistent']}/10 consistent, {result['avg_convergence_time']*1000:.1f}ms convergence")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -671,7 +655,6 @@ async def test_cross_region_conflict_resolution(regional_consistency_manager):
     assert result["avg_resolution_time"] < 1.0, f"Resolution time {result['avg_resolution_time']*1000:.1f}ms too high"
     
     logger.info(f"Conflict resolution: {result['conflicts_resolved']}/{result['conflicts_detected']} resolved, {result['avg_resolution_time']*1000:.1f}ms avg time")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -690,7 +673,6 @@ async def test_cross_region_read_performance(regional_consistency_manager):
             assert perf["avg_latency"] < 0.5, f"Region {region} latency {perf['avg_latency']*1000:.1f}ms too high"
     
     logger.info(f"Cross-region reads: {result['hit_rate']:.1f}% hit rate, {result['avg_read_latency']*1000:.1f}ms avg latency")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

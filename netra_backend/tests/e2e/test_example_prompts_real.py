@@ -4,23 +4,14 @@ Tests all 9 example prompts with real LLM calls and complete validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.tests.example_prompts_core import (
-    # Add project root to path
     EXAMPLE_PROMPTS,
     create_ep_001_state,
     create_ep_002_state,
@@ -45,7 +36,6 @@ from netra_backend.tests.example_prompts_validators import (
     validate_rollback_analysis_result,
     validate_tool_migration_result,
 )
-
 
 @pytest.mark.real_llm
 class TestExamplePromptsComprehensive:

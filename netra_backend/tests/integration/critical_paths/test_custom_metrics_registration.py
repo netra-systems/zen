@@ -11,17 +11,10 @@ Coverage: Dynamic metric creation, schema validation, registration persistence, 
 L3 Realism: Tests with real metric registration services and actual schema validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,10 +30,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-# Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +42,6 @@ pytestmark = [
     pytest.mark.custom_metrics
 ]
 
-
 class MetricType(Enum):
     """Supported metric types for custom registration."""
     COUNTER = "counter"
@@ -60,14 +49,12 @@ class MetricType(Enum):
     HISTOGRAM = "histogram"
     SUMMARY = "summary"
 
-
 class MetricScope(Enum):
     """Metric scope levels."""
     GLOBAL = "global"
     TENANT = "tenant"
     USER = "user"
     SESSION = "session"
-
 
 @dataclass
 class MetricDefinition:
@@ -90,7 +77,6 @@ class MetricDefinition:
         if self.validation_rules is None:
             self.validation_rules = {}
 
-
 @dataclass
 class CustomMetricInstance:
     """Instance of a custom metric with data."""
@@ -102,7 +88,6 @@ class CustomMetricInstance:
     tenant_id: Optional[str] = None
     user_id: Optional[str] = None
     session_id: Optional[str] = None
-
 
 @dataclass
 class RegistrationResult:
@@ -118,7 +103,6 @@ class RegistrationResult:
             self.validation_errors = []
         if self.registration_timestamp is None:
             self.registration_timestamp = datetime.now(timezone.utc)
-
 
 class CustomMetricsValidator:
     """Validates custom metrics registration with real services."""
@@ -597,7 +581,6 @@ class CustomMetricsValidator:
         except Exception as e:
             logger.error(f"Custom metrics cleanup failed: {e}")
 
-
 class CustomMetricsRegistry:
     """Mock custom metrics registry for L3 testing."""
     
@@ -641,7 +624,6 @@ class CustomMetricsRegistry:
         """Shutdown metrics registry."""
         pass
 
-
 class MetricSchemaValidator:
     """Schema validator for custom metric definitions."""
     
@@ -671,7 +653,6 @@ class MetricSchemaValidator:
         
         return {"valid": len(errors) == 0, "errors": errors}
 
-
 @pytest.fixture
 async def custom_metrics_validator():
     """Create custom metrics validator for L3 testing."""
@@ -679,7 +660,6 @@ async def custom_metrics_validator():
     await validator.initialize_custom_metrics_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_business_metrics_registration_l3(custom_metrics_validator):
@@ -702,7 +682,6 @@ async def test_business_metrics_registration_l3(custom_metrics_validator):
     if registration_results["registration_times_ms"]:
         avg_registration_time = sum(registration_results["registration_times_ms"]) / len(registration_results["registration_times_ms"])
         assert avg_registration_time <= 100.0  # Should register within 100ms
-
 
 @pytest.mark.asyncio
 async def test_dynamic_metric_collection_l3(custom_metrics_validator):
@@ -727,7 +706,6 @@ async def test_dynamic_metric_collection_l3(custom_metrics_validator):
         avg_collection_time = sum(collection_results["collection_latency_ms"]) / len(collection_results["collection_latency_ms"])
         assert avg_collection_time <= 50.0  # Collection should be fast
 
-
 @pytest.mark.asyncio
 async def test_metric_schema_validation_l3(custom_metrics_validator):
     """Test comprehensive schema validation for custom metrics.
@@ -745,7 +723,6 @@ async def test_metric_schema_validation_l3(custom_metrics_validator):
     total_processed = validation_results["valid_schemas"] + validation_results["invalid_schemas"]
     validation_accuracy = (validation_results["valid_schemas"] / total_processed) * 100
     assert validation_accuracy >= 80.0  # Should have good validation accuracy
-
 
 @pytest.mark.asyncio
 async def test_custom_metric_lifecycle_l3(custom_metrics_validator):
@@ -767,7 +744,6 @@ async def test_custom_metric_lifecycle_l3(custom_metrics_validator):
     
     # Verify lifecycle performance
     assert lifecycle_results["lifecycle_duration_ms"] <= 5000.0  # Complete lifecycle under 5s
-
 
 @pytest.mark.asyncio
 async def test_metric_scope_isolation_l3(custom_metrics_validator):

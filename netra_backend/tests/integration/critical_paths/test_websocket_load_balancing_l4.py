@@ -12,17 +12,10 @@ Multi-server deployment -> Load balancer configuration -> Connection distributio
 Coverage: Multiple WebSocket servers, load balancer health checks, sticky session validation, connection failover, staging environment
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,8 +28,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest
@@ -51,7 +43,6 @@ from netra_backend.app.websocket.load_balanced_connection_manager import (
     LoadBalancedConnectionManager,
 )
 
-
 @dataclass
 class LoadBalancingMetrics:
     """Metrics container for load balancing testing."""
@@ -62,7 +53,6 @@ class LoadBalancingMetrics:
     average_connection_latency: float
     health_check_success_rate: float
 
-
 @dataclass
 class WebSocketServer:
     """WebSocket server instance representation."""
@@ -71,7 +61,6 @@ class WebSocketServer:
     health_status: str
     connection_count: int
     last_health_check: float
-
 
 class WebSocketLoadBalancingL4TestSuite:
     """L4 test suite for WebSocket load balancing in staging environment."""
@@ -509,7 +498,6 @@ class WebSocketLoadBalancingL4TestSuite:
         self.active_connections.clear()
         self.session_assignments.clear()
 
-
 @pytest.fixture
 async def websocket_load_balancing_l4_suite():
     """Create L4 WebSocket load balancing test suite."""
@@ -517,7 +505,6 @@ async def websocket_load_balancing_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -543,7 +530,6 @@ async def test_websocket_connection_distribution_l4(websocket_load_balancing_l4_
     # Validate connection performance
     assert load_balancing_metrics.average_connection_latency < 2.0, "Connection latency too high"
 
-
 @pytest.mark.asyncio  
 @pytest.mark.staging
 @pytest.mark.l4
@@ -562,7 +548,6 @@ async def test_websocket_sticky_sessions_l4(websocket_load_balancing_l4_suite):
     
     # Validate session tracking
     assert sticky_results["sticky_violations"] <= 3, "Too many sticky session violations"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
@@ -588,7 +573,6 @@ async def test_websocket_server_failover_l4(websocket_load_balancing_l4_suite):
     # Validate data integrity
     assert failover_results["data_loss_incidents"] == 0, "Data loss detected during failover"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4  
@@ -608,7 +592,6 @@ async def test_websocket_health_check_monitoring_l4(websocket_load_balancing_l4_
     
     # Validate health check reliability
     assert health_results.get("success_rate", 0) >= 0.8, "Health check success rate too low"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -660,7 +643,6 @@ async def test_websocket_load_balancing_performance_l4(websocket_load_balancing_
         server_usage[assigned_server] = server_usage.get(assigned_server, 0) + 1
     
     assert len(server_usage) >= 2, "Load not distributed across multiple servers"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

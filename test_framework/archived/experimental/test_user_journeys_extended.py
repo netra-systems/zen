@@ -38,9 +38,6 @@ from test_framework.test_user_journeys import (
     ServiceOrchestrator,
 )
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
 
 
 logger = central_logger.get_logger(__name__)

@@ -4,17 +4,10 @@ L3 Integration Test: Token Refresh Flow
 Tests JWT token refresh mechanisms including edge cases and error scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,13 +19,9 @@ import aiohttp
 import jwt
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.auth import TokenManager
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
-
-# Add project root to path
-
 
 class TestAuthTokenRefreshFlow(L3IntegrationTest):
     """Test token refresh flow from multiple angles."""
@@ -289,7 +278,6 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 if not isinstance(r, Exception) and r.status == 429
             )
             assert rate_limited > 0, "Rate limiting should trigger"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -23,9 +23,9 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .crash_recovery_models import DiagnosisResult, RecoveryStage
-from .recovery_actions import RecoveryActions
-from .system_diagnostics import SystemDiagnostics
+from dev_launcher.crash_recovery_models import DiagnosisResult, RecoveryStage
+from dev_launcher.recovery_actions import RecoveryActions
+from dev_launcher.system_diagnostics import SystemDiagnostics
 
 logger = logging.getLogger(__name__)
 

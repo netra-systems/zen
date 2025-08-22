@@ -3,17 +3,10 @@ L4 Integration Test: API Request Lifecycle Complete
 Tests complete API request lifecycle from ingress to response
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import hashlib
@@ -27,14 +20,10 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
-from netra_backend.app.services.api_gateway import APIGateway
+from netra_backend.app.services.api_gateway.gateway_manager import ApiGatewayManager
 from netra_backend.app.services.middleware_chain import MiddlewareChain
 from netra_backend.app.services.rate_limiter import RateLimiter
 from netra_backend.app.services.request_validator import RequestValidator
-
-# Add project root to path
-
 
 class TestAPIRequestLifecycleCompleteL4:
     """Complete API request lifecycle testing"""
@@ -43,7 +32,7 @@ class TestAPIRequestLifecycleCompleteL4:
     async def api_infrastructure(self):
         """API infrastructure setup"""
         return {
-            'gateway': APIGateway(),
+            'gateway': ApiGatewayManager(),
             'rate_limiter': RateLimiter(),
             'validator': RequestValidator(),
             'middleware': MiddlewareChain(),

@@ -10,17 +10,10 @@ Critical Path: Configuration ingestion -> Schema validation -> Dependency checki
 Coverage: Multi-environment config validation, schema compliance, dependency resolution, breaking change detection, rollback mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -43,7 +36,6 @@ from test_framework.mock_utils import mock_justified
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ConfigValidationResult:
     """Configuration validation result."""
@@ -56,7 +48,6 @@ class ConfigValidationResult:
     breaking_changes: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
 
-
 @dataclass
 class ConfigDependency:
     """Configuration dependency definition."""
@@ -64,7 +55,6 @@ class ConfigDependency:
     config_key: str
     required: bool
     dependency_type: str  # service, database, external_api, config_value
-
 
 @dataclass
 class ConfigSchema:
@@ -74,7 +64,6 @@ class ConfigSchema:
     field_types: Dict[str, str]
     field_constraints: Dict[str, Dict[str, Any]]
     dependencies: List[ConfigDependency]
-
 
 class ConfigurationValidationPipeline:
     """Configuration validation pipeline with comprehensive validation rules."""
@@ -497,7 +486,6 @@ class ConfigurationValidationPipeline:
         
         return validated_configs
 
-
 @pytest.fixture
 async def redis_client():
     """Create Redis client for configuration caching."""
@@ -512,12 +500,10 @@ async def redis_client():
         # If Redis not available, return None
         yield None
 
-
 @pytest.fixture
 async def config_validator(redis_client):
     """Create configuration validation pipeline."""
     return ConfigurationValidationPipeline(redis_client)
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -870,7 +856,6 @@ class TestConfigurationValidationPipelineL3:
             config_validator.validation_timeout = original_timeout
             if hasattr(config_validator, '_validate_service_dependency'):
                 config_validator._validate_service_dependency = original_validate_service
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

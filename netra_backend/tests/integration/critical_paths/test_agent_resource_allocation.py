@@ -10,17 +10,10 @@ Critical Path: Resource request -> Allocation strategy -> Limits -> Monitoring -
 Coverage: Real resource manager, allocation algorithms, monitoring, auto-scaling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -38,12 +31,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class ResourceType(Enum):
     """Types of resources that can be allocated."""
@@ -54,14 +45,12 @@ class ResourceType(Enum):
     NETWORK = "network"
     LLM_TOKENS = "llm_tokens"
 
-
 class AllocationStrategy(Enum):
     """Resource allocation strategies."""
     FAIR_SHARE = "fair_share"
     PRIORITY_BASED = "priority_based"
     DEMAND_BASED = "demand_based"
     PREDICTIVE = "predictive"
-
 
 @dataclass
 class ResourceQuota:
@@ -81,7 +70,6 @@ class ResourceQuota:
         """Get utilization percentage."""
         return (self.allocated / self.total_available) * 100 if self.total_available > 0 else 0
 
-
 @dataclass
 class ResourceRequest:
     """Resource allocation request."""
@@ -97,7 +85,6 @@ class ResourceRequest:
     def __post_init__(self):
         if self.duration_seconds is None:
             self.duration_seconds = 3600  # Default 1 hour
-
 
 @dataclass
 class ResourceAllocation:
@@ -115,7 +102,6 @@ class ResourceAllocation:
         if self.expires_at is None:
             return False
         return datetime.now() > self.expires_at
-
 
 class ResourceMonitor:
     """Monitors resource usage and performance."""
@@ -162,7 +148,6 @@ class ResourceMonitor:
             return 0.0
         
         return (stats["average_usage"] / allocated_amount) * 100
-
 
 class ResourceAllocator:
     """Allocates resources based on strategies and policies."""
@@ -310,7 +295,6 @@ class ResourceAllocator:
         
         return summary
 
-
 class AutoScaler:
     """Handles automatic resource scaling based on demand."""
     
@@ -385,7 +369,6 @@ class AutoScaler:
         except Exception as e:
             logger.error(f"Failed to apply scaling: {e}")
             return False
-
 
 class AgentResourceAllocationManager:
     """Manages agent resource allocation testing."""
@@ -486,7 +469,6 @@ class AgentResourceAllocationManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def resource_allocation_manager():
     """Create resource allocation manager for testing."""
@@ -494,7 +476,6 @@ async def resource_allocation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -526,7 +507,6 @@ async def test_basic_resource_allocation(resource_allocation_manager):
     assert allocation.active is False
     assert cpu_quota.allocated == 0.0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_resource_quota_limits(resource_allocation_manager):
@@ -552,7 +532,6 @@ async def test_resource_quota_limits(resource_allocation_manager):
     
     # Waiting request should still be there (requires 15 GPUs)
     assert len(manager.allocator.waiting_requests) == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -580,7 +559,6 @@ async def test_priority_based_allocation(resource_allocation_manager):
     
     assert high_allocation.allocated_amount >= low_allocation.allocated_amount
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_resource_usage_monitoring(resource_allocation_manager):
@@ -607,7 +585,6 @@ async def test_resource_usage_monitoring(resource_allocation_manager):
     efficiency = manager.monitor.calculate_efficiency(allocation_id, 100.0)
     
     assert 0 <= efficiency <= 100
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -648,7 +625,6 @@ async def test_auto_scaling_evaluation(resource_allocation_manager):
     if cpu_recommendations:
         assert cpu_recommendations[0]["action"] == "scale_down"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_allocation_expiration_cleanup(resource_allocation_manager):
@@ -674,7 +650,6 @@ async def test_allocation_expiration_cleanup(resource_allocation_manager):
     
     assert expired_count > 0
     assert not allocation.active
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -705,7 +680,6 @@ async def test_concurrent_resource_requests(resource_allocation_manager):
     cpu_quota = manager.allocator.quotas[ResourceType.CPU]
     assert cpu_quota.allocated == 100.0
     assert cpu_quota.free == 0.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -738,7 +712,6 @@ async def test_resource_allocation_fairness(resource_allocation_manager):
         
         assert fairness_ratio > 0.8  # At least 80% fairness
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_resource_allocation_summary(resource_allocation_manager):
@@ -768,7 +741,6 @@ async def test_resource_allocation_summary(resource_allocation_manager):
     cpu_util = summary["resource_utilization"]["cpu"]
     assert cpu_util["allocated"] == 20.0
     assert cpu_util["utilization_percent"] == 20.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

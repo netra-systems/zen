@@ -3,17 +3,10 @@ Tests for LLM Manager provider switching and failover functionality
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -21,14 +14,12 @@ from typing import Any, Dict, List
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
 from netra_backend.tests.llm_manager_helpers import (
     assert_failure_count,
     assert_health_status,
     count_provider_usage,
-    # Add project root to path
     create_mock_app_config,
     create_mock_providers,
     execute_concurrent_requests,
@@ -36,7 +27,6 @@ from netra_backend.tests.llm_manager_helpers import (
     register_providers_with_manager,
     simulate_provider_usage_pattern,
 )
-
 
 class TestLLMManagerProviderSwitching:
     """Test LLM manager provider switching functionality"""

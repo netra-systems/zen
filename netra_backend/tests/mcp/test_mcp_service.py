@@ -4,17 +4,10 @@ Tests for MCP Service
 Test MCP service integration with Netra platform.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 from datetime import datetime
@@ -24,15 +17,11 @@ import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.mcp_service import (
     MCPClient,
     MCPService,
     MCPToolExecution,
 )
-
-# Add project root to path
-
 
 class TestMCPClient:
     """Test MCP Client model"""
@@ -67,7 +56,6 @@ class TestMCPClient:
         assert client.permissions == []
         assert client.metadata == {}
 
-
 class TestMCPToolExecution:
     """Test MCP Tool Execution model"""
     
@@ -91,7 +79,6 @@ class TestMCPToolExecution:
         assert execution.status == "success"
         assert execution.error == None
         assert isinstance(execution.created_at, datetime)
-
 
 class TestMCPService:
     """Test MCP service functionality"""

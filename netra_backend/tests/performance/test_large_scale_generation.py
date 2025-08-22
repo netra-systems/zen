@@ -5,17 +5,10 @@ Tests for corpus generation at scale (100k+ records) with resource monitoring.
 Focuses on memory efficiency and system resource utilization.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -31,11 +24,7 @@ from netra_backend.app.schemas.Generation import (
     ContentGenParams,
 )
 
-# Add project root to path
 from netra_backend.app.services.generation_service import run_content_generation_job
-
-# Add project root to path
-
 
 @pytest.fixture
 def large_corpus_params():
@@ -46,7 +35,6 @@ def large_corpus_params():
         max_cores=4,
         clickhouse_table='perf_test_corpus'
     )
-
 
 @pytest.fixture
 def resource_monitor():
@@ -79,7 +67,6 @@ def resource_monitor():
             }
 
     return ResourceMonitor()
-
 
 class TestLargeScaleGeneration:
     """Test large corpus generation (100k+ records)"""
@@ -184,7 +171,6 @@ class TestLargeScaleGeneration:
             time_ratio = execution_times[i] / execution_times[i-1]
             scale_ratio = scale_factors[i] / scale_factors[i-1]
             assert time_ratio < scale_ratio * 1.5  # Allow 50% overhead
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

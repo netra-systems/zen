@@ -15,14 +15,29 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# Default allowed origins for WebSocket connections
+# Default allowed origins for WebSocket connections - expanded for dynamic ports
 DEFAULT_WEBSOCKET_ORIGINS = [
     "http://localhost:3000",
     "https://localhost:3000", 
     "http://127.0.0.1:3000",
     "https://127.0.0.1:3000",
     "http://localhost:3001",
-    "https://localhost:3001"
+    "https://localhost:3001",
+    "http://localhost:3002",
+    "http://localhost:3003",
+    "http://localhost:4000",
+    "http://localhost:4001",
+    "http://localhost:4200",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:3002",
+    "http://127.0.0.1:3003",
+    "http://127.0.0.1:4000",
+    "http://127.0.0.1:4001",
+    "http://127.0.0.1:4200",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174"
 ]
 
 # Production origins (should be configured via environment variables)
@@ -42,9 +57,10 @@ SECURITY_CONFIG = {
     "rate_limit_violations": True,  # Rate limit origins with violations
 }
 
-# Suspicious patterns to block
+# Suspicious patterns to block - relaxed for development
 SUSPICIOUS_PATTERNS = [
-    r".*localhost.*:(?!3000|3001).*",  # Block unexpected localhost ports
+    # Allow more localhost ports in development - only block very unusual ones
+    r".*localhost.*:(?!3000|3001|3002|3003|4000|4001|4200|5173|5174|8000|8001|8002|8003|8080|8081|8082|8083)\d+.*",  # Block only unexpected localhost ports
     r".*\d+\.\d+\.\d+\.\d+.*",  # Block direct IP addresses in production
     r".*\.ngrok\.io.*",  # Block ngrok tunnels in production
     r".*\.localtunnel\.me.*",  # Block localtunnel in production
@@ -202,7 +218,8 @@ class WebSocketCORSHandler:
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET",
-            "Access-Control-Allow-Headers": "Authorization, Content-Type, Origin, Accept",
+            "Access-Control-Allow-Headers": "Authorization, Content-Type, Origin, Accept, X-Request-ID, X-Trace-ID, X-Service-ID, X-Cross-Service-Auth",
+            "Access-Control-Expose-Headers": "X-Trace-ID, X-Request-ID, X-Service-Name, X-Service-Version",
             "Vary": "Origin"
         }
         
@@ -276,7 +293,7 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
 
 
 def get_environment_origins() -> List[str]:
-    """Get allowed origins based on environment configuration."""
+    """Get allowed origins based on environment configuration and service discovery."""
     from netra_backend.app.core.configuration import unified_config_manager
     config = unified_config_manager.get_config()
     
@@ -297,14 +314,27 @@ def get_environment_origins() -> List[str]:
         staging_origins = [origin for origin in PRODUCTION_ORIGINS if "staging" in origin]
         allowed_origins = staging_origins + DEFAULT_WEBSOCKET_ORIGINS + custom_list
     else:
-        # Development/test environment: use development origins + custom
+        # Development/test environment: use development origins + custom + service discovery
         allowed_origins = DEFAULT_WEBSOCKET_ORIGINS + custom_list
+        
+        # Add service discovery origins if available
+        try:
+            from pathlib import Path
+            from dev_launcher.service_discovery import ServiceDiscovery
+            
+            service_discovery = ServiceDiscovery(Path.cwd())
+            discovered_origins = service_discovery.get_all_service_origins()
+            allowed_origins.extend(discovered_origins)
+            
+            logger.debug(f"Added {len(discovered_origins)} service discovery origins for WebSocket CORS")
+        except (ImportError, Exception) as e:
+            logger.debug(f"Service discovery not available for WebSocket CORS: {e}")
     
     # Remove duplicates while preserving order
     unique_origins = []
     seen = set()
     for origin in allowed_origins:
-        if origin not in seen:
+        if origin and origin not in seen:
             unique_origins.append(origin)
             seen.add(origin)
     

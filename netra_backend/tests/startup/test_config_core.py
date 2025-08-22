@@ -4,17 +4,10 @@ Tests for configuration status, validation results, and validation context.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta
@@ -32,12 +25,10 @@ from dev_launcher.config_validator import (
 )
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
-
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:
     """Create temporary config file path."""
     return tmp_path / ".dev_services.json"
-
 
 @pytest.fixture
 def mock_validation_context(temp_config_path: Path) -> ValidationContext:
@@ -49,7 +40,6 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
         cli_overrides={"REDIS_HOST": "localhost"},
         env_overrides={"POSTGRES_HOST": "db.example.com"}
     )
-
 
 @pytest.fixture
 def mock_services_config() -> ServicesConfiguration:
@@ -70,7 +60,6 @@ def mock_services_config() -> ServicesConfiguration:
     
     return config
 
-
 class TestConfigStatus:
     """Test configuration status enumeration."""
     
@@ -81,7 +70,6 @@ class TestConfigStatus:
         assert ConfigStatus.STALE.value == "stale"
         assert ConfigStatus.MISSING.value == "missing"
         assert ConfigStatus.UNREACHABLE.value == "unreachable"
-
 
 class TestConfigValidationResult:
     """Test configuration validation result model."""
@@ -108,7 +96,6 @@ class TestConfigValidationResult:
         assert len(result.warnings) == 1
         assert result.config_age_days == 45
 
-
 class TestValidationContext:
     """Test validation context dataclass."""
     
@@ -134,7 +121,6 @@ class TestValidationContext:
         assert context.is_interactive is False
         assert context.cli_overrides == cli_overrides
         assert context.env_overrides == env_overrides
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

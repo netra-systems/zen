@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>PostgreSQL URL Simplification</name>
+        <type>Learning</type>
+        <version>1.0</version>
+        <created>2025-08-22</created>
+        <description>Learnings from simplifying PostgreSQL URL configuration for staging environment</description>
+    </metadata>
+
+    <context>
+        <problem>
+            Staging PostgreSQL URLs contained complex prefixes (postgresql+psycopg2://) and suffixes 
+            that created configuration fragility across different system components. The system required
+            exact driver specifications in URLs, causing deployment and migration issues.
+        </problem>
+        <solution>
+            Simplified URLs to use basic postgresql:// scheme and implemented automatic driver 
+            normalization at runtime based on context (async for app, sync for migrations).
+        </solution>
+    </context>
+
+    <learnings>
+        <learning id="postgres-url-normalization">
+            <title>Automatic PostgreSQL Driver Normalization</title>
+            <description>
+                System should automatically add appropriate drivers to simplified PostgreSQL URLs
+                rather than requiring explicit driver prefixes in configuration.
+            </description>
+            <implementation>
+                Added _normalize_postgres_url() method in DatabaseConfigManager that converts:
+                - postgresql:// → postgresql+asyncpg:// (for async operations)
+                - postgres:// → postgresql+asyncpg:// (for async operations)
+                - Leaves already-prefixed URLs unchanged
+            </implementation>
+            <benefit>
+                Reduces configuration complexity and allows using standard PostgreSQL URLs
+                from cloud providers without modification.
+            </benefit>
+        </learning>
+
+        <learning id="migration-url-conversion">
+            <title>Context-Aware URL Conversion for Migrations</title>
+            <description>
+                Alembic migrations require synchronous drivers while the application uses async drivers.
+                The system must handle this conversion transparently.
+            </description>
+            <implementation>
+                Enhanced get_sync_database_url() in migration_utils.py to handle:
+                - postgresql:// → postgresql+psycopg2://
+                - postgres:// → postgresql+psycopg2://
+                - postgresql+asyncpg:// → postgresql+psycopg2://
+            </implementation>
+            <benefit>
+                Migrations work seamlessly regardless of the URL format stored in secrets.
+            </benefit>
+        </learning>
+
+        <learning id="staging-url-structure">
+            <title>Simplified Staging Database URL Format</title>
+            <description>
+                Staging database URLs should use the simplest possible format that contains
+                only essential connection information.
+            </description>
+            <format>
+                postgresql://username:password@host:port/database
+                Example: postgresql://netra_staging:password@35.223.209.195:5432/netra_staging
+            </format>
+            <avoid>
+                - Complex driver prefixes (postgresql+psycopg2://)
+                - Cloud SQL socket paths when using direct IP
+                - Unnecessary query parameters when not required
+            </avoid>
+        </learning>
+
+        <learning id="url-validation-flexibility">
+            <title>Flexible URL Validation</title>
+            <description>
+                URL validation must accept various PostgreSQL URL schemes to accommodate
+                different deployment environments and migration paths.
+            </description>
+            <accepted-schemes>
+                - postgresql://
+                - postgres://
+                - postgresql+asyncpg://
+                - postgresql+psycopg2://
+                - postgresql+psycopg://
+            </accepted-schemes>
+            <validation-rule>
+                Check for PostgreSQL-like schemes using prefix matching rather than
+                exact scheme validation to allow for driver variations.
+            </validation-rule>
+        </learning>
+
+        <learning id="secret-manager-simplification">
+            <title>Google Secret Manager URL Storage</title>
+            <description>
+                Store simplified URLs in Secret Manager and let the application handle
+                driver configuration based on runtime context.
+            </description>
+            <best-practice>
+                Update secrets using gcloud CLI with simplified format:
+                echo "postgresql://user:pass@host:port/db" | gcloud secrets versions add database-url --data-file=-
+            </best-practice>
+            <avoid>
+                Storing driver-specific URLs that may not work across all components.
+            </avoid>
+        </learning>
+
+        <learning id="ssl-mode-handling">
+            <title>SSL Mode Configuration</title>
+            <description>
+                SSL mode should be added as a query parameter when needed for staging/production,
+                but the base URL should remain simple.
+            </description>
+            <pattern>
+                Base URL: postgresql://user:pass@host:port/db
+                With SSL: postgresql://user:pass@host:port/db?sslmode=require
+            </pattern>
+            <note>
+                SSL validation accepts various modes: require, verify-ca, verify-full, prefer, disable
+            </note>
+        </learning>
+
+        <learning id="deployment-script-defaults">
+            <title>Deployment Script Configuration</title>
+            <description>
+                Deployment scripts should use simplified URLs as defaults to reduce
+                configuration overhead during initial setup.
+            </description>
+            <location>scripts/deploy_to_gcp.py</location>
+            <change>
+                Updated setup_secrets() to use simplified PostgreSQL URL format
+                instead of Cloud SQL socket path format.
+            </change>
+        </learning>
+    </learnings>
+
+    <technical-details>
+        <files-modified>
+            <file>netra_backend/app/core/configuration/database.py</file>
+            <file>netra_backend/app/db/migration_utils.py</file>
+            <file>scripts/deploy_to_gcp.py</file>
+        </files-modified>
+        
+        <functions-added>
+            <function>
+                <name>_normalize_postgres_url</name>
+                <location>netra_backend/app/core/configuration/database.py</location>
+                <purpose>Convert simple PostgreSQL URLs to async driver format</purpose>
+            </function>
+        </functions-added>
+
+        <functions-modified>
+            <function>
+                <name>get_sync_database_url</name>
+                <location>netra_backend/app/db/migration_utils.py</location>
+                <change>Enhanced to handle multiple PostgreSQL URL formats</change>
+            </function>
+            <function>
+                <name>_is_valid_postgres_url</name>
+                <location>netra_backend/app/core/configuration/database.py</location>
+                <change>Expanded to accept various PostgreSQL schemes</change>
+            </function>
+        </functions-modified>
+    </technical-details>
+
+    <testing>
+        <test-coverage>
+            Created comprehensive test script validating:
+            - URL normalization for different schemes
+            - Sync URL conversion for migrations
+            - Staging URL configuration with actual credentials
+            - SSL mode validation for staging environment
+        </test-coverage>
+        <test-results>
+            All tests passed successfully with simplified URL format.
+        </test-results>
+    </testing>
+
+    <recommendations>
+        <recommendation>
+            Always use simplified PostgreSQL URLs in configuration and let the
+            system handle driver selection based on context.
+        </recommendation>
+        <recommendation>
+            Document the simplified URL format in deployment guides to avoid
+            confusion with complex driver-specific formats.
+        </recommendation>
+        <recommendation>
+            Consider implementing similar simplification for other database
+            connections (Redis, ClickHouse) for consistency.
+        </recommendation>
+    </recommendations>
+</specification>

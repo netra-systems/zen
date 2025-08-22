@@ -3,25 +3,14 @@ Tests for error recovery strategy logic.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 # Add netra_backend to path  
-NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
-if str(NETRA_BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import (
-    # Add project root to path
     AgentError,
     DatabaseError,
     ErrorCategory,
@@ -32,7 +21,6 @@ from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
 )
 from netra_backend.app.core.error_codes import ErrorSeverity
-
 
 class TestErrorRecoveryStrategy:
     """Test error recovery strategy logic."""

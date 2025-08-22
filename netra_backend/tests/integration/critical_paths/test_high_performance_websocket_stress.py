@@ -15,21 +15,10 @@ These L3 integration tests validate:
 - Proper rate limiting and backpressure handling
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from test_framework import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import gc
@@ -49,7 +38,6 @@ from starlette.websockets import WebSocketState
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.websocket.enhanced_rate_limiter import (
 
     BackpressureManager,
@@ -87,14 +75,10 @@ from netra_backend.app.websocket.optimized_message_processor import (
 )
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
-
 class MockWebSocketForStress:
 
     """High-performance mock WebSocket for stress testing."""
     
-
     def __init__(self, user_id: str, simulate_latency: bool = False):
 
         self.user_id = user_id
@@ -117,7 +101,6 @@ class MockWebSocketForStress:
 
         self.total_bytes_sent = 0
     
-
     async def send_text(self, message: str) -> None:
 
         """Mock send_text with performance tracking."""
@@ -142,7 +125,6 @@ class MockWebSocketForStress:
 
         })
         
-
         self.send_count += 1
 
         self.total_bytes_sent += len(message.encode('utf-8'))
@@ -155,21 +137,18 @@ class MockWebSocketForStress:
 
         self.send_times.append(send_time)
     
-
     async def send_json(self, data: Dict[str, Any]) -> None:
 
         """Mock send_json."""
 
         await self.send_text(json.dumps(data))
     
-
     async def close(self, code: int = 1000, reason: str = "") -> None:
 
         """Mock close connection."""
 
         self.client_state = WebSocketState.DISCONNECTED
     
-
     def get_performance_stats(self) -> Dict[str, Any]:
 
         """Get performance statistics for this connection."""
@@ -186,7 +165,6 @@ class MockWebSocketForStress:
 
             max_send_time = 0.0
         
-
         return {
 
             "send_count": self.send_count,
@@ -203,12 +181,10 @@ class MockWebSocketForStress:
 
         }
 
-
 class StressTestMetrics:
 
     """Comprehensive metrics for stress testing."""
     
-
     def __init__(self):
 
         self.start_time = time.time()
@@ -227,7 +203,6 @@ class StressTestMetrics:
 
         }
         
-
         self.message_metrics = {
 
             "total_messages": 0,
@@ -244,7 +219,6 @@ class StressTestMetrics:
 
         }
         
-
         self.resource_metrics = {
 
             "peak_memory_mb": 0.0,
@@ -257,12 +231,10 @@ class StressTestMetrics:
 
         }
         
-
         self.performance_samples = []
 
         self.resource_samples = []
     
-
     def record_connection(self, success: bool) -> None:
 
         """Record connection attempt."""
@@ -277,7 +249,6 @@ class StressTestMetrics:
 
             self.connection_metrics["failed_connections"] += 1
     
-
     def record_message(self, success: bool, latency_ms: float = 0.0) -> None:
 
         """Record message send attempt."""
@@ -296,7 +267,6 @@ class StressTestMetrics:
 
             self.message_metrics["failed_sends"] += 1
     
-
     def _update_latency_stats(self, latency_ms: float) -> None:
 
         """Update latency statistics."""
@@ -305,7 +275,6 @@ class StressTestMetrics:
 
         success_count = self.message_metrics["successful_sends"]
         
-
         if success_count == 1:
 
             self.message_metrics["avg_latency_ms"] = latency_ms
@@ -318,12 +287,10 @@ class StressTestMetrics:
 
             )
         
-
         if latency_ms > self.message_metrics["max_latency_ms"]:
 
             self.message_metrics["max_latency_ms"] = latency_ms
     
-
     def record_resource_usage(self, memory_mb: float, cpu_percent: float) -> None:
 
         """Record resource usage sample."""
@@ -332,7 +299,6 @@ class StressTestMetrics:
 
             self.resource_metrics["peak_memory_mb"] = memory_mb
         
-
         if cpu_percent > self.resource_metrics["peak_cpu_percent"]:
 
             self.resource_metrics["peak_cpu_percent"] = cpu_percent
@@ -361,7 +327,6 @@ class StressTestMetrics:
 
         })
     
-
     def update_concurrent_connections(self, count: int) -> None:
 
         """Update concurrent connection count."""
@@ -370,14 +335,12 @@ class StressTestMetrics:
 
             self.connection_metrics["peak_concurrent"] = count
     
-
     def finalize_metrics(self) -> None:
 
         """Finalize calculated metrics."""
 
         duration = time.time() - self.start_time
         
-
         if duration > 0:
 
             self.connection_metrics["connection_rate"] = (
@@ -392,14 +355,12 @@ class StressTestMetrics:
 
             )
     
-
     def get_comprehensive_report(self) -> Dict[str, Any]:
 
         """Get comprehensive stress test report."""
 
         self.finalize_metrics()
         
-
         return {
 
             "test_duration": time.time() - self.start_time,
@@ -428,7 +389,6 @@ class StressTestMetrics:
 
         }
     
-
     def _check_target_compliance(self) -> Dict[str, bool]:
 
         """Check compliance with performance targets."""
@@ -447,7 +407,6 @@ class StressTestMetrics:
 
         }
 
-
 @pytest.mark.integration
 
 @pytest.mark.stress
@@ -456,7 +415,6 @@ class TestHighPerformanceWebSocketStress:
 
     """High-performance WebSocket stress tests with enhanced systems."""
     
-
     @pytest.fixture
 
     async def mock_redis_manager(self):
@@ -471,7 +429,6 @@ class TestHighPerformanceWebSocketStress:
 
         return manager
     
-
     @pytest.fixture
 
     async def enhanced_rate_limiter(self, mock_redis_manager):
@@ -480,7 +437,6 @@ class TestHighPerformanceWebSocketStress:
 
         return DistributedRateLimiter(mock_redis_manager)
     
-
     @pytest.fixture
 
     async def high_performance_broadcaster(self):
@@ -501,7 +457,6 @@ class TestHighPerformanceWebSocketStress:
 
         return HighPerformanceBroadcaster(config)
     
-
     @pytest.fixture
 
     async def load_balanced_manager(self):
@@ -518,10 +473,8 @@ class TestHighPerformanceWebSocketStress:
 
         manager.add_pool("pool-3", max_connections=500, weight=1.5)
         
-
         return manager
     
-
     @pytest.fixture
 
     async def memory_efficient_manager(self):
@@ -530,7 +483,6 @@ class TestHighPerformanceWebSocketStress:
 
         return MemoryEfficientWebSocketManager(memory_limit_mb=1024)
     
-
     @pytest.fixture
 
     async def optimized_processor(self):
@@ -545,7 +497,6 @@ class TestHighPerformanceWebSocketStress:
 
         await processor.stop()
     
-
     @pytest.fixture
 
     def stress_metrics(self):
@@ -554,7 +505,6 @@ class TestHighPerformanceWebSocketStress:
 
         return StressTestMetrics()
     
-
     @pytest.fixture
 
     def large_user_pool(self):
@@ -581,7 +531,6 @@ class TestHighPerformanceWebSocketStress:
 
         ]
     
-
     async def test_1000_concurrent_connections_stress(self, high_performance_broadcaster, 
 
                                                     large_user_pool, stress_metrics):
@@ -606,7 +555,6 @@ class TestHighPerformanceWebSocketStress:
 
         connection_start = time.time()
         
-
         for i in range(0, len(users), batch_size):
 
             batch_users = users[i:i + batch_size]
@@ -661,7 +609,6 @@ class TestHighPerformanceWebSocketStress:
 
             await asyncio.sleep(0.1)
         
-
         connection_time = time.time() - connection_start
 
         actual_connections = len(connections)
@@ -692,7 +639,6 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "stress_pool", user.id)
     
-
     async def test_10k_messages_per_second_throughput(self, high_performance_broadcaster, 
 
                                                      large_user_pool, stress_metrics):
@@ -723,7 +669,6 @@ class TestHighPerformanceWebSocketStress:
 
                 connections.append((user, websocket))
         
-
         assert len(connections) >= connection_count * 0.9  # 90% connection success
         
         # Prepare messages
@@ -782,7 +727,6 @@ class TestHighPerformanceWebSocketStress:
 
                 failed_sends += result.failed_deliveries
         
-
         throughput_time = time.time() - throughput_start
 
         actual_throughput = successful_sends / throughput_time
@@ -811,7 +755,6 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "throughput_pool", user.id)
     
-
     async def test_broadcast_latency_under_100ms(self, high_performance_broadcaster, 
 
                                                large_user_pool, stress_metrics):
@@ -840,7 +783,6 @@ class TestHighPerformanceWebSocketStress:
 
                 connections.append((user, websocket))
         
-
         assert len(connections) >= connection_count * 0.95
         
         # Test multiple broadcast rounds for statistical accuracy
@@ -849,7 +791,6 @@ class TestHighPerformanceWebSocketStress:
 
         test_rounds = 10
         
-
         for round_num in range(test_rounds):
 
             test_message = {
@@ -876,7 +817,6 @@ class TestHighPerformanceWebSocketStress:
 
             broadcast_latency = (time.time() - broadcast_start) * 1000
             
-
             latency_measurements.append(broadcast_latency)
 
             stress_metrics.record_message(
@@ -919,7 +859,6 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "latency_pool", user.id)
     
-
     async def test_memory_efficiency_under_load(self, memory_efficient_manager, 
 
                                               large_user_pool, stress_metrics):
@@ -964,7 +903,6 @@ class TestHighPerformanceWebSocketStress:
 
         messages_per_round = 100
         
-
         for round_num in range(message_rounds):
             # Send batch of messages
 
@@ -1046,7 +984,6 @@ class TestHighPerformanceWebSocketStress:
 
             await memory_efficient_manager.remove_connection(websocket, user.id)
     
-
     async def test_enhanced_rate_limiting_under_stress(self, enhanced_rate_limiter, 
 
                                                      large_user_pool, stress_metrics):
@@ -1077,7 +1014,6 @@ class TestHighPerformanceWebSocketStress:
 
             tier = "enterprise" if i % 4 == 0 else "free"  # 25% enterprise, 75% free
             
-
             task = enhanced_rate_limiter.check_rate_limit(user.id, tier)
 
             burst_results.append((task, tier))
@@ -1102,7 +1038,6 @@ class TestHighPerformanceWebSocketStress:
 
         denied_count = 0
         
-
         for result in results:
 
             if isinstance(result, dict) and result.get("allowed", False):
@@ -1145,7 +1080,6 @@ class TestHighPerformanceWebSocketStress:
 
             message = {"type": "backpressure_test", "sequence": i}
             
-
             result = backpressure_manager.enqueue_message(user.id, message)
 
             if result["queued"]:
@@ -1162,7 +1096,6 @@ class TestHighPerformanceWebSocketStress:
 
         assert global_metrics["total_queued_messages"] > 0
     
-
     @mock_justified("L3: Comprehensive stress testing with enhanced WebSocket systems")
 
     async def test_comprehensive_stress_scenario(self, high_performance_broadcaster,
@@ -1180,7 +1113,6 @@ class TestHighPerformanceWebSocketStress:
 
         test_duration = 30  # 30 seconds of stress
         
-
         users = large_user_pool[:connection_count]
 
         connections = []
@@ -1189,7 +1121,6 @@ class TestHighPerformanceWebSocketStress:
 
         connection_start = time.time()
         
-
         for user in users:
 
             websocket = MockWebSocketForStress(user.id)
@@ -1198,7 +1129,6 @@ class TestHighPerformanceWebSocketStress:
 
             pool_id = await load_balanced_manager.route_connection(websocket, user.id)
             
-
             if pool_id:
                 # Add to broadcaster
 
@@ -1222,7 +1152,6 @@ class TestHighPerformanceWebSocketStress:
 
                 stress_metrics.record_connection(False)
         
-
         connection_time = time.time() - connection_start
 
         actual_connections = len(connections)
@@ -1237,7 +1166,6 @@ class TestHighPerformanceWebSocketStress:
 
         process = psutil.Process()
         
-
         while time.time() - stress_start < test_duration:
 
             cycle_start = time.time()
@@ -1314,21 +1242,18 @@ class TestHighPerformanceWebSocketStress:
 
             await asyncio.sleep(0.1)
         
-
         total_stress_time = time.time() - stress_start
         
         # Phase 3: Cleanup and final measurements
 
         cleanup_start = time.time()
         
-
         for user, websocket, pool_id in connections:
 
             await high_performance_broadcaster.remove_connection(websocket, pool_id, user.id)
 
             await load_balanced_manager.remove_connection(websocket, pool_id, user.id)
         
-
         cleanup_time = time.time() - cleanup_start
         
         # Comprehensive performance assertions
@@ -1391,9 +1316,7 @@ class TestHighPerformanceWebSocketStress:
 
         print(f"Target Compliance: {final_report['target_compliance']}")
         
-
         return final_report
-
 
 @pytest.mark.asyncio
 
@@ -1415,7 +1338,6 @@ async def test_stress_test_performance_targets():
     # validate the actual performance requirements
 
     assert True  # Individual tests validate the actual requirements
-
 
 if __name__ == "__main__":
 

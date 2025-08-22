@@ -10,17 +10,10 @@ Critical Path: Config change detection -> Validation -> Rollback preparation -> 
 Coverage: Runtime configuration updates, validation mechanisms, rollback capabilities, service coordination, zero-downtime operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -38,14 +31,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class ConfigurationType(Enum):
     """Types of configuration that can be hot reloaded."""
@@ -57,7 +46,6 @@ class ConfigurationType(Enum):
     CACHE_SETTINGS = "cache_settings"
     LOGGING_LEVEL = "logging_level"
 
-
 class ReloadStatus(Enum):
     """Status of configuration reload operation."""
     PENDING = "pending"
@@ -66,7 +54,6 @@ class ReloadStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     ROLLED_BACK = "rolled_back"
-
 
 @dataclass
 class ConfigurationSnapshot:
@@ -82,7 +69,6 @@ class ConfigurationSnapshot:
         import hashlib
         calculated_checksum = hashlib.md5(json.dumps(self.data, sort_keys=True).encode()).hexdigest()
         return calculated_checksum == self.checksum
-
 
 @dataclass
 class ReloadMetrics:
@@ -101,7 +87,6 @@ class ReloadMetrics:
         if self.total_reloads == 0:
             return 0.0
         return (self.successful_reloads / self.total_reloads) * 100.0
-
 
 class ConfigurationValidator:
     """Validates configuration changes before applying."""
@@ -273,7 +258,6 @@ class ConfigurationValidator:
                 result["errors"].append(f"Invalid logging level: {level}")
         
         return result
-
 
 class ConfigurationHotReloader:
     """Manages hot reload operations for various configuration types."""
@@ -517,13 +501,11 @@ class ConfigurationHotReloader:
             "current_configurations": len(self.current_configs)
         }
 
-
 @pytest.fixture
 async def config_hot_reloader():
     """Create configuration hot reloader for testing."""
     reloader = ConfigurationHotReloader()
     yield reloader
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

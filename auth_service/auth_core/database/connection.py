@@ -118,7 +118,10 @@ class AuthDatabase:
     
     async def _get_direct_cloud_sql_url(self) -> str:
         """Get direct Cloud SQL connection URL"""
-        from auth_service.auth_core.config import AuthConfig
+        try:
+            from auth_service.auth_core.config import AuthConfig
+        except ImportError:
+            from ..config import AuthConfig
         database_url = AuthConfig.get_database_url()
         
         if not database_url:
@@ -142,7 +145,10 @@ class AuthDatabase:
     
     async def _get_local_postgres_url(self) -> str:
         """Get local PostgreSQL connection URL"""
-        from auth_service.auth_core.config import AuthConfig
+        try:
+            from auth_service.auth_core.config import AuthConfig
+        except ImportError:
+            from ..config import AuthConfig
         database_url = AuthConfig.get_database_url()
         
         if not database_url:
@@ -184,10 +190,16 @@ class AuthDatabase:
     
     async def create_tables(self):
         """Create database tables if they don't exist"""
-        from .models import Base
+        try:
+            from auth_service.auth_core.database.models import Base
+        except ImportError:
+            from .models import Base
         
-        async with self.engine.begin() as conn:
+        # For SQLite :memory: databases, we need to use connect() not begin()
+        # to avoid the transaction being rolled back when connection closes
+        async with self.engine.connect() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            await conn.commit()
     
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:

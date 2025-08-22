@@ -17,17 +17,10 @@ Features:
 Each function ≤8 lines, file ≤300 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -46,7 +39,6 @@ from logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-# Add project root to path
 from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
 from netra_backend.app.core.exceptions_config import DatabaseError
 from netra_backend.tests.database_test_fixtures import (
@@ -54,9 +46,6 @@ from netra_backend.tests.database_test_fixtures import (
     create_mock_thread,
     create_mock_user,
 )
-
-# Add project root to path
-
 
 class TestDatabaseManager:
     """Manager for test database lifecycle and utilities."""

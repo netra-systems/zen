@@ -3,17 +3,10 @@ Security Middleware Tests
 Tests security middleware functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -25,14 +18,10 @@ from fastapi import Request
 
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import (
     RateLimitTracker,
     SecurityMiddleware,
 )
-
-# Add project root to path
-
 
 class TestSecurityMiddleware:
     """Test security middleware functionality."""
@@ -173,7 +162,6 @@ class TestSecurityMiddleware:
                 security_middleware._validate_request_body(mock_request),
                 timeout=5.0
             )
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

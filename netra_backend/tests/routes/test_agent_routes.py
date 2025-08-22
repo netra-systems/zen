@@ -9,31 +9,21 @@ Business Value Justification (BVJ):
 - Revenue Impact: Core revenue driver - agent performance affects customer retention
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
-    # Add project root to path
     agent_test_client,
 )
-
 
 class TestAgentRoute:
     """Test agent API message processing and streaming functionality."""

@@ -1,16 +1,9 @@
 """Core tests for SupervisorAgent - initialization, registration, and properties."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, Mock
 
@@ -20,13 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
-
 
 class TestSupervisorAgentInitialization:
     """Test initialization and setup methods."""
@@ -109,7 +98,6 @@ class TestSupervisorAgentInitialization:
         assert hasattr(supervisor, '_execution_lock')
         assert isinstance(supervisor.hooks, dict)
 
-
 class TestSupervisorAgentRegistration:
     """Test agent registration and hook management."""
     
@@ -167,7 +155,6 @@ class TestSupervisorAgentRegistration:
         
         # Verify invalid event not added
         assert "invalid_event" not in supervisor.hooks
-
 
 class TestSupervisorAgentProperties:
     """Test property methods."""

@@ -3,17 +3,10 @@ L4 Integration Test: WebSocket Reconnection Resilience
 Tests WebSocket reconnection scenarios, state recovery, and message continuity
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from test_framework import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -22,7 +15,6 @@ from collections import deque
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
-# Add project root to path
 # from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -33,7 +25,6 @@ WebSocketService = AsyncMock
 from netra_backend.app.config import get_config
 from netra_backend.app.services.message_queue_service import MessageQueueService
 from netra_backend.app.services.session_service import SessionService
-
 
 class TestWebSocketReconnectionResilienceL4:
     """WebSocket reconnection resilience testing"""
