@@ -12,7 +12,7 @@ import asyncio
 import uuid
 from typing import List
 
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 from tests.database_test_connections import DatabaseTestConnections
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.cross_service_transaction_core import (

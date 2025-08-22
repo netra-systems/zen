@@ -15,7 +15,7 @@ These tests validate Tests 9 and 10 from the critical conversion paths.
 import sys
 from pathlib import Path
 
-from tests.e2e.test_utils import setup_test_path
+from tests.e2e.test_helpers import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 import pytest
 
 # Add project root to path
-from conftest import *
+from tests.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 # Add project root to path

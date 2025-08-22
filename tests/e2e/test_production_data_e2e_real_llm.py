@@ -34,7 +34,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-from netra_backend.agent_conversation_helpers import (
+from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     AgentConversationTestUtils,
     ConversationFlowValidator,

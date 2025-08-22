@@ -586,7 +586,6 @@ class AgentPipelineRealLLMTester:
             error_type = type(e).__name__
 
             self.test_metrics["error_types"][error_type] = \
-
                 self.test_metrics["error_types"].get(error_type, 0) + 1
             
 
@@ -1245,7 +1244,6 @@ async def test_staging_environment_performance_slas(l4_pipeline_tester):
             if sla_key in PERFORMANCE_SLAS:
 
                 assert value <= PERFORMANCE_SLAS[sla_key], \
-
                     f"SLA violation: {metric} = {value}s exceeds {PERFORMANCE_SLAS[sla_key]}s"
 
 

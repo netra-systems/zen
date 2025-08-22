@@ -52,7 +52,7 @@ from tests.e2e.real_client_types import (
     create_backend_config,
 )
 from tests.e2e.real_http_client import RealHTTPClient
-from tests.e2e.real_services_manager import (
+from tests.e2e.service_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

@@ -35,7 +35,7 @@ from tests.e2e.unified_e2e_harness import (
     UnifiedE2ETestHarness,
     create_e2e_harness,
 )
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 from tests.test_environment_config import (
     TestEnvironment,
     TestEnvironmentType,

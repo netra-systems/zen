@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Set
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from tests.database_sync_fixtures import DatabaseSyncValidator
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)

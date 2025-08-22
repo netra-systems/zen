@@ -38,8 +38,8 @@ class TestWebSocketConnectionManager:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
-        with patch('app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
-            manager = Modernget_connection_manager()
+        with patch('netra_backend.app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
+            manager = ConnectionManager()
             manager.orchestrator = Mock()
             return manager
     

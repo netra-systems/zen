@@ -29,10 +29,10 @@ from tests.e2e.jwt_token_helpers import (
     JWTTestFixtures,
     JWTTestHelper,
 )
-from tests.e2e.data_factory import (
+from tests.e2e.test_data_factory import (
     create_test_service_credentials,
 )
-from tests.e2e.unified_e2e_harness import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarness
 
 
 class JWTSecretSynchronizationValidator:

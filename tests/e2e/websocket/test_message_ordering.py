@@ -42,7 +42,7 @@ try:
         ClientConfig,
         ConnectionState,
     )
-    from tests.e2e.real_services_manager import RealServicesManager
+    from tests.e2e.service_manager import RealServicesManager
     from tests.e2e.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Fallback for standalone execution

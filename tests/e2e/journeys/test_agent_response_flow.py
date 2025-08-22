@@ -19,7 +19,7 @@ COMPLIANCE:
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.supervisor_agent import SupervisorAgent
+from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService

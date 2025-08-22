@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
 

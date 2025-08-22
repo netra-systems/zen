@@ -32,7 +32,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.utils.search_filter import (
+from netra_backend.app.services.search.search_filter import (
     FilterValidationCore,
     PaginationTester,
     PerformanceValidator,

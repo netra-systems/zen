@@ -1,72 +1,122 @@
-"""Real Client Types and Configuration
+"""Real Client Types for E2E Testing
 
-Core types, enums, and configuration classes for the real client factory.
-Separated for architectural compliance with 450-line limit.
-
-Business Value Justification (BVJ):
-- Segment: All customer tiers
-- Business Goal: Enable reliable E2E testing infrastructure  
-- Value Impact: Foundation for production-like testing
-- Revenue Impact: Better testing prevents production issues
+Provides client types and interfaces for E2E tests.
 """
 
-import ssl
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional
-
-
-class ConnectionState(Enum):
-    """Connection state enumeration"""
-    DISCONNECTED = "disconnected"
-    CONNECTING = "connecting"
-    CONNECTED = "connected"
-    FAILED = "failed"
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass
+import httpx
+import websockets
+from unittest.mock import MagicMock
 
 
 @dataclass
-class ConnectionMetrics:
-    """Connection performance tracking"""
-    requests_sent: int = 0
-    responses_received: int = 0
-    connection_time: Optional[float] = None
-    last_error: Optional[str] = None
-    retry_count: int = 0
-
-
-@dataclass
-class ClientConfig:
-    """Client configuration settings"""
+class TestClient:
+    """HTTP test client for E2E tests."""
+    
+    base_url: str
+    headers: Dict[str, str] = None
+    cookies: Dict[str, str] = None
     timeout: float = 30.0
-    max_retries: int = 3
-    retry_delay: float = 1.0
-    pool_size: int = 10
-    verify_ssl: bool = False
     
-    def create_ssl_context(self) -> Optional[ssl.SSLContext]:
-        """Create SSL context if needed"""
-        if not self.verify_ssl:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
-            return context
-        return None
+    def __post_init__(self):
+        self.headers = self.headers or {}
+        self.cookies = self.cookies or {}
+        self._client = httpx.AsyncClient(
+            base_url=self.base_url,
+            headers=self.headers,
+            cookies=self.cookies,
+            timeout=self.timeout
+        )
     
-    def get_retry_delay(self, attempt: int) -> float:
-        """Get retry delay with backoff"""
-        return self.retry_delay * (attempt + 1)
+    async def get(self, path: str, **kwargs) -> httpx.Response:
+        """Make GET request."""
+        return await self._client.get(path, **kwargs)
+    
+    async def post(self, path: str, **kwargs) -> httpx.Response:
+        """Make POST request."""
+        return await self._client.post(path, **kwargs)
+    
+    async def put(self, path: str, **kwargs) -> httpx.Response:
+        """Make PUT request."""
+        return await self._client.put(path, **kwargs)
+    
+    async def delete(self, path: str, **kwargs) -> httpx.Response:
+        """Make DELETE request."""
+        return await self._client.delete(path, **kwargs)
+    
+    async def close(self):
+        """Close the client."""
+        await self._client.aclose()
+    
+    async def __aenter__(self):
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
 
 
-def create_test_config(timeout: float = 30.0, max_retries: int = 3) -> ClientConfig:
-    """Create test configuration with common settings"""
-    return ClientConfig(timeout=timeout, max_retries=max_retries, verify_ssl=False)
+@dataclass
+class WebSocketClient:
+    """WebSocket test client for E2E tests."""
+    
+    url: str
+    headers: Dict[str, str] = None
+    
+    def __post_init__(self):
+        self.headers = self.headers or {}
+        self._websocket = None
+        self._connected = False
+    
+    async def connect(self):
+        """Connect to WebSocket."""
+        self._websocket = await websockets.connect(
+            self.url,
+            extra_headers=self.headers
+        )
+        self._connected = True
+        return self
+    
+    async def send(self, message: str):
+        """Send message."""
+        if not self._connected:
+            raise RuntimeError("WebSocket not connected")
+        await self._websocket.send(message)
+    
+    async def receive(self) -> str:
+        """Receive message."""
+        if not self._connected:
+            raise RuntimeError("WebSocket not connected")
+        return await self._websocket.recv()
+    
+    async def close(self):
+        """Close connection."""
+        if self._websocket:
+            await self._websocket.close()
+            self._connected = False
+    
+    async def __aenter__(self):
+        return await self.connect()
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
 
 
-def create_auth_config() -> ClientConfig:
-    """Create auth-specific configuration"""
-    return ClientConfig(timeout=15.0, max_retries=2, verify_ssl=False)
-
-
-def create_backend_config() -> ClientConfig:
-    """Create backend-specific configuration"""
-    return ClientConfig(timeout=60.0, max_retries=3, pool_size=20, verify_ssl=False)
+class MockClient:
+    """Mock client for testing without real services."""
+    
+    def __init__(self):
+        self.requests = []
+        self.responses = []
+        self.mock = MagicMock()
+    
+    async def get(self, *args, **kwargs):
+        self.requests.append(("GET", args, kwargs))
+        return self.mock.get(*args, **kwargs)
+    
+    async def post(self, *args, **kwargs):
+        self.requests.append(("POST", args, kwargs))
+        return self.mock.post(*args, **kwargs)
+    
+    async def close(self):
+        pass

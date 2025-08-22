@@ -33,6 +33,28 @@ class TestTier(Enum):
     ENTERPRISE = "enterprise"
 
 
+class TestEnvironmentType(Enum):
+    """Test environment types"""
+    LOCAL = "local"
+    DEV = "dev"
+    STAGING = "staging"
+    
+    
+@dataclass
+class TestEnvironmentConfig:
+    """Test environment configuration"""
+    environment_type: TestEnvironmentType
+    base_url: str
+    ws_url: str
+    auth_url: str
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    postgres_host: str = "localhost"
+    postgres_port: int = 5432
+    clickhouse_host: str = "localhost"
+    clickhouse_port: int = 8123
+
+
 @dataclass
 class TestUser:
     """Test user data structure"""
@@ -281,3 +303,30 @@ TEST_CONFIG = create_unified_config()
 TEST_USERS = TEST_CONFIG.users
 TEST_SECRETS = TEST_CONFIG.secrets
 TEST_ENDPOINTS = TEST_CONFIG.endpoints
+
+
+def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentType.LOCAL) -> TestEnvironmentConfig:
+    """Get test environment configuration for specified environment type"""
+    if env_type == TestEnvironmentType.LOCAL:
+        return TestEnvironmentConfig(
+            environment_type=TestEnvironmentType.LOCAL,
+            base_url="http://localhost:8000",
+            ws_url="ws://localhost:8000/ws",
+            auth_url="http://localhost:8001"
+        )
+    elif env_type == TestEnvironmentType.DEV:
+        return TestEnvironmentConfig(
+            environment_type=TestEnvironmentType.DEV,
+            base_url="https://dev.netra-apex.com",
+            ws_url="wss://dev.netra-apex.com/ws",
+            auth_url="https://auth-dev.netra-apex.com"
+        )
+    elif env_type == TestEnvironmentType.STAGING:
+        return TestEnvironmentConfig(
+            environment_type=TestEnvironmentType.STAGING,
+            base_url="https://staging.netra-apex.com",
+            ws_url="wss://staging.netra-apex.com/ws",
+            auth_url="https://auth-staging.netra-apex.com"
+        )
+    else:
+        raise ValueError(f"Unknown environment type: {env_type}")

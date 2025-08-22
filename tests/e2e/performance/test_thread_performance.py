@@ -6,7 +6,7 @@ Tests thread operations under load and stress conditions.
 import sys
 from pathlib import Path
 
-from tests.e2e.test_utils import setup_test_path
+from tests.e2e.test_helpers import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:

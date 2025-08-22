@@ -31,7 +31,7 @@ from websockets.exceptions import ConnectionClosedError, WebSocketException
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_SECRETS, TEST_USERS
 from tests.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 
 
 class AuthTestConfig:

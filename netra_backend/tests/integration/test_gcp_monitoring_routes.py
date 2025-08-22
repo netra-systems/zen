@@ -34,8 +34,8 @@ import pytest
 import pytest_asyncio
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
-from main import app
-from app.routes.gcp_monitoring import router
+from netra_backend.app.main import app
+from netra_backend.app.routes.gcp_monitoring import router
 
 from netra_backend.app.core.error_codes import ErrorCode
 from netra_backend.app.core.exceptions_base import NetraException

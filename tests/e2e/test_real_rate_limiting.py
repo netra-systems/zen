@@ -26,7 +26,7 @@ import redis.asyncio as redis
 from typing import Dict, Any, Optional
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.unified_e2e_harness import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarness
 from tests.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
 from tests.e2e.rate_limiting_advanced import (
     APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester, TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator,

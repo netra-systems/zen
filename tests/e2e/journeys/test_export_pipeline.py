@@ -42,7 +42,7 @@ from tests.e2e.export_pipeline_helpers import (
     ExportFileValidator,
     PerformanceTracker
 )
-from tests.e2e.unified_e2e_harness import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarness
 
 
 class ExportPipelineCore:

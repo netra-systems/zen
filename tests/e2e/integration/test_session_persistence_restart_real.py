@@ -39,7 +39,7 @@ sys.path.insert(0, str(project_root))
 
 # Import test helpers and real services manager
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_services_manager import (
+from tests.e2e.service_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

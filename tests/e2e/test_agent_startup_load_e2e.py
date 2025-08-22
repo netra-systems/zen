@@ -51,7 +51,7 @@ from tests.load_test_utilities import (
     SystemResourceMonitor,
 )
 from tests.real_client_factory import create_real_client_factory
-from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.service_manager import RealServicesManager
 
 
 class CorruptedStateTestManager:

@@ -40,7 +40,7 @@ from websockets.exceptions import ConnectionClosedError
 
 from tests.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.real_services_manager import (
+from tests.e2e.service_manager import (
     create_real_services_manager,
 )
 from tests.e2e.real_websocket_client import RealWebSocketClient

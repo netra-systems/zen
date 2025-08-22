@@ -27,7 +27,7 @@ from tests.e2e.config import (
     TestDataFactory,
 )
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.e2e.unified_e2e_harness import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarness
 
 logger = central_logger.get_logger(__name__)
 
