@@ -6,21 +6,33 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Set testing environment variables
+# =============================================================================
+# COMMON ENVIRONMENT SETUP FOR ALL TESTS
+# Consolidated from multiple conftest files to eliminate duplication
+# =============================================================================
+
+# Set base testing environment variables
 os.environ["TESTING"] = "1"
 os.environ["NETRA_ENV"] = "testing"
 os.environ["ENVIRONMENT"] = "testing"
+os.environ["LOG_LEVEL"] = "ERROR"
+
+# Network and service configuration
 os.environ["REDIS_HOST"] = "localhost"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-# Set authentication secrets required for tests
+# Authentication secrets required for tests
 os.environ["JWT_SECRET_KEY"] = (
     "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
 )
-# Test key only
 os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
 os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
+
+# Disable heavy services for faster testing
+os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+os.environ["CLICKHOUSE_ENABLED"] = "false"
+os.environ["TEST_DISABLE_REDIS"] = "true"
 
 # Add parent directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -96,7 +108,7 @@ async def high_volume_server():
         return
         
     try:
-        from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeWebSocketServer
+        from tests.e2e.test_helpers.performance_base import HighVolumeWebSocketServer
         server = HighVolumeWebSocketServer()
         await server.start()
         
@@ -114,7 +126,7 @@ async def high_volume_server():
 async def throughput_client(test_user_token, high_volume_server):
     """High-volume throughput client fixture."""
     try:
-        from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
+        from tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
         websocket_uri = E2E_TEST_CONFIG["websocket_url"]
         client = HighVolumeThroughputClient(websocket_uri, test_user_token["token"], "primary-client")
         
@@ -142,9 +154,14 @@ async def throughput_client(test_user_token, high_volume_server):
         yield AsyncMock()
 
 
+# =============================================================================
+# COMMON MOCK FIXTURES
+# Consolidated basic mocks used across multiple services
+# =============================================================================
+
 @pytest.fixture
 def mock_redis_client():
-    """Mock Redis client for basic operations (renamed to avoid conflict)"""
+    """Common Redis client mock for all tests"""
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
     mock.disconnect = AsyncMock(return_value=None)
@@ -152,10 +169,24 @@ def mock_redis_client():
     mock.set = AsyncMock(return_value=None)
     mock.delete = AsyncMock(return_value=None)
     mock.exists = AsyncMock(return_value=False)
+    mock.ping = AsyncMock(return_value=True)
+    mock.aclose = AsyncMock(return_value=None)
     return mock
 
 
-# mock_clickhouse_client removed - duplicate exists in netra_backend/tests/conftest.py with more methods
+@pytest.fixture
+def mock_redis_manager():
+    """Common Redis manager mock"""
+    mock = MagicMock()
+    mock.enabled = True
+    mock.get = AsyncMock(return_value=None)
+    mock.set = AsyncMock(return_value=True)
+    mock.delete = AsyncMock(return_value=None)
+    mock.exists = AsyncMock(return_value=False)
+    return mock
+
+
+# =============================================================================\n# COMMON TEST DATA FIXTURES\n# Shared test data used across multiple services\n# =============================================================================\n\n@pytest.fixture\ndef common_test_user():\n    \"\"\"Common test user data for all services\"\"\"\n    return {\n        \"id\": \"test-user-123\",\n        \"email\": \"test@example.com\",\n        \"name\": \"Test User\",\n        \"is_active\": True,\n        \"is_superuser\": False\n    }\n\n\n@pytest.fixture\ndef sample_data():\n    \"\"\"Basic sample data for tests\"\"\"\n    return {\"test\": \"data\", \"status\": \"active\"}\n\n\n# =============================================================================\n# COMMON SERVICE MOCKS\n# Basic service mocks that are reused across tests\n# ============================================================================="
 
 
 @pytest.fixture
@@ -290,12 +321,7 @@ def auth_headers(test_user):
         return {"Authorization": "Bearer mock-token"}
 
 
-# Simple fixture for basic testing
-
-
-@pytest.fixture
-def sample_data():
-    return {"test": "data"}
+# NOTE: sample_data fixture moved to common fixtures section above
 
 
 # Real Service Testing Fixtures

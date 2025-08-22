@@ -69,7 +69,7 @@ const b = useStore(state =&gt; state.b);
   <section title="Backend Specific Conventions">
     <guideline id="BE-001" context="Namespace Convention" priority="CRITICAL">
       <title>Service-Based Namespace Pattern - Absolute Imports Only</title>
-      <instruction>All backend imports must follow the service-based namespace pattern: {top_level_service_name}.{app|tests}. NO relative imports are allowed - use absolute imports exclusively.</instruction>
+      <instruction>All backend imports must follow the service-based namespace pattern: {top_level_service_name}.{app|tests}. NO relative imports are allowed - use absolute imports exclusively. EXCEPTION: E2E test helpers must be imported from root-level tests.unified directory.</instruction>
       <code-example language="python">
         <before description="VIOLATION: Old import pattern or relative imports">
 
@@ -77,6 +77,8 @@ from netra_backend.app.core.config import Settings
 from netra_backend.tests.conftest import TestClient
 from .config import Settings  # FORBIDDEN: relative import
 from ..core.config import Settings  # FORBIDDEN: relative import
+# E2E test helpers - WRONG pattern:
+from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete
 
                 </before>
         <after description="CORRECT: Service-based absolute namespace">
@@ -85,10 +87,16 @@ from netra_backend.app.core.config import Settings
 from netra_backend.tests.conftest import TestClient
 # Always use absolute imports with full service namespace
 
+# E2E test helpers - CORRECT pattern (root-level tests directory):
+from tests.unified.harness_complete import UnifiedTestHarnessComplete
+from tests.unified.e2e.helpers.database_sync_helpers import DatabaseSyncHelper
+
                 </after>
       </code-example>
       <pattern>For microservices: {service_name}.{app|tests} (e.g., auth_service.app, auth_service.tests)</pattern>
+      <pattern>For E2E test helpers: tests.unified.{module} (root-level, not service-specific)</pattern>
       <forbidden-pattern>Relative imports using . or .. are strictly forbidden</forbidden-pattern>
+      <forbidden-pattern>Importing E2E test helpers from netra_backend.tests.unified is incorrect</forbidden-pattern>
     </guideline>
     <guideline id="BE-002" context="Dependency Injection (FastAPI)" priority="CRITICAL">
       <title>Explicit Typing for DB Sessions</title>

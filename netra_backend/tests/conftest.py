@@ -1,3 +1,7 @@
+"""
+Backend-specific test configuration.
+Depends on root /tests/conftest.py for common fixtures and environment setup.
+"""
 import os
 import sys
 
@@ -536,24 +540,13 @@ def sample_corpus_records():
     ]
 
 
-@pytest.fixture
-def mock_redis_manager():
-    """Mock Redis manager for caching tests"""
-    from unittest.mock import AsyncMock, MagicMock
-    manager = MagicMock()
-    manager.enabled = True
-    manager.get = AsyncMock(return_value=None)
-    manager.set = AsyncMock(return_value=True)
-    return manager
-
+# NOTE: mock_redis_manager is now provided by root conftest.py to avoid duplication
 
 @pytest.fixture(autouse=True)
-def setup_test_environment(monkeypatch):
-    """Set up test environment variables"""
-    monkeypatch.setenv("ENVIRONMENT", "testing")
-    monkeypatch.setenv("DATABASE_URL", "postgresql://test:test@localhost/test")
+def setup_backend_test_environment(monkeypatch):
+    """Set up backend-specific test environment variables"""
+    # Backend-specific database configs (root conftest handles common env vars)
     monkeypatch.setenv("CLICKHOUSE_URL", "clickhouse://test:test@localhost:9000/test")
-    monkeypatch.setenv("SECRET_KEY", "test-secret-key")
 
 
 @pytest.fixture

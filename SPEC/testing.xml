@@ -3,8 +3,8 @@
   <metadata>
     <name>Netra AI Optimization Platform - Comprehensive Testing Strategy</name>
     <type>Quality Engineering and Testing Specification</type>
-    <version>4.0</version>
-    <last_updated>2025-08-20</last_updated>
+    <version>5.0</version>
+    <last_updated>2025-08-22</last_updated>
     <owner>QA Architecture Team</owner>
     <status>Active</status>
     <changes>
@@ -21,13 +21,15 @@
                 - Enhanced 'Bad Test Detection' to 'Flaky Test Management' with Quarantine process.
                 - Introduced Metrics and KPIs (Flakiness Rate, MTTD, MTTR).
             </change>
+      <change version="5.0" date="2025-08-22">
+                - Test Organization and Consolidation Standards.
+                - Added comprehensive test structure and conftest.py placement rules.
+                - Defined test naming conventions and anti-regression enforcement.
+                - Documented approved test directory structure for microservices.
+                - Added references to automation scripts for compliance checking.
+            </change>
     </changes>
     <last_edited>2025-08-21T16:30:00.000000</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.636943">
-      <reasons>
-        <reason>Content contains: OBSOLETE</reason>
-      </reasons>
-    </legacy_status>
   </metadata>
   <overview>
     <description>
@@ -264,6 +266,121 @@
       <location>Tests marked with @feature_flag or @tdd_test decorators.</location>
     </category>
   </test_categories>
+  <test_organization_standards>
+    <description>
+            Comprehensive standards for test file organization, configuration placement, and directory structure to ensure maintainability and clear service boundaries.
+        </description>
+    <conftest_placement_rules>
+      <description>conftest.py files MUST only exist at service-level directories to prevent complexity and maintain clear service boundaries.</description>
+      <allowed_locations>
+        <location>auth_service/tests/conftest.py</location>
+        <location>netra_backend/tests/conftest.py</location>
+        <location>tests/conftest.py</location>
+        <location>frontend/tests/conftest.py</location>
+      </allowed_locations>
+      <prohibited_patterns>
+        <pattern>netra_backend/tests/*/conftest.py</pattern>
+        <pattern>tests/*/conftest.py</pattern>
+        <pattern>Any subdirectory conftest.py files</pattern>
+      </prohibited_patterns>
+      <enforcement>
+        <script>scripts/check_conftest_violations.py</script>
+        <pre_commit_hook>.githooks/check-test-organization.py</pre_commit_hook>
+      </enforcement>
+    </conftest_placement_rules>
+    <test_naming_standards>
+      <description>All test files MUST follow the test_*.py naming pattern for consistency and proper test discovery.</description>
+      <required_pattern>test_*.py</required_pattern>
+      <prohibited_patterns>
+        <pattern>*_test.py</pattern>
+        <pattern>test*.py (without underscore)</pattern>
+      </prohibited_patterns>
+      <examples>
+        <correct>test_user_service.py</correct>
+        <correct>test_auth_integration.py</correct>
+        <incorrect>user_service_test.py</incorrect>
+        <incorrect>testUserService.py</incorrect>
+      </examples>
+    </test_naming_standards>
+    <directory_structure>
+      <description>Approved test directory structure following microservice boundaries and functional organization.</description>
+      <service_level_structure>
+        <service name="auth_service">
+          <path>auth_service/tests/</path>
+          <purpose>Authentication service tests</purpose>
+          <conftest>auth_service/tests/conftest.py</conftest>
+        </service>
+        <service name="netra_backend">
+          <path>netra_backend/tests/</path>
+          <purpose>Backend service tests</purpose>
+          <conftest>netra_backend/tests/conftest.py</conftest>
+          <subdirectories>
+            <subdirectory>agents/ - Agent-related tests</subdirectory>
+            <subdirectory>services/ - Service layer tests</subdirectory>
+            <subdirectory>integration/ - Integration tests</subdirectory>
+            <subdirectory>e2e/ - End-to-end tests</subdirectory>
+            <subdirectory>critical/ - Business-critical tests</subdirectory>
+          </subdirectories>
+        </service>
+        <service name="unified_tests">
+          <path>tests/</path>
+          <purpose>Cross-service and system-wide tests</purpose>
+          <conftest>tests/conftest.py</conftest>
+          <subdirectories>
+            <subdirectory>e2e/ - End-to-end system tests</subdirectory>
+            <subdirectory>integration/ - Cross-service integration</subdirectory>
+          </subdirectories>
+        </service>
+      </service_level_structure>
+    </directory_structure>
+    <fixture_organization>
+      <description>Test fixtures MUST be organized at service level to prevent duplication and maintain clear boundaries.</description>
+      <principles>
+        <principle>Service-specific fixtures belong in service-level conftest.py</principle>
+        <principle>Shared cross-service fixtures belong in tests/conftest.py</principle>
+        <principle>No fixture duplication across conftest.py files</principle>
+        <principle>Complex fixtures should be extracted to utility modules</principle>
+      </principles>
+      <fixture_categories>
+        <category name="auth_fixtures">
+          <location>auth_service/tests/conftest.py</location>
+          <examples>auth_client, mock_oauth_provider, test_user_tokens</examples>
+        </category>
+        <category name="backend_fixtures">
+          <location>netra_backend/tests/conftest.py</location>
+          <examples>async_db_session, mock_llm_manager, test_agent_state</examples>
+        </category>
+        <category name="system_fixtures">
+          <location>tests/conftest.py</location>
+          <examples>real_service_manager, e2e_test_environment, cross_service_auth</examples>
+        </category>
+      </fixture_categories>
+    </fixture_organization>
+    <anti_patterns>
+      <anti_pattern>Creating conftest.py in test subdirectories</anti_pattern>
+      <anti_pattern>Duplicating fixtures across multiple conftest.py files</anti_pattern>
+      <anti_pattern>Using *_test.py naming pattern</anti_pattern>
+      <anti_pattern>Mixing test utilities with test files in same directory</anti_pattern>
+      <anti_pattern>Creating test directories outside service boundaries</anti_pattern>
+    </anti_patterns>
+    <migration_guidelines>
+      <description>Guidelines for consolidating existing test configurations and maintaining standards.</description>
+      <consolidation_steps>
+        <step order="1">Identify all existing conftest.py files using scanner scripts</step>
+        <step order="2">Merge fixtures from subdirectory conftest.py into service-level files</step>
+        <step order="3">Remove duplicate fixtures and resolve conflicts</step>
+        <step order="4">Update test imports to reference service-level fixtures</step>
+        <step order="5">Archive legacy test configurations</step>
+        <step order="6">Validate with full test suite execution</step>
+      </consolidation_steps>
+      <validation_checklist>
+        <item>Run scripts/check_conftest_violations.py to verify compliance</item>
+        <item>Execute full test suite to ensure no broken imports</item>
+        <item>Verify test discovery works correctly</item>
+        <item>Check that all fixtures resolve properly</item>
+      </validation_checklist>
+    </migration_guidelines>
+  </test_organization_standards>
   <unified_test_runner>
     <description>Single entry point (test_runner.py) for all testing activities, managing environments, parallelism, reporting, and CI/CD integration.</description>
     <ci_cd_pipeline_integration>
