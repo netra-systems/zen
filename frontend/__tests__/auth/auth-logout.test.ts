@@ -40,10 +40,10 @@ describe('Auth Logout Flow', () => {
     mockToken = createMockToken();
     resetAuthTestMocks(testEnv);
     
-    // Mock window.location.href
+    // Mock window.location.href properly for JSDOM
     originalLocation = window.location;
     delete (window as any).location;
-    window.location = {
+    const mockLocation: any = {
       href: '',
       protocol: 'http:',
       host: 'localhost',
@@ -53,7 +53,8 @@ describe('Auth Logout Flow', () => {
       search: '',
       hash: '',
       origin: 'http://localhost:3000'
-    } as Location;
+    };
+    window.location = mockLocation;
     
     // Reset mocks
     Object.values(mockAuthServiceClient).forEach(mock => {

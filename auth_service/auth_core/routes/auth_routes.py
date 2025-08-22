@@ -594,6 +594,7 @@ async def oauth_callback_post(
                     return user_response.json()
             
             user_info = await auth_service._make_http_request_with_circuit_breaker("google_oauth", make_oauth_request)
+            logger.info(f"User info received: {type(user_info)} - {user_info}")
                 
         except httpx.ConnectError as e:
             logger.error(f"Network connection failed: {e}")
