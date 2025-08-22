@@ -19,7 +19,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import Corpus, CorpusCreate, CorpusUpdate
+from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
 
 from netra_backend.app.core.exceptions_base import NetraException
 

@@ -30,7 +30,7 @@ import pytest
 import websockets
 
 WebSocketService = AsyncMock
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.message_queue_service import MessageQueueService
 from netra_backend.app.services.session_service import SessionService
 

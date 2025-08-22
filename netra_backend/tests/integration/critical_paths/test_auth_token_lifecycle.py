@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, patch
 import jwt
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.services.auth_service import AuthService

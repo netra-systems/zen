@@ -4,7 +4,7 @@ Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
 
 # Add the project root directory to Python path for imports
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 import os
 import sys
 
@@ -115,7 +115,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_agent_state import *  # Import all agent state models
 from netra_backend.app.db.models_content import *  # Import all content models
@@ -259,7 +259,8 @@ def ensure_db_initialized():
 
 async def test_engine():
 
-    engine = create_async_engine(settings.database_url, echo=False)
+    config = get_config()
+    engine = create_async_engine(config.database_url, echo=False)
 
     async with engine.begin() as conn:
 
@@ -311,10 +312,11 @@ def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
 
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from netra_backend.app.config import settings
+        from netra_backend.app.config import get_config
         from netra_backend.app.llm.llm_manager import LLMManager
 
-        return LLMManager(settings)
+        config = get_config()
+        return LLMManager(config)
 
     else:
 

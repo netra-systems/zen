@@ -1,6 +1,7 @@
 # app/services/generation_worker.py
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.data.synthetic.content_generator import generate_content_sample
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger

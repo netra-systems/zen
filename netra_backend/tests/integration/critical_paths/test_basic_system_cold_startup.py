@@ -42,7 +42,7 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 from main import app
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.db.client_clickhouse import clickhouse_client
 from netra_backend.app.db.postgres import engine as pg_engine

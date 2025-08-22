@@ -13,7 +13,7 @@ setup_test_path()
 
 import pytest
 from pydantic import ValidationError
-from schemas import AppConfig
+from netra_backend.app.schemas import AppConfig
 
 # Add project root to path
 from netra_backend.app.services.key_manager import KeyManager

@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 setup_test_path()
 
 import pytest
-from schemas import ToolInput
+from netra_backend.app.schemas import ToolInput
 
 # Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

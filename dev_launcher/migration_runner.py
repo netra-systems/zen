@@ -229,12 +229,13 @@ class MigrationRunner:
             # Try to import and use the app's table creation logic
             sys.path.insert(0, str(self.project_root))
             
-            from netra_backend.app.config import settings
+            from netra_backend.app.config import get_config
             from netra_backend.app.db.postgres import initialize_postgres
             
+            config = get_config()
             # Override database URL if provided in env
             if env and "DATABASE_URL" in env:
-                settings.database_url = env["DATABASE_URL"]
+                config.database_url = env["DATABASE_URL"]
             
             # Initialize database (creates tables if missing)
             import asyncio

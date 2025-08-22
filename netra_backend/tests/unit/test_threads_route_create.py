@@ -18,7 +18,7 @@ import pytest
 from fastapi import HTTPException
 
 # Add project root to path
-from netra_backend.app.routes.threads_route import ThreadCreate, create_thread
+from netra_backend.app.routes.threads_route import Thread, create_thread
 from netra_backend.tests.helpers.thread_test_helpers import (
     assert_http_exception,
     assert_thread_creation_call,
@@ -60,7 +60,7 @@ class TestCreateThread:
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(return_value=mock_thread)
-            thread_data = ThreadCreate(title="New Thread", metadata={"custom": "data"})
+            thread_data = Thread(title="New Thread", metadata={"custom": "data"})
             
             result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
             
@@ -76,7 +76,7 @@ class TestCreateThread:
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(return_value=mock_thread)
-            thread_data = ThreadCreate()
+            thread_data = Thread()
             
             result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
             
@@ -90,7 +90,7 @@ class TestCreateThread:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(side_effect=Exception("Database error"))
-            thread_data = ThreadCreate(title="Test")
+            thread_data = Thread(title="Test")
             
             with pytest.raises(HTTPException) as exc_info:
                 await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)

@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.resource_manager import ResourceManager
 

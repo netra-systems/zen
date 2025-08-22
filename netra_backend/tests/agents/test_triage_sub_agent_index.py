@@ -20,7 +20,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_triage_agent_caching import (
+from netra_backend.tests.agents.test_triage_agent_caching import (
     TestCaching,
     TestExecuteMethod,
     TestRequestHashing,

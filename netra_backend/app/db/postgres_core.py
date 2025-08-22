@@ -28,7 +28,8 @@ from netra_backend.app.logging_config import central_logger
 # Import settings lazily to avoid circular dependency
 def get_settings():
     """Get settings lazily to avoid circular import."""
-    from netra_backend.app.config import settings
+    from netra_backend.app.config import get_config
+    settings = get_config()
     return settings
 
 logger = central_logger.get_logger(__name__)

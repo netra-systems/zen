@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
 from netra_backend.app.services.agent_service_core import AgentService
@@ -72,7 +72,7 @@ class TestFirstMessageErrorRecovery:
     @pytest.fixture
     async def test_user(self):
         """Create test user for error recovery testing."""
-        return UserInDB(
+        return User(
             id="error_recovery_user_001",
             email="recovery@test.netrasystems.ai",
             username="recoveryuser",

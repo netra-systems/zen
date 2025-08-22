@@ -9,7 +9,7 @@ import pytest
 from pydantic import BaseModel
 
 
-class ThreadCreate(BaseModel):
+class Thread(BaseModel):
     """Model for thread creation"""
     title: str
     user_id: str

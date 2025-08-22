@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -205,7 +205,7 @@ class TestAgentQualityGatePipelineL3:
     @pytest.fixture
     def test_user(self):
         """Create test user for quality testing."""
-        return UserInDB(
+        return User(
             id="quality_test_user",
             email="qualityuser@example.com",
             username="qualityuser",

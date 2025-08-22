@@ -8,13 +8,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.models_postgres import User
 
 
 async def check_users():
     # Create async engine
-    engine = create_async_engine(settings.database_url, echo=True)
+    config = get_config()
+    engine = create_async_engine(config.database_url, echo=True)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     async with async_session() as session:

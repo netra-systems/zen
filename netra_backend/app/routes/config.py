@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 from netra_backend.app import schemas
 from netra_backend.app.auth_integration.auth import get_current_user, require_admin
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 
 router = APIRouter()
 

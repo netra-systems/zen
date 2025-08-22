@@ -9,7 +9,8 @@ import os
 from multiprocessing import Pool, cpu_count
 from typing import Any, Dict
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.data.synthetic.content_generator import META_PROMPTS
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.generation_job_manager import (

@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
 import pytest
-from schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (

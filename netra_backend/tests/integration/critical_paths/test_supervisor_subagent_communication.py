@@ -12,7 +12,7 @@ Validates agent communication patterns, tool execution, state management, and er
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
+from netra_backend.app.schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base import BaseSubAgent

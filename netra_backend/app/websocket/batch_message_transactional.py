@@ -8,7 +8,7 @@ import asyncio
 import time
 from typing import Dict, List, Optional, Tuple
 
-from netra_backend.app.batch_message_types import (
+from netra_backend.app.websocket.batch_message_types import (
     BatchConfig,
     MessageState,
     PendingMessage,

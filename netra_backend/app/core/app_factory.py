@@ -70,8 +70,9 @@ def _add_path_traversal_middleware(app: FastAPI) -> None:
 
 def _add_security_headers_middleware(app: FastAPI) -> None:
     """Add security headers middleware."""
-    from netra_backend.app.config import settings
+    from netra_backend.app.config import get_config
     from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
+    settings = get_config()
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 
 

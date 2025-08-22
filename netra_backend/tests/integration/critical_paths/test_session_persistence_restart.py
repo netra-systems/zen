@@ -11,7 +11,7 @@ Tests session recovery, WebSocket reconnection, and state continuity.
 """
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys

@@ -5,7 +5,7 @@ Validates full application startup in staging environment
 with all dependencies and configurations.
 """
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 
 setup_test_path()

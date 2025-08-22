@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
@@ -25,7 +25,7 @@ from netra_backend.app.logging_config import central_logger as logger
 
 def get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""
-    return settings.clickhouse_https
+    return get_config().clickhouse_https
 
 
 def create_clickhouse_client(config):

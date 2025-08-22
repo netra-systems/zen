@@ -48,7 +48,7 @@ import psutil
 import pytest
 import websockets
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 
 @dataclass

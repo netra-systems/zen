@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import (
+from netra_backend.app.schemas import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,

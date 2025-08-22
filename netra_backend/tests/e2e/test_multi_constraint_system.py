@@ -19,7 +19,7 @@ setup_test_path()
 from typing import Dict, List
 
 import pytest
-from schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 # Add project root to path
 from tests.e2e.multi_constraint_test_helpers import (

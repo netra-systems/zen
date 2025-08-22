@@ -10,16 +10,16 @@ from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.alert_notifications import (
+from .alert_notifications import (
     NotificationDeliveryManager,
     create_default_notification_configs,
 )
-from netra_backend.app.monitoring.alert_rules import (
+from .alert_rules import (
     CooldownManager,
     RuleEvaluator,
     create_default_alert_rules,
 )
-from netra_backend.app.monitoring.alert_types import (
+from .alert_types import (
     Alert,
     AlertLevel,
     AlertRule,

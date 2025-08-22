@@ -9,7 +9,7 @@ from netra_backend.app.agents.tool_dispatcher import (
     ToolDispatcher,
     ToolDispatchResponse,
 )
-from netra_backend.app.schemas.unified_tools import ToolInput, ToolResult, ToolStatus
+from netra_backend.app.schemas import ToolInput, ToolResult, ToolStatus
 
 
 class MockBaseTool:

@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import AppConfig, RequestModel
+from netra_backend.app.schemas import AppConfig, RequestModel
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.services.apex_optimizer_agent.models import AgentState

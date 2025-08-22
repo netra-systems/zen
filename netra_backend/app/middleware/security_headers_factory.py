@@ -7,7 +7,8 @@ from typing import Any, Dict, Optional
 
 from fastapi import Request
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.middleware.security_headers_middleware import (
     SecurityHeadersMiddleware,

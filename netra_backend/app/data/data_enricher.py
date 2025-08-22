@@ -4,7 +4,8 @@ from typing import Any, Dict, Optional, Tuple
 
 from clickhouse_driver import Client
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 
 
 class DataEnricher:

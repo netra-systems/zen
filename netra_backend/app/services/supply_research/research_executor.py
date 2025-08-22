@@ -8,7 +8,8 @@ from datetime import UTC, datetime
 from typing import Any, Dict, List
 
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.db.postgres import Database
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger

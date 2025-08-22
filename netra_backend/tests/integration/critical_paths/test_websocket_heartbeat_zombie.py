@@ -38,7 +38,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 # Add project root to path
 from netra_backend.app.core.cache.redis_manager import RedisManager
@@ -976,7 +976,7 @@ def test_users():
 
     return [
 
-        UserInDB(
+        User(
 
             id=f"heartbeat_user_{i}",
 

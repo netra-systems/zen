@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 
 import pytest
 from pydantic import BaseModel
-from schemas import AppConfig
+from netra_backend.app.schemas import AppConfig
 
 from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 

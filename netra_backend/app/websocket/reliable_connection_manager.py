@@ -13,13 +13,13 @@ from netra_backend.app.core.reliability import (
     RetryConfig,
     get_reliability_wrapper,
 )
-from netra_backend.app.heartbeat import HeartbeatManager
+from netra_backend.app.websocket.heartbeat_manager import HeartbeatManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.reliable_message_handler import (
+from netra_backend.app.websocket.reliable_message_handler import (
     MessageTypeRouter,
     ReliableMessageHandler,
 )
-from netra_backend.app.services.synthetic_data.error_handler import (
+from netra_backend.app.websocket.error_handler import (
     WebSocketErrorHandler,
     default_error_handler,
 )
@@ -31,6 +31,7 @@ from netra_backend.app.websocket.connection_lifecycle_manager import (
     ConnectionLifecycleManager,
 )
 from netra_backend.app.websocket.connection_manager import ConnectionManager
+from netra_backend.app.websocket.connection import get_connection_manager
 from netra_backend.app.websocket.connection_message_handler import (
     ConnectionMessageHandler,
 )
@@ -247,4 +248,4 @@ class ReliableConnectionManager:
 
 
 # Global instance
-default_reliable_connection_manager = Reliableget_connection_manager()
+default_reliable_connection_manager = None

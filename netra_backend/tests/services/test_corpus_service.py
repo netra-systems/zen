@@ -17,7 +17,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from schemas import Corpus, CorpusCreate
+from netra_backend.app.schemas import Corpus, CorpusCreate
 
 # Add project root to path
 from netra_backend.app.services.corpus_service import CorpusStatus

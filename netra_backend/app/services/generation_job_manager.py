@@ -13,7 +13,8 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema

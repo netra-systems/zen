@@ -12,7 +12,7 @@ Binary target: 10MB file support with <5% corruption rate.
 """
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -42,7 +42,7 @@ import tempfile
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
@@ -332,7 +332,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         return [
 
-            UserInDB(
+            User(
 
                 id=f"binary_user_{i}",
 

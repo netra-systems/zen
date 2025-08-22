@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 from pydantic import BaseModel, ValidationError
-from schemas import AgentMessage, WebSocketMessage
+from netra_backend.app.schemas import AgentMessage, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 # Add project root to path

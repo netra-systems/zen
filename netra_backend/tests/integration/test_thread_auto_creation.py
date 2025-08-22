@@ -23,7 +23,7 @@ from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from schemas import ThreadCreate, UserInDB
+from netra_backend.app.schemas import Thread, User
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -67,7 +67,7 @@ class TestThreadAutoCreation:
     @pytest.fixture
     async def test_user(self):
         """Create test user for thread operations."""
-        return UserInDB(
+        return User(
             id="thread_test_user_001",
             email="thread@test.netrasystems.ai",
             username="threaduser",

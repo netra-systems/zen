@@ -7,7 +7,8 @@ Each function must be ≤8 lines as per architecture requirements.
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.llm_cache_core import LLMCacheCore
 from netra_backend.app.services.llm_cache_metrics import LLMCacheMetrics

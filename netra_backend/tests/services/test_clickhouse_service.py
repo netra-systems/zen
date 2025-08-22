@@ -24,7 +24,7 @@ import pytest
 import pytest_asyncio
 from logging_config import central_logger as logger
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
@@ -42,7 +42,8 @@ from netra_backend.app.services.clickhouse_service import list_corpus_tables
 def clickhouse_client():
     """Create a real test ClickHouse client with proper configuration."""
     # Skip if in pure testing mode without ClickHouse
-    if settings.environment == "testing" and not settings.dev_mode_clickhouse_enabled:
+    config = get_config()
+    if config.environment == "testing" and not config.dev_mode_clickhouse_enabled:
         pytest.skip("ClickHouse disabled in testing mode")
     
     async def _get_client():
@@ -64,22 +65,23 @@ def clickhouse_client():
 def real_clickhouse_client(event_loop):
     """Create a real ClickHouse client using actual cloud configuration."""
     # Skip if ClickHouse is not configured or in pure testing mode
-    if settings.environment == "testing" and not settings.dev_mode_clickhouse_enabled:
+    config = get_config()
+    if config.environment == "testing" and not config.dev_mode_clickhouse_enabled:
         pytest.skip("ClickHouse disabled in testing mode")
     
-    config = settings.clickhouse_https
+    ch_config = config.clickhouse_https
     
     # Skip if pointing to localhost (no real ClickHouse available)
-    if config.host in ["localhost", "127.0.0.1"]:
+    if ch_config.host in ["localhost", "127.0.0.1"]:
         pytest.skip("ClickHouse not available on localhost")
     
     try:
         client = ClickHouseDatabase(
-            host=config.host,
-            port=config.port,
-            user=config.user,
-            password=config.password,
-            database=config.database,
+            host=ch_config.host,
+            port=ch_config.port,
+            user=ch_config.user,
+            password=ch_config.password,
+            database=ch_config.database,
             secure=True
         )
         

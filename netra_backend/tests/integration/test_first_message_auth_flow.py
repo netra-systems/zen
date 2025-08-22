@@ -6,7 +6,7 @@ Critical: First user message must seamlessly authenticate and process
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import jwt
 import pytest
 from fastapi import WebSocket
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketState
 
@@ -58,7 +58,7 @@ class TestFirstMessageAuthenticationFlow:
 
         """Create test user for authentication testing."""
 
-        return UserInDB(
+        return User(
 
             id="auth_test_user_001",
 
@@ -246,7 +246,7 @@ class TestFirstMessageAuthenticationFlow:
         # Mock auth middleware
         # L2: Mocking auth middleware to test integration points
 
-        async def auth_middleware(websocket: WebSocket) -> Optional[UserInDB]:
+        async def auth_middleware(websocket: WebSocket) -> Optional[User]:
 
             auth_header = websocket.headers.get("Authorization")
 

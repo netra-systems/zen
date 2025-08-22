@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import websockets
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.services.websocket_service import WebSocketService

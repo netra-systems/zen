@@ -9,7 +9,6 @@ for customer optimization and revenue forecasting.
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -29,8 +28,8 @@ from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
-from netra_backend.app.monitoring.models import MetricsCollector, PerformanceMetric
+from netra_backend.app.monitoring.models import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 
 # Add project root to path
 

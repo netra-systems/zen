@@ -17,18 +17,19 @@ from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.services.corpus.validation import (
+from netra_backend.app.websocket.validation import (
     MessageValidator,
     default_message_validator,
 )
-from netra_backend.app.services.synthetic_data.error_handler import (
+from netra_backend.app.websocket.error_handler import (
     WebSocketErrorHandler,
     default_error_handler,
 )

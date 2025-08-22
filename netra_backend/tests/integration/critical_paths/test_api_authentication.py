@@ -23,7 +23,7 @@ import jwt
 import pytest
 
 # Add project root to path
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 # Add project root to path
 
@@ -39,7 +39,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # Request without auth header
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources"
+                f"{get_config().API_BASE_URL}/api/v1/resources"
             )
             
             assert response.status_code == 401
@@ -55,12 +55,12 @@ class TestAPIAuthenticationL3:
             # Valid token
             valid_token = jwt.encode(
                 {"sub": "123", "exp": time.time() + 3600},
-                settings.SECRET_KEY,
+                get_config().SECRET_KEY,
                 algorithm="HS256"
             )
             
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/v1/resources",
                 headers={"Authorization": f"Bearer {valid_token}"}
             )
             
@@ -74,7 +74,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # API key auth
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/v1/resources",
                 headers={"X-API-Key": "test_api_key_123"}
             )
             
@@ -91,12 +91,12 @@ class TestAPIAuthenticationL3:
             # Expired token
             expired_token = jwt.encode(
                 {"sub": "123", "exp": time.time() - 3600},
-                settings.SECRET_KEY,
+                get_config().SECRET_KEY,
                 algorithm="HS256"
             )
             
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/v1/resources",
                 headers={"Authorization": f"Bearer {expired_token}"}
             )
             
@@ -112,7 +112,7 @@ class TestAPIAuthenticationL3:
         async with httpx.AsyncClient() as client:
             # Malformed token
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/v1/resources",
                 headers={"Authorization": "Bearer invalid.token.format"}
             )
             
@@ -120,7 +120,7 @@ class TestAPIAuthenticationL3:
             
             # Wrong auth scheme
             response = await client.get(
-                f"{settings.API_BASE_URL}/api/v1/resources",
+                f"{get_config().API_BASE_URL}/api/v1/resources",
                 headers={"Authorization": "Basic dXNlcjpwYXNz"}  # Basic auth
             )
             

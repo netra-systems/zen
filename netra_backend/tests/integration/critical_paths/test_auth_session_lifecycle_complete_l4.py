@@ -26,7 +26,7 @@ import pytest
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.models.session import Session
 from netra_backend.app.models.user import User
 

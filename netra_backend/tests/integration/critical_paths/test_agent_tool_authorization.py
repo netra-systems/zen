@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState

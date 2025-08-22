@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from pydantic import BaseModel, Field
-from schemas import AppConfig, LLMConfig
+from netra_backend.app.schemas import AppConfig, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
 

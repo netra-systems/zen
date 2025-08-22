@@ -6,7 +6,7 @@ Critical: Streaming responses provide immediate feedback for better UX
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ from typing import Any, AsyncGenerator, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from schemas import StreamingResponse, UserInDB
+from netra_backend.app.schemas import LLMStreamChunk, User
 
 from netra_backend.app.services.agent_service_core import AgentService
 
@@ -91,7 +91,7 @@ class TestFirstMessageStreaming:
 
         """Create test user for streaming."""
 
-        return UserInDB(
+        return User(
 
             id="stream_user_001",
 
