@@ -35,7 +35,7 @@ from typing import Dict, Any, List
 from pathlib import Path
 import pytest
 
-from tests.unified.e2e.export_pipeline_helpers import (
+from tests.e2e.integration.export_pipeline_helpers import (
     LargeDatasetGenerator, ExportRequestManager, ExportFileValidator, PerformanceTracker,
     LargeDatasetGenerator,
     ExportRequestManager,

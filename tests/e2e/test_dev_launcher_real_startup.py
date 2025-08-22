@@ -157,9 +157,7 @@ class TestDevLauncherRealStartup:
             no_browser=True,
             backend_port=8000,
             frontend_port=3000,
-            auth_port=8001,
             load_secrets=False,  # Skip secrets for test
-            legacy_mode=False,
             parallel_startup=True,
             startup_mode="minimal",
             non_interactive=True

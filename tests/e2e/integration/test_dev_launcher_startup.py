@@ -27,7 +27,7 @@ sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
 from dev_launcher.config import LauncherConfig
-from tests.unified.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
+from tests.e2e.integration.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
 class DevLauncherTestFixture:

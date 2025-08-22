@@ -21,11 +21,11 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
-from tests.unified.e2e.password_reset_complete_flow_tester import (
+from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.integration.password_reset_complete_flow_tester import (
     PasswordResetCompleteFlowTester,
 )
-from tests.unified.e2e.password_reset_security_flow_tester import (
+from tests.e2e.integration.password_reset_security_flow_tester import (
     PasswordResetSecurityFlowTester,
 )
 

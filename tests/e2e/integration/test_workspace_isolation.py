@@ -29,7 +29,7 @@ import asyncio
 import time
 from typing import Dict, Any
 
-from tests.unified.e2e.workspace_isolation_helpers import (
+from tests.e2e.integration.workspace_isolation_helpers import (
     WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator, RBACEnforcementTester, WorkspaceAuditTrailValidator, WorkspaceDeletionCleaner, WorkspaceSecurityTestUtils,
     WorkspaceIsolationTestCore, WorkspaceDataSegregationValidator,
     RBACEnforcementTester, WorkspaceAuditTrailValidator,

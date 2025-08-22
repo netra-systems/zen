@@ -25,8 +25,8 @@ import pytest
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.service_failure_tester import ServiceFailureScenarioTester
-from tests.unified.e2e.startup_sequence_validator import ServiceStartupSequenceValidator
+from tests.e2e.integration.service_failure_tester import ServiceFailureScenarioTester
+from tests.e2e.integration.startup_sequence_validator import ServiceStartupSequenceValidator
 
 # PYTEST TEST IMPLEMENTATIONS
 

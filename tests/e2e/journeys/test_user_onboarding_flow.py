@@ -20,7 +20,7 @@ from contextlib import asynccontextmanager
 
 import pytest
 
-from tests.unified.e2e.onboarding_flow_executor import OnboardingFlowExecutor
+from tests.e2e.integration.onboarding_flow_executor import OnboardingFlowExecutor
 from tests.unified.test_harness import UnifiedTestHarness
 
 

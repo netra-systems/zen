@@ -19,7 +19,7 @@ import pytest_asyncio
 
 from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.helpers.session_test_helpers import (
+from tests.e2e.integration.helpers.session_test_helpers import (
     SessionPersistenceManager, CrossServiceSessionValidator, MultiTabSessionManager, create_test_session_data, validate_session_timeout_behavior, create_session_test_scenarios,
     SessionPersistenceManager,
     CrossServiceSessionValidator,

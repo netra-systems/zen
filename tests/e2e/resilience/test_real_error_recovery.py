@@ -44,8 +44,8 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.error_cascade_core import ServiceFailureSimulator
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.integration.error_cascade_core import ServiceFailureSimulator
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.unified.real_client_types import ClientConfig
 from tests.unified.real_websocket_client import RealWebSocketClient
 

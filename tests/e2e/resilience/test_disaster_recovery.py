@@ -31,7 +31,7 @@ import uuid
 from typing import Dict, List, Any
 from datetime import datetime, timezone
 
-from tests.unified.e2e.disaster_recovery_helpers import (
+from tests.e2e.integration.disaster_recovery_helpers import (
     create_backup_manager, create_disaster_simulator, create_restore_manager, create_integrity_validator, create_rto_validator,
     create_backup_manager,
     create_disaster_simulator,
@@ -39,7 +39,7 @@ from tests.unified.e2e.disaster_recovery_helpers import (
     create_integrity_validator,
     create_rto_validator
 )
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig
 

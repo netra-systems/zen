@@ -27,7 +27,7 @@ import pytest
 import redis.asyncio as redis
 import websockets
 
-from tests.unified.e2e.rate_limiting_core import (
+from tests.e2e.integration.rate_limiting_core import (
     MessageSender,
     RedisManager,
     UserManager,

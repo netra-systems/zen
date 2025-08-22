@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 import pytest
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.e2e.integration.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.unified.network_failure_simulator import NetworkFailureSimulator
 from tests.unified.real_websocket_client import RealWebSocketClient
 

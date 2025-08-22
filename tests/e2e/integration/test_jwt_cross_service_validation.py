@@ -34,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.e2e.token_lifecycle_helpers import (
+from tests.e2e.integration.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,

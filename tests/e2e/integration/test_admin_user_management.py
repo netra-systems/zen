@@ -23,9 +23,9 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.unified.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
-from tests.unified.e2e.admin_user_management_tester import AdminUserManagementTester
-from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.integration.admin_audit_trail_validator import AdminAuditTrailValidator
+from tests.e2e.integration.admin_user_management_tester import AdminUserManagementTester
+from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
 
 
 # Pytest Test Implementations

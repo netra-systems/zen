@@ -16,11 +16,11 @@ from unittest.mock import patch
 
 import pytest
 
-from tests.unified.e2e.unified_e2e_harness import (
+from tests.e2e.integration.unified_e2e_harness import (
     UnifiedE2ETestHarness,
     create_e2e_harness,
 )
-from tests.unified.e2e.user_journey_executor import TestUser
+from tests.e2e.integration.user_journey_executor import TestUser
 from tests.unified.real_client_types import ClientConfig, ConnectionState
 from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.test_environment_config import TestEnvironmentType

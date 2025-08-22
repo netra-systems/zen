@@ -29,7 +29,7 @@ from dev_launcher import DevLauncher, LauncherConfig
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.core.database_types import DatabaseType
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
-from tests.unified.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
+from tests.e2e.integration.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
 class DatabaseConnectionTester:

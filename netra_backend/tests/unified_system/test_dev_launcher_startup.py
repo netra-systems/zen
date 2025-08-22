@@ -77,11 +77,10 @@ class TestDevLauncherStartup:
             no_browser=True,
             backend_port=8000,
             frontend_port=3000,
-            auth_port=8081,
             load_secrets=False,
-            legacy_mode=False,
             parallel_startup=True,
-            startup_mode="minimal"
+            startup_mode="minimal",
+            non_interactive=True
         )
     
     @pytest.fixture

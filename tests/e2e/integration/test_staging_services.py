@@ -24,7 +24,7 @@ import aiohttp
 import httpx
 import pytest
 
-from tests.unified.e2e.staging_test_helpers import (
+from tests.e2e.integration.staging_test_helpers import (
     ServiceHealthStatus,
     StagingTestSuite,
     get_staging_suite,

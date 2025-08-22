@@ -20,8 +20,8 @@ REQUIREMENTS:
 import pytest
 import time
 
-from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
-from tests.unified.e2e.api_key_lifecycle_helpers import (
+from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.integration.api_key_lifecycle_helpers import (
     create_test_user_session,
     ApiKeyLifecycleManager,
     ApiKeyScopeValidator

@@ -285,7 +285,7 @@ class DevLauncher:
                         if len(parts) >= 5:
                             pid = parts[-1]
                             if pid.isdigit():
-                                subprocess.run(f"taskkill //F //PID {pid}", shell=True)
+                                subprocess.run(f"taskkill /F /PID {pid}", shell=True)
                                 self._print("✅", "PORT", f"Freed port {port}")
             except Exception as e:
                 logger.error(f"Failed to free port {port}: {e}")

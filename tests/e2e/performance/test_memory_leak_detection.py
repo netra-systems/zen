@@ -10,8 +10,8 @@ import gc
 import logging
 from typing import Optional
 
-from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.unified.e2e.memory_leak_utilities import (
+from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.e2e.integration.memory_leak_utilities import (
     MemoryLeakMetrics, UserActivitySimulator, MemoryLeakDetector,
     MemoryLeakMetrics,
     UserActivitySimulator,

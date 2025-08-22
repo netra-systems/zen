@@ -28,8 +28,8 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from tests.unified.e2e.session_persistence_core import SessionPersistenceManager
-from tests.unified.e2e.session_persistence_validators import SessionPersistenceValidator
+from tests.e2e.integration.session_persistence_core import SessionPersistenceManager
+from tests.e2e.integration.session_persistence_validators import SessionPersistenceValidator
 from tests.unified.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 from tests.unified.real_client_factory import RealClientFactory
 from tests.unified.real_client_types import ClientConfig

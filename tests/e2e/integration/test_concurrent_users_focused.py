@@ -26,8 +26,8 @@ import time
 
 import pytest
 
-from tests.unified.e2e.concurrent_user_models import IsolationValidator
-from tests.unified.e2e.concurrent_user_simulators import (
+from tests.e2e.integration.concurrent_user_models import IsolationValidator
+from tests.e2e.integration.concurrent_user_simulators import (
     ConcurrentUserSimulator,
     ConcurrentWebSocketManager,
 )

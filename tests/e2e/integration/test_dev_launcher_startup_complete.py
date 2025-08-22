@@ -144,7 +144,6 @@ class RealDevLauncherTester:
             # Performance optimization for tests
             silent_mode=True,
             profile_startup=False,
-            legacy_mode=False,
             
             # Set project root
             project_root=project_root

@@ -70,6 +70,9 @@ class TestHealthMonitor(unittest.TestCase):
         self.monitor.register_service(
             "TestService", health_check, recovery, max_failures=2
         )
+        # Mark service as ready and enable monitoring per SPEC requirements
+        self.monitor.mark_service_ready("TestService")
+        self.monitor.enable_monitoring()
     
     def _test_failure_threshold(self, recovery):
         """Test that recovery triggers at threshold."""
@@ -91,6 +94,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def _test_thread_execution(self, health_check):
         """Test that monitoring thread runs checks."""
+        # Mark service as ready and enable monitoring
+        self.monitor.mark_service_ready("TestService")
+        self.monitor.enable_monitoring()
         self.monitor.start()
         time.sleep(0.3)
         self.assertGreater(health_check.call_count, 1)

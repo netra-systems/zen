@@ -24,8 +24,8 @@ import time
 import pytest
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
-from tests.unified.e2e.payment_upgrade_flow_tester import PaymentUpgradeFlowTester
+from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.integration.payment_upgrade_flow_tester import PaymentUpgradeFlowTester
 
 
 @pytest.mark.asyncio

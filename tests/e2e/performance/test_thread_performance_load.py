@@ -17,7 +17,7 @@ import pytest
 
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.thread_test_fixtures_core import (
+from tests.e2e.integration.thread_test_fixtures_core import (
     ThreadContextManager,
     ThreadPerformanceUtils,
     ThreadWebSocketFixtures,

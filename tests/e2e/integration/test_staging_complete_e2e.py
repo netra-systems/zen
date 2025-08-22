@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.unified.real_services_manager import RealServicesManager
 from tests.unified.test_environment_config import TestEnvironmentType
 

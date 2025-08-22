@@ -41,12 +41,12 @@ from netra_backend.app.core.circuit_breaker_types import (
     CircuitState,
 )
 from netra_backend.app.logging_config import central_logger
-from tests.unified.e2e.error_cascade_core import (
+from tests.e2e.integration.error_cascade_core import (
     AutoRecoveryVerifier,
     GracefulDegradationValidator,
     ServiceFailureSimulator,
 )
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.unified.real_client_types import ClientConfig
 from tests.unified.real_websocket_client import RealWebSocketClient
 

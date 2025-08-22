@@ -19,7 +19,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.unified.e2e.token_lifecycle_helpers import (
+from tests.e2e.integration.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,

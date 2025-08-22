@@ -70,7 +70,8 @@ class RealServicesManager:
         """Detect project root directory."""
         current = Path(__file__).parent
         while current.parent != current:
-            if (current / "app").exists() and (current / "auth_service").exists():
+            # Check for project root markers - netra_backend and auth_service directories
+            if (current / "netra_backend").exists() and (current / "auth_service").exists():
                 return current
             current = current.parent
         raise RuntimeError("Could not detect project root")

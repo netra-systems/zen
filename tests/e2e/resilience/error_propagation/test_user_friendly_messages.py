@@ -16,7 +16,7 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.unified.e2e.fixtures.error_propagation_fixtures import (
+from tests.e2e.integration.fixtures.error_propagation_fixtures import (
     error_correlation_context,
     real_http_client,
     real_websocket_client,

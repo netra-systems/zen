@@ -42,13 +42,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.e2e.service_failure_recovery_helpers import (
+from tests.e2e.integration.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
     create_degradation_tester,
     create_recovery_time_validator,
     create_state_preservation_validator,
 )
-from tests.unified.e2e.service_orchestrator import (
+from tests.e2e.integration.service_orchestrator import (
     create_service_orchestrator,
 )
 from tests.unified.jwt_token_helpers import JWTTestHelper

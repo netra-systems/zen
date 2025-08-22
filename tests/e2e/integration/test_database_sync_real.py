@@ -45,7 +45,7 @@ from tests.unified.database_test_operations import (
 )
 
 # Test infrastructure imports
-from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
 
 logger = logging.getLogger(__name__)
 

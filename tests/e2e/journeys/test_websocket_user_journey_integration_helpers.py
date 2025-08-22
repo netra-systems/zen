@@ -31,8 +31,8 @@ from websockets.exceptions import ConnectionClosedError
 
 from test_framework.mock_utils import mock_justified
 from tests.unified.config import TEST_ENDPOINTS, TEST_SECRETS, TestTier, TestUser
-from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
-from tests.unified.e2e.websocket_dev_utilities import (
+from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.integration.websocket_dev_utilities import (
     ConnectionState,
     WebSocketClientSimulator,
 )

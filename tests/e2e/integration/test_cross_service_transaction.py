@@ -15,7 +15,7 @@ from typing import List
 from tests.unified.real_services_manager import RealServicesManager
 from tests.unified.database_test_connections import DatabaseTestConnections
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.cross_service_transaction_core import (
+from tests.e2e.integration.cross_service_transaction_core import (
     CrossServiceTransactionError, TransactionOperation, TransactionDataFactory, AuthServiceOperations, BackendServiceOperations, ClickHouseOperations, TransactionVerificationService, TransactionRollbackService,
     CrossServiceTransactionError,
     TransactionOperation,

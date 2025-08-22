@@ -23,7 +23,7 @@ from typing import Dict, Any, List
 import pytest
 
 from tests.unified.config import TEST_USERS
-from tests.unified.e2e.websocket_message_guarantee_helpers import (
+from tests.e2e.integration.websocket_message_guarantee_helpers import (
     MessageDeliveryGuaranteeCore, ConcurrentMessageSender, OrderingValidator, NetworkInterruptionSimulator, MessageLossDetector, AcknowledmentTracker,
     MessageDeliveryGuaranteeCore,
     ConcurrentMessageSender,

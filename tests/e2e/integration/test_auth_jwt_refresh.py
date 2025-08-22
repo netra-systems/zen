@@ -28,7 +28,7 @@ from uuid import uuid4
 import jwt
 import pytest
 
-from tests.unified.e2e.test_auth_jwt_generation import (
+from .test_auth_jwt_generation import (
     JWTGenerationTestManager,
     TokenSet,
 )

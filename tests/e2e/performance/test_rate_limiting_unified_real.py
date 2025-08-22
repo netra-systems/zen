@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.e2e.rate_limiting_core import (
+from tests.e2e.integration.rate_limiting_core import (
     MessageSender,
     RateLimitFlowValidator,
     RedisManager,

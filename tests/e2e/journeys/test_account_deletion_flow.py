@@ -30,8 +30,8 @@ import time
 
 import pytest
 
-from tests.unified.e2e.account_deletion_flow_manager import AccountDeletionFlowManager
-from tests.unified.e2e.account_deletion_helpers import (
+from tests.e2e.integration.account_deletion_flow_manager import AccountDeletionFlowManager
+from tests.e2e.integration.account_deletion_helpers import (
     AccountDeletionFlowTester,
     GDPRComplianceValidator,
 )
