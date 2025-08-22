@@ -4,24 +4,20 @@ Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
 
 # Add the project root directory to Python path for imports
-from app.websocket.connection import ConnectionManager as WebSocketManager
 import os
 import sys
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 if project_root not in sys.path:
-
     sys.path.insert(0, project_root)
 
-from app.core.network_constants import (
-
+# Now import after path is set up
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.core.network_constants import (
     DatabaseConstants,
-
     HostConstants,
-
     ServicePorts,
-
 )
 
 # Set test environment variables BEFORE importing any app modules
