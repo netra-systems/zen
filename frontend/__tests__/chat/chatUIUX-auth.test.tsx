@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import MainChat from '../../components/chat/MainChat';
+import MainChat from '@/components/chat/MainChat';
 import { 
   setupBasicMocks,
   setupAuthenticatedStore,
@@ -22,11 +22,11 @@ import {
 setupBasicMocks();
 
 // Import mocked modules
-import { useAuthStore } from '../../store/authStore';
-import { useChatStore } from '../../store/chatStore';
-import { useThreadStore } from '../../store/threadStore';
-import { useUnifiedChatStore } from '../../store/unified-chat';
-import { useChatWebSocket } from '../../hooks/useChatWebSocket';
+import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chatStore';
+import { useThreadStore } from '@/store/threadStore';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 
 describe('Chat UI/UX Authentication Flow Tests', () => {
   const mockAuthStore = createMockAuthStore();

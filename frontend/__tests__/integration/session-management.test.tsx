@@ -78,7 +78,7 @@ import React, { useEffect, useState } from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useAuthStore } from '@/store/authStore';
-import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '../test-utils/integration-test-setup';
+import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '@/__tests__/test-utils/integration-test-setup';
 
 // Test data for session scenarios
 const sessionTestData = {

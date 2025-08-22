@@ -65,7 +65,7 @@ jest.mock('../../services/webSocketService', () => {
 });
 
 // Import the mocked service after mocking
-import { webSocketService as mockWebSocketService } from '../../services/webSocketService';
+import { webSocketService as mockWebSocketService } from '@/services/webSocketService';
 
 // Mock fetch for config - will be reset in beforeEach
 const mockFetch = jest.fn();

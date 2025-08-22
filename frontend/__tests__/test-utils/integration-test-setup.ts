@@ -8,6 +8,20 @@
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
 
+// Import store types but don't import the actual store to avoid import issues
+interface MockAuthStore {
+  isAuthenticated: boolean;
+  user: any;
+  token: string | null;
+  login: (user: any, token: string) => void;
+  logout: () => void;
+  setLoading: (loading: boolean) => void;
+  initializeFromStorage: () => void;
+}
+
+// Mock useAuthStore reference for assertions
+declare const useAuthStore: any;
+
 // Mock Next.js router
 export const mockNextRouter = () => {
   jest.mock('next/navigation', () => ({

@@ -11,12 +11,12 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { MessageItem } from '@/components/chat/MessageItem';
 import MainChat from '@/components/chat/MainChat'; // Default import
 import type { Message } from '@/types/registry';
-import { TestProviders } from '../setup/test-providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Test message factories (8 lines max each)
 const createTestMessage = (overrides = {}): Message => ({

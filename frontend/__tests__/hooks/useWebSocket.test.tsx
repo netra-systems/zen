@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 describe('useWebSocket', () => {
   beforeEach(() => {

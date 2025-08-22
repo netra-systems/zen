@@ -162,6 +162,11 @@ describe('WebSocket State Synchronization Tests', () => {
     it('should sync incoming messages to chat store', async () => {
       const chatResult = renderHook(() => useChatStore());
       
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
+      
       const { result } = renderHook(() => useWebSocketContext(), {
         wrapper: ({ children }) => (
           <WebSocketProvider>{children}</WebSocketProvider>
@@ -190,6 +195,11 @@ describe('WebSocket State Synchronization Tests', () => {
 
     it('should handle agent status updates', async () => {
       const chatResult = renderHook(() => useChatStore());
+      
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
       
       const { result } = renderHook(() => useWebSocketContext(), {
         wrapper: ({ children }) => (
@@ -254,6 +264,11 @@ describe('WebSocket State Synchronization Tests', () => {
     it('should handle message updates and confirmations', async () => {
       const chatResult = renderHook(() => useChatStore());
       
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
+      
       // Add initial message
       const initialMessage = {
         id: 'update-msg',
@@ -290,6 +305,11 @@ describe('WebSocket State Synchronization Tests', () => {
     it('should handle typing indicators', async () => {
       const chatResult = renderHook(() => useChatStore());
       
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
+      
       // Test processing state directly
       act(() => {
         chatResult.result.current.setProcessing(true);
@@ -304,6 +324,11 @@ describe('WebSocket State Synchronization Tests', () => {
 
     it('should handle progress updates', async () => {
       const chatResult = renderHook(() => useChatStore());
+      
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
       
       // Test progress updates directly
       const progress = { current: 3, total: 10, message: 'Processing data...' };
@@ -329,6 +354,11 @@ describe('WebSocket State Synchronization Tests', () => {
     it('should handle error states from WebSocket', async () => {
       const chatResult = renderHook(() => useChatStore());
       
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
+      
       // Test error handling directly
       act(() => {
         chatResult.result.current.setSubAgentName('DataSubAgent');
@@ -350,6 +380,11 @@ describe('WebSocket State Synchronization Tests', () => {
 
     it('should handle thread switching via WebSocket', async () => {
       const chatResult = renderHook(() => useChatStore());
+      
+      // Reset store first
+      act(() => {
+        chatResult.result.current.reset();
+      });
       
       // Test thread switching directly
       const messages = [

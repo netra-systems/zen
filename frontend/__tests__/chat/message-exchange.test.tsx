@@ -15,7 +15,7 @@ import '@testing-library/jest-dom';
 import { ChatWindow } from '../../components/chat/ChatWindow';
 import { MessageList } from '../../components/chat/MessageList';
 import MainChat from '../../components/chat/MainChat';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 import {
   createAuthStoreMock,
   createChatStoreMock,

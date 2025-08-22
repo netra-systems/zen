@@ -4,59 +4,14 @@ String Literals Scanner for Netra Platform
 Scans codebase for string literals and maintains a master index.
 """
 
-import ast
 import json
-import os
 import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
 
-
-class StringLiteralScanner(ast.NodeVisitor):
-    """AST visitor to extract string literals with context."""
-    
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self.literals: List[Dict[str, Any]] = []
-        self.current_class = None
-        self.current_function = None
-        
-    def visit_ClassDef(self, node):
-        old_class = self.current_class
-        self.current_class = node.name
-        self.generic_visit(node)
-        self.current_class = old_class
-        
-    def visit_FunctionDef(self, node):
-        old_function = self.current_function
-        self.current_function = node.name
-        self.generic_visit(node)
-        self.current_function = old_function
-        
-    def visit_AsyncFunctionDef(self, node):
-        self.visit_FunctionDef(node)
-        
-    def visit_Constant(self, node):
-        if isinstance(node.value, str) and node.value:
-            # Skip docstrings and comments
-            if not (self.current_function and node.col_offset == 0):
-                self.literals.append({
-                    'value': node.value,
-                    'line': node.lineno,
-                    'context': self._get_context(),
-                    'file': self.filepath
-                })
-        self.generic_visit(node)
-        
-    def _get_context(self) -> str:
-        parts = []
-        if self.current_class:
-            parts.append(f"class:{self.current_class}")
-        if self.current_function:
-            parts.append(f"func:{self.current_function}")
-        return '.'.join(parts) if parts else 'module'
+from string_literals import RawLiteral, scan_directory as scan_directory_core
 
 class StringLiteralCategorizer:
     """Categorizes string literals based on patterns and context."""
@@ -138,41 +93,20 @@ class StringLiteralIndexer:
     def __init__(self, root_dir: str):
         self.root_dir = Path(root_dir)
         self.index: Dict[str, Dict[str, List[Dict]]] = defaultdict(lambda: defaultdict(list))
-        self.scanner = None
         self.categorizer = StringLiteralCategorizer()
-        
-    def scan_file(self, filepath: Path) -> List[Dict[str, Any]]:
-        """Scan a single Python file for string literals."""
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                content = f.read()
                 
-            tree = ast.parse(content)
-            scanner = StringLiteralScanner(str(filepath.relative_to(self.root_dir)))
-            scanner.visit(tree)
-            return scanner.literals
-        except Exception as e:
-            print(f"Error scanning {filepath}: {e}")
-            return []
-            
     def scan_directory(self, directory: Path, exclude_dirs: Set[str] = None) -> None:
         """Recursively scan directory for Python files."""
         if exclude_dirs is None:
             exclude_dirs = {'.git', '__pycache__', 'venv', 'node_modules', '.pytest_cache'}
             
-        for item in directory.iterdir():
-            if item.is_dir():
-                if item.name not in exclude_dirs:
-                    self.scan_directory(item, exclude_dirs)
-            elif item.suffix == '.py':
-                literals = self.scan_file(item)
-                self.process_literals(literals)
+        literals = scan_directory_core(directory, self.root_dir, exclude_dirs)
+        self.process_literals(literals)
                 
-    def process_literals(self, literals: List[Dict[str, Any]]) -> None:
+    def process_literals(self, literals: List[RawLiteral]) -> None:
         """Process and categorize literals."""
-        for literal_info in literals:
-            value = literal_info['value']
-            category, subtype = self.categorizer.categorize(value, literal_info['context'])
+        for literal in literals:
+            category, subtype = self.categorizer.categorize(literal.value, literal.context)
             
             # Skip uncategorized messages
             if category == 'uncategorized' and subtype == 'message':
@@ -180,26 +114,26 @@ class StringLiteralIndexer:
                 
             # Create entry
             entry = {
-                'value': value,
+                'value': literal.value,
                 'type': subtype,
-                'locations': [f"{literal_info['file']}:{literal_info['line']}"],
-                'context': literal_info['context']
+                'locations': [f"{literal.file}:{literal.line}"],
+                'context': literal.context
             }
             
             # Check if already exists
             existing = None
-            for existing_entry in self.index[category][value]:
-                if existing_entry['value'] == value:
+            for existing_entry in self.index[category][literal.value]:
+                if existing_entry['value'] == literal.value:
                     existing = existing_entry
                     break
                     
             if existing:
                 # Add new location
-                location = f"{literal_info['file']}:{literal_info['line']}"
+                location = f"{literal.file}:{literal.line}"
                 if location not in existing['locations']:
                     existing['locations'].append(location)
             else:
-                self.index[category][value] = [entry]
+                self.index[category][literal.value] = [entry]
                 
     def generate_index(self) -> Dict[str, Any]:
         """Generate the final index structure."""

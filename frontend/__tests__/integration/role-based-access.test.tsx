@@ -57,7 +57,7 @@ jest.mock('@/components/auth/AuthGate', () => {
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { setupTestEnvironment, resetTestState } from '../test-utils/integration-test-setup';
+import { setupTestEnvironment, resetTestState } from '@/__tests__/test-utils/integration-test-setup';
 
 // User tier definitions for testing
 const userTiers = {

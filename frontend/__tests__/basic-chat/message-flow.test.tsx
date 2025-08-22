@@ -30,7 +30,7 @@ import {
   expectRealMessageContent,
   expectRealMessageOrder,
   simulateRealNetworkError
-} from '../test-utils';
+} from '@/__tests__/test-utils';
 
 // Modular test helpers
 import {

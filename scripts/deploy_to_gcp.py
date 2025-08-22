@@ -73,7 +73,6 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=20,
                 environment_vars={
-                    "PORT": "8888",
                     "ENVIRONMENT": "production",
                     "PYTHONUNBUFFERED": "1",
                 }
@@ -89,7 +88,6 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=10,
                 environment_vars={
-                    "PORT": "8001",
                     "ENVIRONMENT": "production",
                     "PYTHONUNBUFFERED": "1",
                 }
@@ -105,7 +103,6 @@ class GCPDeployer:
                 min_instances=0,
                 max_instances=10,
                 environment_vars={
-                    "PORT": "3000",
                     "NODE_ENV": "production",
                 }
             )

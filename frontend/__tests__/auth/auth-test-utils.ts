@@ -134,12 +134,17 @@ export function expectFetchCall(fetchMock: any, url: string, options?: any) {
   expect(fetchMock).toHaveBeenCalledWith(url, options);
 }
 
-export function validateTokenOperation(localStorageMock: any, operation: string) {
+export function validateTokenOperation(localStorageMock: any, operation: string, key?: string, value?: string) {
+  const targetKey = key || 'jwt_token';
+  
   if (operation === 'get') {
-    expect(localStorageMock.getItem).toHaveBeenCalledWith('jwt_token');
+    expect(localStorageMock.getItem).toHaveBeenCalledWith(targetKey);
   } else if (operation === 'remove') {
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+    expect(localStorageMock.removeItem).toHaveBeenCalledWith(targetKey);
+  } else if (operation === 'set') {
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(targetKey, value);
   } else {
+    // Legacy: treat operation as the value for jwt_token
     expect(localStorageMock.setItem).toHaveBeenCalledWith('jwt_token', operation);
   }
 }
@@ -225,5 +230,5 @@ export function createLocalStorageMock() {
 }
 
 // Export mocks for direct access
-export { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig };
+export { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, mockAuthService };
 

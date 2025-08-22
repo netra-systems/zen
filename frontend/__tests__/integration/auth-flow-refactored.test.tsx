@@ -68,7 +68,7 @@ import {
   expectUnauthenticatedState,
   performFullCleanup,
   mockNextRouter
-} from '../test-utils/integration-test-setup';
+} from '@/__tests__/test-utils/integration-test-setup';
 import {
   createLoginComponent,
   createLogoutComponent,

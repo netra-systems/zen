@@ -11,7 +11,7 @@
  */
 
 import { render, screen, waitFor } from '@testing-library/react';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 interface NetworkPayload {
   totalSize: number;

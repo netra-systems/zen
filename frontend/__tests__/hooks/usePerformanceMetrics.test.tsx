@@ -16,7 +16,7 @@
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { usePerformanceMetrics, PerformanceMonitor } from '@/hooks/usePerformanceMetrics';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 import { DEFAULT_PERFORMANCE_METRICS, PERFORMANCE_THRESHOLDS } from '@/types/performance-metrics';
 
 // Mock performance.now for consistent testing

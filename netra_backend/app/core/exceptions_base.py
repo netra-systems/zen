@@ -86,3 +86,15 @@ class StateRecoveryException(NetraException):
             message=message, code=ErrorCode.INTERNAL_ERROR, severity=ErrorSeverity.HIGH,
             details=details, user_message=user_message, trace_id=trace_id, context=context
         )
+
+
+class AuthorizationException(NetraException):
+    """Exception raised when authorization or permission checks fail."""
+    
+    def __init__(self, message: str = "Authorization failed", details: Optional[Dict[str, Any]] = None,
+                 user_message: Optional[str] = None, trace_id: Optional[str] = None,
+                 context: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message, code=ErrorCode.AUTHORIZATION_FAILED, severity=ErrorSeverity.HIGH,
+            details=details, user_message=user_message, trace_id=trace_id, context=context
+        )

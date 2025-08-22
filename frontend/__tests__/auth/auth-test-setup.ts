@@ -93,5 +93,28 @@ jest.mock('@/config', () => ({
 // Note: We DON'T mock @/auth/service here because we want to test the real auth service
 // which will use our mocked authServiceClient from @/lib/auth-service-config
 
+// Create mock auth service for tests
+const mockAuthService = {
+  getAuthConfig: jest.fn().mockResolvedValue(defaultMockAuthConfig),
+  handleDevLogin: jest.fn(),
+  getToken: jest.fn(),
+  getAuthHeaders: jest.fn(() => ({})),
+  removeToken: jest.fn(),
+  getDevLogoutFlag: jest.fn(() => false),
+  setDevLogoutFlag: jest.fn(),
+  clearDevLogoutFlag: jest.fn(),
+  handleLogin: jest.fn(),
+  handleLogout: jest.fn().mockImplementation(async () => {
+    await mockAuthServiceClient.logout();
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem('jwt_token');
+    }
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
+  }),
+  useAuth: jest.fn()
+};
+
 // Export mocks for test access
-export { mockUseContext, mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig };
+export { mockUseContext, mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, mockAuthService };

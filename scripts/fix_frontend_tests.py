@@ -26,7 +26,7 @@ def _add_test_providers_import(content: str) -> str:
     if import_match:
         last_import_end = import_match.end()
         return (content[:last_import_end] + 
-                "\nimport { TestProviders } from '../test-utils/providers';" +
+                "\nimport { TestProviders } from '@/__tests__/test-utils/providers';" +
                 content[last_import_end:])
     return content
 

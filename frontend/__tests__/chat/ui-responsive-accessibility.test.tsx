@@ -13,7 +13,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { MessageInput } from '@/components/chat/MessageInput';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 import {
   setupDefaultMocks
 } from './ui-test-utilities';
