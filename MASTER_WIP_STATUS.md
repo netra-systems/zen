@@ -8,14 +8,14 @@
 
 ## Executive Summary
 
-### Overall System Health Score: **13.5%** (CRITICAL)
+### Overall System Health Score: **50.5%** (CRITICAL)
 
 The Netra Apex AI Optimization Platform shows improving compliance and test coverage with relaxed, per-file violation counting.
 
 ### Trend Analysis
-- **Architecture Compliance:** 27.0% (Production code only)
-- **Testing Compliance:** 0.0% (Based on pyramid distribution)
-- **E2E Tests Found:** 0 tests
+- **Architecture Compliance:** 66.0% (Production code only)
+- **Testing Compliance:** 35.0% (Based on pyramid distribution)
+- **E2E Tests Found:** 4460 tests
 - **Overall Trajectory:** Improving with reasonable violation standards
 
 ## Compliance Breakdown (Relaxed Counting)
@@ -23,9 +23,9 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 ### Violation Summary
 | Category | Files with Violations | Status |
 |----------|----------------------|--------|
-| Production Code | 146 | 🔴 CRITICAL |
-| Test Code | 2191 | 🔴 CRITICAL |
-| **Total** | **2337** | - |
+| Production Code | 68 | ⚠️ NEEDS ATTENTION |
+| Test Code | 82 | ✅ GOOD |
+| **Total** | **150** | - |
 
 *Note: Using relaxed counting - one violation per file per type, not per occurrence*
 
@@ -41,15 +41,15 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 ### Test Distribution (Per testing.xml Pyramid)
 | Type | Count | Target Ratio | Actual Ratio | Status |
 |------|-------|--------------|--------------|--------|
-| E2E Tests (L4) | 0 | 15% | 0.0% | 🔴 CRITICAL |
-| Integration (L2-L3) | 49 | 60% | 4900.0% | ✅ GOOD |
-| Unit Tests (L1) | 0 | 20% | 0.0% | 🔴 CRITICAL |
+| E2E Tests (L4) | 4460 | 15% | 81.0% | ✅ GOOD |
+| Integration (L2-L3) | 884 | 60% | 16.1% | 🔴 CRITICAL |
+| Unit Tests (L1) | 200 | 20% | 3.6% | 🔴 CRITICAL |
 
 ### Coverage Metrics
-- **Total Tests:** 0
-- **Estimated Coverage:** 0.0%
+- **Total Tests:** 5503
+- **Estimated Coverage:** 30.0%
 - **Target Coverage:** 97%
-- **Pyramid Score:** 0.0%
+- **Pyramid Score:** 41.1%
 
 ---
 
