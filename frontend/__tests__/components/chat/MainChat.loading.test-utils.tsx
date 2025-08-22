@@ -96,7 +96,7 @@ export function createProcessingState(): MockLoadingState {
 export function createConnectionFailedState(): MockLoadingState {
   return {
     loadingState: ChatLoadingState.CONNECTION_FAILED,
-    shouldShowLoading: false,
+    shouldShowLoading: true,
     shouldShowEmptyState: false,
     shouldShowExamplePrompts: false,
     loadingMessage: 'Connection failed. Retrying...',

@@ -73,7 +73,7 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=20,
                 environment_vars={
-                    "ENVIRONMENT": "production",
+                    "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                 }
             ),
@@ -88,7 +88,7 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=10,
                 environment_vars={
-                    "ENVIRONMENT": "production",
+                    "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                 }
             ),

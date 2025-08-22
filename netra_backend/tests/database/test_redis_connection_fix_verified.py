@@ -13,7 +13,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 # Add parent directory to path for imports
-# from scripts.dev_launcher_database_connector import  # Should be mocked in tests DatabaseConnector, DatabaseType, ConnectionStatus
+from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
 
 @pytest.mark.asyncio
 async def test_redis_connection_works_with_python312():

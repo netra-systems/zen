@@ -73,7 +73,7 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
 
   return (
     <>
-      <ResponseCardContainer isAdminAction={isAdminAction}>
+      <ResponseCardContainer isAdminAction={isAdminAction} isCollapsed={isCollapsed}>
         <AdminSection
           isAdminAction={isAdminAction}
           adminConfig={adminConfig}
@@ -114,8 +114,9 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
 
 const ResponseCardContainer: React.FC<{
   isAdminAction: boolean;
+  isCollapsed: boolean;
   children: React.ReactNode;
-}> = ({ isAdminAction, children }) => (
+}> = ({ isAdminAction, isCollapsed, children }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -125,6 +126,10 @@ const ResponseCardContainer: React.FC<{
       "bg-white rounded-lg shadow-lg overflow-hidden border",
       isAdminAction ? "border-purple-200" : "border-gray-200"
     )}
+    role="region"
+    aria-label="response card"
+    data-testid="response-card"
+    data-collapsed={isCollapsed.toString()}
   >
     {children}
   </motion.div>

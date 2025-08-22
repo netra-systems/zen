@@ -114,13 +114,16 @@ export const CollapseHeader: React.FC<CollapseHeaderProps> = ({
   if (!showHeader) return null;
 
   return (
-    <div 
-      className="px-4 py-2 bg-gray-50 border-b border-gray-200 cursor-pointer flex items-center justify-between hover:bg-gray-100 transition-colors"
+    <button 
+      className="w-full px-4 py-2 bg-gray-50 border-b border-gray-200 cursor-pointer flex items-center justify-between hover:bg-gray-100 transition-colors"
       onClick={onToggleCollapse}
+      role="button"
+      aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} analysis card`}
+      type="button"
     >
       <HeaderText isCollapsed={isCollapsed} isAdminAction={isAdminAction} />
       <HeaderIcon isCollapsed={isCollapsed} />
-    </div>
+    </button>
   );
 };
 

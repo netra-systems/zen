@@ -46,9 +46,11 @@ def create_execution_context(run_id: str, **kwargs) -> AgentExecutionContext:
 def _build_execution_context_params(run_id: str, kwargs: dict) -> dict:
     """Build execution context parameters with defaults."""
     return {
-        'run_id': run_id, 'thread_id': kwargs.get('thread_id', 'thread-1'),
-        'user_id': kwargs.get('user_id', 'user-1'), 'agent_name': kwargs.get('agent_name', 'Supervisor'),
-        'max_retries': kwargs.get('max_retries', 3), 'started_at': kwargs.get('started_at', datetime.now(timezone.utc))
+        'context_id': run_id,
+        'agent_id': kwargs.get('agent_name', 'Supervisor'),
+        'operation': kwargs.get('operation', 'test_operation'),
+        'metadata': None,
+        'timeout': kwargs.get('timeout', 30.0)
     }
 
 def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:

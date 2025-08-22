@@ -49,6 +49,50 @@ jest.mock('@/utils/debug-logger', () => ({
   }
 }));
 
+// Mock components that have complex dependencies
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: () => (
+    <div role="region" aria-label="response card">
+      <span>response card</span>
+    </div>
+  )
+}));
+
+jest.mock('@/components/chat/ExamplePrompts', () => ({
+  ExamplePrompts: () => <div>explore these examples</div>
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div>Overflow Panel</div>
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div>Event Diagnostics Panel</div>
+}));
+
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => <div>Chat Header</div>
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => <div>Message Input</div>
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => <div role="list">Message List</div>
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
+jest.mock('lucide-react', () => ({
+  Loader2: () => <div>Loading...</div>
+}));
+
 describe('MainChat Loading State Transitions', () => {
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;

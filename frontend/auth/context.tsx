@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, ReactNode, useState, useCallback } from 'react';
+import { createContext, useEffect, ReactNode, useState, useCallback, useRef } from 'react';
 import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,8 @@ import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 export interface AuthContextType {
   user: User | null;
-  login: () => void;
-  logout: () => void;
+  login: () => Promise<void> | void;
+  logout: () => Promise<void>;
   loading: boolean;
   authConfig: AuthConfigResponse | null;
   token: string | null;
@@ -25,6 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const authStore = useAuthStore();
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isRefreshingRef = useRef(false);
 
   const syncAuthStore = useCallback((userData: User | null, tokenData: string | null) => {
     if (userData && tokenData) {
@@ -37,7 +39,75 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       authStore.logout();
     }
-  }, []);
+  }, [authStore]);
+
+  /**
+   * Automatically refresh token if needed
+   */
+  const handleTokenRefresh = useCallback(async (currentToken: string) => {
+    if (isRefreshingRef.current) {
+      logger.debug('Token refresh already in progress, skipping', {
+        component: 'AuthContext',
+        action: 'refresh_skipped'
+      });
+      return;
+    }
+
+    if (!authService.needsRefresh(currentToken)) {
+      return;
+    }
+
+    isRefreshingRef.current = true;
+    logger.info('Attempting automatic token refresh', {
+      component: 'AuthContext',
+      action: 'auto_refresh_start'
+    });
+
+    try {
+      const refreshResult = await authService.refreshToken();
+      if (refreshResult) {
+        const newToken = refreshResult.access_token;
+        setToken(newToken);
+        
+        const decodedUser = jwtDecode(newToken) as User;
+        setUser(decodedUser);
+        syncAuthStore(decodedUser, newToken);
+        
+        logger.info('Automatic token refresh successful', {
+          component: 'AuthContext',
+          action: 'auto_refresh_success'
+        });
+      } else {
+        logger.warn('Token refresh returned null response', {
+          component: 'AuthContext',
+          action: 'auto_refresh_null_response'
+        });
+      }
+    } catch (error) {
+      logger.error('Automatic token refresh failed', error as Error, {
+        component: 'AuthContext',
+        action: 'auto_refresh_failed'
+      });
+      // Don't logout immediately - let the user continue with potentially expired token
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  }, [syncAuthStore]);
+
+  /**
+   * Schedule automatic token refresh check
+   */
+  const scheduleTokenRefreshCheck = useCallback((tokenToCheck: string) => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Check every 2 minutes for token refresh needs
+    refreshTimeoutRef.current = setTimeout(() => {
+      handleTokenRefresh(tokenToCheck);
+      scheduleTokenRefreshCheck(tokenToCheck);
+    }, 2 * 60 * 1000);
+  }, [handleTokenRefresh]);
 
   const fetchAuthConfig = useCallback(async () => {
     try {
@@ -55,6 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(decodedUser);
           // Sync with Zustand store
           syncAuthStore(decodedUser, storedToken);
+          // Start automatic token refresh cycle
+          scheduleTokenRefreshCheck(storedToken);
         } catch (e) {
           logger.error('Invalid token detected', e as Error, {
             component: 'AuthContext',
@@ -85,6 +157,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(decodedUser);
             // Sync with Zustand store
             syncAuthStore(decodedUser, devLoginResponse.access_token);
+            // Start automatic token refresh cycle
+            scheduleTokenRefreshCheck(devLoginResponse.access_token);
           }
         } else {
           logger.info('Skipping auto dev login - user has logged out', {
@@ -127,17 +201,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [syncAuthStore]);
+  }, [syncAuthStore, scheduleTokenRefreshCheck]);
 
   useEffect(() => {
     fetchAuthConfig();
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
   }, [fetchAuthConfig]);
 
-  const login = () => {
-    if (authConfig) {
-      // Clear dev logout flag when user manually logs in
-      authService.clearDevLogoutFlag();
-      authService.handleLogin(authConfig);
+  const login = async () => {
+    try {
+      if (authConfig) {
+        // Clear dev logout flag when user manually logs in
+        authService.clearDevLogoutFlag();
+        authService.handleLogin(authConfig);
+      }
+    } catch (error) {
+      logger.error('Login error in AuthContext', error as Error, {
+        component: 'AuthContext',
+        action: 'login_error'
+      });
+      throw error; // Re-throw so components can catch it
     }
   };
 

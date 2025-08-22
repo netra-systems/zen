@@ -46,6 +46,10 @@ class BaseSubAgent(
 
     def _get_subagent_logging_enabled(self) -> bool:
         """Get subagent logging configuration setting."""
+        import os
+        # Skip heavy config loading during test collection
+        if os.environ.get('TEST_COLLECTION_MODE') == '1':
+            return False
         try:
             config = get_config()
             return getattr(config, 'subagent_logging_enabled', True)

@@ -167,10 +167,14 @@ async def bulk_update_users(operation: str, user_ids: List[str], db: AsyncSessio
     """Perform bulk operations on multiple users."""
     return await user_service.bulk_update_users(operation, user_ids, db)
 
+# Legacy alias for backward compatibility
+UserService = CRUDUser
+
 # Export all public functions for proper module imports
 __all__ = [
     'user_service',
     'CRUDUser',
+    'UserService',
     'get_all_users',
     'update_user_role',
     'bulk_update_users',

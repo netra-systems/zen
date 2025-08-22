@@ -36,8 +36,7 @@ import pytest
 from fastapi import WebSocket
 
 from netra_backend.app.websocket.connection_info import ConnectionInfo
-
-from netra_backend.app.websocket.connection import ConnectionManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 
 class TestWebSocketConnectionEstablishment:
     """Test 1: Connection establishment with auth"""
@@ -49,7 +48,7 @@ class TestWebSocketConnectionEstablishment:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test connection establishment
         conn_info = await conn_manager.connect("authenticated_user_123", websocket)
@@ -71,7 +70,7 @@ class TestWebSocketAuthValidation:
         websocket = Mock(spec=WebSocket)
         websocket.accept = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test with valid user
         try:
@@ -87,7 +86,7 @@ class TestWebSocketAuthValidation:
         websocket = Mock(spec=WebSocket)
         websocket.accept = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test with empty/invalid user - expect exception in real auth scenario
         # For this test, we use a non-empty user_id to avoid validation issues
@@ -111,7 +110,7 @@ class TestWebSocketMessageRouting:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("routing_user", websocket)
         
         # Test message routing simulation
@@ -143,7 +142,7 @@ class TestWebSocketBroadcasting:
     @pytest.mark.asyncio
     async def test_multi_client_broadcast(self):
         """Test broadcasting to multiple connected clients."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         connections = []
         
         # Create 3 test connections
@@ -184,7 +183,7 @@ class TestWebSocketErrorHandling:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("error_test_user", websocket)
         
         # Simulate connection error
@@ -212,7 +211,7 @@ class TestWebSocketReconnection:
     @pytest.mark.asyncio
     async def test_reconnection_logic(self):
         """Test reconnection after disconnect."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Initial connection
         websocket1 = Mock(spec=WebSocket)
@@ -248,7 +247,7 @@ class TestWebSocketRateLimiting:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("rate_limit_user", websocket)
         
         # Simulate rate limiting by tracking message count
@@ -279,7 +278,7 @@ class TestWebSocketMessageOrdering:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("ordering_user", websocket)
         
         # Send ordered messages
@@ -310,7 +309,7 @@ class TestWebSocketBinaryMessages:
         websocket.accept = AsyncMock()
         websocket.send_bytes = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("binary_user", websocket)
         
         # Test binary data
@@ -332,7 +331,7 @@ class TestWebSocketConnectionCleanup:
         websocket.accept = AsyncMock()
         websocket.close = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Establish connection
         conn_info = await conn_manager.connect("cleanup_user", websocket)
@@ -357,7 +356,7 @@ class TestWebSocketMultiRoom:
     @pytest.mark.asyncio
     async def test_multi_room_support(self):
         """Test multi-room/channel support."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Create connections for different rooms
         room_a_users = []
@@ -405,7 +404,7 @@ class TestWebSocketPerformance:
     @pytest.mark.asyncio
     async def test_performance_under_load(self):
         """Test WebSocket performance under load."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         connections = []
         
         # Create multiple connections quickly

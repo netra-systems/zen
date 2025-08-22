@@ -4,7 +4,7 @@ Tests real-time streaming of agent responses back to UI including chunking,
 backpressure handling, connection stability, buffering and reconnection scenarios.
 
 Business Value Justification (BVJ):
-1. Segment: Platform/Internal (All tiers require real-time experience)
+    1. Segment: Platform/Internal (All tiers require real-time experience)
 2. Business Goal: Protect real-time user experience and engagement
 3. Value Impact: Prevents $25K MRR loss from streaming failures and poor UX
 4. Strategic Impact: Ensures competitive real-time AI interaction experience
@@ -16,7 +16,6 @@ from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocketStats
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import (
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -29,16 +28,13 @@ import time
 
     get_connection_manager,
 
-)
 from tests.e2e.integration.agent_response_test_utilities import (
 
     ResponseStreamingVerifier,
 
-)
-
 class WebSocketStreamingTester:
 
-    """Tests WebSocket message streaming integration."""
+    # """Tests WebSocket message streaming integration."""
     
     def __init__(self):
 
@@ -52,7 +48,7 @@ class WebSocketStreamingTester:
         
     async def create_test_websocket_manager(self) -> WebSocketManager:
 
-        """Create WebSocket manager for streaming tests."""
+#         """Create WebSocket manager for streaming tests.""" # Possibly broken comprehension
         # Create mock dependencies
 
         mock_connection_manager = MagicMock(spec=ConnectionManager)
@@ -79,7 +75,7 @@ class WebSocketStreamingTester:
 
         start_time = time.time()
         
-        # Create response chunks for streaming
+#         # Create response chunks for streaming # Possibly broken comprehension
 
         chunks = await self._create_response_chunks(response_content, chunk_size=50)
         
@@ -97,7 +93,6 @@ class WebSocketStreamingTester:
 
             "streaming_successful": False
 
-        }
         
         # Stream chunks through WebSocket
 
@@ -106,8 +101,6 @@ class WebSocketStreamingTester:
             chunk_event = await self._send_chunk_through_websocket(
 
                 ws_manager, chunk, user_id, i
-
-            )
 
             streaming_result["chunks"].append(chunk_event)
 
@@ -133,7 +126,7 @@ class WebSocketStreamingTester:
         
         return streaming_result
 
-    async def test_websocket_connection_stability(self, ws_manager: WebSocketManager:
+    async def test_websocket_connection_stability(self, ws_manager: WebSocketManager):
 
                                                 user_id: str) -> Dict[str, Any]:
 
@@ -151,7 +144,6 @@ class WebSocketStreamingTester:
 
             connection_time=time.time()
 
-        )
         
         # Test connection persistence
 
@@ -159,7 +151,6 @@ class WebSocketStreamingTester:
 
             ws_manager, connection_info
 
-        )
         
         stability_result["test_duration"] = time.time() - stability_start
         
@@ -201,23 +192,21 @@ class WebSocketStreamingTester:
 
             "queue_overflow": False
 
-        }
         
         # Simulate rapid chunk sending to trigger backpressure
 
         for i, chunk in enumerate(high_volume_chunks[:50]):  # Limit for test
 
             try:
+    pass
 
                 await self._send_chunk_with_backpressure_detection(
 
                     ws_manager, chunk, user_id, i
 
-                )
-
                 backpressure_result["chunks_processed"] += 1
                 
-                # Check for backpressure indicators
+#                 # Check for backpressure indicators # Possibly broken comprehension
 
                 if i > 20 and i % 5 == 0:
 
@@ -251,7 +240,7 @@ class WebSocketStreamingTester:
         
         return backpressure_result
 
-    async def test_reconnection_handling(self, ws_manager: WebSocketManager:
+    async def test_reconnection_handling(self, ws_manager: WebSocketManager):
 
                                        user_id: str) -> Dict[str, Any]:
 
@@ -269,7 +258,6 @@ class WebSocketStreamingTester:
 
             "connection_restored": False
 
-        }
         
         # Simulate connection loss scenarios
 
@@ -279,7 +267,6 @@ class WebSocketStreamingTester:
 
                 ws_manager, user_id, attempt
 
-            )
             
             reconnection_result["reconnection_attempts"] += 1
             
@@ -299,9 +286,9 @@ class WebSocketStreamingTester:
 
 class TestWebSocketMessageStreaming:
 
-    """Integration tests for WebSocket message streaming."""
+    # """Integration tests for WebSocket message streaming."""
     
-    @pytest.fixture
+    # @pytest.fixture
 
     def streaming_tester(self):
 
@@ -325,7 +312,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, response_content, user_id
 
-        )
         
         assert streaming_result["streaming_successful"] is True
 
@@ -353,7 +339,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, user_id
 
-        )
         
         # Stream during stability test
 
@@ -363,7 +348,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, response_content, user_id
 
-        )
         
         assert stability_result["connection_stable"] is True
 
@@ -385,7 +369,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, user_id
 
-        )
         
         # Backpressure should be detected but handled gracefully
 
@@ -400,7 +383,7 @@ class TestWebSocketMessageStreaming:
 
     async def test_concurrent_streaming_sessions(self, streaming_tester):
 
-        """Test concurrent streaming sessions for multiple users."""
+#         """Test concurrent streaming sessions for multiple users.""" # Possibly broken comprehension
 
         ws_manager = await streaming_tester.create_test_websocket_manager()
         
@@ -423,8 +406,6 @@ class TestWebSocketMessageStreaming:
             streaming_tester.simulate_agent_response_streaming(
 
                 ws_manager, content, user_id
-
-            )
 
             for content, user_id in zip(response_contents, user_ids)
 
@@ -456,7 +437,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, user_id
 
-        )
         
         assert reconnection_result["reconnection_attempts"] > 0
 
@@ -481,7 +461,6 @@ class TestWebSocketMessageStreaming:
 
             ws_manager, original_content, user_id
 
-        )
         
         # Validate chunk ordering
 
@@ -499,7 +478,7 @@ class TestWebSocketMessageStreaming:
     
     async def _create_response_chunks(self, content: str, chunk_size: int) -> List[str]:
 
-        """Create response chunks for streaming."""
+#         """Create response chunks for streaming.""" # Possibly broken comprehension
 
         return [content[i:i+chunk_size] for i in range(0, len(content), chunk_size)]
     
@@ -519,7 +498,6 @@ class TestWebSocketMessageStreaming:
 
             "success": True
 
-        }
     
     async def _test_connection_persistence(self, ws_manager, connection_info):
 
@@ -559,38 +537,36 @@ class TestWebSocketMessageStreaming:
 
 class TestCriticalStreamingScenarios:
 
-    """Critical streaming scenarios protecting user experience."""
+    # """Critical streaming scenarios protecting user experience."""
     
-    @pytest.mark.asyncio
+    # @pytest.mark.asyncio
 
-    async def test_enterprise_streaming_performance(self):
+    # async def test_enterprise_streaming_performance(self):
 
-        """Test enterprise-level streaming performance requirements."""
+    # """Test enterprise-level streaming performance requirements."""
 
-        tester = WebSocketStreamingTester()
+    # tester = WebSocketStreamingTester()
 
-        ws_manager = await tester.create_test_websocket_manager()
+    # ws_manager = await tester.create_test_websocket_manager()
         
-        # Enterprise-scale response (10KB+)
+    # # Enterprise-scale response (10KB+)
 
-        enterprise_response = "Enterprise analysis response: " + "detailed analysis content " * 500
+    # enterprise_response = "Enterprise analysis response: " + "detailed analysis content " * 500
 
-        user_id = "enterprise_user_001"
+    # user_id = "enterprise_user_001"
         
-        start_time = time.time()
+    # start_time = time.time()
 
-        streaming_result = await tester.simulate_agent_response_streaming(
+    # streaming_result = await tester.simulate_agent_response_streaming(
 
-            ws_manager, enterprise_response, user_id
+    # ws_manager, enterprise_response, user_id
 
-        )
-
-        total_time = time.time() - start_time
+    # total_time = time.time() - start_time
         
-        # Enterprise SLA requirements
+    # # Enterprise SLA requirements
 
-        assert total_time < 5.0, f"Enterprise streaming too slow: {total_time:.2f}s"
+    # assert total_time < 5.0, f"Enterprise streaming too slow: {total_time:.2f}s"
 
-        assert streaming_result["streaming_successful"] is True
+    # assert streaming_result["streaming_successful"] is True
 
-        assert streaming_result["chunks_sent"] > 50  # Large response should have many chunks
+    # assert streaming_result["chunks_sent"] > 50  # Large response should have many chunks

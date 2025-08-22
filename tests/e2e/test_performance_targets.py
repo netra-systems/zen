@@ -1,22 +1,22 @@
 """Performance Targets Validation Suite - Agent 18 Implementation
 
-Validates Netra Apex performance against SLA requirements with real measurements.
+# Validates Netra Apex performance against SLA requirements with real measurements. # Possibly broken comprehension
 Tests critical performance metrics that directly impact user experience and retention.
 
 Business Value Justification (BVJ):
-1. Segment: Growth & Enterprise (performance-sensitive customers)
-2. Business Goal: Ensure optimal user experience quality for retention
+    1. Segment: Growth & Enterprise (performance-sensitive customers)
+# 2. Business Goal: Ensure optimal user experience quality for retention # Possibly broken comprehension
 3. Value Impact: Performance directly affects user satisfaction and subscription renewal
 4. Revenue Impact: Poor performance causes 15-25% churn - $50K+ ARR protection
 
 PERFORMANCE TARGETS:
-- Agent startup time: < 2s (cold start)
+    - Agent startup time: < 2s (cold start)
 - First response latency: < 1s (warm system)
 - Throughput capacity: 100 req/min sustained
 - P99 latency: < 5s (tail latency protection)
 
 ARCHITECTURAL COMPLIANCE:
-- File size: ≤300 lines (enforced through modular design)
+    - File size: ≤300 lines (enforced through modular design)
 - Function size: ≤8 lines each (enforced through composition)
 - Real performance measurements, not mocks
 - Comprehensive SLA validation with statistical accuracy
@@ -24,7 +24,7 @@ ARCHITECTURAL COMPLIANCE:
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+# from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric # Possibly broken comprehension
 from tests.e2e.config import TestUser, UnifiedTestConfig
 from tests.e2e.service_manager import ServiceManager
 from typing import Any, Dict, List, Optional
@@ -40,26 +40,25 @@ import time
 
 class PerformanceMetrics:
 
-    """Comprehensive performance metrics container"""
+    # """Comprehensive performance metrics container"""
 
-    operation_name: str
+    # operation_name: str
 
-    start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    # start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
-    end_time: Optional[datetime] = None
+    # end_time: Optional[datetime] = None
 
-    response_times: List[float] = field(default_factory=list)
+    # response_times: List[float] = field(default_factory=list)
 
-    error_count: int = 0
+    # error_count: int = 0
 
-    success_count: int = 0
+    # success_count: int = 0
 
-    memory_samples: List[float] = field(default_factory=list)
-
+    # memory_samples: List[float] = field(default_factory=list)
 
 class AgentStartupTimer:
 
-    """Measures agent startup performance under various conditions"""
+    # """Measures agent startup performance under various conditions"""
     
 
     def __init__(self):
@@ -128,10 +127,9 @@ class AgentStartupTimer:
 
         await asyncio.sleep(0.02)  # Context loading
 
-
 class ResponseLatencyMeasurer:
 
-    """Measures first response latency performance"""
+    # """Measures first response latency performance"""
     
 
     def __init__(self):
@@ -193,7 +191,6 @@ class ResponseLatencyMeasurer:
 
             "complex": 0.65
 
-        }
         
 
         base_delay = complexity_delays.get(complexity, 0.35)
@@ -202,10 +199,9 @@ class ResponseLatencyMeasurer:
 
         return {"response": f"Generated {complexity} response", "tokens": 150}
 
-
 class ThroughputValidator:
 
-    """Validates system throughput capacity"""
+    # """Validates system throughput capacity"""
     
 
     def __init__(self):
@@ -263,6 +259,9 @@ class ThroughputValidator:
             return False
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _analyze_throughput_results(self, results: List[Any], 
 
                                   duration: float) -> Dict[str, Any]:
@@ -286,12 +285,9 @@ class ThroughputValidator:
 
             "target_met": requests_per_minute >= self.target_throughput
 
-        }
-
-
 class LatencyPercentileCalculator:
 
-    """Calculates latency percentiles for P99 validation"""
+    # """Calculates latency percentiles for P99 validation"""
     
 
     def __init__(self, target_p99: float = 5.0):
@@ -336,8 +332,10 @@ class LatencyPercentileCalculator:
 
             "avg": statistics.mean(sorted_samples)
 
-        }
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def validate_p99_target(self) -> bool:
 
@@ -370,10 +368,9 @@ class LatencyPercentileCalculator:
 
         return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
 
-
 class PerformanceTestHarness:
 
-    """Coordinates comprehensive performance testing"""
+    # """Coordinates comprehensive performance testing"""
     
 
     def __init__(self, config: UnifiedTestConfig):
@@ -406,7 +403,6 @@ class PerformanceTestHarness:
 
             startup_result, latency_result, throughput_result, percentile_result
 
-        )
     
 
     async def _test_startup_performance(self) -> Dict[str, Any]:
@@ -432,7 +428,6 @@ class PerformanceTestHarness:
 
             "measurements": len(cold_times)
 
-        }
     
 
     async def _test_response_latency(self) -> Dict[str, Any]:
@@ -452,13 +447,12 @@ class PerformanceTestHarness:
 
             "measurements": len(response_times)
 
-        }
     
 
     async def _test_throughput_capacity(self) -> Dict[str, Any]:
 
         """Test throughput capacity targets"""
-        # Abbreviated test - 20 seconds instead of 60 for CI/CD
+#         # Abbreviated test - 20 seconds instead of 60 for CI/CD # Possibly broken comprehension
 
         self.throughput_validator.test_duration = 20
 
@@ -490,7 +484,6 @@ class PerformanceTestHarness:
 
             "p99_seconds": percentiles["p99"] / 1000
 
-        }
     
 
     async def _measure_single_latency(self) -> float:
@@ -506,13 +499,16 @@ class PerformanceTestHarness:
         return (end - start) * 1000  # Convert to milliseconds
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _compile_test_results(self, startup: Dict, latency: Dict, 
 
                             throughput: Dict, percentiles: Dict) -> Dict[str, Any]:
 
         """Compile comprehensive test results"""
 
-        all_targets_met = all([
+        all_targets_met = all()
 
             startup.get("startup_target_met", False),
 
@@ -539,17 +535,14 @@ class PerformanceTestHarness:
 
             "test_timestamp": datetime.now(timezone.utc).isoformat()
 
-        }
-
 # Test Classes
-
 
 class TestAgentStartupTime:
 
-    """Test agent startup performance meets < 2s target"""
+    # """Test agent startup performance meets < 2s target"""
     
 
-    @pytest.fixture
+    # @pytest.fixture
 
     def startup_timer(self):
 
@@ -582,13 +575,12 @@ class TestAgentStartupTime:
 
         assert max_startup < 2.5, f"Max startup {max_startup:.2f}s too high for reliability"
 
-
 class TestFirstResponseLatency:
 
-    """Test first response latency meets < 1s target"""
+    # """Test first response latency meets < 1s target"""
     
 
-    @pytest.fixture
+    # @pytest.fixture
 
     def latency_measurer(self):
 
@@ -615,13 +607,12 @@ class TestFirstResponseLatency:
 
         assert p95_latency < 1.2, f"P95 latency {p95_latency:.2f}s too high for SLA"
 
-
 class TestThroughputTargets:
 
-    """Test throughput capacity meets 100 req/min target"""
+    # """Test throughput capacity meets 100 req/min target"""
     
 
-    @pytest.fixture
+    # @pytest.fixture
 
     def throughput_validator(self):
 
@@ -642,21 +633,20 @@ class TestThroughputTargets:
         results = await throughput_validator.measure_sustained_throughput()
         
 
-        assert results["target_met"], \
+        assert results["target_met"], 
 
             f"Throughput {results['requests_per_minute']:.1f} req/min below 100 target"
 
-        assert results["success_rate"] > 98, \
+        assert results["success_rate"] > 98, 
 
             f"Success rate {results['success_rate']:.1f}% too low for production"
 
-
 class TestP99Latency:
 
-    """Test P99 latency meets < 5s target"""
+    # """Test P99 latency meets < 5s target"""
     
 
-    @pytest.fixture
+    # @pytest.fixture
 
     def percentile_calculator(self):
 
@@ -684,21 +674,20 @@ class TestP99Latency:
         target_met = percentile_calculator.validate_p99_target()
         
 
-        assert target_met, \
+        assert target_met, 
 
             f"P99 latency {percentiles['p99']/1000:.2f}s exceeds 5s SLA target"
 
-        assert percentiles["p95"] < 3000, \
+        assert percentiles["p95"] < 3000, 
 
             f"P95 latency {percentiles['p95']:.0f}ms should be well under P99 target"
 
-
 class TestComprehensivePerformance:
 
-    """Test comprehensive performance validation against all SLAs"""
+    # """Test comprehensive performance validation against all SLAs"""
     
 
-    @pytest.fixture
+    # @pytest.fixture
 
     def test_config(self):
 
@@ -725,24 +714,24 @@ class TestComprehensivePerformance:
         results = await performance_harness.run_comprehensive_test()
         
 
-        assert results["all_sla_targets_met"], \
+        assert results["all_sla_targets_met"], 
 
             "One or more performance SLA targets not met"
         
         # Individual target validation
 
-        assert results["startup_performance"]["startup_target_met"], \
+        assert results["startup_performance"]["startup_target_met"], 
 
             "Startup performance target not met"
 
-        assert results["response_latency"]["latency_target_met"], \
+        assert results["response_latency"]["latency_target_met"], 
 
             "Response latency target not met"
 
-        assert results["throughput_capacity"]["target_met"], \
+        assert results["throughput_capacity"]["target_met"], 
 
             "Throughput capacity target not met"
 
-        assert results["latency_percentiles"]["p99_target_met"], \
+        assert results["latency_percentiles"]["p99_target_met"], 
 
             "P99 latency target not met"

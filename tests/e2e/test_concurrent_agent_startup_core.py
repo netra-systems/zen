@@ -7,7 +7,7 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+# from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric # Possibly broken comprehension
 from typing import Any, Dict, List, Optional, Set, Union
 import asyncio
 import asyncpg
@@ -28,47 +28,47 @@ import websockets
 
 class TestUser:
 
-    """Test user for concurrent agent startup testing."""
+    # """Test user for concurrent agent startup testing."""
 
-    user_id: str
+    # user_id: str
 
-    email: str
+    # email: str
 
-    session_id: str
+    # session_id: str
 
-    auth_token: str
+    # auth_token: str
 
-    context_data: Dict[str, Any] = field(default_factory=dict)
+    # context_data: Dict[str, Any] = field(default_factory=dict)
 
-    sensitive_data: Dict[str, Any] = field(default_factory=dict)
+    # sensitive_data: Dict[str, Any] = field(default_factory=dict)
 
-    websocket_client: Optional[websockets.WebSocketServerProtocol] = None
+    # websocket_client: Optional[websockets.WebSocketServerProtocol] = None
 
-    agent_instance_id: Optional[str] = None
+    # agent_instance_id: Optional[str] = None
 
-    startup_metrics: Dict[str, float] = field(default_factory=dict)
+    # startup_metrics: Dict[str, float] = field(default_factory=dict)
 
 class IsolationReport:
 
-    """Report for isolation validation results."""
+    # """Report for isolation validation results."""
 
-    unique_agents: bool = False
+    # unique_agents: bool = False
 
-    context_isolation: bool = True
+    # context_isolation: bool = True
 
-    session_isolation: bool = False
+    # session_isolation: bool = False
 
-    contamination_incidents: int = 0
+    # contamination_incidents: int = 0
 
-    unauthorized_access_attempts: int = 0
+    # unauthorized_access_attempts: int = 0
 
-    validation_details: Dict[str, Any] = field(default_factory=dict)
+    # validation_details: Dict[str, Any] = field(default_factory=dict)
 
 class ContaminationReport:
 
-    """Report for cross-contamination detection."""
+    # """Report for cross-contamination detection."""
 
-    incidents: List[Dict[str, Any]] = field(default_factory=list)
+    # incidents: List[Dict[str, Any]] = field(default_factory=list)
     
     def add_contamination_incident(self, source_user: str, target_user: str, 
 
@@ -92,6 +92,9 @@ class ContaminationReport:
     
     @property
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def contamination_incidents(self) -> int:
 
         """Get total contamination incidents."""
@@ -100,27 +103,30 @@ class ContaminationReport:
 
 class ConcurrentTestReport:
 
-    """Comprehensive test report for concurrent agent startup testing."""
+    # """Comprehensive test report for concurrent agent startup testing."""
 
-    test_start_time: float = field(default_factory=time.time)
+    # test_start_time: float = field(default_factory=time.time)
 
-    test_end_time: Optional[float] = None
+    # test_end_time: Optional[float] = None
 
-    total_users: int = 0
+    # total_users: int = 0
 
-    successful_startups: int = 0
+    # successful_startups: int = 0
 
-    basic_startup: Optional[IsolationReport] = None
+    # basic_startup: Optional[IsolationReport] = None
 
-    contamination: Optional[ContaminationReport] = None
+    # contamination: Optional[ContaminationReport] = None
 
-    performance: Optional[Dict[str, Any]] = None
+    # performance: Optional[Dict[str, Any]] = None
 
-    websocket_scaling: Optional[Dict[str, Any]] = None
+    # websocket_scaling: Optional[Dict[str, Any]] = None
 
-    state_isolation: Optional[IsolationReport] = None
+    # state_isolation: Optional[IsolationReport] = None
     
-    @property
+    # @property
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def success_rate(self) -> float:
 
@@ -144,7 +150,7 @@ class ConcurrentTestReport:
 
 class ConcurrentTestEnvironment:
 
-    """Manages test environment for concurrent agent startup testing."""
+    # """Manages test environment for concurrent agent startup testing."""
     
     def __init__(self):
 
@@ -172,7 +178,6 @@ class ConcurrentTestEnvironment:
 
             socket_timeout=10
 
-        )
         
         # Initialize database pool
 
@@ -186,7 +191,6 @@ class ConcurrentTestEnvironment:
 
             command_timeout=30
 
-        )
         
         # Verify services are available
 
@@ -252,7 +256,7 @@ class ConcurrentTestEnvironment:
     
     async def _seed_single_user(self, user: TestUser):
 
-        """Seed data for a single user."""
+#         """Seed data for a single user.""" # Possibly broken comprehension
 
         async with self.db_pool.acquire() as conn:
             # Insert user record
@@ -275,7 +279,6 @@ class ConcurrentTestEnvironment:
 
                 mapping=user.context_data
 
-            )
     
     async def cleanup_user_data(self, users: List[TestUser]):
 
@@ -295,15 +298,11 @@ class ConcurrentTestEnvironment:
 
                 user_ids
 
-            )
-
             await conn.execute(
 
                 "DELETE FROM user_sessions WHERE user_id = ANY($1)", 
 
                 user_ids
-
-            )
 
             await conn.execute(
 
@@ -311,7 +310,6 @@ class ConcurrentTestEnvironment:
 
                 user_ids
 
-            )
         
         # Clean Redis
 
@@ -341,7 +339,7 @@ class ConcurrentTestEnvironment:
 
 class CrossContaminationDetector:
 
-    """Advanced detection system for identifying data leakage between users."""
+    # """Advanced detection system for identifying data leakage between users."""
     
     def __init__(self):
 
@@ -355,7 +353,7 @@ class CrossContaminationDetector:
 
         user_markers = {}
         
-        for user in users:
+#         for user in users: # Possibly broken comprehension
 
             markers = {
 
@@ -363,7 +361,6 @@ class CrossContaminationDetector:
 
                 for i in range(10)  # 10 unique markers per user
 
-            }
             
             user_markers[user.user_id] = markers
 
@@ -387,11 +384,11 @@ class CrossContaminationDetector:
     
     async def scan_for_contamination(self, responses: List[Dict[str, Any]], user_markers: Dict[str, Set[str]]) -> ContaminationReport:
 
-        """Scan agent responses for cross-user contamination."""
+#         """Scan agent responses for cross-user contamination.""" # Possibly broken comprehension
 
         contamination_report = ContaminationReport()
         
-        for response in responses:
+#         for response in responses: # Possibly broken comprehension
 
             user_id = response.get('user_id')
 
@@ -401,13 +398,13 @@ class CrossContaminationDetector:
                 
             response_text = json.dumps(response)
             
-            # Check for other users' markers in this response
+#             # Check for other users' markers in this response # Possibly broken comprehension
 
             for other_user_id, other_markers in user_markers.items():
 
                 if other_user_id != user_id:
 
-                    for marker in other_markers:
+#                     for marker in other_markers: # Possibly broken comprehension
 
                         if marker in response_text:
 
@@ -421,13 +418,12 @@ class CrossContaminationDetector:
 
                                 detection_context=response
 
-                            )
         
         return contamination_report
 
 class ConcurrentTestOrchestrator:
 
-    """Orchestrates concurrent agent startup testing."""
+    # """Orchestrates concurrent agent startup testing."""
     
     def __init__(self, test_env: ConcurrentTestEnvironment):
 
@@ -475,12 +471,6 @@ class ConcurrentTestOrchestrator:
 
                         "notification_settings": {"email": True, "sms": False}
 
-                    }
-
-                }
-
-            )
-
             users.append(user)
         
         # Inject contamination markers
@@ -489,6 +479,10 @@ class ConcurrentTestOrchestrator:
         
         return users
     
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _generate_test_jwt(self, user_id: str) -> str:
 
         """Generate test JWT token for user."""
@@ -502,8 +496,6 @@ class ConcurrentTestOrchestrator:
             "exp": int(time.time()) + 3600,
 
             "user_id": user_id
-
-        }
 
         return jwt.encode(payload, "test-secret", algorithm="HS256")
     
@@ -529,7 +521,7 @@ class ConcurrentTestOrchestrator:
 
                 self._establish_single_connection(user) 
 
-                for user in batch_users
+#                 for user in batch_users # Possibly broken comprehension
 
             ]
             
@@ -557,7 +549,7 @@ class ConcurrentTestOrchestrator:
     
     async def _establish_single_connection(self, user: TestUser) -> bool:
 
-        """Establish WebSocket connection for a single user."""
+#         """Establish WebSocket connection for a single user.""" # Possibly broken comprehension
 
         try:
 
@@ -573,7 +565,6 @@ class ConcurrentTestOrchestrator:
 
                 close_timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout"]
 
-            )
             
             user.startup_metrics['websocket_connection_time'] = time.time() - start_time
 
@@ -609,7 +600,7 @@ class ConcurrentTestOrchestrator:
 
             self._send_first_message(user) 
 
-            for user in connected_users
+#             for user in connected_users # Possibly broken comprehension
 
         ]
         
@@ -657,7 +648,6 @@ class ConcurrentTestOrchestrator:
 
             "context": user.context_data
 
-        }
         
         # Send message
 
@@ -671,7 +661,6 @@ class ConcurrentTestOrchestrator:
 
             timeout=CONCURRENT_TEST_CONFIG["agent_startup_timeout"]
 
-        )
         
         response = json.loads(response_raw)
         
@@ -697,7 +686,6 @@ class ConcurrentTestOrchestrator:
 
             {**user.startup_metrics, 'total_startup_time': total_time}
 
-        )
         
         return {
 
@@ -711,10 +699,7 @@ class ConcurrentTestOrchestrator:
 
             'agent_instance_id': user.agent_instance_id
 
-        }
-
-async def test_cross_contamination_detection(:
-
+async def test_cross_contamination_detection(, 
     concurrent_test_environment, 
 
     isolated_test_users
@@ -751,13 +736,12 @@ async def test_cross_contamination_detection(:
 
     responses = await orchestrator.send_concurrent_first_messages(isolated_test_users)
     
-    # Scan for contamination
+#     # Scan for contamination # Possibly broken comprehension
 
     contamination_report = await orchestrator.contamination_detector.scan_for_contamination(
 
         responses, user_markers
 
-    )
     
     # Additional state access validation
 
@@ -765,22 +749,20 @@ async def test_cross_contamination_detection(:
 
         concurrent_test_environment, isolated_test_users
 
-    )
     
     # Assertions
 
-    assert contamination_report.contamination_incidents == 0, \
+    assert contamination_report.contamination_incidents == 0, 
 
         f"Cross-contamination detected: {contamination_report.incidents}"
 
-    assert unauthorized_access_count == 0, \
+    assert unauthorized_access_count == 0, 
 
         f"Unauthorized state access detected: {unauthorized_access_count} attempts"
     
     logger.info("Test Case 2 completed: No contamination detected")
 
-async def test_state_persistence_isolation(:
-
+async def test_state_persistence_isolation(, 
     concurrent_test_environment, 
 
     isolated_test_users
@@ -823,7 +805,6 @@ async def test_state_persistence_isolation(:
 
         concurrent_test_environment, isolated_test_users
 
-    )
     
     # Test state modification isolation
 
@@ -831,7 +812,6 @@ async def test_state_persistence_isolation(:
 
         concurrent_test_environment, isolated_test_users
 
-    )
     
     # Validate state persistence integrity
 
@@ -839,19 +819,18 @@ async def test_state_persistence_isolation(:
 
         concurrent_test_environment, isolated_test_users
 
-    )
     
     # Assertions
 
-    assert isolation_violations == 0, \
+    assert isolation_violations == 0, 
 
         f"State isolation violations detected: {isolation_violations}"
 
-    assert modification_violations == 0, \
+    assert modification_violations == 0, 
 
         f"State modification violations detected: {modification_violations}"
 
-    assert integrity_violations == 0, \
+    assert integrity_violations == 0, 
 
         f"State integrity violations detected: {integrity_violations}"
     

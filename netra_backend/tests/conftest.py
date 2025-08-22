@@ -15,7 +15,7 @@ if str(project_root) not in sys.path:
 
 import os
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+# Lazy imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.core.network_constants import (
     DatabaseConstants,
     HostConstants,
@@ -24,6 +24,9 @@ from netra_backend.app.core.network_constants import (
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
+
+# CRITICAL: Set test collection mode to skip heavy initialization during pytest collection
+os.environ["TEST_COLLECTION_MODE"] = "1"
 
 if os.environ.get("TEST_ISOLATION") == "1":
     # When using test isolation, environment is already configured
@@ -43,6 +46,13 @@ else:
     # Standard test environment setup
 
     os.environ["TESTING"] = "1"
+    # Import network constants lazily to avoid slow startup
+    from netra_backend.app.core.network_constants import (
+        DatabaseConstants,
+        HostConstants, 
+        ServicePorts,
+    )
+    
     # Use PostgreSQL URL format even for tests to satisfy validator
 
     os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
@@ -113,16 +123,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Import unified configuration system
-from netra_backend.app.config import get_config
+# Configuration imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.db.base import Base
 
-# Import the main app first - this will load all models through app.db imports
-from netra_backend.app.main import app
+# NOTE: Import main app lazily in fixtures to avoid slow startup during test collection
+# The app will be imported when actually needed in fixtures, not during conftest loading
 
-# Initialize database on import to ensure async_session_factory is available
-from netra_backend.app.db.postgres import initialize_postgres
+# Database imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.db.session import get_db_session
 from netra_backend.tests.conftest_helpers import (
 
@@ -208,15 +215,8 @@ def pytest_configure(config):
 
     )
 
-try:
-
-    initialize_postgres()
-
-except Exception as e:
-    # Log but don't fail on import - some tests may not need database
-    import logging
-
-    logging.getLogger(__name__).warning(f"Failed to initialize database in conftest.py: {e}")
+# Database initialization moved to fixtures - no longer done at module level
+# This avoids slow startup during test collection
 
 # Temporarily disabled to fix test hanging issue
 # @pytest.fixture(scope="function")
@@ -250,6 +250,9 @@ def ensure_db_initialized():
 @pytest.fixture(scope="function")
 
 async def test_engine():
+    """Create test database engine."""
+    # Import Base lazily to avoid slow startup during test collection
+    from netra_backend.app.db.base import Base
 
     # Use unified config for test engine setup
     config = get_unified_config()
@@ -280,6 +283,9 @@ async def db_session(test_engine):
 @pytest.fixture(scope="function")
 
 def client(db_session):
+    """Create FastAPI test client with database session override."""
+    # Import app lazily to avoid startup during test collection
+    from netra_backend.app.main import app
 
     def override_get_db():
 
@@ -490,6 +496,7 @@ def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 
     websocket_manager = WebSocketManager()
 
@@ -1093,6 +1100,8 @@ class MockWebSocket:
 def fresh_manager():
 
     """Create a fresh WebSocketManager instance for each test"""
+    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    
     # Reset singleton
 
     WebSocketManager._instance = None

@@ -2,31 +2,25 @@ import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-// Hoist all mocks to the top level for proper Jest handling
-var mockUseUnifiedChatStore = jest.fn();
-var mockUseLoadingState = jest.fn();
-var mockUseThreadNavigation = jest.fn();
-var mockUseWebSocket = jest.fn();
-var mockUseEventProcessor = jest.fn();
-
+// Mock only the hooks and services, NOT UI components
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: jest.fn()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: jest.fn()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: jest.fn()
 }));
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
+  useWebSocket: jest.fn()
 }));
 
 jest.mock('@/hooks/useEventProcessor', () => ({
-  useEventProcessor: mockUseEventProcessor
+  useEventProcessor: jest.fn()
 }));
 
 // Mock utility services but NOT UI components
@@ -47,7 +41,71 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
+// Mock chat components
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => <div data-testid="message-list">Message List</div>
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => <div data-testid="message-input">Message Input</div>
+}));
+
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
+    <div 
+      role="region" 
+      aria-label="response card"
+      data-testid="response-card"
+      data-collapsed={isCollapsed?.toString()}
+    >
+      <span>response card</span>
+      <button 
+        role="button" 
+        aria-label={`${isCollapsed ? 'expand' : 'collapse'} analysis card`}
+        onClick={onToggleCollapse}
+      >
+        {isCollapsed ? 'Expand' : 'Collapse'}
+      </button>
+    </div>
+  )
+}));
+
+jest.mock('@/components/chat/ExamplePrompts', () => ({
+  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics-panel">Event Diagnostics Panel</div>
+}));
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  Loader2: () => <div data-testid="loader">Loading...</div>,
+  ChevronDown: () => <div data-testid="chevron-down">▼</div>,
+  ChevronUp: () => <div data-testid="chevron-up">▲</div>
+}));
+
 import MainChat from '@/components/chat/MainChat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useLoadingState } from '@/hooks/useLoadingState';
+import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useEventProcessor } from '@/hooks/useEventProcessor';
+
+// Get the mocked functions
+const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
+const mockUseLoadingState = useLoadingState as jest.MockedFunction<typeof useLoadingState>;
+const mockUseThreadNavigation = useThreadNavigation as jest.MockedFunction<typeof useThreadNavigation>;
+const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
+const mockUseEventProcessor = useEventProcessor as jest.MockedFunction<typeof useEventProcessor>;
 
 const mockStore = {
   isProcessing: false,

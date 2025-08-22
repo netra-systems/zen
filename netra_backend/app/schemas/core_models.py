@@ -113,6 +113,20 @@ class Thread(BaseModel):
     )
 
 
+class Optimization(BaseModel):
+    """Unified Optimization model - single source of truth."""
+    id: str
+    name: str
+    config: Dict[str, Any] = Field(default_factory=dict)
+    version: int = 1
+    parent_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
 @dataclass
 class CircuitBreakerConfig:
     """Unified configuration for circuit breaker behavior - consolidates all variants."""

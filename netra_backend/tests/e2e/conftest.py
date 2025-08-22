@@ -59,7 +59,7 @@ def mock_database_factory():
     
     return MockSessionFactory()
 
-@pytest.fixture(autouse=True) 
+@pytest.fixture
 def setup_database_mocking(mock_database_factory):
     """Auto-setup database mocking for all E2E tests."""
     import netra_backend.app.services.database.unit_of_work as uow_module

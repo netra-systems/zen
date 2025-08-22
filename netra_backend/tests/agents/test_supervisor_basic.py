@@ -105,10 +105,10 @@ class TestSupervisorOrchestration:
         
         async def mock_opt_execute(state, run_id, stream_updates=True):
             await asyncio.sleep(0.03)  # Different duration
-            state.optimizations_result = DeepAgentState(
-                optimization_type="parallel_test",
-                recommendations=["Parallel optimization complete"]
-            ).__dict__
+            state.optimizations_result = {
+                "optimization_type": "parallel_test",
+                "recommendations": ["Parallel optimization complete"]
+            }
             return state
         
         supervisor.agents["data"].execute = mock_data_execute

@@ -108,10 +108,10 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Auth database initialization failed: {error_msg}")
         initialization_errors.append(f"Database: {error_msg}")
     
-    # In development, allow service to start even with DB issues
-    if env == "development" and initialization_errors:
-        logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
-    elif initialization_errors and env in ["staging", "production"]:
+    # In development and staging, allow service to start even with DB issues for initial deployment
+    if env in ["development", "staging"] and initialization_errors:
+        logger.warning(f"Starting with {len(initialization_errors)} DB issues in {env} mode")
+    elif initialization_errors and env == "production":
         raise RuntimeError(f"Critical database failures: {initialization_errors}")
     
     yield
@@ -358,10 +358,33 @@ if AuthConfig.get_environment() in ["staging", "production"]:
     ]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
-# Custom middleware for service identification
+# Custom middleware for request size limiting and service identification
 @app.middleware("http")
-async def add_service_headers(request: Request, call_next):
-    """Add service identification headers"""
+async def security_and_service_middleware(request: Request, call_next):
+    """Add security checks, request size limits, and service identification headers"""
+    # Check Content-Length for JSON payloads to prevent oversized requests
+    content_length = request.headers.get("content-length")
+    content_type = request.headers.get("content-type", "")
+    
+    if content_length and "json" in content_type.lower():
+        try:
+            size = int(content_length)
+            # Limit JSON payloads to 50KB for security
+            max_size = 50 * 1024  # 50KB
+            if size > max_size:
+                logger.warning(f"Request payload too large: {size} bytes (max: {max_size})")
+                return JSONResponse(
+                    status_code=413,  # Payload Too Large
+                    content={"detail": f"Request payload too large. Maximum size: {max_size} bytes"}
+                )
+        except ValueError:
+            # Invalid Content-Length header
+            logger.warning(f"Invalid Content-Length header: {content_length}")
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Invalid Content-Length header"}
+            )
+    
     response = await call_next(request)
     response.headers["X-Service-Name"] = "auth-service"
     response.headers["X-Service-Version"] = "1.0.0"

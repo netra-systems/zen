@@ -1,309 +1,189 @@
 /**
- * First-Time User Welcome Flow Tests - Business Critical
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (Critical post-auth conversion moment)
- * - Business Goal: Optimize post-login experience for engagement
- * - Value Impact: Smooth transition increases 25% retention
- * - Revenue Impact: Welcome flow optimization = $125K+ annually
- * 
- * ARCHITECTURAL COMPLIANCE: ≤300 lines, functions ≤8 lines
- * Coverage: Post-auth transition, welcome experience, WebSocket setup
+ * First-time user onboarding welcome screen tests
  */
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
 
-// Real components under test
-import ChatPage from '@/app/chat/page';
+// Mock hooks and stores
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseEventProcessor = jest.fn();
+const mockUseThreadNavigation = jest.fn();
 
-// Test utilities
-import { TestProviders } from '../setup/test-providers';
-import { createMockUser } from '../utils/mock-factories';
-import {
-  setupCleanState,
-  resetAllMocks,
-  setupSimpleWebSocketMock,
-  clearAuthState,
-  mockAuthService,
-  newUserData,
-  renderWithTestSetup,
-  setupNextJSMocks,
-  setupAuthMocks
-} from './onboarding-test-helpers';
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
 
-// Setup mocks
-setupNextJSMocks();
-setupAuthMocks();
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
 
-describe('First-Time User Welcome Flow Tests', () => {
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// Mock child components
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => React.createElement('div', { 'data-testid': 'chat-header' }, 'Chat Header')
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => React.createElement('div', { 'data-testid': 'message-list' }, 'Message List')
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => React.createElement('div', { 'data-testid': 'message-input' }, 'Message Input')
+}));
+
+jest.mock('@/components/chat/ExamplePrompts', () => ({
+  ExamplePrompts: () => React.createElement('div', { 'data-testid': 'example-prompts' }, 'Example Prompts')
+}));
+
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: () => React.createElement('div', { 'data-testid': 'response-card' }, 'Response Card')
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => React.createElement('div', { 'data-testid': 'overflow-panel' }, 'Overflow Panel')
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => React.createElement('div', { 'data-testid': 'diagnostics-panel' }, 'Diagnostics Panel')
+}));
+
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn()
+  }
+}));
+
+// Import component after mocks
+import MainChat from '@/components/chat/MainChat';
+
+describe('First-Time User Onboarding Welcome', () => {
   beforeEach(() => {
-    setupCleanState();
-    setupSimpleWebSocketMock();
-    resetAllMocks();
-  });
-
-  afterEach(() => {
-    clearAuthState();
     jest.clearAllMocks();
-  });
-
-  describe('Post-Authentication Welcome Flow', () => {
-    it('transitions smoothly from auth to chat', async () => {
-      mockAuthService.user = createMockUser();
-      mockAuthService.loading = false;
-      
-      await renderChatPage();
-      await expectChatInterface();
+    
+    // Default mock implementations for first-time user state
+    mockUseUnifiedChatStore.mockReturnValue({
+      isProcessing: false,
+      messages: [], // No messages for first-time user
+      fastLayerData: null,
+      mediumLayerData: null,
+      slowLayerData: null,
+      currentRunId: null,
+      activeThreadId: null,
+      isThreadLoading: false,
+      handleWebSocketEvent: jest.fn()
     });
-
-    it('shows first-time user guidance', async () => {
-      const newUser = createMockUser({ email: newUserData.email });
-      mockAuthService.user = newUser;
-      
-      await renderChatPage();
-      await expectWelcomeExperience();
+    
+    mockUseWebSocket.mockReturnValue({
+      messages: []
     });
-
-    it('establishes websocket connection immediately', async () => {
-      mockAuthService.user = createMockUser();
-      const startTime = Date.now();
-      
-      await renderChatPage();
-      
-      const connectionTime = Date.now() - startTime;
-      expect(connectionTime).toBeLessThan(1000);
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: true, // Show welcome for first-time user
+      shouldShowExamplePrompts: true,
+      loadingMessage: ''
     });
-
-    it('displays example prompts prominently for new users', async () => {
-      mockAuthService.user = createMockUser({ email: newUserData.email });
-      
-      await renderChatPage();
-      await expectExamplePromptsVisible();
+    
+    mockUseEventProcessor.mockReturnValue({
+      processedCount: 0,
+      queueSize: 0
     });
-
-    it('shows clear value proposition on first load', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await waitFor(() => {
-        const content = document.body.textContent;
-        expect(content).toMatch(/ai.*optimization|cost.*savings|performance/i);
-      });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: null, // No thread selected for first-time user
+      isNavigating: false
     });
   });
 
-  describe('First-Time User Onboarding Elements', () => {
-    it('provides clear getting started guidance', async () => {
-      mockAuthService.user = createMockUser({ email: newUserData.email });
-      
-      await renderChatPage();
-      
-      await waitFor(() => {
-        const content = document.body.textContent;
-        expect(content).toMatch(/example|start|help|guide/i);
-      });
+  it('shows welcome header for first-time users', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
     });
+    
+    expect(screen.getByText('Your AI-powered optimization platform for reducing costs and improving performance')).toBeInTheDocument();
+  });
 
-    it('highlights key features for new users', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await expectKeyFeaturesHighlighted();
+  it('displays onboarding steps guide', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Get Started in 3 Easy Steps:')).toBeInTheDocument();
     });
+    
+    // Check for all 3 steps
+    expect(screen.getByText(/Choose an example prompt below/)).toBeInTheDocument();
+    expect(screen.getByText(/Describe your current setup/)).toBeInTheDocument();
+    expect(screen.getByText(/Get AI-powered recommendations/)).toBeInTheDocument();
+  });
 
-    it('shows message input prominently', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await waitFor(() => {
-        const messageInput = screen.getByRole('textbox', { name: /message input/i });
-        expect(messageInput).toBeInTheDocument();
-        expect(messageInput).toBeVisible();
-      });
-    });
-
-    it('provides placeholder text guidance in message input', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await waitFor(() => {
-        const messageInput = screen.getByRole('textbox', { name: /message input/i });
-        expect(messageInput).toHaveAttribute('placeholder');
-      });
+  it('shows example prompts section for new users', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
     });
   });
 
-  describe('User Experience Optimization', () => {
-    it('loads chat interface quickly for good first impression', async () => {
-      mockAuthService.user = createMockUser();
-      const startTime = performance.now();
-      
-      await renderChatPage();
-      
-      const loadTime = performance.now() - startTime;
-      expect(loadTime).toBeLessThan(3000); // More lenient for chat page
-    });
-
-    it('shows appropriate loading states during initialization', async () => {
-      mockAuthService.user = createMockUser();
-      mockAuthService.loading = true;
-      
-      await renderChatPage();
-      
-      // Should handle loading state gracefully
-      expect(document.body).toBeInTheDocument();
-    });
-
-    it('handles user without authentication gracefully', async () => {
-      mockAuthService.user = null;
-      mockAuthService.isAuthenticated = false;
-      
-      await renderChatPage();
-      
-      // Should handle unauthenticated state
-      expect(document.body).toBeInTheDocument();
-    });
-
-    it('provides immediate visual feedback on page load', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      // Should show some visual content immediately
-      expect(document.body.textContent).toBeTruthy();
+  it('shows helpful tip for first-time users', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Try typing something like:/)).toBeInTheDocument();
+      expect(screen.getByText(/I need to reduce my AI costs by 30% while maintaining quality/)).toBeInTheDocument();
     });
   });
 
-  describe('Conversion-Critical Elements', () => {
-    it('emphasizes AI optimization value proposition', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await waitFor(() => {
-        const content = document.body.textContent;
-        expect(content).toMatch(/ai.*optimization|cost.*reduction|performance.*improvement/i);
-      });
+  it('hides welcome content when user has messages', async () => {
+    // Simulate user with existing messages
+    mockUseUnifiedChatStore.mockReturnValue({
+      isProcessing: false,
+      messages: [{ id: '1', content: 'Test message', role: 'user' }],
+      fastLayerData: null,
+      mediumLayerData: null,
+      slowLayerData: null,
+      currentRunId: null,
+      activeThreadId: 'thread-1',
+      isThreadLoading: false,
+      handleWebSocketEvent: jest.fn()
     });
-
-    it('shows clear next steps for engagement', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await expectNextStepsVisible();
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false, // No welcome for existing users
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
     });
-
-    it('maintains professional appearance for enterprise users', async () => {
-      mockAuthService.user = createMockUser({ email: 'cto@enterprise.com' });
-      
-      await renderChatPage();
-      
-      // Should not show overly casual or informal elements
-      expect(document.body).toBeInTheDocument();
-    });
-
-    it('provides easy access to help and documentation', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await expectHelpAccessibility();
+    
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.queryByText('Welcome to Netra AI')).not.toBeInTheDocument();
     });
   });
 
-  describe('WebSocket and Connectivity', () => {
-    it('establishes secure WebSocket connection', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      // WebSocket mock should be called
-      expect(global.WebSocket).toHaveBeenCalled();
-    });
-
-    it('handles WebSocket connection failures gracefully', async () => {
-      // Mock WebSocket failure
-      global.WebSocket = jest.fn(() => {
-        throw new Error('Connection failed');
-      }) as any;
-      
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      // Should handle connection failure without crashing
-      expect(document.body).toBeInTheDocument();
-    });
-
-    it('shows connection status to user', async () => {
-      mockAuthService.user = createMockUser();
-      
-      await renderChatPage();
-      
-      await expectConnectionStatusVisible();
+  it('shows message input for interaction', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('message-input')).toBeInTheDocument();
     });
   });
-
-  // Helper functions (≤8 lines each)
-  async function renderChatPage(): Promise<void> {
-    await renderWithTestSetup(
-      <TestProviders>
-        <ChatPage />
-      </TestProviders>
-    );
-  }
-
-  async function expectChatInterface(): Promise<void> {
-    await waitFor(() => {
-      const messageInput = screen.getByRole('textbox', { name: /message input/i });
-      expect(messageInput).toBeInTheDocument();
-    });
-  }
-
-  async function expectWelcomeExperience(): Promise<void> {
-    await waitFor(() => {
-      const pageContent = document.body.textContent;
-      expect(pageContent).toBeTruthy();
-    });
-  }
-
-  async function expectExamplePromptsVisible(): Promise<void> {
-    await waitFor(() => {
-      const content = document.body.textContent;
-      expect(content).toMatch(/example|start|prompt|help/i);
-    });
-  }
-
-  async function expectKeyFeaturesHighlighted(): Promise<void> {
-    await waitFor(() => {
-      const content = document.body.textContent;
-      expect(content).toBeTruthy();
-    });
-  }
-
-  async function expectNextStepsVisible(): Promise<void> {
-    await waitFor(() => {
-      const messageInput = screen.getByRole('textbox', { name: /message input/i });
-      expect(messageInput).toBeVisible();
-    });
-  }
-
-  async function expectHelpAccessibility(): Promise<void> {
-    await waitFor(() => {
-      expect(document.body).toBeInTheDocument();
-    });
-  }
-
-  async function expectConnectionStatusVisible(): Promise<void> {
-    await waitFor(() => {
-      expect(document.body).toBeInTheDocument();
-    });
-  }
 });

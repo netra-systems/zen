@@ -161,10 +161,18 @@ async def login(
     """User login endpoint"""
     try:
         response = await auth_service.login(request, client_info)
+        logger.info(f"Login successful for user: {request.email}")
         return response
     except Exception as e:
-        logger.error(f"Login error: {e}")
-        raise HTTPException(status_code=401, detail=str(e))
+        # Log failed login attempts with security details (no passwords)
+        logger.error(f"Login failed for email: {request.email}, IP: {client_info.get('ip')}, Error: {str(e)}")
+        
+        # Check for potential SQL injection patterns
+        email = request.email or ""
+        if any(pattern in email.lower() for pattern in ["'", '"', 'union', 'select', 'drop', 'delete', 'insert', 'update']):
+            logger.warning(f"Potential SQL injection attempt detected from IP {client_info.get('ip')} with email: {email}")
+        
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @router.post("/logout")
 async def logout(

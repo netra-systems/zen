@@ -261,6 +261,11 @@ class AgentExecutionContext(ExecutionContext):
     def get_metric(self, key: str, default: Any = None) -> Any:
         """Get a recorded metric."""
         return self.metrics.get(key, default)
+    
+    @property
+    def run_id(self) -> str:
+        """Get run_id from context_id for compatibility."""
+        return self.context_id
         
     def to_dict(self) -> Dict[str, Any]:
         """Convert agent context to dictionary."""

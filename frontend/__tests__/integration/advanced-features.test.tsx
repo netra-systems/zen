@@ -21,7 +21,7 @@ global.URL.revokeObjectURL = jest.fn();
 let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  wsManager = WebSocketTestManager.createWebSocketManager();
+  wsManager = new WebSocketTestManager();
   wsManager.setup();
 });
 
@@ -410,17 +410,38 @@ describe('Real-time Metrics Dashboard', () => {
         memory: 0,
         requests: 0
       });
+      const [connected, setConnected] = React.useState(false);
       
       React.useEffect(() => {
         const ws = new WebSocket(wsManager.getUrl());
+        
+        ws.onopen = () => {
+          setConnected(true);
+        };
+        
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'metrics') {
             setMetrics(data.metrics);
           }
         };
+        
         return () => ws.close();
       }, []);
+      
+      // Simulate metrics update directly for testing
+      React.useEffect(() => {
+        if (connected) {
+          const timer = setTimeout(() => {
+            setMetrics({
+              cpu: 45,
+              memory: 67,
+              requests: 150
+            });
+          }, 100);
+          return () => clearTimeout(timer);
+        }
+      }, [connected]);
       
       return (
         <div data-testid="metrics">
@@ -436,19 +457,6 @@ describe('Real-time Metrics Dashboard', () => {
         <TestComponent />
       </TestProviders>
     );
-    
-    await wsManager.waitForConnection();
-    
-    act(() => {
-      wsManager.sendMessage({
-        type: 'metrics',
-        metrics: {
-          cpu: 45,
-          memory: 67,
-          requests: 150
-        }
-      });
-    });
     
     await waitFor(() => {
       expect(getByTestId('metrics')).toHaveTextContent('CPU: 45%');

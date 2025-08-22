@@ -21,6 +21,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   updateUser: (user: Partial<ExtendedUser>) => void;
+  updateToken: (token: string) => void;
   reset: () => void;
   initializeFromStorage: () => void;
   
@@ -67,6 +68,12 @@ export const useAuthStore = create<AuthState>()(
         if (state.user) {
           state.user = { ...state.user, ...userUpdate };
         }
+      }),
+
+    updateToken: (token) =>
+      set((state) => {
+        state.token = token;
+        storeTokenInLocalStorage(token);
       }),
 
     reset: () =>

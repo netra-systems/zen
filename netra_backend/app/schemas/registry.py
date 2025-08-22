@@ -60,6 +60,7 @@ from netra_backend.app.schemas.core_enums import (
 from netra_backend.app.schemas.core_models import (
     Message,
     MessageMetadata,
+    Optimization,
     Thread,
     ThreadMetadata,
     User,
@@ -132,7 +133,7 @@ __all__ = [
     "CorpusAuditAction", "CorpusAuditStatus", "TaskPriority", "MessageTypeLiteral",
     
     # Core models  
-    "UserBase", "UserCreate", "UserCreateOAuth", "User", "Message", "Thread", 
+    "UserBase", "UserCreate", "UserCreateOAuth", "User", "Message", "Thread", "Optimization",
     "MessageMetadata", "ThreadMetadata",
     
     # Agent models
@@ -164,6 +165,7 @@ TYPE_REGISTRY = {
     "User": User,
     "Message": Message, 
     "Thread": Thread,
+    "Optimization": Optimization,
     "MessageMetadata": MessageMetadata,
     "ThreadMetadata": ThreadMetadata,
     

@@ -105,6 +105,11 @@ class TestOAuthComprehensiveFailures:
         Test 1: Basic successful OAuth login flow - THE DEFAULT CASE
         This MUST work in production but is designed to initially fail.
         """
+        # Reset circuit breaker state before test
+        from auth_service.auth_core.routes.auth_routes import auth_service
+        auth_service._circuit_breaker_state.clear()
+        auth_service._failure_counts.clear()
+        auth_service._last_failure_times.clear()
         # Simulate Google OAuth callback with valid token
         state = secrets.token_urlsafe(32)
         mock_google_user = {
