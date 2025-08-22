@@ -15,13 +15,22 @@ Architecture:
 - Clear contracts for auth service integration
 """
 from abc import ABC, abstractmethod
-from typing import Protocol, Optional, Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Protocol
 
 from netra_backend.app.schemas.auth_types import (
-    LoginRequest, LoginResponse, TokenData, TokenRequest, TokenResponse,
-    RefreshRequest, ServiceTokenRequest, ServiceTokenResponse,
-    HealthResponse, SessionInfo, UserPermission, AuditLog
+    AuditLog,
+    HealthResponse,
+    LoginRequest,
+    LoginResponse,
+    RefreshRequest,
+    ServiceTokenRequest,
+    ServiceTokenResponse,
+    SessionInfo,
+    TokenData,
+    TokenRequest,
+    TokenResponse,
+    UserPermission,
 )
 
 

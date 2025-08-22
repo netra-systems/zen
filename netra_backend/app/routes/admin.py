@@ -1,10 +1,17 @@
+from typing import Any, Dict, List
+
 from fastapi import APIRouter, Depends, HTTPException
-from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.auth_integration.auth import ActiveUserDep, DeveloperDep, AdminDep, require_permission
+
 from netra_backend.app import schemas
+from netra_backend.app.auth_integration.auth import (
+    ActiveUserDep,
+    AdminDep,
+    DeveloperDep,
+    require_permission,
+)
 from netra_backend.app.config import settings
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.services.permission_service import PermissionService
-from typing import List, Dict, Any
 
 router = APIRouter()
 
@@ -29,7 +36,7 @@ async def get_audit_logs(limit: int = 100, offset: int = 0) -> List[Dict[str, An
 
 @router.get("/settings", response_model=AppConfig)
 async def get_app_settings(
-    current_user: schemas.User = Depends(require_permission("system_config"))
+    current_user: schemas.UserBase = Depends(require_permission("system_config"))
 ) -> AppConfig:
     """
     Retrieve the current application settings.
@@ -53,7 +60,7 @@ def _build_table_response(log_table: str, action: str) -> Dict[str, str]:
 @router.post("/settings/log_table")
 async def set_log_table(
     data: schemas.LogTableSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Set the default ClickHouse log table."""
     _validate_table_exists(data.log_table)
@@ -72,7 +79,7 @@ def _add_table_to_available(log_table: str) -> None:
 @router.post("/settings/log_tables")
 async def add_log_table(
     data: schemas.LogTableSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Add a new ClickHouse log table to the list of available tables."""
     _validate_table_not_exists(data.log_table)
@@ -93,7 +100,7 @@ def _remove_table_from_available(log_table: str) -> None:
 @router.delete("/settings/log_tables")
 async def remove_log_table(
     data: schemas.LogTableSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Remove a ClickHouse log table from the list of available tables."""
     _validate_table_removal(data.log_table)
@@ -112,7 +119,7 @@ def _update_default_time_period(days: int) -> None:
 @router.post("/settings/time_period")
 async def set_time_period(
     data: schemas.TimePeriodSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Set the default time period for log analysis."""
     _validate_time_period(data.days)
@@ -126,7 +133,7 @@ def _set_context_default_table(context: str, log_table: str) -> None:
 @router.post("/settings/default_log_table")
 async def set_default_log_table_for_context(
     data: schemas.DefaultLogTableSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Set the default ClickHouse log table for a specific context."""
     _validate_table_exists(data.log_table)
@@ -145,7 +152,7 @@ def _remove_context_default_table(context: str) -> None:
 @router.delete("/settings/default_log_table")
 async def remove_default_log_table_for_context(
     data: schemas.DefaultLogTableSettings,
-    current_user: schemas.User = AdminDep
+    current_user: schemas.UserBase = AdminDep
 ) -> Dict[str, str]:
     """Remove the default ClickHouse log table for a specific context."""
     _validate_context_exists(data.context)

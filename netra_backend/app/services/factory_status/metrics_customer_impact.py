@@ -5,9 +5,18 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import List
-from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.services.factory_status.metrics_business_value_types import CustomerImpactMetrics
-from netra_backend.app.services.factory_status.metrics_pattern_utils import BusinessValuePatternMatcher
+
+from netra_backend.app.services.factory_status.git_commit_parser import (
+    CommitInfo,
+    CommitType,
+    GitCommitParser,
+)
+from netra_backend.app.services.factory_status.metrics_business_value_types import (
+    CustomerImpactMetrics,
+)
+from netra_backend.app.services.factory_status.metrics_pattern_utils import (
+    BusinessValuePatternMatcher,
+)
 
 
 class CustomerImpactCalculator:

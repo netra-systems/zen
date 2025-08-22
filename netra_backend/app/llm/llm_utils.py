@@ -4,7 +4,8 @@ Provides utility functions for logging, token extraction, and response processin
 Each function must be ≤8 lines as per architecture requirements.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from netra_backend.app.llm.observability import log_llm_input, log_llm_output
 from netra_backend.app.services.llm_cache_service import llm_cache_service
 

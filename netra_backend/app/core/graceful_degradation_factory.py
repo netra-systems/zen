@@ -9,7 +9,7 @@ from typing import Dict, List
 from netra_backend.app.core.degradation_strategies import (
     DatabaseDegradationStrategy,
     LLMDegradationStrategy,
-    WebSocketDegradationStrategy
+    WebSocketDegradationStrategy,
 )
 
 

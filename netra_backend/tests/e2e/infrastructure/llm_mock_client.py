@@ -6,8 +6,9 @@ Follows 450-line/25-line limits and provides model-specific response patterns.
 """
 import asyncio
 import random
-from typing import Dict, Any, Optional
-from netra_backend.tests.llm_test_manager import LLMTestModel
+from typing import Any, Dict, Optional
+
+from tests.e2e.infrastructure.llm_test_manager import LLMTestModel
 
 
 class LLMTestMockClient:

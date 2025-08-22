@@ -4,24 +4,38 @@ Tests capacity planning workflows for different scaling scenarios.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
-
-from netra_backend.tests.e2e.scaling_test_helpers import (
 
 # Add project root to path
-    create_scaling_setup, execute_scaling_workflow,
-    create_gradual_scaling_state, create_traffic_spike_state,
-    validate_gradual_scaling_plan, validate_spike_handling_strategy
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
+from tests.e2e.scaling_test_helpers import (
+    create_gradual_scaling_state,
+    # Add project root to path
+    create_scaling_setup,
+    create_traffic_spike_state,
+    execute_scaling_workflow,
+    validate_gradual_scaling_plan,
+    validate_spike_handling_strategy,
 )
 
 

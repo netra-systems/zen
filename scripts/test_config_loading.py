@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test configuration loading with detailed logging for debugging staging issues."""
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add app directory to path
@@ -59,8 +59,7 @@ def _print_loading_header():
 
 def _load_and_reload_config():
     """Load and reload configuration modules"""
-    from netra_backend.app.config import settings, get_config
-    from netra_backend.app.config import reload_config
+    from netra_backend.app.config import get_config, reload_config, settings
     reload_config()
     config = get_config()
     print("\n[SUCCESS] Configuration loaded successfully!")

@@ -23,7 +23,7 @@ from typing import Dict, Any, List
 
 from tests.e2e.fixtures.resource_monitoring import isolation_test_config, resource_limits
 from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase
-from tests.e2e.test_helpers.file_system_helpers import simulate_file_operations, simulate_disk_usage, concurrent_file_access
+from tests.e2e.test_helpers.file_system_helpers import (
     simulate_file_operations, simulate_disk_usage, concurrent_file_access
 )
 from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents

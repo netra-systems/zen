@@ -1,15 +1,30 @@
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.schemas.registry import (
+    AgentMessage,
+    UserMessage,
+    WebSocketMessage,
+)
 
 # Add project root to path
-
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.schemas.registry import WebSocketMessage, UserMessage, AgentMessage
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 # Add project root to path
 async def test_message_handler_service_initialization():

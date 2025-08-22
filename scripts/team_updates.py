@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Team Updates - Generate human-readable codebase change summaries."""
 
-import asyncio
 import argparse
+import asyncio
+import sys
 from datetime import datetime
 from pathlib import Path
-import sys
 
 # Add scripts directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))

@@ -4,7 +4,8 @@ Tool Handlers
 Contains the implementation methods for handling tool execution requests.
 Split into separate modules for better maintainability.
 """
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
+
 from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
@@ -80,7 +81,9 @@ class AnalyticsToolHandlers:
     
     async def _analyze_workload_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for analyze_workload tool"""
-        from netra_backend.app.services.apex_optimizer_service import ApexOptimizerService
+        from netra_backend.app.services.apex_optimizer_service import (
+            ApexOptimizerService,
+        )
         
         optimizer = ApexOptimizerService(self.db)
         

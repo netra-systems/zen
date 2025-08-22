@@ -17,28 +17,29 @@ Tests cover:
 4. Configuration Validation (environment variables, secrets, feature flags)
 """
 
-import os
-import pytest
 import asyncio
-import tempfile
-import time
-import threading
+import os
 import subprocess
-from unittest.mock import patch, MagicMock
-from pathlib import Path
-from typing import Dict, Any, Set, Optional
+import tempfile
+import threading
+import time
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, Optional, Set
+from unittest.mock import MagicMock, patch
 
-from dev_launcher.launcher import DevLauncher
-from dev_launcher.config import LauncherConfig
-from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep, StepResult
+import pytest
+
 from dev_launcher.cache_manager import CacheManager
-from dev_launcher.database_connector import DatabaseConnector, ConnectionStatus
-from dev_launcher.secret_loader import SecretLoader
-from dev_launcher.log_streamer import LogManager
-from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
-from dev_launcher.service_discovery import ServiceDiscovery
+from dev_launcher.config import LauncherConfig
+from dev_launcher.database_connector import ConnectionStatus, DatabaseConnector
 from dev_launcher.environment_validator import EnvironmentValidator
+from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
+from dev_launcher.launcher import DevLauncher
+from dev_launcher.log_streamer import LogManager
+from dev_launcher.secret_loader import SecretLoader
+from dev_launcher.service_discovery import ServiceDiscovery
+from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep, StepResult
 
 
 class TestDevEnvironmentInitialization:

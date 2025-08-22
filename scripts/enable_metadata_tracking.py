@@ -10,6 +10,7 @@ from pathlib import Path
 
 from metadata_tracking import MetadataTrackingEnabler
 
+
 def _get_argument_parser() -> argparse.ArgumentParser:
     """Get command line argument parser"""
     parser = argparse.ArgumentParser(description="Enable AI Agent Metadata Tracking")

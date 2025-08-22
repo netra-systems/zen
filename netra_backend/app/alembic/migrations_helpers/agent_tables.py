@@ -3,8 +3,9 @@ Agent and AI System Table Creation Functions
 Handles creation of agent, assistant, thread, run, message, and step tables
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 
 def _create_assistants() -> None:

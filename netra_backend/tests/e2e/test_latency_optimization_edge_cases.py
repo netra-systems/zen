@@ -4,21 +4,33 @@ Tests edge cases and integration scenarios for latency optimization workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
-from netra_backend.tests.e2e.latency_optimization_helpers import (
-
-# Add project root to path
-    create_latency_optimization_setup, execute_latency_workflow,
-    create_impossible_latency_state, create_already_optimized_state,
-    create_3x_latency_state, create_caching_optimization_state,
-    validate_impossible_target_handling, validate_optimized_system_handling,
-    validate_agent_data_flow, validate_state_consistency
+from tests.e2e.latency_optimization_helpers import (
+    create_3x_latency_state,
+    create_already_optimized_state,
+    create_caching_optimization_state,
+    create_impossible_latency_state,
+    # Add project root to path
+    create_latency_optimization_setup,
+    execute_latency_workflow,
+    validate_agent_data_flow,
+    validate_impossible_target_handling,
+    validate_optimized_system_handling,
+    validate_state_consistency,
 )
 
 

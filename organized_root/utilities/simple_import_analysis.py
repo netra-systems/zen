@@ -4,12 +4,12 @@ Simple Import Analysis - Static Analysis Only
 Analyzes import statements without executing files to avoid runtime errors.
 """
 
-import json
 import ast
+import json
 import os
-from pathlib import Path
-from typing import Dict, List, Set, Any
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Set
 
 
 class SimpleImportAnalyzer:

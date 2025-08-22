@@ -4,6 +4,7 @@
 from pathlib import Path
 from typing import Dict
 
+
 class ReporterConstants:
     """Test reporting constants and configurations."""
     

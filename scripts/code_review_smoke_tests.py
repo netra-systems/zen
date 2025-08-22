@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 
+
 class CodeReviewSmokeTests:
     """Handles smoke test operations for code review"""
     

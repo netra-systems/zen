@@ -5,21 +5,26 @@ Handles operation tracking and metrics aggregation.
 
 import asyncio
 import time
-from datetime import datetime, UTC, timedelta
-from typing import Dict, List, Optional, Any
-from collections import deque, defaultdict
+from collections import defaultdict, deque
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import TimeSeriesPoint
 from netra_backend.app.services.metrics.agent_metrics_models import (
-    AgentOperationRecord, AgentMetrics, FailureType, AgentMetricType,
-    create_operation_record, calculate_operation_metrics,
-    update_agent_metrics, calculate_health_score
+    AgentMetrics,
+    AgentMetricType,
+    AgentOperationRecord,
+    FailureType,
+    calculate_health_score,
+    calculate_operation_metrics,
+    create_operation_record,
+    update_agent_metrics,
 )
-from netra_backend.app.services.metrics.metric_reader import MetricReader
 from netra_backend.app.services.metrics.metric_aggregator import MetricAggregator
 from netra_backend.app.services.metrics.metric_formatter import MetricFormatter
 from netra_backend.app.services.metrics.metric_publisher import MetricPublisher
+from netra_backend.app.services.metrics.metric_reader import MetricReader
 
 logger = central_logger.get_logger(__name__)
 

@@ -3,7 +3,8 @@
 
 import json
 import os
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 def save_file(corpus, filename):
     """Save to file."""

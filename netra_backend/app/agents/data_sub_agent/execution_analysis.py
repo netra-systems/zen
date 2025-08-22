@@ -1,7 +1,7 @@
 """Analysis routing and execution for DataSubAgent."""
 
-from typing import Dict, Any, Tuple, List, Callable
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Tuple
 
 
 class AnalysisRouter:

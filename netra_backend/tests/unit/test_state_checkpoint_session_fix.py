@@ -4,22 +4,34 @@ This test ensures the StateCheckpointManager properly handles
 db_session_factory as an async context manager.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor.state_checkpoint_manager import StateCheckpointManager
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.agent_state import CheckpointType, AgentPhase
-from netra_backend.app.llm.llm_manager import LLMManager
+
+# Add project root to path
+from netra_backend.app.agents.supervisor.state_checkpoint_manager import (
+    StateCheckpointManager,
+)
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.agent_state import AgentPhase, CheckpointType
 
 # Add project root to path
 

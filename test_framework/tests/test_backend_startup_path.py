@@ -3,13 +3,13 @@ Test for backend startup path issue.
 This test exposes the incorrect app directory path configuration.
 """
 
-import sys
+import json
 import os
 import subprocess
-from pathlib import Path
-import unittest
+import sys
 import tempfile
-import json
+import unittest
+from pathlib import Path
 
 
 class TestBackendStartupPath(unittest.TestCase):

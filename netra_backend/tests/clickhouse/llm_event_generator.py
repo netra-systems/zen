@@ -3,10 +3,10 @@ LLM Event Generator
 Generates realistic LLM event data for testing
 """
 
-import uuid
 import random
+import uuid
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from netra_backend.tests.data_models import LLMEvent
 from netra_backend.tests.generator_base import DataGeneratorBase

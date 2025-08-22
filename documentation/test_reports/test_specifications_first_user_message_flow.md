@@ -325,10 +325,10 @@ This document defines comprehensive test specifications for the first 5 integrat
 Execute via unified test runner:
 ```bash
 # Run First Message Flow tests specifically
-python -m test_framework.test_runner --level integration --filter "first_message_flow" --real-services
+python unified_test_runner.py --level integration --filter "first_message_flow" --real-services
 
 # Run with staging validation
-python -m test_framework.test_runner --level integration --filter "first_message_flow" --env staging --real-llm
+python unified_test_runner.py --level integration --filter "first_message_flow" --env staging --real-llm
 ```
 
 This specification provides the foundation for implementing robust, business-value-driven integration tests that validate the critical first user message flow while adhering to the platform's testing philosophy and architectural standards.

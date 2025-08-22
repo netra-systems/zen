@@ -38,7 +38,7 @@ describe('LoginForm Validation Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Email Validation', () => {
@@ -143,7 +143,7 @@ describe('LoginForm Validation Tests', () => {
     });
 
     it('should disable form during submission', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -162,7 +162,7 @@ describe('LoginForm Validation Tests', () => {
       expect(mockLogin).toHaveBeenCalled();
       
       // Simulate successful login
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: { id: '1', email: 'test@example.com', full_name: 'Test User' }
       });

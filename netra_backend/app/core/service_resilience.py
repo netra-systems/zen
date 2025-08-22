@@ -4,11 +4,11 @@ This module provides utilities for graceful service degradation, optional servic
 management, and resilient startup patterns following Postel's Law.
 """
 
-import logging
 import asyncio
-from typing import Dict, Any, Optional, Callable, Union, List
-from functools import wraps
+import logging
 from contextlib import asynccontextmanager
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 

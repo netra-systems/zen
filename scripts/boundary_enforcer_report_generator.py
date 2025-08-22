@@ -5,11 +5,14 @@ Handles all report formatting and output generation.
 """
 
 from collections import defaultdict
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 from boundary_enforcer_core_types import (
-    BoundaryReport, BoundaryViolation, create_timestamp
+    BoundaryReport,
+    BoundaryViolation,
+    create_timestamp,
 )
+
 
 class BoundaryReportGenerator:
     """Generates comprehensive boundary enforcement reports"""

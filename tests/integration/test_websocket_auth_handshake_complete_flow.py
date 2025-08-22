@@ -16,13 +16,14 @@ Tests the complete auth flow: OAuth → JWT → WebSocket → Session.
 
 import asyncio
 import json
-import pytest
 import time
-import websockets
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Any, List
 from dataclasses import dataclass
-from unittest.mock import patch, AsyncMock
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
+import websockets
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.mock_utils import mock_justified

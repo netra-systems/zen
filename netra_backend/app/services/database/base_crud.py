@@ -3,18 +3,20 @@
 Core CRUD operations for database repositories.
 """
 
-from typing import TypeVar, Generic, Optional, List, Dict, Any, Type
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.exceptions import RecordNotFoundError, NetraException
-from netra_backend.app.services.database.repository_errors import RepositoryErrorHandler
-from netra_backend.app.services.database.session_manager import SessionManager
-from netra_backend.app.services.database.bulk_operations import BulkOperations
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.core.exceptions import NetraException, RecordNotFoundError
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.bulk_operations import BulkOperations
+from netra_backend.app.services.database.repository_errors import RepositoryErrorHandler
+from netra_backend.app.services.database.session_manager import SessionManager
 
 logger = central_logger.get_logger(__name__)
 

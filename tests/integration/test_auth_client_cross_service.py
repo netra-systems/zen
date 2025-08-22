@@ -4,16 +4,17 @@ Integration tests for auth client cross-service functionality.
 Tests auth client integration with service discovery and cross-service authentication.
 """
 
-import pytest
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import httpx
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from test_framework.mock_utils import mock_justified
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
+import httpx
+import pytest
+
 from dev_launcher.service_discovery import ServiceDiscovery
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from test_framework.mock_utils import mock_justified
 
 
 class TestAuthClientCrossServiceIntegration:
@@ -211,7 +212,10 @@ class TestWebSocketSecurityIntegration:
     
     def test_websocket_validation_with_cross_service_context(self):
         """Test WebSocket message validation in cross-service context."""
-        from netra_backend.app.websocket.validation_security import validate_payload_security, has_valid_payload_structure
+        from netra_backend.app.websocket.validation_security import (
+            has_valid_payload_structure,
+            validate_payload_security,
+        )
         
         # Test message with cross-service metadata
         cross_service_message = {
@@ -235,7 +239,9 @@ class TestWebSocketSecurityIntegration:
     
     def test_websocket_security_prevents_malicious_cross_service_messages(self):
         """Test WebSocket security prevents malicious cross-service messages."""
-        from netra_backend.app.websocket.validation_security import validate_payload_security
+        from netra_backend.app.websocket.validation_security import (
+            validate_payload_security,
+        )
         
         # Test malicious message disguised as cross-service
         malicious_message = {

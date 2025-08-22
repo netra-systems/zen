@@ -1,26 +1,40 @@
 """Thread-Agent Integration Fixtures and Tests"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import uuid
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import (
+    AgentPhase,
+    CheckpointType,
+    StatePersistenceRequest,
+)
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
-from netra_backend.app.db.models_postgres import Thread, Message, Run
-from netra_backend.app.core.exceptions import NetraException
+
+# Add project root to path
+from netra_backend.app.services.thread_service import ThreadService
 
 # Add project root to path
 

@@ -16,12 +16,15 @@ Handles preset matching, custom profile parsing, and default profile creation.
 Single responsibility: Profile parsing and workload type determination.
 """
 
-from typing import Optional, Dict, Any, List
-from netra_backend.app.llm.llm_manager import LLMManager
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.agents.synthetic_data_presets import (
-    WorkloadProfile, DataGenerationType, get_all_presets
+    DataGenerationType,
+    WorkloadProfile,
+    get_all_presets,
 )
 from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

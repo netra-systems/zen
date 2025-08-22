@@ -15,32 +15,45 @@ This test validates real-world LLM agent orchestration including:
 - Context management across agents
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
+import time
 import uuid
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+# # # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from unittest.mock import AsyncMock
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
-    L4StagingCriticalPathTestBase, CriticalPathMetrics
+    CriticalPathMetrics,
+    # Add project root to path
+    L4StagingCriticalPathTestBase,
 )
-# # # from agents.supervisor_agent_modern import ModernSupervisorAgent
-from unittest.mock import AsyncMock
+
 ModernSupervisorAgent = AsyncMock
 from unittest.mock import AsyncMock
+
 ModernSupervisorAgent = AsyncMock
-# # # from agents.base.interface import ExecutionContext, ExecutionResult
+# # # from app.agents.base.interface import ExecutionContext, ExecutionResult
 from unittest.mock import AsyncMock
+
 ExecutionContext = dict
 ExecutionResult = dict
 ExecutionContext = dict
@@ -49,9 +62,11 @@ ExecutionContext = dict  # Use dict as placeholder
 ExecutionResult = dict   # Use dict as placeholder
 # # from netra_backend.app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
-from netra_backend.app.core.configuration.base import get_unified_config
-# # # from agents.tool_dispatcher import ToolDispatcher
+# # # from app.agents.tool_dispatcher import ToolDispatcher
 from unittest.mock import AsyncMock
+
+from netra_backend.app.core.configuration.base import get_unified_config
+
 ToolDispatcher = AsyncMock
 ToolDispatcher = AsyncMock
 # # from netra_backend.app.services.redis.session_manager import RedisSessionManager
@@ -258,6 +273,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             
             # Initialize supervisor agent with real dependencies
             from sqlalchemy.ext.asyncio import AsyncSession
+
             from netra_backend.app.database.connection_manager import get_db_session
             
             db_session = await get_db_session()

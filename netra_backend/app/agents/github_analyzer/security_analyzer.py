@@ -4,7 +4,7 @@ Analyzes security aspects of AI operations maps.
 Handles credential exposure detection and security recommendations.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class SecurityAnalyzer:

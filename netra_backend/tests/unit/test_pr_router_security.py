@@ -1,23 +1,34 @@
 """Tests for PR router security and validation functions."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
+    _is_allowed_return_domain,
+    _is_valid_url,
+    # Add project root to path
     _validate_pr_inputs,
     _validate_pr_number_format,
     _validate_pr_with_github,
-    _is_valid_url,
-    _is_allowed_return_domain
 )
-from netra_backend.app.core.exceptions_auth import AuthenticationError, NetraSecurityException
+from netra_backend.app.core.exceptions_auth import (
+    AuthenticationError,
+    NetraSecurityException,
+)
 
 
 # Tests for _validate_return_url functions

@@ -18,13 +18,13 @@ Business Value: Centralized data access patterns with caching optimization.
 """
 
 import json
-from typing import Dict, List, Optional, Any
 from functools import lru_cache
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
 
 logger = central_logger.get_logger(__name__)
 

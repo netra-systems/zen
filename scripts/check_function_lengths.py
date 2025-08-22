@@ -2,6 +2,7 @@ import ast
 import os
 from pathlib import Path
 
+
 def count_function_lines(node):
     """Count actual lines in a function (excluding decorators and docstrings)."""
     start_line = node.lineno

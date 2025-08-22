@@ -17,14 +17,14 @@ Usage:
     python scripts/test_backend_optimized.py --benchmark
 """
 
+import argparse
+import asyncio
+import logging
 import os
 import sys
-import asyncio
-import argparse
 import time
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import logging
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -32,14 +32,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import optimization modules
 try:
+    from test_framework.intelligent_parallelization import IntelligentTestParallelizer
     from test_framework.optimized_executor import OptimizedTestExecutor
     from test_framework.performance_optimizer import PerformanceOptimizer
     from test_framework.resource_monitor import HardwareAwareOptimizer
-    from test_framework.intelligent_parallelization import IntelligentTestParallelizer
 except ImportError as e:
     print(f"Failed to import optimization modules: {e}")
     print("Falling back to standard test runner...")
-    from scripts.test_backend import main as fallback_main
+    from unified_test_runner import main as fallback_main
     fallback_main()
     sys.exit(0)
 

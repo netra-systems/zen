@@ -9,15 +9,16 @@ This module handles:
 
 import re
 import sys
-from typing import Dict, Any, Optional
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, Optional
 
 from loguru import logger
+from pydantic import BaseModel, ConfigDict, Field
+
 from netra_backend.app.core.logging_context import (
     request_id_context,
+    trace_id_context,
     user_id_context,
-    trace_id_context
 )
 
 

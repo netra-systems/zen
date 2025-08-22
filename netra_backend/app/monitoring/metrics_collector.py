@@ -8,18 +8,19 @@ This module provides comprehensive metrics collection capabilities including:
 """
 
 import asyncio
-import psutil
-import time
 import gc
 import threading
+import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
-from collections import deque, defaultdict
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
+import psutil
+
 from netra_backend.app.core.performance_optimization_manager import performance_manager
 from netra_backend.app.db.observability_metrics import DatabaseMetrics
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -296,7 +297,9 @@ class MetricsCollector:
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         try:
-            from netra_backend.app.websocket.connection_manager import get_connection_manager
+            from netra_backend.app.websocket.connection_manager import (
+                get_connection_manager,
+            )
             conn_manager = get_connection_manager()
             if conn_manager is None:
                 return self._build_empty_websocket_metrics()

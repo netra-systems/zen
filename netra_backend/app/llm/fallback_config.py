@@ -7,8 +7,8 @@ Each class focuses on a single configuration aspect with ≤8 line methods.
 
 import time
 from dataclasses import dataclass
-from typing import List, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List
 
 from netra_backend.app.llm.error_classification import FailureType
 

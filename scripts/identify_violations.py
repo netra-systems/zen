@@ -1,7 +1,8 @@
 import ast
 import os
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
+
 
 def count_function_lines(node: ast.FunctionDef) -> int:
     """Count actual lines in a function."""

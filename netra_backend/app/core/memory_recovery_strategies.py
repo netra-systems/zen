@@ -12,17 +12,17 @@ from netra_backend.app.core.memory_recovery_base import (
     MemoryPressureLevel,
     MemoryRecoveryStrategy,
     MemorySnapshot,
-    MemoryThresholds
+    MemoryThresholds,
 )
 from netra_backend.app.core.memory_recovery_utils import (
     calculate_pressure_level,
     collect_all_memory_metrics,
-    create_memory_snapshot
+    create_memory_snapshot,
 )
 from netra_backend.app.core.memory_strategies import (
-    GarbageCollectionStrategy,
     CacheClearingStrategy,
-    ConnectionPoolReductionStrategy
+    ConnectionPoolReductionStrategy,
+    GarbageCollectionStrategy,
 )
 from netra_backend.app.logging_config import central_logger
 

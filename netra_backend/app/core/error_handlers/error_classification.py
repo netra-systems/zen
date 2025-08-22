@@ -4,12 +4,12 @@ Provides consistent error classification across the system.
 Maps exception types to categories and severities.
 """
 
-from typing import Dict
 from dataclasses import dataclass
+from typing import Dict
 
 from netra_backend.app.core.error_codes import ErrorSeverity
-from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.core.exceptions_agent import AgentError
+from netra_backend.app.schemas.core_enums import ErrorCategory
 
 
 @dataclass

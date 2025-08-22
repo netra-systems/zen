@@ -110,7 +110,7 @@ describe('Thread Management Tests', () => {
         setCurrentThreadId: jest.fn()
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       expectElementByText('Thread 1').toBeInTheDocument();
@@ -136,7 +136,7 @@ describe('Thread Management Tests', () => {
         setCurrentThreadId: mockSetCurrentThreadId
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const thread2 = expectElementByText('Thread 2');
@@ -157,7 +157,7 @@ describe('Thread Management Tests', () => {
         addThread: mockAddThread
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const newThreadButton = expectElementByRole('button', { name: /new thread/i });
@@ -182,7 +182,7 @@ describe('Thread Management Tests', () => {
         deleteThread: mockDeleteThread
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const deleteButton = expectElementByTestId('delete-thread-1');
@@ -206,7 +206,7 @@ describe('Thread Management Tests', () => {
         currentThreadId: null
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       expectElementByText(/No threads available/i).toBeInTheDocument();
@@ -218,7 +218,7 @@ describe('Thread Management Tests', () => {
         isLoading: true
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       expectElementByTestId('thread-loading').toBeInTheDocument();
@@ -235,7 +235,7 @@ describe('Thread Management Tests', () => {
         currentThreadId: '2'
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const currentThread = expectElementByTestId('thread-2');
@@ -253,7 +253,7 @@ describe('Thread Management Tests', () => {
         updateThread: mockUpdateThread
       });
       
-      (useThreadStore as jest.Mock).mockReturnValueOnce(mockThreadStore);
+      jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
       const editButton = expectElementByTestId('edit-thread-1');

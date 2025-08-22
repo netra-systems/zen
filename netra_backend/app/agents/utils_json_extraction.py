@@ -11,33 +11,31 @@
 """Main JSON extraction interface - coordinates parsing and validation modules."""
 
 import json
-from typing import Any, Dict, Optional, List, Callable
-from netra_backend.app.logging_config import central_logger as logger
+from typing import Any, Callable, Dict, List, Optional
 
 # Import functions from specialized modules
 from netra_backend.app.agents.utils_json_parsers import (
-    try_direct_parse,
-    try_extract_object,
-    try_extract_array,
-    try_clean_edges,
-    extract_from_markdown,
     attempt_recovery_parse,
-    extract_truncated_array,
     extract_complex_field,
-    extract_simple_fields
+    extract_from_markdown,
+    extract_simple_fields,
+    extract_truncated_array,
+    try_clean_edges,
+    try_direct_parse,
+    try_extract_array,
+    try_extract_object,
 )
 from netra_backend.app.agents.utils_json_validators import (
-    fix_common_json_errors,
-    count_structure_balance,
     build_closing_sequence,
-    clean_trailing_comma,
-    truncate_at_last_comma,
-    truncate_at_error_position,
     check_required_fields,
-    preprocess_llm_response
+    clean_trailing_comma,
+    count_structure_balance,
+    fix_common_json_errors,
+    preprocess_llm_response,
+    truncate_at_error_position,
+    truncate_at_last_comma,
 )
-
-
+from netra_backend.app.logging_config import central_logger as logger
 
 
 def recover_truncated_json(json_str: str, max_retries: int = 3) -> Optional[Dict[str, Any]]:

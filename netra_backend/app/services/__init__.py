@@ -22,27 +22,25 @@ class ServiceConfigManager:
 # Core services will be imported on-demand to avoid circular import issues
 
 # Quality analytics service
-from . import quality_analytics
-
 # Quality monitor service (test compatibility)
-from . import quality_monitor
-
 # Supply chain services
-from . import supply_optimization
-from . import supply_tracking
-from . import supply_contract_service
-from . import supply_sustainability_service
-from . import supply_catalog_service
-from . import supplier_comparison
-
 # Thread services
-from . import thread_analytics
-
 # New service modules
-from . import llm_manager
-from . import api_gateway
-from . import redis
-from . import billing
+from . import (
+    api_gateway,
+    billing,
+    llm_manager,
+    quality_analytics,
+    quality_monitor,
+    redis,
+    supplier_comparison,
+    supply_catalog_service,
+    supply_contract_service,
+    supply_optimization,
+    supply_sustainability_service,
+    supply_tracking,
+    thread_analytics,
+)
 
 # Alias for backward compatibility
 supply_chain_service = supply_catalog_service

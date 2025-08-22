@@ -9,11 +9,11 @@ This script automatically fixes schema import violations by:
 
 import ast
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
-import re
+from typing import Dict, List, Set, Tuple
 
 
 class SchemaImportFixer:

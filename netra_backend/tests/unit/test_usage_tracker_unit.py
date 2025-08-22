@@ -11,18 +11,27 @@ Tests the UsageTracker that monitors tool usage, enforces limits,
 calculates costs, and triggers upgrade prompts. Core conversion engine.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
-from netra_backend.app.db.models_postgres import User, ToolUsageLog
+from netra_backend.app.db.models_postgres import ToolUsageLog, User
 from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
 
 # Add project root to path

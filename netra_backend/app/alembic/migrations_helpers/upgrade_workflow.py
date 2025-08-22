@@ -3,30 +3,59 @@ Database Upgrade Workflow Functions
 Orchestrates the table creation process during migration upgrade
 """
 
-from netra_backend.app.alembic.migrations_helpers.apex_tables import (
-    _create_apex_reports, _create_apex_runs, _add_apex_runs_cols, 
-    _add_apex_reports_idx, _add_apex_runs_idx
-)
-from netra_backend.app.alembic.migrations_helpers.user_auth_tables import (
-    _create_users, _add_users_cols, _add_users_indexes,
-    _create_secrets, _add_secrets_final
-)
 from netra_backend.app.alembic.migrations_helpers.agent_tables import (
-    _create_assistants, _add_assistants_cols, _add_assistants_final_cols,
-    _create_threads, _create_runs, _add_runs_cols1, _add_runs_cols2, 
-    _add_runs_cols3, _add_runs_final, _create_messages, _add_messages_cols,
-    _add_messages_final, _add_messages_thread_fk, _create_steps,
-    _add_steps_cols1, _add_steps_cols2, _add_steps_cols3, _add_steps_fks
+    _add_assistants_cols,
+    _add_assistants_final_cols,
+    _add_messages_cols,
+    _add_messages_final,
+    _add_messages_thread_fk,
+    _add_runs_cols1,
+    _add_runs_cols2,
+    _add_runs_cols3,
+    _add_runs_final,
+    _add_steps_cols1,
+    _add_steps_cols2,
+    _add_steps_cols3,
+    _add_steps_fks,
+    _create_assistants,
+    _create_messages,
+    _create_runs,
+    _create_steps,
+    _create_threads,
 )
 from netra_backend.app.alembic.migrations_helpers.analysis_tables import (
-    _create_analyses, _add_analyses_cols, _create_analysis_results, 
-    _add_analysis_results_fk, _create_corpora, _add_corpora_cols, 
-    _add_analyses_index, _add_corpora_final
+    _add_analyses_cols,
+    _add_analyses_index,
+    _add_analysis_results_fk,
+    _add_corpora_cols,
+    _add_corpora_final,
+    _create_analyses,
+    _create_analysis_results,
+    _create_corpora,
+)
+from netra_backend.app.alembic.migrations_helpers.apex_tables import (
+    _add_apex_reports_idx,
+    _add_apex_runs_cols,
+    _add_apex_runs_idx,
+    _create_apex_reports,
+    _create_apex_runs,
 )
 from netra_backend.app.alembic.migrations_helpers.supply_tables import (
-    _create_supplies, _add_supplies_final, _create_supply_options, 
-    _add_supply_options_cols, _add_supply_options_final, _create_references, 
-    _add_references_cols, _add_references_final_cols
+    _add_references_cols,
+    _add_references_final_cols,
+    _add_supplies_final,
+    _add_supply_options_cols,
+    _add_supply_options_final,
+    _create_references,
+    _create_supplies,
+    _create_supply_options,
+)
+from netra_backend.app.alembic.migrations_helpers.user_auth_tables import (
+    _add_secrets_final,
+    _add_users_cols,
+    _add_users_indexes,
+    _create_secrets,
+    _create_users,
 )
 
 

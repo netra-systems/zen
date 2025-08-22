@@ -3,13 +3,14 @@ ClickHouse Realistic Log Ingestion Tests
 Tests realistic log ingestion patterns and operations
 """
 
-import pytest
 import asyncio
-import uuid
 import random
+import uuid
 from datetime import datetime, timedelta
-from typing import List, Dict
-from unittest.mock import patch, AsyncMock
+from typing import Dict, List
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 

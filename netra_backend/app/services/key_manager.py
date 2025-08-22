@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from netra_backend.app.schemas.Config import AppConfig
 
+
 class KeyManager(BaseModel):
     jwt_secret_key: str = Field(..., min_length=32)
     fernet_key: bytes = Field(...)

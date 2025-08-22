@@ -21,55 +21,100 @@ Usage:
     from netra_backend.app.schemas.registry import User, Message, AgentState, WebSocketMessage
 """
 
-from typing import Dict, List, Optional, Union, Any, Literal, TypedDict
 from datetime import datetime
-
-# ============================================================================
-# IMPORTS FROM FOCUSED MODULES (450-line COMPLIANCE)
-# ============================================================================
-
-# Import all enums from the dedicated module
-from netra_backend.app.schemas.core_enums import (
-    MessageType, AgentStatus, WebSocketMessageType, WebSocketConnectionState,
-    CorpusAuditAction, CorpusAuditStatus, TaskPriority, MessageTypeLiteral
-)
-
-# Import all core models from the dedicated module
-from netra_backend.app.schemas.core_models import (
-    UserBase, UserCreate, UserCreateOAuth, User, Message, Thread,
-    MessageMetadata, ThreadMetadata
-)
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
 
 # Import all agent models from the dedicated module
 from netra_backend.app.schemas.agent_models import (
-    ToolResultData, AgentMetadata, AgentResult, DeepAgentState, AgentState
-)
-
-# Import all WebSocket models from the dedicated module
-from netra_backend.app.schemas.websocket_models import (
-    BaseWebSocketPayload, StartAgentPayload, CreateThreadPayload,
-    SwitchThreadPayload, DeleteThreadPayload, UserMessagePayload,
-    AgentUpdatePayload, StopAgentPayload, AgentUpdate, AgentLog,
-    ToolCall, ToolResult, StreamChunk, StreamComplete, StreamEvent,
-    AgentStarted, SubAgentUpdate, AgentCompleted, WebSocketError,
-    WebSocketMessage, WebSocketMessageIn, MessageData, ThreadHistoryResponse,
-    AgentResponseData, AgentResponse, MessageToUser, AnalysisRequest,
-    UserMessage, AgentMessage, StopAgent, AgentCompletedPayload,
-    AgentStoppedPayload, ServerMessage, WebSocketValidationError,
-    WebSocketStats, RateLimitInfo, BroadcastResult
+    AgentMetadata,
+    AgentResult,
+    AgentState,
+    DeepAgentState,
+    ToolResultData,
 )
 
 # Import all audit models from the dedicated module
 from netra_backend.app.schemas.audit_models import (
-    CorpusAuditMetadata, CorpusAuditRecord, CorpusAuditSearchFilter,
-    CorpusAuditReport
+    CorpusAuditMetadata,
+    CorpusAuditRecord,
+    CorpusAuditReport,
+    CorpusAuditSearchFilter,
+)
+
+# ============================================================================
+# IMPORTS FROM FOCUSED MODULES (450-line COMPLIANCE)
+# ============================================================================
+# Import all enums from the dedicated module
+from netra_backend.app.schemas.core_enums import (
+    AgentStatus,
+    CorpusAuditAction,
+    CorpusAuditStatus,
+    MessageType,
+    MessageTypeLiteral,
+    TaskPriority,
+    WebSocketConnectionState,
+    WebSocketMessageType,
+)
+
+# Import all core models from the dedicated module
+from netra_backend.app.schemas.core_models import (
+    Message,
+    MessageMetadata,
+    Thread,
+    ThreadMetadata,
+    User,
+    UserBase,
+    UserCreate,
+    UserCreateOAuth,
+)
+
+# Import all WebSocket models from the dedicated module
+from netra_backend.app.schemas.websocket_models import (
+    AgentCompleted,
+    AgentCompletedPayload,
+    AgentLog,
+    AgentMessage,
+    AgentResponse,
+    AgentResponseData,
+    AgentStarted,
+    AgentStoppedPayload,
+    AgentUpdate,
+    AgentUpdatePayload,
+    AnalysisRequest,
+    BaseWebSocketPayload,
+    BroadcastResult,
+    CreateThreadPayload,
+    DeleteThreadPayload,
+    MessageData,
+    MessageToUser,
+    RateLimitInfo,
+    ServerMessage,
+    StartAgentPayload,
+    StopAgent,
+    StopAgentPayload,
+    StreamChunk,
+    StreamComplete,
+    StreamEvent,
+    SubAgentUpdate,
+    SwitchThreadPayload,
+    ThreadHistoryResponse,
+    ToolCall,
+    ToolResult,
+    UserMessage,
+    UserMessagePayload,
+    WebSocketError,
+    WebSocketMessage,
+    WebSocketMessageIn,
+    WebSocketStats,
+    WebSocketValidationError,
 )
 
 # Import additional WebSocket message types from websocket_payloads
 from netra_backend.app.schemas.websocket_payloads import (
-    BaseWebSocketMessage, ClientToServerMessage, ServerToClientMessage
+    BaseWebSocketMessage,
+    ClientToServerMessage,
+    ServerToClientMessage,
 )
-
 
 # ============================================================================
 # BACKWARD COMPATIBILITY AND EXPORTS

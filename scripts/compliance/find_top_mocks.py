@@ -4,9 +4,10 @@ Quick script to find top mocked functions/services that need justification or re
 """
 
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from typing import List, Tuple
+
 
 def find_mock_patterns(root_path: str = ".") -> List[Tuple[str, str, int, str]]:
     """Find all mock patterns and categorize them"""

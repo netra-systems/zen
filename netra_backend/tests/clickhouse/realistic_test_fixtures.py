@@ -3,18 +3,19 @@ Common fixtures and helpers for realistic ClickHouse operations tests
 Shared utilities for production-like data volumes and patterns
 """
 
-import pytest
-import uuid
-import random
 import json
+import random
+import uuid
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
 from netra_backend.app.db.clickhouse_query_fixer import (
+    ClickHouseQueryInterceptor,
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
-    ClickHouseQueryInterceptor
 )
 
 

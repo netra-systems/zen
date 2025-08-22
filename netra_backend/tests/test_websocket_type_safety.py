@@ -4,31 +4,39 @@ Entry point for WebSocket message type safety testing suite.
 Imports and orchestrates tests from focused modules.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-
-# Import from the focused modules
-from netra_backend.tests.websocket.test_websocket_type_safety_factory import (
-    WebSocketMessageFactory, 
-    WebSocketTestDataFactory
-)
-from netra_backend.tests.websocket.test_websocket_client_to_server_types import (
-    TestClientToServerMessageTypes,
-    TestClientMessageBatchValidation
-)
-from netra_backend.tests.websocket.test_websocket_server_to_client_types import (
-    TestServerToClientMessageTypes,
-    TestServerMessageBatchValidation
-)
 from netra_backend.tests.websocket.test_websocket_bidirectional_types import (
     TestBidirectionalTypeConsistency,
+    TestWebSocketMessageValidation,
     TestWebSocketSendToThread,
-    TestWebSocketMessageValidation
+)
+from netra_backend.tests.websocket.test_websocket_client_to_server_types import (
+    TestClientMessageBatchValidation,
+    TestClientToServerMessageTypes,
+)
+from netra_backend.tests.websocket.test_websocket_server_to_client_types import (
+    TestServerMessageBatchValidation,
+    TestServerToClientMessageTypes,
+)
+
+# Add project root to path
+# Import from the focused modules
+from netra_backend.tests.websocket.test_websocket_type_safety_factory import (
+    WebSocketMessageFactory,
+    WebSocketTestDataFactory,
 )
 
 

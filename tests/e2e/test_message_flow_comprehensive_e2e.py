@@ -19,16 +19,17 @@ Test Coverage:
 - Message format validation
 """
 
-import pytest
 import asyncio
-import websockets
-import aiohttp
 import json
-import uuid
 import time
-from typing import Dict, List, Optional, Any
+import uuid
 from datetime import datetime, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
+import websockets
 
 
 class MessageFlowTester:

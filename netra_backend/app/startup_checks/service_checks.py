@@ -5,13 +5,14 @@ Handles external service connectivity (Redis, ClickHouse, LLM providers).
 Maintains 25-line function limit and focused responsibility.
 """
 
-import time
 import asyncio
+import time
 from typing import List
+
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.llm_types import LLMProvider
 from netra_backend.app.startup_checks.models import StartupCheckResult
-from netra_backend.app.core.configuration import unified_config_manager
 
 
 class ServiceChecker:

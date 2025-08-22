@@ -96,7 +96,7 @@ describe('Authentication & Connection Tests', () => {
         isAuthenticated: false
       });
       
-      (useAuthStore as jest.Mock).mockReturnValueOnce(mockAuthStore);
+      jest.mocked(useAuthStore).mockReturnValueOnce(mockAuthStore);
       render(<ChatHeader />);
       expectElementByText(/Please log in/i).toBeInTheDocument();
     });
@@ -109,7 +109,7 @@ describe('Authentication & Connection Tests', () => {
         logout: mockLogout
       });
       
-      (useAuthStore as jest.Mock).mockReturnValueOnce(mockAuthStore);
+      jest.mocked(useAuthStore).mockReturnValueOnce(mockAuthStore);
       render(<ChatHeader />);
       
       const logoutButton = expectElementByRole('button', { name: /logout/i });
@@ -197,7 +197,7 @@ describe('Authentication & Connection Tests', () => {
         connectionState: 'connected'
       });
       
-      (useAuthStore as jest.Mock).mockReturnValueOnce(mockAuthStore);
+      jest.mocked(useAuthStore).mockReturnValueOnce(mockAuthStore);
       (useWebSocket as jest.Mock).mockReturnValueOnce(mockWebSocket);
       
       render(<ChatHeader />);
@@ -217,7 +217,7 @@ describe('Authentication & Connection Tests', () => {
         connectionState: 'disconnected'
       });
       
-      (useAuthStore as jest.Mock).mockReturnValueOnce(mockAuthStore);
+      jest.mocked(useAuthStore).mockReturnValueOnce(mockAuthStore);
       (useWebSocket as jest.Mock).mockReturnValueOnce(mockWebSocket);
       
       render(<ChatHeader />);

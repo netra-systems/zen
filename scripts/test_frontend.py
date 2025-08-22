@@ -5,14 +5,14 @@ Designed for easy use by Claude Code and CI/CD pipelines
 Now with test isolation support for concurrent execution
 """
 
-import os
-import sys
-import json
-import time
 import argparse
+import json
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -21,7 +21,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import test isolation utilities
 try:
-    from scripts.test_isolation import TestIsolationManager
+    from test_framework.test_isolation import TestIsolationManager
 except ImportError:
     TestIsolationManager = None
 
@@ -359,27 +359,27 @@ def get_usage_examples():
     return """
 Examples:
   # Run all Jest tests
-  python scripts/test_frontend.py
+  python unified_test_runner.py --service frontend
   
   # Run specific category
-  python scripts/test_frontend.py --category components
-  python scripts/test_frontend.py --category hooks
+  python unified_test_runner.py --service frontend --category components
+  python unified_test_runner.py --service frontend --category hooks
   
   # Run with coverage
-  python scripts/test_frontend.py --coverage
+  python unified_test_runner.py --service frontend --coverage
   
   # Run E2E tests with Cypress
-  python scripts/test_frontend.py --e2e
-  python scripts/test_frontend.py --cypress-open
+  python unified_test_runner.py --service frontend --e2e
+  python unified_test_runner.py --service frontend --cypress-open
   
   # Run specific test file
-  python scripts/test_frontend.py components/Button.test.tsx
+  python unified_test_runner.py --service frontend components/Button.test.tsx
   
   # Watch mode for development
-  python scripts/test_frontend.py --watch
+  python unified_test_runner.py --service frontend --watch
   
   # Full CI/CD run
-  python scripts/test_frontend.py --lint --type-check --coverage --build
+  python unified_test_runner.py --service frontend --lint --type-check --coverage --build
         """
 
 

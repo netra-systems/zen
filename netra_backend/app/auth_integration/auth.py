@@ -22,18 +22,20 @@ ARCHITECTURE:
 
 See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 """
-from typing import Optional, Annotated, Dict, Any
+# Create auth-specific logger
+import logging
 from datetime import timedelta
+from typing import Annotated, Any, Dict, Optional
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.dependencies import get_db_dependency as get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 
-# Create auth-specific logger
-import logging
 logger = logging.getLogger('auth_integration.auth')
 
 security = HTTPBearer()
@@ -65,8 +67,9 @@ async def get_current_user(
             detail="Invalid token payload",
         )
     
-    from sqlalchemy import select
     import os
+
+    from sqlalchemy import select
     
     # Use async session properly with context manager
     async with db as session:
@@ -193,6 +196,7 @@ def validate_token_jwt(token: str) -> Optional[Dict]:
 # Backward compatibility for token_manager imports
 from dataclasses import dataclass
 
+
 @dataclass
 class TokenClaims:
     """DEPRECATED: Compatibility stub for token_manager.TokenClaims"""
@@ -261,15 +265,15 @@ def _build_pr_state_data(pr_number: str, csrf_token: str) -> Dict:
 def _encode_state_to_base64(state_data: Dict) -> str:
     """DEPRECATED: Compatibility stub for pr_router._encode_state_to_base64"""
     logger.warning("_encode_state_to_base64 is deprecated - use auth service")
-    import json
     import base64
+    import json
     return base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
 
 def _decode_state_from_base64(state_string: str) -> Dict:
     """DEPRECATED: Compatibility stub for pr_router._decode_state_from_base64"""
     logger.warning("_decode_state_from_base64 is deprecated - use auth service")
-    import json
     import base64
+    import json
     return json.loads(base64.urlsafe_b64decode(state_string))
 
 def _validate_state_timestamp(timestamp: float) -> None:

@@ -1,8 +1,8 @@
 """Message Queue Service module"""
 
-from typing import Dict, Any, Optional, List
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
 
 class MessageQueueService:

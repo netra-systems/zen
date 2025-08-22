@@ -4,7 +4,7 @@ Focused micro-functions for sanitizing text, dictionaries, and lists.
 Each function ≤8 lines for performance-critical WebSocket sanitization path.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
 

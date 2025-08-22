@@ -4,9 +4,9 @@ Core data structures and types for code review system.
 Implements foundational classes and issue tracking.
 """
 
-from typing import List, Dict, Any
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class ReviewIssue:

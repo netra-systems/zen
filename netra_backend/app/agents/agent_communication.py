@@ -3,16 +3,30 @@
 Handles WebSocket communication, error handling, and message updates for agents.
 """
 
-import time
 import asyncio
-from typing import Dict, Any
-from starlette.websockets import WebSocketDisconnect
-from langchain_core.messages import SystemMessage
+import time
+from typing import Any, Dict
 
-from netra_backend.app.schemas.Agent import SubAgentUpdate, SubAgentState
-from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
-from netra_backend.app.agents.error_handler import global_error_handler, ErrorContext, WebSocketError
+from langchain_core.messages import SystemMessage
+from starlette.websockets import WebSocketDisconnect
+
+# Import error types directly to avoid circular imports
+from netra_backend.app.core.exceptions_database import DatabaseError
+
+# Define WebSocketError locally to avoid circular imports
+class WebSocketError(Exception):
+    """Error related to WebSocket communication."""
+    pass
+
+# Create error context locally to avoid circular imports
+class ErrorContext:
+    """Context for error handling in agent communication."""
+    def __init__(self, agent_id: str = None, **kwargs):
+        self.agent_id = agent_id
+        self.additional_info = kwargs
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Agent import SubAgentState, SubAgentUpdate
+from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
 logger = central_logger.get_logger(__name__)
 
@@ -131,8 +145,8 @@ class AgentCommunicationMixin:
     
     def _process_websocket_error(self, websocket_error: WebSocketError) -> None:
         """Process WebSocket error through centralized handler."""
-        global_error_handler._store_error(websocket_error)
-        global_error_handler._log_error(websocket_error)
+        # Log error directly instead of using global_error_handler to avoid circular import
+        logger.error(f"WebSocket error for agent {self.agent_id}: {websocket_error}")
     
     def _store_failed_update(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
         """Store failed update for potential retry later."""

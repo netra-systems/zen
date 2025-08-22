@@ -6,14 +6,24 @@ These tests validate that imports are correctly structured
 and that modules are in expected locations.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestImportStructureFailures:
@@ -120,10 +130,12 @@ class TestImportStructureFailures:
         
         # Then try to import modules that StartupChecker depends on
         try:
-            from netra_backend.app.environment_checks import EnvironmentChecker
             from netra_backend.app.database_checks import DatabaseChecker
+            from netra_backend.app.environment_checks import EnvironmentChecker
             from netra_backend.app.service_checks import ServiceChecker
-            from netra_backend.app.system_checks import SystemChecker as SystemChecksModule
+            from netra_backend.app.system_checks import (
+                SystemChecker as SystemChecksModule,
+            )
         except ImportError as e:
             pytest.fail(f"Circular import detected: {e}")
     
@@ -178,8 +190,9 @@ class TestImportErrorConsequences:
         """
         # Try to run startup checks the way the app would
         with pytest.raises(ImportError):
-            from netra_backend.app.startup_checks import run_startup_checks
             from fastapi import FastAPI
+
+            from netra_backend.app.startup_checks import run_startup_checks
             
             app = FastAPI()
             # This would fail due to import error
@@ -191,8 +204,9 @@ class TestImportErrorConsequences:
         This exposes the broken public API.
         """
         with pytest.raises(ImportError):
-            from netra_backend.app.startup_checks import StartupChecker
             from fastapi import FastAPI
+
+            from netra_backend.app.startup_checks import StartupChecker
             
             app = FastAPI()
             checker = StartupChecker(app)
@@ -276,8 +290,10 @@ class TestCorrectImportStructure:
         """
         from netra_backend.app.checker import SystemChecker
         from netra_backend.app.startup_checks.checker import StartupChecker
-        from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
         from netra_backend.app.startup_checks.database_checks import DatabaseChecker
+        from netra_backend.app.startup_checks.environment_checks import (
+            EnvironmentChecker,
+        )
         
         # Each should have unique interface
         checkers = {

@@ -5,8 +5,8 @@ Handles shell commands with timeout and error handling.
 """
 
 import subprocess
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
 
 from .core import ReviewConfig
 

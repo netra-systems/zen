@@ -6,10 +6,11 @@ discovering it during test collection, which was causing port binding conflicts.
 
 Usage: python scripts/debug_uvicorn_recursion.py"""
 
-import sys
-import uvicorn
 import os
+import sys
 from pathlib import Path
+
+import uvicorn
 
 # Add project root to path (parent of scripts directory)
 sys.path.insert(0, str(Path(__file__).parent.parent))

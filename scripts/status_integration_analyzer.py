@@ -8,13 +8,22 @@ Complies with 450-line and 25-line function limits.
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
+
 try:
     from .status_types import (
-        WebSocketStatus, ApiSyncStatus, OAuthStatus, IntegrationStatus, StatusConfig
+        ApiSyncStatus,
+        IntegrationStatus,
+        OAuthStatus,
+        StatusConfig,
+        WebSocketStatus,
     )
 except ImportError:
     from status_types import (
-        WebSocketStatus, ApiSyncStatus, OAuthStatus, IntegrationStatus, StatusConfig
+        ApiSyncStatus,
+        IntegrationStatus,
+        OAuthStatus,
+        StatusConfig,
+        WebSocketStatus,
     )
 
 

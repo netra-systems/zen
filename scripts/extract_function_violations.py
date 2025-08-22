@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Extract and prioritize function length violations for agent-based fixing"""
 import ast
+import json
 import os
 from pathlib import Path
 from typing import List, Tuple
-import json
+
 
 class FunctionViolationExtractor:
     def __init__(self, root_path: str = "."):

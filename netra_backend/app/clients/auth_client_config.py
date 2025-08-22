@@ -4,9 +4,9 @@ Handles OAuth settings for different environments and deployment contexts.
 """
 
 import logging
-from typing import List
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import List
 
 from netra_backend.app.core.config import get_config
 

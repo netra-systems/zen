@@ -5,6 +5,11 @@ service components that have been split into focused modules for better maintain
 """
 
 # Core agent service
+# Backward compatibility
+from netra_backend.app.services.agent_service_compat import (
+    generate_stream,
+    process_message,
+)
 from netra_backend.app.services.agent_service_core import AgentService
 
 # Factory functions
@@ -13,8 +18,6 @@ from netra_backend.app.services.agent_service_factory import get_agent_service
 # Streaming components
 from netra_backend.app.services.agent_service_streaming import AgentResponseProcessor
 
-# Backward compatibility
-from netra_backend.app.services.agent_service_compat import process_message, generate_stream
 
 # Multimodal processing
 async def process_multimodal(multimodal_data: dict) -> dict:
@@ -26,14 +29,16 @@ async def process_multimodal(multimodal_data: dict) -> dict:
 # Fallback agent functions for testing
 def get_primary_agent():
     """Get primary agent instance."""
-    from .agent_service_core import AgentService
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+
+    from .agent_service_core import AgentService
     return AgentService(SupervisorAgent())
 
 def get_fallback_agent():
     """Get fallback agent instance."""
-    from .agent_service_core import AgentService
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+
+    from .agent_service_core import AgentService
     return AgentService(SupervisorAgent())
 
 __all__ = [

@@ -3,16 +3,25 @@ WebSocket Updates Test Suite for Synthetic Data Service
 Testing WebSocket real-time updates during generation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
 # Add project root to path

@@ -4,12 +4,12 @@ Cleanup script for generated docs, reports, and agent communication files.
 Removes files older than 1 day from designated directories.
 """
 
-import os
-import time
 import json
+import os
 import shutil
-from pathlib import Path
+import time
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List, Tuple
 
 # Configuration

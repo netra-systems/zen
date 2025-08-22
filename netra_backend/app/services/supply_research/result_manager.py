@@ -4,10 +4,11 @@ Handles retrieval and management of research results
 """
 
 import json
-from typing import List, Dict, Any, Optional
-from datetime import datetime, UTC, timedelta
-from netra_backend.app.redis_manager import RedisManager
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.supply_research.scheduler_models import ResearchSchedule
 
 

@@ -9,21 +9,29 @@ Business Value Justification (BVJ):
 - Revenue Impact: Quality monitoring enables SLA guarantees for Enterprise tier
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from datetime import UTC, datetime
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
-from datetime import datetime, UTC
 
 # Add project root to path
-
 from netra_backend.tests.routes.test_route_fixtures import (
-
-# Add project root to path
-    basic_test_client,
     CommonResponseValidators,
-    MockServiceFactory
+    MockServiceFactory,
+    # Add project root to path
+    basic_test_client,
 )
 
 
@@ -80,7 +88,11 @@ class TestQualityRoute:
     async def test_quality_alerts(self):
         """Test quality threshold alerts."""
         from netra_backend.app.routes.quality_handlers import handle_alerts_request
-        from netra_backend.app.schemas.quality_types import QualityAlert, AlertSeverity, MetricType
+        from netra_backend.app.schemas.quality_types import (
+            AlertSeverity,
+            MetricType,
+            QualityAlert,
+        )
         
         # Create proper QualityAlert objects
         test_alert = QualityAlert(
@@ -254,7 +266,10 @@ class TestQualityRoute:
         """Test quality report generation."""
         
         with patch('app.routes.quality_handlers.handle_report_generation') as mock_report:
-            from netra_backend.app.schemas.quality_types import QualityReport, QualityReportType
+            from netra_backend.app.schemas.quality_types import (
+                QualityReport,
+                QualityReportType,
+            )
             
             mock_report.return_value = QualityReport(
                 report_type=QualityReportType.SUMMARY,

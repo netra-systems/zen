@@ -5,17 +5,18 @@ Helper functions for E2E performance testing to maintain 450-line limit
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, Mock
 import uuid
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 def create_benchmark_supervisor(infrastructure, index):
     """Create supervisor for benchmarking"""
     from ..fixtures.llm_agent_fixtures import (
-        setup_llm_responses, create_supervisor_with_mocks
+        create_supervisor_with_mocks,
+        setup_llm_responses,
     )
     
     db_session, llm_manager, ws_manager = infrastructure
@@ -99,7 +100,9 @@ def create_flow_persistence_mock():
 async def run_concurrency_benchmark(concurrency_level):
     """Run concurrency benchmark for given level"""
     from ..fixtures.llm_agent_fixtures import (
-        create_mock_infrastructure, setup_llm_responses, create_supervisor_with_mocks
+        create_mock_infrastructure,
+        create_supervisor_with_mocks,
+        setup_llm_responses,
     )
     
     start_time = time.time()

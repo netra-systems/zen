@@ -2,8 +2,9 @@
 Auth Service Configuration
 Handles environment variable loading with staging/production awareness
 """
-import os
 import logging
+import os
+
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 logger = logging.getLogger(__name__)

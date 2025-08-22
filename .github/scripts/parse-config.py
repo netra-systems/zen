@@ -6,10 +6,10 @@ Reads JSON configuration files and outputs values for GitHub Actions workflow us
 ACT compatible - follows patterns from MASTER_GITHUB_WORKFLOW.xml
 """
 
+import argparse
 import json
 import os
 import sys
-import argparse
 from pathlib import Path
 from typing import Any, Dict, Optional
 

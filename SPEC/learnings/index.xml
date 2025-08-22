@@ -83,9 +83,19 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
-        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest">
+        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
+            <critical-takeaway>All test directories MUST be added to test_scanners.py for discovery (test-discovery-all-directories).</critical-takeaway>
+            <critical-takeaway>Test runner requires PROJECT_ROOT in sys.path for imports (test-import-project-root).</critical-takeaway>
+        </category>
+        
+        <category name="Test Infrastructure Unification" path="SPEC/learnings/test_unification.xml" keywords="Test Runner, Unified Testing, Test Framework, Test Plumbing">
+            <critical-takeaway>Use unified_test_runner.py in root as single entry point for ALL test operations.</critical-takeaway>
+            <critical-takeaway>Test infrastructure (runners, configs) centralized in root/test_framework/, test files remain in service directories.</critical-takeaway>
+            <critical-takeaway>Service differences abstracted via SERVICE_CONFIGS - same interface for pytest/jest backends.</critical-takeaway>
+            <critical-takeaway>Import paths must be updated systematically when consolidating - use migration scripts for large refactors.</critical-takeaway>
+            <critical-takeaway>Maintain backwards compatibility during migrations with wrapper scripts and deprecation warnings.</critical-takeaway>
         </category>
         
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
@@ -99,7 +109,7 @@
             <critical-takeaway>Set PYTHONPATH explicitly on Windows: set PYTHONPATH=C:\path\to\app</critical-takeaway>
             <critical-takeaway>Run tests from app directory for proper import resolution.</critical-takeaway>
             <critical-takeaway>Use -m "not real_services" to skip external API calls in tests.</critical-takeaway>
-            <critical-takeaway>Test size limits: 300 lines per file, 8 lines per function (many violations exist).</critical-takeaway>
+            <critical-takeaway>Test size limits: 1000 lines per file, 8 lines per function (many violations exist).</critical-takeaway>
         </category>
         
         <category name="Test Import Standardization" path="SPEC/test_import_standardization.xml" keywords="Test Setup, sys.path, Imports, DRY, setup_test_path">

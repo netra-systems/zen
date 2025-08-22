@@ -10,6 +10,7 @@ Creates production-ready tools that enforce CLAUDE.md architectural rules:
 These tools are designed for CI/CD integration and large codebase analysis.
 """
 
+import argparse
 import ast
 import json
 import os
@@ -17,12 +18,10 @@ import re
 import sys
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
-
-import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 @dataclass

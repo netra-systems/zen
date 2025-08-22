@@ -7,10 +7,10 @@ Generates comprehensive system status report based on specifications and test co
 import json
 import subprocess
 import sys
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Tuple
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -30,8 +30,10 @@ class WIPReportGenerator:
         """Run architecture compliance check with relaxed violation counting."""
         try:
             # First try to get relaxed counts using the new counter
-            from scripts.compliance.relaxed_violation_counter import RelaxedViolationCounter
             from scripts.compliance import ArchitectureEnforcer
+            from scripts.compliance.relaxed_violation_counter import (
+                RelaxedViolationCounter,
+            )
             
             enforcer = ArchitectureEnforcer(root_path=self.project_root)
             results = enforcer.run_all_checks()

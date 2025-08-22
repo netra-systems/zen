@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
+
 class CodeReviewReporter:
     """Handles all report generation operations for code review"""
     

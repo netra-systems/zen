@@ -2,11 +2,12 @@
 JWT Token Handler - Core authentication token management
 Maintains 450-line limit with focused single responsibility
 """
-import os
-import jwt
-from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional, Any
 import logging
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional
+
+import jwt
 
 from auth_service.auth_core.config import AuthConfig
 

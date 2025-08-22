@@ -8,32 +8,40 @@ COMPLIANCE: Modular split from 514-line monolith
 
 # Add project root to path
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-from netra_backend.tests.startup.test_health_monitor_core import (
-
-# Add project root to path
-    TestHealthStage,
-    TestServiceConfig,
-    TestHealthCheckResult,
-    TestStageConfig,
-    TestServiceState,
-    TestStagedHealthMonitorInit
-)
-from netra_backend.tests.startup.test_health_monitor_lifecycle import (
-    TestServiceRegistration,
-    TestMonitoringLifecycle
-)
-from netra_backend.tests.startup.test_health_monitor_checks import (
-    TestHealthChecks,
-    TestCheckResultProcessing,
-    TestStageProgression
-)
 from netra_backend.tests.startup.test_health_monitor_adaptive import (
     TestAdaptiveRules,
+    TestHealthCheckFactories,
     TestServiceStatus,
-    TestHealthCheckFactories
+)
+from netra_backend.tests.startup.test_health_monitor_checks import (
+    TestCheckResultProcessing,
+    TestHealthChecks,
+    TestStageProgression,
+)
+from netra_backend.tests.startup.test_health_monitor_core import (
+    TestHealthCheckResult,
+    # Add project root to path
+    TestHealthStage,
+    TestServiceConfig,
+    TestServiceState,
+    TestStageConfig,
+    TestStagedHealthMonitorInit,
+)
+from netra_backend.tests.startup.test_health_monitor_lifecycle import (
+    TestMonitoringLifecycle,
+    TestServiceRegistration,
 )
 
 # Re-export for backward compatibility

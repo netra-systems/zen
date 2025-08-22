@@ -1,17 +1,22 @@
 """Fixtures for quality monitoring tests"""
 
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.services.quality_gate_service import QualityLevel, ContentType, QualityMetrics
+import pytest
+
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityLevel,
+    QualityMetrics,
+)
 from netra_backend.app.services.quality_monitoring_service import (
-    QualityMonitoringService,
+    AgentQualityProfile,
     AlertSeverity,
     MetricType,
     QualityAlert,
+    QualityMonitoringService,
     QualityTrend,
-    AgentQualityProfile
 )
 
 

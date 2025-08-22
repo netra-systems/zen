@@ -6,8 +6,8 @@ Extracted from metrics_middleware.py to maintain 25-line function limits.
 import asyncio
 import time
 import traceback
-from typing import Dict, Any, Optional, Callable, List, Union
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.metrics.agent_metrics_models import FailureType

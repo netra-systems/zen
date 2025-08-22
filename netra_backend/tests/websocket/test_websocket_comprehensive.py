@@ -18,37 +18,46 @@ Tests cover:
 15. Token expiry and refresh
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 import time
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+import websockets
 from fastapi import WebSocket
 from fastapi.testclient import TestClient
-import websockets
+
+from netra_backend.app.core.websocket_cors import (
+    WebSocketCORSHandler,
+    get_environment_origins,
+    validate_websocket_origin,
+)
+from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-
-from netra_backend.app.routes.mcp.main import app
+from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_enhanced import (
-
-# Add project root to path
+    authenticate_websocket_with_database,
+    connection_manager,
+    # Add project root to path
     enhanced_websocket_endpoint,
     get_websocket_service_discovery,
     validate_websocket_token_enhanced,
-    authenticate_websocket_with_database,
-    connection_manager
 )
-from netra_backend.app.core.websocket_cors import (
-    WebSocketCORSHandler,
-    validate_websocket_origin,
-    get_environment_origins
-)
-from netra_backend.app.db.postgres import get_async_db
 from netra_backend.tests.conftest import create_test_user, get_test_token
 
 

@@ -6,12 +6,13 @@ Systematically analyzes Python functions across critical modules to identify
 violations of the 25-line function limit per CLAUDE.md specifications.
 """
 
+import argparse
 import ast
 import os
-from pathlib import Path
-from typing import Dict, List, Tuple, NamedTuple
 from dataclasses import dataclass
-import argparse
+from pathlib import Path
+from typing import Dict, List, NamedTuple, Tuple
+
 
 @dataclass
 class FunctionInfo:

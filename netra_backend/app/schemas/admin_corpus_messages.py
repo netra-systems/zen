@@ -6,10 +6,11 @@ All models follow Pydantic with strong typing per type_safety.xml.
 Maximum 300 lines per conventions.xml, each function ≤8 lines.
 """
 
-from typing import Dict, Any, List, Optional, Literal
+from datetime import UTC, datetime
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
-from datetime import datetime, UTC
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CorpusIntent(str, Enum):

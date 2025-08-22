@@ -4,10 +4,13 @@ Pytest Fixtures for Resource Isolation Testing
 Contains pytest fixtures for the resource isolation test suite.
 """
 
-import pytest
 import logging
 
-from tests.e2e.resource_isolation.suite.test_suite_core import ResourceIsolationTestSuite
+import pytest
+
+from tests.e2e.resource_isolation.suite.test_suite_core import (
+    ResourceIsolationTestSuite,
+)
 
 logger = logging.getLogger(__name__)
 

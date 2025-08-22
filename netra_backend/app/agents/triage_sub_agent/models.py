@@ -3,9 +3,11 @@
 This module defines all the Pydantic models and enums used by the triage system.
 """
 
-from typing import Optional, Dict, Any, List
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field, field_validator
+
 from netra_backend.app.core.json_parsing_utils import parse_dict_field
 
 

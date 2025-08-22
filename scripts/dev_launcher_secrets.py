@@ -8,7 +8,7 @@ import os
 import socket
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Tuple, Optional, List
+from typing import Dict, List, Optional, Tuple
 
 from .dev_launcher_config import get_project_root
 

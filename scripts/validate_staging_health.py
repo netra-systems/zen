@@ -8,14 +8,15 @@ Validates all health endpoints and service connectivity.
 Each function ≤8 lines, file ≤300 lines.
 """
 
+import json
 import os
 import sys
 import time
-import json
-import requests
-from typing import Dict, List, Tuple, Optional
 from datetime import datetime
-from colorama import init, Fore, Style
+from typing import Dict, List, Optional, Tuple
+
+import requests
+from colorama import Fore, Style, init
 
 init(autoreset=True)
 

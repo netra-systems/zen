@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run compliance checker and capture output."""
-import sys
 import os
+import sys
 
 # Set UTF-8 encoding
 os.environ['PYTHONIOENCODING'] = 'utf-8'
@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scripts.compliance.analyzer import Analyzer
 from scripts.compliance.collector import ViolationCollector
 from scripts.compliance.reporter import ComplianceReporter
+
 
 def main():
     analyzer = Analyzer()

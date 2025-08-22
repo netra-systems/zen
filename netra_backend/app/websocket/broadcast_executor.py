@@ -4,13 +4,16 @@ Handles the actual execution of broadcast operations to connections.
 """
 
 import asyncio
-from typing import Dict, List, Any, Union, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.schemas.websocket_message_types import ServerMessage, BroadcastResult
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.schemas.websocket_message_types import (
+    BroadcastResult,
+    ServerMessage,
+)
 from netra_backend.app.websocket import broadcast_utils as utils
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 
 logger = central_logger.get_logger(__name__)
 

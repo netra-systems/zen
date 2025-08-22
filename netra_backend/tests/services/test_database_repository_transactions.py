@@ -3,31 +3,42 @@ Tests for database repository transaction management.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
-# Add project root to path
+import pytest
+from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 
-from netra_backend.app.db.transaction_core import with_deadlock_retry
 from netra_backend.app.core.exceptions import DatabaseError
 
-from netra_backend.tests.database_transaction_test_helpers import (
-
 # Add project root to path
-    create_mock_session,
+from netra_backend.app.db.transaction_core import with_deadlock_retry
+from netra_backend.tests.database_transaction_test_helpers import (
+    MockDatabaseModel,
+    assert_all_sessions_closed,
     configure_mock_query_results,
+    # Add project root to path
+    create_mock_session,
     create_tracked_session_factory,
     run_multiple_transaction_cycles,
-    assert_all_sessions_closed,
-    MockDatabaseModel
 )
-from netra_backend.tests.database_transaction_test_mocks import MockRepository, TransactionTestManager
+from netra_backend.tests.database_transaction_test_mocks import (
+    MockRepository,
+    TransactionTestManager,
+)
 
 
 @pytest.fixture

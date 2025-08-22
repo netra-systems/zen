@@ -6,7 +6,8 @@ Split from dispatcher_core.py to maintain 450-line limit.
 
 Business Value: Enables secure admin operations with full audit trail.
 """
-from typing import Dict, Any
+from typing import Any, Dict
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
@@ -78,7 +79,10 @@ async def handle_operation_error(dispatcher, error: Exception, operation: Dict[s
 async def execute_operation_safely(dispatcher, tool_name: str, 
                                  params: Dict[str, Any]) -> Dict[str, Any]:
     """Execute operation via tool dispatcher if available"""
-    from .dispatcher_helpers import execute_operation_via_dispatcher, create_no_dispatcher_error
+    from .dispatcher_helpers import (
+        create_no_dispatcher_error,
+        execute_operation_via_dispatcher,
+    )
     if has_valid_tool_dispatcher(dispatcher):
         return await execute_operation_via_dispatcher(dispatcher, tool_name, params)
     return create_no_dispatcher_error(tool_name)

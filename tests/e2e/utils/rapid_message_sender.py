@@ -13,12 +13,16 @@ import json
 import logging
 import time
 import uuid
-import websockets
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 
-from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import MessageBurstResult, MessageSequenceEntry
+import websockets
+
+from tests.e2e.fixtures.rapid_message_fixtures import (
+    MessageBurstResult,
+    MessageSequenceEntry,
+)
 
 logger = logging.getLogger(__name__)
 

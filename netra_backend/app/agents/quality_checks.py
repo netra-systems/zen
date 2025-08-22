@@ -4,14 +4,19 @@ This module contains validation logic separated from the supervisor
 to maintain the 450-line and 25-line function limits per CLAUDE.md.
 """
 
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
-from netra_backend.app.core.interfaces_quality import QualityValidator as CoreQualityValidator
-from netra_backend.app.core.quality_types import ContentType, ValidationResult
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.core.interfaces_quality import (
+    QualityValidator as CoreQualityValidator,
+)
+from netra_backend.app.core.quality_types import ContentType, ValidationResult
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.quality_types import (
+    QualityValidationResult,
+    QualityValidatorInterface,
+)
 from netra_backend.app.services.quality_gate_service import QualityGateService
 
 logger = central_logger.get_logger(__name__)
@@ -209,7 +214,7 @@ class QualityValidator(QualityValidatorInterface):
     
     def _build_default_metrics(self, content: str):
         """Build default quality metrics."""
-        from netra_backend.app.schemas.quality_types import QualityMetrics, QualityLevel
+        from netra_backend.app.schemas.quality_types import QualityLevel, QualityMetrics
         base_scores = self._get_default_scores()
         additional_metrics = self._get_default_additional_metrics(content)
         return QualityMetrics(**base_scores, **additional_metrics)

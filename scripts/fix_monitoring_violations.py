@@ -7,6 +7,7 @@ Each function must be <= 8 lines.
 import os
 import re
 
+
 def fix_alert_manager_core():
     """Fix violations in alert_manager_core.py"""
     file_path = 'app/monitoring/alert_manager_core.py'

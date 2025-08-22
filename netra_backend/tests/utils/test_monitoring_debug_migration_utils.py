@@ -3,22 +3,34 @@ Tests for monitoring, debug, and migration utilities (Tests 98-100).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import MonitoringTestHelpers
 from netra_backend.tests.helpers.debug_migration_test_helpers import (
+    # Add project root to path
+    DebugTestHelpers,
+    MigrationTestHelpers,
+)
 
 # Add project root to path
-    DebugTestHelpers, MigrationTestHelpers
+from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
+    MonitoringTestHelpers,
 )
 
 

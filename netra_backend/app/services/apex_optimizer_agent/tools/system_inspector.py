@@ -1,6 +1,7 @@
 
 from typing import Any, Dict, List
 
+
 class SystemInspector:
     def __init__(self):
         """Initialize the SystemInspector."""

@@ -7,9 +7,10 @@ Each function must be ≤8 lines as per architecture requirements.
 import hashlib
 import json
 import time
-from typing import Optional, Dict, Any
-from netra_backend.app.redis_manager import redis_manager
+from typing import Any, Dict, Optional
+
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -5,9 +5,10 @@ Maximum 300 lines, functions ≤8 lines
 """
 
 import asyncio
-import pytest
-from typing import Dict, Any, Optional, List, Callable
+from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class StandardAsyncMockFactory:

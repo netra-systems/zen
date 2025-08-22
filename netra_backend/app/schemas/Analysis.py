@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from typing import Dict
 from datetime import datetime
+from typing import Dict
+
+from pydantic import BaseModel
+
 
 class AnalysisResult(BaseModel):
     id: str

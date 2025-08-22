@@ -7,11 +7,11 @@ Should this be also or primarily in clickhouse?
 """
 
 import os
-from sqlalchemy import (
-    Column, String, DateTime, Boolean, Text, JSON, Integer
-)
-from netra_backend.app.db.base import Base
 from datetime import datetime, timezone
+
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
+
+from netra_backend.app.db.base import Base
 
 
 class MCPExternalServer(Base):

@@ -1,13 +1,17 @@
 """Agent state management models with immutable patterns."""
-from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
-from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
-from netra_backend.app.core.json_parsing_utils import parse_string_list_field
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field, field_validator
 
 # Import actual types needed at runtime
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.core.json_parsing_utils import parse_string_list_field
 from netra_backend.app.schemas.agent_models import AgentMetadata
+from netra_backend.app.schemas.shared_types import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:

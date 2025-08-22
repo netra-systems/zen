@@ -124,7 +124,7 @@ describe('First Load Integration Tests', () => {
         name: 'Test User'
       };
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         loading: false,
         user: mockUser,
         error: null
@@ -142,7 +142,7 @@ describe('First Load Integration Tests', () => {
     });
 
     it('should handle auth service unavailable gracefully', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         loading: false,
         user: null,
         error: 'Auth service unavailable'
@@ -160,7 +160,7 @@ describe('First Load Integration Tests', () => {
     });
 
     it('should show loading during auth check', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         loading: true,
         user: null,
         error: null
@@ -181,7 +181,7 @@ describe('First Load Integration Tests', () => {
 
     it('should render login page with Google OAuth button', async () => {
       const mockLogin = jest.fn();
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         login: mockLogin,
         loading: false,
         user: null,
@@ -204,7 +204,7 @@ describe('First Load Integration Tests', () => {
     });
 
     it('should show loading state during login process', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         login: jest.fn(),
         loading: true,
         user: null,

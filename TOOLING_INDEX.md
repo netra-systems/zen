@@ -44,7 +44,7 @@ This index provides a comprehensive overview of all quality checking, violation 
   - Multi-environment validation (local, dev, staging)
   - Coverage reporting
   - Bad test detection
-- **Usage**: `python -m test_framework.test_runner --level integration --no-coverage --fast-fail`
+- **Usage**: `python unified_test_runner.py --level integration --no-coverage --fast-fail`
 
 ---
 
@@ -290,7 +290,7 @@ This index provides a comprehensive overview of all quality checking, violation 
 python scripts/check_architecture_compliance.py
 
 # Run unified test suite
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Check and fix imports
 python scripts/unified_import_manager.py all

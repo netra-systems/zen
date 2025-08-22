@@ -1,7 +1,7 @@
 """Authentication and authorization exceptions - compliant with 25-line function limit."""
 
-from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class AuthenticationError(NetraException):

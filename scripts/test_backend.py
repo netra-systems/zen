@@ -5,13 +5,13 @@ Designed for easy use by Claude Code and CI/CD pipelines
 Now with test isolation support for concurrent execution
 """
 
-import os
-import sys
-import json
-import time
-import asyncio
 import argparse
+import asyncio
+import json
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -21,7 +21,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import test isolation utilities
 try:
-    from scripts.test_isolation import TestIsolationManager
+    from test_framework.test_isolation import TestIsolationManager
 except ImportError:
     TestIsolationManager = None
 
@@ -37,9 +37,9 @@ TEST_CATEGORIES = {
     "smoke": [
         "netra_backend/tests/routes/test_health_route.py",
         "netra_backend/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
-        "netra_backend/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
+        "netra_backend/tests/core/test_config_manager.py::TestSecretManager::test_initialization",
         "netra_backend/tests/services/test_security_service.py::test_encrypt_and_decrypt",
-        "netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading"
+        "netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup"
     ],
 }
 
@@ -185,13 +185,13 @@ def build_pytest_args(args) -> List[str]:
 
 def _add_config_file_args(pytest_args):
     """Add pytest configuration file path"""
-    # Check if we're testing app/ directory tests
-    app_pytest_ini = PROJECT_ROOT / "app" / "pytest.ini"
+    # Use netra_backend pytest.ini for backend tests if it exists
+    netra_backend_pytest = PROJECT_ROOT / "netra_backend" / "pytest.ini"
     root_pytest_ini = PROJECT_ROOT / "pytest.ini"
     
-    # Use app/pytest.ini if it exists, otherwise use root pytest.ini
-    if app_pytest_ini.exists():
-        pytest_args.extend(["-c", str(app_pytest_ini)])
+    # Prefer netra_backend pytest.ini for proper path resolution
+    if netra_backend_pytest.exists():
+        pytest_args.extend(["-c", str(netra_backend_pytest)])
     elif root_pytest_ini.exists():
         pytest_args.extend(["-c", str(root_pytest_ini)])
 
@@ -260,7 +260,7 @@ def _add_coverage_args(args, pytest_args):
 def _get_coverage_options(args):
     """Get coverage configuration options"""
     return [
-        "--cov=app", "--cov-report=html:reports/coverage/html",
+        "--cov=netra_backend.app", "--cov-report=html:reports/coverage/html",
         "--cov-report=term-missing", "--cov-report=json:reports/coverage/coverage.json",
         f"--cov-fail-under={args.min_coverage}"
     ]
@@ -450,30 +450,30 @@ def _get_basic_usage_examples():
     """Get basic usage examples"""
     return """Examples:
   # Run all tests
-  python scripts/test_backend.py
+  python unified_test_runner.py --service backend
   
   # Run specific category
-  python scripts/test_backend.py --category unit
-  python scripts/test_backend.py --category agent"""
+  python unified_test_runner.py --service backend --category unit
+  python unified_test_runner.py --service backend --category agent"""
 
 def _get_advanced_usage_examples():
     """Get advanced usage examples"""
     return """
   
   # Run with coverage
-  python scripts/test_backend.py --coverage --min-coverage 80
+  python unified_test_runner.py --service backend --coverage --min-coverage 80
   
   # Run specific test file
-  python scripts/test_backend.py netra_backend/tests/test_main.py
+  python unified_test_runner.py --service backend netra_backend/tests/test_main.py
   
   # Run tests matching keyword
-  python scripts/test_backend.py -k "test_login"
+  python unified_test_runner.py --service backend -k "test_login"
   
   # Quick smoke test
-  python scripts/test_backend.py --category smoke --fail-fast
+  python unified_test_runner.py --service backend --category smoke --fail-fast
   
   # Full CI/CD run
-  python scripts/test_backend.py --coverage --html-output --json-output --parallel auto
+  python unified_test_runner.py --service backend --coverage --html-output --json-output --parallel auto
         """
 
 

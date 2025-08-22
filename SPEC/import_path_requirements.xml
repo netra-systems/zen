@@ -73,7 +73,7 @@
           <description>Importing test runner components</description>
           <example>
             from test_framework.test_config import TEST_LEVELS
-            from test_framework.test_runner import TestRunner
+            from unified_test_runner import TestRunner
           </example>
         </rule>
       </rules>

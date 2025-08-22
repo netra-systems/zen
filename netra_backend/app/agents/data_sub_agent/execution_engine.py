@@ -23,31 +23,38 @@ Business Value: Critical data analysis pipeline - HIGH revenue impact.
 BVJ: Growth & Enterprise | Data Intelligence Core | +25% performance capture
 """
 
-from typing import Dict, Any, Callable, Optional, TYPE_CHECKING
-from datetime import datetime, UTC
 import time
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.state import DeepAgentState
 
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
-)
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.interface import (
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
+)
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.data_sub_agent.execution_analysis import AnalysisRouter
 
 # Import existing modular components
 from netra_backend.app.agents.data_sub_agent.execution_core import ExecutionCore
-from netra_backend.app.agents.data_sub_agent.execution_parameters import ParameterProcessor
-from netra_backend.app.agents.data_sub_agent.execution_analysis import AnalysisRouter
-from netra_backend.app.agents.data_sub_agent.execution_fallbacks import ExecutionFallbackHandler
+from netra_backend.app.agents.data_sub_agent.execution_fallbacks import (
+    ExecutionFallbackHandler,
+)
+from netra_backend.app.agents.data_sub_agent.execution_parameters import (
+    ParameterProcessor,
+)
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 
 class DataSubAgentExecutionEngine(BaseExecutionInterface):

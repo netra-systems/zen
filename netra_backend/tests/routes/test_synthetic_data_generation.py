@@ -9,19 +9,27 @@ Business Value Justification (BVJ):
 - Revenue Impact: Premium feature for faster model iteration and testing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 # Add project root to path
-
 from netra_backend.tests.routes.test_route_fixtures import (
-
-# Add project root to path
+    CommonResponseValidators,
+    # Add project root to path
     basic_test_client,
-    CommonResponseValidators
 )
 
 
@@ -128,8 +136,9 @@ class TestSyntheticDataGeneration:
     
     async def test_synthetic_data_templates(self):
         """Test synthetic data template management."""
-        from netra_backend.app.routes.synthetic_data import _fetch_templates
         from unittest.mock import AsyncMock
+
+        from netra_backend.app.routes.synthetic_data import _fetch_templates
         
         # Mock the database dependency
         mock_db = AsyncMock()

@@ -47,7 +47,7 @@
             </measurement>
             <exceptions>
                 <exception>Example/demo files (severity: low warning)</exception>
-                <exception>Test files (but still discouraged)</exception>
+                <exception>Test files may extend up to 1000 lines (test_*.py, *.test.ts, *.test.tsx)</exception>
             </exceptions>
         </limit>
 

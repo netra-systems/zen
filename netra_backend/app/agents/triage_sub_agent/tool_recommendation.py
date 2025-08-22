@@ -10,8 +10,12 @@
 # ================================
 """Tool recommendation utilities - compliant with 25-line limit."""
 
-from typing import List, Dict
-from netra_backend.app.agents.triage_sub_agent.models import ToolRecommendation, ExtractedEntities
+from typing import Dict, List
+
+from netra_backend.app.agents.triage_sub_agent.models import (
+    ExtractedEntities,
+    ToolRecommendation,
+)
 
 
 def get_tool_mapping() -> Dict[str, List[str]]:

@@ -9,26 +9,29 @@ Integrates with modern agent base components for:
 Business Value: Reduces WebSocket error recovery time by 60%.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.error_types import WebSocketErrorInfo, ErrorSeverity
-from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
-from netra_backend.app.websocket.error_handler_recovery import ErrorHandlerRecovery
-from netra_backend.app.websocket.error_handler_logging import ErrorHandlerLogger
-from netra_backend.app.websocket.error_handler_cleanup import ErrorHandlerCleanup
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+# Import ExecutionErrorHandler from correct location
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 
 # Modern agent architecture imports
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult,
-    WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.errors import ExecutionErrorHandler
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.error_handler_cleanup import ErrorHandlerCleanup
+from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.websocket.error_handler_logging import ErrorHandlerLogger
+from netra_backend.app.websocket.error_handler_recovery import ErrorHandlerRecovery
+from netra_backend.app.websocket.error_types import ErrorSeverity, WebSocketErrorInfo
 
 
 class ModernWebSocketErrorInterface(BaseExecutionInterface):

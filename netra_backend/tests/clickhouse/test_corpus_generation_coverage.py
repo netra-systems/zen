@@ -3,29 +3,41 @@ Test Suite 3: Corpus Generation Coverage Tests
 Tests comprehensive coverage of corpus generation workflows
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import uuid
+import asyncio
 import json
 import os
-import asyncio
+import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
+import pytest
+from schemas import ContentGenParams, CorpusCreate, CorpusUpdate
 
 # Add project root to path
-
-from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus, ContentSource
+from netra_backend.app.services.corpus_service import (
+    ContentSource,
+    CorpusService,
+    CorpusStatus,
+)
 from netra_backend.app.services.generation_service import (
-
-# Add project root to path
+    get_corpus_from_clickhouse,
+    # Add project root to path
     run_content_generation_job,
     run_synthetic_data_generation_job,
     save_corpus_to_clickhouse,
-    get_corpus_from_clickhouse
 )
-from schemas import CorpusCreate, CorpusUpdate, ContentGenParams
 
 
 class TestCorpusLifecycle:

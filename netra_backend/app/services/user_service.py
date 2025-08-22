@@ -1,11 +1,13 @@
-from netra_backend.app.services.base import EnhancedCRUDService
+from typing import Any, Dict, List, Optional, Union
+
+from argon2 import PasswordHasher
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.User import UserCreate, UserUpdate
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
-from fastapi.encoders import jsonable_encoder
-from typing import List, Dict, Any, Optional, Union
-from argon2 import PasswordHasher
+from netra_backend.app.services.base import EnhancedCRUDService
 
 # Initialize Argon2 hasher for password hashing
 ph = PasswordHasher()
@@ -60,8 +62,9 @@ class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     
     async def get_or_create_dev_user(self, db: AsyncSession, email: str = "dev@example.com", user_id: Optional[str] = None) -> User:
         """Get or create development user. SINGLE SOURCE OF TRUTH for dev user creation."""
-        from sqlalchemy.exc import IntegrityError
         import uuid
+
+        from sqlalchemy.exc import IntegrityError
         
         # First try to find by email
         user = await self.get_by_email(db, email=email)

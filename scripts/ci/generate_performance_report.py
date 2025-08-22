@@ -3,9 +3,9 @@
 
 import argparse
 import json
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any
+from pathlib import Path
+from typing import Any, Dict
 
 
 def generate_performance_report(results: Dict[str, Any], format: str) -> str:

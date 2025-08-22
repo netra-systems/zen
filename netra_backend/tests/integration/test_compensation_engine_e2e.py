@@ -12,34 +12,47 @@ Tests the complete compensation engine workflow from cost tracking to fee captur
 Critical for revenue generation and customer trust.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+import tempfile
+import uuid
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-import asyncio
-import uuid
-from decimal import Decimal
-from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_user import ToolUsageLog, User
 
 # Add project root to path
-
 from netra_backend.app.services.factory_status.business_core import (
-
-# Add project root to path
-    BusinessValueScore, BusinessObjective, ValueCategory, ROIEstimate
+    BusinessObjective,
+    # Add project root to path
+    BusinessValueScore,
+    ROIEstimate,
+    ValueCategory,
 )
-from netra_backend.app.db.models_user import User, ToolUsageLog
+
 # TODO: Implement ValueCalculator class in app.services.factory_status.value_calculator
 # from netra_backend.app.services.factory_status.value_calculator import ValueCalculator
 from netra_backend.app.services.factory_status.metrics_roi import ROICalculator
 from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from netra_backend.app.db.base import Base
-import tempfile
 
 
 class TestCompensationEngineE2E:

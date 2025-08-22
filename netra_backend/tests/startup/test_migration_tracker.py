@@ -4,21 +4,35 @@ Tests all critical migration operations, state management, and error handling.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import json
 import asyncio
-from pathlib import Path
+import json
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from pathlib import Path
 from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.exceptions import NetraException
 
 # Add project root to path
-
-from netra_backend.app.startup.migration_tracker import MigrationTracker, MigrationState, FailedMigration
-from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.startup.migration_tracker import (
+    FailedMigration,
+    MigrationState,
+    MigrationTracker,
+)
 
 # Add project root to path
 

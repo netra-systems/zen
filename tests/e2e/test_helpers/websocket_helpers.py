@@ -8,8 +8,8 @@ import json
 import logging
 import time
 import uuid
-from typing import Dict, Any, Optional, List, Callable
 from contextlib import asynccontextmanager
+from typing import Any, Callable, Dict, List, Optional
 
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode

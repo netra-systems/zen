@@ -9,27 +9,35 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum business value prote
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
-from unittest.mock import Mock, AsyncMock, patch, MagicMock, mock_open
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, mock_open, patch
+
+import pytest
+from fastapi import WebSocket, WebSocketDisconnect
 
 # Add project root to path
-
-
 # FastAPI and WebSocket imports
 from fastapi.testclient import TestClient
-from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
 # Core business components - simplified and verified
-from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector  
+from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 
 @pytest.mark.critical

@@ -11,35 +11,40 @@ BVJ:
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-import pytest
-import pytest_asyncio
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+import time
 import uuid
 from datetime import datetime
-import time
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.agent_service import AgentService
+import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.agents.test_fixtures import (
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-    mock_llm_manager, mock_db_session, mock_websocket_manager,
-    mock_tool_dispatcher, mock_persistence_service, supervisor_agent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.tests.agents.test_fixtures import (
+    mock_db_session,
+    # Add project root to path
+    mock_llm_manager,
+    mock_persistence_service,
+    mock_tool_dispatcher,
+    mock_websocket_manager,
+    supervisor_agent,
 )
 
 

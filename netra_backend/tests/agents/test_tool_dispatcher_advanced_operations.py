@@ -1,25 +1,33 @@
 """Unit tests for ToolDispatcher advanced operations."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.tests.helpers.tool_dispatcher_assertions import (
+    assert_execution_error_response,
+)
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (
-
-# Add project root to path
+    # Add project root to path
     create_mock_tool,
     create_test_state,
-    verify_dispatch_response_success,
     verify_dispatch_response_error,
-    verify_metadata
-)
-from netra_backend.tests.helpers.tool_dispatcher_assertions import (
-    assert_execution_error_response
+    verify_dispatch_response_success,
+    verify_metadata,
 )
 
 

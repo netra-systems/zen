@@ -3,8 +3,8 @@ Base Data Generator Configuration
 Provides common constants and utilities for data generation
 """
 
-from typing import List, Optional
 import random
+from typing import List, Optional
 
 
 class DataGeneratorBase:

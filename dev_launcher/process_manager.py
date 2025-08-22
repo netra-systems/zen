@@ -11,16 +11,16 @@ Windows-specific features:
 Services rely on their native reload capabilities (uvicorn, Next.js).
 """
 
+import logging
 import os
-import sys
 import signal
+import socket
 import subprocess
+import sys
 import threading
 import time
-import socket
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Set
-import logging
+from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 

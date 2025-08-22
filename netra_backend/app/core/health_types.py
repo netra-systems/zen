@@ -3,12 +3,16 @@
 Centralized type definitions for system health monitoring components.
 """
 
-from enum import Enum
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from enum import Enum
 
 # Import shared types from their single sources of truth
-from netra_backend.app.core.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
+from netra_backend.app.core.shared_health_types import (
+    ComponentHealth,
+    HealthStatus,
+    SystemAlert,
+)
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 

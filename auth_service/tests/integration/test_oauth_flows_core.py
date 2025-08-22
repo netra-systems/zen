@@ -1,18 +1,20 @@
 """Core Tests - Split from test_oauth_flows.py"""
 
-import pytest
-import httpx
-from unittest.mock import patch, Mock, AsyncMock
 import json
-from typing import Dict, Any
 import secrets
+import sys
 import uuid
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
-from auth_service.auth_core.models.auth_models import AuthProvider
-import sys
 from pathlib import Path
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
+
+import httpx
+import pytest
+from fastapi.testclient import TestClient
 from main import app
+
+from auth_service.auth_core.models.auth_models import AuthProvider
 
 
 class TestSyntaxFix:

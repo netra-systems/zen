@@ -8,9 +8,9 @@ Business Value Justification (BVJ):
 - Revenue Impact: Indirect - ensures system reliability for production
 """
 
-from typing import Dict, List, Any
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
 
 class MockDataGenerator:

@@ -6,13 +6,13 @@ Maximum 300 lines, functions ≤8 lines
 
 import ast
 import asyncio
-from pathlib import Path
-from typing import Dict, List, Any
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
 
 from netra_backend.tests.async_pattern_analyzer import AsyncPatternAnalyzer
-from netra_backend.tests.async_resource_detector import AsyncResourceLeakDetector  
 from netra_backend.tests.async_performance_analyzer import AsyncPerformanceAnalyzer
+from netra_backend.tests.async_resource_detector import AsyncResourceLeakDetector
 
 
 @dataclass

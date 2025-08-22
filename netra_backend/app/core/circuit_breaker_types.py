@@ -5,9 +5,9 @@ and data classes used by the circuit breaker system.
 """
 
 import time
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, Optional
-from dataclasses import dataclass, field
 
 from netra_backend.app.core.exceptions_service import ServiceError
 

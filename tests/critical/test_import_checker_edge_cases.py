@@ -4,13 +4,15 @@ Critical test cases for import checker to catch edge cases and syntax errors.
 These tests ensure the import checker catches ALL problematic import patterns.
 """
 
-from scripts.comprehensive_import_scanner import ComprehensiveImportScanner
 import ast
-import tempfile
-import pytest
-from pathlib import Path
-import sys
 import re
+import sys
+import tempfile
+from pathlib import Path
+
+import pytest
+
+from scripts.comprehensive_import_scanner import ComprehensiveImportScanner
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent

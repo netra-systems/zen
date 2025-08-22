@@ -4,19 +4,28 @@ This file demonstrates how environment variables can override feature flags
 for different testing scenarios and CI/CD environments.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import os
+
 import pytest
+
 from test_framework.decorators import (
-
-# Add project root to path
-
+    experimental_test,
+    # Add project root to path
     feature_flag,
-    tdd_test,
     requires_feature,
-    experimental_test
+    tdd_test,
 )
 
 

@@ -1,7 +1,9 @@
 """Demo handlers for industry templates and metrics."""
 
+from typing import Any, Dict, List
+
 from fastapi import HTTPException
-from typing import Dict, Any, List
+
 from netra_backend.app.logging_config import central_logger as logger
 
 
@@ -54,7 +56,7 @@ async def handle_synthetic_metrics(scenario: str, duration_hours: int, demo_serv
     except AttributeError:
         # Fallback if demo_service doesn't have generate_synthetic_metrics
         logger.info("Using default synthetic metrics")
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return {
             "latency_reduction": 60.0 + (duration_hours * 0.5),
             "throughput_increase": 200.0 + (duration_hours * 1.0),

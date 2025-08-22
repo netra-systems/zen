@@ -3,27 +3,37 @@ L4 Integration Test: Complete Auth Session Lifecycle
 Tests the entire auth session from creation to expiry including edge cases
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import jwt
+import pytest
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
+from netra_backend.app.config import settings
+from netra_backend.app.models.session import Session
+from netra_backend.app.models.user import User
 
+# Add project root to path
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.token_service import TokenService
-from netra_backend.app.models.user import User
-from netra_backend.app.models.session import Session
-from netra_backend.app.config import settings
 
 # Add project root to path
 

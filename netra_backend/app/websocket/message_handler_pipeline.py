@@ -4,7 +4,7 @@ Core message processing pipeline with validation and error handling.
 """
 
 import json
-from typing import Dict, Any, Optional, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo

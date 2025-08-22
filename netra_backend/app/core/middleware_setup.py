@@ -2,17 +2,18 @@
 Middleware configuration module.
 Handles CORS, session, and other middleware setup for FastAPI.
 """
+import logging
 import os
 import re
-from typing import Any, Callable, Optional, List, Dict
+from typing import Any, Callable, Dict, List, Optional
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from netra_backend.app.core.configuration import get_configuration
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -124,8 +125,9 @@ def _setup_custom_cors_middleware(app: FastAPI) -> None:
     service_discovery = None
     if config.environment == "development":
         try:
-            from dev_launcher.service_discovery import ServiceDiscovery
             from pathlib import Path
+
+            from dev_launcher.service_discovery import ServiceDiscovery
             # Initialize service discovery for CORS integration
             service_discovery = ServiceDiscovery(Path.cwd())
         except ImportError:

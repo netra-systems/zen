@@ -76,15 +76,22 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | - Supply Tools | `/app/services/apex_optimizer_agent/tools/` | `supply_catalog_search.py` | Supply catalog search |
 | - Report Generation | `/app/services/apex_optimizer_agent/tools/` | `final_report_generator.py` | Final optimization reports |
 
-### Test Files (Multiple Test Types)
+### Test Files (Unified Testing System)
+| Component | Location | Purpose | Documentation |
+|-----------|----------|---------|---------------|
+| **📖 MAIN TESTING GUIDE** | `/TESTING.md` | **Comprehensive testing documentation** | Start here for all testing |
+| **Unified Test Runner** | `/unified_test_runner.py` | Single entry point for ALL tests | Run with `--help` for options |
+| **Test Configuration** | `/unified_test_config.py` | Central test configuration | Test levels, environments, coverage |
+| **Test Framework** | `/test_framework/` | Test utilities and plumbing | Consolidated infrastructure |
+
+#### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
 |-----------|----------|---------|-------------|
-| Unit Tests | `/netra_backend/tests/unit/` | `test_*.py` | `python -m test_framework.test_runner --level unit` |
-| Integration Tests | `/netra_backend/tests/integration/` | `test_*.py` | `python -m test_framework.test_runner --level integration` |
-| E2E Tests | `/tests/unified/e2e/` | `test_*.py` | `python -m test_framework.test_runner --level e2e` |
-| Import Tests | `/netra_backend/tests/` | `test_imports.py` | `python scripts/test_imports.py` |
+| Backend Tests | `/netra_backend/tests/` | `test_*.py` | `python unified_test_runner.py --service backend` |
+| Auth Tests | `/auth_service/tests/` | `test_*.py` | `python unified_test_runner.py --service auth` |
+| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python unified_test_runner.py --service frontend` |
+| E2E Tests | `/tests/unified/e2e/` | `test_*.py` | `python unified_test_runner.py --level comprehensive` |
 | Legacy Tests | `/legacy_integration_tests/` | `test_*.py` | **DEPRECATED - Do not use** |
-| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `npm test` |
 
 ### Import Testing System
 | Component | Location | Purpose | Key Functions |
@@ -102,7 +109,7 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | **Pytest Plugin** | `/test_framework/pytest_bad_test_plugin.py` | Pytest integration | Automatic test outcome recording |
 | **Reporter CLI** | `/test_framework/bad_test_reporter.py` | View/manage reports | `python -m test_framework.bad_test_reporter` |
 | **Data Storage** | `/test_reports/bad_tests.json` | Persistent failure history | JSON format with test statistics |
-| **Integration** | `/scripts/test_backend.py` | Backend test runner | `--no-bad-test-detection` flag |
+| **Integration** | `/unified_test_runner.py --service backend` | Backend test runner | `--no-bad-test-detection` flag |
 
 #### Bad Test Detection Commands
 ```bash
@@ -119,7 +126,7 @@ python -m test_framework.bad_test_reporter --test "test_name"
 python -m test_framework.bad_test_reporter --reset
 
 # Disable detection for a run
-python scripts/test_backend.py --no-bad-test-detection
+python unified_test_runner.py --service backend --no-bad-test-detection
 ```
 
 ---
@@ -129,7 +136,7 @@ python scripts/test_backend.py --no-bad-test-detection
 ### Backend Entry Points
 - **Main App**: `/app/main.py` - FastAPI application entry
 - **Dev Launcher**: `/scripts/dev_launcher.py` - Development server starter
-- **Test Runner**: `/test_framework/test_runner.py` - Test execution entry (run with `python -m test_framework.test_runner`)
+- **Test Runner**: `/test_framework/test_runner.py` - Test execution entry (run with `python unified_test_runner.py`)
 
 ### Deployment Entry Points
 - **Enhanced Deploy**: `/organized_root/deployment_configs/deploy_staging_enhanced.py` - Modular deployment orchestrator
@@ -458,7 +465,7 @@ python scripts/test_backend.py --no-bad-test-detection
 - **Types**: `/app/schemas/websocket_types.py`
 
 ### Issue: "Tests failing"
-- **Runner**: `/test_framework/test_runner.py` (use `python -m test_framework.test_runner`)
+- **Runner**: `/test_framework/test_runner.py` (use `python unified_test_runner.py`)
 - **Unit tests**: `/app/tests/unit/`
 - **E2E tests**: `/app/tests/e2e/`
 

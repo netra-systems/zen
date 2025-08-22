@@ -3,17 +3,22 @@ Security compliance auditors and scoring logic.
 Contains all auditor implementations and compliance calculation functionality.
 """
 
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
+
 # NOTE: Temporarily commented out - these modules need to be moved to auth_integration
 # from netra_backend.app.auth_integration.enhanced_auth_security import enhanced_auth_security
 # from netra_backend.app.auth_integration.api_key_manager import api_key_manager
 enhanced_auth_security = None  # Placeholder until consolidation complete
 api_key_manager = None  # Placeholder until consolidation complete
-from netra_backend.app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory
+from netra_backend.app.security.audit_findings import (
+    SecurityCategory,
+    SecurityFinding,
+    SecuritySeverity,
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -269,4 +274,7 @@ class ConfigurationAuditor(SecurityAuditor):
 
 
 # Import scoring functionality from dedicated module
-from netra_backend.app.security.audit_scoring import compliance_score_calculator, security_recommendation_engine
+from netra_backend.app.security.audit_scoring import (
+    compliance_score_calculator,
+    security_recommendation_engine,
+)

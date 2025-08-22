@@ -2,9 +2,10 @@
 Factory Status Utilities
 """
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
-from netra_backend.app.services.factory_status.report_builder import FactoryStatusReport
+from typing import Any, Dict, List
+
 from netra_backend.app.routes.factory_status.models import ReportResponse
+from netra_backend.app.services.factory_status.report_builder import FactoryStatusReport
 
 
 def _filter_by_start_date(reports: List, start_date: datetime) -> List:

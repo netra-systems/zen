@@ -15,26 +15,27 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for enterprise sales, compliance requirements, regulatory adherence
 """
 
-import pytest
-import jwt
-import json
 import asyncio
-import httpx
-from typing import Dict, Any, List
-from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
-import uuid
-import secrets
 import hashlib
+import json
+import secrets
+import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
 
+import httpx
+import jwt
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
-from netra_backend.app.services.permission_service import PermissionService
+
 from netra_backend.app.agents.admin_tool_permissions import AdminToolPermissionManager
-from netra_backend.tests.unified.clients.auth_client import AuthTestClient
-from netra_backend.tests.unified.clients.backend_client import BackendTestClient
-from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient
+from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
+from netra_backend.app.services.permission_service import PermissionService
+from tests.clients.auth_client import AuthTestClient
+from tests.clients.backend_client import BackendTestClient
+from tests.clients.websocket_client import WebSocketTestClient
 
 
 class TestTenantIsolation:

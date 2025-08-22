@@ -14,22 +14,25 @@ This test validates the complete agent failover and recovery system.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
 import json
-import time
 import random
-from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
-import aiohttp
-import websockets
-import pytest
-from datetime import datetime, timedelta
-import uuid
 
 # Add project root to path
 import sys
+import time
+import uuid
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import aiohttp
+import pytest
+import websockets
+
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 

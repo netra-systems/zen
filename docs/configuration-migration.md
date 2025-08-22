@@ -196,7 +196,7 @@ if not is_valid:
 python scripts/test_imports.py
 
 # Run integration tests
-python -m test_framework.test_runner --level integration
+python unified_test_runner.py --level integration
 ```
 
 ## Business Impact

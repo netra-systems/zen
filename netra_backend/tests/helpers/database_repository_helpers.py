@@ -5,7 +5,7 @@ on database repositories. All functions are ≤8 lines.
 """
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
 

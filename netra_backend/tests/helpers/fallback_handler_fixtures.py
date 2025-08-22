@@ -3,8 +3,10 @@ Test fixtures for fallback handler tests
 Provides reusable test data, metadata objects, and mock configurations
 """
 
+from typing import Any, Dict, List, Tuple
+
 import pytest
-from typing import Dict, List, Tuple, Any
+
 from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
 
 

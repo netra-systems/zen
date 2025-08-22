@@ -3,16 +3,17 @@ Session Cleanup Job Tests
 Tests automated session cleanup and maintenance operations
 Focuses on database cleanup and expired session management
 """
-import pytest
 import asyncio
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch, MagicMock
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from auth_service.auth_core.database.models import AuthSession, AuthUser
-from auth_service.auth_core.database.connection import auth_db
+import pytest
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.database.connection import auth_db
+from auth_service.auth_core.database.models import AuthSession, AuthUser
 
 
 class SessionCleanupService:

@@ -3,8 +3,8 @@ Quality issue analysis for corpus operations
 Handles issue categorization, tracking, and analysis
 """
 
-from typing import Dict, List, Any
 from collections import defaultdict
+from typing import Any, Dict, List
 
 from netra_backend.app.schemas.Metrics import QualityMetrics
 

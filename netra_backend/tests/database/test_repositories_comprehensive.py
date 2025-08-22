@@ -3,17 +3,27 @@ Comprehensive repository tests (76-85) from top 100 missing tests.
 Tests database operations, queries, and repository patterns.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 import hashlib
 import json
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 
@@ -23,8 +33,10 @@ class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
     
     async def test_thread_crud_operations(self):
-        from netra_backend.app.services.database.thread_repository import ThreadRepository
         from netra_backend.app.schemas.registry import Thread
+        from netra_backend.app.services.database.thread_repository import (
+            ThreadRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -68,8 +80,10 @@ class TestThreadRepositoryOperations:
         assert result == True
     
     async def test_soft_delete_functionality(self):
-        from netra_backend.app.services.database.thread_repository import ThreadRepository
         from netra_backend.app.schemas.registry import Thread
+        from netra_backend.app.services.database.thread_repository import (
+            ThreadRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -106,8 +120,10 @@ class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
     
     async def test_message_pagination(self):
-        from netra_backend.app.services.database.message_repository import MessageRepository
         from netra_backend.app.schemas.registry import Message
+        from netra_backend.app.services.database.message_repository import (
+            MessageRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -142,8 +158,10 @@ class TestMessageRepositoryQueries:
         assert page2[0].id == "msg20"
     
     async def test_complex_message_queries(self):
-        from netra_backend.app.services.database.message_repository import MessageRepository
         from netra_backend.app.schemas.registry import Message
+        from netra_backend.app.services.database.message_repository import (
+            MessageRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -183,9 +201,10 @@ class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
     async def test_password_hashing(self):
-        from netra_backend.app.services.database.user_repository import UserRepository
-        from netra_backend.app.schemas.registry import User
         from argon2 import PasswordHasher
+
+        from netra_backend.app.schemas.registry import User
+        from netra_backend.app.services.database.user_repository import UserRepository
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
@@ -211,9 +230,10 @@ class TestUserRepositoryAuth:
             mock_hash.assert_called_once()
     
     async def test_authentication_flow(self):
-        from netra_backend.app.services.database.user_repository import UserRepository
-        from netra_backend.app.schemas.registry import User
         from argon2 import PasswordHasher
+
+        from netra_backend.app.schemas.registry import User
+        from netra_backend.app.services.database.user_repository import UserRepository
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
@@ -249,8 +269,10 @@ class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
     async def test_optimization_versioning(self):
-        from netra_backend.app.services.database.optimization_repository import OptimizationRepository
         from netra_backend.app.schemas.registry import Optimization
+        from netra_backend.app.services.database.optimization_repository import (
+            OptimizationRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -289,8 +311,10 @@ class TestOptimizationRepositoryStorage:
         assert new_version.parent_id == "opt123"
     
     async def test_optimization_history(self):
-        from netra_backend.app.services.database.optimization_repository import OptimizationRepository
         from netra_backend.app.schemas.registry import Optimization
+        from netra_backend.app.services.database.optimization_repository import (
+            OptimizationRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -313,8 +337,10 @@ class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
     async def test_metric_aggregation(self):
-        from netra_backend.app.services.database.metric_repository import MetricRepository
         from netra_backend.app.schemas.registry import Metric
+        from netra_backend.app.services.database.metric_repository import (
+            MetricRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
@@ -345,8 +371,10 @@ class TestMetricRepositoryAggregation:
         assert max_val == 70.0
     
     async def test_time_series_queries(self):
-        from netra_backend.app.services.database.metric_repository import MetricRepository
         from netra_backend.app.schemas.registry import Metric
+        from netra_backend.app.services.database.metric_repository import (
+            MetricRepository,
+        )
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()

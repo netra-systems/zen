@@ -4,14 +4,17 @@ This module handles state serialization, deserialization, and validation
 following the 25-line function limit and modular design principles.
 """
 
-import json
 import gzip
+import json
 import pickle
 from datetime import datetime
 from typing import Any, Dict, List
+
 from pydantic import BaseModel
+
 from netra_backend.app.schemas.agent_state import (
-    SerializationFormat, StateValidationResult
+    SerializationFormat,
+    StateValidationResult,
 )
 
 

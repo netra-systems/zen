@@ -10,21 +10,32 @@ Critical Path: Lock acquisition -> Conflict prevention -> Performance validation
 Coverage: Concurrent editing protection, performance benchmarks, audit trails
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
-
-# Add project root to path
-    TeamCollaborationManager, TeamRole, PermissionType, 
-    assert_performance_benchmark, validate_audit_trail
+    PermissionType,
+    # Add project root to path
+    TeamCollaborationManager,
+    TeamRole,
+    assert_performance_benchmark,
+    validate_audit_trail,
 )
 
 
@@ -164,7 +175,7 @@ class TestConcurrentEditingPerformance:
         if lock_key in manager.concurrent_locks:
             lock_info = manager.concurrent_locks[lock_key]
             # Set expiration to past
-            from datetime import datetime, timezone, timedelta
+            from datetime import datetime, timedelta, timezone
             lock_info["expires_at"] = datetime.now(timezone.utc) - timedelta(minutes=1)
         
         # Second user should be able to take over expired lock

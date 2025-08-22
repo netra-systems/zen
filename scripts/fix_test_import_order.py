@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+
 def fix_import_order(file_path):
     """Fix the import order in a test file."""
     with open(file_path, 'r', encoding='utf-8') as f:

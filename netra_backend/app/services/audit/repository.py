@@ -4,14 +4,16 @@ Repository layer for corpus audit operations with async patterns.
 Focused on database interactions only. ≤300 lines, ≤8 lines per function.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, desc, func
-from netra_backend.app.schemas.registry import CorpusAuditSearchFilter
-from netra_backend.app.db.models_postgres import CorpusAuditLog
-from netra_backend.app.services.database.base_repository import BaseRepository
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.core.exceptions_database import DatabaseError
+from netra_backend.app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import CorpusAuditSearchFilter
+from netra_backend.app.services.database.base_repository import BaseRepository
 
 logger = central_logger.get_logger(__name__)
 

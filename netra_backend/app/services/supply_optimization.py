@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enterprise feature for supply optimization
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 async def optimize(request_data: Dict[str, Any]) -> Dict[str, Any]:

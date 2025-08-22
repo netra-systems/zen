@@ -112,7 +112,7 @@ describe('Message Display & Input Tests', () => {
         messages: mockMessages
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageList />);
       
       expectElementByText('Hello').toBeInTheDocument();
@@ -181,7 +181,7 @@ describe('Message Display & Input Tests', () => {
         sendMessage: mockSendMessage
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);
@@ -198,7 +198,7 @@ describe('Message Display & Input Tests', () => {
         sendMessage: mockSendMessage
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);
@@ -214,7 +214,7 @@ describe('Message Display & Input Tests', () => {
         isLoading: true
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);
@@ -232,7 +232,7 @@ describe('Message Display & Input Tests', () => {
         messages: []
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageList />);
       
       expectElementByText(/No messages yet/i).toBeInTheDocument();
@@ -244,7 +244,7 @@ describe('Message Display & Input Tests', () => {
         sendMessage: mockSendMessage
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       // Try to send empty message
@@ -272,7 +272,7 @@ describe('Message Display & Input Tests', () => {
         messages: []
       });
       
-      (useChatStore as jest.Mock).mockReturnValueOnce(mockChatStore);
+      jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
       const input = screen.getByPlaceholderText(/Type your message/i);

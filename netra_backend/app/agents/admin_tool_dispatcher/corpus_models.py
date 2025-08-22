@@ -5,8 +5,9 @@ Data structures for corpus admin tools including enums, request/response models.
 All functions maintain 25-line limit with single responsibility.
 """
 
-from typing import Dict, Any, Optional
 from enum import Enum
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
 
 

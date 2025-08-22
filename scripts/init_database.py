@@ -4,9 +4,10 @@ Uses environment variables for database configuration.
 """
 
 import asyncio
-import sys
 import os
+import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Add the parent directory to sys.path to import app modules
@@ -18,6 +19,7 @@ load_dotenv('.env.development')
 load_dotenv('.env.development.local')
 
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import *  # Import all models
 from netra_backend.app.logging_config import central_logger

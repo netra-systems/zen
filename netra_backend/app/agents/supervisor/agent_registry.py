@@ -1,22 +1,27 @@
 """Agent registry and management for supervisor."""
 
-from typing import Dict, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 if TYPE_CHECKING:
-    from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+    ActionsToMeetGoalsSubAgent,
+)
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+
+# DataSubAgent is imported later to avoid circular dependency
+from netra_backend.app.agents.optimizations_core_sub_agent import (
+    OptimizationsCoreSubAgent,
+)
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
 
 # Import all sub-agents
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-# DataSubAgent is imported later to avoid circular dependency
-from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
-from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

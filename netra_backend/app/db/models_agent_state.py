@@ -1,12 +1,22 @@
 """Agent state database models for persistence and recovery."""
 
+import uuid
+from datetime import datetime, timezone
+
 from sqlalchemy import (
-    Column, String, DateTime, Boolean, JSON, Text, Integer, 
-    ForeignKey, Index, UniqueConstraint
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
-import uuid
+
 from netra_backend.app.db.base import Base
 
 

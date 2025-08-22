@@ -8,7 +8,11 @@ import gc
 from datetime import datetime
 from typing import Tuple
 
-from netra_backend.app.core.memory_recovery_base import MemoryPressureLevel, MemorySnapshot, MemoryThresholds
+from netra_backend.app.core.memory_recovery_base import (
+    MemoryPressureLevel,
+    MemorySnapshot,
+    MemoryThresholds,
+)
 
 
 def get_system_memory_metrics() -> Tuple[float, float, float, float]:

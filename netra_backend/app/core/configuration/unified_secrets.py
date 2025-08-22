@@ -12,11 +12,16 @@ incidents and ensuring compliance with Enterprise requirements.
 """
 
 import os
-from typing import Dict, Any, Optional, List
 from functools import lru_cache
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.core.configuration.secrets import SecretManager
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+if TYPE_CHECKING:
+    # Import TriageResult only for type checking to prevent circular imports
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+
 from netra_backend.app.core.configuration.environment import EnvironmentDetector
+from netra_backend.app.core.configuration.secrets import SecretManager
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class UnifiedSecretManager:

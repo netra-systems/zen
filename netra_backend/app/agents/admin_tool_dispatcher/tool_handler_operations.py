@@ -17,7 +17,8 @@ Contains all business logic operations extracted from main handlers.
 Business Value: Modular operations for improved maintainability.
 Target Segments: Growth & Enterprise (improved admin operations).
 """
-from typing import Dict, Any
+from typing import Any, Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
@@ -26,7 +27,10 @@ from netra_backend.app.db.models_postgres import User
 # Core utility functions for tool handlers
 def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
     """Extract parameters for corpus creation."""
-    from .tool_handler_helpers import build_corpus_create_params_base, add_corpus_description
+    from .tool_handler_helpers import (
+        add_corpus_description,
+        build_corpus_create_params_base,
+    )
     params = build_corpus_create_params_base(kwargs, user)
     add_corpus_description(params, kwargs)
     return params
@@ -34,7 +38,10 @@ def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str
 
 def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
     """Extract parameters for synthetic data generation."""
-    from .tool_handler_helpers import extract_corpus_service_params, add_user_id_to_params
+    from .tool_handler_helpers import (
+        add_user_id_to_params,
+        extract_corpus_service_params,
+    )
     params = extract_corpus_service_params(kwargs)
     add_user_id_to_params(params, user)
     return params
@@ -111,6 +118,7 @@ def _create_permission_response(success: bool) -> Dict[str, Any]:
 async def _execute_debug_analysis(db: AsyncSession, user: User) -> dict:
     """Execute debug analysis with service"""
     from netra_backend.app.services.debug_service import DebugService
+
     from .tool_handler_helpers import build_debug_service_params
     service = DebugService(db)
     service_params = build_debug_service_params(user)

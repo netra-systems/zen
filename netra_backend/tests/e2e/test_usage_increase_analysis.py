@@ -4,22 +4,32 @@ Tests agent analysis of usage increase scenarios for scaling impact.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-from netra_backend.tests.e2e.scaling_test_helpers import (
-
 # Add project root to path
-    create_scaling_setup, execute_scaling_workflow,
-    create_50_percent_increase_state, create_cost_projection_state,
-    validate_50_percent_increase_results, validate_cost_projection_results
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from tests.e2e.scaling_test_helpers import (
+    create_50_percent_increase_state,
+    create_cost_projection_state,
+    # Add project root to path
+    create_scaling_setup,
+    execute_scaling_workflow,
+    validate_50_percent_increase_results,
+    validate_cost_projection_results,
 )
 
 

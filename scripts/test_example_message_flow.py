@@ -6,13 +6,13 @@ with detailed reporting and validation.
 Business Value: Ensures reliability of AI optimization demonstration system
 """
 
-import sys
-import subprocess
-import time
-import json
-from pathlib import Path
-from typing import Dict, Any, List
 import asyncio
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -206,10 +206,18 @@ class ExampleMessageFlowTestRunner:
         """Validate that all required imports work"""
         
         try:
-            from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-            from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor
-            from netra_backend.app.formatters.example_response_formatter import ExampleResponseFormatter
-            from netra_backend.app.error_handling.example_message_errors import ExampleMessageErrorHandler
+            from netra_backend.app.agents.example_message_processor import (
+                ExampleMessageProcessor,
+            )
+            from netra_backend.app.error_handling.example_message_errors import (
+                ExampleMessageErrorHandler,
+            )
+            from netra_backend.app.formatters.example_response_formatter import (
+                ExampleResponseFormatter,
+            )
+            from netra_backend.app.handlers.example_message_handler import (
+                ExampleMessageHandler,
+            )
             
             print("     ✅ All imports successful")
             return True
@@ -241,8 +249,12 @@ class ExampleMessageFlowTestRunner:
         """Test that handlers can be initialized"""
         
         try:
-            from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-            from netra_backend.app.agents.example_message_processor import ExampleMessageSupervisor
+            from netra_backend.app.agents.example_message_processor import (
+                ExampleMessageSupervisor,
+            )
+            from netra_backend.app.handlers.example_message_handler import (
+                ExampleMessageHandler,
+            )
             
             handler = ExampleMessageHandler()
             supervisor = ExampleMessageSupervisor()
@@ -262,7 +274,9 @@ class ExampleMessageFlowTestRunner:
         """Test message validation functionality"""
         
         try:
-            from netra_backend.app.handlers.example_message_handler import ExampleMessageRequest
+            from netra_backend.app.handlers.example_message_handler import (
+                ExampleMessageRequest,
+            )
             
             # Test valid message
             valid_message = {
@@ -361,10 +375,18 @@ def run_quick_validation():
     try:
         # Test imports
         print("Checking imports...")
-        from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-        from netra_backend.app.agents.example_message_processor import ExampleMessageProcessor
-        from netra_backend.app.formatters.example_response_formatter import ExampleResponseFormatter
-        from netra_backend.app.error_handling.example_message_errors import ExampleMessageErrorHandler
+        from netra_backend.app.agents.example_message_processor import (
+            ExampleMessageProcessor,
+        )
+        from netra_backend.app.error_handling.example_message_errors import (
+            ExampleMessageErrorHandler,
+        )
+        from netra_backend.app.formatters.example_response_formatter import (
+            ExampleResponseFormatter,
+        )
+        from netra_backend.app.handlers.example_message_handler import (
+            ExampleMessageHandler,
+        )
         print("✅ Imports successful")
         
         # Test initialization
@@ -375,7 +397,9 @@ def run_quick_validation():
         
         # Test basic functionality
         print("Testing message validation...")
-        from netra_backend.app.handlers.example_message_handler import ExampleMessageRequest
+        from netra_backend.app.handlers.example_message_handler import (
+            ExampleMessageRequest,
+        )
         
         test_message = {
             "content": "Quick validation test",

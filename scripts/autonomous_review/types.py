@@ -7,7 +7,7 @@ Data types and enums for the autonomous test review system
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 @dataclass

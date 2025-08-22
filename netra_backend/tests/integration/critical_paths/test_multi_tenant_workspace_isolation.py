@@ -14,32 +14,45 @@ IMPORTANT: This is a critical L4 test for Enterprise customer trust and complian
 All workspace isolation must be validated in real staging environment conditions.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
+import json
 import logging
 import os
-import json
-from typing import Dict, List, Optional, Any, Set
-from datetime import datetime, timedelta
+import time
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
+from unittest.mock import AsyncMock
 
-# Add project root to path
-
-from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
-from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
+import pytest
 
 # Add project root to path
 # Permissions service replaced with auth_integration
 from auth_integration import require_permission
-from unittest.mock import AsyncMock
+
+from netra_backend.app.services.database.connection_manager import (
+    DatabaseConnectionManager,
+)
+
+# Add project root to path
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+
 PermissionsService = AsyncMock
-from netra_backend.app.services.audit.audit_logger import AuditLogger
 from netra_backend.app.core.security import SecurityContext
+from netra_backend.app.services.audit.audit_logger import AuditLogger
 
 logger = logging.getLogger(__name__)
 

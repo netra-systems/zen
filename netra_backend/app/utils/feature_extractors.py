@@ -3,6 +3,7 @@
 import re
 from typing import List
 
+
 class LanguageDetector:
     """Production language detection implementation using pattern matching.
     

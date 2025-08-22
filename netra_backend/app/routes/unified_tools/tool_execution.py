@@ -1,12 +1,14 @@
 """
 Tool Execution Logic for Unified Tools API
 """
-from typing import Dict, Any
+from typing import Any, Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.services.unified_tool_registry import ToolExecutionResult
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.unified_tools import ToolExecutionRequest
+from netra_backend.app.services.unified_tool_registry import ToolExecutionResult
 
 logger = central_logger
 
@@ -83,4 +85,6 @@ async def process_tool_execution(
 
 
 # Import needed to avoid circular dependency
-from netra_backend.app.routes.unified_tools.database_utils import log_tool_execution_to_db
+from netra_backend.app.routes.unified_tools.database_utils import (
+    log_tool_execution_to_db,
+)

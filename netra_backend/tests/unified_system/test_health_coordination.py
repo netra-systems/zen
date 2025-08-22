@@ -18,26 +18,39 @@ Key validations:
 - Cross-service consistency
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import time
-from typing import Dict, Any, List
-import pytest
-import httpx
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
-# Add project root to path
+import httpx
+import pytest
 
+# Add project root to path
 from netra_backend.app.core.health import HealthInterface, HealthLevel
-from netra_backend.app.core.health.checks import UnifiedDatabaseHealthChecker, DependencyHealthChecker
+from netra_backend.app.core.health.checks import (
+    DependencyHealthChecker,
+    UnifiedDatabaseHealthChecker,
+)
 from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.unified_system.mock_services import (
-
-# Add project root to path
-    setup_unified_mock_services, ServiceRegistry, MockHTTPService
+from tests.unified_system.mock_services import (
+    MockHTTPService,
+    ServiceRegistry,
+    # Add project root to path
+    setup_unified_mock_services,
 )
 
 logger = central_logger.get_logger(__name__)
@@ -473,8 +486,11 @@ async def test_mock_websocket_service():
     - Message handling functions
     - Health endpoint available
     """
-    from netra_backend.tests.unified_system.mock_services import create_mock_websocket_service
     import websockets
+
+    from tests.unified_system.mock_services import (
+        create_mock_websocket_service,
+    )
     
     ws_service = create_mock_websocket_service()
     

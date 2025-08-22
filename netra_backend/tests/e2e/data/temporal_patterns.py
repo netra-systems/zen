@@ -15,19 +15,20 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable pattern generators
 
 Usage:
-    from netra_backend.tests.e2e.data.temporal_patterns import (
+    from tests.e2e.data.temporal_patterns import (
         TemporalPatternGenerator,
         SeasonalPatternGenerator,
         BurstPatternGenerator
     )
 """
 
-from typing import Dict, List, Optional, Union, Any, Iterator
-from datetime import datetime, timedelta, timezone
-from dataclasses import dataclass
 import random
-import numpy as np
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, Iterator, List, Optional, Union
+
+import numpy as np
 
 
 class TemporalPatternType(Enum):

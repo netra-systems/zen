@@ -2,11 +2,11 @@
 Real-time log streaming and monitoring for development processes.
 """
 
-import threading
-import subprocess
-from typing import Optional, List
-from collections import deque
 import logging
+import subprocess
+import threading
+from collections import deque
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 

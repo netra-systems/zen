@@ -4,31 +4,53 @@ Tests system error collection, automatic fixes, and CLI interface.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
 import json
 import sys
-import asyncio
-from pathlib import Path
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from typing import List, Dict, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from scripts.startup_diagnostics import (
+import pytest
 
-# Add project root to path
-
-    StartupDiagnostics, collect_system_errors, check_port_conflicts,
-    check_database_connection, check_dependencies, check_environment_variables,
-    check_migrations, apply_fixes, apply_single_fix, fix_port_conflict,
-    fix_dependencies, fix_migrations, diagnose_startup, generate_recommendations,
-    main
-)
 from netra_backend.app.schemas.diagnostic_types import (
-    DiagnosticResult, DiagnosticError, DiagnosticSeverity, FixResult,
-    ServiceType, StartupPhase
+    DiagnosticError,
+    DiagnosticResult,
+    DiagnosticSeverity,
+    FixResult,
+    ServiceType,
+    StartupPhase,
+)
+from scripts.startup_diagnostics import (
+    # Add project root to path
+    StartupDiagnostics,
+    apply_fixes,
+    apply_single_fix,
+    check_database_connection,
+    check_dependencies,
+    check_environment_variables,
+    check_migrations,
+    check_port_conflicts,
+    collect_system_errors,
+    diagnose_startup,
+    fix_dependencies,
+    fix_migrations,
+    fix_port_conflict,
+    generate_recommendations,
+    main,
 )
 
 

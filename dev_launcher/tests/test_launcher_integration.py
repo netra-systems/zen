@@ -5,19 +5,20 @@ Tests cover full launch cycles, multi-service coordination, and complex scenario
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock, call, ANY
+import os
 import subprocess
 import sys
-from pathlib import Path
-import os
 import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import ANY, MagicMock, Mock, call, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.service_config import ServicesConfiguration, ResourceMode
+from dev_launcher.service_config import ResourceMode, ServicesConfiguration
+from dev_launcher.utils import wait_for_service, check_dependencies, check_project_structure
 
 
 class TestDevLauncher(unittest.TestCase):
@@ -33,8 +34,8 @@ class TestDevLauncher(unittest.TestCase):
                 load_secrets=False
             )
     
-    @patch('dev_launcher.launcher.check_dependencies')
-    @patch('dev_launcher.launcher.check_project_structure')
+    @patch('dev_launcher.utils.check_dependencies')
+    @patch('dev_launcher.utils.check_project_structure')
     def test_check_environment_success(self, mock_structure, mock_deps):
         """Test successful environment check."""
         self._setup_successful_environment(mock_deps, mock_structure)
@@ -55,10 +56,9 @@ class TestDevLauncher(unittest.TestCase):
     
     def _create_launcher(self):
         """Create launcher with mocked config."""
-        with patch('dev_launcher.launcher.load_or_create_config'):
-            return DevLauncher(self.config)
+        return DevLauncher(self.config)
     
-    @patch('dev_launcher.launcher.check_dependencies')
+    @patch('dev_launcher.utils.check_dependencies')
     def test_check_environment_missing_deps(self, mock_deps):
         """Test environment check with missing dependencies."""
         self._setup_missing_dependencies(mock_deps)
@@ -74,13 +74,11 @@ class TestDevLauncher(unittest.TestCase):
             'node': False, 'npm': True
         }
     
-    @patch('dev_launcher.launcher.create_subprocess')
-    @patch('dev_launcher.launcher.create_process_env')
-    def test_start_backend_success(self, mock_env, mock_subprocess):
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    def test_start_backend_success(self, mock_start_backend):
         """Test successful backend startup."""
         mock_process = self._create_mock_backend_process()
-        mock_subprocess.return_value = mock_process
-        mock_env.return_value = {}
+        mock_start_backend.return_value = (mock_process, None)
         launcher = self._create_launcher()
         self._test_backend_startup(launcher, mock_process)
     
@@ -93,17 +91,16 @@ class TestDevLauncher(unittest.TestCase):
     
     def _test_backend_startup(self, launcher, expected_process):
         """Test backend startup returns expected process."""
-        with patch.object(launcher.log_manager, 'add_streamer'):
-            with patch.object(launcher.service_discovery, 'write_backend_info'):
-                process, streamer = launcher.start_backend()
+        with patch.object(launcher.service_startup, 'start_backend') as mock_backend_start:
+            mock_backend_start.return_value = (expected_process, None)
+            process, streamer = launcher.service_startup.start_backend()
         self.assertIsNotNone(process)
         self.assertEqual(process, expected_process)
     
-    @patch('dev_launcher.launcher.create_subprocess')
-    def test_start_backend_failure(self, mock_subprocess):
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    def test_start_backend_failure(self, mock_start_backend):
         """Test backend startup failure."""
-        mock_process = self._create_failed_backend_process()
-        mock_subprocess.return_value = mock_process
+        mock_start_backend.return_value = (None, None)
         launcher = self._create_launcher()
         self._test_backend_failure(launcher)
     
@@ -118,8 +115,7 @@ class TestDevLauncher(unittest.TestCase):
     def _test_backend_failure(self, launcher):
         """Test backend failure returns None."""
         with patch('builtins.print'):
-            with patch.object(launcher.log_manager, 'add_streamer'):
-                process, streamer = launcher.start_backend()
+            process, streamer = launcher.service_startup.start_backend()
         self.assertIsNone(process)
         self.assertIsNone(streamer)
 
@@ -127,19 +123,21 @@ class TestDevLauncher(unittest.TestCase):
 class TestFullIntegration(unittest.TestCase):
     """Integration tests for complete launch cycles."""
     
-    @patch('dev_launcher.launcher.check_dependencies')
-    @patch('dev_launcher.launcher.check_project_structure')
-    @patch('dev_launcher.launcher.create_subprocess')
-    @patch('dev_launcher.launcher.wait_for_service')
-    @patch('dev_launcher.launcher.open_browser')
-    def test_full_launch_cycle(self, mock_browser, mock_wait, mock_subprocess,
+    @patch('dev_launcher.utils.check_dependencies')
+    @patch('dev_launcher.utils.check_project_structure')
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
+    @patch('dev_launcher.utils.wait_for_service')
+    @patch('webbrowser.open')
+    def test_full_launch_cycle(self, mock_browser, mock_wait, mock_start_frontend, mock_start_backend,
                                mock_structure, mock_deps):
         """Test a complete launch cycle."""
         self._setup_full_launch_mocks(mock_deps, mock_structure, mock_wait)
         processes = self._create_mock_processes()
-        mock_subprocess.side_effect = processes
+        mock_start_backend.return_value = (processes[0], None)
+        mock_start_frontend.return_value = (processes[1], None)
         exit_code = self._run_full_launch()
-        self._assert_launch_success(exit_code, mock_browser, mock_subprocess)
+        self._assert_launch_success(exit_code, mock_browser, mock_start_backend, mock_start_frontend)
     
     def _setup_full_launch_mocks(self, mock_deps, mock_structure, mock_wait):
         """Set up mocks for full launch test."""
@@ -183,26 +181,29 @@ class TestFullIntegration(unittest.TestCase):
                         }
                         return launcher.run()
     
-    def _assert_launch_success(self, exit_code, mock_browser, mock_subprocess):
+    def _assert_launch_success(self, exit_code, mock_browser, mock_start_backend, mock_start_frontend):
         """Assert launch completed successfully."""
         self.assertEqual(exit_code, 0)
         mock_browser.assert_called_once()
-        self.assertEqual(mock_subprocess.call_count, 2)
+        mock_start_backend.assert_called_once()
+        mock_start_frontend.assert_called_once()
 
 
 class TestRollingRestart(unittest.TestCase):
     """Test rolling restart scenarios."""
     
-    @patch('dev_launcher.launcher.check_dependencies')
-    @patch('dev_launcher.launcher.check_project_structure')
-    @patch('dev_launcher.launcher.create_subprocess')
-    @patch('dev_launcher.launcher.wait_for_service')
-    def test_rolling_restart(self, mock_wait, mock_subprocess,
+    @patch('dev_launcher.utils.check_dependencies')
+    @patch('dev_launcher.utils.check_project_structure')
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
+    @patch('dev_launcher.utils.wait_for_service')
+    def test_rolling_restart(self, mock_wait, mock_start_frontend, mock_start_backend,
                             mock_structure, mock_deps):
         """Test rolling restart of services."""
         self._setup_restart_environment(mock_deps, mock_structure, mock_wait)
         processes = self._create_restart_processes()
-        mock_subprocess.side_effect = processes
+        mock_start_backend.side_effect = [(processes[0], None), (processes[2], None)]
+        mock_start_frontend.side_effect = [(processes[1], None), (processes[3], None)]
         launcher = self._create_configured_launcher()
         self._perform_rolling_restart(launcher)
     
@@ -238,10 +239,10 @@ class TestRollingRestart(unittest.TestCase):
         """Perform rolling restart of backend."""
         with patch.object(launcher.service_discovery, 'write_backend_info'):
             with patch.object(launcher.service_discovery, 'write_frontend_info'):
-                launcher.start_backend()
-                launcher.start_frontend()
+                launcher.service_startup.start_backend()
+                launcher.service_startup.start_frontend()
                 launcher.process_manager.terminate_process("Backend")
-                launcher.start_backend()
+                launcher.service_startup.start_backend()
         self.assertTrue(launcher.process_manager.is_running("Backend"))
 
 
@@ -256,27 +257,22 @@ class TestMultiEnvironment(unittest.TestCase):
     
     def _create_dev_config(self):
         """Create development configuration."""
-        return ServicesConfiguration(
-            resource_mode=ResourceMode.DEVELOPMENT,
-            backend_workers=1,
-            enable_monitoring=False,
-            enable_profiling=True
-        )
+        config = ServicesConfiguration()
+        config.postgres.mode = ResourceMode.LOCAL
+        config.redis.mode = ResourceMode.LOCAL
+        return config
     
     def _create_prod_config(self):
         """Create production configuration."""
-        return ServicesConfiguration(
-            resource_mode=ResourceMode.PRODUCTION,
-            backend_workers=4,
-            enable_monitoring=True,
-            enable_profiling=False
-        )
+        config = ServicesConfiguration()
+        config.postgres.mode = ResourceMode.SHARED
+        config.redis.mode = ResourceMode.SHARED
+        return config
     
     def _assert_config_differences(self, dev, prod):
         """Assert configurations are different."""
-        self.assertNotEqual(dev.backend_workers, prod.backend_workers)
-        self.assertNotEqual(dev.enable_monitoring, prod.enable_monitoring)
-        self.assertNotEqual(dev.enable_profiling, prod.enable_profiling)
+        self.assertNotEqual(dev.postgres.mode, prod.postgres.mode)
+        self.assertNotEqual(dev.redis.mode, prod.redis.mode)
     
     def test_multi_environment_launch(self):
         """Test launching in different environments."""

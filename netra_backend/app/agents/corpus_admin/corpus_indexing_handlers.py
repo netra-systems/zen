@@ -6,8 +6,8 @@ Provides specialized handlers for document indexing failures with recovery strat
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
 from netra_backend.app.agents.corpus_admin.corpus_error_types import IndexingError
+from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

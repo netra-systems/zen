@@ -16,15 +16,15 @@ Features:
 - Integration with test runner
 """
 
+import argparse
 import ast
+import json
 import os
 import sys
-import json
-import argparse
-from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Set
-from dataclasses import dataclass, asdict
 from collections import defaultdict
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.parent

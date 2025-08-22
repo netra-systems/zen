@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+
 def create_agent_tasks():
     # Load violations data
     with open('function_violations_top1000.json', 'r') as f:

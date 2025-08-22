@@ -9,8 +9,8 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.reliability import CircuitBreaker
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

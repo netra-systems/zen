@@ -3,23 +3,31 @@ Tool Permission Service - Service Initialization Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.schemas.ToolPermission import PermissionLevel
-from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
-from netra_backend.tests.helpers.tool_permission_helpers import (
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 
 # Add project root to path
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.tests.helpers.tool_permission_helpers import (
+    # Add project root to path
     MockRedisClient,
-    assert_service_initialization,
     assert_permission_definition_properties,
-    get_permission_test_data
+    assert_service_initialization,
+    get_permission_test_data,
 )
 
 

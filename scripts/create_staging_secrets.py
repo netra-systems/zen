@@ -5,10 +5,10 @@ This script creates the required staging secrets by copying from production
 secrets or using provided values.
 """
 
+import json
 import subprocess
 import sys
-import json
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Required secrets for staging environment
 REQUIRED_SECRETS = [

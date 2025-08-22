@@ -2,11 +2,13 @@
 Base corpus service class - core orchestrator initialization
 """
 
+from netra_backend.app.services.corpus.clickhouse_operations import (
+    CorpusClickHouseOperations,
+)
+from netra_backend.app.services.corpus.corpus_manager import CorpusManager
 from netra_backend.app.services.corpus.document_manager import DocumentManager
 from netra_backend.app.services.corpus.search_operations import SearchOperations
 from netra_backend.app.services.corpus.validation import ValidationManager
-from netra_backend.app.services.corpus.clickhouse_operations import CorpusClickHouseOperations
-from netra_backend.app.services.corpus.corpus_manager import CorpusManager
 
 
 class BaseCorpusService:

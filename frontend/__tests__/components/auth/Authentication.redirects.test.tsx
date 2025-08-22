@@ -48,7 +48,7 @@ describe('Authentication Success Redirects Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
       replace: mockReplace,
@@ -69,7 +69,7 @@ describe('Authentication Success Redirects Tests', () => {
       expect(mockLogin).toHaveBeenCalled();
       
       // Simulate successful login
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -89,7 +89,7 @@ describe('Authentication Success Redirects Tests', () => {
       await userEvent.click(button);
       
       // Simulate successful login with redirect expectation
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -108,7 +108,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -122,7 +122,7 @@ describe('Authentication Success Redirects Tests', () => {
     });
 
     it('should handle authenticated state without redirect', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -149,7 +149,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -172,7 +172,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -195,7 +195,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -218,7 +218,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -239,7 +239,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'admin-123',
@@ -259,7 +259,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -279,7 +279,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'enterprise-123',
@@ -299,7 +299,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -316,7 +316,7 @@ describe('Authentication Success Redirects Tests', () => {
 
   describe('Development Mode Redirects', () => {
     it('should handle dev mode login redirects', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -329,7 +329,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -347,7 +347,7 @@ describe('Authentication Success Redirects Tests', () => {
     });
 
     it('should handle dev logout without redirect', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -366,7 +366,7 @@ describe('Authentication Success Redirects Tests', () => {
       await userEvent.click(logoutButton);
       expect(mockLogout).toHaveBeenCalled();
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -379,7 +379,7 @@ describe('Authentication Success Redirects Tests', () => {
     });
 
     it('should handle dev OAuth login button', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -400,7 +400,7 @@ describe('Authentication Success Redirects Tests', () => {
     });
 
     it('should preserve dev mode state during redirects', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -410,7 +410,7 @@ describe('Authentication Success Redirects Tests', () => {
       
       const { rerender } = render(<LoginButton />);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -437,7 +437,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -460,7 +460,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -479,7 +479,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -502,7 +502,7 @@ describe('Authentication Success Redirects Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',

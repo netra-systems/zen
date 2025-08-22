@@ -3,15 +3,24 @@ E2E Test Helpers - Modular Support Functions
 All helper functions broken into ≤8 line functions for architectural compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import uuid
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -100,7 +109,9 @@ def _setup_supervisor_ids(supervisor):
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+    from netra_backend.app.agents.supervisor.execution_context import (
+        AgentExecutionResult,
+    )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
         AgentExecutionResult(success=True, state=None),
         AgentExecutionResult(success=True, state=None),

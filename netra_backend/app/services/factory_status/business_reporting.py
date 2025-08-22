@@ -6,10 +6,19 @@ Module follows 450-line limit with 25-line function limit.
 
 from typing import List
 
-from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
 from netra_backend.app.services.factory_status.business_core import (
-    BusinessObjective, ROIEstimate, InnovationMetrics, BusinessValueMetrics,
-    CustomerImpactMetrics, RevenueMetrics, ComplianceSecurityMetrics
+    BusinessObjective,
+    BusinessValueMetrics,
+    ComplianceSecurityMetrics,
+    CustomerImpactMetrics,
+    InnovationMetrics,
+    RevenueMetrics,
+    ROIEstimate,
+)
+from netra_backend.app.services.factory_status.git_commit_parser import (
+    CommitInfo,
+    CommitType,
+    GitCommitParser,
 )
 
 
@@ -214,8 +223,10 @@ class BusinessValueCalculator:
     def _initialize_value_calculators(self) -> dict:
         """Initialize all value calculation components."""
         from .value_calculator import (
-            ObjectiveMapper, CustomerImpactCalculator, 
-            RevenueCalculator, ComplianceSecurityCalculator
+            ComplianceSecurityCalculator,
+            CustomerImpactCalculator,
+            ObjectiveMapper,
+            RevenueCalculator,
         )
         return {
             'objective_mapper': ObjectiveMapper(self.repo_path),

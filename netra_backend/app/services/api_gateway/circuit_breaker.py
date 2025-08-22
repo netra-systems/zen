@@ -1,9 +1,9 @@
 """API Gateway Circuit Breaker implementation."""
 
 import time
-from typing import Dict, Optional, Any, Callable
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Callable, Dict, Optional
 
 
 class CircuitState(Enum):

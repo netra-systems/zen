@@ -1,19 +1,30 @@
 """Demo API routes for enterprise demonstrations."""
 
-from fastapi import APIRouter, Depends, BackgroundTasks, WebSocket
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, WebSocket
 
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.services.demo_service import DemoService, get_demo_service
-from netra_backend.app.schemas.demo_schemas import (
-    DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse,
-    ExportReportRequest, IndustryTemplate, DemoMetrics
-)
 from netra_backend.app.routes.demo_handlers import (
-    handle_demo_chat, handle_industry_templates, handle_roi_calculation,
-    handle_synthetic_metrics, handle_export_report, handle_session_status,
-    handle_session_feedback, handle_demo_analytics
+    handle_demo_analytics,
+    handle_demo_chat,
+    handle_export_report,
+    handle_industry_templates,
+    handle_roi_calculation,
+    handle_session_feedback,
+    handle_session_status,
+    handle_synthetic_metrics,
 )
+from netra_backend.app.schemas.demo_schemas import (
+    DemoChatRequest,
+    DemoChatResponse,
+    DemoMetrics,
+    ExportReportRequest,
+    IndustryTemplate,
+    ROICalculationRequest,
+    ROICalculationResponse,
+)
+from netra_backend.app.services.demo_service import DemoService, get_demo_service
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 

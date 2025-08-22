@@ -4,18 +4,29 @@ Handles quality scores, validation metrics, and data integrity monitoring
 """
 
 import asyncio
-from datetime import datetime, UTC
-from typing import Dict, List, Optional, Any
 from collections import defaultdict, deque
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import (
-    QualityMetrics, CorpusMetric, MetricType, TimeSeriesPoint
+    CorpusMetric,
+    MetricType,
+    QualityMetrics,
+    TimeSeriesPoint,
 )
-from netra_backend.app.services.metrics.quality_trend_analyzer import QualityTrendAnalyzer
-from netra_backend.app.services.metrics.quality_statistics_calculator import QualityStatisticsCalculator
-from netra_backend.app.services.metrics.quality_issue_analyzer import QualityIssueAnalyzer
-from netra_backend.app.services.metrics.quality_report_generator import QualityReportGenerator
+from netra_backend.app.services.metrics.quality_issue_analyzer import (
+    QualityIssueAnalyzer,
+)
+from netra_backend.app.services.metrics.quality_report_generator import (
+    QualityReportGenerator,
+)
+from netra_backend.app.services.metrics.quality_statistics_calculator import (
+    QualityStatisticsCalculator,
+)
+from netra_backend.app.services.metrics.quality_trend_analyzer import (
+    QualityTrendAnalyzer,
+)
 
 logger = central_logger.get_logger(__name__)
 

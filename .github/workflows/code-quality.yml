@@ -275,7 +275,7 @@ jobs:
           else
             # Run circular import detection
             echo "Running circular import detection..."
-            python -m test_framework.test_runner --level code-quality > circular_output.txt 2>&1
+            python unified_test_runner.py --level code-quality > circular_output.txt 2>&1
             
             # Parse output for circular imports
             if grep -q "ERROR.*circular import" circular_output.txt; then

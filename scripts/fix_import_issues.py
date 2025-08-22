@@ -5,13 +5,14 @@ Fix Import Issues Across E2E Test Files
 This script fixes common import issues found in the codebase:
 1. validate_token -> validate_token_jwt
 2. websockets module -> mcp.main module for websocket_endpoint
-3. ConnectionManager -> ModernConnectionManager (where applicable)
+3. ConnectionManager -> ConnectionManager (where applicable)
 """
 
+import glob
 import os
 import re
-import glob
 from pathlib import Path
+
 
 def fix_validate_token_imports(file_path: str) -> bool:
     """Fix validate_token imports to use validate_token_jwt."""
@@ -86,7 +87,7 @@ def fix_websockets_import(file_path: str) -> bool:
     return False
 
 def fix_connection_manager_specs(file_path: str) -> bool:
-    """Fix ConnectionManager mock specs to use ModernConnectionManager."""
+    """Fix ConnectionManager mock specs to use ConnectionManager."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -97,7 +98,7 @@ def fix_connection_manager_specs(file_path: str) -> bool:
         if 'from netra_backend.app.websocket.connection_manager import' in content:
             content = re.sub(
                 r'spec=ConnectionManager',
-                r'spec=ModernConnectionManager',
+                r'spec=ConnectionManager',
                 content
             )
             

@@ -2,19 +2,24 @@
 Comprehensive fixtures and utilities for thread management testing.
 """
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, List, Optional, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import (
+    AgentPhase,
+    CheckpointType,
+    StatePersistenceRequest,
+)
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.db.models_postgres import Thread, Message, Run
-from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
+from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.websocket.ws_manager import manager
 
 

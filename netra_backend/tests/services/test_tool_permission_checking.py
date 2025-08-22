@@ -3,29 +3,38 @@ Tool Permission Service - Main Permission Checking Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
-from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
-from netra_backend.tests.helpers.tool_permission_helpers import (
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 # Add project root to path
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.tests.helpers.tool_permission_helpers import (
+    # Add project root to path
     MockRedisClient,
+    assert_missing_permissions,
+    assert_permission_allowed,
+    assert_permission_denied,
+    assert_rate_limit_status,
     create_user_plan,
     setup_mock_user_plan,
     setup_redis_usage,
-    assert_permission_allowed,
-    assert_permission_denied,
-    assert_missing_permissions,
-    assert_rate_limit_status
 )
 
 

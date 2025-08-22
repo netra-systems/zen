@@ -6,22 +6,27 @@ Integrates with existing health infrastructure and circuit breakers.
 
 import asyncio
 import time
-from typing import Dict, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.health_types import HealthCheckResult
-from netra_backend.app.core.health_checkers import (
-    check_postgres_health, check_clickhouse_health, 
-    check_redis_health, check_websocket_health
-)
 from netra_backend.app.core.health.interface import BaseHealthChecker
+from netra_backend.app.core.health_checkers import (
+    check_clickhouse_health,
+    check_postgres_health,
+    check_redis_health,
+    check_websocket_health,
+)
+from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
 # Import DatabaseHealthChecker from canonical location - CONSOLIDATED
-from netra_backend.app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
+from netra_backend.app.db.health_checks import (
+    DatabaseHealthChecker as CoreDatabaseHealthChecker,
+)
+
 
 class UnifiedDatabaseHealthChecker(BaseHealthChecker):
     """Unified database health checker supporting PostgreSQL and ClickHouse."""

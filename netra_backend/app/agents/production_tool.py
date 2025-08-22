@@ -1,9 +1,14 @@
 """Production tool with real service integrations and error handling."""
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel
+
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.reliability_utils import (
+    create_default_tool_result,
+    create_tool_reliability_wrapper,
+)
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.reliability_utils import create_tool_reliability_wrapper, create_default_tool_result
 
 logger = central_logger.get_logger(__name__)
 
@@ -81,7 +86,9 @@ class ProductionTool:
     
     async def _try_synthetic_tools(self, parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Try to execute synthetic data tools."""
-        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import (
+            SyntheticToolExecutor,
+        )
         executor = SyntheticToolExecutor(self.name)
         return await executor.execute(parameters)
     
@@ -102,19 +109,25 @@ class ProductionTool:
     # Direct methods for test compatibility
     async def _execute_synthetic_data_batch(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data batch generation (test compatibility method)"""
-        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import (
+            SyntheticToolExecutor,
+        )
         executor = SyntheticToolExecutor("generate_synthetic_data_batch")
         return await executor._execute_synthetic_data_batch(parameters)
     
     async def _execute_validate_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data validation (test compatibility method)"""
-        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import (
+            SyntheticToolExecutor,
+        )
         executor = SyntheticToolExecutor("validate_synthetic_data")
         return await executor._execute_validate_synthetic_data(parameters)
     
     async def _execute_store_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data storage (test compatibility method)"""
-        from netra_backend.app.agents.production_tool_synthetic import SyntheticToolExecutor
+        from netra_backend.app.agents.production_tool_synthetic import (
+            SyntheticToolExecutor,
+        )
         executor = SyntheticToolExecutor("store_synthetic_data")
         return await executor._execute_store_synthetic_data(parameters)
     

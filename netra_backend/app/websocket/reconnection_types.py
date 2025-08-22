@@ -4,10 +4,10 @@ Contains enums, data classes, and configuration for reconnection functionality.
 Each component focused on data structures and configuration.
 """
 
-from datetime import datetime
-from typing import Dict, Optional, List
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional
 
 
 class ReconnectionState(str, Enum):

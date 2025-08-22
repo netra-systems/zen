@@ -6,10 +6,12 @@ Maintains 25-line function limit and focused responsibility.
 """
 
 import socket
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
+
 import psutil
-from netra_backend.app.config import settings
+
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.startup_checks.models import StartupCheckResult
 
 
@@ -167,14 +169,20 @@ class SystemChecker:
 
     def _get_database_endpoint(self) -> str:
         """Get database endpoint"""
-        if '@' in settings.database_url:
-            return settings.database_url.split('@')[1].split('/')[0]
+        config = unified_config_manager.get_config()
+        database_url = getattr(config, 'database_url', '')
+        if '@' in database_url:
+            return database_url.split('@')[1].split('/')[0]
         return "localhost:5432"
 
     def _get_redis_endpoint(self) -> str:
         """Get Redis endpoint"""
-        if settings.redis:
-            return f"{settings.redis.host}:{settings.redis.port}"
+        config = unified_config_manager.get_config()
+        redis_config = getattr(config, 'redis', None)
+        if redis_config:
+            host = getattr(redis_config, 'host', 'localhost')
+            port = getattr(redis_config, 'port', 6379)
+            return f"{host}:{port}"
         return "localhost:6379"
 
     def _parse_endpoint(self, endpoint: str) -> Tuple[str, int]:

@@ -1,13 +1,12 @@
-import sys
 import os
+import sys
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
@@ -26,6 +25,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import *
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

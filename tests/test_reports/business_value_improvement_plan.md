@@ -49,8 +49,8 @@ Current test coverage shows critical gaps that expose $347K+ MRR to risk. Immedi
 2. [ ] Add environment markers to all critical tests
 3. [ ] Set up automated validation pipeline:
    ```bash
-   python -m test_framework.test_runner --level integration --env dev
-   python -m test_framework.test_runner --level integration --env staging
+   python unified_test_runner.py --level integration --env dev
+   python unified_test_runner.py --level integration --env staging
    ```
 
 ## Test Distribution Rebalancing
@@ -106,10 +106,10 @@ Current test coverage shows critical gaps that expose $347K+ MRR to risk. Immedi
 ### Quick Wins (Run Today):
 ```bash
 # Enable real LLM for agent tests
-python -m test_framework.test_runner --level agents --real-llm
+python unified_test_runner.py --level agents --real-llm
 
 # Run integration tests with staging config
-python -m test_framework.test_runner --level integration --env staging
+python unified_test_runner.py --level integration --env staging
 
 # Generate coverage report with business value
 python scripts/analyze_test_business_value.py --generate-report
@@ -120,8 +120,8 @@ python scripts/analyze_test_business_value.py --generate-report
 # Add to GitHub Actions
 - name: Run Business-Critical Tests
   run: |
-    python -m test_framework.test_runner --level critical --real-llm
-    python -m test_framework.test_runner --level e2e --env staging
+    python unified_test_runner.py --level critical --real-llm
+    python unified_test_runner.py --level e2e --env staging
 ```
 
 ## Risk Mitigation
@@ -173,5 +173,5 @@ python scripts/analyze_test_business_value.py --generate-report --output test_re
 python scripts/check_architecture_compliance.py --coverage
 
 # Validate multi-environment health
-python -m test_framework.test_runner --all-envs --summary
+python unified_test_runner.py --all-envs --summary
 ```

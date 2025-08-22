@@ -14,13 +14,15 @@ Business Value Justification (BVJ):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
+import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
-import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -67,7 +69,9 @@ class TestStartupCheckResultImport:
     @pytest.mark.asyncio
     async def test_environment_checker_uses_correct_model(self):
         """Test that EnvironmentChecker can create results with name parameter"""
-        from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
+        from netra_backend.app.startup_checks.environment_checks import (
+            EnvironmentChecker,
+        )
         
         checker = EnvironmentChecker()
         
@@ -127,7 +131,9 @@ class TestSchemaValidationService:
     @pytest.mark.asyncio
     async def test_schema_validation_imports(self):
         """Test that schema validation service has all required imports"""
-        from netra_backend.app.services.schema_validation_service import SchemaValidationService
+        from netra_backend.app.services.schema_validation_service import (
+            SchemaValidationService,
+        )
         
         # Should be able to import without errors
         assert SchemaValidationService is not None
@@ -135,8 +141,11 @@ class TestSchemaValidationService:
     @pytest.mark.asyncio
     async def test_database_connectivity_check(self):
         """Test that check_database_connectivity doesn't reference undefined 'settings'"""
-        from netra_backend.app.services.schema_validation_service import SchemaValidationService
         from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+
+        from netra_backend.app.services.schema_validation_service import (
+            SchemaValidationService,
+        )
         
         # Create a mock engine
         mock_engine = MagicMock(spec=AsyncEngine)
@@ -154,8 +163,11 @@ class TestSchemaValidationService:
     @pytest.mark.asyncio 
     async def test_run_comprehensive_validation(self):
         """Test that run_comprehensive_validation handles errors properly"""
-        from netra_backend.app.services.schema_validation_service import run_comprehensive_validation
         from sqlalchemy.ext.asyncio import AsyncEngine
+
+        from netra_backend.app.services.schema_validation_service import (
+            run_comprehensive_validation,
+        )
         
         # Create mock engine
         mock_engine = MagicMock(spec=AsyncEngine)
@@ -188,8 +200,9 @@ class TestStartupIntegration:
     @pytest.mark.asyncio
     async def test_startup_checks_can_run(self):
         """Test that startup checks can run without critical errors"""
-        from netra_backend.app.startup_checks import run_startup_checks
         from fastapi import FastAPI
+
+        from netra_backend.app.startup_checks import run_startup_checks
         
         app = FastAPI()
         

@@ -1,7 +1,8 @@
 """Agent route processing functions."""
-from typing import Dict, Any, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
+
+from netra_backend.app.routes.agent_route_helpers import AttachmentData, MultimodalInput
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.routes.agent_route_helpers import MultimodalInput, AttachmentData
 
 
 async def process_message_with_agent_service(

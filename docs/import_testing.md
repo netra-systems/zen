@@ -23,10 +23,10 @@ The Import Testing System provides fast-fail import validation to catch import e
 
 ```bash
 # Run import tests before main test suite (fast-fail)
-python -m test_framework.test_runner --import-test
+python unified_test_runner.py --import-test
 
 # Run ONLY import tests
-python -m test_framework.test_runner --import-only
+python unified_test_runner.py --import-only
 ```
 
 ### Via Standalone Script

@@ -5,7 +5,7 @@ Helper functions and utilities for the architecture scanner
 """
 
 import ast
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class ScannerHelpers:

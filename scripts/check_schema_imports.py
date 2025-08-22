@@ -15,14 +15,14 @@ Wrong patterns:
 """
 
 import ast
-import os
-import sys
-from pathlib import Path
-from typing import Dict, List, Tuple, Set, Optional
-from dataclasses import dataclass, field
 import json
-from collections import defaultdict
+import os
 import re
+import sys
+from collections import defaultdict
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass

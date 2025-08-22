@@ -4,8 +4,9 @@ User Management Routes - Profile, Settings, Preferences, API Keys, Sessions
 Handles comprehensive user profile and account management endpoints 
 that the frontend expects but were missing from the backend.
 """
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from typing import Optional, Dict, List, Any
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 

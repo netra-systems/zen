@@ -1,6 +1,10 @@
 """Metrics creation helper functions for Quality Gate Service tests"""
 
-from netra_backend.app.services.quality_gate_service import QualityLevel, QualityMetrics, ContentType
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityLevel,
+    QualityMetrics,
+)
 
 
 def create_all_penalties_metrics():

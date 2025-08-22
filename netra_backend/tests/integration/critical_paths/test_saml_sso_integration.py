@@ -24,33 +24,45 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import base64
+import hashlib
+import json
+import logging
 import time
 import uuid
-import json
-import redis.asyncio as aioredis
 import xml.etree.ElementTree as ET
-import base64
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
 from urllib.parse import parse_qs, urlparse
-import hashlib
-import logging
 
-# Add project root to path
+import pytest
+import redis.asyncio as aioredis
 
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    TokenData, SessionInfo, UserPermission,
-    LoginResponse, AuthProvider
-)
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    AuthProvider,
+    LoginResponse,
+    SessionInfo,
+    # Add project root to path
+    TokenData,
+    UserPermission,
+)
 
 logger = logging.getLogger(__name__)
 

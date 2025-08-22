@@ -4,15 +4,25 @@ Defines models for AI supply research, model catalogs, and research sessions.
 Focused module adhering to modular architecture and single responsibility.
 """
 
-from sqlalchemy import (
-    Column, String, DateTime, Boolean, JSON, Text, ForeignKey, 
-    Float, Numeric, Integer
-)
-from sqlalchemy.orm import relationship
-from netra_backend.app.db.base import Base
+import enum
 import uuid
 from datetime import datetime, timezone
-import enum
+
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
+from sqlalchemy.orm import relationship
+
+from netra_backend.app.db.base import Base
 
 
 class Supply(Base):

@@ -2,10 +2,12 @@
 Auth Service Pydantic Models - Type safety and validation
 Single Source of Truth for auth data structures
 """
-from pydantic import BaseModel, EmailStr, Field, model_validator
-from typing import Optional, List, Dict, Any
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
 
 class TokenType(str, Enum):
     """Token type enumeration"""

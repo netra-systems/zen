@@ -3,24 +3,37 @@ Tests for AgentErrorHandler core functionality.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
 from netra_backend.app.agents.error_handler import (
+    AgentError,
+    DatabaseError,
+    NetworkError,
+)
 
 # Add project root to path
-    AgentErrorHandler as ErrorHandler, 
-    AgentError,
+from netra_backend.app.agents.error_handler import (
+    # Add project root to path
+    AgentErrorHandler as ErrorHandler,
+)
+from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
-    NetworkError,
-    DatabaseError
 )
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext

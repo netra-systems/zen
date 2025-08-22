@@ -4,34 +4,49 @@ Tests for advanced workflow patterns, resource management, and coordination stra
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import AsyncMock
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.execution_context import (
-
-# Add project root to path
-    AgentExecutionContext,
-    AgentExecutionResult
-)
-from netra_backend.app.agents.state import DeepAgentState
+import pytest
 from schemas import SubAgentLifecycle
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-from netra_backend.tests.helpers.supervisor_test_helpers import (
-    create_supervisor_mocks, create_supervisor_agent, create_execution_context,
-    create_agent_state, setup_triage_agent_mock, setup_data_agent_mock,
-    setup_optimization_agent_mock, assert_agent_called
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
+    # Add project root to path
+    AgentExecutionContext,
+    AgentExecutionResult,
 )
-from netra_backend.tests.helpers.supervisor_extensions import install_supervisor_extensions
+
+# Add project root to path
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.tests.helpers.supervisor_extensions import (
+    install_supervisor_extensions,
+)
+from netra_backend.tests.helpers.supervisor_test_helpers import (
+    assert_agent_called,
+    create_agent_state,
+    create_execution_context,
+    create_supervisor_agent,
+    create_supervisor_mocks,
+    setup_data_agent_mock,
+    setup_optimization_agent_mock,
+    setup_triage_agent_mock,
+)
 
 # Install extension methods for testing
 install_supervisor_extensions()

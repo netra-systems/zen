@@ -9,7 +9,7 @@ import glob
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from architecture_scanner_helpers import ScannerHelpers
 from architecture_scanner_quality import QualityScanner

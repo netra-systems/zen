@@ -5,8 +5,10 @@ Utility functions for MCP handlers.
 Maintains 25-line function limit and single responsibility.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from fastapi import HTTPException, status
+
 from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()

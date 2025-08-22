@@ -8,17 +8,28 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Critical for enterprise data reliability
 """
 
-import pytest
 import asyncio
 import uuid
 from datetime import datetime, timezone
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
-    network_condition, stream_buffer, test_user_id, response_configs,
-    ConnectionState, ResponseType, StreamBuffer
+import pytest
+
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+    ConnectionState,
+    ResponseType,
+    StreamBuffer,
+    network_condition,
+    response_configs,
+    stream_buffer,
+    test_user_id,
 )
-from netra_backend.tests.e2e.websocket_resilience.utils.network_simulator import NetworkSimulator
-from netra_backend.tests.e2e.websocket_resilience.utils.streaming_response_generator import StreamingResponseGenerator
+from tests.e2e.websocket_resilience.utils.network_simulator import (
+    NetworkSimulator,
+)
+from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
+    StreamingResponseGenerator,
+)
+
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

@@ -5,10 +5,11 @@ Provides common functionality for testing against real
 GCP staging environment resources.
 """
 
+import asyncio
 import os
 import unittest
-import asyncio
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 try:
     from google.cloud import secretmanager
 except ImportError:

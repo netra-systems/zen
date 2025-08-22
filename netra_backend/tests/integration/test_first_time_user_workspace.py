@@ -8,26 +8,35 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Foundation for premium feature adoption
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import uuid
-from typing import Dict, Any
+from typing import Any, Dict
 
-import pytest
 import httpx
+import pytest
 from fastapi import status
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.tests.first_time_user_fixtures import (
-
-# Add project root to path
-    assert_api_key_properties, verify_rate_limiting,
-    get_mock_user_preferences, assert_export_response
+    # Add project root to path
+    assert_api_key_properties,
+    assert_export_response,
+    get_mock_user_preferences,
+    verify_rate_limiting,
 )
 
 

@@ -5,8 +5,8 @@ Orchestrates focused installer modules following 450-line/8-function limits.
 CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 """
 
-import sys
 import platform
+import sys
 from pathlib import Path
 from typing import List
 
@@ -14,13 +14,17 @@ from typing import List
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
-from installer_types import (
-    create_installer_config, create_version_requirements,
-    InstallerConfig, VersionRequirements, InstallerResult
-)
-from env_checker import run_full_environment_check
-from dependency_installer import run_complete_dependency_installation
 from config_setup import run_complete_configuration_setup
+from dependency_installer import run_complete_dependency_installation
+from env_checker import run_full_environment_check
+from installer_types import (
+    InstallerConfig,
+    InstallerResult,
+    VersionRequirements,
+    create_installer_config,
+    create_version_requirements,
+)
+
 
 class Colors:
     """Terminal colors for installer output"""

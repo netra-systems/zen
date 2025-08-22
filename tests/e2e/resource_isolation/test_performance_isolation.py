@@ -5,15 +5,19 @@ This test validates that one tenant's high resource usage
 does not significantly impact other tenants' performance.
 """
 
-import pytest
 import asyncio
-import time
 import logging
 import statistics
-from typing import Dict, Any, List
+import time
+from typing import Any, Dict, List
 
-from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+import pytest
+
 from tests.e2e.resource_isolation.test_infrastructure import RESOURCE_LIMITS
+from tests.e2e.resource_isolation.test_suite import (
+    resource_isolation_suite,
+    tenant_agents,
+)
 
 logger = logging.getLogger(__name__)
 

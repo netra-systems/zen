@@ -4,6 +4,7 @@ import ast
 import sys
 from pathlib import Path
 
+
 def check_import_order(file_path):
     """Check if setup_test_path() is called before netra_backend imports."""
     with open(file_path, 'r', encoding='utf-8') as f:

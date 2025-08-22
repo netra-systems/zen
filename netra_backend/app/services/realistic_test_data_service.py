@@ -6,8 +6,8 @@ Addresses gaps identified in test_realism_analysis_20250811.md
 """
 
 from netra_backend.app.realistic_test_data import (
+    RealisticDataPatterns,
     RealisticTestDataService,
-    RealisticDataPatterns
 )
 
 # Create the global instance for backward compatibility

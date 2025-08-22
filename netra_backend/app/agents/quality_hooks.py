@@ -16,16 +16,20 @@ This module contains quality validation hooks and monitoring logic.
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import (
-    QualityGateService, ContentType, ValidationResult
-)
-from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    ValidationResult,
+)
+from netra_backend.app.services.quality_monitoring_service import (
+    QualityMonitoringService,
+)
 
 logger = central_logger.get_logger(__name__)
 

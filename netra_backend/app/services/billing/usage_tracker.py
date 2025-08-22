@@ -1,10 +1,10 @@
 """Usage Tracker for billing and cost management."""
 
 import time
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class UsageType(Enum):

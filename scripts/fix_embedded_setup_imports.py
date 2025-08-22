@@ -23,12 +23,12 @@ setup_test_path()
 )
 """
 
+import argparse
+import ast
 import re
 import sys
-import ast
 from pathlib import Path
-from typing import List, Tuple, Optional
-import argparse
+from typing import List, Optional, Tuple
 
 
 class EmbeddedSetupImportFixer:

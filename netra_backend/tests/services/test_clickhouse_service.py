@@ -1,32 +1,41 @@
 """Test ClickHouse service for time-series data and analytics with real API."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
-import pytest_asyncio
-import uuid
 import json
 import random
-from datetime import datetime, timedelta, UTC
+import uuid
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import List, Dict, Any, Optional
 
-# Add project root to path
+import pytest
+import pytest_asyncio
+from logging_config import central_logger as logger
 
-from netra_backend.app.services.clickhouse_service import list_corpus_tables
+from netra_backend.app.config import settings
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
-
-# Add project root to path
+    # Add project root to path
     create_workload_events_table_if_missing,
-    verify_workload_events_table
+    verify_workload_events_table,
 )
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from config import settings
-from logging_config import central_logger as logger
+
+# Add project root to path
+from netra_backend.app.services.clickhouse_service import list_corpus_tables
 
 
 @pytest.fixture(scope="function")

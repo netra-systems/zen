@@ -2,20 +2,23 @@
 Simple OAuth proxy for staging environment.
 Handles OAuth redirects with proper CORS headers.
 """
+import os
+from datetime import UTC, datetime
+from typing import Any, Dict
+
+import httpx
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-import os
-import httpx
-from typing import Dict, Any
-from datetime import datetime, UTC
 
 app = FastAPI()
 
 # CORS configuration with regex support for wildcard subdomains
 import re
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 
 class WildcardCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):

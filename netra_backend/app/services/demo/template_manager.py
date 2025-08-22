@@ -1,12 +1,17 @@
 """Template management for demo service."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from netra_backend.app.services.demo.industry_config import INDUSTRY_FACTORS
-from netra_backend.app.services.demo.response_generator import (generate_prompt_template, 
-                                generate_optimization_scenarios)
-from netra_backend.app.services.demo.metrics_generator import (generate_baseline_metrics,
-                               generate_optimized_metrics)
+from netra_backend.app.services.demo.metrics_generator import (
+    generate_baseline_metrics,
+    generate_optimized_metrics,
+)
+from netra_backend.app.services.demo.response_generator import (
+    generate_optimization_scenarios,
+    generate_prompt_template,
+)
+
 
 async def get_industry_templates(industry: str) -> List[Dict[str, Any]]:
     """Get industry-specific templates and scenarios."""

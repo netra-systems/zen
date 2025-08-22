@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Analyze test failures to determine fixability and strategy."""
 
+import argparse
 import json
 import re
-import argparse
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass

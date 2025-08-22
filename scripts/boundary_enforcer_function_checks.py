@@ -7,11 +7,14 @@ Handles function size validation and refactor suggestions.
 import ast
 import glob
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 from boundary_enforcer_core_types import (
-    BoundaryViolation, SystemBoundaries, should_skip_file
+    BoundaryViolation,
+    SystemBoundaries,
+    should_skip_file,
 )
+
 
 class FunctionBoundaryChecker:
     """Handles function size boundary validation"""

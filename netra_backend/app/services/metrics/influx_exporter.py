@@ -3,8 +3,9 @@ InfluxDB line protocol metrics exporter
 Converts metrics data to InfluxDB line protocol format for time series databases
 """
 
-from typing import Dict, List, Any, Optional
-from netra_backend.app.schemas.Metrics import MetricsSnapshot, CorpusMetric
+from typing import Any, Dict, List, Optional
+
+from netra_backend.app.schemas.Metrics import CorpusMetric, MetricsSnapshot
 
 
 class InfluxExporter:

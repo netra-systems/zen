@@ -10,15 +10,15 @@ Business Value Justification (BVJ):
 - Strategic Impact: Prevents CI/CD failures and improves test coverage
 """
 
-import sys
-import os
-from pathlib import Path
 import ast
-import re
-import logging
-from typing import Dict, List, Tuple, Set, Optional
 import json
+import logging
+import os
+import re
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -171,7 +171,7 @@ class ComprehensiveE2EImportFixer:
             
             # Fix unified test imports
             content = content.replace(
-                'from netra_backend.tests.unified',
+                'from tests.unified',
                 'from tests.unified'
             )
             

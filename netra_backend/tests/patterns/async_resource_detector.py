@@ -5,7 +5,7 @@ Maximum 300 lines, functions ≤8 lines
 """
 
 import asyncio
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class AsyncResourceLeakDetector:

@@ -18,14 +18,14 @@ All tests maintain ≤8 lines per test function and ≤300 lines per module.
 
 from netra_backend.tests.shared_fixtures import (
     MetricEvent,
-    MockMetricsCollector,
     MockMetricsAggregator,
+    MockMetricsCollector,
     MockMetricsStorage,
     MockUserActionTracker,
-    metrics_collector,
     metrics_aggregator,
+    metrics_collector,
     metrics_storage,
-    user_action_tracker
+    user_action_tracker,
 )
 
 __all__ = [

@@ -6,8 +6,8 @@ Analyzes recent git changes for potential issues and hotspots.
 
 from typing import List
 
-from .core import ReviewConfig, ReviewData
 from .command_runner import CommandRunner
+from .core import ReviewConfig, ReviewData
 
 
 class GitAnalyzer:

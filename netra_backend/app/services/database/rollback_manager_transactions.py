@@ -5,10 +5,13 @@ for backward compatibility and clean module organization.
 """
 
 # Import PostgreSQL executor
-from netra_backend.app.services.database.rollback_manager_postgres import PostgresRollbackExecutor
-
 # Import ClickHouse executor  
-from netra_backend.app.services.database.rollback_manager_clickhouse import ClickHouseRollbackExecutor
+from netra_backend.app.services.database.rollback_manager_clickhouse import (
+    ClickHouseRollbackExecutor,
+)
+from netra_backend.app.services.database.rollback_manager_postgres import (
+    PostgresRollbackExecutor,
+)
 
 # Re-export for backward compatibility
 __all__ = [

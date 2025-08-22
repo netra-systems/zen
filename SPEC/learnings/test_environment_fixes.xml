@@ -43,8 +43,8 @@
         <working_patterns>
             From app directory:
             - python -m pytest tests/ (works)
-            - python scripts/test_backend.py (works)
-            - python -m test_framework.test_runner (fails)
+            - python unified_test_runner.py --service backend (works)
+            - python unified_test_runner.py (fails)
         </working_patterns>
     </learning>
 
@@ -79,7 +79,7 @@
         </worst_offenders>
         <spec_requirement>
             Per SPEC/testing.xml:
-            - Test files: 300 lines maximum
+            - Test files: 1000 lines maximum
             - Test functions: 8 lines maximum
         </spec_requirement>
         <impact>

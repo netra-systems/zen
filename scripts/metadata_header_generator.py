@@ -4,15 +4,16 @@ AI Agent File Metadata Tracking System
 Generates and manages metadata headers for AI-modified files
 """
 
-import os
-import sys
+import argparse
 import json
-import uuid
+import os
 import subprocess
+import sys
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, Optional, List
-import argparse
+from typing import Any, Dict, List, Optional
+
 
 class MetadataHeaderGenerator:
     """Generates metadata headers for AI-modified files"""

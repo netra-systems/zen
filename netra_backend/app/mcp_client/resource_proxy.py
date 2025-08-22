@@ -5,16 +5,16 @@ Handles resource discovery and fetching from external MCP servers.
 Compliant with 450-line limit and 25-line function requirements.
 """
 
-import json
-import hashlib
 import asyncio
-from typing import Dict, List, Any, Optional, Union
+import hashlib
+import json
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
-from netra_backend.app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
 from netra_backend.app.core.async_retry_logic import _retry_with_backoff
-from netra_backend.app.mcp_client.models import MCPResource, MCPConnection
+from netra_backend.app.core.exceptions import ErrorCode, ErrorSeverity, NetraException
+from netra_backend.app.mcp_client.models import MCPConnection, MCPResource
 
 
 class MCPResourceProxy:

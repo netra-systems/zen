@@ -18,23 +18,35 @@ Coverage: OAuth failover, fallback mechanisms, user notification, recovery handl
 session preservation during provider issues
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
+import logging
 import time
 import uuid
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
 import httpx
-import logging
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
+import pytest
+
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
-
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
-from netra_backend.app.logging_config import central_logger
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    L4StagingCriticalPathTestBase,
+)
 
 # Add project root to path
 

@@ -2,14 +2,14 @@
 Job Management Module - Handles job lifecycle and status tracking
 """
 
-from datetime import datetime, UTC
-from typing import Dict, Optional, TYPE_CHECKING
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Dict, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
 from netra_backend.app.db import models_postgres as models
 from netra_backend.app.logging_config import central_logger
-
 from netra_backend.app.services.synthetic_data.enums import GenerationStatus
 from netra_backend.app.services.synthetic_data.metrics import calculate_generation_rate
 

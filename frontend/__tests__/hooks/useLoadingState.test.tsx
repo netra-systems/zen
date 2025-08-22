@@ -14,9 +14,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { ChatLoadingState } from '@/types/loading-state';
 
 // Mock the dependencies
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn()
-}));
+jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: jest.fn()
 }));

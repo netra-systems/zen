@@ -2,9 +2,10 @@
 """Robust splitting of learnings.xml into modular files."""
 
 import re
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, List, Tuple
+
 
 def extract_learnings(content: str) -> List[Tuple[str, str, str]]:
     """Extract learning blocks with ID, category, and content."""

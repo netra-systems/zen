@@ -4,13 +4,13 @@ Regression tests for dynamic port health checks.
 Tests to ensure health checks work correctly with dynamically allocated ports.
 """
 
-import unittest
 import json
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
-import sys
 import os
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, mock_open, patch
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -42,7 +42,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
             result = self.validator._verify_auth_ready(8082)
             
             mock_wait.assert_called_once_with(
-                "http://localhost:8082/health", 
+                "http://localhost:8082/health/ready", 
                 timeout=30
             )
             self.assertTrue(result)

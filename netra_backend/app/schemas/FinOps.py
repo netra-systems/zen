@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import Dict, Any
 from enum import Enum
+from typing import Any, Dict
+
+from pydantic import BaseModel, Field
+
 
 class FinOps(BaseModel):
     attribution: Dict[str, str]

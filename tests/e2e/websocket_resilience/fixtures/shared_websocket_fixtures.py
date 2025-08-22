@@ -8,16 +8,18 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Enables comprehensive WebSocket reliability validation
 """
 
-import pytest
 import asyncio
-import uuid
 import json
 import time
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 
 class ConnectionState(Enum):
     """WebSocket connection states for testing."""

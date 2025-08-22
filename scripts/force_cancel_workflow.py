@@ -3,8 +3,10 @@
 
 import os
 import sys
+from typing import List, Optional, Tuple
+
 import requests
-from typing import Optional, List, Tuple
+
 
 def get_workflow_runs(token: str, owner: str, repo: str) -> list:
     """Get list of workflow runs."""

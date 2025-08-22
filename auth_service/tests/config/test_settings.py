@@ -5,8 +5,8 @@ Provides type-safe configuration for different test scenarios.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
 
 @dataclass

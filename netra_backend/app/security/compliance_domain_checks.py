@@ -1,9 +1,13 @@
 """Domain-specific compliance checks for various security standards."""
 
-from typing import Dict
 from datetime import datetime, timezone
+from typing import Dict
 
-from netra_backend.app.compliance_types import ComplianceCheck, ComplianceStandard, ComplianceStatus
+from netra_backend.app.compliance_types import (
+    ComplianceCheck,
+    ComplianceStandard,
+    ComplianceStatus,
+)
 
 
 class DomainComplianceChecks:

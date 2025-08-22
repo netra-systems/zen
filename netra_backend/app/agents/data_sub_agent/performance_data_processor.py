@@ -1,7 +1,7 @@
 """Performance data processing module with ≤8 line functions."""
 
-from typing import Dict, List, Any, Tuple
 from datetime import datetime
+from typing import Any, Dict, List, Tuple
 
 
 class PerformanceDataProcessor:

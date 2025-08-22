@@ -3,7 +3,9 @@ User Authentication Service
 Provides service layer abstraction for user model operations in routes
 """
 from typing import Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.user_service import user_service
 

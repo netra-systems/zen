@@ -4,6 +4,7 @@ Contains mock functions for generating fake LLM responses during testing.
 Each function must be ≤8 lines as per module architecture requirements.
 """
 from typing import Any, Type, TypeVar
+
 from pydantic import BaseModel
 
 T = TypeVar('T', bound=BaseModel)

@@ -2,11 +2,11 @@
 
 import asyncio
 from contextvars import ContextVar
-from typing import Dict, Any, Optional
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 from uuid import uuid4
-from pydantic import BaseModel, Field
-from datetime import datetime, UTC
 
+from pydantic import BaseModel, Field
 
 # Context variables for error tracking
 _trace_id_context: ContextVar[Optional[str]] = ContextVar('trace_id', default=None)

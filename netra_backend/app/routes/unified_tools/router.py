@@ -1,26 +1,41 @@
 """
 Unified Tools API Router - Route definitions only
 """
-from fastapi import APIRouter, Depends, Query
-from typing import List, Dict, Any, Optional
-from netra_backend.app.dependencies import DbDep
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
-import redis
-from netra_backend.app.core.configuration import unified_config_manager
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.schemas.unified_tools import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
-from netra_backend.app.routes.unified_tools.tool_listing import gather_tool_data, build_tool_availability_response
-from netra_backend.app.routes.unified_tools.tool_execution import process_tool_execution
-from netra_backend.app.routes.unified_tools.permissions import execute_permission_check
-from netra_backend.app.routes.unified_tools.user_plan import gather_user_plan_data, build_user_plan_response
-from netra_backend.app.routes.unified_tools.migration import process_migration_request
+import redis
+from fastapi import APIRouter, Depends, Query
+
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.core.configuration import unified_config_manager
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.dependencies import DbDep
 from netra_backend.app.routes.unified_tools.error_handlers import (
-    handle_list_tools_error, handle_tool_execution_error, handle_categories_error,
-    handle_permission_check_error, handle_user_plan_error, handle_migration_error
+    handle_categories_error,
+    handle_list_tools_error,
+    handle_migration_error,
+    handle_permission_check_error,
+    handle_tool_execution_error,
+    handle_user_plan_error,
 )
+from netra_backend.app.routes.unified_tools.migration import process_migration_request
+from netra_backend.app.routes.unified_tools.permissions import execute_permission_check
+from netra_backend.app.routes.unified_tools.tool_execution import process_tool_execution
+from netra_backend.app.routes.unified_tools.tool_listing import (
+    build_tool_availability_response,
+    gather_tool_data,
+)
+from netra_backend.app.routes.unified_tools.user_plan import (
+    build_user_plan_response,
+    gather_user_plan_data,
+)
+from netra_backend.app.schemas.unified_tools import (
+    ToolAvailabilityResponse,
+    ToolExecutionRequest,
+    UserPlanResponse,
+)
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
 
 router = APIRouter()
 

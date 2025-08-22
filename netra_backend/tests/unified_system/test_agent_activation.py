@@ -10,24 +10,34 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for delivering accurate AI optimization recommendations
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+
+# Add project root to path
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Config import AppConfig
 
 # Add project root to path

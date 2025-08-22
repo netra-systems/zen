@@ -1,6 +1,7 @@
 """Error response models and types for standardized API responses."""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 

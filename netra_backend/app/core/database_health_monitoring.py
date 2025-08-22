@@ -7,14 +7,17 @@ function decomposition. All functions ≤8 lines.
 from datetime import datetime
 from typing import Any
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.database_types import DatabaseType, PoolHealth, PoolMetrics
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
 # Import DatabaseHealthChecker from canonical location - CONSOLIDATED
-from netra_backend.app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
+from netra_backend.app.db.health_checks import (
+    DatabaseHealthChecker as CoreDatabaseHealthChecker,
+)
+
 
 class PoolHealthChecker:
     """Health checker for database connections - ≤8 lines per function."""

@@ -5,21 +5,30 @@ Tests the message repository layer with comprehensive mocking to ensure
 message-specific data access patterns work correctly.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.helpers.database_repository_helpers import (
-
-# Add project root to path
-    create_test_thread, create_test_message, create_test_messages,
-    assert_pagination_result
+    assert_pagination_result,
+    create_test_message,
+    create_test_messages,
+    # Add project root to path
+    create_test_thread,
 )
-
 
 # Import fixtures from helpers
 pytest_plugins = ["app.tests.helpers.database_repository_fixtures"]

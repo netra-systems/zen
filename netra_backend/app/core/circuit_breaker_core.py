@@ -8,10 +8,13 @@ import asyncio
 import time
 from typing import Any, Callable, Dict, Optional, TypeVar
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.circuit_breaker_types import (
-    CircuitState, CircuitConfig, CircuitMetrics, CircuitBreakerOpenError
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    CircuitMetrics,
+    CircuitState,
 )
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T')

@@ -1,10 +1,20 @@
 """Basic tests for Quality Monitoring Service"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import sys
 from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 
 # Add project root to path
@@ -14,17 +24,19 @@ import pytest
 sys.modules['app.db.clickhouse'] = MagicMock()
 sys.modules['app.db.clickhouse'].ClickHouseManager = MagicMock
 
-from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
+from netra_backend.app.services.quality_monitoring_service import (
+    QualityMonitoringService,
+)
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
-    mock_redis_manager,
-    mock_clickhouse_manager, 
+    mock_clickhouse_manager,
     mock_db_session,
-    quality_monitoring_service
+    mock_redis_manager,
+    quality_monitoring_service,
 )
 from netra_backend.tests.helpers.quality_monitoring_helpers import (
-    assert_service_initialization,
     assert_service_collections_initialized,
-    assert_service_monitoring_state
+    assert_service_initialization,
+    assert_service_monitoring_state,
 )
 
 
@@ -61,7 +73,10 @@ class TestQualityThresholds:
     def test_alert_thresholds_exist(self):
         """Test that alert thresholds are defined"""
         service = QualityMonitoringService()
-        from netra_backend.app.services.quality_monitoring.models import MetricType, AlertSeverity
+        from netra_backend.app.services.quality_monitoring.models import (
+            AlertSeverity,
+            MetricType,
+        )
         thresholds = service.alert_manager.ALERT_THRESHOLDS
         
         # Test specific threshold exists
@@ -91,7 +106,10 @@ class TestServiceConstants:
     
     def test_alert_thresholds_structure(self):
         """Test alert thresholds are properly defined"""
-        from netra_backend.app.services.quality_monitoring.models import MetricType, AlertSeverity
+        from netra_backend.app.services.quality_monitoring.models import (
+            AlertSeverity,
+            MetricType,
+        )
         service = QualityMonitoringService()
         thresholds = service.alert_manager.ALERT_THRESHOLDS
         
@@ -116,7 +134,10 @@ class TestServiceConstants:
         
     def test_alert_threshold_values(self):
         """Test alert threshold values are reasonable"""
-        from netra_backend.app.services.quality_monitoring.models import MetricType, AlertSeverity
+        from netra_backend.app.services.quality_monitoring.models import (
+            AlertSeverity,
+            MetricType,
+        )
         service = QualityMonitoringService()
         thresholds = service.alert_manager.ALERT_THRESHOLDS
         

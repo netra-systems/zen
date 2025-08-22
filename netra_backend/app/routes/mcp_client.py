@@ -5,21 +5,29 @@ tool execution, and resource access.
 """
 
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends
+
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
 
-from netra_backend.app.services.service_locator import get_service
-from netra_backend.app.services.service_interfaces import IMCPClientService
-from netra_backend.app.schemas.mcp_client import (
-    RegisterServerRequest, RegisterServerResponse,
-    ConnectServerRequest, ConnectServerResponse,
-    ListServersResponse, DiscoverToolsResponse,
-    ExecuteToolRequest, ExecuteToolResponse,
-    GetResourcesResponse, FetchResourceRequest, FetchResourceResponse,
-    ClearCacheRequest, ClearCacheResponse
-)
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.mcp_client import (
+    ClearCacheRequest,
+    ClearCacheResponse,
+    ConnectServerRequest,
+    ConnectServerResponse,
+    DiscoverToolsResponse,
+    ExecuteToolRequest,
+    ExecuteToolResponse,
+    FetchResourceRequest,
+    FetchResourceResponse,
+    GetResourcesResponse,
+    ListServersResponse,
+    RegisterServerRequest,
+    RegisterServerResponse,
+)
+from netra_backend.app.services.service_interfaces import IMCPClientService
+from netra_backend.app.services.service_locator import get_service
 
 logger = central_logger.get_logger(__name__)
 security = HTTPBearer()

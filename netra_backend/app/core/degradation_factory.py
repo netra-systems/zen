@@ -10,7 +10,7 @@ from netra_backend.app.core.degradation_manager import GracefulDegradationManage
 from netra_backend.app.core.degradation_strategies import (
     DatabaseDegradationStrategy,
     LLMDegradationStrategy,
-    WebSocketDegradationStrategy
+    WebSocketDegradationStrategy,
 )
 
 

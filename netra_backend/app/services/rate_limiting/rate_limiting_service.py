@@ -8,12 +8,14 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
-from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter as RateLimiter
-from typing import NamedTuple
+from netra_backend.app.services.api_gateway.rate_limiter import (
+    ApiGatewayRateLimiter as RateLimiter,
+)
+
 
 class RateLimitConfig(NamedTuple):
     """Configuration for rate limiting."""

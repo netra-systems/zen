@@ -3,9 +3,13 @@ Helper functions for converting metrics objects to dictionaries
 Used for JSON export functionality
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 from netra_backend.app.schemas.Metrics import (
-    CorpusMetric, TimeSeriesPoint, ResourceUsage, QualityMetrics
+    CorpusMetric,
+    QualityMetrics,
+    ResourceUsage,
+    TimeSeriesPoint,
 )
 
 

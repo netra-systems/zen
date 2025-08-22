@@ -6,7 +6,7 @@ Configuration classes and enums for message batching system.
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from netra_backend.app.schemas.registry import WebSocketMessage
 

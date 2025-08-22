@@ -5,11 +5,11 @@ This test ensures that the launcher correctly identifies and validates
 the actual project directory structure, particularly the backend path.
 """
 
-import unittest
-import sys
-from pathlib import Path
-import tempfile
 import os
+import sys
+import tempfile
+import unittest
+from pathlib import Path
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

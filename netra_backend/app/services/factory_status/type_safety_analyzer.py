@@ -2,9 +2,13 @@
 
 import ast
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
-from netra_backend.app.services.factory_status.spec_analyzer_core import SpecLoader, SpecViolation, ViolationSeverity
+from netra_backend.app.services.factory_status.spec_analyzer_core import (
+    SpecLoader,
+    SpecViolation,
+    ViolationSeverity,
+)
 
 
 class TypeSafetyAnalyzer:

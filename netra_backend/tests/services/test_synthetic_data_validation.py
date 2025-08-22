@@ -3,13 +3,23 @@ Validation Tests for Synthetic Data Generation Spec v3
 Tests to validate that the implementation matches the specification
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import os
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import pytest
 
 # Add project root to path
 
@@ -200,7 +210,10 @@ class TestImplementationConsistency:
 
     def test_corpus_service_exists(self):
         """Verify corpus service implementation exists"""
-        from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
+        from netra_backend.app.services.corpus_service import (
+            CorpusService,
+            CorpusStatus,
+        )
         
         assert CorpusService != None
         
@@ -221,7 +234,9 @@ class TestImplementationConsistency:
 
     def test_synthetic_data_service_has_required_methods(self):
         """Verify synthetic data service has required methods"""
-        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import (
+            SyntheticDataService,
+        )
         
         service = SyntheticDataService()
         
@@ -246,7 +261,9 @@ class TestImplementationConsistency:
 
     def test_data_clustering_tool_exists(self):
         """Verify data clustering tool exists"""
-        from netra_backend.app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import log_enricher_and_clusterer
+        from netra_backend.app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import (
+            log_enricher_and_clusterer,
+        )
         
         assert log_enricher_and_clusterer != None
 

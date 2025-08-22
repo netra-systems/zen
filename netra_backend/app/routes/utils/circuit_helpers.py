@@ -1,6 +1,6 @@
 """Circuit breaker specific utilities."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 def _circuit_matches_keywords(name: str, keywords: List[str]) -> bool:

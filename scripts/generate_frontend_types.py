@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # Change CWD to project root directory
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

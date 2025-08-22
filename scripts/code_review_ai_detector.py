@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 
+
 class CodeReviewAIDetector:
     """Handles AI coding issue detection for code review"""
     

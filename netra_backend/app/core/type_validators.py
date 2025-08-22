@@ -4,16 +4,20 @@ This module provides decorators and utilities for enforcing strict type safety
 at runtime across the Netra AI agent system.
 """
 
-from typing import Union, Dict, List, Optional, Callable, TypeVar, Any
-from functools import wraps
 import inspect
 import logging
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+
 from beartype import beartype
 from beartype.roar import BeartypeException
 
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from netra_backend.app.schemas.shared_types import AgentState
+from netra_backend.app.schemas.shared_types import (
+    AgentState,
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
 
 T = TypeVar('T')
 F = TypeVar('F', bound=Callable[..., Any])

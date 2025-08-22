@@ -14,28 +14,39 @@ Target Coverage:
 - IP tracking and authentication attempt monitoring
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import time
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from fastapi import Request, Response, HTTPException, status
+import pytest
+from fastapi import HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
-from starlette.datastructures import Headers, URL
+from starlette.datastructures import URL, Headers
 
-# Add project root to path
-
-from netra_backend.app.middleware.security_middleware import (
-
-# Add project root to path
-    SecurityMiddleware, SecurityConfig, RateLimitTracker,
-    InputValidator, create_security_middleware
-)
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
+
+# Add project root to path
+from netra_backend.app.middleware.security_middleware import (
+    InputValidator,
+    RateLimitTracker,
+    SecurityConfig,
+    # Add project root to path
+    SecurityMiddleware,
+    create_security_middleware,
+)
 
 
 class TestSecurityConfig:

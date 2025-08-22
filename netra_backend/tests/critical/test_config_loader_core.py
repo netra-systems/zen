@@ -8,24 +8,44 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum config loading relia
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import os
+from typing import Any, Dict
 from unittest.mock import Mock, patch
-from typing import Dict, Any
 
-# Core config loader components
-from config_loader import (
-    load_env_var, set_clickhouse_host, set_clickhouse_port, set_clickhouse_password,
-    set_clickhouse_user, set_gemini_api_key, set_llm_api_key, get_critical_vars_mapping,
-    apply_single_secret, _navigate_to_parent_object, _get_attribute_or_none
-)
+import pytest
 
 # Cloud environment detection components
 from cloud_environment_detector import (
-    detect_cloud_run_environment, _check_k_service_for_staging, _check_pr_number_for_staging
+    _check_k_service_for_staging,
+    _check_pr_number_for_staging,
+    detect_cloud_run_environment,
+)
+
+# Core config loader components
+from config_loader import (
+    _get_attribute_or_none,
+    _navigate_to_parent_object,
+    apply_single_secret,
+    get_critical_vars_mapping,
+    load_env_var,
+    set_clickhouse_host,
+    set_clickhouse_password,
+    set_clickhouse_port,
+    set_clickhouse_user,
+    set_gemini_api_key,
+    set_llm_api_key,
 )
 
 

@@ -3,23 +3,34 @@ Tests for file, crypto, and validation utilities (Tests 89-91).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import os
 import tempfile
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.tests.helpers.json_file_crypto_test_helpers import (
-
-# Add project root to path
-    FileTestHelpers, CryptoTestHelpers
+    CryptoTestHelpers,
+    # Add project root to path
+    FileTestHelpers,
 )
-from netra_backend.tests.helpers.validation_formatting_test_helpers import ValidationTestHelpers
+from netra_backend.tests.helpers.validation_formatting_test_helpers import (
+    ValidationTestHelpers,
+)
 
 
 # Test 89: File utils operations

@@ -7,6 +7,7 @@ Contains all data structures for function complexity linting.
 from dataclasses import dataclass
 from typing import List
 
+
 @dataclass
 class FunctionComplexityViolation:
     """Function complexity violation data"""

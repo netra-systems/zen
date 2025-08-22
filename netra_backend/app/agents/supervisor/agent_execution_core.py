@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
-    AgentExecutionContext, AgentExecutionResult
+    AgentExecutionContext,
+    AgentExecutionResult,
 )
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

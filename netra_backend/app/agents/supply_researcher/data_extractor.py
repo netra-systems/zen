@@ -6,9 +6,9 @@ Maintains 25-line function limit and focused extraction logic.
 """
 
 import re
-from typing import Dict, Any, List
+from datetime import UTC, datetime
 from decimal import Decimal
-from datetime import datetime, UTC
+from typing import Any, Dict, List
 
 
 class SupplyDataExtractor:

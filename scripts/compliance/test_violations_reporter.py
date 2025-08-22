@@ -6,13 +6,13 @@ Generates detailed reports with splitting suggestions for test limit violations.
 
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 # Add the compliance directory to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from test_limits_checker import TestLimitsChecker
 from core import ComplianceConfig, Violation
+from test_limits_checker import TestLimitsChecker
 
 
 class TestViolationsReporter:

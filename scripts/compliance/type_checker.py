@@ -8,9 +8,9 @@ import glob
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
-from .core import Violation, ComplianceConfig, ViolationBuilder
+from .core import ComplianceConfig, Violation, ViolationBuilder
 
 
 class TypeChecker:

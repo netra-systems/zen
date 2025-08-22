@@ -6,8 +6,9 @@ Extracted from main service to maintain 450-line module limit.
 """
 
 import uuid
-from typing import Dict, Any, List, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 

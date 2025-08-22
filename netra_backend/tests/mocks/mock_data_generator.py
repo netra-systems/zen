@@ -4,9 +4,9 @@ Provides mock data for testing and development.
 Module follows 450-line limit with 25-line function limit.
 """
 
-from typing import Dict, List, Any
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
 
 class MockDataGenerator:

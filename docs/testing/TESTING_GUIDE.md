@@ -231,7 +231,7 @@ The test framework includes automatic bad test detection to identify consistentl
 python test_runner.py --level unit
 
 # Disable bad test detection
-python scripts/test_backend.py --no-bad-test-detection
+python unified_test_runner.py --service backend --no-bad-test-detection
 
 # View bad test reports
 python -m test_framework.bad_test_reporter          # Full report

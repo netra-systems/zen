@@ -14,13 +14,15 @@ Usage:
     from netra_backend.app.schemas.websocket_server_messages import AgentStartedMessage, AgentCompletedMessage
 """
 
-from typing import Any, Dict, Optional, Union, Literal
-from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Any, Dict, Literal, Optional, Union
+
+from pydantic import BaseModel, Field
+
+from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
 
 # Import WebSocket base types from registry to avoid circular imports
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.schemas.core_enums import WebSocketMessageType, AgentStatus
 
 
 # Base class for server messages

@@ -3,8 +3,9 @@ Apex Optimizer Table Creation Functions
 Handles creation of Apex-related database tables
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 
 def _create_apex_reports() -> None:

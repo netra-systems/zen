@@ -9,7 +9,9 @@
 # Review: Pending | Score: 85
 # ================================
 from typing import List
+
 from langchain_core.tools import BaseTool
+
 
 class AgentToolConfigRegistry:
     def __init__(self, db_session):

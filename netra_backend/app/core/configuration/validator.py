@@ -9,18 +9,23 @@ Each function ≤8 lines, file ≤300 lines.
 """
 
 import os
-from typing import Dict, List, Tuple
 from enum import Enum
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
-from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.core.environment_constants import get_current_environment
+if TYPE_CHECKING:
+    # Import TriageResult only for type checking to prevent circular imports
+    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 
-from netra_backend.app.core.configuration.validator_types import ValidationResult
-from netra_backend.app.core.configuration.validator_database import DatabaseValidator
-from netra_backend.app.core.configuration.validator_llm import LLMValidator
 from netra_backend.app.core.configuration.validator_auth import AuthValidator
-from netra_backend.app.core.configuration.validator_environment import EnvironmentValidator
+from netra_backend.app.core.configuration.validator_database import DatabaseValidator
+from netra_backend.app.core.configuration.validator_environment import (
+    EnvironmentValidator,
+)
+from netra_backend.app.core.configuration.validator_llm import LLMValidator
+from netra_backend.app.core.configuration.validator_types import ValidationResult
+from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.Config import AppConfig
 
 
 class ValidationMode(str, Enum):

@@ -2,19 +2,21 @@
 Integration test for OAuth token flow from Google to frontend storage.
 Tests the complete flow: OAuth callback -> token exchange -> frontend redirect -> token storage
 """
-import pytest
-import httpx
-from unittest.mock import AsyncMock, patch, MagicMock
-from fastapi.testclient import TestClient
-import json
 import base64
+import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import pytest
+from fastapi.testclient import TestClient
 
 
 @pytest.mark.asyncio
 async def test_oauth_callback_token_exchange():
     """Test that auth service correctly exchanges OAuth code for tokens"""
-    from auth_service.auth_core.routes.auth_routes import router
     from fastapi import FastAPI
+
+    from auth_service.auth_core.routes.auth_routes import router
     
     app = FastAPI()
     app.include_router(router)
@@ -98,7 +100,7 @@ async def test_oauth_callback_token_exchange():
 async def test_frontend_token_storage():
     """Test that frontend correctly stores tokens from URL parameters"""
     # This would be better as a frontend test, but we can test the logic
-    from urllib.parse import urlparse, parse_qs
+    from urllib.parse import parse_qs, urlparse
     
     # Simulate the redirect URL from auth service
     redirect_url = "http://app.test/chat?token=jwt-access-token&refresh=jwt-refresh-token"
@@ -180,8 +182,9 @@ async def test_oauth_error_handling():
 @pytest.mark.asyncio
 async def test_staging_environment_urls():
     """Test that staging environment uses correct URLs"""
-    from auth_service.auth_core.config import AuthConfig
     import os
+
+    from auth_service.auth_core.config import AuthConfig
     
     # Set staging environment
     with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
@@ -200,8 +203,9 @@ async def test_staging_environment_urls():
 
 def test_jwt_token_decoding():
     """Test that frontend can decode JWT tokens"""
-    import jwt
     import time
+
+    import jwt
     
     # Create a test JWT token
     payload = {

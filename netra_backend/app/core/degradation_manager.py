@@ -12,7 +12,7 @@ from netra_backend.app.core.degradation_types import (
     DegradationPolicy,
     DegradationStrategy,
     ServiceStatus,
-    ServiceTier
+    ServiceTier,
 )
 from netra_backend.app.logging_config import central_logger
 

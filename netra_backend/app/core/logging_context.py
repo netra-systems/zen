@@ -8,15 +8,14 @@ This module handles:
 - Performance monitoring decorators
 """
 
-import os
 import asyncio
+import os
 import time
-from typing import Optional, Dict, Any
-from functools import wraps
 from contextvars import ContextVar
+from functools import wraps
+from typing import Any, Dict, Optional
 
 from loguru import logger
-
 
 # Context variables for request tracking
 request_id_context: ContextVar[Optional[str]] = ContextVar('request_id', default=None)

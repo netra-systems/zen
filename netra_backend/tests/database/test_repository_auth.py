@@ -4,20 +4,30 @@ Tests user authentication, optimization storage, and metric aggregation
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
+
+import pytest
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.db.repositories.user_repository import UserRepository
-from netra_backend.app.db.models_postgres import User
-from sqlalchemy import Column, String, Integer, JSON, DateTime, Float
 from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_postgres import User
+
+# Add project root to path
+from netra_backend.app.db.repositories.user_repository import UserRepository
 
 # Add project root to path
 

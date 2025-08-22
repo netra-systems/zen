@@ -17,43 +17,50 @@ MODULES:
 - test_llm_agent_advanced_integration.py: Integration tests with ≤8 line functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
-
 # Import all fixtures from modular structure
 from netra_backend.tests.agents.test_fixtures import (
-    mock_llm_manager, 
-    mock_db_session, 
-    mock_websocket_manager, 
-    mock_tool_dispatcher, 
-    supervisor_agent
-)
-
-# Import all basic tests (≤8 line functions)
-from netra_backend.tests.test_llm_agent_basic import (
-    test_supervisor_initialization,
-    test_llm_triage_processing, 
-    test_llm_response_parsing,
-    test_agent_state_transitions,
-    test_websocket_message_streaming,
-    test_tool_dispatcher_integration,
-    test_state_persistence,
-    test_error_recovery,
-    test_multi_agent_coordination
+    mock_db_session,
+    mock_llm_manager,
+    mock_tool_dispatcher,
+    mock_websocket_manager,
+    supervisor_agent,
 )
 
 # Import all integration tests (≤8 line functions)
 from netra_backend.tests.test_llm_agent_advanced_integration import (
     test_concurrent_request_handling,
+    test_end_to_end_optimization_flow,
     test_performance_metrics,
     test_real_llm_interaction,
     test_tool_execution_with_llm,
-    test_end_to_end_optimization_flow
+)
+
+# Import all basic tests (≤8 line functions)
+from netra_backend.tests.test_llm_agent_basic import (
+    test_agent_state_transitions,
+    test_error_recovery,
+    test_llm_response_parsing,
+    test_llm_triage_processing,
+    test_multi_agent_coordination,
+    test_state_persistence,
+    test_supervisor_initialization,
+    test_tool_dispatcher_integration,
+    test_websocket_message_streaming,
 )
 
 

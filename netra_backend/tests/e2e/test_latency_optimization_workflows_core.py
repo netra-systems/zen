@@ -4,26 +4,43 @@ Tests real LLM agents with complete data flow validation for latency optimizatio
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import time
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
-
-from netra_backend.tests.e2e.latency_optimization_helpers import (
-
-# Add project root to path
-    create_latency_optimization_setup, execute_latency_workflow,
-    create_3x_latency_state, create_bottleneck_analysis_state,
-    create_caching_optimization_state, create_parallel_processing_state,
-    validate_3x_latency_results, validate_bottleneck_identification,
-    validate_caching_strategy_results, validate_parallel_processing_results,
-    validate_execution_time_bounds, validate_timing_consistency
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
+from tests.e2e.latency_optimization_helpers import (
+    create_3x_latency_state,
+    create_bottleneck_analysis_state,
+    create_caching_optimization_state,
+    # Add project root to path
+    create_latency_optimization_setup,
+    create_parallel_processing_state,
+    execute_latency_workflow,
+    validate_3x_latency_results,
+    validate_bottleneck_identification,
+    validate_caching_strategy_results,
+    validate_execution_time_bounds,
+    validate_parallel_processing_results,
+    validate_timing_consistency,
 )
 
 

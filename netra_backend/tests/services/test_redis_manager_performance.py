@@ -3,24 +3,41 @@ Tests for Redis Manager performance characteristics
 Tests high throughput, memory usage, latency, and concurrent safety
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import tracemalloc
 
-# Add project root to path
+import pytest
 
-from netra_backend.tests.helpers.redis_test_fixtures import performance_redis_manager, RedisConnectionPool
+# Add project root to path
+from netra_backend.tests.helpers.redis_test_fixtures import (
+    RedisConnectionPool,
+    performance_redis_manager,
+)
 from netra_backend.tests.helpers.redis_test_helpers import (
-
-# Add project root to path
-    verify_performance_metrics, verify_memory_usage, verify_latency_metrics,
-    verify_metrics_accuracy, calculate_hit_rate, verify_concurrent_safety,
-    setup_large_dataset_tasks, measure_operation_latency, setup_batch_operations,
-    verify_no_exceptions
+    calculate_hit_rate,
+    measure_operation_latency,
+    setup_batch_operations,
+    setup_large_dataset_tasks,
+    verify_concurrent_safety,
+    verify_latency_metrics,
+    verify_memory_usage,
+    verify_metrics_accuracy,
+    verify_no_exceptions,
+    # Add project root to path
+    verify_performance_metrics,
 )
 
 

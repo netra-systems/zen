@@ -81,14 +81,14 @@ describe('Remember Me Functionality Tests', () => {
     mockSessionStorage.removeItem.mockClear();
     mockSessionStorage.clear.mockClear();
     mockCookies.clear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Token Persistence', () => {
     it('should persist authentication token in storage', async () => {
       mockLocalStorage.getItem.mockReturnValue('stored-jwt-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'stored-jwt-token',
         user: {
@@ -114,7 +114,7 @@ describe('Remember Me Functionality Tests', () => {
     it('should handle corrupted stored token', () => {
       mockLocalStorage.getItem.mockReturnValue('corrupted-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: null,
         user: null
@@ -129,7 +129,7 @@ describe('Remember Me Functionality Tests', () => {
       const expiredToken = 'expired.jwt.token';
       mockLocalStorage.getItem.mockReturnValue(expiredToken);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: null,
         user: null
@@ -145,7 +145,7 @@ describe('Remember Me Functionality Tests', () => {
     it('should restore session from valid stored data', async () => {
       mockLocalStorage.getItem.mockReturnValue('valid-jwt-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'valid-jwt-token',
         user: {
@@ -181,7 +181,7 @@ describe('Remember Me Functionality Tests', () => {
       expect(mockLogin).toHaveBeenCalled();
       
       // New login should override stored session
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'fresh-token',
         user: {
@@ -200,7 +200,7 @@ describe('Remember Me Functionality Tests', () => {
         throw new Error('QuotaExceededError');
       });
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -219,7 +219,7 @@ describe('Remember Me Functionality Tests', () => {
     it('should respect dev logout flag in persistence', () => {
       mockLocalStorage.getItem.mockReturnValue('dev-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -233,7 +233,7 @@ describe('Remember Me Functionality Tests', () => {
     });
 
     it('should handle dev mode auto-login', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -253,7 +253,7 @@ describe('Remember Me Functionality Tests', () => {
     });
 
     it('should clear dev logout flag on manual login', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -270,7 +270,7 @@ describe('Remember Me Functionality Tests', () => {
     });
 
     it('should persist dev mode sessions differently', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'dev-user-123',
@@ -309,7 +309,7 @@ describe('Remember Me Functionality Tests', () => {
     });
 
     it('should sync logout across tabs', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -331,7 +331,7 @@ describe('Remember Me Functionality Tests', () => {
       window.dispatchEvent(logoutEvent);
       
       // Simulate state update after storage event
-      (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
       
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
@@ -371,7 +371,7 @@ describe('Remember Me Functionality Tests', () => {
 
   describe('Persistence Security', () => {
     it('should handle secure token storage', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'secure-jwt-token',
         user: {
@@ -389,7 +389,7 @@ describe('Remember Me Functionality Tests', () => {
     it('should validate token integrity on restore', () => {
       mockLocalStorage.getItem.mockReturnValue('tampered.jwt.token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: null,
         user: null
@@ -401,7 +401,7 @@ describe('Remember Me Functionality Tests', () => {
     });
 
     it('should clear tokens on security violations', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: null,
         user: null
@@ -415,7 +415,7 @@ describe('Remember Me Functionality Tests', () => {
     it('should handle token refresh for persistent sessions', async () => {
       mockLocalStorage.getItem.mockReturnValue('refresh-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'refreshed-token',
         user: {
@@ -448,7 +448,7 @@ describe('Remember Me Functionality Tests', () => {
       });
       mockSessionStorage.getItem.mockReturnValue('session-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: 'session-token',
         user: {
@@ -476,7 +476,7 @@ describe('Remember Me Functionality Tests', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
       mockSessionStorage.getItem.mockReturnValue('partial-token');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         token: null,
         user: null

@@ -1,8 +1,11 @@
 # app/data/data_enricher.py
 import logging
-from typing import Dict, Tuple, Optional, Any
+from typing import Any, Dict, Optional, Tuple
+
 from clickhouse_driver import Client
+
 from netra_backend.app.config import settings
+
 
 class DataEnricher:
     """

@@ -7,22 +7,33 @@ Business Value: Analytics critical for customer optimization insights.
 BVJ: Growth & Enterprise | Performance Analytics | +15% optimization value capture
 """
 
-from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
-)
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.base.interface import (
+    BaseExecutionInterface,
+    ExecutionContext,
+    WebSocketManagerProtocol,
+)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-
-from netra_backend.app.agents.data_sub_agent.metric_distribution_analyzer import MetricDistributionAnalyzer
-from netra_backend.app.agents.data_sub_agent.metric_trend_analyzer import MetricTrendAnalyzer
-from netra_backend.app.agents.data_sub_agent.metric_percentile_analyzer import MetricPercentileAnalyzer
-from netra_backend.app.agents.data_sub_agent.metric_comparison_analyzer import MetricComparisonAnalyzer
-from netra_backend.app.agents.data_sub_agent.metric_seasonality_analyzer import MetricSeasonalityAnalyzer
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.data_sub_agent.metric_comparison_analyzer import (
+    MetricComparisonAnalyzer,
+)
+from netra_backend.app.agents.data_sub_agent.metric_distribution_analyzer import (
+    MetricDistributionAnalyzer,
+)
+from netra_backend.app.agents.data_sub_agent.metric_percentile_analyzer import (
+    MetricPercentileAnalyzer,
+)
+from netra_backend.app.agents.data_sub_agent.metric_seasonality_analyzer import (
+    MetricSeasonalityAnalyzer,
+)
+from netra_backend.app.agents.data_sub_agent.metric_trend_analyzer import (
+    MetricTrendAnalyzer,
+)
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class MetricsAnalyzer(BaseExecutionInterface):

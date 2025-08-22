@@ -10,14 +10,15 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from rich.console import Console
-from rich.table import Table
-from rich.tree import Tree
 from rich.panel import Panel
 from rich.syntax import Syntax
+from rich.table import Table
+from rich.tree import Tree
 
 
 @dataclass

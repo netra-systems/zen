@@ -4,10 +4,11 @@ This module provides reusable fixtures and helper functions for testing
 database repositories with mocked behavior. All functions are ≤8 lines.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
@@ -96,8 +97,10 @@ def _create_reference_mock(**kwargs):
 def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked repositories."""
     from netra_backend.tests.helpers.database_repository_helpers import (
-        setup_thread_mock_behavior, setup_message_mock_behavior,
-        setup_run_mock_behavior, setup_reference_mock_behavior
+        setup_message_mock_behavior,
+        setup_reference_mock_behavior,
+        setup_run_mock_behavior,
+        setup_thread_mock_behavior,
     )
     
     with patch('app.services.database.unit_of_work.async_session_factory') as mock_factory:

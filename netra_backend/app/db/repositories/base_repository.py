@@ -3,13 +3,14 @@
 Provides common CRUD operations for all entity repositories.
 """
 
-from typing import Optional, List, Dict, Any, TypeVar, Generic
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
-from sqlalchemy.exc import SQLAlchemyError
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
-from netra_backend.app.logging_config import central_logger
+from sqlalchemy import delete, select, update
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.core.exceptions_database import NetraException
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

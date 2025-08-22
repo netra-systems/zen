@@ -7,12 +7,12 @@ Validates service initialization order, dependencies, and configuration.
 import asyncio
 import json
 import os
+import subprocess
 import sys
 import time
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-import subprocess
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

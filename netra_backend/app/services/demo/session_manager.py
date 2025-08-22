@@ -1,8 +1,8 @@
 """Session management for demo service."""
 
 import json
-from datetime import datetime, UTC
-from typing import Dict, Any, Optional
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager

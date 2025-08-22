@@ -5,7 +5,8 @@ and provides monitoring insights for system health.
 """
 
 import time
-from typing import Callable, Dict, Any
+from typing import Any, Callable, Dict
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 

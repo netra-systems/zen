@@ -15,37 +15,51 @@ OAuth initiation → User authorization → Token exchange → JWT validation �
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session persistence, token refresh, cross-service validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import base64
+import hashlib
 import json
+import secrets
 import time
 import uuid
-import httpx
-import websockets
-import secrets
-import hashlib
-import base64
-from typing import Dict, Any, Optional
-from urllib.parse import urlencode, parse_qs, urlparse
-
-# Add project root to path
-
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
+from typing import Any, Dict, Optional
 
 # Add project root to path
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
+from urllib.parse import parse_qs, urlencode, urlparse
+
+import httpx
+import pytest
+import websockets
+
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    L4StagingCriticalPathTestBase,
+)
+
 OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # from auth_integration import create_access_token, validate_token_jwt
 # from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
+
 create_access_token = AsyncMock()
 # from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
+
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock
 # Session manager replaced with mock

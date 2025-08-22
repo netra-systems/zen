@@ -119,13 +119,13 @@ pytest integration_tests/test_e2e_staging_environment.py -v -m critical
 ### Integration with Test Runner
 ```bash
 # Run via unified test runner with dev environment
-python -m test_framework.test_runner --level integration --env dev
+python unified_test_runner.py --level integration --env dev
 
 # Run via unified test runner with staging environment
-python -m test_framework.test_runner --level integration --env staging
+python unified_test_runner.py --level integration --env staging
 
 # Run with real LLM in staging
-python -m test_framework.test_runner --level integration --env staging --real-llm
+python unified_test_runner.py --level integration --env staging --real-llm
 ```
 
 ## Next Steps Recommendations

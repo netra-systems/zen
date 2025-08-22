@@ -14,18 +14,18 @@ Business Value: Prevents $8K MRR loss from poor real-time experience
 
 import asyncio
 import time
-from typing import Dict, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, Optional
 
 from fastapi import WebSocket
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.enhanced_lifecycle_manager import (
+    ConnectionPool,
     EnhancedLifecycleManager,
     HeartbeatConfig,
-    ConnectionPool,
-    ShutdownConfig
+    ShutdownConfig,
 )
 
 logger = central_logger.get_logger(__name__)

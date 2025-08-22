@@ -3,23 +3,30 @@ Workload Events Table Operations Tests
 Tests workload_events table operations with real data
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
-
-# Add project root to path
-
-from netra_backend.app.db.clickhouse import get_clickhouse_client
 from logging_config import central_logger as logger
-from netra_backend.tests.clickhouse_test_fixtures import (
 
 # Add project root to path
-    setup_workload_table,
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.tests.clickhouse_test_fixtures import (
+    build_workload_insert_query,
     check_table_insert_permission,
     generate_test_workload_events,
-    build_workload_insert_query,
-    insert_with_permission_check
+    insert_with_permission_check,
+    # Add project root to path
+    setup_workload_table,
 )
 
 

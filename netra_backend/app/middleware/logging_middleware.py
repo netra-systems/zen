@@ -3,11 +3,17 @@
 import time
 import uuid
 from typing import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from netra_backend.app.logging_config import central_logger, request_id_context, user_id_context, trace_id_context
+from netra_backend.app.logging_config import (
+    central_logger,
+    request_id_context,
+    trace_id_context,
+    user_id_context,
+)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):

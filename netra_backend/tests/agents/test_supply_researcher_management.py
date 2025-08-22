@@ -3,20 +3,30 @@ Scheduling and management tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
 from netra_backend.tests.supply_researcher_fixtures import (
-
-# Add project root to path
-    agent, mock_supply_service, research_query_test_cases
+    # Add project root to path
+    agent,
+    mock_supply_service,
+    research_query_test_cases,
 )
 
 
@@ -32,7 +42,10 @@ class TestSupplyResearcherManagement:
 
     def _test_daily_schedule(self, now):
         """Test daily schedule calculation (≤8 lines)"""
-        from netra_backend.app.services.supply_research_scheduler import ResearchSchedule, ScheduleFrequency
+        from netra_backend.app.services.supply_research_scheduler import (
+            ResearchSchedule,
+            ScheduleFrequency,
+        )
         daily = ResearchSchedule(
             name="test_daily",
             frequency=ScheduleFrequency.DAILY,
@@ -48,7 +61,10 @@ class TestSupplyResearcherManagement:
 
     def _test_weekly_schedule(self, now):
         """Test weekly schedule calculation (≤8 lines)"""
-        from netra_backend.app.services.supply_research_scheduler import ResearchSchedule, ScheduleFrequency
+        from netra_backend.app.services.supply_research_scheduler import (
+            ResearchSchedule,
+            ScheduleFrequency,
+        )
         weekly = ResearchSchedule(
             name="test_weekly",
             frequency=ScheduleFrequency.WEEKLY,
@@ -64,7 +80,10 @@ class TestSupplyResearcherManagement:
 
     def _test_monthly_schedule(self, now):
         """Test monthly schedule calculation (≤8 lines)"""
-        from netra_backend.app.services.supply_research_scheduler import ResearchSchedule, ScheduleFrequency
+        from netra_backend.app.services.supply_research_scheduler import (
+            ResearchSchedule,
+            ScheduleFrequency,
+        )
         monthly = ResearchSchedule(
             name="test_monthly",
             frequency=ScheduleFrequency.MONTHLY,
@@ -182,7 +201,10 @@ class TestSupplyResearcherManagement:
 
     def _create_conflicting_schedules(self):
         """Create conflicting schedule scenarios (≤8 lines)"""
-        from netra_backend.app.services.supply_research_scheduler import ResearchSchedule, ScheduleFrequency
+        from netra_backend.app.services.supply_research_scheduler import (
+            ResearchSchedule,
+            ScheduleFrequency,
+        )
         return [
             ResearchSchedule("high_priority", ScheduleFrequency.DAILY, 
                            ResearchType.PRICING, priority=1),

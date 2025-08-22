@@ -3,10 +3,10 @@ Core compliance check data structures and types.
 Defines the foundational components for security compliance tracking.
 """
 
-from typing import Dict, List
-from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Dict, List
 
 
 class ComplianceStandard(str, Enum):

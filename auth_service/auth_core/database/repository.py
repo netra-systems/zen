@@ -2,14 +2,15 @@
 Auth Service Database Repository
 Repository pattern for auth database operations
 """
-from typing import Optional, Dict, List
-from sqlalchemy import select, update, and_, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, timezone, timedelta
 import hashlib
 import logging
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Optional
 
-from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
+from sqlalchemy import and_, or_, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
 
 logger = logging.getLogger(__name__)
 

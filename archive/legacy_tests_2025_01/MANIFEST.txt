@@ -1,0 +1,65 @@
+# Legacy Test Directory Archive - January 2025
+
+This archive contains legacy test directories that were moved on 2025-08-21 to clean up the test structure.
+
+## Archived Directories
+
+### 1. legacy_integration_tests/
+- **Original Path:** ./legacy_integration_tests/
+- **Reason for Archival:** Clearly legacy/duplicate test files (19 old test files)
+- **Contents:** 16 Python test files including conftest.py
+- **Key Files:**
+  - conftest.py
+  - test_agent_orchestration.py
+  - test_app.py
+  - test_auth_flow_comprehensive.py
+  - test_e2e_dev_environment.py
+  - test_e2e_staging_environment.py
+  - test_error_recovery_resilience.py
+  - test_generation_service.py
+  - test_health.py
+  - test_session_management.py
+  - test_simple.py
+  - test_supervisor.py
+  - test_thread_lifecycle.py
+  - test_websocket.py
+  - test_websocket_realtime.py
+  - test_websocket_simple.py
+
+### 2. test_data/
+- **Original Path:** ./test_data/
+- **Reason for Archival:** Orphaned test data, duplicated by netra_backend/test_data
+- **Contents:** Seed data files
+- **Key Files:**
+  - seed/basic_optimization.json
+  - seed/complex_workflows.json
+  - seed/edge_cases.json
+
+### 3. test_snapshots/
+- **Original Path:** ./test_snapshots/
+- **Reason for Archival:** Empty directory, duplicate of netra_backend/test_snapshots
+- **Contents:** Empty directory (removed)
+
+### 4. ccusage_test/ (formerly ccusage/test/)
+- **Original Path:** ./ccusage/test/
+- **Reason for Archival:** Orphaned test directory
+- **Contents:** Single test configuration file
+- **Key Files:**
+  - statusline-test.json
+
+## Current Test Structure
+
+After this archival, the main test directories are:
+- **netra_backend/tests/**: Primary test suite with organized structure
+- **tests/**: Additional test suite (not empty as initially thought)
+- **frontend/**: Frontend test suite
+
+## Notes
+
+- The directories ./tests/agents/, ./tests/critical/, ./tests/deployment/, ./tests/integration/, and ./tests/websocket/ were NOT removed as they are not empty duplicates - they contain active test files.
+- All moves were performed using `git mv` to preserve version control history where possible.
+- The ccusage test file was not under version control, so it was copied rather than moved.
+
+## Git Status
+
+These changes should be committed as part of the test structure cleanup.

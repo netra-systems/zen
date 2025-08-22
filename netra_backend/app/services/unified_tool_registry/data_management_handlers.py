@@ -3,7 +3,8 @@ Data Management Tool Handlers
 
 Contains handlers for data management, corpus management, and synthetic data tools.
 """
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
+
 from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
@@ -15,7 +16,9 @@ class DataManagementHandlers:
     
     async def _generate_synthetic_data_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for generate_synthetic_data tool"""
-        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import (
+            SyntheticDataService,
+        )
         
         synthetic_service = SyntheticDataService(self.db)
         

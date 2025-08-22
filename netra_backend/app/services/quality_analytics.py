@@ -10,11 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Quality analytics drives customer retention and upselling
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta, UTC
 import asyncio
-
 import logging
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

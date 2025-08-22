@@ -13,66 +13,62 @@ Database URL: postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/
 
 import asyncio
 import sys
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 # Import Base first
 from netra_backend.app.db.base import Base
 
-# Explicitly import ALL model classes to ensure they're registered with Base.metadata
-
-# User models
-from netra_backend.app.db.models_user import (
-    User,
-    Secret,
-    ToolUsageLog
-)
-
-# Supply models  
-from netra_backend.app.db.models_supply import (
-    Supply,
-    SupplyOption,
-    AvailabilityStatus,
-    AISupplyItem,
-    ResearchSessionStatus,
-    ResearchSession,
-    SupplyUpdateLog
-)
-
 # Agent models
 from netra_backend.app.db.models_agent import (
+    ApexOptimizerAgentRun,
+    ApexOptimizerAgentRunReport,
     Assistant,
-    Thread,
     Message,
     Run,
     Step,
-    ApexOptimizerAgentRun,
-    ApexOptimizerAgentRunReport
+    Thread,
+)
+
+# Agent State models
+from netra_backend.app.db.models_agent_state import (
+    AgentRecoveryLog,
+    AgentStateSnapshot,
+    AgentStateTransaction,
 )
 
 # Content models
 from netra_backend.app.db.models_content import (
-    CorpusAuditLog,
     Analysis,
     AnalysisResult,
+    Corpus,
+    CorpusAuditLog,
     Reference,
-    Corpus
 )
 
 # MCP Client models
 from netra_backend.app.db.models_mcp_client import (
     MCPExternalServer,
+    MCPResourceAccess,
     MCPToolExecution,
-    MCPResourceAccess
 )
 
-# Agent State models
-from netra_backend.app.db.models_agent_state import (
-    AgentStateSnapshot,
-    AgentStateTransaction,
-    AgentRecoveryLog
+# Supply models  
+from netra_backend.app.db.models_supply import (
+    AISupplyItem,
+    AvailabilityStatus,
+    ResearchSession,
+    ResearchSessionStatus,
+    Supply,
+    SupplyOption,
+    SupplyUpdateLog,
 )
+
+# Explicitly import ALL model classes to ensure they're registered with Base.metadata
+# User models
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Database configuration
 DATABASE_URL = "postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev"

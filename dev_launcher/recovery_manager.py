@@ -16,17 +16,16 @@ ARCHITECTURE COMPLIANCE:
 """
 
 import asyncio
-import os
-import subprocess
 import logging
-from pathlib import Path
-from typing import List, Optional, Dict, Any
+import os
 import shutil
+import subprocess
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from .crash_recovery_models import DiagnosisResult, RecoveryStage
-from .system_diagnostics import SystemDiagnostics
 from .recovery_actions import RecoveryActions
-
+from .system_diagnostics import SystemDiagnostics
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ Each function ≤8 lines for performance-critical WebSocket path.
 """
 
 import json
-from typing import Dict, Any, Union
+from typing import Any, Dict, Union
 
 from pydantic import ValidationError
 

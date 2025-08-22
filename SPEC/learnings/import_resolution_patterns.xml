@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="import_resolution">
+  <meta>
+    <title>Import Resolution Patterns and Learnings</title>
+    <description>Critical learnings about Python import resolution patterns in the Netra codebase</description>
+    <date>2025-08-21</date>
+    <impact>High - Prevents module loading failures and test execution errors</impact>
+  </meta>
+
+  <learning id="websocket-module-reorganization">
+    <title>WebSocket Module Path Changes</title>
+    <problem>Files were moved to websocket subdirectory but imports weren't updated</problem>
+    <solution>
+      <incorrect>from netra_backend.app.batch_load_monitor import LoadMonitor</incorrect>
+      <correct>from netra_backend.app.websocket.batch_load_monitor import LoadMonitor</correct>
+    </solution>
+    <pattern>When moving files to subdirectories, update ALL import statements across the codebase</pattern>
+    <files_affected>
+      - batch_message_handler.py
+      - batch_message_core.py
+    </files_affected>
+  </learning>
+
+  <learning id="route-module-naming">
+    <title>Route Module Naming Discrepancies</title>
+    <problem>Imports referenced non-existent 'websockets' module instead of actual 'websocket_secure'</problem>
+    <solution>
+      <incorrect>from netra_backend.app.routes.websockets import router</incorrect>
+      <correct>from netra_backend.app.routes.websocket_secure import router</correct>
+    </solution>
+    <pattern>Verify actual module names match import statements, especially for route definitions</pattern>
+    <files_affected>
+      - tests/conftest.py
+      - Multiple test files in critical tests
+    </files_affected>
+  </learning>
+
+  <learning id="error-handler-relocation">
+    <title>Error Handler Class Relocation</title>
+    <problem>ExecutionErrorHandler moved to specialized directory but imports not updated</problem>
+    <solution>
+      <incorrect>from netra_backend.app.agents.base import ExecutionErrorHandler</incorrect>
+      <correct>from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler</correct>
+    </solution>
+    <pattern>When refactoring error handlers to specialized modules, maintain backward compatibility shims</pattern>
+    <note>Backward compatibility shim added in agents/base/error_handler.py</note>
+  </learning>
+
+  <learning id="test-fixture-organization">
+    <title>Test Fixture Module Organization</title>
+    <problem>Test fixtures moved to service subdirectory but imports not updated</problem>
+    <solution>
+      <incorrect>from netra_backend.tests.test_agent_service_fixtures import fixtures</incorrect>
+      <correct>from netra_backend.tests.services.test_agent_service_fixtures import fixtures</correct>
+    </solution>
+    <pattern>Keep test fixtures close to their test files in the same directory structure</pattern>
+  </learning>
+
+  <learning id="config-module-resolution">
+    <title>Configuration Module Import Resolution</title>
+    <problem>Tests importing from non-existent root 'config' module</problem>
+    <solution>
+      <incorrect>from config import settings</incorrect>
+      <correct>from netra_backend.app.config import settings</correct>
+    </solution>
+    <pattern>Always use fully qualified imports for configuration modules</pattern>
+    <note>Configuration is at netra_backend/app/config.py, not at root</note>
+  </learning>
+
+  <learning id="mcp-app-import-confusion">
+    <title>MCP Main vs App Import Confusion</title>
+    <problem>Tests importing 'app' from MCP main module which only exports 'router'</problem>
+    <solution>
+      <incorrect>from netra_backend.app.routes.mcp.main import app</incorrect>
+      <correct>from netra_backend.app.main import app</correct>
+    </solution>
+    <pattern>The main FastAPI app is in app/main.py, individual route modules only export routers</pattern>
+  </learning>
+
+  <learning id="frontend-mock-patterns">
+    <title>Frontend Jest Mock Patterns</title>
+    <problem>Incorrect mock setup for Zustand stores in Jest tests</problem>
+    <solution>
+      <incorrect>(useAuthStore as jest.Mock).mockReturnValue(mockStore)</incorrect>
+      <correct>jest.mocked(useAuthStore).mockReturnValue(mockStore)</correct>
+    </solution>
+    <pattern>Use jest.mocked() helper for type-safe mocking instead of type casting</pattern>
+    <note>Affects 55+ frontend test files</note>
+  </learning>
+
+  <learning id="duplicate-import-statements">
+    <title>Duplicate Import Statement Issues</title>
+    <problem>Exact duplicate import lines causing syntax errors</problem>
+    <solution>Remove duplicate import statements, often caused by copy-paste errors</solution>
+    <pattern>Use automated tools to detect and remove duplicate imports</pattern>
+    <files_affected>
+      - tests/e2e/resource_isolation/infrastructure/__init__.py
+    </files_affected>
+  </learning>
+
+  <best_practices>
+    <practice id="import-validation">
+      <title>Import Validation Strategy</title>
+      <steps>
+        1. Use python -m py_compile to validate syntax
+        2. Run import tests before full test suite
+        3. Use grep/ripgrep to find all import occurrences
+        4. Batch fix imports using scripting when patterns are consistent
+      </steps>
+    </practice>
+
+    <practice id="module-reorganization">
+      <title>Module Reorganization Checklist</title>
+      <steps>
+        1. Before moving files, grep for all imports of that module
+        2. Update imports in the same commit as the file move
+        3. Add backward compatibility imports if needed
+        4. Run import validation tests immediately after changes
+      </steps>
+    </practice>
+
+    <practice id="test-mock-setup">
+      <title>Test Mock Setup Pattern</title>
+      <steps>
+        1. Mock at module level with jest.mock('@/module/path')
+        2. Use jest.mocked() for type-safe mock access
+        3. Avoid inline mock definitions in jest.mock() calls
+        4. Keep mock setup functions under 25 lines
+      </steps>
+    </practice>
+  </best_practices>
+
+  <tools_used>
+    <tool>grep/ripgrep - Find all import occurrences</tool>
+    <tool>python -m py_compile - Validate Python syntax</tool>
+    <tool>Python scripting - Batch fix import patterns</tool>
+    <tool>MultiEdit - Fix multiple imports in single file</tool>
+  </tools_used>
+
+  <metrics>
+    <metric name="Files Fixed">100+</metric>
+    <metric name="Import Patterns Fixed">8 major patterns</metric>
+    <metric name="Test Files Updated">55+ frontend, 20+ backend</metric>
+    <metric name="Time Saved">Automated fixes vs manual: ~4 hours</metric>
+  </metrics>
+</learnings>

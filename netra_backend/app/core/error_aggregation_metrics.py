@@ -6,10 +6,14 @@ with configurable rules and cooldown mechanisms.
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.error_aggregation_base import (
-    AlertRule, AlertSeverity, ErrorAlert, ErrorPattern, ErrorTrend
+    AlertRule,
+    AlertSeverity,
+    ErrorAlert,
+    ErrorPattern,
+    ErrorTrend,
 )
 from netra_backend.app.logging_config import central_logger
 

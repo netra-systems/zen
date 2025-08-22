@@ -21,9 +21,9 @@ from netra_backend.app.agents.demo_service import DemoService, DemoTriageService
 
 # Backward compatibility imports
 from netra_backend.app.agents.demo_service.core import DemoService
-from netra_backend.app.agents.demo_service.triage import DemoTriageService
 from netra_backend.app.agents.demo_service.optimization import DemoOptimizationService
 from netra_backend.app.agents.demo_service.reporting import DemoReportingService
+from netra_backend.app.agents.demo_service.triage import DemoTriageService
 
 # Legacy class aliases for backward compatibility
 DemoAgent = DemoService

@@ -1,9 +1,9 @@
 """Circuit Breaker Service for service mesh"""
 
-from typing import Dict, Any, Optional, Callable
 import asyncio
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any, Callable, Dict, Optional
 
 
 class CircuitState(Enum):

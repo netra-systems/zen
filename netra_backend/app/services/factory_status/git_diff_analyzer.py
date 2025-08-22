@@ -4,13 +4,13 @@ Analyzes code changes, calculates impact metrics, and maps to business value.
 Module follows 450-line limit with 25-line function limit.
 """
 
-import re
 import asyncio
+import re
 import subprocess
-from typing import Dict, List, Optional, Tuple, Set, Any
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 class ChangeCategory(Enum):

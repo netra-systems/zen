@@ -4,7 +4,7 @@ Extracts and analyzes AI-related dependencies from patterns and configurations.
 Handles library, framework, and provider detection.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class DependencyExtractor:

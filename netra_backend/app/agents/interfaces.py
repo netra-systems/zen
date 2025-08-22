@@ -1,14 +1,20 @@
 """Interface definitions to break circular dependencies."""
 
-from typing import Protocol, Dict, Optional, List, Union
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Dict, List, Optional, Protocol, Union
 
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from netra_backend.app.schemas.shared_types import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
 from netra_backend.app.schemas.strict_types import (
-    StrictParameterType, StrictReturnType, AgentExecutionContext,
-    AgentExecutionMetrics, TypedAgentResult
+    AgentExecutionContext,
+    AgentExecutionMetrics,
+    StrictParameterType,
+    StrictReturnType,
+    TypedAgentResult,
 )
 
 

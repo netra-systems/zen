@@ -5,18 +5,23 @@ Handles backend and frontend service startup and management.
 """
 
 import os
+import subprocess
 import sys
 import time
-import subprocess
 from pathlib import Path
 from typing import Optional, Tuple
 
 from .dev_launcher_config import (
-    resolve_path, get_free_port, setup_environment_variables, 
-    setup_frontend_environment, print_with_emoji_fallback
+    get_free_port,
+    print_with_emoji_fallback,
+    resolve_path,
+    setup_environment_variables,
+    setup_frontend_environment,
 )
 from .dev_launcher_processes import (
-    LogStreamer, create_backend_process, create_frontend_process
+    LogStreamer,
+    create_backend_process,
+    create_frontend_process,
 )
 
 

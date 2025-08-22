@@ -4,25 +4,40 @@ Tests end-to-end flow logging during supervisor execution with inter-agent commu
 Each test must be concise and focused as per architecture requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.supervisor.execution_context import (
-
-# Add project root to path
-    AgentExecutionContext, AgentExecutionResult, PipelineStep
-)
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
+    # Add project root to path
+    AgentExecutionContext,
+    AgentExecutionResult,
+    PipelineStep,
+)
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+
+# Add project root to path
+from netra_backend.app.agents.supervisor.flow_logger import (
+    FlowState,
+    SupervisorPipelineLogger,
+    TodoState,
+)
 
 
 class MockAgent:

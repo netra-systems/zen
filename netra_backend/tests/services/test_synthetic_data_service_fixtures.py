@@ -3,18 +3,28 @@ Shared Fixtures for Synthetic Data Service Tests
 Common fixtures and mock classes used across all test modules
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.corpus_service import CorpusService
+
+# Add project root to path
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
 # Add project root to path

@@ -5,11 +5,14 @@ Validates performance isolation between tenants.
 """
 
 import asyncio
-import time
 import logging
+import time
 from typing import Dict, List
 
-from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics, PerformanceImpactReport
+from tests.e2e.resource_isolation.infrastructure.data_models import (
+    PerformanceImpactReport,
+    ResourceMetrics,
+)
 
 logger = logging.getLogger(__name__)
 

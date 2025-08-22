@@ -3,22 +3,35 @@ Shared production types and classes to eliminate duplicate type definitions.
 Single source of truth for production types used across multiple modules.
 """
 
-from typing import Dict, Optional, List, AsyncGenerator, Union, Any, Literal
-from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field, field_validator
-from datetime import datetime, UTC
-from enum import Enum
 import asyncio
-from netra_backend.app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
+from abc import ABC, abstractmethod
+from datetime import UTC, datetime
+from enum import Enum
 
 # Avoid circular imports by using TYPE_CHECKING
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+)
+
+from pydantic import BaseModel, Field, field_validator
+
+from netra_backend.app.core.json_parsing_utils import (
+    parse_dict_field,
+    parse_string_list_field,
+)
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.state import DeepAgentState
-    from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.agents.base import BaseSubAgent
+    from netra_backend.app.agents.state import DeepAgentState
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.llm.llm_manager import LLMManager
 
 # Type aliases for common patterns to replace Any usage
 PrimitiveType = Union[str, int, float, bool, None]

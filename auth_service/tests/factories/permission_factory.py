@@ -6,7 +6,7 @@ Supports various permission patterns and user permission assignments.
 
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from auth_service.auth_core.models.auth_models import UserPermission
 

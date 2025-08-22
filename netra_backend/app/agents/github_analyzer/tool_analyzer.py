@@ -4,11 +4,15 @@ Analyzes function calling, tool usage, and agent tools.
 Maps tool definitions and usage patterns.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
+from netra_backend.app.agents.github_analyzer.tool_patterns import (
+    ToolPatternDefinitions,
+)
+from netra_backend.app.agents.github_analyzer.tool_processing_core import (
+    ToolProcessingCore,
+)
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.agents.github_analyzer.tool_patterns import ToolPatternDefinitions
-from netra_backend.app.agents.github_analyzer.tool_processing_core import ToolProcessingCore
 
 
 class ToolUsageAnalyzer:

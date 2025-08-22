@@ -13,29 +13,39 @@ Test Level: L2 (Real Internal Dependencies)
 - Mock external payment gateways
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch, MagicMock
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.billing.usage_metering import UsageMeteringService
-from netra_backend.app.services.billing.payment_processor import PaymentProcessor
-from netra_backend.app.services.billing.subscription_manager import SubscriptionManager
-from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
-from netra_backend.app.schemas.UserPlan import PlanTier, UserPlan, PlanDefinition
-from netra_backend.app.db.models_postgres import User, Subscription, UsageRecord
 from netra_backend.app.core.exceptions_base import NetraException, PaymentException
 from netra_backend.app.core.logging_config import get_logger
+from netra_backend.app.db.models_postgres import Subscription, UsageRecord, User
+from netra_backend.app.schemas.UserPlan import PlanDefinition, PlanTier, UserPlan
+from netra_backend.app.services.billing.payment_processor import PaymentProcessor
+from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
+from netra_backend.app.services.billing.subscription_manager import SubscriptionManager
+
+# Add project root to path
+from netra_backend.app.services.billing.usage_metering import UsageMeteringService
 
 # Add project root to path
 

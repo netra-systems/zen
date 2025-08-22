@@ -4,9 +4,10 @@ OAuth Callback Processing Logic - Forwards to Auth Service
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.security_service import SecurityService
 
 logger = central_logger.get_logger(__name__)
 

@@ -1,29 +1,40 @@
 """Part 1: Basic type validation tests - TypeMismatchSeverity, TypeMismatch, basic TypeScriptParser."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import json
-import pytest
 import tempfile
 from pathlib import Path
-from typing import Dict, Any
-from unittest.mock import patch, mock_open, MagicMock
+from typing import Any, Dict
+from unittest.mock import MagicMock, mock_open, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.core.type_validation import (
-
-# Add project root to path
-    TypeMismatchSeverity,
-    TypeMismatch,
-    TypeScriptParser,
-    TypeCompatibilityChecker,
-    SchemaValidator,
-    validate_type_consistency,
-    generate_validation_report
+from netra_backend.app.core.exceptions_config import (
+    ValidationError as NetraValidationError,
 )
-from netra_backend.app.core.exceptions_config import ValidationError as NetraValidationError
+
+# Add project root to path
+from netra_backend.app.core.type_validation import (
+    SchemaValidator,
+    TypeCompatibilityChecker,
+    TypeMismatch,
+    # Add project root to path
+    TypeMismatchSeverity,
+    TypeScriptParser,
+    generate_validation_report,
+    validate_type_consistency,
+)
 
 
 class TestTypeMismatchSeverity:

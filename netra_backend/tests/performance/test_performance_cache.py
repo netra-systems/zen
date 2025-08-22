@@ -4,22 +4,31 @@ Tests for memory cache and database query optimization functionality.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
-import time
 import statistics
-from typing import List, Dict, Any
-from unittest.mock import Mock, AsyncMock, patch
+import time
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.core.performance_optimization_manager import (
-
-# Add project root to path
-    MemoryCache, QueryOptimizer
+    # Add project root to path
+    MemoryCache,
+    QueryOptimizer,
 )
 
 

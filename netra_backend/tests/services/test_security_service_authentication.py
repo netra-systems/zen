@@ -3,23 +3,36 @@ Enhanced tests for security service authentication.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Any
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from cryptography.fernet import Fernet
 
 # Add project root to path
-
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.tests.security_service_test_mocks import (
-
-# Add project root to path
-    MockUser, EnhancedSecurityService, create_test_user, create_admin_user,
-    create_locked_user, assert_authentication_success, assert_authentication_failure
+    EnhancedSecurityService,
+    # Add project root to path
+    MockUser,
+    assert_authentication_failure,
+    assert_authentication_success,
+    create_admin_user,
+    create_locked_user,
+    create_test_user,
 )
 
 

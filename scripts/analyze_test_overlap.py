@@ -4,21 +4,21 @@ Analyzes test files for similarity and potential duplication using vector simila
 """
 
 import ast
+import hashlib
 import json
 import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
-import hashlib
 from datetime import datetime
+from difflib import SequenceMatcher
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from difflib import SequenceMatcher
-import pandas as pd
 
 
 @dataclass

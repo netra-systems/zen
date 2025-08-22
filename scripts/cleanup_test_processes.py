@@ -5,11 +5,12 @@ Cleans up hanging Node.js and Python test processes on Windows
 """
 
 import os
-import sys
 import subprocess
-import psutil
+import sys
 import time
 from pathlib import Path
+
+import psutil
 
 PROJECT_ROOT = Path(__file__).parent.parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"

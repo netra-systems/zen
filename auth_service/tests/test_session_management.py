@@ -3,18 +3,19 @@ Session Management Tests for Auth Service
 Tests complete session lifecycle with database operations
 Covers security, multi-device, and cleanup scenarios
 """
-import pytest
 import asyncio
-import uuid
 import json
-import redis.asyncio as redis
+import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.database.models import AuthSession, AuthUser
 from auth_service.auth_core.database.connection import auth_db
+from auth_service.auth_core.database.models import AuthSession, AuthUser
 
 
 class TestSessionCreation:

@@ -6,8 +6,12 @@ Maintains 25-line function limit and single responsibility.
 """
 
 import re
-from typing import Dict, Any, List
-from netra_backend.app.agents.supply_researcher.models import ResearchType, ProviderPatterns
+from typing import Any, Dict, List
+
+from netra_backend.app.agents.supply_researcher.models import (
+    ProviderPatterns,
+    ResearchType,
+)
 
 
 class SupplyRequestParser:

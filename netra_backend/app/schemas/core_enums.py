@@ -14,8 +14,8 @@ Usage:
     from netra_backend.app.schemas.core_enums import MessageType, AgentStatus, WebSocketMessageType
 """
 
-from typing import Literal
 from enum import Enum
+from typing import Literal
 
 
 class MessageType(str, Enum):

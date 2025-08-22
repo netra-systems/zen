@@ -23,9 +23,7 @@ jest.mock('@/hooks/useThreadCreation', () => ({
   useThreadCreation: jest.fn()
 }));
 
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn()
-}));
+jest.mock('@/store/unified-chat');
 
 jest.mock('framer-motion', () => ({
   motion: {

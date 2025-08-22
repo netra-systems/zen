@@ -1,10 +1,12 @@
 """Message processing utilities"""
 
 from typing import Any, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
+
+from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.db.models_postgres import Thread, Run
 from netra_backend.app.services.websocket.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
@@ -26,6 +28,12 @@ async def process_user_message_with_notifications(
 ) -> None:
     """Process user message and send response"""
     try:
+        # Don't process if thread creation failed
+        if thread is None:
+            logger.error(f"Cannot process message without thread for user {user_id}")
+            await send_error_safely(user_id, "Failed to create or access thread")
+            return
+            
         # Send agent_started notification
         await send_agent_started_notification(user_id, thread, run)
         response = await execute_and_persist(

@@ -6,14 +6,14 @@ Pre-populates caches to improve startup performance.
 
 import asyncio
 import logging
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 try:
-    from .cache_entry import ContentHasher, CacheEntry, TTL_PRESETS
+    from .cache_entry import TTL_PRESETS, CacheEntry, ContentHasher
 except ImportError:
-    from cache_entry import ContentHasher, CacheEntry, TTL_PRESETS
+    from cache_entry import TTL_PRESETS, CacheEntry, ContentHasher
 
 logger = logging.getLogger(__name__)
 

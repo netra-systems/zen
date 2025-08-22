@@ -5,16 +5,19 @@ for agent communication and tool interactions.
 """
 
 import time
-from typing import Dict, Any, Union, Optional, List, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
+
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
+from netra_backend.app.core.json_utils import prepare_websocket_message
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
-from netra_backend.app.core.json_utils import prepare_websocket_message
 from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.state_synchronization_manager import (
+    StateSynchronizationManager,
+)
 from netra_backend.app.websocket.validation import MessageValidator
-from netra_backend.app.websocket.state_synchronization_manager import StateSynchronizationManager
 
 logger = central_logger.get_logger(__name__)
 

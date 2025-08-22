@@ -1,10 +1,11 @@
 """Demo chat handlers."""
-from fastapi import BackgroundTasks
-from typing import Optional, Dict, Any
 import uuid
+from typing import Any, Dict, Optional
 
-from netra_backend.app.services.demo_service import DemoService
+from fastapi import BackgroundTasks
+
 from netra_backend.app.schemas.demo_schemas import DemoChatRequest, DemoChatResponse
+from netra_backend.app.services.demo_service import DemoService
 
 
 async def handle_demo_chat(

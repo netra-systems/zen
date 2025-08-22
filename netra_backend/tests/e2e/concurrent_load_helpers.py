@@ -5,13 +5,14 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 import asyncio
-import time
-import statistics
-import random
-import string
 import json
-from typing import List, Dict, Any
+import random
+import statistics
+import string
+import time
 from datetime import datetime
+from typing import Any, Dict, List
+
 import aiohttp
 import websockets
 

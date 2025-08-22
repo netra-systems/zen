@@ -17,7 +17,7 @@ import logging
 import time
 from typing import Dict, Any
 
-from tests.e2e.fixtures.resource_monitoring import resource_monitor, memory_leak_detector, isolation_test_config, resource_limits, assert_resource_within_limits
+from tests.e2e.fixtures.resource_monitoring import (
     resource_monitor, memory_leak_detector, isolation_test_config,
     resource_limits, assert_resource_within_limits
 )

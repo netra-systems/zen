@@ -12,13 +12,15 @@ Business Value Justification (BVJ):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
-import subprocess
 import json
+import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path  
 
@@ -150,7 +152,7 @@ class TestCoverageGeneration:
 import sys
 from pathlib import Path
 sys.path.insert(0, r'{PROJECT_ROOT}')
-from test_framework.test_runner import configure_speed_options
+from unified_test_runner import configure_speed_options
 
 # Create a mock args object with no_coverage=True
 class MockArgs:
@@ -232,7 +234,7 @@ sys.path.insert(0, r'{PROJECT_ROOT}')
 from test_framework.test_runners import _apply_speed_optimizations
 
 # Create a mock command for backend runner with --coverage
-cmd = ['python', 'scripts/test_backend.py', '--coverage', '--category', 'unit']
+cmd = ['python', 'unified_test_runner.py --service backend', '--coverage', '--category', 'unit']
 
 # Create speed options with no_coverage=True
 speed_opts = {{'no_coverage': True}}

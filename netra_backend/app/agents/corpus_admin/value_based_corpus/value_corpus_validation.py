@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Value-based corpus validation using existing corpus_admin validators."""
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from typing import Any, Dict, List
+
 from corpus_creation_validation import (
-    REQUIRED, 
+    REQUIRED,
     check_fields,
-    SimpleVal as BaseValidator,
+    print_errors,
     validate_simple,
-    print_errors
 )
-from typing import Dict, Any, List
+from corpus_creation_validation import SimpleVal as BaseValidator
+
 
 class ValueCorpusValidator(BaseValidator):
     """Extended validator for value-based corpus with flexible metadata."""

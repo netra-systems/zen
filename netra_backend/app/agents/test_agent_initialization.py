@@ -5,10 +5,10 @@ Tests fallback mechanisms, error handling, and graceful degradation.
 """
 
 import asyncio
-import time
-from unittest.mock import Mock, AsyncMock
-import sys
 import os
+import sys
+import time
+from unittest.mock import AsyncMock, Mock
 
 # Add the app directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -21,7 +21,10 @@ async def test_initialization_manager():
     print("Testing AgentInitializationManager...")
     
     try:
-        from netra_backend.app.agents.initialization_manager import AgentInitializationManager, InitializationStatus
+        from netra_backend.app.agents.initialization_manager import (
+            AgentInitializationManager,
+            InitializationStatus,
+        )
         
         # Create mock dependencies
         mock_llm_manager = Mock()
@@ -124,7 +127,9 @@ async def test_enhanced_registry():
     print("\nTesting enhanced agent registry...")
     
     try:
-        from netra_backend.app.agents.supervisor.agent_registry_enhanced import EnhancedAgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry_enhanced import (
+            EnhancedAgentRegistry,
+        )
         
         # Create mock dependencies
         mock_llm_manager = Mock()

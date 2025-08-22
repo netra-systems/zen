@@ -9,15 +9,16 @@ from pathlib import Path
 # Add parent directory to Python path for auth_service imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from dotenv import load_dotenv
+import logging
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any, Dict
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-import logging
-from typing import Dict, Any
-from datetime import datetime, UTC
 
 # Load environment variables from .env file
 # Try parent directory first (where main .env is located)
@@ -30,8 +31,8 @@ else:
     load_dotenv()
     print("Loaded environment from current directory or system")
 
-from auth_service.auth_core.routes.auth_routes import router as auth_router
 from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -193,6 +194,7 @@ else:
 # Always use DynamicCORSMiddleware to properly handle OPTIONS requests
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+
 
 class DynamicCORSMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, allowed_origins=None):

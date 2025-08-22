@@ -1,12 +1,12 @@
 """Git Changes Analyzer - Analyzes git commits and generates summaries."""
 
 import asyncio
+import json
+import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import re
-import json
+from typing import Any, Dict, List, Optional
 
 
 class GitAnalyzer:

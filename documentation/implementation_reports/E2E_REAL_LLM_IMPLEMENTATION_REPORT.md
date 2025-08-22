@@ -149,7 +149,7 @@ python -m pytest tests/unified/e2e/test_real_llm_core.py -v --real-llm
 ### Running Full E2E Suite
 ```bash
 # Complete validation with real LLMs
-python -m test_framework.test_runner --level e2e --real-llm
+python unified_test_runner.py --level e2e --real-llm
 ```
 
 ## Technical Integration

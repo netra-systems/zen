@@ -1,9 +1,10 @@
 """Metrics schema definitions for corpus operations and monitoring"""
 
-from pydantic import BaseModel, Field
-from typing import Dict, Optional, List, Union
 from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 
 class MetricType(str, Enum):

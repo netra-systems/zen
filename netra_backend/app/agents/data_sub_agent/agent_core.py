@@ -4,32 +4,39 @@ Business Value: Core data analysis critical for customer insights - HIGH revenue
 BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
 """
 
-from typing import Dict, Optional, Any
-import time
 import asyncio
+import time
+from typing import Any, Dict, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.schemas.strict_types import TypedAgentResult
-from netra_backend.app.core.type_validators import agent_type_safe
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.input_validation import validate_agent_input
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.data_sub_agent.data_processing_operations import (
+    DataProcessingOperations,
+)
 
 # Modular Data Sub Agent Components
 from netra_backend.app.agents.data_sub_agent.data_sub_agent_core import DataSubAgentCore
-from netra_backend.app.agents.data_sub_agent.data_sub_agent_helpers import DataSubAgentHelpers
-from netra_backend.app.agents.data_sub_agent.data_processing_operations import DataProcessingOperations
+from netra_backend.app.agents.data_sub_agent.data_sub_agent_helpers import (
+    DataSubAgentHelpers,
+)
+from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.type_validators import agent_type_safe
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
 class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
@@ -84,7 +91,9 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             return self.core.create_reliability_manager()
         except Exception:
             # Return a minimal fallback reliability manager
-            from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+            from netra_backend.app.agents.base.circuit_breaker import (
+                CircuitBreakerConfig,
+            )
             from netra_backend.app.schemas.shared_types import RetryConfig
             circuit_config = CircuitBreakerConfig("DataSubAgent", 3, 30)
             retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=5.0)

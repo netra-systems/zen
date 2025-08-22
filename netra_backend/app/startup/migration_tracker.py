@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import alembic.config
-
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.db.migration_utils import (
     create_alembic_config,

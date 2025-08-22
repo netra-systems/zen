@@ -157,7 +157,7 @@ python -m pytest app/tests/integration -k "performance" -m L3
 ### Integration with CI/CD
 ```bash
 # Add to GitHub Actions
-python -m test_framework.test_runner --level integration --L3
+python unified_test_runner.py --level integration --L3
 ```
 
 ## Impact on Testing Metrics

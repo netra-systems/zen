@@ -5,8 +5,12 @@ Validates schemas for breaking changes.
 Maintains 25-line function limit and focused responsibility.
 """
 
-from typing import Dict, Any, List, Set
-from netra_backend.app.services.apex_optimizer_agent.models import SchemaValidationLevel, SchemaChangeInfo
+from typing import Any, Dict, List, Set
+
+from netra_backend.app.services.apex_optimizer_agent.models import (
+    SchemaChangeInfo,
+    SchemaValidationLevel,
+)
 
 
 class SchemaValidator:

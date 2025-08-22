@@ -14,7 +14,7 @@ import os
 from typing import Dict, List, Optional, Any
 
 # Import metrics and data structures
-from tests.e2e.fixtures.throughput_metrics import ThroughputMetrics, LatencyMeasurement, LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
+from tests.e2e.fixtures.throughput_metrics import (
     ThroughputMetrics, LatencyMeasurement, LoadTestResults,
     ThroughputAnalyzer, HIGH_VOLUME_CONFIG
 )

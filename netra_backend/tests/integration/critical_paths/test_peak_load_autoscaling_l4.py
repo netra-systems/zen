@@ -17,28 +17,41 @@ L4 Requirements:
 - Cross-service coordination
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
+import random
 import time
 import uuid
-import logging
-import json
-import random
-import httpx
-from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import patch
 
-# Add project root to path
+import httpx
+import pytest
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
-from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from monitoring.metrics_collector import MetricsCollector
-from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.services.redis_service import RedisService
+
+# Add project root to path
+from netra_backend.tests.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
+)
 
 # Add project root to path
 

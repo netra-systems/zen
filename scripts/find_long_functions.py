@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+
 def count_function_lines(node: ast.FunctionDef) -> int:
     """Count lines in a function."""
     if not node.body:

@@ -5,19 +5,20 @@ Tests cover LauncherConfig, ServiceDiscovery, and resource configuration.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
-from pathlib import Path
 import json
-import threading
 import os
-
 import sys
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.service_discovery import ServiceDiscovery
+
 # Remove service_config import until module exists
 
 
@@ -163,39 +164,7 @@ class TestServiceDiscovery(unittest.TestCase):
         self.assertEqual(info['port'], 8001)
 
 
-class TestServicesConfiguration(unittest.TestCase):
-    """Test services configuration management."""
-    
-    def test_development_configuration(self):
-        """Test development mode configuration."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _assert_development_config(self, config):
-        """Assert development configuration values."""
-        pass
-    
-    def test_production_configuration(self):
-        """Test production mode configuration."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _assert_production_config(self, config):
-        """Assert production configuration values."""
-        pass
-    
-    def test_configuration_switching(self):
-        """Test switching between configurations."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _create_dev_config(self):
-        """Create development configuration."""
-        pass
-    
-    def _create_prod_config(self):
-        """Create production configuration."""
-        pass
+# Legacy TestServicesConfiguration class removed - module no longer exists
     
     def _assert_configs_different(self, dev, prod):
         """Assert configurations are different."""

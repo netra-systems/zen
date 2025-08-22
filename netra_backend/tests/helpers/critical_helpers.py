@@ -1,7 +1,8 @@
 """Critical test helpers."""
 
-from typing import Dict, Any, List
 import asyncio
+from typing import Any, Dict, List
+
 
 async def run_critical_test_scenario(steps: List[callable]) -> List[Any]:
     """Run a critical test scenario."""

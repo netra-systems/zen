@@ -9,13 +9,16 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
+import hashlib
 import json
 import uuid
-import hashlib
-from typing import AsyncGenerator, Dict, Any, Optional
 from datetime import datetime, timezone
+from typing import Any, AsyncGenerator, Dict, Optional
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import ResponseType
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+    ResponseType,
+)
+
 
 class StreamingResponseGenerator:
     """Generates streaming responses for testing."""

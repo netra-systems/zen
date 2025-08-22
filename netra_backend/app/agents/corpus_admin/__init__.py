@@ -7,12 +7,12 @@ modular architecture under 450-line limit.
 
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.corpus_admin.models import (
-    CorpusOperation,
-    CorpusType,
     CorpusMetadata,
+    CorpusOperation,
     CorpusOperationRequest,
     CorpusOperationResult,
-    CorpusStatistics
+    CorpusStatistics,
+    CorpusType,
 )
 from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
 from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser

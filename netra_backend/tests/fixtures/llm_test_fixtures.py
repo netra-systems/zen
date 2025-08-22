@@ -13,26 +13,27 @@ Business Value Justification:
 
 import json
 import uuid
-from datetime import datetime, UTC
-from typing import Dict, List, Any, Optional, Type
-from unittest.mock import Mock, AsyncMock
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Type
+from unittest.mock import AsyncMock, Mock
+
 from pydantic import BaseModel
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.tests.llm_fixtures_advanced import (
+    create_circuit_breaker_manager,
+    create_error_simulating_manager,
+    create_performance_monitoring_manager,
+    create_provider_switching_manager,
+)
 
 # Import specialized fixtures
 from netra_backend.tests.llm_fixtures_core import (
     create_basic_llm_manager,
     create_streaming_llm_manager,
-    create_structured_llm_manager
-)
-from netra_backend.tests.llm_fixtures_advanced import (
-    create_error_simulating_manager,
-    create_provider_switching_manager,
-    create_performance_monitoring_manager,
-    create_circuit_breaker_manager
+    create_structured_llm_manager,
 )
 
 # Type aliases for better readability

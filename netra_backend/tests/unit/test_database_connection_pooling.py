@@ -5,21 +5,31 @@ through FastAPI dependencies and that async context managers
 are correctly handled.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import FastAPI, Depends
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-
 from netra_backend.app.dependencies import DbDep, get_db_dependency
 from netra_backend.app.services.database.thread_repository import ThreadRepository
-from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
 

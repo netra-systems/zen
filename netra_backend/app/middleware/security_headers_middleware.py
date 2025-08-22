@@ -3,16 +3,17 @@ Core security headers middleware implementation.
 Applies comprehensive security headers to HTTP responses.
 """
 
-import time
 import hashlib
-from typing import Dict, Any, Callable
+import time
+from typing import Any, Callable, Dict
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.middleware.security_headers_config import SecurityHeadersConfig
 from netra_backend.app.middleware.nonce_generator import NonceGenerator
+from netra_backend.app.middleware.security_headers_config import SecurityHeadersConfig
 
 logger = central_logger.get_logger(__name__)
 

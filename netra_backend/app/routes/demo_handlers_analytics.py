@@ -1,5 +1,5 @@
 """Demo analytics handlers."""
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.services.demo_service import DemoService
 

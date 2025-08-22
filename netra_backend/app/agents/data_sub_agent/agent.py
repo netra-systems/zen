@@ -10,31 +10,36 @@ Business Value: Data analysis critical for customer insights - HIGH revenue impa
 BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
 """
 
-from typing import Dict, Optional, Any
-import time
 import asyncio
+import time
+from typing import Any, Dict, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.schemas.strict_types import TypedAgentResult
-from netra_backend.app.core.type_validators import agent_type_safe
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.input_validation import validate_agent_input
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 
 # Modular Data Sub Agent Components
 from netra_backend.app.agents.data_sub_agent.data_sub_agent_core import DataSubAgentCore
-from netra_backend.app.agents.data_sub_agent.data_sub_agent_helpers import DataSubAgentHelpers
+from netra_backend.app.agents.data_sub_agent.data_sub_agent_helpers import (
+    DataSubAgentHelpers,
+)
+from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.type_validators import agent_type_safe
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
 class DataSubAgent(BaseSubAgent, BaseExecutionInterface):

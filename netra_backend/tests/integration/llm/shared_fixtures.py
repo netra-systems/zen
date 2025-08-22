@@ -8,23 +8,25 @@ BVJ:
 - Revenue Impact: Prevents customer AI requests from failing due to broken LLM integration
 """
 
-import pytest
 import asyncio
-import time
-import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # Set testing environment
 import os
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

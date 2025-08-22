@@ -1,375 +1,103 @@
 /**
- * Real WebSocket Test Utilities - Simulates actual WebSocket behavior
- * Replaces excessive jest.fn() mocking with realistic WebSocket simulation
- * FIXED: Act() wrapping for React synchronization and timing issue resolution
+ * WebSocket Test Utilities
+ * Core utilities for testing WebSocket functionality
  */
-
-export interface WebSocketLike {
-  readonly readyState: number;
-  readonly url: string;
-  send(data: string | ArrayBuffer | Blob): void;
-  close(code?: number, reason?: string): void;
-  addEventListener(type: string, listener: EventListener): void;
-  removeEventListener(type: string, listener: EventListener): void;
-  onopen: ((event: Event) => void) | null;
-  onclose: ((event: CloseEvent) => void) | null;
-  onerror: ((event: Event) => void) | null;
-  onmessage: ((event: MessageEvent) => void) | null;
-}
 
 /**
- * Real WebSocket simulation that mimics actual WebSocket behavior
+ * Test WebSocket implementation for mocking
  */
-export class TestWebSocket implements WebSocketLike {
-  public readyState: number = 0; // CONNECTING
-  public readonly url: string;
-  public onopen: ((event: Event) => void) | null = null;
-  public onclose: ((event: CloseEvent) => void) | null = null;
-  public onerror: ((event: Event) => void) | null = null;
-  public onmessage: ((event: MessageEvent) => void) | null = null;
+export class TestWebSocket extends EventTarget {
+  url: string;
+  readyState: number;
+  CONNECTING = 0;
+  OPEN = 1;
+  CLOSING = 2;
+  CLOSED = 3;
   
-  private listeners: Map<string, EventListener[]> = new Map();
-  private messageQueue: string[] = [];
-  private connectionDelay: number = 50;
-  private isClosing: boolean = false;
-  
-  constructor(url: string, protocols?: string | string[]) {
+  onopen: ((event: Event) => void) | null = null;
+  onclose: ((event: CloseEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onmessage: ((event: MessageEvent) => void) | null = null;
+
+  constructor(url: string) {
+    super();
     this.url = url;
-    // Don't auto-connect - let the test manager control when to connect
+    this.readyState = this.CONNECTING;
   }
-  
+
   send(data: string | ArrayBuffer | Blob): void {
-    if (this.readyState !== 1) { // Not OPEN
-      throw new Error('WebSocket is not in OPEN state');
-    }
-    
-    // Immediately add to queue for testing synchronization
-    this.messageQueue.push(data.toString());
-  }
-  
-  close(code: number = 1000, reason: string = ''): void {
-    if (this.readyState === 2 || this.readyState === 3) return; // Already closing/closed
-    
-    this.isClosing = true;
-    this.readyState = 2; // CLOSING
-    
-    this.scheduleCloseEvent(code, reason);
-  }
-  
-  addEventListener(type: string, listener: EventListener): void {
-    if (!this.listeners.has(type)) {
-      this.listeners.set(type, []);
-    }
-    this.listeners.get(type)!.push(listener);
-  }
-  
-  removeEventListener(type: string, listener: EventListener): void {
-    const listeners = this.listeners.get(type);
-    if (listeners) {
-      const index = listeners.indexOf(listener);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
+    if (this.readyState !== this.OPEN) {
+      throw new Error('WebSocket is not open');
     }
   }
-  
-  // Test utilities for simulating WebSocket behavior
-  simulateMessage(data: any): void {
-    if (this.readyState !== 1) return;
-    
-    const messageData = typeof data === 'string' ? data : JSON.stringify(data);
-    const event = new MessageEvent('message', { data: messageData });
-    
-    // Use setTimeout to ensure proper event timing
+
+  close(code?: number, reason?: string): void {
+    if (this.readyState === this.CLOSED || this.readyState === this.CLOSING) {
+      return;
+    }
+    this.readyState = this.CLOSING;
     setTimeout(() => {
-      this.triggerEvent('message', event);
-      if (this.onmessage) {
-        this.onmessage(event);
-      }
+      this.readyState = this.CLOSED;
+      const event = new CloseEvent('close', { code, reason });
+      this.onclose?.(event);
+      this.dispatchEvent(event);
     }, 0);
   }
-  
-  simulateError(error?: any): void {
-    if (this.readyState === 3) return; // Already closed
-    
-    const event = new ErrorEvent('error', { error });
-    this.readyState = 3; // CLOSED
-    
-    // Use setTimeout to ensure proper event timing
-    setTimeout(() => {
-      this.triggerEvent('error', event);
-      if (this.onerror) {
-        this.onerror(event);
-      }
-    }, 0);
-  }
-  
-  simulateReconnect(): void {
-    this.readyState = 0; // CONNECTING
-    this.scheduleOpenEvent();
-  }
-  
-  connect(): void {
-    // Allow connection if not already connected or connecting
-    if (this.readyState !== 1) {
-      this.readyState = 0; // Set to CONNECTING
-      this.scheduleOpenEvent();
-    }
-  }
-  
-  private simulateOpen(): void {
-    if (this.isClosing) return;
-    
-    this.readyState = 1; // OPEN
-    const event = new Event('open');
-    
-    this.triggerEvent('open', event);
-    if (this.onopen) {
-      this.onopen(event);
-    }
-  }
-  
-  private triggerClose(code: number, reason: string): void {
-    const event = new CloseEvent('close', { code, reason });
-    
-    this.triggerEvent('close', event);
-    if (this.onclose) {
-      this.onclose(event);
-    }
-  }
-  
-  private triggerEvent(type: string, event: Event): void {
-    const listeners = this.listeners.get(type);
-    if (listeners) {
-      listeners.forEach(listener => listener(event));
-    }
-  }
-  
-  private scheduleOpenEvent(): void {
-    // Use proper timing for React synchronization
-    setTimeout(() => {
-      if (!this.isClosing && this.readyState === 0) {
-        this.simulateOpen();
-      }
-    }, this.connectionDelay);
-  }
-  
-  private scheduleCloseEvent(code: number, reason: string): void {
-    setTimeout(() => {
-      this.readyState = 3; // CLOSED
-      this.triggerClose(code, reason);
-    }, 5);
-  }
-  
-  // Test utilities
-  getSentMessages(): string[] {
-    return [...this.messageQueue];
-  }
-  
-  clearMessageQueue(): void {
-    this.messageQueue = [];
-  }
-  
-  setConnectionDelay(ms: number): void {
-    this.connectionDelay = ms;
-  }
 }
 
 /**
- * WebSocket test setup with real behavior simulation
- */
-export function setupMockWebSocket(): TestWebSocket {
-  const testWebSocket = new TestWebSocket('ws://localhost:8000/ws');
-  
-  // Replace global WebSocket with our test implementation
-  global.WebSocket = jest.fn().mockImplementation((url: string, protocols?: string | string[]) => {
-    return new TestWebSocket(url, protocols);
-  });
-  
-  global.mockWebSocket = testWebSocket;
-  return testWebSocket;
-}
-
-/**
- * Reset WebSocket test state
- */
-export function resetMockWebSocket(): void {
-  if (global.mockWebSocket && global.mockWebSocket instanceof TestWebSocket) {
-    global.mockWebSocket.clearMessageQueue();
-    global.mockWebSocket.readyState = 1; // OPEN
-  }
-}
-
-/**
- * Simulate WebSocket open event with real behavior
- */
-export function simulateWebSocketOpen(): void {
-  if (global.mockWebSocket && global.mockWebSocket instanceof TestWebSocket) {
-    global.mockWebSocket.simulateReconnect();
-  }
-}
-
-/**
- * Simulate WebSocket message with real event handling
- */
-export function simulateWebSocketMessage(data: any): void {
-  if (global.mockWebSocket && global.mockWebSocket instanceof TestWebSocket) {
-    global.mockWebSocket.simulateMessage(data);
-  }
-}
-
-/**
- * Simulate WebSocket close with real state transitions
- */
-export function simulateWebSocketClose(code: number = 1000, reason: string = 'Normal closure'): void {
-  if (global.mockWebSocket && global.mockWebSocket instanceof TestWebSocket) {
-    global.mockWebSocket.close(code, reason);
-  }
-}
-
-/**
- * Simulate WebSocket error with real error handling
- */
-export function simulateWebSocketError(error?: any): void {
-  if (global.mockWebSocket && global.mockWebSocket instanceof TestWebSocket) {
-    global.mockWebSocket.simulateError(error);
-  }
-}
-
-/**
- * Connection state manager for testing WebSocket states
+ * Connection state manager for tracking WebSocket states
  */
 export class ConnectionStateManager {
-  private state: string = 'disconnected';
-  private callbacks: ((state: string) => void)[] = [];
-  private stateHistory: { state: string; timestamp: number }[] = [];
-  
-  setState(newState: string): void {
-    this.state = newState;
-    this.stateHistory.push({ state: newState, timestamp: Date.now() });
-    this.notifyCallbacks();
+  private states: Map<string, number> = new Map();
+  private stateHistory: Array<{ url: string; state: number; timestamp: number }> = [];
+
+  setState(url: string, state: number): void {
+    this.states.set(url, state);
+    this.stateHistory.push({ url, state, timestamp: Date.now() });
   }
-  
-  getState(): string {
-    return this.state;
+
+  getState(url: string): number | undefined {
+    return this.states.get(url);
   }
-  
-  getStateHistory(): { state: string; timestamp: number }[] {
+
+  getHistory(): Array<{ url: string; state: number; timestamp: number }> {
     return [...this.stateHistory];
   }
-  
-  addCallback(callback: (state: string) => void): void {
-    this.callbacks.push(callback);
-  }
-  
-  clearHistory(): void {
+
+  clear(): void {
+    this.states.clear();
     this.stateHistory = [];
   }
-  
-  private notifyCallbacks(): void {
-    this.callbacks.forEach(callback => callback(this.state));
-  }
 }
 
 /**
- * Message buffer for testing message queuing and processing
+ * Message buffer for tracking WebSocket messages
  */
 export class MessageBuffer {
-  private messages: string[] = [];
-  private maxSize: number = 1000;
-  private processingTime: number = 0;
-  
-  add(message: string): boolean {
-    if (this.messages.length >= this.maxSize) {
-      return false;
-    }
-    this.messages.push(message);
-    return true;
+  private messages: Array<{ type: 'sent' | 'received'; data: any; timestamp: number }> = [];
+
+  addSent(data: any): void {
+    this.messages.push({ type: 'sent', data, timestamp: Date.now() });
   }
-  
-  flush(): string[] {
-    const messages = [...this.messages];
+
+  addReceived(data: any): void {
+    this.messages.push({ type: 'received', data, timestamp: Date.now() });
+  }
+
+  getMessages(): Array<{ type: 'sent' | 'received'; data: any; timestamp: number }> {
+    return [...this.messages];
+  }
+
+  getSentMessages(): any[] {
+    return this.messages.filter(m => m.type === 'sent').map(m => m.data);
+  }
+
+  getReceivedMessages(): any[] {
+    return this.messages.filter(m => m.type === 'received').map(m => m.data);
+  }
+
+  clear(): void {
     this.messages = [];
-    return messages;
-  }
-  
-  size(): number {
-    return this.messages.length;
-  }
-  
-  peek(): string | undefined {
-    return this.messages[0];
-  }
-  
-  setMaxSize(size: number): void {
-    this.maxSize = size;
-  }
-  
-  getProcessingTime(): number {
-    return this.processingTime;
-  }
-  
-  simulateProcessing(timeMs: number): void {
-    this.processingTime = timeMs;
-  }
-}
-
-/**
- * Performance measurement utilities for WebSocket testing
- */
-export const measureConnectionTime = async (connectionFn: () => Promise<void>): Promise<number> => {
-  const start = performance.now();
-  await connectionFn();
-  return performance.now() - start;
-};
-
-export const measureMessageLatency = (sendTime: number): number => {
-  return performance.now() - sendTime;
-};
-
-/**
- * Advanced WebSocket test utilities
- */
-export class AdvancedWebSocketTester {
-  private connections: TestWebSocket[] = [];
-  private messageLog: { connection: number; message: string; timestamp: number }[] = [];
-  
-  createConnection(url: string): TestWebSocket {
-    const connection = new TestWebSocket(url);
-    this.connections.push(connection);
-    return connection;
-  }
-  
-  broadcastMessage(message: string): void {
-    this.connections.forEach((connection, index) => {
-      if (connection.readyState === 1) {
-        connection.simulateMessage(message);
-        this.messageLog.push({
-          connection: index,
-          message,
-          timestamp: Date.now()
-        });
-      }
-    });
-  }
-  
-  getMessageLog(): { connection: number; message: string; timestamp: number }[] {
-    return [...this.messageLog];
-  }
-  
-  closeAllConnections(): void {
-    this.connections.forEach(connection => {
-      if (connection.readyState === 1) {
-        connection.close();
-      }
-    });
-  }
-  
-  getActiveConnections(): number {
-    return this.connections.filter(conn => conn.readyState === 1).length;
-  }
-  
-  clearLog(): void {
-    this.messageLog = [];
   }
 }

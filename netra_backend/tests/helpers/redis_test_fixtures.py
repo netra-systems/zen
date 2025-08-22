@@ -5,11 +5,12 @@ Provides reusable mock classes and pytest fixtures
 
 import asyncio
 import time
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Any, Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
-import redis.asyncio as redis
+
 import pytest
+import redis.asyncio as redis
 
 from netra_backend.app.redis_manager import RedisManager
 

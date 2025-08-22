@@ -1,8 +1,9 @@
 """Direct ClickHouse reset script - drops all tables for both cloud and local instances."""
 
-import clickhouse_connect
 import os
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
+import clickhouse_connect
 
 # ClickHouse configurations
 CLOUD_CONFIG = {

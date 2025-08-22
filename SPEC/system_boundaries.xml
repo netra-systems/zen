@@ -20,6 +20,13 @@
       <max-value>300</max-value>
       <enforcement>Build failure on violation.</enforcement>
       <rationale>Optimizes AI context windows and enforces modularity.</rationale>
+      <exceptions>
+        <exception type="test_files">
+          <description>Test files (test_*.py, *.test.ts, *.test.tsx) may extend up to 1000 lines</description>
+          <max-value>1000</max-value>
+          <rationale>Comprehensive test suites require more space for setup, assertions, and multiple test cases</rationale>
+        </exception>
+      </exceptions>
     </constraint>
     <constraint id="SB-LIM-002" priority="CRITICAL">
       <title>Function/Method Complexity Limit (8 LOC)</title>

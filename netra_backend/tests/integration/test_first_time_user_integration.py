@@ -10,18 +10,21 @@ BVJ (Business Value Justification):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path for test imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from test_unified_first_time_user import FirstTimeUserTester
+
 
 @pytest.mark.integration
 @pytest.mark.first_time_user

@@ -3,10 +3,14 @@ Compliance validation and summary functionality.
 Provides analysis and reporting capabilities for compliance checks.
 """
 
-from typing import Dict, List, Any
 from datetime import datetime, timezone
+from typing import Any, Dict, List
 
-from netra_backend.app.compliance_checks import ComplianceCheckManager, ComplianceCheck, ComplianceStatus
+from netra_backend.app.compliance_checks import (
+    ComplianceCheck,
+    ComplianceCheckManager,
+    ComplianceStatus,
+)
 
 
 class ComplianceValidator:

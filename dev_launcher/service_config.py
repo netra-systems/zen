@@ -4,14 +4,15 @@ Service configuration management for the dev launcher.
 Provides clear options for using local vs shared resources with user-friendly prompts.
 """
 
-import os
 import json
-from pathlib import Path
-from typing import Dict, Optional, Any, List
+import logging
+import os
 from dataclasses import dataclass, field
 from enum import Enum
-import logging
-from dev_launcher.unicode_utils import safe_print, get_emoji, setup_unicode_console
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from dev_launcher.unicode_utils import get_emoji, safe_print, setup_unicode_console
 
 logger = logging.getLogger(__name__)
 

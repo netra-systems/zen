@@ -8,24 +8,34 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum agent reliability pr
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
 
 # Add project root to path
-
-
 # Core agent recovery components
 from netra_backend.app.core.agent_recovery_strategies import (
-    TriageAgentRecoveryStrategy, DataAnalysisRecoveryStrategy
+    DataAnalysisRecoveryStrategy,
+    TriageAgentRecoveryStrategy,
 )
-from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy  
-from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.core.agent_recovery_types import AgentRecoveryConfig
+from netra_backend.app.core.error_recovery import RecoveryContext
 
 
 @pytest.mark.critical

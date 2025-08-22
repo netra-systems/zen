@@ -11,10 +11,10 @@ Entry point for the Netra AI Optimization Platform.
 
 See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
-import sys
-import os
-from pathlib import Path
 import logging
+import os
+import sys
+from pathlib import Path
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

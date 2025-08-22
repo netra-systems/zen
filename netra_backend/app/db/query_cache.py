@@ -8,20 +8,36 @@ This module has been refactored into focused sub-modules for maintainability.
 
 # Import all components from the refactored modules
 from netra_backend.app.db.cache_config import (
-    CacheStrategy, QueryCacheConfig, CacheEntry, CacheMetrics,
-    CacheKeyGenerator, QueryPatternAnalyzer, CacheabilityChecker,
-    AdaptiveTTLCalculator
-)
-from netra_backend.app.db.cache_strategies import (
-    LRUEvictionStrategy, TTLEvictionStrategy, AdaptiveEvictionStrategy,
-    EvictionStrategyFactory, CacheCleanupWorker, CacheMetricsWorker,
-    QueryPatternTracker, CacheTaskManager
-)
-from netra_backend.app.db.cache_operations import (
-    CacheRetrieval, CacheStorage, CacheInvalidation, CacheMetricsBuilder
+    AdaptiveTTLCalculator,
+    CacheabilityChecker,
+    CacheEntry,
+    CacheKeyGenerator,
+    CacheMetrics,
+    CacheStrategy,
+    QueryCacheConfig,
+    QueryPatternAnalyzer,
 )
 from netra_backend.app.db.cache_core import (
-    QueryCache, query_cache, CachedQueryExecutor, cached_query
+    CachedQueryExecutor,
+    QueryCache,
+    cached_query,
+    query_cache,
+)
+from netra_backend.app.db.cache_operations import (
+    CacheInvalidation,
+    CacheMetricsBuilder,
+    CacheRetrieval,
+    CacheStorage,
+)
+from netra_backend.app.db.cache_strategies import (
+    AdaptiveEvictionStrategy,
+    CacheCleanupWorker,
+    CacheMetricsWorker,
+    CacheTaskManager,
+    EvictionStrategyFactory,
+    LRUEvictionStrategy,
+    QueryPatternTracker,
+    TTLEvictionStrategy,
 )
 
 # Maintain backward compatibility exports

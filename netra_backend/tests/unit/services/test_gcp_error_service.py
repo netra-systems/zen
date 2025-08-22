@@ -14,26 +14,43 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Edge case and error scenario coverage
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, List, Any, Optional
+
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.schemas.monitoring_schemas import (
+    ErrorDetailResponse,
+    ErrorQuery,
+    ErrorResolution,
+    ErrorResponse,
+    ErrorSeverity,
+    ErrorStatus,
+    ErrorSummary,
+    GCPCredentialsConfig,
+    GCPError,
+    GCPErrorEvent,
+    GCPErrorServiceConfig,
+)
 
 # Add project root to path
-
 from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
-from netra_backend.app.schemas.monitoring_schemas import (
-
-    GCPErrorServiceConfig, GCPCredentialsConfig, ErrorQuery, ErrorResponse,
-    GCPError, ErrorSeverity, ErrorStatus, ErrorSummary, ErrorDetailResponse,
-    ErrorResolution, GCPErrorEvent
-)
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.error_codes import ErrorCode
 
 
 class TestGCPErrorService:

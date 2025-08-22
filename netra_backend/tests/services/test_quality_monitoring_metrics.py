@@ -1,26 +1,38 @@
 """Metrics collection and analysis tests for Quality Monitoring Service"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+from netra_backend.app.services.quality_gate_service import ContentType
+
+# Helper imports removed since many methods don't exist in actual service
+from netra_backend.app.services.quality_monitoring_service import (
+    QualityMonitoringService,
+)
+
+# Add project root to path
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
-
-# Add project root to path
+    actual_metrics,
+    # Add project root to path
     sample_quality_metrics,
     sla_targets,
-    actual_metrics
 )
-# Helper imports removed since many methods don't exist in actual service
-from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
-from netra_backend.app.services.quality_gate_service import ContentType
 
 
 class TestMetricsCollection:

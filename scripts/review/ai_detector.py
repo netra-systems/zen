@@ -6,8 +6,8 @@ Detects common issues from AI-assisted coding patterns.
 
 from typing import Dict, List, Tuple
 
-from .core import ReviewConfig, ReviewData
 from .command_runner import CommandRunner
+from .core import ReviewConfig, ReviewData
 
 
 class AIDetector:

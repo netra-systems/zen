@@ -52,7 +52,7 @@ describe('Initial State Integration Tests', () => {
 
     it('should provide sidebar toggle functionality', async () => {
       const mockToggle = jest.fn();
-      (useAppStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAppStore).mockReturnValue({
         isSidebarCollapsed: false,
         toggleSidebar: mockToggle
       });
@@ -75,7 +75,7 @@ describe('Initial State Integration Tests', () => {
     });
 
     it('should render sidebar by default when not collapsed', () => {
-      (useAppStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAppStore).mockReturnValue({
         isSidebarCollapsed: false,
         toggleSidebar: jest.fn()
       });
@@ -257,7 +257,7 @@ describe('Initial State Integration Tests', () => {
     });
 
     it('should show sidebar when not collapsed', () => {
-      (useAppStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAppStore).mockReturnValue({
         isSidebarCollapsed: false,
         toggleSidebar: jest.fn()
       });
@@ -274,7 +274,7 @@ describe('Initial State Integration Tests', () => {
     });
 
     it('should hide sidebar when collapsed', () => {
-      (useAppStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAppStore).mockReturnValue({
         isSidebarCollapsed: true,
         toggleSidebar: jest.fn()
       });

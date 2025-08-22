@@ -4,8 +4,9 @@ Provides the main ServiceLocator class and related exceptions.
 Follows 450-line limit with 25-line function limit.
 """
 
-from typing import Dict, Type, Any, Optional, TypeVar, Callable
 import threading
+from typing import Any, Callable, Dict, Optional, Type, TypeVar
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

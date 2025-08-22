@@ -12,10 +12,10 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, Any, List, Tuple
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ class TestResultValidator:
 
 def create_session_result_converter():
     """Factory function for session result converter"""
-    from netra_backend.tests.e2e.test_helpers.concurrency_base import UserSessionResult
+    from tests.e2e.test_helpers.concurrency_base import UserSessionResult
     
     def convert_dict_to_session_result(result_dict: Dict[str, Any]) -> UserSessionResult:
         """Convert dictionary to UserSessionResult object"""

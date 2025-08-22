@@ -1,18 +1,27 @@
 """Data models for DataSubAgent."""
 
-from typing import Dict, List, Optional, Any, Union, Literal
-from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from enum import Enum
-from netra_backend.app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
+from typing import Any, Dict, List, Literal, Optional, Union
+
+from pydantic import BaseModel, Field, field_validator
+
+from netra_backend.app.core.json_parsing_utils import (
+    parse_dict_field,
+    parse_string_list_field,
+)
 
 # Import shared models to avoid duplication
 from netra_backend.app.schemas.shared_types import (
-    DataAnalysisResponse, AnomalyDetectionResponse, AnomalySeverity,
-    AnomalyDetail, PerformanceMetrics, CorrelationAnalysis,
-    UsagePattern, DataQualityMetrics
+    AnomalyDetail,
+    AnomalyDetectionResponse,
+    AnomalySeverity,
+    CorrelationAnalysis,
+    DataAnalysisResponse,
+    DataQualityMetrics,
+    PerformanceMetrics,
+    UsagePattern,
 )
-
 
 # Shared models are now imported from netra_backend.app.schemas.shared_types
 

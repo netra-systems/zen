@@ -57,7 +57,7 @@ export const setupInitialStateMocks = () => {
   resetAuthServiceMocks();
   jest.clearAllMocks();
   
-  (useAppStore as jest.Mock).mockReturnValue({
+  jest.mocked(useAppStore).mockReturnValue({
     isSidebarCollapsed: false,
     toggleSidebar: jest.fn()
   });

@@ -1,26 +1,35 @@
 """Tests for demo API routes."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, UTC
 import json
 import uuid
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from routes.demo import (
-
-# Add project root to path
-
+    # Add project root to path
     DemoChatRequest,
     DemoChatResponse,
-    ROICalculationRequest,
-    ROICalculationResponse,
+    DemoMetrics,
     ExportReportRequest,
     IndustryTemplate,
-    DemoMetrics
+    ROICalculationRequest,
+    ROICalculationResponse,
 )
+
+
 class TestDemoRoutes:
     """Test suite for demo API endpoints."""
     
@@ -138,8 +147,9 @@ class TestDemoRoutes:
         mock_demo_service.get_industry_templates.assert_called_once_with("healthcare")
     async def test_get_industry_templates_invalid_industry(self, mock_demo_service):
         """Test getting templates for invalid industry."""
-        from netra_backend.app.routes.demo import get_industry_templates
         from fastapi import HTTPException
+
+        from netra_backend.app.routes.demo import get_industry_templates
         
         mock_demo_service.get_industry_templates.side_effect = ValueError("Unknown industry: invalid")
         
@@ -269,8 +279,9 @@ class TestDemoRoutes:
         )
     async def test_export_report_session_not_found(self, mock_demo_service):
         """Test report export with invalid session."""
-        from netra_backend.app.routes.demo import export_demo_report
         from fastapi import HTTPException
+
+        from netra_backend.app.routes.demo import export_demo_report
         
         mock_demo_service.generate_report.side_effect = ValueError("Session not found")
         
@@ -341,8 +352,9 @@ class TestDemoRoutes:
         mock_demo_service.submit_feedback.assert_called_once_with("session-123", feedback)
     async def test_get_analytics_admin_only(self, mock_demo_service):
         """Test analytics endpoint requires admin access."""
-        from netra_backend.app.routes.demo import get_demo_analytics
         from fastapi import HTTPException
+
+        from netra_backend.app.routes.demo import get_demo_analytics
         
         # Non-admin user
         non_admin_user = {"id": 1, "email": "user@example.com", "is_admin": False}
@@ -389,8 +401,9 @@ class TestDemoRoutes:
         mock_demo_service.get_analytics_summary.assert_called_once_with(days=30)
     async def test_demo_chat_error_handling(self, mock_demo_service):
         """Test demo chat error handling."""
-        from netra_backend.app.routes.demo import demo_chat
         from fastapi import HTTPException
+
+        from netra_backend.app.routes.demo import demo_chat
         
         # Setup service to raise error
         mock_demo_service.process_demo_chat.side_effect = Exception("Service error")

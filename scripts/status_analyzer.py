@@ -7,15 +7,19 @@ Complies with 450-line and 25-line function limits.
 
 # Import all analyzer classes for easy access
 try:
-    from .status_integration_analyzer import IntegrationAnalyzer
     from .status_agent_analyzer import (
-        AgentSystemAnalyzer, TestCoverageAnalyzer, HealthScoreCalculator
+        AgentSystemAnalyzer,
+        HealthScoreCalculator,
+        TestCoverageAnalyzer,
     )
+    from .status_integration_analyzer import IntegrationAnalyzer
 except ImportError:
-    from status_integration_analyzer import IntegrationAnalyzer
     from status_agent_analyzer import (
-        AgentSystemAnalyzer, TestCoverageAnalyzer, HealthScoreCalculator
+        AgentSystemAnalyzer,
+        HealthScoreCalculator,
+        TestCoverageAnalyzer,
     )
+    from status_integration_analyzer import IntegrationAnalyzer
 
 # Re-export classes for backward compatibility
 __all__ = [

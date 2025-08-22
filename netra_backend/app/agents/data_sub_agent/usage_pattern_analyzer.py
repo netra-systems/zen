@@ -1,6 +1,6 @@
 """Usage pattern analysis module for DataSubAgent."""
 
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.logging_config import central_logger as logger
 

@@ -5,9 +5,10 @@ One-command setup for developers
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def main():
     """Quick setup entry point"""

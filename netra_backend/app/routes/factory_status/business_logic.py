@@ -1,8 +1,12 @@
 """
 Factory Status Business Logic
 """
-from typing import Dict, Optional, Any
-from netra_backend.app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
+from typing import Any, Dict, Optional
+
+from netra_backend.app.services.factory_status.report_builder import (
+    FactoryStatusReport,
+    ReportBuilder,
+)
 
 # In-memory cache for demo (replace with Redis in production)
 _report_cache: Dict[str, FactoryStatusReport] = {}

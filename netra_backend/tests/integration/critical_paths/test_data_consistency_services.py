@@ -10,25 +10,39 @@ Critical Path: Transaction initiation -> Service coordination -> Consistency che
 Coverage: Distributed transactions, eventual consistency, conflict resolution, data reconciliation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.services.data.conflict_resolver import ConflictResolver
+from netra_backend.app.services.data.consistency_manager import ConsistencyManager
 
 # Add project root to path
-
-from netra_backend.app.services.data.transaction_coordinator import TransactionCoordinator
-from netra_backend.app.services.data.consistency_manager import ConsistencyManager
-from netra_backend.app.services.data.conflict_resolver import ConflictResolver
-from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
+from netra_backend.app.services.data.transaction_coordinator import (
+    TransactionCoordinator,
+)
+from netra_backend.app.services.database.connection_manager import (
+    DatabaseConnectionManager,
+)
 
 # Add project root to path
 

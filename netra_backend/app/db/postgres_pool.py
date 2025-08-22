@@ -4,13 +4,15 @@ Handles connection pool metrics, monitoring, and status reporting.
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 def _get_enhanced_pool_status():
     """Get pool status from enhanced monitoring system."""
     try:
-        from netra_backend.app.services.database.connection_monitor import connection_metrics
+        from netra_backend.app.services.database.connection_monitor import (
+            connection_metrics,
+        )
         return connection_metrics.get_pool_status()
     except ImportError:
         return None

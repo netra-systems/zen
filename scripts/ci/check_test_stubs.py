@@ -10,9 +10,9 @@ Usage:
     python scripts/ci/check_test_stubs.py --quiet  # Minimal output for CI
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
 from pathlib import Path
 
 # Add project root to path for imports

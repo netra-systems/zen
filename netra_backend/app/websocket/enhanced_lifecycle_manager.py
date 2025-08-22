@@ -12,13 +12,13 @@ Architecture: Follows CLAUDE.md modularity with <25 line functions
 """
 
 import asyncio
-import time
 import json
-from typing import Dict, Any, Optional, Set, List, Callable
+import time
+import weakref
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from dataclasses import dataclass, field
-import weakref
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState

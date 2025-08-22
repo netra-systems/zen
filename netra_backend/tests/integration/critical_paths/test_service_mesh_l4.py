@@ -11,29 +11,43 @@ Coverage: Real service mesh patterns, load balancing algorithms, timeout/retry p
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
+import os
+import random
 import time
 import uuid
-import logging
-import json
-import os
-from typing import Dict, List, Optional, Any
-from unittest.mock import patch
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import patch
+
 import httpx
-import random
+import pytest
+
+from netra_backend.app.config import get_config
+from netra_backend.app.services.service_mesh.circuit_breaker import (
+    CircuitBreakerService,
+)
 
 # Add project root to path
-
-from netra_backend.app.services.service_mesh.discovery_service import ServiceDiscoveryService
+from netra_backend.app.services.service_mesh.discovery_service import (
+    ServiceDiscoveryService,
+)
 from netra_backend.app.services.service_mesh.load_balancer import LoadBalancerService
-from netra_backend.app.services.service_mesh.circuit_breaker import CircuitBreakerService
 from netra_backend.app.services.service_mesh.retry_policy import RetryPolicyService
-from config import get_config
 
 # Add project root to path
 

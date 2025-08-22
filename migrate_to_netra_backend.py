@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+
 def find_files_to_update(root_dir: Path, extensions: List[str]) -> List[Path]:
     """Find all files that might need updating."""
     files = []

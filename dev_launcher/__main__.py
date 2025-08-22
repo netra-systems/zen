@@ -13,12 +13,12 @@ Windows Compatibility Features:
 - Clear error messages with Windows-specific troubleshooting steps
 """
 
-import sys
-import os
-import asyncio
 import argparse
-import signal
+import asyncio
 import logging
+import os
+import signal
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -321,8 +321,8 @@ QUICK SHORTCUTS:
 
 def handle_service_configuration(args):
     """Handle service configuration commands."""
-    from dev_launcher.service_config import ServicesConfiguration, ResourceMode
-    from dev_launcher.unicode_utils import safe_print, get_emoji, setup_unicode_console
+    from dev_launcher.service_config import ResourceMode, ServicesConfiguration
+    from dev_launcher.unicode_utils import get_emoji, safe_print, setup_unicode_console
     
     setup_unicode_console()
     config_path = Path.cwd() / "netra-core-generation-1" / ".dev_services.json"

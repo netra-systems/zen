@@ -271,10 +271,10 @@ export class ChatSidebarTestSetup {
       userTier: mockAuthState.userTier 
     });
     (useAuthState as jest.Mock).mockReturnValue(mockAuthState);
-    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
     
     // Configure other store mocks
-    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
+    jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
     
     // CRITICAL: Reset ChatSidebar hooks to default empty state
     // This ensures clean state before each test - use mockReset then mockReturnValue
@@ -327,7 +327,7 @@ export class ChatSidebarTestSetup {
   // Configure store with custom data
   configureStore(overrides: Partial<typeof mockChatStore>) {
     const storeConfig = { ...mockChatStore, ...overrides };
-    (useUnifiedChatStore as jest.Mock).mockReturnValue(storeConfig);
+    jest.mocked(useUnifiedChatStore).mockReturnValue(storeConfig);
     return storeConfig;
   }
 
@@ -423,7 +423,7 @@ export class ChatSidebarTestSetup {
   // Configure auth store
   configureAuth(overrides: Partial<typeof mockAuthStore>) {
     const authConfig = { ...mockAuthStore, ...overrides };
-    (useAuthStore as jest.Mock).mockReturnValue(authConfig);
+    jest.mocked(useAuthStore).mockReturnValue(authConfig);
     return authConfig;
   }
 

@@ -5,17 +5,23 @@ This file demonstrates how to use the comprehensive audit logging system
 for corpus operations. Follow these patterns for consistency.
 """
 
-from typing import Optional, Dict, List, Any
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger, create_audit_logger
+from netra_backend.app.schemas.registry import (
+    CorpusAuditAction,
+    CorpusAuditMetadata,
+    CorpusAuditSearchFilter,
+    CorpusAuditStatus,
+)
+from netra_backend.app.services.audit.corpus_audit import (
+    CorpusAuditLogger,
+    create_audit_logger,
+)
 from netra_backend.app.services.audit.repository import CorpusAuditRepository
 from netra_backend.app.services.audit.utils import AuditTimer
-from netra_backend.app.schemas.registry import (
-    CorpusAuditAction, CorpusAuditStatus, CorpusAuditMetadata,
-    CorpusAuditSearchFilter
-)
 
 
 def _create_corpus_metadata() -> CorpusAuditMetadata:

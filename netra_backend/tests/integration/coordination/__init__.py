@@ -16,11 +16,11 @@ All tests maintain ≤8 lines per test function and ≤300 lines per module.
 """
 
 from netra_backend.tests.integration.coordination.shared_fixtures import (
-    MockCoordinationAgent,
     MockAgentRegistry,
+    MockCoordinationAgent,
     MockCoordinationInfrastructure,
+    coordination_agents,
     coordination_infrastructure,
-    coordination_agents
 )
 
 __all__ = [

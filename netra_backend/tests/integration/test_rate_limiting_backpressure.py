@@ -20,6 +20,14 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 import sys
 from pathlib import Path
 
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
 
 - Uses canonical rate limiting types from netra_backend.app.schemas.rate_limit_types
 - Tests real rate limiting infrastructure (not mocks)
@@ -28,17 +36,19 @@ from pathlib import Path
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, Optional, List, Tuple, AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta, timezone
+from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 # Mock justification decorator
@@ -50,14 +60,21 @@ def mock_justified(reason: str):
     return decorator
 
 # Canonical rate limiting types
-from netra_backend.app.schemas.rate_limit_types import (
-    RateLimitConfig, RateLimitResult, RateLimitStatus, TokenBucket,
-    RateLimitScope, RateLimitAlgorithm, AdaptiveRateLimitConfig,
-    RateLimitViolation, RateLimitMetrics, SlidingWindowCounter
-)
-from netra_backend.app.websocket.rate_limiter import RateLimiter, AdaptiveRateLimiter
 from netra_backend.app.core.configuration import get_configuration
+from netra_backend.app.schemas.rate_limit_types import (
+    AdaptiveRateLimitConfig,
+    RateLimitAlgorithm,
+    RateLimitConfig,
+    RateLimitMetrics,
+    RateLimitResult,
+    RateLimitScope,
+    RateLimitStatus,
+    RateLimitViolation,
+    SlidingWindowCounter,
+    TokenBucket,
+)
 from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.websocket.rate_limiter import AdaptiveRateLimiter, RateLimiter
 
 
 class BackpressureTestHarness:

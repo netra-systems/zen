@@ -15,13 +15,13 @@ This script systematically identifies and fixes common e2e test issues:
 4. Syntax issues
 """
 
-import os
 import ast
+import os
 import re
 import sys
-from pathlib import Path
-from typing import List, Dict, Set, Tuple, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass
@@ -170,7 +170,7 @@ class E2ETestFixer:
         # Check for common problematic imports
         problematic_imports = [
             'from netra_backend.app.agents.validate_token_jwt',  # Should be from auth_integration
-            'from netra_backend.app.websocket.ModernConnectionManager',  # Wrong import path
+            'from netra_backend.app.websocket.ConnectionManager',  # Wrong import path
             'import TestSyntaxFix',  # Non-existent module
         ]
         
@@ -217,7 +217,7 @@ class E2ETestFixer:
         """Fix common import errors."""
         fixes = {
             'from netra_backend.app.agents.validate_token_jwt': 'from netra_backend.app.auth_integration.auth import validate_token_jwt',
-            'from netra_backend.app.websocket.ModernConnectionManager': 'from netra_backend.app.websocket.connection_manager import ModernConnectionManager',
+            'from netra_backend.app.websocket.ConnectionManager': 'from netra_backend.app.websocket.connection_manager import ConnectionManager',
             'import TestSyntaxFix': '# Removed invalid import: TestSyntaxFix',
             'from TestSyntaxFix': '# Removed invalid import: TestSyntaxFix',
         }

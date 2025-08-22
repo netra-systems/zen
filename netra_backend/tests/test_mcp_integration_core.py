@@ -1,18 +1,30 @@
 """Core Tests - Split from test_mcp_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, UTC
+
+import pytest
 from netra_mcp.netra_mcp_server import NetraMCPServer
 
 # Add project root to path
-
-from netra_backend.app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
-from datetime import timedelta
+from netra_backend.app.services.mcp_service import (
+    MCPClient,
+    MCPService,
+    MCPToolExecution,
+)
 
 # Add project root to path
 

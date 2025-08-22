@@ -3,8 +3,9 @@ Supply and Reference Table Creation Functions
 Handles creation of supplies, supply_options, and references tables
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 
 def _create_references() -> None:

@@ -9,22 +9,30 @@ Tests production-specific security measures including:
 - Threat pattern detection
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import re
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.core.websocket_cors import (
-
-# Add project root to path
-    WebSocketCORSHandler, 
-    SECURITY_CONFIG, 
+    SECURITY_CONFIG,
     SUSPICIOUS_PATTERNS,
-    get_environment_origins
+    # Add project root to path
+    WebSocketCORSHandler,
+    get_environment_origins,
 )
 
 

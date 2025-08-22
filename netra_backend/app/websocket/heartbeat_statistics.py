@@ -1,7 +1,7 @@
 """Heartbeat statistics collection and reporting."""
 
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 class HeartbeatStatistics:

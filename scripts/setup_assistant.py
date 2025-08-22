@@ -1,11 +1,13 @@
 """Setup the Netra Assistant in the database"""
 import asyncio
 import time
-from typing import Dict, List, Any, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.db.models_postgres import Assistant
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.db.models_postgres import Assistant
+from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -8,20 +8,29 @@ Tests critical paths including lifecycle management, WebSocket integration,
 error handling, and state transitions.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from starlette.websockets import WebSocketDisconnect
 
 # Add project root to path
-
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 
 # Add project root to path
 

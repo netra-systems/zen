@@ -4,14 +4,14 @@ Comprehensive Import Issue Fixer for Netra Backend
 Systematically fixes all import path issues between services and agents
 """
 
-import sys
-import os
-from pathlib import Path
-import re
-from typing import Dict, List, Tuple, Optional, Set
-import logging
 import ast
 import json
+import logging
+import os
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -70,8 +70,8 @@ class ComprehensiveImportFixer:
         ]
         for cls in missing_classes:
             self.fix_patterns.append((
-                re.compile(f'from netra_backend\.app\.services\.apex_optimizer_agent\.models import (.*?){cls}(.*?)'),
-                f'# TODO: Fix import - {cls} not found in apex_optimizer_agent.models\n# \g<0>',
+                re.compile(rf'from netra_backend\.app\.services\.apex_optimizer_agent\.models import (.*?){cls}(.*?)'),
+                f'# TODO: Fix import - {cls} not found in apex_optimizer_agent.models\n# \\g<0>',
                 f"Comment out missing {cls} import"
             ))
         

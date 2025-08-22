@@ -9,21 +9,29 @@ Business Value Justification (BVJ):
 - Revenue Impact: Core revenue driver - agent performance affects customer retention
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from typing import Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.tests.routes.test_route_fixtures import (
-
-# Add project root to path
-    agent_test_client,
     CommonResponseValidators,
-    MockServiceFactory
+    MockServiceFactory,
+    # Add project root to path
+    agent_test_client,
 )
 
 
@@ -32,7 +40,7 @@ class TestAgentRoute:
     
     def test_agent_message_processing(self, agent_test_client):
         """Test agent message processing endpoint."""
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -61,9 +69,10 @@ class TestAgentRoute:
     
     async def test_agent_streaming_response(self):
         """Test agent streaming response capability."""
+        import json
+
         from netra_backend.app.routes.agent_route import stream_agent_response
         from netra_backend.app.services.agent_service import AgentService
-        import json
         
         # Create a mock agent service with streaming capability
         mock_agent_service = Mock(spec=AgentService)
@@ -98,8 +107,11 @@ class TestAgentRoute:
     
     def test_agent_error_handling(self, agent_test_client):
         """Test agent error handling."""
-        from netra_backend.app.routes.mcp.main import app
-        from netra_backend.app.services.agent_service import get_agent_service, AgentService
+        from netra_backend.app.main import app
+        from netra_backend.app.services.agent_service import (
+            AgentService,
+            get_agent_service,
+        )
         
         # Create a mock AgentService that raises an exception
         mock_agent_service = Mock(spec=AgentService)
@@ -122,7 +134,7 @@ class TestAgentRoute:
     
     def test_agent_message_validation(self, agent_test_client):
         """Test agent message input validation."""
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -181,7 +193,7 @@ class TestAgentRoute:
     
     def test_agent_rate_limiting(self, agent_test_client):
         """Test agent endpoint rate limiting."""
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -235,7 +247,7 @@ class TestAgentRoute:
     
     def test_agent_performance_metrics(self, agent_test_client):
         """Test agent performance metric collection."""
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Mock agent service with performance metrics

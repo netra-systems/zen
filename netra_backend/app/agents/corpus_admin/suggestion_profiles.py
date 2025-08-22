@@ -5,7 +5,7 @@ Contains domain-specific and workload-specific configuration profiles
 extracted from suggestions.py to maintain 450-line limit.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 def _get_performance_optimization_rules() -> Dict[str, Any]:

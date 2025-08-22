@@ -3,11 +3,12 @@
 Validate workflow configuration and ensure all workflows can use it properly.
 """
 
-import yaml
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
+
+import yaml
 
 
 def load_config(config_path: Path) -> Dict[str, Any]:

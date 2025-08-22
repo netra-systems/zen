@@ -2,19 +2,30 @@
 Factory Status API Router - Main route definitions
 """
 from datetime import datetime
-from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Query, Depends
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.routes.factory_status.models import ReportResponse, MetricResponse, GenerateReportRequest
-from netra_backend.app.routes.factory_status.report_routes import (
-    get_latest_report_handler, get_report_history_handler, generate_report_handler
+from fastapi import APIRouter, Depends, Query
+
+from netra_backend.app.routes.factory_status.dashboard_routes import (
+    get_dashboard_summary_handler,
+    test_factory_status_handler,
 )
 from netra_backend.app.routes.factory_status.metrics_routes import (
-    get_specific_metric_handler, get_velocity_trend_handler,
-    get_business_objectives_handler, get_compliance_status_handler
+    get_business_objectives_handler,
+    get_compliance_status_handler,
+    get_specific_metric_handler,
+    get_velocity_trend_handler,
 )
-from netra_backend.app.routes.factory_status.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
-
+from netra_backend.app.routes.factory_status.models import (
+    GenerateReportRequest,
+    MetricResponse,
+    ReportResponse,
+)
+from netra_backend.app.routes.factory_status.report_routes import (
+    generate_report_handler,
+    get_latest_report_handler,
+    get_report_history_handler,
+)
 
 router = APIRouter(
     prefix="/api/factory-status",

@@ -3,36 +3,46 @@ Content-specific validation tests for Quality Gate Service
 Tests validation for different content types and scenarios
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
 from netra_backend.tests.helpers.quality_gate_content import (
-
-# Add project root to path
-    get_data_analysis_content,
     get_complete_action_plan_content,
-    get_good_error_message_content,
-    get_redundant_report_content,
+    # Add project root to path
+    get_data_analysis_content,
     get_domain_specific_content,
-    get_mediocre_content,
+    get_good_error_message_content,
     get_hallucination_risk_content,
-    get_triage_content
+    get_mediocre_content,
+    get_redundant_report_content,
+    get_triage_content,
+)
+from netra_backend.tests.helpers.quality_gate_fixtures import (
+    quality_service,
+    redis_mock,
 )
 from netra_backend.tests.helpers.quality_gate_helpers import (
-    assert_quantification_metrics,
     assert_action_plan_completeness,
-    assert_error_message_clarity,
-    assert_redundancy_detected,
     assert_domain_terms_recognition,
-    assert_retry_suggestions_provided,
+    assert_error_message_clarity,
     assert_hallucination_risk_detected,
-    assert_triage_content_metrics
+    assert_quantification_metrics,
+    assert_redundancy_detected,
+    assert_retry_suggestions_provided,
+    assert_triage_content_metrics,
 )
 
 

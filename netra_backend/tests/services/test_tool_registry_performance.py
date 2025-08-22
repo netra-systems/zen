@@ -3,17 +3,26 @@ Tool Registry Performance Tests
 Tests performance aspects of tool registry
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import time
 import threading
-from typing import Dict, List, Any, Optional
+import time
+from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.test_tool_registry_registration_core import MockTool
 
@@ -121,8 +130,9 @@ class TestToolRegistryPerformance:
     
     def test_memory_usage_with_large_registry(self, tool_registry):
         """Test memory usage with large tool registry"""
-        import psutil
         import os
+
+        import psutil
         
         # Get initial memory usage
         process = psutil.Process(os.getpid())

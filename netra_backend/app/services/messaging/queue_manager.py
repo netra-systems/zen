@@ -1,7 +1,8 @@
 """Queue Manager for orchestrating message queues"""
 
-from typing import Dict, Any, Optional, List
 import asyncio
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.services.message_queue import MessageQueue
 
 

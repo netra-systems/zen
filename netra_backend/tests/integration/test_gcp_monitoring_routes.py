@@ -14,30 +14,44 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - WebSocket integration testing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, List, Any, Optional
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
+from netra_backend.app.main import app
+from netra_backend.app.routes.gcp_monitoring import router
 
-from routes.gcp_monitoring import router
-
-# Add project root to path
-
-from netra_backend.app.schemas.monitoring_schemas import (
-
-# Add project root to path
-    ErrorResponse, ErrorDetailResponse, ErrorQuery, ErrorSummary,
-    GCPError, ErrorSeverity, ErrorStatus, ErrorResolution
-)
-from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode
-from main import app
+from netra_backend.app.core.exceptions_base import NetraException
+
+# Add project root to path
+from netra_backend.app.schemas.monitoring_schemas import (
+    ErrorDetailResponse,
+    ErrorQuery,
+    ErrorResolution,
+    # Add project root to path
+    ErrorResponse,
+    ErrorSeverity,
+    ErrorStatus,
+    ErrorSummary,
+    GCPError,
+)
 
 
 class TestGCPMonitoringRoutes:

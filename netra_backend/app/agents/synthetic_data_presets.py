@@ -15,10 +15,12 @@ This module contains pre-configured workload profiles for common use cases.
 Each preset defines realistic parameters for synthetic data generation.
 """
 
-from typing import Dict, Any
-from enum import Enum
-from pydantic import BaseModel, Field
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict
+
+from pydantic import BaseModel, Field
+
 
 class DataGenerationType(str, Enum):
     """Types of synthetic data generation"""

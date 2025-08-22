@@ -17,30 +17,38 @@ ARCHITECTURAL COMPLIANCE:
 - Focus on transaction integrity and failure recovery
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import time
 import json
+import time
 import uuid
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Callable
-from enum import Enum
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+
 import pytest
+from logging_config import central_logger
 
 # Add project root to path
-
-from netra_backend.tests.integration.helpers.critical_integration_helpers import (
-
-# Add project root to path
+from tests.integration.helpers.user_flow_helpers import (
+    # Add project root to path
     DatabaseTestHelpers,
+    MiscTestHelpers,
     RevenueTestHelpers,
-    MiscTestHelpers
 )
 from test_framework.mock_utils import mock_justified
-from logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

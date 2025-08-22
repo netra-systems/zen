@@ -3,17 +3,28 @@ Tests for Unit of Work pattern transaction handling.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from netra_backend.tests.database_transaction_test_helpers import create_mock_session_factory
+from netra_backend.tests.database_transaction_test_helpers import (
+    create_mock_session_factory,
+)
 
 # Add project root to path
 

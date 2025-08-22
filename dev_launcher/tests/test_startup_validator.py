@@ -4,9 +4,10 @@ Tests for startup validator module.
 This module tests the service startup and readiness validation functionality.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
 import time
+import unittest
+from unittest.mock import MagicMock, Mock, patch
+
 from dev_launcher.startup_validator import StartupValidator
 
 
@@ -48,7 +49,7 @@ class TestStartupValidator(unittest.TestCase):
         self.assertFalse(result)
         self.assertIn('Auth config check timed out', str(mock_print.call_args_list))
     
-    @patch('dev_launcher.startup_validator.open_browser')
+    @patch('dev_launcher.utils.open_browser')
     @patch('dev_launcher.startup_validator.wait_for_service')
     @patch('dev_launcher.startup_validator.print_with_emoji')
     @patch('time.sleep')
@@ -60,7 +61,7 @@ class TestStartupValidator(unittest.TestCase):
         mock_browser.assert_called_once_with('http://localhost:3000')
         mock_sleep.assert_called()
     
-    @patch('dev_launcher.startup_validator.open_browser')
+    @patch('dev_launcher.utils.open_browser')
     @patch('dev_launcher.startup_validator.wait_for_service')
     @patch('dev_launcher.startup_validator.print_with_emoji')
     @patch('time.sleep')

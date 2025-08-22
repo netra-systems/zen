@@ -7,19 +7,30 @@ Business Value: Ensures reliable health monitoring preventing SLA violations
 that could result in enterprise contract penalties and customer churn.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-
 from netra_backend.app.core.health_checkers import (
-
-# Add project root to path
-    check_postgres_health, check_clickhouse_health, check_redis_health,
-    check_websocket_health, check_system_resources
+    check_clickhouse_health,
+    # Add project root to path
+    check_postgres_health,
+    check_redis_health,
+    check_system_resources,
+    check_websocket_health,
 )
 from netra_backend.app.schemas.core_models import HealthCheckResult
 

@@ -5,13 +5,19 @@ Handles JSON-RPC over HTTP with authentication and retry logic.
 
 import asyncio
 import json
-import uuid
 import logging
-from typing import Dict, Any, Optional, AsyncGenerator
-import httpx
+import uuid
+from typing import Any, AsyncGenerator, Dict, Optional
 from urllib.parse import urljoin
 
-from netra_backend.app.db.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
+import httpx
+
+from netra_backend.app.db.base import (
+    MCPConnectionError,
+    MCPProtocolError,
+    MCPTimeoutError,
+    MCPTransport,
+)
 
 logger = logging.getLogger(__name__)
 

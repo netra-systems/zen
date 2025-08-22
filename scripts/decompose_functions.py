@@ -7,9 +7,10 @@ Analyzes Python files for functions exceeding 8 lines and suggests decomposition
 import ast
 import os
 import sys
-from pathlib import Path
-from typing import List, Dict, Tuple, Any
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
 
 @dataclass
 class FunctionInfo:

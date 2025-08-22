@@ -5,11 +5,13 @@ All functions ≤8 lines per requirements.
 
 import asyncio
 import uuid
-from datetime import datetime, UTC
-from typing import List, Any
+from datetime import UTC, datetime
+from typing import Any, List
 from unittest.mock import AsyncMock, MagicMock
+
+from sqlalchemy import Column, DateTime, String
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Column, String, DateTime
+
 from netra_backend.app.db.base import Base
 
 

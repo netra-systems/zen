@@ -4,18 +4,22 @@ This script tests the error threshold and decision logic without requiring GCP a
 """
 
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Add the parent directory to sys.path to import from staging_error_monitor
 sys.path.append(str(Path(__file__).parent))
 
 try:
-    from staging_error_monitor import (
-        ErrorThreshold, ErrorAnalyzer, DeploymentDecision, ConsoleFormatter
-    )
     # Mock the schemas that would require GCP libraries
     from dataclasses import dataclass
+
+    from staging_error_monitor import (
+        ConsoleFormatter,
+        DeploymentDecision,
+        ErrorAnalyzer,
+        ErrorThreshold,
+    )
     
     @dataclass
     class MockGCPError:

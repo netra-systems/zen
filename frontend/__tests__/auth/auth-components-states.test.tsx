@@ -34,12 +34,12 @@ describe('Auth Components States', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
   });
 
   describe('Loading State', () => {
     it('should render loading state when loading is true', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         loading: true
       });
@@ -52,7 +52,7 @@ describe('Auth Components States', () => {
     });
 
     it('should not be clickable when loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         loading: true
       });
@@ -100,7 +100,7 @@ describe('Auth Components States', () => {
     };
 
     beforeEach(() => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: mockUser,
         authConfig: {
@@ -117,7 +117,7 @@ describe('Auth Components States', () => {
     });
 
     it('should display email when full_name is not available', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: { ...mockUser, full_name: null },
         authConfig: {
@@ -163,7 +163,7 @@ describe('Auth Components States', () => {
     };
 
     beforeEach(() => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: mockUser,
         authConfig: {
@@ -228,14 +228,14 @@ describe('Auth Components States', () => {
     it('should handle state change from loading to logged out', () => {
       const { rerender } = render(<LoginButton />);
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         loading: true
       });
       rerender(<LoginButton />);
       expect(screen.getByText('Loading...')).toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+      jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
       rerender(<LoginButton />);
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
     });
@@ -245,7 +245,7 @@ describe('Auth Components States', () => {
 
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -264,7 +264,7 @@ describe('Auth Components States', () => {
     it('should handle development mode toggle', () => {
       const { rerender } = render(<LoginButton />);
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',
@@ -279,7 +279,7 @@ describe('Auth Components States', () => {
       rerender(<LoginButton />);
       expect(screen.queryByText('DEV MODE')).not.toBeInTheDocument();
 
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...mockAuthContext,
         user: {
           id: 'user-123',

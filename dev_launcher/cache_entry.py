@@ -4,13 +4,14 @@ Cache entry structure for dev launcher caching system.
 Provides cache entry data structure with TTL, hashing, and encryption support.
 """
 
-import json
+import base64
 import hashlib
+import json
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
-from dataclasses import dataclass, asdict
+
 from cryptography.fernet import Fernet
-import base64
 
 
 @dataclass

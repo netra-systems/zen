@@ -23,7 +23,7 @@
 
 #### Real LLM Integration Points:
 - Mock LLM calls are patched in tests using: `patch('app.llm.llm_manager.LLMManager.call_llm')`
-- Real LLM can be enabled via command: `python -m test_framework.test_runner --level agents --real-llm`
+- Real LLM can be enabled via command: `python unified_test_runner.py --level agents --real-llm`
 - Test framework supports parallel LLM calls with rate limiting
 
 ### Completed Tasks (cont.):
@@ -82,7 +82,7 @@ python tests/unified/e2e/test_agent_orchestration_runner.py --mode e2e --real-ll
 python tests/unified/e2e/test_agent_orchestration_runner.py --mode performance --real-llm
 
 # Using main test runner
-python -m test_framework.test_runner --level agents --real-llm
+python unified_test_runner.py --level agents --real-llm
 ```
 
 #### Coverage Improvements:

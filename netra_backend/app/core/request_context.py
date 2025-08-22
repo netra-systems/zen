@@ -2,9 +2,10 @@
 Request context management module.
 Handles request tracing, error context, and logging middleware.
 """
-import time
 import logging
+import time
 from typing import Any, Callable, Optional, Tuple
+
 from fastapi import Request
 
 from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext

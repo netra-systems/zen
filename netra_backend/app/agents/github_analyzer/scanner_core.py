@@ -5,9 +5,9 @@ Implements intelligent scanning strategies based on repo size.
 """
 
 import asyncio
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
 import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger as logger
 

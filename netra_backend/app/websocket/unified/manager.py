@@ -14,32 +14,33 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 import asyncio
 import json
 import time
-from typing import Dict, Any, Union, List, Optional, Literal
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.schemas.websocket_models import (
-    WebSocketValidationError,
-    WebSocketStats,
+    BroadcastResult,
     RateLimitInfo,
-    BroadcastResult
+    WebSocketStats,
+    WebSocketValidationError,
 )
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.websocket.rate_limiter import RateLimiter
 from netra_backend.app.websocket.error_handler import WebSocketErrorHandler
+from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_integrator
+from netra_backend.app.websocket.rate_limiter import RateLimiter
 from netra_backend.app.websocket.room_manager import RoomManager
+
+from .broadcasting import UnifiedBroadcastingManager
+from .circuit_breaker import CircuitBreaker
 
 # Import unified modules
 from .messaging import UnifiedMessagingManager
-from .broadcasting import UnifiedBroadcastingManager
 from .state import UnifiedStateManager
-from .circuit_breaker import CircuitBreaker
 from .telemetry_manager import TelemetryManager
-from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_integrator
 
 logger = central_logger.get_logger(__name__)
 

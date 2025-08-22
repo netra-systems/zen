@@ -5,7 +5,7 @@ Provides robust JSON parsing with fallbacks for Pydantic pre-validators.
 
 import json
 import logging
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 

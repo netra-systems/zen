@@ -4,10 +4,10 @@ Data classes and metric structures for database monitoring.
 """
 
 import time
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
 from collections import deque
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 
 @dataclass

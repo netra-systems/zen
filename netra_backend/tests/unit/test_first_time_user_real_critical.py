@@ -14,36 +14,48 @@ first-time user paths that determine whether a free user converts to paid.
 Each test failure = potential lost customer = lost $99-999/month recurring revenue.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import uuid
 import json
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
-from argon2 import PasswordHasher
 import jwt
+import pytest
+from argon2 import PasswordHasher
+from fastapi import HTTPException, status
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
-
 # Import REAL implementations
-from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash, verify_password
+from netra_backend.app.auth_integration.auth import (
+    create_access_token,
+    get_password_hash,
+    validate_token_jwt,
+    verify_password,
+)
+from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
 from netra_backend.app.db.session import get_db_session, session_manager
-from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
-from netra_backend.app.schemas.registry import UserCreate
-from netra_backend.app.services.user_service import user_service
-from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
-from netra_backend.app.websocket.rate_limiter import RateLimiter
-from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
+from netra_backend.app.services.user_service import user_service
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.rate_limiter import RateLimiter
 
 
 class TestFirstTimeUserRealCritical:

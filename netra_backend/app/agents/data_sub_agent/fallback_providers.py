@@ -7,13 +7,20 @@ Business Value: Ensures 99.9% data availability through intelligent fallback pat
 """
 
 from typing import Any, Dict, List, Optional
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext
+
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.interface import (
+    BaseExecutionInterface,
+    ExecutionContext,
+)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.data_sub_agent.fallback_helpers import (
+    FallbackDataHelpers,
+    FallbackSystemIntegrations,
+)
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.agents.data_sub_agent.fallback_helpers import FallbackDataHelpers, FallbackSystemIntegrations
 
 logger = central_logger.get_logger(__name__)
 

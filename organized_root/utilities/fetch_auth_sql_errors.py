@@ -6,16 +6,16 @@ SQL-related issues with the auth_core service in staging.
 """
 
 import asyncio
+import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-import json
 
 # Add the project root to path
 sys.path.append(str(Path(__file__).parent))
 
-from test_framework.gcp_integration.log_reader import GCPLogReader, LogFilter
 from test_framework.gcp_integration.base import GCPConfig
+from test_framework.gcp_integration.log_reader import GCPLogReader, LogFilter
 
 
 async def analyze_auth_sql_errors():

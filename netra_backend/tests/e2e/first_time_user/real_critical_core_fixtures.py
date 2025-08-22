@@ -11,11 +11,12 @@ Real Critical User Journey Core Fixtures - Core environment and auth fixtures
 Provides pytest fixtures for real service testing of critical user journeys.
 """
 
-import pytest
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from netra_backend.tests.real_critical_auth_helpers import CriticalUserJourneyHelpers
 

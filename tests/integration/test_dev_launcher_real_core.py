@@ -1,24 +1,30 @@
 """Core Tests - Split from test_dev_launcher_real.py"""
 
 import asyncio
-import pytest
-import time
-import sys
-import os
-import subprocess
-import signal
-import requests
+import json
 import logging
+import os
+import signal
+import socket
+import subprocess
+import sys
+import threading
+import time
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, Future
-import threading
-import json
+
+import pytest
+import requests
+
 from dev_launcher import DevLauncher, LauncherConfig
+from dev_launcher.cache_manager import CacheManager
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager
-from dev_launcher.cache_manager import CacheManager
-import socket
+
+# Set up project root and logger
+project_root = Path(__file__).parent.parent.parent
+logger = logging.getLogger(__name__)
 
 
 class TestSyntaxFix:

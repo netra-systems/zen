@@ -4,10 +4,10 @@ This module provides ClickHouse-specific database optimization
 with proper async/await handling and modular architecture.
 """
 
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

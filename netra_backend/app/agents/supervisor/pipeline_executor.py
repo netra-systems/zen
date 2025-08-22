@@ -1,18 +1,26 @@
 """Pipeline execution logic for supervisor agent."""
 
-from typing import Dict, List, Any
+from typing import TYPE_CHECKING, Any, Dict, List
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
-    AgentExecutionContext, AgentExecutionResult, PipelineStep
+    AgentExecutionContext,
+    AgentExecutionResult,
+    PipelineStep,
 )
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.supervisor.observability_flow import (
+    get_supervisor_flow_logger,
+)
 from netra_backend.app.llm.observability import generate_llm_correlation_id
-from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import TYPE_CHECKING
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.agent_state import (
+    CheckpointType,
+    StatePersistenceRequest,
+)
+from netra_backend.app.services.state_persistence import state_persistence_service
 
 if TYPE_CHECKING:
     from netra_backend.app.services.websocket.ws_manager import WebSocketManager

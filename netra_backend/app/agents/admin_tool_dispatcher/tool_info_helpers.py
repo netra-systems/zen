@@ -6,8 +6,9 @@ Split from dispatcher_core.py to maintain 450-line limit.
 
 Business Value: Provides comprehensive tool information for admin operations.
 """
-from typing import List, Dict, Any
-from netra_backend.app.schemas.admin_tool_types import AdminToolType, AdminToolInfo
+from typing import Any, Dict, List
+
+from netra_backend.app.schemas.admin_tool_types import AdminToolInfo, AdminToolType
 
 
 def list_all_tools(dispatcher) -> List[AdminToolInfo]:
@@ -101,7 +102,10 @@ def enhance_stats_with_user_and_health(dispatcher, stats: Dict[str, Any]) -> Non
 
 def add_user_specific_stats(dispatcher, stats: Dict[str, Any]) -> None:
     """Add user-specific statistics."""
-    from .dispatcher_helpers import calculate_enabled_tools_count, calculate_active_sessions
+    from .dispatcher_helpers import (
+        calculate_active_sessions,
+        calculate_enabled_tools_count,
+    )
     stats["enabled_tools"] = calculate_enabled_tools_count(dispatcher.user)
     stats["active_sessions"] = calculate_active_sessions(dispatcher.user)
 

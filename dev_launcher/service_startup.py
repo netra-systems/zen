@@ -4,20 +4,24 @@ Service startup coordination for development launcher.
 
 import asyncio
 import logging
-import time
-from typing import Optional, Tuple, Dict, Any, List
 import subprocess
-from concurrent.futures import ThreadPoolExecutor, Future
+import time
+from concurrent.futures import Future, ThreadPoolExecutor
+from typing import Any, Dict, List, Optional, Tuple
 
-from dev_launcher.config import LauncherConfig
-from dev_launcher.log_streamer import LogStreamer, LogManager
-from dev_launcher.service_discovery import ServiceDiscovery
-from dev_launcher.backend_starter import BackendStarter
-from dev_launcher.frontend_starter import FrontendStarter
 from dev_launcher.auth_starter import AuthStarter
+from dev_launcher.backend_starter import BackendStarter
+from dev_launcher.config import LauncherConfig
+from dev_launcher.critical_error_handler import CriticalErrorType, critical_handler
+from dev_launcher.frontend_starter import FrontendStarter
+from dev_launcher.log_streamer import LogManager, LogStreamer
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
-from dev_launcher.critical_error_handler import critical_handler, CriticalErrorType
-from dev_launcher.utils import is_port_available, find_available_port, wait_for_service_with_details
+from dev_launcher.service_discovery import ServiceDiscovery
+from dev_launcher.utils import (
+    find_available_port,
+    is_port_available,
+    wait_for_service_with_details,
+)
 
 logger = logging.getLogger(__name__)
 

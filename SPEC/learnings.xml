@@ -1470,7 +1470,7 @@
                     Components: **/__tests__/components/**/*.test.[jt]s?(x)
                 </correct-patterns>
                 <files-changed>
-                    <file>scripts/test_frontend.py - Updated to use --testMatch and correct patterns</file>
+                    <file>unified_test_runner.py --service frontend - Updated to use --testMatch and correct patterns</file>
                     <file>test_framework/test_runners.py - Added conditional --cleanup-on-exit flag</file>
                 </files-changed>
                 <prevention>

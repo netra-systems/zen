@@ -4,21 +4,29 @@ Automatically tracks all agent operations and injects metrics collection.
 """
 
 import asyncio
-import time
-from typing import Dict, Any, Optional, Callable
-from functools import wraps
-from datetime import datetime, UTC
 import inspect
+import time
 import traceback
+from datetime import UTC, datetime
+from functools import wraps
+from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.metrics.agent_metrics import (
-    agent_metrics_collector, FailureType, AgentMetricsCollector
-)
 from netra_backend.app.middleware.metrics_helpers import (
-    AgentNameExtractor, OperationTypeDetector, FailureClassifier,
-    PerformanceUtils, ErrorHandler, BatchResultProcessor,
-    OperationMetadataBuilder, TimeoutHandler, WrapperUtils
+    AgentNameExtractor,
+    BatchResultProcessor,
+    ErrorHandler,
+    FailureClassifier,
+    OperationMetadataBuilder,
+    OperationTypeDetector,
+    PerformanceUtils,
+    TimeoutHandler,
+    WrapperUtils,
+)
+from netra_backend.app.services.metrics.agent_metrics import (
+    AgentMetricsCollector,
+    FailureType,
+    agent_metrics_collector,
 )
 
 logger = central_logger.get_logger(__name__)

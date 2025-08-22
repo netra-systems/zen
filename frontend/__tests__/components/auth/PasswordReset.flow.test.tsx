@@ -50,7 +50,7 @@ describe('Password Reset Flow Tests', () => {
     mockEmailValidation.isValid.mockClear();
     mockEmailValidation.validateFormat.mockClear();
     mockPasswordReset.mockClear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Password Reset UI Presence', () => {
@@ -79,7 +79,7 @@ describe('Password Reset Flow Tests', () => {
     });
 
     it('should handle missing reset password endpoint', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -100,7 +100,7 @@ describe('Password Reset Flow Tests', () => {
 
   describe('Password Reset Configuration', () => {
     it('should handle password reset endpoint configuration', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -117,7 +117,7 @@ describe('Password Reset Flow Tests', () => {
     });
 
     it('should validate reset password URL format', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -134,7 +134,7 @@ describe('Password Reset Flow Tests', () => {
     });
 
     it('should support custom password reset providers', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -148,7 +148,7 @@ describe('Password Reset Flow Tests', () => {
     });
 
     it('should handle development mode reset settings', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,
@@ -190,7 +190,7 @@ describe('Password Reset Flow Tests', () => {
     });
 
     it('should show password reset loading states', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });

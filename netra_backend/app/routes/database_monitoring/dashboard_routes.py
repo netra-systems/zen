@@ -1,11 +1,16 @@
 """
 Database Monitoring Dashboard Routes
 """
-from typing import Dict, Any, List
-from fastapi import HTTPException, Query, Depends
-from netra_backend.app.db.observability import database_observability, get_database_dashboard
-from netra_backend.app.services.database.connection_monitor import get_connection_status
+from typing import Any, Dict, List
+
+from fastapi import Depends, HTTPException, Query
+
+from netra_backend.app.db.observability import (
+    database_observability,
+    get_database_dashboard,
+)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.connection_monitor import get_connection_status
 
 logger = central_logger.get_logger(__name__)
 

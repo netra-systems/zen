@@ -1,13 +1,17 @@
 """Analytics and trend analysis for quality monitoring"""
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta, UTC
+import statistics
 from collections import defaultdict
 from dataclasses import asdict
-import statistics
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.quality_monitoring.models import QualityTrend, MetricType, AgentQualityProfile
+from netra_backend.app.services.quality_monitoring.models import (
+    AgentQualityProfile,
+    MetricType,
+    QualityTrend,
+)
 
 logger = central_logger.get_logger(__name__)
 

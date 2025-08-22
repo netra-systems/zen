@@ -5,18 +5,19 @@ Tests cover HealthMonitor, recovery mechanisms, and error handling.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
 import sys
-from pathlib import Path
-import time
 import threading
+import time
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.config import LauncherConfig
+from dev_launcher.utils import wait_for_service
 
 
 class TestHealthMonitor(unittest.TestCase):
@@ -69,6 +70,9 @@ class TestHealthMonitor(unittest.TestCase):
         self.monitor.register_service(
             "TestService", health_check, recovery, max_failures=2
         )
+        # Mark service as ready and enable monitoring per SPEC requirements
+        self.monitor.mark_service_ready("TestService")
+        self.monitor.enable_monitoring()
     
     def _test_failure_threshold(self, recovery):
         """Test that recovery triggers at threshold."""
@@ -90,6 +94,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def _test_thread_execution(self, health_check):
         """Test that monitoring thread runs checks."""
+        # Mark service as ready and enable monitoring
+        self.monitor.mark_service_ready("TestService")
+        self.monitor.enable_monitoring()
         self.monitor.start()
         time.sleep(0.3)
         self.assertGreater(health_check.call_count, 1)
@@ -231,7 +238,6 @@ class TestErrorRecovery(unittest.TestCase):
     
     def test_network_error_recovery(self):
         """Test recovery from network errors."""
-        from dev_launcher.utils import wait_for_service
         attempt_count = self._test_retry_logic()
         self.assertEqual(attempt_count, 3)
     
@@ -245,7 +251,6 @@ class TestErrorRecovery(unittest.TestCase):
                 raise ConnectionError("Network error")
             return Mock(status_code=200)
         with patch('requests.get', side_effect=mock_request):
-            from dev_launcher.utils import wait_for_service
             result = wait_for_service("http://localhost:8000", timeout=5)
             self.assertTrue(result)
         return attempt_count

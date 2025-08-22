@@ -6,9 +6,9 @@ Critical for capturing performance fees through 15-30% cost savings.
 Business Value: Direct revenue impact through performance fee model.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
 import statistics
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.logging_config import central_logger
 

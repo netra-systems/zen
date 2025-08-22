@@ -12,11 +12,11 @@ import asyncio
 import json
 import time
 import uuid
-import jwt
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional, Tuple
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import jwt
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode

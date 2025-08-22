@@ -5,6 +5,7 @@ Defines core WebSocket service interfaces for the application.
 """
 
 from typing import Any, Dict, Optional, Protocol
+
 from netra_backend.app.core.interfaces_service import BaseServiceInterface
 
 

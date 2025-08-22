@@ -14,26 +14,39 @@ Tests comprehensive usage metering pipeline:
 - Multi-tenant usage isolation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
 import uuid
-from datetime import datetime, timedelta, UTC
-from decimal import Decimal, ROUND_HALF_UP
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch
+from datetime import UTC, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
-from netra_backend.app.services.cost_calculator import CostCalculatorService, BudgetManager, CostTier
-from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
-from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
+from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
+from netra_backend.app.services.cost_calculator import (
+    BudgetManager,
+    CostCalculatorService,
+    CostTier,
+)
+from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 # Add project root to path
 

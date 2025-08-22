@@ -3,10 +3,11 @@
 Manages service lifecycle and dependencies.
 """
 
-from typing import Dict, Any, Type, Optional, Callable
+import inspect
 from dataclasses import dataclass, field
 from enum import Enum
-import inspect
+from typing import Any, Callable, Dict, Optional, Type
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

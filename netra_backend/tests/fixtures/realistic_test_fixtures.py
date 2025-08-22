@@ -5,36 +5,37 @@ Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import pytest
 
-# Import all fixture modules
-from netra_backend.tests.fixtures.fixtures_core import CoreTestFixtures
-from netra_backend.tests.fixtures.fixtures_workloads import WorkloadFixtures
-from netra_backend.tests.fixtures.fixtures_metrics import MetricsFixtures
+from netra_backend.app.services.realistic_test_data_service import (
+    RealisticTestDataService,
+)
 
+# Import all fixture modules
 # Import all fixture functions
 from netra_backend.tests.fixtures.fixtures_core import (
+    CoreTestFixtures,
     core_fixtures,
-    small_core_data,
+    large_core_data,
     medium_core_data,
-    large_core_data
-)
-from netra_backend.tests.fixtures.fixtures_workloads import (
-    workload_fixtures,
-    training_jobs,
-    inference_endpoints,
-    batch_jobs
+    small_core_data,
 )
 from netra_backend.tests.fixtures.fixtures_metrics import (
-    metrics_fixtures,
+    MetricsFixtures,
     error_cascade_logs,
     memory_leak_logs,
-    performance_metrics
+    metrics_fixtures,
+    performance_metrics,
 )
-
-from netra_backend.app.services.realistic_test_data_service import RealisticTestDataService
+from netra_backend.tests.fixtures.fixtures_workloads import (
+    WorkloadFixtures,
+    batch_jobs,
+    inference_endpoints,
+    training_jobs,
+    workload_fixtures,
+)
 
 
 class RealisticTestFixtures:

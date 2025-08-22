@@ -5,15 +5,20 @@ Monitors resource usage across multiple tenant agents.
 """
 
 import asyncio
-import time
-import os
-import psutil
 import logging
+import os
 import statistics
-from typing import Dict, List, Optional
+import time
 from collections import defaultdict
+from typing import Dict, List, Optional
 
-from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics, ResourceViolation, RESOURCE_LIMITS
+import psutil
+
+from tests.e2e.resource_isolation.infrastructure.data_models import (
+    RESOURCE_LIMITS,
+    ResourceMetrics,
+    ResourceViolation,
+)
 
 logger = logging.getLogger(__name__)
 

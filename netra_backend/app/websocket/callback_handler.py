@@ -4,7 +4,7 @@ Handles callback execution with proper exception handling and criticality classi
 """
 
 import asyncio
-from typing import Set, Callable, Optional
+from typing import Callable, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.sync_types import CriticalCallbackFailure

@@ -3,9 +3,10 @@ Supply Research Scheduler Models
 Defines scheduling models and frequency enums for supply research tasks
 """
 
-from typing import List, Optional
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import List, Optional
+
 # Import ResearchType from canonical source to avoid circular import
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 

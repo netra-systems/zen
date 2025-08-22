@@ -3,28 +3,36 @@ Tool Permission Service - Rate Limiting Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.tests.helpers.tool_permission_helpers import (
-
-# Add project root to path
+    # Add project root to path
     MockRedisClient,
-    create_sample_context,
-    setup_redis_usage,
-    create_failing_redis_method,
-    assert_redis_usage_count,
     assert_rate_limits_within_bounds,
-    run_concurrent_usage_recording,
+    assert_redis_usage_count,
     create_context_with_special_chars,
-    get_rate_limit_test_data
+    create_failing_redis_method,
+    create_sample_context,
+    get_rate_limit_test_data,
+    run_concurrent_usage_recording,
+    setup_redis_usage,
 )
 
 

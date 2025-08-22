@@ -10,12 +10,16 @@ This module provides a compatibility layer for code that expects app.core.config
 All actual configuration logic is handled by the unified configuration system.
 """
 
-from typing import Any, Dict, Optional
 import os
 from functools import lru_cache
+from typing import Any, Dict, Optional
+
+from netra_backend.app.core.configuration.base import (
+    config_manager as unified_config_manager,
+)
 
 # Import from the actual unified configuration system
-from netra_backend.app.core.configuration.base import get_unified_config, config_manager as unified_config_manager
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.schemas.Config import AppConfig
 
 

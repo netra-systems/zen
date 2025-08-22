@@ -1,6 +1,9 @@
-from langchain_core.tools import tool
 from typing import Any
+
+from langchain_core.tools import tool
+
 from netra_backend.app.services.context import ToolContext
+
 
 @tool
 async def optimized_implementation_proposer(context: ToolContext, function_name: str) -> str:

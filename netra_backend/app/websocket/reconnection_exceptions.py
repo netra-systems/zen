@@ -4,10 +4,11 @@ Custom exceptions for callback failure propagation and circuit breaker handling.
 """
 
 from typing import List, Optional
+
 try:
-    from .reconnection_types import CallbackType, CallbackFailure
+    from .reconnection_types import CallbackFailure, CallbackType
 except ImportError:
-    from reconnection_types import CallbackType, CallbackFailure
+    from reconnection_types import CallbackFailure, CallbackType
 
 
 class ReconnectionException(Exception):

@@ -19,25 +19,32 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
 import os
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 from config_environment import ConfigEnvironment
 
 # Add project root to path
-
 from netra_backend.app.schemas.Config import (
-
-# Add project root to path
-    AppConfig, 
-    DevelopmentConfig, 
-    ProductionConfig, 
-    StagingConfig, 
-    NetraTestingConfig
+    # Add project root to path
+    AppConfig,
+    DevelopmentConfig,
+    NetraTestingConfig,
+    ProductionConfig,
+    StagingConfig,
 )
 
 

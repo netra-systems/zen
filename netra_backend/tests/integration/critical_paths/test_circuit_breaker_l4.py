@@ -12,30 +12,44 @@ Service health monitoring -> Failure threshold detection -> Circuit breaker acti
 Coverage: Real service failures, circuit breaker state transitions, cascade prevention, staging environment validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import httpx
-import json
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-
-from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import CircuitBreakerManager
-from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor
-from netra_backend.app.services.circuit_breaker.failure_detector import FailureDetector
-from monitoring.metrics_collector import MetricsCollector
-
-# Add project root to path
-# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
+
+import httpx
+import pytest
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+
+# Add project root to path
+from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import (
+    CircuitBreakerManager,
+)
+from netra_backend.app.services.circuit_breaker.failure_detector import FailureDetector
+from netra_backend.app.services.circuit_breaker.service_health_monitor import (
+    ServiceHealthMonitor,
+)
+
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 

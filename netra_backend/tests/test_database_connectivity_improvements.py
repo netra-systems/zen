@@ -15,48 +15,57 @@ Business Value Justification (BVJ):
 - Revenue Impact: Reduces support costs and customer churn (+$5K MRR)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.db.fast_startup_connection_manager import (
-
-# Add project root to path
-    FastStartupConnectionManager, 
-    ConnectionHealth,
-    connection_registry
-)
 from netra_backend.app.db.clickhouse_reliable_manager import (
-    ReliableClickHouseManager,
     ClickHouseHealth,
-    MockClickHouseClient
-)
-from netra_backend.app.db.graceful_degradation_manager import (
-    GracefulDegradationManager,
-    ServiceLevel,
-    DatabaseStatus
-)
-from netra_backend.app.db.intelligent_retry_system import (
-    IntelligentRetrySystem,
-    RetryStrategy,
-    ErrorSeverity
-)
-from netra_backend.app.db.optimized_startup_checks import (
-    OptimizedStartupChecker,
-    CheckPriority,
-    CheckStatus
+    MockClickHouseClient,
+    ReliableClickHouseManager,
 )
 from netra_backend.app.db.comprehensive_health_monitor import (
+    AlertSeverity,
     ComprehensiveHealthMonitor,
     HealthStatus,
-    AlertSeverity
+)
+
+# Add project root to path
+from netra_backend.app.db.fast_startup_connection_manager import (
+    ConnectionHealth,
+    # Add project root to path
+    FastStartupConnectionManager,
+    connection_registry,
+)
+from netra_backend.app.db.graceful_degradation_manager import (
+    DatabaseStatus,
+    GracefulDegradationManager,
+    ServiceLevel,
+)
+from netra_backend.app.db.intelligent_retry_system import (
+    ErrorSeverity,
+    IntelligentRetrySystem,
+    RetryStrategy,
+)
+from netra_backend.app.db.optimized_startup_checks import (
+    CheckPriority,
+    CheckStatus,
+    OptimizedStartupChecker,
 )
 
 

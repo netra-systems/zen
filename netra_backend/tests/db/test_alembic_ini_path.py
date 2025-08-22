@@ -1,15 +1,25 @@
 """Test alembic.ini path configuration to expose issues."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from netra_backend.app.db.migration_utils import (
+from unittest.mock import MagicMock, patch
 
+import pytest
+
+from netra_backend.app.db.migration_utils import (
     _get_alembic_ini_path,
-    create_alembic_config
+    create_alembic_config,
 )
 
 

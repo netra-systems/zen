@@ -1,8 +1,11 @@
 # netra_apex/utils/vectorizers.py
 
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from netra_backend.app.logging_config import central_logger as logger
+
 
 class SemanticVectorizer:
     """

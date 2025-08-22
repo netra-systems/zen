@@ -1,5 +1,6 @@
-from datamodel_code_generator import generate
 from pathlib import Path
+
+from datamodel_code_generator import generate
 
 
 def main():

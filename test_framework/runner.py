@@ -2,27 +2,29 @@
 
 import sys
 import time
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, Optional, List, Tuple
-
-from .test_config import TEST_LEVELS, RUNNERS
-from .test_runners import (
-    run_backend_tests, run_frontend_tests, run_e2e_tests, 
-    run_simple_tests
-)
-from .failing_test_runner import run_failing_tests
-from .test_parser import extract_failing_tests, parse_test_counts, parse_coverage
-from .report_generators import generate_json_report, generate_text_report, generate_markdown_report
-from .report_manager import save_test_report, print_summary
-from .failing_tests_manager import (
-    load_failing_tests, update_failing_tests, show_failing_tests, 
-    clear_failing_tests, organize_failures_by_category
-)
-from .feature_flags import FeatureFlagManager, FeatureStatus
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 # Import comprehensive reporter
 from .comprehensive_reporter import ComprehensiveTestReporter
+import subprocess
+from .failing_tests_manager import (
+    clear_failing_tests,
+    load_failing_tests,
+    organize_failures_by_category,
+    show_failing_tests,
+    update_failing_tests,
+)
+from .feature_flags import FeatureFlagManager, FeatureStatus
+from .report_generators import (
+    generate_json_report,
+    generate_markdown_report,
+    generate_text_report,
+)
+from .report_manager import print_summary, save_test_report
+from .test_config import RUNNERS, TEST_LEVELS
+from .test_parser import extract_failing_tests, parse_coverage, parse_test_counts
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -50,30 +52,128 @@ class UnifiedTestRunner:
     
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests and update results."""
-        exit_code, output = run_backend_tests(args, timeout, real_llm_config, self.results, speed_opts)
+        cmd = ["python", "-m", "pytest"] + args
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            exit_code = result.returncode
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            exit_code = 1
+            output = f"Tests timed out after {timeout} seconds"
+        
+        # Update results
+        self.results["backend"]["exit_code"] = exit_code
+        self.results["backend"]["output"] = output
+        self.results["backend"]["status"] = "passed" if exit_code == 0 else "failed"
+        
+        # Parse test counts and coverage
+        test_counts = parse_test_counts(output)
+        if test_counts:
+            self.results["backend"]["test_counts"] = test_counts
+        coverage = parse_coverage(output)
+        if coverage:
+            self.results["backend"]["coverage"] = coverage
+        
         self._handle_test_failures(exit_code, output, "backend")
         return exit_code, output
     
     def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None, test_level: str = None) -> Tuple[int, str]:
         """Run frontend tests and update results."""
-        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts, test_level)
+        # Frontend tests use npm
+        cmd = ["npm", "test", "--"] + args
+        cwd = PROJECT_ROOT / "frontend"
+        
+        if not cwd.exists():
+            return 0, "Frontend directory not found, skipping tests"
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=str(cwd))
+            exit_code = result.returncode
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            exit_code = 1
+            output = f"Tests timed out after {timeout} seconds"
+        
+        # Update results
+        self.results["frontend"]["exit_code"] = exit_code
+        self.results["frontend"]["output"] = output
+        self.results["frontend"]["status"] = "passed" if exit_code == 0 else "failed"
+        
+        # Parse test counts
+        test_counts = parse_test_counts(output)
+        if test_counts:
+            self.results["frontend"]["test_counts"] = test_counts
+        
         self._handle_test_failures(exit_code, output, "frontend")
         return exit_code, output
     
     def run_e2e_tests(self, args: List[str], timeout: int = 600) -> Tuple[int, str]:
         """Run e2e tests and update results."""
-        exit_code, output = run_e2e_tests(args, timeout, self.results)
+        # E2E tests are Python tests in tests/e2e or tests/unified/e2e
+        test_paths = ["tests/e2e", "tests/unified/e2e"]
+        cmd = ["python", "-m", "pytest"] + test_paths + args
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            exit_code = result.returncode
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            exit_code = 1
+            output = f"Tests timed out after {timeout} seconds"
+        
+        # Update results
+        self.results["e2e"]["exit_code"] = exit_code
+        self.results["e2e"]["output"] = output
+        self.results["e2e"]["status"] = "passed" if exit_code == 0 else "failed"
+        
+        # Parse test counts
+        test_counts = parse_test_counts(output)
+        if test_counts:
+            self.results["e2e"]["test_counts"] = test_counts
+        
         self._handle_test_failures(exit_code, output, "e2e")
         return exit_code, output
     
     def run_simple_tests(self) -> Tuple[int, str]:
-        """Run simple tests and update results."""
-        return run_simple_tests(self.results)
+        """Run simple smoke tests."""
+        # Run basic smoke tests
+        cmd = ["python", "-m", "pytest", "--category", "smoke", "--fail-fast"]
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            exit_code = result.returncode
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired:
+            exit_code = 1
+            output = "Simple tests timed out after 60 seconds"
+        
+        return exit_code, output
     
     def run_failing_tests(self, max_fixes: int = None, backend_only: bool = False, frontend_only: bool = False) -> int:
         """Run only the currently failing tests."""
         failing_tests = load_failing_tests(self.reports_dir)
-        return run_failing_tests(failing_tests, max_fixes, backend_only, frontend_only)
+        if not failing_tests:
+            print("No failing tests to run")
+            return 0
+        
+        # Run failing tests with pytest
+        test_files = []
+        for component, tests in failing_tests.items():
+            if backend_only and component != "backend":
+                continue
+            if frontend_only and component != "frontend":
+                continue
+            test_files.extend(tests)
+        
+        if not test_files:
+            return 0
+        
+        if max_fixes:
+            test_files = test_files[:max_fixes]
+        
+        cmd = ["python", "-m", "pytest"] + test_files + ["--fail-fast"]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.returncode
     
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
         """Save test report to test_reports directory with comprehensive reporting."""

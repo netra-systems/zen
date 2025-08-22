@@ -10,12 +10,12 @@ import json
 import logging
 import time
 import uuid
-import psutil
-import websockets
 from typing import Dict, List, Set
 
-from tests.e2e.fixtures.throughput_metrics import HIGH_VOLUME_CONFIG
+import psutil
+import websockets
 
+from tests.e2e.fixtures.throughput_metrics import HIGH_VOLUME_CONFIG
 
 logger = logging.getLogger(__name__)
 

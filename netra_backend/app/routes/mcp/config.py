@@ -5,9 +5,10 @@ Configuration generators for different MCP clients.
 Maintains 25-line function limit and single responsibility.
 """
 
-from typing import Dict, Any, Optional
-from netra_backend.app.db.models_postgres import User as UserInDB
+from typing import Any, Dict, Optional
+
 from netra_backend.app.core.configuration import unified_config_manager
+from netra_backend.app.db.models_postgres import User as UserInDB
 
 
 def get_mcp_config(user: Optional[UserInDB]) -> Dict[str, Any]:

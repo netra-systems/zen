@@ -14,12 +14,12 @@ Usage:
     python scripts/auth_constants_migration.py --migrate
 """
 
+import argparse
 import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
-import argparse
+from typing import Dict, List, Set, Tuple
 
 
 class AuthConstantsMigrator:

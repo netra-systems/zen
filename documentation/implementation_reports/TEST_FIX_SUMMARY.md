@@ -69,5 +69,5 @@
 python -m pytest integration_tests/test_websocket.py integration_tests/test_e2e_dev_environment.py::TestAuthenticationE2E::test_complete_auth_lifecycle integration_tests/test_e2e_dev_environment.py::TestDatabaseTransactionsE2E::test_concurrent_transactions -v --tb=short
 
 # Test runner (blocked by size violations)
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 ```

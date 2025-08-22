@@ -3,15 +3,24 @@
 This test prevents the regression where frontend sends 'content' but backend expects 'text'.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.schemas.websocket_models import UserMessagePayload
+
+# Add project root to path
+from netra_backend.app.services.message_handlers import MessageHandlerService
 
 # Add project root to path
 

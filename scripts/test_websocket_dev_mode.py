@@ -11,13 +11,13 @@ This script tests the actual WebSocket connection functionality by:
 
 import asyncio
 import json
-import time
-import sys
 import os
-import subprocess
 import signal
-from pathlib import Path
+import subprocess
+import sys
+import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent

@@ -3,7 +3,7 @@ Test helpers for validation and formatting utilities testing.
 Provides setup, assertion, and fixture functions for validation and formatting utility tests.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ValidationTestHelpers:

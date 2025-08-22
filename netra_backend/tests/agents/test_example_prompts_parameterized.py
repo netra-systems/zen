@@ -3,26 +3,35 @@ Parameterized Example Prompts E2E Tests with Real LLM Calls
 Replaces 90 individual test methods with parameterized testing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+from typing import Any, Dict
 
 import pytest
 import pytest_asyncio
-import asyncio
-from typing import Dict, Any
+
+from netra_backend.app.services.quality_gate_service import ContentType
 
 # Add project root to path
-
 from netra_backend.tests.agents.test_example_prompts_base import (
-
-# Add project root to path
-    EXAMPLE_PROMPTS, 
+    # Add project root to path
+    EXAMPLE_PROMPTS,
+    ExamplePromptsTestBase,
     setup_real_infrastructure,
-    ExamplePromptsTestBase
 )
 from netra_backend.tests.agents.test_example_prompts_contexts import ContextGenerator
 from netra_backend.tests.agents.test_example_prompts_runner import TestRunner
-from netra_backend.app.services.quality_gate_service import ContentType
 
 
 @pytest_asyncio.fixture

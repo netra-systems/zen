@@ -3,11 +3,13 @@
 Validates database schema and provides comprehensive checks.
 """
 
-from typing import List, Dict, Any, Optional
-from sqlalchemy.ext.asyncio import AsyncEngine
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy import inspect, text
-from netra_backend.app.logging_config import central_logger
+from sqlalchemy.ext.asyncio import AsyncEngine
+
 from netra_backend.app.db.models_postgres import Base
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

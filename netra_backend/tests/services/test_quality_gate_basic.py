@@ -3,39 +3,47 @@ Basic validation tests for Quality Gate Service
 Tests fundamental validation functionality
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
 from netra_backend.tests.helpers.quality_gate_content import (
-
-# Add project root to path
+    get_borderline_quality_content,
+    get_circular_reasoning_content,
+    # Add project root to path
     get_high_quality_optimization_content,
     get_low_quality_generic_content,
-    get_circular_reasoning_content,
-    get_borderline_quality_content,
     get_optimization_context,
-    get_relevant_context
-)
-from netra_backend.tests.helpers.quality_gate_helpers import (
-    assert_validation_passed,
-    assert_validation_failed,
-    assert_high_quality_metrics,
-    assert_low_quality_metrics,
-    assert_circular_reasoning_detected,
-    assert_strict_mode_differences,
-    assert_context_improves_relevance,
-    assert_quality_level_classification,
-    assert_error_handling_result
+    get_relevant_context,
 )
 from netra_backend.tests.helpers.quality_gate_fixtures import (
+    quality_service,
+    redis_mock,
     setup_quality_level_test_cases,
-    setup_validation_error_mock
+    setup_validation_error_mock,
+)
+from netra_backend.tests.helpers.quality_gate_helpers import (
+    assert_circular_reasoning_detected,
+    assert_context_improves_relevance,
+    assert_error_handling_result,
+    assert_high_quality_metrics,
+    assert_low_quality_metrics,
+    assert_quality_level_classification,
+    assert_strict_mode_differences,
+    assert_validation_failed,
+    assert_validation_passed,
 )
 
 

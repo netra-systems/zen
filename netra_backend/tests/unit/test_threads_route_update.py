@@ -1,26 +1,34 @@
 """Tests for update_thread endpoint - split from test_threads_route.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from fastapi import HTTPException
 
 # Add project root to path
-
 from netra_backend.app.routes.threads_route import ThreadUpdate, update_thread
 from netra_backend.tests.helpers.thread_test_helpers import (
-
-# Add project root to path
+    assert_http_exception,
+    create_access_denied_thread,
+    # Add project root to path
     create_mock_thread,
-    setup_thread_repo_mock,
+    create_thread_update_scenario,
     setup_message_repo_mock,
     setup_repos_with_patches,
+    setup_thread_repo_mock,
     setup_thread_with_special_metadata,
-    create_thread_update_scenario,
-    assert_http_exception,
-    create_access_denied_thread
 )
 
 

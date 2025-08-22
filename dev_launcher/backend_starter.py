@@ -2,19 +2,22 @@
 Backend service startup management.
 """
 
+import logging
 import os
+import subprocess
 import sys
 import time
-import subprocess
-import logging
 from pathlib import Path
 from typing import Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
-from dev_launcher.log_streamer import LogStreamer, LogManager, Colors
+from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
-    get_free_port, create_process_env, create_subprocess, print_with_emoji
+    create_process_env,
+    create_subprocess,
+    get_free_port,
+    print_with_emoji,
 )
 
 logger = logging.getLogger(__name__)

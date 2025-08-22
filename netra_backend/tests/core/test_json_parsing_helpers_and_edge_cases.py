@@ -3,26 +3,34 @@ Tests for JSON parsing helper functions and edge cases.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
 
 # Add project root to path
-
 from netra_backend.app.core.json_parsing_utils import (
-
-# Add project root to path
-    _try_json_parse,
+    _fix_dict_data,
+    _fix_tool_params_list,
+    _handle_json_error,
+    _handle_unexpected_type,
+    _parse_dict_to_string_list,
     _parse_string_to_dict,
     _parse_string_to_list,
     _parse_string_to_string_list,
-    _parse_dict_to_string_list,
-    _fix_tool_params_list,
-    _fix_dict_data,
-    _handle_unexpected_type,
-    _handle_json_error
+    # Add project root to path
+    _try_json_parse,
 )
 
 
@@ -279,7 +287,9 @@ class TestEdgeCases:
     def test_empty_and_whitespace_inputs(self):
         """Test handling of empty and whitespace inputs."""
         from netra_backend.app.core.json_parsing_utils import (
-            safe_json_parse, parse_dict_field, parse_list_field
+            parse_dict_field,
+            parse_list_field,
+            safe_json_parse,
         )
         
         empty_cases = self._get_empty_cases()

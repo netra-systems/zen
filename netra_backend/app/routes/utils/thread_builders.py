@@ -1,6 +1,8 @@
 """Thread response builders."""
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.services.database.message_repository import MessageRepository
 
 

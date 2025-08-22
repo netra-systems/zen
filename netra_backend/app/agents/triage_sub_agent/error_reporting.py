@@ -139,7 +139,7 @@ class TriageErrorReporter:
     
     def _get_current_timestamp(self) -> str:
         """Get current timestamp for reporting."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC).isoformat()
     
     def log_recovery_attempt(self, operation_name: str, run_id: str, strategy: str) -> None:

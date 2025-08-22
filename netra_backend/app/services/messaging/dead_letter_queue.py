@@ -1,7 +1,7 @@
 """Dead Letter Queue for handling failed messages"""
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
 
 class DeadLetterQueue:

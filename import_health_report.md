@@ -113,7 +113,7 @@ Status: **IMPROVED** - Major issues resolved, minor issues remain
 
 ### Immediate Actions
 1. **Verify thread_service**: Check if ThreadService should be in services configuration or separate module
-2. **Run full E2E test suite**: `python -m test_framework.test_runner --level e2e`
+2. **Run full E2E test suite**: `python unified_test_runner.py --level e2e`
 3. **Monitor import health**: Use the created tools regularly
 
 ### Long-term Improvements

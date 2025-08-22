@@ -118,13 +118,13 @@ python scripts/check_architecture_compliance.py --ci --strict
 
 ```bash
 # Default fast feedback
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+python unified_test_runner.py --level integration --no-coverage --fast-fail
 
 # Agent changes with real LLM
-python -m test_framework.test_runner --level agents --real-llm
+python unified_test_runner.py --level agents --real-llm
 
 # Pre-release comprehensive
-python -m test_framework.test_runner --level all --staging
+python unified_test_runner.py --level all --staging
 ```
 
 ### Bad Test Detection System
@@ -389,9 +389,9 @@ python scripts/analyze_production_metrics.py --recommend-optimizations
    - API endpoints
    - Database migrations
    - Comprehensive tests
-3. Run validation: `python -m test_framework.test_runner --level integration`
+3. Run validation: `python unified_test_runner.py --level integration`
 4. Deploy to staging: `python scripts/deploy_staging.py --service email_service`
-5. Validate in staging: `python -m test_framework.test_runner --level e2e --staging`
+5. Validate in staging: `python unified_test_runner.py --level e2e --staging`
 6. Merge and deploy to production
 
 **Result:** Feature implemented with 99.9% correctness, 0 manual code changes required
@@ -404,7 +404,7 @@ python scripts/analyze_production_metrics.py --recommend-optimizations
 2. Identify pattern in `SPEC/learnings/websocket_errors.xml`
 3. Write failing test: `test_websocket_connection_persistence_beyond_30s()`
 4. AI implements fix based on test requirements
-5. Validate fix: `python -m test_framework.test_runner --level websocket`
+5. Validate fix: `python unified_test_runner.py --level websocket`
 6. Update learnings: Add to `SPEC/learnings/websocket_timeout_fix.xml`
 7. Deploy fix with monitoring
 
@@ -421,7 +421,7 @@ python scripts/analyze_production_metrics.py --recommend-optimizations
    - QA Agent: Test migration
    - DevOps Agent: Infrastructure updates
 4. Execute migration: `python scripts/migrate_to_microservices.py --validate`
-5. Comprehensive validation: `python -m test_framework.test_runner --level all`
+5. Comprehensive validation: `python unified_test_runner.py --level all`
 6. Staged rollout with feature flags
 
 **Result:** Complete architectural migration with zero downtime, all tests passing, 100% automated

@@ -5,6 +5,7 @@ import os
 import re
 from pathlib import Path
 
+
 def fix_boolean_comparisons(file_path):
     """Fix is True/False/None comparisons in a file"""
     try:

@@ -1,6 +1,8 @@
-from pydantic import BaseModel
 import uuid
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class EventMetadata(BaseModel):
     log_schema_version: str

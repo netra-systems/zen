@@ -5,7 +5,6 @@ This module contains prompt templates for the core optimization agent.
 
 from langchain_core.prompts import PromptTemplate
 
-
 # Optimizations Core Sub-Agent Prompt
 optimizations_core_prompt_template = PromptTemplate(
     input_variables=["data", "triage_result", "user_request"],

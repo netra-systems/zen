@@ -18,9 +18,19 @@ See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 
 # Import core functionality
+from netra_backend.app.clients.auth_client_cache import (
+    AuthCircuitBreakerManager,
+    AuthServiceSettings,
+    AuthTokenCache,
+    CachedToken,
+)
+from netra_backend.app.clients.auth_client_config import (
+    Environment,
+    EnvironmentDetector,
+    OAuthConfig,
+    OAuthConfigGenerator,
+)
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client
-from netra_backend.app.clients.auth_client_config import Environment, OAuthConfig, EnvironmentDetector, OAuthConfigGenerator
-from netra_backend.app.clients.auth_client_cache import CachedToken, AuthTokenCache, AuthCircuitBreakerManager, AuthServiceSettings
 
 # Re-export for backward compatibility
 __all__ = [

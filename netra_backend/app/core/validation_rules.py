@@ -4,8 +4,8 @@ Contains security threat patterns and detection logic.
 """
 
 import re
-from typing import Dict, List
 from enum import Enum
+from typing import Dict, List
 
 
 class ValidationLevel(str, Enum):

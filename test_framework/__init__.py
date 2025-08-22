@@ -1,38 +1,37 @@
 """Test framework module for Netra AI Platform."""
 
-# Import from refactored modules
+# Import core unified components
 from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, RUNNERS, COMPONENT_MAPPINGS, SHARD_MAPPINGS
-from .test_parser import parse_test_counts, parse_coverage, extract_failing_tests, extract_test_details
-# from .test_orchestrator import TestOrchestrator  # Currently not compatible
+from .test_config import COMPONENT_MAPPINGS, RUNNERS, SHARD_MAPPINGS, TEST_LEVELS
+
+# Import discovery and parsing utilities
+from .test_discovery import TestDiscovery
+from .test_parser import (
+    extract_failing_tests,
+    extract_test_details,
+    parse_coverage,
+    parse_test_counts,
+)
 
 # Import report generators and managers
-from .report_generators import generate_json_report, generate_text_report, generate_markdown_report
+from .report_generators import (
+    generate_json_report,
+    generate_markdown_report,
+    generate_text_report,
+)
 from .report_manager import print_summary, save_test_report
 
-# Import test runners
-from .test_runners import (
-    run_backend_tests, run_frontend_tests, run_e2e_tests, run_simple_tests
-)
-from .failing_test_runner import run_failing_tests
+# Import unified quality analyzer
+from .test_quality_analyzer import TestQualityAnalyzer, TestQualityIssue
 
-# Import discovery and execution engines
-from .test_discovery import TestDiscovery
-# from .test_execution_engine import TestExecutionEngine  # Uses functions not classes
-
-# Import failure analysis
-from .failure_patterns import FailurePatternAnalyzer
-from .test_insights import TestInsightGenerator, FailureReportGenerator
-
-# Import profile models
-from .test_profile_models import (
-    TestProfile, TestSuite, TestPriority, TestStatus, TestProfileManager
-)
+# Import essential utilities
+from .mock_utils import mock_justified
+from .feature_flags import FeatureFlagManager, FeatureStatus
+from .decorators import feature_flag, requires_feature, tdd_test
 
 __all__ = [
     # Core runner classes
     'UnifiedTestRunner',
-    # 'TestOrchestrator',
     
     # Configuration
     'TEST_LEVELS',
@@ -44,6 +43,7 @@ __all__ = [
     'parse_test_counts',
     'parse_coverage',
     'extract_failing_tests',
+    'extract_test_details',
     
     # Report generation
     'generate_json_report',
@@ -52,26 +52,18 @@ __all__ = [
     'print_summary',
     'save_test_report',
     
-    # Test execution
-    'run_backend_tests',
-    'run_frontend_tests', 
-    'run_e2e_tests',
-    'run_simple_tests',
-    'run_failing_tests',
-    
-    # Discovery and execution engines
+    # Discovery engine
     'TestDiscovery',
-    # 'TestExecutionEngine',
     
-    # Failure analysis
-    'FailurePatternAnalyzer',
-    'TestInsightGenerator',
-    'FailureReportGenerator',
+    # Quality analysis
+    'TestQualityAnalyzer',
+    'TestQualityIssue',
     
-    # Profile models
-    'TestProfile',
-    'TestSuite',
-    'TestPriority',
-    'TestStatus',
-    'TestProfileManager'
+    # Essential utilities
+    'mock_justified',
+    'FeatureFlagManager',
+    'FeatureStatus',
+    'feature_flag',
+    'requires_feature',
+    'tdd_test',
 ]

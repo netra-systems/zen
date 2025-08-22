@@ -6,20 +6,28 @@ Maintains 25-line function limit and single responsibility.
 """
 
 import json
-from typing import Dict, Any, Optional, List
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.supply_research_service import SupplyResearchService
-from netra_backend.app.db.models_postgres import ResearchSession
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.supply_researcher.data_extractor import (
+    SupplyDataExtractor,
+)
+from netra_backend.app.agents.supply_researcher.database_manager import (
+    SupplyDatabaseManager,
+)
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from netra_backend.app.agents.supply_researcher.parsers import SupplyRequestParser
-from netra_backend.app.agents.supply_researcher.research_engine import SupplyResearchEngine
-from netra_backend.app.agents.supply_researcher.data_extractor import SupplyDataExtractor
-from netra_backend.app.agents.supply_researcher.database_manager import SupplyDatabaseManager
+from netra_backend.app.agents.supply_researcher.research_engine import (
+    SupplyResearchEngine,
+)
+from netra_backend.app.db.models_postgres import ResearchSession
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.services.supply_research_service import SupplyResearchService
 
 
 class SupplyResearcherAgent(BaseSubAgent):

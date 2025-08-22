@@ -3,13 +3,13 @@
 Handles error logging and context building.
 """
 
-from typing import Dict, Any, Optional, Callable
 from datetime import datetime, timezone
+from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.error_types import WebSocketErrorInfo, ErrorSeverity
 from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.websocket.error_types import ErrorSeverity, WebSocketErrorInfo
 
 logger = central_logger.get_logger(__name__)
 

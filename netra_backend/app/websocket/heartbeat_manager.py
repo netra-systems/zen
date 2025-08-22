@@ -5,12 +5,17 @@ and maintain connection health.
 """
 
 import asyncio
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
+from netra_backend.app.core.websocket_connection_manager import (
+    WebSocketConnectionManager as ConnectionManager,
+)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.synthetic_data.error_handler import (
+    ErrorHandler as WebSocketErrorHandler,
+)
 from netra_backend.app.websocket.connection_info import ConnectionInfo
-from netra_backend.app.core.websocket_connection_manager import WebSocketConnectionManager as ConnectionManager
-from netra_backend.app.services.synthetic_data.error_handler import ErrorHandler as WebSocketErrorHandler
+
 # Heartbeat modules not yet implemented - commented out to fix imports
 # from netra_backend.app.heartbeat_config import HeartbeatConfig
 # from netra_backend.app.heartbeat_statistics import HeartbeatStatistics

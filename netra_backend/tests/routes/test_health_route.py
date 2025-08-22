@@ -1,6 +1,15 @@
 
 # Add project root to path
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 setup_test_path()
 
@@ -8,8 +17,8 @@ setup_test_path()
 
 def test_basic_import():
     """Test that we can import the app without hanging"""
-    import sys
     import os
+    import sys
     
     # Set minimal environment
     os.environ["TESTING"] = "1"
@@ -40,7 +49,8 @@ def test_health_endpoint_direct():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from netra_backend.app.routes.mcp.main import app
+
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")
@@ -58,7 +68,8 @@ def test_live_endpoint():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from netra_backend.app.routes.mcp.main import app
+
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")

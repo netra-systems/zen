@@ -5,9 +5,10 @@ for different LLM types and configurations.
 """
 
 from typing import Dict
+
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, circuit_registry
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 from netra_backend.app.llm.client_config import LLMClientConfig
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 
 
 class LLMCircuitBreakerManager:

@@ -3,7 +3,7 @@
 Fix E2E Test ConnectionManager Import Issues
 
 This script systematically fixes all e2e tests that are importing the old
-ConnectionManager class name, replacing it with the new ModernConnectionManager
+ConnectionManager class name, replacing it with the new ConnectionManager
 and proper import patterns.
 
 Business Value Justification (BVJ):
@@ -17,7 +17,8 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Set
+from typing import List, Set, Tuple
+
 
 def find_files_with_connection_manager_imports(root_dir: str) -> List[Path]:
     """Find all Python files importing ConnectionManager from connection_manager."""
@@ -59,27 +60,27 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         
         # Pattern 1: Direct import replacement
         pattern1 = r'from app\.websocket\.connection_manager import ConnectionManager'
-        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager'
+        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ConnectionManager'
         if re.search(pattern1, content):
             content = re.sub(pattern1, replacement1, content)
-            changes.append("Updated import statement to use ModernConnectionManager")
+            changes.append("Updated import statement to use ConnectionManager")
         
         # Pattern 2: Mixed imports with ConnectionManager
         pattern2 = r'from app\.websocket\.connection_manager import ([^,]*,\s*)*ConnectionManager([^,\n]*)'
         def replace_mixed_import(match):
             full_match = match.group(0)
-            if 'get_connection_manager' not in full_match and 'ModernConnectionManager' not in full_match:
-                return full_match.replace('ConnectionManager', 'get_connection_manager, ModernConnectionManager')
-            elif 'ConnectionManager' in full_match and 'ModernConnectionManager' not in full_match:
-                return full_match.replace('ConnectionManager', 'ModernConnectionManager')
+            if 'get_connection_manager' not in full_match and 'ConnectionManager' not in full_match:
+                return full_match.replace('ConnectionManager', 'get_connection_manager, ConnectionManager')
+            elif 'ConnectionManager' in full_match and 'ConnectionManager' not in full_match:
+                return full_match.replace('ConnectionManager', 'ConnectionManager')
             return full_match
         
         content = re.sub(pattern2, replace_mixed_import, content)
         
         # Pattern 3: Fix type hints and instantiation
         # Type hint fixes
-        content = re.sub(r':\s*ConnectionManager\b', ': ModernConnectionManager', content)
-        content = re.sub(r'spec=ConnectionManager\b', 'spec=ModernConnectionManager', content)
+        content = re.sub(r':\s*ConnectionManager\b', ': ConnectionManager', content)
+        content = re.sub(r'spec=ConnectionManager\b', 'spec=ConnectionManager', content)
         
         # Instantiation fixes - replace ConnectionManager() with get_connection_manager()
         pattern3 = r'\bConnectionManager\(\)'
@@ -140,7 +141,7 @@ def main():
     if fixed_count > 0:
         print(f"\nSuccessfully fixed {fixed_count} e2e test files!")
         print("Next steps:")
-        print("  1. Run tests to verify fixes: python -m test_framework.test_runner --level integration")
+        print("  1. Run tests to verify fixes: python unified_test_runner.py --level integration")
         print("  2. Check for any remaining import issues")
         print("  3. Review changes with git diff")
     else:

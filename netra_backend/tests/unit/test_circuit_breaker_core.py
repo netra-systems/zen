@@ -7,21 +7,33 @@ Tests critical paths including state transitions, adaptive thresholds,
 health monitoring, and failure recovery mechanisms.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
+from netra_backend.app.schemas.core_models import (
+    CircuitBreakerConfig,
+    HealthCheckResult,
+)
 
 # Add project root to path
 

@@ -4,23 +4,30 @@ Business Value: Prevents WebSocket failures that disconnect users, protecting $8
 Tests ensure proper async/await usage and coroutine handling in WebSocket message processing.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import WebSocket
-
 from routes.utils.websocket_helpers import (
-
-# Add project root to path
-
-    parse_json_message,
     _handle_ping_message,
+    _handle_with_manager,
+    # Add project root to path
+    parse_json_message,
     validate_and_handle_message,
-    _handle_with_manager
 )
 
 
@@ -170,7 +177,7 @@ class TestAsyncAwaitChain:
     @pytest.mark.asyncio
     async def test_full_message_processing_chain(self):
         """Verify entire message processing chain awaits properly."""
-        from netra_backend.app.routes.websockets import _process_single_message
+        from netra_backend.app.routes.websocket_secure import _process_single_message
         
         websocket = Mock(spec=WebSocket)
         websocket.receive_text = AsyncMock(return_value='{"type": "test"}')
@@ -310,6 +317,7 @@ class TestRegressionPrevention:
         """Verify all async functions are properly awaited."""
         # This test checks that common async functions are awaited
         import inspect
+
         from netra_backend.app.routes import websockets
         
         # Get the source of _process_single_message

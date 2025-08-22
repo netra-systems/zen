@@ -4,23 +4,35 @@ Tests the MCP context manager, intent detector, and agent bridge.
 Follows strict 25-line function design for testability.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
-
-from netra_backend.app.agents.mcp_integration.context_manager import (
-
-# Add project root to path
-    MCPContextManager, MCPPermissionContext, MCPAgentContext
-)
-from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector
-from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
+import pytest
 from mcp_client import MCPTool
+
+# Add project root to path
+from netra_backend.app.agents.mcp_integration.context_manager import (
+    MCPAgentContext,
+    # Add project root to path
+    MCPContextManager,
+    MCPPermissionContext,
+)
+from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
+    MCPIntentDetector,
+)
+from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
 
 
 @pytest.fixture

@@ -14,12 +14,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Ensures test reliability and system integrity
 """
 
+import ast
 import os
 import re
-import ast
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -323,8 +323,8 @@ class RealTestValidator:
 
 def main():
     """Main validation entry point"""
-    import sys
     import os
+    import sys
     
     # Add scripts directory to path for standalone execution
     script_dir = os.path.dirname(os.path.abspath(__file__))

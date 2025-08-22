@@ -1,13 +1,15 @@
 """Core spec analysis components - Base classes and data structures."""
 
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.core.exceptions_base import ValidationError as ValidationException
+from netra_backend.app.core.exceptions_base import (
+    ValidationError as ValidationException,
+)
 
 
 class ViolationSeverity(Enum):

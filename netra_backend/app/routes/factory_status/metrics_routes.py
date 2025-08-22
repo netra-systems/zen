@@ -2,13 +2,19 @@
 Factory Status Metrics Routes
 """
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
-from fastapi import HTTPException, Query, Depends
-from netra_backend.app.services.factory_status.report_builder import ReportBuilder
+from typing import Any, Dict, List
+
+from fastapi import Depends, HTTPException, Query
+
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.routes.factory_status.models import ReportResponse, MetricResponse, GenerateReportRequest
 from netra_backend.app.routes.factory_status.business_logic import fetch_metric
+from netra_backend.app.routes.factory_status.models import (
+    GenerateReportRequest,
+    MetricResponse,
+    ReportResponse,
+)
 from netra_backend.app.routes.factory_status.utils import calculate_trend
+from netra_backend.app.services.factory_status.report_builder import ReportBuilder
 
 
 def build_metric_response(metric_name: str, value: Any, hours: int) -> MetricResponse:

@@ -4,9 +4,9 @@ Google Secret Manager integration for fallback secret loading.
 Handles Google Cloud Secret Manager operations with timeout and error handling.
 """
 
-import socket
 import logging
-from typing import Dict, Set, Tuple, Optional
+import socket
+from typing import Dict, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 

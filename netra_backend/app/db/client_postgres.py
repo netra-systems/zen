@@ -4,14 +4,18 @@ Main resilient database client with circuit breaker protection.
 """
 
 from contextlib import asynccontextmanager
-from typing import Any, Dict, Optional, List, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.client_postgres_session import TransactionHandler
-from netra_backend.app.db.client_postgres_executors import QueryExecutor, WriteExecutor, TransactionExecutor
-from netra_backend.app.db.client_postgres_health import PostgresHealthChecker
 from netra_backend.app.db.client_config import CircuitBreakerManager
+from netra_backend.app.db.client_postgres_executors import (
+    QueryExecutor,
+    TransactionExecutor,
+    WriteExecutor,
+)
+from netra_backend.app.db.client_postgres_health import PostgresHealthChecker
+from netra_backend.app.db.client_postgres_session import TransactionHandler
 
 
 class ResilientDatabaseClient:

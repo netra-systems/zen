@@ -7,8 +7,9 @@ Handles performance benchmarks and metrics
 import os
 import subprocess
 import time
+from typing import Any, Dict, Optional
+
 import psutil
-from typing import Dict, Any, Optional
 from startup_test_executor import TestResult
 
 

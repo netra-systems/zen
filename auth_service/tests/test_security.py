@@ -2,19 +2,22 @@
 Security Tests for Auth Service - Critical Security Validation
 Tests SQL injection, XSS, CSRF protection, and audit logging
 """
-import pytest
 import asyncio
-import httpx
-from unittest.mock import AsyncMock, patch, MagicMock
-from fastapi.testclient import TestClient
-from fastapi import FastAPI
 import json
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from auth_service.auth_core.routes.auth_routes import router as auth_router
-from auth_service.auth_core.services.auth_service import AuthService  
+import httpx
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from auth_service.auth_core.models.auth_models import (
-    LoginRequest, AuthProvider, ServiceTokenRequest
+    AuthProvider,
+    LoginRequest,
+    ServiceTokenRequest,
 )
+from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.services.auth_service import AuthService
 
 
 @pytest.fixture

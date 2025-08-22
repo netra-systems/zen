@@ -2,6 +2,7 @@
 Auth Route Utilities
 """
 from typing import Optional
+
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.configuration import unified_config_manager
 

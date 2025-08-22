@@ -5,10 +5,10 @@ Handles system-wide metrics and boundary validation.
 """
 
 import glob
-import subprocess
 import re
+import subprocess
 from pathlib import Path
-from typing import Dict, Union, Tuple
+from typing import Dict, Tuple, Union
 
 try:
     import radon.complexity as radon_cc
@@ -17,8 +17,12 @@ except ImportError:
     HAS_RADON = False
 
 from boundary_enforcer_core_types import (
-    BoundaryViolation, SystemBoundaries, should_skip_file, get_file_patterns
+    BoundaryViolation,
+    SystemBoundaries,
+    get_file_patterns,
+    should_skip_file,
 )
+
 
 class SystemBoundaryChecker:
     """Handles system-wide boundary validation"""

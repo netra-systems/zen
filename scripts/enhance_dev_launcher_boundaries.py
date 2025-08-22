@@ -8,6 +8,7 @@ import os
 import sys
 from pathlib import Path
 
+
 def enhance_launcher_config():
     """Add boundary monitoring configuration to LauncherConfig."""
     config_file = Path(__file__).parent.parent / "dev_launcher" / "config.py"

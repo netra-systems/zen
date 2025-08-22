@@ -12,13 +12,14 @@ Usage:
     python generate_openapi_spec.py [--sync-readme] [--readme-api-key KEY] [--readme-version VERSION]
 """
 
-import json
-import sys
-import os
 import argparse
-import requests
-from typing import Optional
+import json
+import os
+import sys
 from pathlib import Path
+from typing import Optional
+
+import requests
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

@@ -5,14 +5,18 @@ This test validates that resource quotas are properly enforced
 and violations are detected and handled appropriately.
 """
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, Any
+import time
+from typing import Any, Dict
 
-from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+import pytest
+
 from tests.e2e.resource_isolation.test_infrastructure import RESOURCE_LIMITS
+from tests.e2e.resource_isolation.test_suite import (
+    resource_isolation_suite,
+    tenant_agents,
+)
 
 logger = logging.getLogger(__name__)
 

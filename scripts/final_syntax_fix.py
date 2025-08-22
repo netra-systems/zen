@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Final script to make all test files syntactically valid by rebuilding them properly"""
 
-import os
 import ast
+import os
 from pathlib import Path
 from typing import List
+
 
 def create_minimal_test_file(filepath: Path) -> str:
     """Create a minimal but valid test file"""

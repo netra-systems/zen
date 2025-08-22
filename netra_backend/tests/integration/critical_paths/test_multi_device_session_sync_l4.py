@@ -12,25 +12,34 @@ Device login -> Session sync -> Real-time updates -> Preferences sync -> Activit
 Coverage: Multi-device session state sync, real-time propagation, preference sync, activity tracking, auth state consistency
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-import httpx
-import websockets
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-
-
-# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
+
+import httpx
+import pytest
+import websockets
+
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 

@@ -7,22 +7,36 @@ execution engines and can process messages end-to-end.
 Business Value: Prevents $8K MRR loss from WebSocket failures.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.connection_executor import ConnectionExecutor
 
 # Add project root to path
-
-from netra_backend.app.websocket.message_handler_core import ModernReliableMessageHandler
+from netra_backend.app.websocket.message_handler_core import (
+    ModernReliableMessageHandler,
+)
 from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-from netra_backend.app.websocket.websocket_broadcast_executor import WebSocketBroadcastExecutor
-from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.websocket.websocket_broadcast_executor import (
+    WebSocketBroadcastExecutor,
+)
 
 # Add project root to path
 
@@ -139,7 +153,10 @@ class TestWebSocketMessageFlow:
             mock_broadcast.return_value = Mock(successful=2, failed=0)
             
             # Create broadcast context
-            from netra_backend.app.websocket.broadcast_context import BroadcastContext, BroadcastOperation
+            from netra_backend.app.websocket.broadcast_context import (
+                BroadcastContext,
+                BroadcastOperation,
+            )
             broadcast_ctx = BroadcastContext(
                 operation=BroadcastOperation.ALL_CONNECTIONS,
                 message={"type": "broadcast", "content": "Hello all"}
@@ -217,10 +234,14 @@ class TestCircularImportPrevention:
         # This test verifies the late import pattern doesn't cause issues
         
         # Import should work without circular dependency
-        from netra_backend.app.websocket.message_handler_core import ModernReliableMessageHandler
-        from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-        from netra_backend.app.websocket.websocket_broadcast_executor import WebSocketBroadcastExecutor
         from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from netra_backend.app.websocket.message_handler_core import (
+            ModernReliableMessageHandler,
+        )
+        from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
+        from netra_backend.app.websocket.websocket_broadcast_executor import (
+            WebSocketBroadcastExecutor,
+        )
         
         # All components should initialize successfully
         handler = ModernReliableMessageHandler()

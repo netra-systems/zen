@@ -3,13 +3,16 @@ OWASP Top 10 2021 compliance rule implementations.
 Focused module for OWASP security checks with 25-line function limit.
 """
 
-from typing import List
 from datetime import datetime, timezone
+from typing import List
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.compliance_checks import (
-    ComplianceCheck, ComplianceCheckManager, ComplianceStandard, ComplianceStatus
+    ComplianceCheck,
+    ComplianceCheckManager,
+    ComplianceStandard,
+    ComplianceStatus,
 )
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

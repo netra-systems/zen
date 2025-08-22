@@ -5,10 +5,10 @@ Generates various workload patterns for testing tenant isolation.
 """
 
 import asyncio
-import time
 import json
 import logging
-from typing import Dict, Any
+import time
+from typing import Any, Dict
 
 import websockets
 

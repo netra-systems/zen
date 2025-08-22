@@ -7,21 +7,36 @@ to replace 70+ duplicated AsyncSession mock patterns across the codebase.
 Shows real-world usage patterns that can replace existing test code.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import Mock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.fixtures.database_test_fixtures import (
-
-# Add project root to path
-    async_session_mock, transaction_session_mock, query_builder,
-    create_mock_user, create_mock_thread, create_mock_message,
-    error_simulator, transaction_context, connection_pool,
-    clickhouse_mocker, migration_helper
+    # Add project root to path
+    async_session_mock,
+    clickhouse_mocker,
+    connection_pool,
+    create_mock_message,
+    create_mock_thread,
+    create_mock_user,
+    error_simulator,
+    migration_helper,
+    query_builder,
+    transaction_context,
+    transaction_session_mock,
 )
 
 

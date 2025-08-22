@@ -2,8 +2,12 @@
 
 from pathlib import Path
 
-from netra_backend.app.services.factory_status.factory_status_reporter import FactoryStatusReporter
-from netra_backend.app.services.factory_status.compliance_api_handler import ComplianceAPIHandler
+from netra_backend.app.services.factory_status.compliance_api_handler import (
+    ComplianceAPIHandler,
+)
+from netra_backend.app.services.factory_status.factory_status_reporter import (
+    FactoryStatusReporter,
+)
 
 
 # Factory function for creating reporter instance

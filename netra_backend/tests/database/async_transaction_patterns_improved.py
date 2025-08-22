@@ -1,12 +1,14 @@
 """Improved Async Database Transaction Patterns - Max 300 lines, functions ≤8 lines"""
 
 import asyncio
-import pytest
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
-from sqlalchemy.ext.asyncio import AsyncSession
+
+import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class AsyncTransactionManager:
     """Enhanced async transaction manager with proper isolation"""

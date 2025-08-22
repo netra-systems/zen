@@ -5,19 +5,19 @@ Handles Python virtual environment, packages, and external services installation
 CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 """
 
-import sys
-import subprocess
 import shutil
-from typing import List, Optional
+import subprocess
+import sys
 from pathlib import Path
+from typing import List, Optional
 
 # Add scripts directory to path for imports
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
-from installer_types import InstallerConfig, InstallerResult
-from env_checker import run_command
 from dependency_services import install_all_services
+from env_checker import run_command
+from installer_types import InstallerConfig, InstallerResult
 
 
 class DependencyInstaller:

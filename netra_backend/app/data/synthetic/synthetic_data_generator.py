@@ -3,12 +3,13 @@ Data generation and processing logic for synthetic data.
 Handles vectorized data generation, trace creation, and parallel processing.
 """
 
+import hashlib
 import random
 import uuid
-import hashlib
+from multiprocessing import Pool, cpu_count
+
 import numpy as np
 import pandas as pd
-from multiprocessing import Pool, cpu_count
 from faker import Faker
 from rich.progress import Progress
 

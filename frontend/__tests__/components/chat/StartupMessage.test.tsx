@@ -15,9 +15,7 @@ import MainChat from '@/components/chat/MainChat';
 import { ChatLoadingState } from '@/types/loading-state';
 
 // Mock all dependencies before imports
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn()
-}));
+jest.mock('@/store/unified-chat');
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: jest.fn()
@@ -37,9 +35,7 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: jest.fn()
 }));
 
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
+jest.mock('@/store/authStore');
 
 jest.mock('@/utils/debug-logger', () => ({
   logger: {

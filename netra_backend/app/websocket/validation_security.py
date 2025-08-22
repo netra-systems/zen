@@ -4,7 +4,7 @@ Micro-validators for XSS, script injection, and content security validation.
 Each function ≤8 lines for performance-critical WebSocket security path.
 """
 
-from typing import Dict, Any, Union, List
+from typing import Any, Dict, List, Union
 
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 

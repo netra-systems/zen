@@ -1,7 +1,9 @@
 """Thread validation utilities."""
 from typing import Any
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 

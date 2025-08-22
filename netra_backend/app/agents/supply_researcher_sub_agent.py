@@ -7,10 +7,7 @@ modules under 300 lines each.
 """
 
 # Import from modular implementation
-from netra_backend.app.supply_researcher import (
-    SupplyResearcherAgent,
-    ResearchType
-)
+from netra_backend.app.supply_researcher import ResearchType, SupplyResearcherAgent
 
 # Maintain backward compatibility - all legacy code removed
 # All classes and functions now imported from supply_researcher module

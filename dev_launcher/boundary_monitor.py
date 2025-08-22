@@ -3,14 +3,14 @@ Real-time boundary monitoring for development environment.
 Follows CLAUDE.md requirements: 450-line limit, 25-line functions.
 """
 
-import time
-import threading
-import subprocess
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional, Callable, List
-from dataclasses import dataclass
 import logging
+import subprocess
+import threading
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

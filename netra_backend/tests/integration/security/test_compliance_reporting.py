@@ -14,21 +14,30 @@ REQUIREMENTS:
 - Configuration change tracking and reporting
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.shared_fixtures import (
-
-# Add project root to path
-    enterprise_security_infrastructure, compliance_helper,
-    ComplianceReportingHelper
+    ComplianceReportingHelper,
+    compliance_helper,
+    # Add project root to path
+    enterprise_security_infrastructure,
 )
 
 

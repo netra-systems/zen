@@ -14,14 +14,14 @@ Supports Python (pytest) and JavaScript (npm) test execution.
 
 import asyncio
 import json
-import subprocess
-import time
 import logging
+import subprocess
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

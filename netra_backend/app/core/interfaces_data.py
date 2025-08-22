@@ -5,10 +5,11 @@ and complex corpus table management with notifications and status tracking.
 Follows 450-line limit and 25-line functions.
 """
 
-import json
 import asyncio
-from typing import Dict, Optional, Any, List
+import json
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.orm import Session
 
 from netra_backend.app.logging_config import central_logger
@@ -147,7 +148,9 @@ class CoreClickHouseOperations:
     async def _execute_data_query(self, query: str) -> List[Dict[str, Any]]:
         """Execute data query and return formatted results."""
         from netra_backend.app.db.clickhouse import get_clickhouse_client
-        from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
+        from netra_backend.app.db.clickhouse_init import (
+            create_workload_events_table_if_missing,
+        )
         
         await create_workload_events_table_if_missing()
         

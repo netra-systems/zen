@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
+
 def _should_skip_file(content: str) -> bool:
     """Check if file should be skipped from processing."""
     if 'WebSocketProvider' not in content:

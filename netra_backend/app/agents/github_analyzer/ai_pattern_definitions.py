@@ -4,7 +4,7 @@ Defines patterns for detecting various AI providers and frameworks.
 Handles OpenAI, Anthropic, LangChain, agents, embeddings, and tools.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger as logger
 

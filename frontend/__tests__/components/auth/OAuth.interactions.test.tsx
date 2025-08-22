@@ -59,7 +59,7 @@ describe('OAuth Button Interaction Tests', () => {
     mockLocation.href = '';
     mockLocation.assign.mockClear();
     mockLocation.replace.mockClear();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Google OAuth Integration', () => {
@@ -105,7 +105,7 @@ describe('OAuth Button Interaction Tests', () => {
         github_client_id: 'test-github-client-id'
       };
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: githubConfig
       });
@@ -152,7 +152,7 @@ describe('OAuth Button Interaction Tests', () => {
         microsoft_client_id: 'test-microsoft-client-id'
       };
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: msConfig
       });
@@ -192,7 +192,7 @@ describe('OAuth Button Interaction Tests', () => {
 
   describe('OAuth Button States', () => {
     it('should disable button during loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -210,7 +210,7 @@ describe('OAuth Button Interaction Tests', () => {
       await userEvent.click(button);
       
       // Simulate loading state
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -267,7 +267,7 @@ describe('OAuth Button Interaction Tests', () => {
     });
 
     it('should handle invalid OAuth configuration', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         authConfig: {
           ...baseAuthContext.authConfig,

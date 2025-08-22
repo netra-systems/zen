@@ -18,14 +18,15 @@ Test Coverage:
 - Security compliance validation for enterprise requirements
 """
 
-import os
-import unittest
-import jwt
-from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
-import time
 import base64
 import json
+import os
+import time
+import unittest
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
+
+import jwt
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 

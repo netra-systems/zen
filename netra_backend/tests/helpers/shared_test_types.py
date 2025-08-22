@@ -3,11 +3,12 @@ Shared test types and classes to eliminate duplicate type definitions.
 Single source of truth for test types used across multiple test modules.
 """
 
-import pytest
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
-from unittest.mock import MagicMock, AsyncMock
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 class TestErrorHandling:
@@ -19,8 +20,9 @@ class TestErrorHandling:
     
     def test_database_connection_failure(self, service):
         """Test graceful handling of database connection failures"""
-        import pytest
         from unittest.mock import patch
+
+        import pytest
         
         # Skip test if service doesn't have a db attribute
         if not hasattr(service, 'db'):
@@ -58,7 +60,7 @@ class TestErrorHandling:
                 assert "redis" not in str(e).lower()
     async def test_retry_on_failure(self, agent_or_service):
         """Test retry mechanism on processing failure"""
-        from unittest.mock import patch, AsyncMock
+        from unittest.mock import AsyncMock, patch
         
         if hasattr(agent_or_service, 'config'):
             agent_or_service.config = {"max_retries": 3}
@@ -185,7 +187,9 @@ class TestErrorContext:
     @pytest.fixture
     def error_context(self):
         """Provide error context for testing"""
-        from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+        from netra_backend.app.core.error_context import (
+            AsyncErrorContext as ErrorContext,
+        )
         return ErrorContext()
     
     def test_trace_id_management(self, error_context):

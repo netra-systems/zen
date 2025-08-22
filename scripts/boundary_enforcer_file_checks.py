@@ -10,8 +10,12 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 from boundary_enforcer_core_types import (
-    BoundaryViolation, SystemBoundaries, should_skip_file, get_file_patterns
+    BoundaryViolation,
+    SystemBoundaries,
+    get_file_patterns,
+    should_skip_file,
 )
+
 
 class FileBoundaryChecker:
     """Handles file size boundary validation"""

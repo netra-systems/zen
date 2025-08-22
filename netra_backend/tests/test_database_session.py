@@ -1,20 +1,36 @@
 """Test database connection pooling and session management."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from sqlalchemy.exc import OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool, QueuePool
-from sqlalchemy.exc import OperationalError, TimeoutError
+
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.postgres import (
+    Database,
+    async_engine,
+    async_session_factory,
+    get_async_db,
+)
 
 # Add project root to path
-
 from netra_backend.app.db.session import get_db_session
-from netra_backend.app.db.postgres import async_engine, async_session_factory, get_async_db, Database
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+
 
 # Add project root to path
 class TestDatabaseConnectionPooling:

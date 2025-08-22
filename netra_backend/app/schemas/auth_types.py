@@ -20,12 +20,13 @@ Business Value Justification (BVJ):
 - Revenue Impact: +$5K MRR recovered
 """
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
-from typing import Optional, List, Dict, Any, Union
+import warnings
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass
-import warnings
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 
 class TokenType(str, Enum):

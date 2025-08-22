@@ -7,23 +7,24 @@ Tests JWT signature validation, claims requirements, and token revocation
 CRITICAL: Uses real JWT libraries (PyJWT) with proper security testing
 Maximum 300 lines enforced - focused on core JWT validation only
 """
-import pytest
-import jwt
-import json
 import base64
-import httpx
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Set
+
+import httpx
+import jwt
+import pytest
 
 # Support both root and auth_service directory execution
 try:
     # Primary import path - auth_core at root level
-    from auth_service.auth_core.core.jwt_handler import JWTHandler
     from auth_service.auth_core.config import AuthConfig
+    from auth_service.auth_core.core.jwt_handler import JWTHandler
 except ImportError:
     # Fallback for auth_service directory execution
-    from auth_service.auth_core.core.jwt_handler import JWTHandler
     from auth_service.auth_core.config import AuthConfig
+    from auth_service.auth_core.core.jwt_handler import JWTHandler
 
 
 class TestJWTSignatureValidation:

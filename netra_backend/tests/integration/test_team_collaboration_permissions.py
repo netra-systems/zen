@@ -27,18 +27,37 @@ Coverage Target: 100% for all team collaboration features.
 
 # Import and run tests from refactored modules
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
+from netra_backend.tests.integration.critical_paths.test_concurrent_editing_performance import (
+    TestConcurrentEditingPerformance,
+)
 
-from netra_backend.tests.integration.critical_paths.test_team_creation_permissions import TestTeamCreationPermissions
-from netra_backend.tests.integration.critical_paths.test_user_invitation_flow import TestUserInvitationFlow
-from netra_backend.tests.integration.critical_paths.test_workspace_resource_sharing import TestWorkspaceResourceSharing
-from netra_backend.tests.integration.critical_paths.test_concurrent_editing_performance import TestConcurrentEditingPerformance
-from netra_backend.tests.integration.critical_paths.test_team_isolation_security import TestTeamIsolationSecurity
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.test_team_creation_permissions import (
+    TestTeamCreationPermissions,
+)
+from netra_backend.tests.integration.critical_paths.test_team_isolation_security import (
+    TestTeamIsolationSecurity,
+)
+from netra_backend.tests.integration.critical_paths.test_user_invitation_flow import (
+    TestUserInvitationFlow,
+)
+from netra_backend.tests.integration.critical_paths.test_workspace_resource_sharing import (
+    TestWorkspaceResourceSharing,
+)
 
 # Add project root to path
 

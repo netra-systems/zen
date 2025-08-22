@@ -2,14 +2,16 @@
 Session Manager - Centralized session handling with Redis
 Maintains 450-line limit with focused session management
 """
-import os
-import json
-import uuid
-import redis
 import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Any
+import json
 import logging
+import os
+import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
+
+import redis
+
 from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)

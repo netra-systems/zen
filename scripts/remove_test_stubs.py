@@ -11,15 +11,15 @@ Usage:
     python scripts/remove_test_stubs.py --report        # Generate detailed report
 """
 
-import os
-import re
+import argparse
 import csv
 import json
-import argparse
-from pathlib import Path
-from typing import Dict, List, Tuple, Any, Optional
-from dataclasses import dataclass, asdict
+import os
+import re
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass

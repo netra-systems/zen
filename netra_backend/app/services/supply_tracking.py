@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enterprise feature for supply tracking
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 async def get_performance_data(request_data: Dict[str, Any]) -> Dict[str, Any]:

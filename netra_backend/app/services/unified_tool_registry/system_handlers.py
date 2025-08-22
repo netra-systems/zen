@@ -3,7 +3,8 @@ System Management Tool Handlers
 
 Contains handlers for system configuration, user administration, and logging tools.
 """
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
+
 from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
@@ -15,7 +16,9 @@ class SystemManagementHandlers:
     
     async def _system_configurator_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for system_configurator tool"""
-        from netra_backend.app.services.configuration_service import ConfigurationService
+        from netra_backend.app.services.configuration_service import (
+            ConfigurationService,
+        )
         config_service = ConfigurationService(self.db)
         action = arguments['action']
         return await self._execute_configuration_action(config_service, action, arguments, user)

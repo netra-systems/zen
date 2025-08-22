@@ -161,8 +161,8 @@ describe('ChatHistorySection - Interactions', () => {
     });
     
     // Configure service mocks with default behavior
-    (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
-    (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+    jest.mocked(ThreadService.listThreads).mockResolvedValue(mockThreads);
+    jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
   });
 
   describe('Search functionality', () => {
@@ -206,7 +206,7 @@ describe('ChatHistorySection - Interactions', () => {
     it('should delete thread when confirmed', async () => {
       const originalConfirm = window.confirm;
       window.confirm = jest.fn(() => true);
-      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
+      jest.mocked(ThreadService.deleteThread).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -223,7 +223,7 @@ describe('ChatHistorySection - Interactions', () => {
     });
 
     it('should handle delete error gracefully', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Delete failed'));
+      jest.mocked(ThreadService.deleteThread).mockRejectedValue(new Error('Delete failed'));
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       render(<ChatHistorySection />);

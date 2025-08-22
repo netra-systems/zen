@@ -4,17 +4,22 @@ Implements efficient compression for large WebSocket payloads
 with multiple compression algorithms and automatic threshold detection.
 """
 
-import json
 import base64
-from typing import Dict, Any, Optional, Tuple, Union
+import json
+from typing import Any, Dict, Optional, Tuple, Union
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.compression_config import (
-    CompressionConfig, CompressionResult, CompressionAlgorithm, CompressionStatsManager
-)
 from netra_backend.app.compression_algorithms import (
-    CompressionAlgorithmHandler, CompressionAlgorithmSelector, CompressionBenchmark
+    CompressionAlgorithmHandler,
+    CompressionAlgorithmSelector,
+    CompressionBenchmark,
 )
+from netra_backend.app.compression_config import (
+    CompressionAlgorithm,
+    CompressionConfig,
+    CompressionResult,
+    CompressionStatsManager,
+)
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -183,11 +188,16 @@ class WebSocketCompressor:
 
 
 # Re-export classes for backward compatibility
-from netra_backend.app.compression_config import (
-    CompressionAlgorithm, CompressionConfig, CompressionResult, CompressionStatsManager
-)
 from netra_backend.app.compression_algorithms import (
-    CompressionAlgorithmHandler, CompressionAlgorithmSelector, CompressionBenchmark
+    CompressionAlgorithmHandler,
+    CompressionAlgorithmSelector,
+    CompressionBenchmark,
+)
+from netra_backend.app.compression_config import (
+    CompressionAlgorithm,
+    CompressionConfig,
+    CompressionResult,
+    CompressionStatsManager,
 )
 
 __all__ = [

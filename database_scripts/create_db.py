@@ -1,5 +1,6 @@
-import psycopg2
 import os
+
+import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 # SECURITY: Get password from environment variable - never hardcode passwords

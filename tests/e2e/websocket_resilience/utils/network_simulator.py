@@ -11,10 +11,13 @@ Business Value Justification (BVJ):
 import asyncio
 import random
 import time
-from typing import Optional, Dict, Any
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import NetworkCondition
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+    NetworkCondition,
+)
+
 
 class NetworkSimulator:
     """Simulates various network conditions for testing."""

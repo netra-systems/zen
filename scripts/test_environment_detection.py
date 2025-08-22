@@ -19,7 +19,10 @@ def test_auth_client_environment_detection():
     os.environ.pop("K_REVISION", None)
     os.environ.pop("TESTING", None)
     
-    from netra_backend.app.clients.auth_client_config import EnvironmentDetector, Environment
+    from netra_backend.app.clients.auth_client_config import (
+        Environment,
+        EnvironmentDetector,
+    )
     
     detector = EnvironmentDetector()
     env = detector.detect_environment()
@@ -125,7 +128,11 @@ def test_oauth_config_fallback():
     print("\n=== Testing OAuth Config Fallback ===")
     
     os.environ.pop("ENVIRONMENT", None)
-    from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator, EnvironmentDetector, Environment
+    from netra_backend.app.clients.auth_client_config import (
+        Environment,
+        EnvironmentDetector,
+        OAuthConfigGenerator,
+    )
     
     detector = EnvironmentDetector()
     env = detector.detect_environment()

@@ -5,11 +5,12 @@ Maximum 300 lines, functions ≤8 lines
 """
 
 import asyncio
-import pytest
 import time
 from contextlib import asynccontextmanager
-from typing import List, Dict, Optional, AsyncGenerator
+from typing import AsyncGenerator, Dict, List, Optional
 from unittest.mock import AsyncMock
+
+import pytest
 
 
 class AsyncWebSocketTestManager:

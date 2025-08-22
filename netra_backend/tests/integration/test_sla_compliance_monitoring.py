@@ -14,20 +14,31 @@ Tests comprehensive SLA compliance monitoring covering:
 Architecture: ≤300 lines total, ≤8 line functions for compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import statistics
-from typing import Dict, Any, List
-from unittest.mock import AsyncMock
-import pytest
 from datetime import datetime, timezone
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock
+
+import pytest
+from logging_config import central_logger
 
 # Add project root to path
-
-from netra_backend.tests.integration.helpers.critical_integration_helpers import MonitoringTestHelpers
-from logging_config import central_logger
+from tests.integration.helpers.user_flow_helpers import (
+    MonitoringTestHelpers,
+)
 
 # Add project root to path
 

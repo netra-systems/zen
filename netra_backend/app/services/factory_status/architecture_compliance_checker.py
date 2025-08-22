@@ -6,9 +6,12 @@ Follows 450-line limit with 25-line function limit.
 
 import re
 import subprocess
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from netra_backend.app.services.factory_status.quality_models import ArchitectureCompliance, ComplianceStatus
+from netra_backend.app.services.factory_status.quality_models import (
+    ArchitectureCompliance,
+    ComplianceStatus,
+)
 
 
 class ArchitectureComplianceChecker:

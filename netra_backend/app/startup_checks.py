@@ -8,9 +8,9 @@ modules under 300 lines each.
 
 # Import from modular implementation
 from netra_backend.app.startup_checks import (
-    StartupCheckResult,
     StartupChecker,
-    run_startup_checks
+    StartupCheckResult,
+    run_startup_checks,
 )
 
 # Maintain backward compatibility - all legacy code removed

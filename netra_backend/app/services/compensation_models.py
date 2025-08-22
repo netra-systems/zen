@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from netra_backend.app.core.error_recovery import RecoveryContext
 

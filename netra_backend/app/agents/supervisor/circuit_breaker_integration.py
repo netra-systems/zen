@@ -4,14 +4,14 @@ Integrates circuit breaker patterns into supervisor workflow.
 Business Value: Prevents cascade failures and ensures system stability.
 """
 
-from typing import Dict, Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict
 
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 logger = central_logger.get_logger(__name__)
 

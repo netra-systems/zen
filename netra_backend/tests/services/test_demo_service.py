@@ -1,17 +1,27 @@
 """Tests for demo service functionality."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta, UTC
 import json
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import numpy as np
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.demo_service import DemoService
+
 
 # Add project root to path
 class TestDemoService:
@@ -397,7 +407,9 @@ class TestDemoService:
     async def test_generate_demo_response(self, demo_service):
         """Test demo response generation."""
         # Import the function directly for testing
-        from netra_backend.app.services.demo.response_generator import generate_demo_response
+        from netra_backend.app.services.demo.response_generator import (
+            generate_demo_response,
+        )
         
         # Execute
         response = generate_demo_response(

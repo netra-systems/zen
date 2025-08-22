@@ -3,8 +3,12 @@
 This module handles tool recommendations based on category and extracted entities.
 """
 
-from typing import List, Dict
-from netra_backend.app.agents.triage_sub_agent.models import ToolRecommendation, ExtractedEntities
+from typing import Dict, List
+
+from netra_backend.app.agents.triage_sub_agent.models import (
+    ExtractedEntities,
+    ToolRecommendation,
+)
 
 
 class ToolRecommender:

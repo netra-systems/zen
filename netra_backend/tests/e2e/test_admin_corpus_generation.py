@@ -6,29 +6,43 @@ Follows 450-line limit and 25-line function requirements.
 Targets 95% coverage of corpus generation functionality.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import pytest_asyncio
 import asyncio
 from typing import Dict
 from unittest.mock import AsyncMock
 
-# Add project root to path
+import pytest
+import pytest_asyncio
 
-from netra_backend.app.schemas.admin_corpus_messages import (
-
-# Add project root to path
-    CorpusDiscoveryRequest, CorpusDiscoveryResponse,
-    CorpusGenerationRequest, CorpusGenerationResponse, 
-    ConfigurationSuggestionRequest, ConfigurationSuggestionResponse,
-    CorpusAutoCompleteRequest, CorpusAutoCompleteResponse,
-    CorpusOperationStatus, CorpusErrorMessage
-)
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+
+# Add project root to path
+from netra_backend.app.schemas.admin_corpus_messages import (
+    ConfigurationSuggestionRequest,
+    ConfigurationSuggestionResponse,
+    CorpusAutoCompleteRequest,
+    CorpusAutoCompleteResponse,
+    # Add project root to path
+    CorpusDiscoveryRequest,
+    CorpusDiscoveryResponse,
+    CorpusErrorMessage,
+    CorpusGenerationRequest,
+    CorpusGenerationResponse,
+    CorpusOperationStatus,
+)
 
 
 @pytest.fixture

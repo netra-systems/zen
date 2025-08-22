@@ -13,18 +13,21 @@ Each function ≤8 lines, file ≤300 lines.
 
 import os
 import threading
-from typing import Optional, Dict, Any, Tuple
-from functools import lru_cache
 from datetime import datetime
+from functools import lru_cache
+from typing import Any, Dict, Optional, Tuple
+
 from pydantic import ValidationError
 
-from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.core.exceptions_config import ConfigurationError
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.Config import AppConfig
 
 # Import actual configuration managers
 try:
-    from netra_backend.app.core.configuration.services import ServiceConfigManager as ActualServiceConfigManager
+    from netra_backend.app.core.configuration.services import (
+        ServiceConfigManager as ActualServiceConfigManager,
+    )
 except ImportError:
     # Fallback placeholder if services module not available
     class ActualServiceConfigManager:
@@ -42,7 +45,9 @@ except ImportError:
             return 0
 
 try:
-    from netra_backend.app.core.configuration.database import DatabaseConfigManager as ActualDatabaseConfigManager
+    from netra_backend.app.core.configuration.database import (
+        DatabaseConfigManager as ActualDatabaseConfigManager,
+    )
 except ImportError:
     # Fallback placeholder if database module not available
     class ActualDatabaseConfigManager:
@@ -60,7 +65,9 @@ except ImportError:
             pass
 
 try:
-    from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager as ActualSecretManager
+    from netra_backend.app.core.configuration.unified_secrets import (
+        UnifiedSecretManager as ActualSecretManager,
+    )
 except ImportError:
     # Fallback placeholder if unified_secrets module not available
     class ActualSecretManager:
@@ -193,8 +200,10 @@ class UnifiedConfigManager:
     def _get_config_class_for_environment(self) -> type:
         """Get configuration class for current environment."""
         from netra_backend.app.schemas.Config import (
-            DevelopmentConfig, StagingConfig, 
-            ProductionConfig, NetraTestingConfig
+            DevelopmentConfig,
+            NetraTestingConfig,
+            ProductionConfig,
+            StagingConfig,
         )
         return {
             "development": DevelopmentConfig,

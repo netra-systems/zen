@@ -4,8 +4,9 @@ Quota Enforcer for Agent Isolation Testing
 Enforces resource quotas for tenant agents.
 """
 
-import time
 import logging
+import time
+
 import psutil
 
 from tests.e2e.resource_isolation.infrastructure.data_models import ResourceViolation

@@ -3,20 +3,30 @@ Security and validation tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.tests.supply_researcher_fixtures import (
-
-# Add project root to path
-    agent, malicious_inputs, assert_malicious_input_safe
+    # Add project root to path
+    agent,
+    assert_malicious_input_safe,
+    malicious_inputs,
 )
 
 

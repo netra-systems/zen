@@ -11,25 +11,34 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents churn from performance issues (+$25K MRR)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import statistics
-import uuid
 import json
-from typing import Dict, List, Tuple, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import statistics
+import time
+import uuid
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.postgres import Database as PostgresDatabase
-from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
 from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
+from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
 
 # Add project root to path
 

@@ -10,33 +10,41 @@ Critical Path: User authentication -> Token generation -> Authorization checks -
 Coverage: OAuth/JWT flows, permission validation, session persistence, token refresh
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import jwt
-
+import pytest
 from auth_integration import (
-
-# Add project root to path
-
-    AuthServiceProtocol, 
-    SessionManagerProtocol, 
-    PermissionManagerProtocol,
-    get_current_user,
-    create_access_token,
-    validate_token_jwt,
+    # Add project root to path
+    AuthServiceProtocol,
     LoginRequest,
     LoginResponse,
-    TokenData
+    PermissionManagerProtocol,
+    SessionManagerProtocol,
+    TokenData,
+    create_access_token,
+    get_current_user,
+    validate_token_jwt,
 )
+
 from netra_backend.app.services.user_service import user_service as UserService
 
 logger = logging.getLogger(__name__)

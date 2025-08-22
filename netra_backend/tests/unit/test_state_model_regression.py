@@ -3,19 +3,29 @@ Regression tests for state model validation errors.
 Ensures all state models can be instantiated with minimal required data.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from typing import Any, Dict
+
 import pytest
-from typing import Dict, Any
 from pydantic import ValidationError
 
 # Add project root to path
-
-
 # Import both versions of DeepAgentState to test consistency
 from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentState
-from netra_backend.app.schemas.agent_models import DeepAgentState as SchemaDeepAgentState
+from netra_backend.app.schemas.agent_models import (
+    DeepAgentState as SchemaDeepAgentState,
+)
 from netra_backend.app.websocket.connection_executor import ConnectionOperationBuilder
 
 
@@ -96,8 +106,9 @@ class TestAllStateModelsInit:
         
     def test_langchain_agent_state_init(self):
         """Test LangChainAgentState initialization."""
-        from netra_backend.app.schemas.Agent import LangChainAgentState
         from langchain_core.messages import HumanMessage
+
+        from netra_backend.app.schemas.Agent import LangChainAgentState
         
         # Test with required fields
         state = LangChainAgentState(
@@ -108,8 +119,9 @@ class TestAllStateModelsInit:
         
     def test_sub_agent_state_init(self):
         """Test SubAgentState initialization."""
-        from netra_backend.app.schemas.Agent import SubAgentState
         from langchain_core.messages import HumanMessage
+
+        from netra_backend.app.schemas.Agent import SubAgentState
         
         # Test with required fields
         state = SubAgentState(
@@ -120,8 +132,9 @@ class TestAllStateModelsInit:
         
     def test_agent_state_from_apex_optimizer(self):
         """Test AgentState from apex_optimizer."""
-        from netra_backend.app.services.apex_optimizer_agent.models import AgentState
         from langchain_core.messages import HumanMessage
+
+        from netra_backend.app.services.apex_optimizer_agent.models import AgentState
         
         # Test with required fields
         state = AgentState(

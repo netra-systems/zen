@@ -6,7 +6,8 @@ Each function is ≤8 lines with strong typing and single responsibility.
 """
 
 import time
-from typing import Dict, Any, Optional, TypeVar, Type
+from typing import Any, Dict, Optional, Type, TypeVar
+
 from pydantic import BaseModel
 
 T = TypeVar('T', bound=BaseModel)

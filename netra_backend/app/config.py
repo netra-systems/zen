@@ -23,16 +23,20 @@ Eliminates 110+ file duplications and ensures Enterprise reliability.
 
 # NEW: Import unified configuration system
 from netra_backend.app.core.configuration.base import (
-    get_unified_config, 
+    config_manager as unified_config_manager,
+)
+from netra_backend.app.core.configuration.base import (
+    get_unified_config,
     reload_unified_config,
     validate_config_integrity,
-    config_manager as unified_config_manager
 )
 from netra_backend.app.schemas.Config import AppConfig
 
 # DEPRECATED: Old config manager - kept for backward compatibility only
 try:
-    from netra_backend.app.core.configuration.manager import ConfigManager as LegacyConfigManager
+    from netra_backend.app.core.configuration.manager import (
+        ConfigManager as LegacyConfigManager,
+    )
     _legacy_config_manager = LegacyConfigManager()
 except ImportError:
     _legacy_config_manager = None

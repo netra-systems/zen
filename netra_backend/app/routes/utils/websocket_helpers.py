@@ -3,14 +3,20 @@
 import asyncio
 import json
 import time
-from typing import Dict, Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
+
 from fastapi import WebSocket, WebSocketDisconnect
-from sqlalchemy import select, func
-from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
+from sqlalchemy import func, select
+
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.configuration import unified_config_manager
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.routes.utils.validators import (
+    validate_token_payload,
+    validate_user_active,
+    validate_user_id_in_payload,
+)
 
 logger = central_logger.get_logger(__name__)
 

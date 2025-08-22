@@ -17,17 +17,23 @@ Provides standardized execution patterns with reliability management.
 Business Value: Standardizes tool execution across all admin operations.
 Target Segments: Growth & Enterprise (improved admin reliability).
 """
-from typing import Dict, Any, Optional, Callable
+from typing import Any, Callable, Dict, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.interface import (
+    AgentExecutionMixin,
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+)
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, AgentExecutionMixin
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 
 logger = central_logger
 
@@ -94,13 +100,17 @@ class CorpusManagerHandler(ModernToolHandler):
     async def _handle_corpus_list(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle corpus listing"""
         from netra_backend.app.core.configuration.services import corpus_service
+
         from .tool_handler_helpers import create_corpus_list_response
         corpora = await corpus_service.list_corpora(db)
         return create_corpus_list_response(corpora)
     
     async def _handle_corpus_validate(self, **kwargs) -> Dict[str, Any]:
         """Handle corpus validation"""
-        from .tool_handler_helpers import check_corpus_id_required, create_corpus_validation_response
+        from .tool_handler_helpers import (
+            check_corpus_id_required,
+            create_corpus_validation_response,
+        )
         corpus_id = kwargs.get('corpus_id')
         check_corpus_id_required(corpus_id)
         return create_corpus_validation_response(corpus_id)
@@ -146,7 +156,10 @@ class SyntheticGeneratorHandler(ModernToolHandler):
     
     async def _handle_synthetic_list_presets(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle listing synthetic data presets"""
-        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import (
+            SyntheticDataService,
+        )
+
         from .tool_handler_helpers import create_presets_list_response
         synthetic_service = SyntheticDataService(db)
         presets = await synthetic_service.list_presets()
@@ -223,7 +236,10 @@ class SystemConfiguratorHandler(ModernToolHandler):
     
     async def _handle_system_update_setting(self, **kwargs) -> Dict[str, Any]:
         """Handle system setting update"""
-        from .tool_handler_helpers import check_setting_name_required, create_setting_update_result
+        from .tool_handler_helpers import (
+            check_setting_name_required,
+            create_setting_update_result,
+        )
         setting_name = kwargs.get('setting_name')
         value = kwargs.get('value')
         check_setting_name_required(setting_name)
@@ -276,18 +292,18 @@ def create_modern_tool_handler(tool_name: str, websocket_manager=None) -> Modern
 
 # Import essential helper functions from other modules
 from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_operations import (
-    extract_corpus_create_params,
-    extract_synthetic_params,
-    _execute_corpus_creation,
     _create_corpus_response,
-    _create_synthetic_service,
+    _create_log_analysis_response,
+    _create_permission_response,
     _create_synthetic_response,
-    _prepare_user_create_params,
-    _execute_user_creation,
+    _create_synthetic_service,
     _create_user_response,
+    _execute_corpus_creation,
+    _execute_debug_analysis,
+    _execute_user_creation,
     _extract_permission_params,
     _grant_user_permission,
-    _create_permission_response,
-    _execute_debug_analysis,
-    _create_log_analysis_response
+    _prepare_user_create_params,
+    extract_corpus_create_params,
+    extract_synthetic_params,
 )

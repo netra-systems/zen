@@ -3,19 +3,29 @@ Integrated Security Tests
 Tests integrated security across all components
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-# Add project root to path
-
-from netra_backend.app.middleware.security_middleware import SecurityMiddleware
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
+
+# Add project root to path
+from netra_backend.app.middleware.security_middleware import SecurityMiddleware
 
 # Add project root to path
 

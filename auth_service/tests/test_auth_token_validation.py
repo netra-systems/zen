@@ -19,11 +19,12 @@ Test Coverage:
 """
 
 import os
-import unittest
-import jwt
-from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
 import time
+import unittest
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, patch
+
+import jwt
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
@@ -261,8 +262,8 @@ class TestJWTTokenValidation(unittest.TestCase):
     
     def test_validate_token_concurrent_validation(self):
         """Test concurrent token validation for race conditions"""
-        import threading
         import queue
+        import threading
         
         # Create valid token
         token = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)

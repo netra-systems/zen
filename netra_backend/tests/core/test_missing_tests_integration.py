@@ -13,11 +13,21 @@ Tests 21-30 from original missing tests covering:
 - Threads route conversation management
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 # Add project root to path
@@ -29,7 +39,7 @@ class TestAdminRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_admin_endpoint_requires_auth(self, client):
@@ -51,7 +61,7 @@ class TestAgentRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_agent_message_processing(self, client):
@@ -76,7 +86,7 @@ class TestConfigRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_config_update_validation(self, client):
@@ -99,7 +109,7 @@ class TestCorpusRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_corpus_create_operation(self, client):
@@ -126,7 +136,7 @@ class TestLLMCacheRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_cache_invalidation(self, client):
@@ -143,7 +153,7 @@ class TestMCPRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_mcp_message_routing(self, client):
@@ -161,7 +171,7 @@ class TestQualityRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_quality_metrics_retrieval(self, client):
@@ -179,7 +189,7 @@ class TestSupplyRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_supply_research_endpoint(self, client):
@@ -197,7 +207,7 @@ class TestSyntheticDataRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_synthetic_data_generation(self, client):
@@ -214,7 +224,7 @@ class TestThreadsRouteIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_thread_pagination(self, client):
@@ -232,7 +242,7 @@ class TestCrossServiceIntegration:
     
     @pytest.fixture
     def client(self):
-        from netra_backend.app.routes.mcp.main import app
+        from netra_backend.app.main import app
         return TestClient(app)
     
     def test_agent_corpus_integration(self, client):

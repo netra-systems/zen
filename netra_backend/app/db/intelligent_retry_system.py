@@ -17,13 +17,13 @@ Business Value Justification (BVJ):
 import asyncio
 import random
 import time
-from typing import Dict, Any, Optional, Callable, TypeVar, Tuple, Union, Type, List
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from enum import Enum
-from contextlib import asynccontextmanager
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -383,8 +383,8 @@ def create_postgres_retry_policy() -> RetryPolicy:
     
     # PostgreSQL specific error classifications
     try:
-        import sqlalchemy.exc
         import psycopg2
+        import sqlalchemy.exc
         
         policy.error_classifications.update({
             sqlalchemy.exc.DisconnectionError: ErrorSeverity.TRANSIENT,

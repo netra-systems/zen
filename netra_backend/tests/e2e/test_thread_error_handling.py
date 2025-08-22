@@ -2,26 +2,39 @@
 Tests comprehensive error scenarios and recovery mechanisms for thread operations.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import uuid
-from typing import Dict, Any, List, Optional, Callable
+from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
+
+import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.core.exceptions_database import DatabaseError, RecordNotFoundError
 from netra_backend.app.core.exceptions_agent import AgentError
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.agent_state import StateRecoveryRequest, RecoveryType
-from netra_backend.app.db.models_postgres import Thread, Message, Run
+from netra_backend.app.core.exceptions_database import (
+    DatabaseError,
+    RecordNotFoundError,
+)
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import RecoveryType, StateRecoveryRequest
+from netra_backend.app.services.state_persistence import state_persistence_service
+
+# Add project root to path
+from netra_backend.app.services.thread_service import ThreadService
 
 # Add project root to path
 
@@ -128,7 +141,10 @@ class ThreadStateErrorTests:
             
             # Attempt to save state
             try:
-                from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+                from netra_backend.app.schemas.agent_state import (
+                    CheckpointType,
+                    StatePersistenceRequest,
+                )
                 request = StatePersistenceRequest(
                     run_id=f"run_{thread.id}",
                     thread_id=thread.id,

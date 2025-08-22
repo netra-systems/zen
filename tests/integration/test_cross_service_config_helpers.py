@@ -1,19 +1,22 @@
 """Utilities Tests - Split from test_cross_service_config.py"""
 
-import pytest
 import asyncio
-import tempfile
 import json
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any, Generator
+from typing import Any, Dict, Generator
+from unittest.mock import AsyncMock, Mock, patch
+
 import httpx
-from dev_launcher.service_discovery import ServiceDiscovery
-from dev_launcher.health_monitor import HealthMonitor
-from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.service_discovery import ServiceDiscovery
+from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
+
 
 def cross_service_config():
     """Provide cross-service test configuration."""

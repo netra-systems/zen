@@ -6,7 +6,7 @@ Generates specific recommendations based on grouped insights analysis.
 Business Value: Actionable recommendations for customer optimization strategies.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class InsightsRecommendationsGenerator:

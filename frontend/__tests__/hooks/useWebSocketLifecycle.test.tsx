@@ -87,17 +87,17 @@ describe('useWebSocket Hook Lifecycle', () => {
     jest.useRealTimers();
     
     // Reset mock WebSocket service completely
-    (mockWebSocketService.connect as jest.Mock).mockClear();
-    (mockWebSocketService.disconnect as jest.Mock).mockClear();
-    (mockWebSocketService.sendMessage as jest.Mock).mockClear();
-    (mockWebSocketService.send as jest.Mock).mockClear();
+    jest.mocked(mockWebSocketService.connect).mockClear();
+    jest.mocked(mockWebSocketService.disconnect).mockClear();
+    jest.mocked(mockWebSocketService.sendMessage).mockClear();
+    jest.mocked(mockWebSocketService.send).mockClear();
     mockWebSocketService.onStatusChange = null;
     mockWebSocketService.onMessage = null;
     mockWebSocketService.status = 'CLOSED';
     mockWebSocketService.state = 'disconnected';
     
     // Proper connect implementation that simulates the real behavior
-    (mockWebSocketService.connect as jest.Mock).mockImplementation((url) => {
+    jest.mocked(mockWebSocketService.connect).mockImplementation((url) => {
       // Simulate successful connection setup
       mockWebSocketService.status = 'CONNECTING';
       if (mockWebSocketService.onStatusChange) {

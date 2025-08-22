@@ -5,26 +5,47 @@ Handles file scanning, pattern detection, and data gathering.
 Complies with 450-line and 25-line function limits.
 """
 
+import glob
 import os
 import re
-import glob
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Optional
+
 try:
     from .status_types import (
-        PatternMatch, ComponentHealthData, WebSocketStatus, ApiSyncStatus,
-        OAuthStatus, IntegrationStatus, SupervisorStatus, SubAgentInfo,
-        ApexOptimizerStatus, AgentSystemStatus, TestCoverageInfo,
-        TestCoverageStatus, TestResults, StatusConfig
+        AgentSystemStatus,
+        ApexOptimizerStatus,
+        ApiSyncStatus,
+        ComponentHealthData,
+        IntegrationStatus,
+        OAuthStatus,
+        PatternMatch,
+        StatusConfig,
+        SubAgentInfo,
+        SupervisorStatus,
+        TestCoverageInfo,
+        TestCoverageStatus,
+        TestResults,
+        WebSocketStatus,
     )
 except ImportError:
     from status_types import (
-        PatternMatch, ComponentHealthData, WebSocketStatus, ApiSyncStatus,
-        OAuthStatus, IntegrationStatus, SupervisorStatus, SubAgentInfo,
-        ApexOptimizerStatus, AgentSystemStatus, TestCoverageInfo,
-        TestCoverageStatus, TestResults, StatusConfig
+        AgentSystemStatus,
+        ApexOptimizerStatus,
+        ApiSyncStatus,
+        ComponentHealthData,
+        IntegrationStatus,
+        OAuthStatus,
+        PatternMatch,
+        StatusConfig,
+        SubAgentInfo,
+        SupervisorStatus,
+        TestCoverageInfo,
+        TestCoverageStatus,
+        TestResults,
+        WebSocketStatus,
     )
 
 

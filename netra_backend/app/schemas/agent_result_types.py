@@ -1,7 +1,8 @@
 """Agent result types module to avoid circular imports."""
 
-from typing import Dict, List, Optional, Union
 from datetime import datetime
+from typing import Dict, List, Optional, Union
+
 from pydantic import BaseModel, Field
 
 # Define result types without circular dependencies

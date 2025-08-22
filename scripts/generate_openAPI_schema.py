@@ -9,8 +9,9 @@ os.environ["GENERATE_SCHEMA_MODE"] = "1"
 # Now that the environment is set up for schema generation, we can import
 # the FastAPI app instance. The app's configuration will use dummy values
 # instead of trying to connect to a real database.
-from netra_backend.app.main import app
 from fastapi.openapi.utils import get_openapi
+
+from netra_backend.app.main import app
 
 
 def generate_openapi_schema():

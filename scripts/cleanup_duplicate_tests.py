@@ -16,13 +16,13 @@ Usage:
     python scripts/cleanup_duplicate_tests.py [--dry-run] [--verbose]
 """
 
+import argparse
 import ast
+import logging
 import os
 import re
-import argparse
 from pathlib import Path
-from typing import List, Dict, Set, Tuple
-import logging
+from typing import Dict, List, Set, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')

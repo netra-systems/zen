@@ -4,13 +4,18 @@ Validates type safety, data flow, referential integrity, and state consistency.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from typing import Dict, List, Any, Optional, Union, Set
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional, Set, Union
+
 from pydantic import BaseModel, Field
-from datetime import datetime, UTC
+
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
+from netra_backend.app.schemas.shared_types import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
+from tests.e2e.state_validation_utils import StateIntegrityChecker
 
 
 class TypeSafetyResult(BaseModel):

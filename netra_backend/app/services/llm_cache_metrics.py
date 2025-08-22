@@ -5,9 +5,10 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 
 import json
-from typing import Dict, Any, Tuple, List
-from netra_backend.app.redis_manager import redis_manager
+from typing import Any, Dict, List, Tuple
+
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
 

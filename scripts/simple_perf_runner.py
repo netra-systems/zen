@@ -4,11 +4,12 @@ Simple Performance Test Runner
 Runs performance tests without loading the full application stack to avoid import issues.
 """
 
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 def _setup_environment():
     """Setup Python paths and environment variables"""

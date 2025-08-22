@@ -1,12 +1,14 @@
 """Database migration utilities split from main.py for modularity."""
 
-import alembic.config
-import alembic.script
-from sqlalchemy import create_engine
-from alembic.runtime.migration import MigrationContext
+import logging
 from pathlib import Path
 from typing import Optional, Tuple
-import logging
+
+from sqlalchemy import create_engine
+
+import alembic.config
+import alembic.script
+from alembic.runtime.migration import MigrationContext
 
 
 def _get_alembic_ini_path() -> str:

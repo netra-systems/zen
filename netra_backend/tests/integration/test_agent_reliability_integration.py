@@ -1,23 +1,34 @@
 """Integration tests for agent reliability across system components."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
-
 # Import components for integration testing
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
-from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix, safe_json_parse
+from netra_backend.app.core.json_parsing_utils import (
+    comprehensive_json_fix,
+    safe_json_parse,
+)
 
 
 class MockReliableAgent(AgentReliabilityMixin):

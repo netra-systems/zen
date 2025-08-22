@@ -5,15 +5,22 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.service_locator_core import ServiceLocator
-from netra_backend.app.services.service_interfaces import (
-    IAgentService, IThreadService, IMessageHandlerService,
-    IMCPService, IWebSocketService, IMCPClientService
-)
 from netra_backend.app.services.service_factory import (
-    _create_agent_service, _create_message_handler_service,
-    _create_mcp_service, _create_websocket_service, _create_mcp_client_service
+    _create_agent_service,
+    _create_mcp_client_service,
+    _create_mcp_service,
+    _create_message_handler_service,
+    _create_websocket_service,
 )
+from netra_backend.app.services.service_interfaces import (
+    IAgentService,
+    IMCPClientService,
+    IMCPService,
+    IMessageHandlerService,
+    IThreadService,
+    IWebSocketService,
+)
+from netra_backend.app.services.service_locator_core import ServiceLocator
 
 logger = central_logger.get_logger(__name__)
 

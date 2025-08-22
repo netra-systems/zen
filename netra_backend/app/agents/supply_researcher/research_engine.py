@@ -5,7 +5,8 @@ Handles Google Deep Research API integration and query generation.
 Maintains 25-line function limit and focused responsibility.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 
 

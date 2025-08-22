@@ -1,8 +1,9 @@
 """Shared test utilities for ExternalAPIClient tests."""
 
 import json
-from unittest.mock import Mock, AsyncMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock
+
 from aiohttp import ClientResponse
 
 

@@ -5,9 +5,10 @@ ULTRA DEEP THINK: Module-based architecture - Metrics tracking extracted for 450
 """
 
 import json
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
 from typing import List
+
 
 class RealServiceTestMetrics:
     """Tracks metrics for real service tests"""

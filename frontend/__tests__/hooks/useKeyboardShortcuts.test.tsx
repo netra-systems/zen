@@ -30,7 +30,7 @@ describe('useKeyboardShortcuts', () => {
       isProcessing: false,
       setProcessing: jest.fn(),
     };
-    (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
+    jest.mocked(useChatStore).mockReturnValue(mockChatStore);
 
     mockThreadStore = {
       threads: [
@@ -41,7 +41,7 @@ describe('useKeyboardShortcuts', () => {
       currentThreadId: '2',
       setCurrentThread: jest.fn(),
     };
-    (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
+    jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
 
     // Mock DOM elements
     document.querySelector = jest.fn((selector) => {

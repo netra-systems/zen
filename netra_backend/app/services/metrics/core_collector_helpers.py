@@ -4,13 +4,16 @@ Contains utility functions for metrics calculation and data processing.
 """
 
 import time
-from datetime import datetime, UTC, timedelta
-from typing import Dict, List, Optional, Any
-from collections import deque
 import uuid
+from collections import deque
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.schemas.Metrics import (
-    CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
+    CorpusMetric,
+    MetricType,
+    OperationMetrics,
+    TimeSeriesPoint,
 )
 
 

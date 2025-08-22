@@ -3,28 +3,38 @@ ClickHouse Workload Events Tests
 Tests for workload_events table operations and complex queries
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import uuid
 import json
 import random
-from datetime import datetime, timedelta, UTC
+import uuid
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from logging_config import central_logger as logger
 
 # Add project root to path
-
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import (
-
-# Add project root to path
+    create_workload_events_table_if_missing,
+    # Add project root to path
     initialize_clickhouse_tables,
     verify_workload_events_table,
-    create_workload_events_table_if_missing
 )
-from logging_config import central_logger as logger
-from netra_backend.tests.test_clickhouse_permissions import _check_table_insert_permission
+from netra_backend.tests.test_clickhouse_permissions import (
+    _check_table_insert_permission,
+)
 
 
 async def _ensure_workload_table():

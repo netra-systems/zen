@@ -1,6 +1,6 @@
 """Netra MCP Server Prompts Registration"""
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class NetraMCPPrompts:

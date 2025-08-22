@@ -5,8 +5,8 @@ Data models and enums for supply research operations.
 Maintains type safety under 450-line limit.
 """
 
-from typing import Dict, List, Any
 from enum import Enum
+from typing import Any, Dict, List
 
 
 class ResearchType(Enum):

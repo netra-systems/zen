@@ -2,10 +2,11 @@
 Basic test setup verification
 Ensures test environment is working correctly
 """
-import pytest
 import os
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add auth_core to path for imports
 auth_service_dir = Path(__file__).parent.parent
@@ -20,8 +21,8 @@ def test_environment_setup():
 def test_imports_work():
     """Test that auth_core modules can be imported"""
     try:
-        from auth_service.auth_core.models.auth_models import AuthProvider, LoginRequest
         from auth_service.auth_core.config import AuthConfig
+        from auth_service.auth_core.models.auth_models import AuthProvider, LoginRequest
         assert True
     except ImportError as e:
         pytest.fail(f"Failed to import auth_core modules: {e}")

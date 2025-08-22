@@ -2,12 +2,13 @@
 Checks the current state of WebSocket communication between backend and frontend
 """
 
+import json
 import os
 import re
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
+
 
 def find_backend_events() -> Dict[str, List[str]]:
     """Find all WebSocket events sent by the backend"""

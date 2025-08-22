@@ -12,10 +12,11 @@ import asyncio
 import json
 import logging
 import uuid
-import websockets
-from datetime import datetime, timezone
-from typing import Dict, Set, Optional, Any
 from collections import deque
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional, Set
+
+import websockets
 
 logger = logging.getLogger(__name__)
 

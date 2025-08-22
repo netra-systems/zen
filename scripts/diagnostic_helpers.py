@@ -3,16 +3,22 @@ Diagnostic Helpers Module
 Support functions for startup diagnostics - separated to maintain 450-line limit
 """
 
-import os
 import asyncio
-import psutil
+import os
 import socket
 from pathlib import Path
 from typing import List, Optional
 
+import psutil
+
 from netra_backend.app.schemas.diagnostic_types import (
-    DiagnosticError, SystemState, DiagnosticConfiguration,
-    DiagnosticSeverity, ServiceType, StartupPhase, FixResult
+    DiagnosticConfiguration,
+    DiagnosticError,
+    DiagnosticSeverity,
+    FixResult,
+    ServiceType,
+    StartupPhase,
+    SystemState,
 )
 
 

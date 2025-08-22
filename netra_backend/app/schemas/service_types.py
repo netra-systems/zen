@@ -2,12 +2,13 @@
 Strong type definitions for service layer operations following Netra conventions.
 """
 
-from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic, Protocol
-from datetime import datetime, UTC
-from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
 import uuid
 from abc import ABC, abstractmethod
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, Dict, Generic, List, Literal, Optional, Protocol, TypeVar, Union
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ServiceStatus(str, Enum):

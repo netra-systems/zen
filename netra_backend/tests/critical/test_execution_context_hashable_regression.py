@@ -6,22 +6,32 @@ as hashable types (dict keys, set members, etc).
 Business Value: Prevents runtime crashes from type errors.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from dataclasses import dataclass, asdict
-from typing import Dict, Any
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from unittest.mock import Mock, MagicMock
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock
+
+import pytest
+
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 
 # Add project root to path
-
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 # Add project root to path
 
@@ -168,7 +178,9 @@ class TestExecutionContextHashableRegression:
     def test_mcp_context_manager_storage(self):
         """Test MCP context manager doesn't use ExecutionContext as key."""
         try:
-            from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
+            from netra_backend.app.agents.mcp_integration.context_manager import (
+                MCPContextManager,
+            )
             
             # Mock dependencies
             mock_service = Mock()

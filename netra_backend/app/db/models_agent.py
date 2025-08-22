@@ -5,15 +5,25 @@ Focused module adhering to modular architecture and single responsibility.
 """
 
 import os
-from sqlalchemy import (
-    Column, Integer, String, DateTime, Boolean, ForeignKey, JSON, 
-    ARRAY, Text
-)
-from sqlalchemy.orm import relationship
-from netra_backend.app.db.base import Base
 import uuid
 from datetime import datetime, timezone
+
+from sqlalchemy import (
+    ARRAY,
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import relationship
+
 from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.db.base import Base
+
 
 # Use JSON instead of ARRAY for SQLite compatibility during testing
 def _get_array_type(column_type):

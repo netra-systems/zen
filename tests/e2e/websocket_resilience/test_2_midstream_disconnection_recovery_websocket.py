@@ -20,7 +20,7 @@ from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 from netra_backend.app.logging_config import central_logger
 
 # Import required classes from core module
-from tests.e2e.websocket_resilience.test_2_midstream_disconnection_recovery_core import ConnectionState, ResponseType, NetworkCondition, StreamBuffer, NetworkSimulator
+from tests.e2e.websocket_resilience.midstream_disconnection_recovery import (
     ConnectionState, ResponseType, NetworkCondition, StreamBuffer, NetworkSimulator
 )
 

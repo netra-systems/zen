@@ -5,12 +5,12 @@ Implements circular buffer for memory-efficient log management
 with pattern-based deduplication as per dev launcher performance spec.
 """
 
-import time
 import hashlib
-from typing import List, Dict, Optional, Set, Tuple
+import time
 from collections import deque
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class LogLevel(Enum):

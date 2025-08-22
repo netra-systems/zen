@@ -6,13 +6,21 @@ Module follows 450-line limit with 25-line function limit.
 
 import math
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
-from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.services.factory_status.git_diff_analyzer import GitDiffAnalyzer, DiffMetrics, ChangeCategory
+from netra_backend.app.services.factory_status.git_commit_parser import (
+    CommitInfo,
+    CommitType,
+    GitCommitParser,
+)
+from netra_backend.app.services.factory_status.git_diff_analyzer import (
+    ChangeCategory,
+    DiffMetrics,
+    GitDiffAnalyzer,
+)
 
 
 class ImpactLevel(Enum):

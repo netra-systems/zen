@@ -4,22 +4,30 @@ Tests AsyncBatchProcessor and AsyncLock functionality with various scenarios
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import time
+from typing import Any, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import List, Any
 
 # Add project root to path
-
 from netra_backend.app.core.async_utils import (
-
-# Add project root to path
+    # Add project root to path
     AsyncBatchProcessor,
-    AsyncLock
+    AsyncLock,
 )
 from netra_backend.app.core.exceptions_service import ServiceError
 

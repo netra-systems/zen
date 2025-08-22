@@ -4,17 +4,20 @@ Tracks CPU, memory, storage, and network usage during operations
 """
 
 import asyncio
-import psutil
+import json
 import os
 import shutil
-from datetime import datetime, UTC, timedelta
-from typing import Dict, List, Optional, Any
-from collections import deque, defaultdict
-import json
+from collections import defaultdict, deque
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+import psutil
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import (
-    ResourceUsage, ResourceType, TimeSeriesPoint
+    ResourceType,
+    ResourceUsage,
+    TimeSeriesPoint,
 )
 
 logger = central_logger.get_logger(__name__)

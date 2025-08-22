@@ -17,15 +17,15 @@ Windows Enhancements:
 This module ensures processes stay running while respecting startup timing requirements.
 """
 
-import time
-import threading
 import logging
-import sys
 import subprocess
-from typing import Dict, Optional, Callable, Set, Any
+import sys
+import threading
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Callable, Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 

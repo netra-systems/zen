@@ -13,12 +13,13 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 
 import asyncio
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo
-from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
+
 from .job_queue import JobQueueManager
+from .telemetry import ConnectionMetrics, JobMetrics, TelemetryCollector
 
 logger = central_logger.get_logger(__name__)
 
@@ -175,8 +176,8 @@ class UnifiedStateManager:
 
 
 # Re-export classes for backward compatibility
-from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
 from .job_queue import JobQueueManager
+from .telemetry import ConnectionMetrics, JobMetrics, TelemetryCollector
 
 __all__ = [
     "UnifiedStateManager", "TelemetryCollector", "ConnectionMetrics", 

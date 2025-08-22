@@ -3,20 +3,30 @@
 Tests to prevent regression of the "Cannot call send once a close message has been sent" error.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
-from starlette.websockets import WebSocketState
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+from starlette.websockets import WebSocketState
+
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.websocket.broadcast_core import BroadcastManager
 
 # Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.websocket.broadcast_core import BroadcastManager
-from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path
 

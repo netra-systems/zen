@@ -4,6 +4,7 @@
 import json
 from typing import List, Optional
 
+
 def print_header():
     """Print header."""
     print("=" * 60)

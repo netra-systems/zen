@@ -1,10 +1,10 @@
 """Test import status of the codebase"""
 
-import sys
-import os
-from pathlib import Path
 import importlib
+import os
+import sys
 import traceback
+from pathlib import Path
 
 # Add project to path
 sys.path.insert(0, r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')

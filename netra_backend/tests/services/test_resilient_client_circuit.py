@@ -1,15 +1,26 @@
 """Tests for ResilientHTTPClient circuit breaker management."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from netra_backend.tests.services.external_api_client_utils import verify_new_circuit_creation
+from netra_backend.tests.services.external_api_client_utils import (
+    verify_new_circuit_creation,
+)
 
 # Add project root to path
 
@@ -81,5 +92,7 @@ class TestResilientHTTPClientCircuit:
     
     def _verify_circuit_open_result(self, result, mock_logger):
         """Verify circuit open behavior."""
-        from netra_backend.tests.services.external_api_client_utils import verify_circuit_open_behavior
+        from netra_backend.tests.services.external_api_client_utils import (
+            verify_circuit_open_behavior,
+        )
         verify_circuit_open_behavior(result, mock_logger)

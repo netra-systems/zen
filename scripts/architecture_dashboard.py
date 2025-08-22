@@ -8,7 +8,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from architecture_dashboard_html import DashboardHTMLComponents
 from architecture_dashboard_tables import DashboardTableRenderers

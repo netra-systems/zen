@@ -5,15 +5,25 @@ Test 14: Tool Dispatcher Initialization - $10K MRR
 Test 15: Quality Gate First Response Validation - $12K MRR
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from typing import Dict, Any, List
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
 import time
+from datetime import datetime
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
 

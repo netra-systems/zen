@@ -5,7 +5,6 @@ This module contains prompt templates for the reporting agent.
 
 from langchain_core.prompts import PromptTemplate
 
-
 # Reporting Sub-Agent Prompt
 reporting_prompt_template = PromptTemplate(
     input_variables=["action_plan", "optimizations", "data", "triage_result", "user_request"],

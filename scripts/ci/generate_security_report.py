@@ -3,9 +3,9 @@
 
 import argparse
 import json
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 def generate_security_report(results: Dict[str, Any], format: str) -> str:

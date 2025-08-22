@@ -39,12 +39,12 @@ describe('Authentication Loading States Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
+    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
   });
 
   describe('Initial Loading State', () => {
     it('should show loading state during auth initialization', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -57,7 +57,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should hide other UI elements during loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -69,7 +69,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should maintain loading state consistency', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -83,7 +83,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should handle loading timeout gracefully', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -104,7 +104,7 @@ describe('Authentication Loading States Tests', () => {
       await userEvent.click(button);
       
       // Simulate loading state during login
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -114,7 +114,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should disable interactions during login loading', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -137,7 +137,7 @@ describe('Authentication Loading States Tests', () => {
       expect(mockLogin).toHaveBeenCalled();
       
       // Complete login with user data
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -158,7 +158,7 @@ describe('Authentication Loading States Tests', () => {
       await userEvent.click(button);
       
       // Simulate loading then failure
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: false,
         error: 'Login failed'
@@ -172,7 +172,7 @@ describe('Authentication Loading States Tests', () => {
   describe('Logout Process Loading', () => {
     it('should show loading during logout process', async () => {
       // Start with logged in user
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -188,7 +188,7 @@ describe('Authentication Loading States Tests', () => {
       expect(mockLogout).toHaveBeenCalled();
       
       // Simulate logout loading
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true,
         user: null
@@ -199,7 +199,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should complete logout loading cycle', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -214,7 +214,7 @@ describe('Authentication Loading States Tests', () => {
       await userEvent.click(logoutButton);
       
       // Complete logout
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: false,
         user: null
@@ -225,7 +225,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should handle logout loading with cleanup', async () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -243,7 +243,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should disable logout button during loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         user: {
           id: 'user-123',
@@ -268,7 +268,7 @@ describe('Authentication Loading States Tests', () => {
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
       
       // Loading state
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -276,7 +276,7 @@ describe('Authentication Loading States Tests', () => {
       expect(screen.getByText('Loading...')).toBeDisabled();
       
       // Logged in state
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: false,
         user: { id: '1', email: 'test@example.com', full_name: 'Test' }
@@ -290,7 +290,7 @@ describe('Authentication Loading States Tests', () => {
       
       // Multiple rapid state changes
       for (let i = 0; i < 5; i++) {
-        (authService.useAuth as jest.Mock).mockReturnValue({
+        jest.mocked(authService.useAuth).mockReturnValue({
           ...baseAuthContext,
           loading: i % 2 === 0
         });
@@ -306,7 +306,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should handle loading with partial user data', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true,
         user: { id: '1' } // Partial user data
@@ -318,7 +318,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should preserve loading state during re-renders', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -337,7 +337,7 @@ describe('Authentication Loading States Tests', () => {
 
   describe('Loading Accessibility', () => {
     it('should provide accessible loading indicators', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -354,7 +354,7 @@ describe('Authentication Loading States Tests', () => {
       
       expect(screen.getByRole('button')).toHaveTextContent('Login with Google');
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -369,7 +369,7 @@ describe('Authentication Loading States Tests', () => {
       const button = screen.getByText('Login with Google');
       await userEvent.click(button);
       
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });
@@ -379,7 +379,7 @@ describe('Authentication Loading States Tests', () => {
     });
 
     it('should provide loading duration feedback', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
+      jest.mocked(authService.useAuth).mockReturnValue({
         ...baseAuthContext,
         loading: true
       });

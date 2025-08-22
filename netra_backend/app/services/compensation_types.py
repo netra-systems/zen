@@ -6,7 +6,7 @@ Defines core types, states, and data structures for compensation operations.
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 
 class CompensationState(Enum):

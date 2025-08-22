@@ -9,13 +9,13 @@ Business Value Justification (BVJ):
 - Strategic Impact: Enables comprehensive e2e testing
 """
 
-import sys
-import os
-from pathlib import Path
-import re
 import ast
 import logging
-from typing import Dict, List, Tuple, Set
+import os
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -61,9 +61,25 @@ class E2EImportFixer:
             (r'from netra_backend\.tests\.l4_staging_critical_base', 
              'from netra_backend.tests.helpers.staging_base'),
             
-            # Fix tests.unified imports
-            (r'^from tests\.unified', 'from tests.unified'),
-            (r'^import tests\.unified', 'import tests.unified'),
+            # Fix tests.unified imports that were moved to tests.e2e
+            (r'from tests\.unified\.clients', 'from tests.clients'),
+            (r'from tests\.unified\.e2e', 'from tests.e2e'),
+            (r'import tests\.unified\.clients', 'import tests.clients'),
+            (r'import tests\.unified\.e2e', 'import tests.e2e'),
+            
+            # Fix specific unified module imports
+            (r'from tests\.unified import', 'from tests.e2e import'),
+            (r'from tests\.unified\.', 'from tests.e2e.'),
+            (r'import tests\.unified\b', 'import tests.e2e'),
+            
+            # Fix imports that refer to files now in tests.e2e
+            (r'from tests\.unified_e2e_harness', 'from tests.e2e.unified_e2e_harness'),
+            (r'from tests\.service_orchestrator', 'from tests.e2e.service_orchestrator'),
+            (r'from tests\.user_journey_executor', 'from tests.e2e.user_journey_executor'),
+            
+            # Fix imports within e2e package itself
+            (r'from unified\.', 'from tests.e2e.'),
+            (r'import unified\.', 'import tests.e2e.'),
             
             # Fix relative imports in test files
             (r'^from \.\.', 'from tests.'),
@@ -72,6 +88,9 @@ class E2EImportFixer:
             # Fix agent_requests import
             (r'from netra_backend\.app\.schemas\.agent_requests', 
              'from netra_backend.app.schemas.thread_schemas'),
+            
+            # Fix netra_backend unified_system imports
+            (r'from tests\.unified_system\.', 'from netra_backend.tests.unified_system.'),
         ]
         
         # Missing classes that need to be created or imported differently
@@ -277,7 +296,7 @@ from typing import Optional
 
 def get_staging_url() -> str:
     """Get staging URL."""
-    return os.getenv("STAGING_URL", "https://staging.netra.ai")
+    return os.getenv("STAGING_URL", "https://staging.netrasystems.ai")
 
 def get_staging_api_key() -> Optional[str]:
     """Get staging API key."""
@@ -354,22 +373,28 @@ def mock_cache():
         # First create missing helpers
         self.create_missing_helpers()
         
-        # Find all e2e test files
-        e2e_files = []
-        patterns = ['*e2e*.py', '*E2E*.py']
+        # Find all test files that might have broken imports
+        test_files = []
         
-        for pattern in patterns:
-            e2e_files.extend(self.project_root.rglob(pattern))
+        # Include all test files in tests directory
+        tests_dir = self.project_root / 'tests'
+        if tests_dir.exists():
+            test_files.extend(tests_dir.rglob('*.py'))
         
-        # Filter test files
-        e2e_files = [
-            f for f in e2e_files 
-            if '__pycache__' not in str(f) and f.name.startswith('test_')
+        # Include test files in netra_backend/tests
+        backend_tests_dir = self.project_root / 'netra_backend' / 'tests'
+        if backend_tests_dir.exists():
+            test_files.extend(backend_tests_dir.rglob('*.py'))
+        
+        # Filter out unwanted files
+        test_files = [
+            f for f in test_files 
+            if '__pycache__' not in str(f)
         ]
         
-        logger.info(f"Found {len(e2e_files)} e2e test files to fix")
+        logger.info(f"Found {len(test_files)} test files to check for import fixes")
         
-        for file_path in e2e_files:
+        for file_path in test_files:
             rel_path = file_path.relative_to(self.project_root)
             if self.fix_file(file_path):
                 logger.info(f"  Fixed: {rel_path}")
@@ -377,7 +402,7 @@ def mock_cache():
                 logger.debug(f"  No changes: {rel_path}")
         
         return {
-            'total_files': len(e2e_files),
+            'total_files': len(test_files),
             'files_fixed': len(self.files_fixed),
             'fixes_applied': self.fixes_applied
         }

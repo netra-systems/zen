@@ -5,10 +5,10 @@ This script uses gcloud logging commands to fetch and analyze
 SQL-related issues with the auth_core service in staging.
 """
 
-import subprocess
 import json
-from datetime import datetime, timedelta
+import subprocess
 import sys
+from datetime import datetime, timedelta
 
 
 def run_gcloud_command(cmd):

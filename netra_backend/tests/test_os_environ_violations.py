@@ -11,16 +11,26 @@ os.environ calls outside of the central configuration system,
 unless explicitly @marked with justification.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import ast
-import os
-import pytest
-from pathlib import Path
-from typing import List, Dict, Set, Tuple
-import re
 import json
+import os
+import re
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
+import pytest
 
 
 class OSEnvironAnalyzer(ast.NodeVisitor):
@@ -155,7 +165,6 @@ class TestOSEnvironViolations:
             'dev_launcher.py',
             'dev_launcher/',  # Dev launcher modules
             'scripts/',  # All scripts are infrastructure
-            'organized_root/deployment_configs/',  # Deployment scripts
             '.github/',  # CI/CD workflows
             
             # Setup and management files

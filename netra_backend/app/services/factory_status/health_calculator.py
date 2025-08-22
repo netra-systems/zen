@@ -4,7 +4,7 @@ Calculates overall factory health scores from collected metrics.
 Provides weighted scoring across different metric categories.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
 

@@ -3,24 +3,34 @@ Test Suite 2: Performance and Edge Cases Tests
 Tests query performance characteristics and edge case handling
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import uuid
-import json
 import asyncio
+import json
+import uuid
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import numpy as np
+import pytest
 
-# Add project root to path
-
-from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
+from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
+
+# Add project root to path
+from netra_backend.app.services.corpus_service import CorpusService
 
 # Add project root to path
 
@@ -349,7 +359,9 @@ class TestConnectionHandling:
     """Test database connection handling"""
     async def test_connection_cleanup_on_error(self):
         """Test 20: Verify connections are cleaned up on errors"""
-        from netra_backend.app.services.generation_service import get_corpus_from_clickhouse
+        from netra_backend.app.services.generation_service import (
+            get_corpus_from_clickhouse,
+        )
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = MagicMock()

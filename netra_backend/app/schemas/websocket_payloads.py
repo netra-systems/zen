@@ -9,12 +9,13 @@ ARCHITECTURAL COMPLIANCE:
 - Imports from registry.py as single source of truth
 """
 
-from typing import Optional, Dict, Any, List, Union
-from pydantic import Field
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
-from netra_backend.app.schemas.registry import BaseWebSocketPayload
+from pydantic import Field
+
 from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.schemas.registry import BaseWebSocketPayload
 
 
 class RenameThreadPayload(BaseWebSocketPayload):

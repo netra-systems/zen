@@ -5,21 +5,38 @@ quality gate validation, and performance measurement.
 Maximum 300 lines, functions ≤8 lines per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-# Add project root to path
-
-from netra_backend.app.agents.state import DeepAgentState
+import pytest
 from schemas import SubAgentLifecycle
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
-from netra_backend.tests.e2e.infrastructure.llm_test_manager import LLMTestManager, LLMTestRequest, LLMTestModel
+
+# Add project root to path
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
+from tests.e2e.infrastructure.llm_test_manager import (
+    LLMTestManager,
+    LLMTestModel,
+    LLMTestRequest,
+)
 
 # Add project root to path
 

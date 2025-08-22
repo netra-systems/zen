@@ -4,27 +4,46 @@ Tests all 9 example prompts with real LLM calls and complete validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
-from netra_backend.tests.e2e.example_prompts_core import (
-
-# Add project root to path
-    EXAMPLE_PROMPTS, real_llm_prompt_setup, execute_full_prompt_workflow,
-    create_ep_001_state, create_ep_002_state, create_ep_003_state,
-    create_ep_004_state, create_ep_005_state, create_ep_006_state,
-    create_ep_007_state, create_ep_008_state, create_ep_009_state
+from tests.e2e.example_prompts_core import (
+    # Add project root to path
+    EXAMPLE_PROMPTS,
+    create_ep_001_state,
+    create_ep_002_state,
+    create_ep_003_state,
+    create_ep_004_state,
+    create_ep_005_state,
+    create_ep_006_state,
+    create_ep_007_state,
+    create_ep_008_state,
+    create_ep_009_state,
+    execute_full_prompt_workflow,
+    real_llm_prompt_setup,
 )
-from netra_backend.tests.e2e.example_prompts_validators import (
-    validate_cost_optimization_result, validate_performance_optimization_result,
-    validate_capacity_planning_result, validate_function_optimization_result,
-    validate_model_selection_result, validate_kv_cache_audit_result,
-    validate_multi_constraint_result, validate_tool_migration_result,
-    validate_rollback_analysis_result
+from tests.e2e.example_prompts_validators import (
+    validate_capacity_planning_result,
+    validate_cost_optimization_result,
+    validate_function_optimization_result,
+    validate_kv_cache_audit_result,
+    validate_model_selection_result,
+    validate_multi_constraint_result,
+    validate_performance_optimization_result,
+    validate_rollback_analysis_result,
+    validate_tool_migration_result,
 )
 
 

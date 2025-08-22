@@ -6,8 +6,8 @@ ClickHouse queries, data fetching, and metrics calculations.
 
 from typing import Dict, Optional
 
-from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.agents.error_handler import AgentError, ErrorContext
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class DataSubAgentError(AgentError):

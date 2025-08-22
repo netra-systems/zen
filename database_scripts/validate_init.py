@@ -6,10 +6,12 @@ Module: Validation (adheres to 450-line limit)
 
 import os
 import sys
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 import psycopg2
 from psycopg2 import sql
-from typing import List, Dict, Tuple
-from dataclasses import dataclass
+
 
 @dataclass
 class TableValidation:

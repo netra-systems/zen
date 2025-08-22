@@ -1,9 +1,13 @@
 """OWASP Top 10 2021 compliance checks for Netra AI Platform."""
 
-from typing import Dict
 from datetime import datetime, timezone
+from typing import Dict
 
-from netra_backend.app.compliance_types import ComplianceCheck, ComplianceStandard, ComplianceStatus
+from netra_backend.app.compliance_types import (
+    ComplianceCheck,
+    ComplianceStandard,
+    ComplianceStatus,
+)
 
 
 class OwaspComplianceChecks:

@@ -16,21 +16,25 @@ Each test follows 25-line function limit through delegation to specialized helpe
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 import pytest
-# Add project root to path
 
+# Add project root to path
 from netra_backend.tests.agents.test_helpers import (
-
-# Add project root to path
-    OAuthFlowHelpers, AIProviderHelpers, WebSocketHelpers, 
-    OptimizationHelpers, ConcurrentTestHelpers
+    AIProviderHelpers,
+    ConcurrentTestHelpers,
+    # Add project root to path
+    OAuthFlowHelpers,
+    OptimizationHelpers,
+    WebSocketHelpers,
 )
 from netra_backend.tests.real_critical_fixtures import *
 

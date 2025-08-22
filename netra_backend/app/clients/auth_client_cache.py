@@ -3,13 +3,13 @@ Auth client caching and circuit breaker functionality.
 Handles token caching and resilience patterns for auth service calls.
 """
 
-from typing import Dict, Optional
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Dict, Optional
 
-from netra_backend.app.core.config import get_config
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+from netra_backend.app.core.config import get_config
 
 
 @dataclass

@@ -3,25 +3,34 @@
 Tests focused on connection resilience, error recovery, and network instability scenarios.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
-from typing import Dict, List, Any
-from unittest.mock import Mock, patch, AsyncMock
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 
 # Add project root to path
-
 from netra_backend.app.routes.websocket_enhanced import (
-
-# Add project root to path
+    # Add project root to path
     connection_manager,
     handle_websocket_message_enhanced,
-    send_error_message
+    send_error_message,
 )
-from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 
 
 @pytest.mark.asyncio

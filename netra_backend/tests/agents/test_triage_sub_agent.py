@@ -3,33 +3,42 @@ Comprehensive tests for the enhanced TriageSubAgent.
 Tests all major functionality including categorization, caching, fallback, and error handling.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
-from unittest.mock import AsyncMock, Mock, MagicMock, patch
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
-
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.triage_sub_agent import (
-
-# Add project root to path
-    TriageResult,
-    Priority,
-    Complexity,
-    KeyParameters,
-    ExtractedEntities,
-    UserIntent,
-    ValidationStatus
-)
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.redis_manager import RedisManager
+import pytest
 from schemas import SubAgentLifecycle
+
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.triage_sub_agent import (
+    Complexity,
+    ExtractedEntities,
+    KeyParameters,
+    Priority,
+    # Add project root to path
+    TriageResult,
+    UserIntent,
+    ValidationStatus,
+)
+
+# Add project root to path
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture

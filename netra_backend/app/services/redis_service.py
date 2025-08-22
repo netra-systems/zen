@@ -10,10 +10,12 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Critical for performance and user experience
 """
 
-import redis.asyncio as redis
-from typing import Optional, List, Any
-import logging
 import json
+import logging
+from typing import Any, List, Optional
+
+import redis.asyncio as redis
+
 from netra_backend.app.core.configuration import get_configuration
 
 logger = logging.getLogger(__name__)

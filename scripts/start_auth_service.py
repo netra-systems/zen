@@ -4,11 +4,13 @@ Start Auth Service for local development
 Manages Docker containers and service startup
 """
 import os
-import sys
 import subprocess
+import sys
 import time
-import requests
 from pathlib import Path
+
+import requests
+
 
 class AuthServiceManager:
     """Manage auth service startup and dependencies"""

@@ -14,22 +14,33 @@ REQUIREMENTS:
 - 100% metric collection reliability
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 from datetime import datetime, timezone
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.shared_fixtures import (
-
-# Add project root to path
-    MetricEvent, MockMetricsCollector, MockUserActionTracker,
-    metrics_collector, user_action_tracker
+    # Add project root to path
+    MetricEvent,
+    MockMetricsCollector,
+    MockUserActionTracker,
+    metrics_collector,
+    user_action_tracker,
 )
 
 logger = central_logger.get_logger(__name__)

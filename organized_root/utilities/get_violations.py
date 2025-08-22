@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 """Get compliance violations for backend."""
-import sys
-import os
 import json
+import os
+import sys
 
 # Add scripts to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scripts'))
 
 from scripts.compliance.analyzer import Analyzer
 from scripts.compliance.orchestrator import ComplianceOrchestrator
+
 
 def main():
     # Analyze backend

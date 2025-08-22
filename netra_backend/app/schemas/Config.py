@@ -9,12 +9,19 @@ with the centralized configuration management.
 """
 
 import os
-from typing import List, Dict, Optional, Any
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
-from netra_backend.app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
-from netra_backend.app.schemas.registry import User
+
+from netra_backend.app.schemas.auth_types import (
+    AuthConfigResponse,
+    AuthEndpoints,
+    DevUser,
+)
 from netra_backend.app.schemas.llm_types import LLMProvider
+from netra_backend.app.schemas.registry import User
+
 
 class ClickHouseCredentials(BaseModel):
     host: str

@@ -10,8 +10,15 @@ For new code, use: from netra_backend.app.core.configuration import unified_conf
 
 import os
 from typing import Dict, Type
-from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
+
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.config import (
+    AppConfig,
+    DevelopmentConfig,
+    NetraTestingConfig,
+    ProductionConfig,
+    StagingConfig,
+)
 
 # MIGRATION NOTE: For new code, use the unified configuration system:
 # from netra_backend.app.core.configuration import unified_config_manager

@@ -23,26 +23,43 @@ Performance Targets:
 - Recovery scenarios: < 5s each
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
-from datetime import datetime, timedelta
 import uuid
-from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
 
 # Add project root to path
-
 from netra_backend.app.core.reliability import AgentReliabilityWrapper
-from netra_backend.app.core.reliability_circuit_breaker import CircuitBreakerConfig, CircuitBreakerState
+from netra_backend.app.core.reliability_circuit_breaker import (
+    CircuitBreakerConfig,
+    CircuitBreakerState,
+)
 from netra_backend.app.core.reliability_retry import RetryConfig
-from netra_backend.app.core.exceptions_base import NetraException, ErrorDetails
-from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
-from netra_backend.app.websocket.recovery import WebSocketRecoveryManager, RecoveryStrategy, WebSocketError
-from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.websocket.recovery import (
+    RecoveryStrategy,
+    WebSocketError,
+    WebSocketRecoveryManager,
+)
 
 # Add project root to path
 

@@ -1,27 +1,37 @@
 """Core_1 Tests - Split from test_free_tier_value_demonstration_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+import tempfile
+import uuid
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-import asyncio
-import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any, List
-from decimal import Decimal
-
-# Add project root to path
-
-from netra_backend.app.db.models_user import User, ToolUsageLog
-from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
-from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from netra_backend.app.db.base import Base
-import tempfile
-from sqlalchemy import select
+
+# Add project root to path
+from netra_backend.app.db.models_user import ToolUsageLog, User
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
 
 # Add project root to path
 

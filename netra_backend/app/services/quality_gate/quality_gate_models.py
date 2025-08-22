@@ -1,8 +1,8 @@
 """Quality Gate Service Models and Data Classes"""
 
-from typing import Dict, List, Optional, Any
-from enum import Enum
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class QualityLevel(Enum):

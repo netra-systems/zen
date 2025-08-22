@@ -1,13 +1,17 @@
-from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app import schemas
-from netra_backend.app.services.clickhouse_service import clickhouse_service
-from netra_backend.app.services.corpus_service import corpus_service_instance as corpus_service
-from netra_backend.app.dependencies import get_db_session
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.services.user_auth_service import user_auth_service
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app import schemas
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.dependencies import get_db_session
+from netra_backend.app.services.clickhouse_service import clickhouse_service
+from netra_backend.app.services.corpus_service import (
+    corpus_service_instance as corpus_service,
+)
+from netra_backend.app.services.user_auth_service import user_auth_service
 
 router = APIRouter()
 

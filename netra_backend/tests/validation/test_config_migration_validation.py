@@ -6,15 +6,25 @@ Business Value: Ensures unified configuration system works correctly
 and no regressions were introduced during the migration.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import sys
 import os
+import sys
 from pathlib import Path
-import pytest
+from typing import Any, Dict
 from unittest.mock import patch
-from typing import Dict, Any
+
+import pytest
 
 # Add project root to path
 
@@ -24,8 +34,8 @@ class TestConfigurationMigrationValidation:
 
     def test_no_direct_os_environ_in_production_code(self):
         """Verify no direct os.environ usage in production code (excluding bootstrap)."""
-        import subprocess
         import re
+        import subprocess
         
         # Search for os.environ violations in production code
         production_dirs = [
@@ -96,7 +106,9 @@ class TestConfigurationMigrationValidation:
                 "ENVIRONMENT": "testing"
             }):
                 # Import configuration components that should work
-                from netra_backend.app.core.environment_constants import EnvironmentVariables
+                from netra_backend.app.core.environment_constants import (
+                    EnvironmentVariables,
+                )
                 
                 # Verify constants are accessible
                 assert hasattr(EnvironmentVariables, 'DATABASE_URL')
@@ -199,7 +211,9 @@ class TestConfigurationMigrationValidation:
         with patch.dict(os.environ, {}, clear=True):
             # Test that missing configuration doesn't crash the system
             try:
-                from netra_backend.app.core.environment_constants import EnvironmentDetector
+                from netra_backend.app.core.environment_constants import (
+                    EnvironmentDetector,
+                )
                 detector = EnvironmentDetector()
                 env = detector.detect_environment()
                 # Should default to development

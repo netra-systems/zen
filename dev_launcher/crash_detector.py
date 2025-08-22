@@ -14,15 +14,15 @@ ARCHITECTURE COMPLIANCE:
 """
 
 import asyncio
+import logging
 import re
 import subprocess
-import logging
 from pathlib import Path
 from typing import List, Optional
+
 import requests
 
-from .crash_recovery_models import DetectionResult, DetectionMethod
-
+from .crash_recovery_models import DetectionMethod, DetectionResult
 
 logger = logging.getLogger(__name__)
 

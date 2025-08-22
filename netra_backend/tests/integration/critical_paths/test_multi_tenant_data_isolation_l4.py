@@ -14,23 +14,26 @@ This test validates complete data isolation in a multi-tenant environment.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
-import json
-import uuid
-import time
-from pathlib import Path
-from typing import Optional, Dict, Any, List, Set
-import aiohttp
-import websockets
-import pytest
-from datetime import datetime
 import hashlib
+import json
 import secrets
 
 # Add project root to path
 import sys
+import time
+import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import aiohttp
+import pytest
+import websockets
+
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -97,7 +100,7 @@ class MultiTenantIsolationTester:
         try:
             # Login as admin
             admin_data = {
-                "email": "admin@netra.ai",
+                "email": "admin@netrasystems.ai",
                 "password": "admin_password"
             }
             

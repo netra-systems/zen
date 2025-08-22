@@ -43,7 +43,7 @@ describe('MessageInput - Focus Management and UI', () => {
       sendMessage: mockSendMessage,
     });
     
-    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+    jest.mocked(useUnifiedChatStore).mockReturnValue({
       setProcessing: mockChatStore.setProcessing,
       isProcessing: false,
       addMessage: mockChatStore.addMessage,
@@ -53,13 +53,13 @@ describe('MessageInput - Focus Management and UI', () => {
       updateOptimisticMessage: jest.fn(),
     });
     
-    (useThreadStore as jest.Mock).mockReturnValue({
+    jest.mocked(useThreadStore).mockReturnValue({
       currentThreadId: 'thread-1',
       setCurrentThread: mockThreadStore.setCurrentThread,
       addThread: mockThreadStore.addThread,
     });
     
-    (useAuthStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAuthStore).mockReturnValue({
       isAuthenticated: true,
     });
     
@@ -75,7 +75,7 @@ describe('MessageInput - Focus Management and UI', () => {
     });
 
     it('should not auto-focus when not authenticated', () => {
-      (useAuthStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAuthStore).mockReturnValue({
         isAuthenticated: false,
       });
       
@@ -107,7 +107,7 @@ describe('MessageInput - Focus Management and UI', () => {
     });
 
     it('should show sign-in prompt when not authenticated', () => {
-      (useAuthStore as jest.Mock).mockReturnValue({
+      jest.mocked(useAuthStore).mockReturnValue({
         isAuthenticated: false,
       });
       
@@ -118,7 +118,7 @@ describe('MessageInput - Focus Management and UI', () => {
     });
 
     it('should show processing indicator when agent is thinking', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      jest.mocked(useUnifiedChatStore).mockReturnValue({
         setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
         addMessage: mockChatStore.addMessage,

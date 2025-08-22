@@ -4,20 +4,32 @@ Entry point for synthetic data generation with modular architecture.
 """
 
 # Import core functionality
-from netra_backend.app.synthetic_data_core import main, SyntheticDataOrchestrator, SyntheticDataCLI
-from netra_backend.app.synthetic_data_loader import (
-    ClickHouseCorpusLoader, FileCorpusLoader, ConfigurationManager, ContentCorpusManager
-)
-from netra_backend.app.agents.synthetic_data_generator import (
-    generate_data_chunk, DataGenerationHelper, ContentPairGenerator, 
-    DataFrameBuilder, ParallelProcessor, MultiTurnGenerator
-)
-
 # Maintain backward compatibility
 import argparse
 import asyncio
 import sys
 from multiprocessing import cpu_count
+
+from netra_backend.app.agents.synthetic_data_generator import (
+    ContentPairGenerator,
+    DataFrameBuilder,
+    DataGenerationHelper,
+    MultiTurnGenerator,
+    ParallelProcessor,
+    generate_data_chunk,
+)
+from netra_backend.app.synthetic_data_core import (
+    SyntheticDataCLI,
+    SyntheticDataOrchestrator,
+    main,
+)
+from netra_backend.app.synthetic_data_loader import (
+    ClickHouseCorpusLoader,
+    ConfigurationManager,
+    ContentCorpusManager,
+    FileCorpusLoader,
+)
+
 
 # Re-export main function for backward compatibility
 async def load_content_corpus_from_clickhouse():

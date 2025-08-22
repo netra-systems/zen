@@ -5,14 +5,14 @@ Profiles each startup phase, identifies performance bottlenecks automatically,
 generates actionable performance reports, and stores metrics for historical analysis.
 """
 
-import time
 import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from pathlib import Path
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from statistics import mean, median
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

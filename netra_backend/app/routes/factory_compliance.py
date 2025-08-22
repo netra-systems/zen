@@ -4,26 +4,32 @@ Provides endpoints for SPEC compliance analysis and scoring.
 Module follows 450-line limit with 25-line function limit.
 """
 
-from fastapi import APIRouter, Query, Depends
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.services.factory_status.factory_status_integration import (
-    init_compliance_api,
-    ComplianceAPIHandler
-)
+from fastapi import APIRouter, Depends, Query
+
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.routes.factory_compliance_handlers import (
-    handle_compliance_scores, handle_module_compliance_analysis,
-    handle_compliance_violations, handle_remediation_steps,
-    handle_compliance_trends, handle_orchestration_alignment,
-    handle_claude_review
-)
-from netra_backend.app.routes.factory_compliance_validators import (
-    validate_claude_cli_access, validate_dev_environment
+    handle_claude_review,
+    handle_compliance_scores,
+    handle_compliance_trends,
+    handle_compliance_violations,
+    handle_module_compliance_analysis,
+    handle_orchestration_alignment,
+    handle_remediation_steps,
 )
 from netra_backend.app.routes.factory_compliance_reports import (
-    handle_full_compliance_report, handle_module_compliance_details,
-    handle_compliance_dashboard
+    handle_compliance_dashboard,
+    handle_full_compliance_report,
+    handle_module_compliance_details,
+)
+from netra_backend.app.routes.factory_compliance_validators import (
+    validate_claude_cli_access,
+    validate_dev_environment,
+)
+from netra_backend.app.services.factory_status.factory_status_integration import (
+    ComplianceAPIHandler,
+    init_compliance_api,
 )
 
 router = APIRouter(

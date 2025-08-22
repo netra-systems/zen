@@ -14,6 +14,7 @@
         <description>
             This guide provides clear instructions for running frontend tests in the Netra platform.
             Frontend tests use Jest and React Testing Library, with a custom Windows-compatible runner.
+            The frontend test suite contains 369+ test files organized across multiple categories.
         </description>
         <key_components>
             <component>Jest - Test framework</component>
@@ -21,6 +22,19 @@
             <component>jest-websocket-mock - WebSocket mocking</component>
             <component>run-jest.js - Windows-compatible test runner</component>
         </key_components>
+        <test_locations>
+            <location path="/frontend/__tests__/" description="Main test directory with 369+ test files">
+                <category name="a11y" count="14" description="Accessibility tests"/>
+                <category name="auth" count="14" description="Authentication tests"/>
+                <category name="chat" count="20" description="Chat functionality tests"/>
+                <category name="components" count="79" description="Component tests"/>
+                <category name="critical" count="10" description="Critical path tests"/>
+                <category name="integration" count="141" description="Integration tests"/>
+                <category name="e2e" count="various" description="End-to-end tests"/>
+                <category name="performance" count="various" description="Performance tests"/>
+            </location>
+            <location path="/frontend/cypress/" description="Cypress E2E tests"/>
+        </test_locations>
     </overview>
     
     <quick_start>

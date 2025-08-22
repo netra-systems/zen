@@ -10,25 +10,35 @@ Critical Path: Service discovery -> Authentication -> Authorization -> Routing -
 Coverage: Inter-service auth, request routing, load balancing, circuit breaking
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
-
-# Add project root to path
-
-from netra_backend.app.services.mesh.service_mesh import ServiceMesh
-from netra_backend.app.services.mesh.service_discovery import ServiceDiscovery
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 # Service authenticator replaced with mock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.services.mesh.service_discovery import ServiceDiscovery
+
+# Add project root to path
+from netra_backend.app.services.mesh.service_mesh import ServiceMesh
+
 ServiceAuthenticator = AsyncMock
 
 logger = logging.getLogger(__name__)

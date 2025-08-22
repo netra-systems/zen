@@ -4,20 +4,30 @@ Components: Supervisor → AgentRegistry → SubAgents → Capabilities → Read
 Critical: Supervisor must reliably initialize entire agent ecosystem
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from typing import Dict, List, Any
-from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.agent_recovery_supervisor import SupervisorRecoveryStrategy
 from test_framework.mock_utils import mock_justified
 

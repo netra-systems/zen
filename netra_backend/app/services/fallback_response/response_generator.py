@@ -3,13 +3,18 @@
 This module handles the core logic for generating context-aware fallback responses.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.fallback_response.models import FallbackContext, FailureReason
-from netra_backend.app.services.fallback_response.templates import TemplateManager
+from netra_backend.app.services.fallback_response.content_processor import (
+    ContentProcessor,
+)
 from netra_backend.app.services.fallback_response.diagnostics import DiagnosticsManager
-from netra_backend.app.services.fallback_response.content_processor import ContentProcessor
+from netra_backend.app.services.fallback_response.models import (
+    FailureReason,
+    FallbackContext,
+)
+from netra_backend.app.services.fallback_response.templates import TemplateManager
 
 logger = central_logger.get_logger(__name__)
 

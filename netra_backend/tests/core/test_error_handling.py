@@ -1,47 +1,62 @@
 """Tests for the standardized error handling system."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
-from fastapi import Request, HTTPException
+
+import pytest
+from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.exc import IntegrityError
 
-# Add project root to path
-
-from netra_backend.app.core.exceptions import (
-
-# Add project root to path
-    ErrorCode,
-    ErrorSeverity,
-    ErrorDetails,
-    NetraException,
-    ConfigurationError,
-    ValidationError,
-    AuthenticationError,
-    AuthorizationError,
-    TokenExpiredError,
-    DatabaseError,
-    RecordNotFoundError,
-    ServiceError,
-    LLMRequestError,
-    WebSocketError,
+from netra_backend.app.core.error_context import (
+    AsyncErrorContextManager as ErrorContextManager,
+)
+from netra_backend.app.core.error_context import (
+    ErrorContext,
+    get_enriched_error_context,
 )
 from netra_backend.app.core.error_handlers import (
     ApiErrorHandler,
-    handle_exception,
+    general_exception_handler,
     get_http_status_code,
+    handle_exception,
+    http_exception_handler,
     netra_exception_handler,
     validation_exception_handler,
-    http_exception_handler,
-    general_exception_handler,
 )
 from netra_backend.app.core.error_response import ErrorResponse
-from netra_backend.app.core.error_context import ErrorContext, AsyncErrorContextManager as ErrorContextManager, get_enriched_error_context
+
+# Add project root to path
+from netra_backend.app.core.exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+    ConfigurationError,
+    DatabaseError,
+    # Add project root to path
+    ErrorCode,
+    ErrorDetails,
+    ErrorSeverity,
+    LLMRequestError,
+    NetraException,
+    RecordNotFoundError,
+    ServiceError,
+    TokenExpiredError,
+    ValidationError,
+    WebSocketError,
+)
 
 
 class TestErrorCodes:

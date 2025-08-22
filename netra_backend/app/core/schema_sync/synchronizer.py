@@ -6,15 +6,19 @@ Maintains 25-line function limit and modular design.
 """
 
 import json
-from typing import Dict, Any, List, Optional
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, UTC
-from netra_backend.app.core.exceptions_service import ServiceError
+from typing import Any, Dict, List, Optional
+
+from netra_backend.app.core.configuration.validator import SchemaValidator
 from netra_backend.app.core.error_context import ErrorContext
-from netra_backend.app.services.apex_optimizer_agent.models import SchemaValidationLevel, SyncReport
+from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.schema_sync.extractor import SchemaExtractor
 from netra_backend.app.core.schema_sync.generator import TypeScriptGenerator
-from netra_backend.app.core.configuration.validator import SchemaValidator
+from netra_backend.app.services.apex_optimizer_agent.models import (
+    SchemaValidationLevel,
+    SyncReport,
+)
 
 
 class SchemaSynchronizer:

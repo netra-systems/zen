@@ -5,13 +5,21 @@ Module follows 450-line limit with 25-line function limit.
 """
 
 import statistics
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.services.factory_status.git_branch_tracker import GitBranchTracker, BranchInfo, BranchType
+from netra_backend.app.services.factory_status.git_branch_tracker import (
+    BranchInfo,
+    BranchType,
+    GitBranchTracker,
+)
+from netra_backend.app.services.factory_status.git_commit_parser import (
+    CommitInfo,
+    CommitType,
+    GitCommitParser,
+)
 
 
 class VelocityPeriod(Enum):

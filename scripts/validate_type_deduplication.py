@@ -12,15 +12,15 @@ Usage:
     python scripts/validate_type_deduplication.py --ci         # CI mode (exit codes)
 """
 
+import argparse
+import json
 import os
 import re
 import sys
-import json
-import argparse
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
 from collections import defaultdict
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass

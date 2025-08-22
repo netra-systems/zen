@@ -1,11 +1,10 @@
 """Service layer interfaces for consistent service patterns."""
 
 import abc
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Protocol
 from datetime import datetime
+from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar
 
 from pydantic import BaseModel
-
 
 # Type variables for generic interfaces
 T = TypeVar('T')

@@ -6,23 +6,24 @@ Focused module adhering to 25-line function limit and modular architecture.
 
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Dict, Optional, List, Callable, AsyncGenerator
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import (
-    OperationalError, 
-    DisconnectionError,
-    TimeoutError as SQLTimeoutError
-)
 from sqlalchemy import text
+from sqlalchemy.exc import DisconnectionError, OperationalError
+from sqlalchemy.exc import TimeoutError as SQLTimeoutError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.core.enhanced_retry_strategies import exponential_backoff_retry
 from netra_backend.app.db.transaction_errors import classify_error, is_retryable_error
-from netra_backend.app.db.transaction_stats import TransactionMetrics, get_transaction_stats, generate_transaction_id
+from netra_backend.app.db.transaction_stats import (
+    TransactionMetrics,
+    generate_transaction_id,
+    get_transaction_stats,
+)
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 logger = central_logger.get_logger(__name__)
 

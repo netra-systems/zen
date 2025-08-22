@@ -5,7 +5,7 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class IAgentService(ABC):

@@ -3,12 +3,15 @@ Security headers factory and utilities.
 Provides factory functions and CSP violation handling.
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from fastapi import Request
 
 from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.middleware.security_headers_middleware import SecurityHeadersMiddleware
+from netra_backend.app.middleware.security_headers_middleware import (
+    SecurityHeadersMiddleware,
+)
 
 logger = central_logger.get_logger(__name__)
 

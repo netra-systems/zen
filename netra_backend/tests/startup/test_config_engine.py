@@ -4,18 +4,34 @@ Tests for decision engine, utility functions, and main validation entry point.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from dev_launcher.config_validator import (
-    ConfigDecisionEngine, ConfigStatus, ConfigValidationResult, ValidationContext,
-    validate_service_config, _detect_ci_environment, _extract_env_overrides, _handle_fallback_action
+    ConfigDecisionEngine,
+    ConfigStatus,
+    ConfigValidationResult,
+    ValidationContext,
+    _detect_ci_environment,
+    _extract_env_overrides,
+    _handle_fallback_action,
+    validate_service_config,
 )
 from dev_launcher.service_config import ServicesConfiguration
 

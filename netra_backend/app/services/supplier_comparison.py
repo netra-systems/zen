@@ -1,4 +1,5 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 
 def compare_suppliers(supplier_ids: List[str], comparison_criteria: List[str], weight_preferences: Dict[str, float]) -> Dict[str, Any]:
     """Compare suppliers based on criteria and weights."""

@@ -14,12 +14,13 @@ EXPECTED FAILURES:
 """
 
 import os
-import pytest
-import httpx
-from unittest.mock import patch, MagicMock
-from dataclasses import dataclass
 import socket
 from contextlib import contextmanager
+from dataclasses import dataclass
+from unittest.mock import MagicMock, patch
+
+import httpx
+import pytest
 
 
 @dataclass
@@ -202,8 +203,9 @@ class TestCORSDynamicFrontendPorts:
         """
         for config in dynamic_frontend_configs:
             with mock_service_discovery(config):
-                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 from fastapi import Request
+
+                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
 
                 # Mock FastAPI app and service discovery
                 mock_app = MagicMock()
@@ -705,8 +707,8 @@ class TestCORSComprehensiveDynamicPortFailures:
         # Get what the system thinks are valid CORS origins
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
             from netra_backend.app.core.middleware_setup import (
-                get_cors_origins,
                 _get_localhost_origins,
+                get_cors_origins,
             )
 
             static_origins = get_cors_origins()
@@ -800,8 +802,8 @@ class TestCORSRegexPatternLimitations:
             from netra_backend.app.core.middleware_setup import (
                 _check_localhost_pattern,
                 _get_localhost_origins,
-                is_origin_allowed,
                 get_cors_origins,
+                is_origin_allowed,
             )
 
             # Origins that pass pattern matching

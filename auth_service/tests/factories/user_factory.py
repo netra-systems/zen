@@ -6,7 +6,8 @@ Supports both local and OAuth users with proper password handling.
 
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 

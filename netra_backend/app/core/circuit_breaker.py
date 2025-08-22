@@ -16,37 +16,35 @@ from both legacy and unified implementations.
 """
 
 # Legacy circuit breaker exports for backwards compatibility
-from netra_backend.app.core.circuit_breaker_types import (
-    CircuitState,
-    CircuitConfig,
-    CircuitMetrics,
-    CircuitBreakerOpenError
-)
-
-from netra_backend.app.core.circuit_breaker_core import (
-    CircuitBreaker
-)
-
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_registry_adaptive import (
     CircuitBreakerRegistry,
-    circuit_breaker_registry as circuit_registry,
+    circuit_breaker,
     get_circuit_breaker,
-    circuit_breaker
+)
+from netra_backend.app.core.circuit_breaker_registry_adaptive import (
+    circuit_breaker_registry as circuit_registry,
+)
+from netra_backend.app.core.circuit_breaker_types import (
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    CircuitMetrics,
+    CircuitState,
 )
 
 # NEW: Unified Resilience Framework exports
 from netra_backend.app.core.resilience import (
+    EnvironmentType,
+    ServiceTier,
     UnifiedCircuitBreaker,
-    UnifiedRetryManager,
     UnifiedFallbackChain,
     UnifiedResilienceRegistry,
-    resilience_registry,
-    with_resilience,
+    UnifiedRetryManager,
     register_api_service,
     register_database_service,
     register_llm_service,
-    EnvironmentType,
-    ServiceTier
+    resilience_registry,
+    with_resilience,
 )
 
 # Export all public interfaces (legacy + unified)

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Split learnings.xml into modular files by category."""
 
-import xml.etree.ElementTree as ET
-from pathlib import Path
-from collections import defaultdict
-from typing import Dict, List
 import re
+import xml.etree.ElementTree as ET
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List
+
 
 def fix_xml_content(content: str) -> str:
     """Fix common XML issues in content."""

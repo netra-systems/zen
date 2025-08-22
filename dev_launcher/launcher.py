@@ -2,42 +2,42 @@
 Main launcher class for the development environment.
 """
 
-import os
-import sys
-import time
-import json
-import hashlib
-import logging
-import threading
-import signal
-import atexit
 import asyncio
-from typing import Optional, Dict, List
-from pathlib import Path
+import atexit
+import hashlib
+import json
+import logging
+import os
+import signal
+import sys
+import threading
+import time
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, Future
+from pathlib import Path
+from typing import Dict, List, Optional
 
+from dev_launcher.cache_manager import CacheManager
 from dev_launcher.config import LauncherConfig
+from dev_launcher.critical_error_handler import CriticalError, critical_handler
+from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.environment_checker import EnvironmentChecker
+from dev_launcher.environment_validator import EnvironmentValidator
+from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.health_registration import HealthRegistrationHelper
+from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
+from dev_launcher.log_streamer import LogManager, setup_logging
+from dev_launcher.migration_runner import MigrationRunner
+from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.process_manager import ProcessManager
 from dev_launcher.secret_loader import SecretLoader
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
-from dev_launcher.process_manager import ProcessManager
-from dev_launcher.log_streamer import LogManager, setup_logging
-from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
+from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.summary_display import SummaryDisplay
 from dev_launcher.utils import check_emoji_support, print_with_emoji
-from dev_launcher.health_registration import HealthRegistrationHelper
-from dev_launcher.startup_validator import StartupValidator
-from dev_launcher.cache_manager import CacheManager
-from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
-from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
-from dev_launcher.critical_error_handler import critical_handler, CriticalError
-from dev_launcher.migration_runner import MigrationRunner
-from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.websocket_validator import WebSocketValidator
-from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
-from dev_launcher.environment_validator import EnvironmentValidator
 
 logger = logging.getLogger(__name__)
 
@@ -285,7 +285,7 @@ class DevLauncher:
                         if len(parts) >= 5:
                             pid = parts[-1]
                             if pid.isdigit():
-                                subprocess.run(f"taskkill //F //PID {pid}", shell=True)
+                                subprocess.run(f"taskkill /F /PID {pid}", shell=True)
                                 self._print("✅", "PORT", f"Freed port {port}")
             except Exception as e:
                 logger.error(f"Failed to free port {port}: {e}")

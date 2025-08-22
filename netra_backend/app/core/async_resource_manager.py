@@ -7,8 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Awaitable, Callable, List, Set, TypeVar
 
 from netra_backend.app.core.async_batch_processor import AsyncBatchProcessor
-from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.core.exceptions_service import ServiceError
 
 T = TypeVar('T')
 

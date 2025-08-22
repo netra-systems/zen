@@ -5,6 +5,7 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 from typing import Dict, List
+
 from pydantic import BaseModel, Field
 
 

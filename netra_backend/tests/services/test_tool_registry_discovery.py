@@ -3,17 +3,25 @@ Tool Registry Discovery Tests
 Tests tool discovery and search functionality
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from typing import Dict, List, Any, Optional
-from unittest.mock import MagicMock, patch, call, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
+import pytest
 from langchain_core.tools import BaseTool
 
 # Add project root to path
-
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.test_tool_registry_registration_core import MockTool
 

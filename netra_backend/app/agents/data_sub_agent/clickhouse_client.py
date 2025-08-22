@@ -6,12 +6,12 @@ Follows ClickHouse best practices for nested types and array operations.
 Business Value: Reliable data access for performance analysis.
 """
 
-from typing import Dict, Any, List, Optional
 import asyncio
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.config import get_config
+from netra_backend.app.logging_config import central_logger
 
 # ClickHouse client imports (assuming standard client available)
 try:

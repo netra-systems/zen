@@ -16,12 +16,11 @@ ARCHITECTURE COMPLIANCE:
 
 import json
 import logging
-from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, List
 
 from .crash_recovery_models import CrashReport, CrashSeverity, DetectionMethod
-
 
 logger = logging.getLogger(__name__)
 

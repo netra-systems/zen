@@ -1,4 +1,4 @@
-"""Unit tests for ModernConnectionManager information and stats.
+"""Unit tests for ConnectionManager information and stats.
 
 Tests WebSocket connection information retrieval and statistics.
 USER RETENTION CRITICAL - Real-time features keep users engaged.
@@ -7,17 +7,27 @@ Business Value: Ensures accurate connection tracking and monitoring
 for operational insights and user experience optimization.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from fastapi import WebSocket
 
-# Add project root to path
-
-from netra_backend.app.websocket.connection_manager import ModernConnectionManager
 from netra_backend.app.websocket.connection_info import ConnectionInfo
+
+# Add project root to path
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 
 # Add project root to path
 
@@ -28,8 +38,8 @@ class TestWebSocketConnectionManager:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
-        with patch('app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
-            manager = Modernget_connection_manager()
+        with patch('netra_backend.app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
+            manager = ConnectionManager()
             manager.orchestrator = Mock()
             return manager
     

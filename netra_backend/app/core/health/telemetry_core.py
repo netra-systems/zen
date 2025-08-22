@@ -4,12 +4,16 @@ Revenue-protecting telemetry for Enterprise SLA monitoring and compliance.
 Prevents $10K MRR loss through proactive health monitoring and alerting.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.health.telemetry_types import (
+    HealthMetric,
+    MetricType,
+    SLAViolation,
+)
 from netra_backend.app.core.health_types import HealthCheckResult
-from netra_backend.app.core.health.telemetry_types import MetricType, HealthMetric, SLAViolation
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

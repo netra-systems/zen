@@ -10,24 +10,34 @@ Critical Path: Cost prediction -> Model selection -> Response caching -> Token o
 Coverage: LLM cost tracking, model selection algorithms, caching strategies, token optimization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch, MagicMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.services.analytics.cost_tracker import CostTracker
+from netra_backend.app.services.cache.response_cache import ResponseCache
 
 # Add project root to path
-
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.services.llm.model_selector import ModelSelector
-from netra_backend.app.services.cache.response_cache import ResponseCache
-from netra_backend.app.services.analytics.cost_tracker import CostTracker
 
 # Add project root to path
 

@@ -4,10 +4,13 @@ Handles quality metrics requests and responses.
 Follows 450-line limit with 25-line function limit.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.quality_monitoring_service import (
+    QualityMonitoringService,
+)
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
 from netra_backend.app.services.websocket.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)

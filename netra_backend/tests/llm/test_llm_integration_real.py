@@ -6,28 +6,38 @@ fallback mechanisms, retry logic, and model switching.
 Maximum 300 lines, functions ≤8 lines per architecture requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
 import json
 import time
-import asyncio
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from llm.llm_response_processing import (
+    # Add project root to path
+    attempt_json_fallback_parse,
+    create_llm_response,
+    extract_response_content,
+    parse_nested_json_recursive,
+)
 from pydantic import BaseModel, Field, ValidationError
-from typing import List, Dict, Any, Optional
+from schemas import AppConfig, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from llm.llm_response_processing import (
-
-# Add project root to path
-
-    attempt_json_fallback_parse, parse_nested_json_recursive,
-    extract_response_content, create_llm_response
-)
-from schemas import AppConfig, LLMConfig
-from netra_backend.app.schemas.llm_response_types import LLMResponse
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_response_types import LLMResponse
 
 
 class ResponseModel(BaseModel):

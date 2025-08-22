@@ -1,24 +1,32 @@
 """Tests for PR router state encoding/decoding and CSRF functions."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import time
-import pytest
 from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
+    PR_STATE_TTL,
+    # Add project root to path
     _build_pr_state_data,
-    _encode_state_to_base64,
     _decode_state_from_base64,
-    _validate_state_timestamp,
-    _validate_and_consume_csrf_token,
+    _encode_state_to_base64,
     _store_csrf_token_in_redis,
-    PR_STATE_TTL
+    _validate_and_consume_csrf_token,
+    _validate_state_timestamp,
 )
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 

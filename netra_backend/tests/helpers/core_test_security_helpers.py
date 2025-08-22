@@ -4,7 +4,8 @@ Provides reusable security mock creation and logging utilities.
 Split from core_test_helpers.py to maintain 450-line limit.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from cryptography.fernet import Fernet
 
 

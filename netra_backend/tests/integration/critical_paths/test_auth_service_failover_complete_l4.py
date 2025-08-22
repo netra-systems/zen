@@ -3,24 +3,34 @@ L4 Integration Test: Auth Service Failover Complete
 Tests auth service failover, recovery, and high availability
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import random
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
-import random
+
+import pytest
+
+from netra_backend.app.config import settings
+from netra_backend.app.services.auth_failover_service import AuthFailoverService
 
 # Add project root to path
-
 from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.auth_failover_service import AuthFailoverService
 from netra_backend.app.services.health_monitor import HealthMonitor
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.config import settings
 
 # Add project root to path
 

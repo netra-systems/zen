@@ -19,12 +19,12 @@ Options:
   --files   Specific files to check (default: all project test files)
 """
 
-import sys
 import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
 from typing import List, Optional, Set
-import subprocess
-import os
 
 # Import our existing validators
 from project_test_validator import ProjectTestValidator, TestViolation

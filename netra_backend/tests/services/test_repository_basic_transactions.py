@@ -3,25 +3,33 @@ Tests for basic database repository transaction management
 Tests basic transaction handling, rollback scenarios, and error handling
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
+import pytest
+from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
 # Add project root to path
-
 from netra_backend.tests.services.shared.transaction_test_helpers import (
-
-# Add project root to path
-    MockDatabaseModel, 
-    MockRepository, 
-    TransactionTestManager
+    # Add project root to path
+    MockDatabaseModel,
+    MockRepository,
+    TransactionTestManager,
 )
 
 

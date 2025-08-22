@@ -3,14 +3,14 @@ Multiprocessing resource cleanup utilities.
 Handles proper cleanup of multiprocessing resources to prevent semaphore leaks.
 """
 
-import multiprocessing
 import atexit
+import logging
+import multiprocessing
+import multiprocessing.synchronize
 import signal
 import sys
-import logging
-from typing import List, Union, Optional
 from types import FrameType
-import multiprocessing.synchronize
+from typing import List, Optional, Union
 
 logger = logging.getLogger(__name__)
 

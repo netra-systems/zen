@@ -2,12 +2,21 @@
 
 import enum
 from datetime import datetime
-from typing import List, Optional, Dict, Any, TypedDict, Union, TypeVar, Generic
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, Generic, List, Optional, TypedDict, TypeVar, Union
+
 from langchain_core.messages import BaseMessage
+from pydantic import BaseModel, ConfigDict, Field
 
 # Import unified agent types from single source of truth
-from netra_backend.app.schemas.registry import AgentStatus, AgentResult, AgentMetadata, ToolResultData, DeepAgentState, AgentState
+from netra_backend.app.schemas.registry import (
+    AgentMetadata,
+    AgentResult,
+    AgentState,
+    AgentStatus,
+    DeepAgentState,
+    ToolResultData,
+)
+
 
 class SubAgentLifecycle(str, enum.Enum):
     PENDING = "pending"

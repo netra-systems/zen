@@ -1,13 +1,15 @@
 """Utilities Tests - Split from log_reader.py"""
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Any, AsyncIterator
-from datetime import datetime, timedelta
 import asyncio
 import json
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, AsyncIterator, Dict, List, Optional
+
 from google.cloud import logging as gcp_logging
-from .base import GCPBaseClient, GCPConfig
+
 from ..unified.base_interfaces import ILogAnalyzer
+from .base import GCPBaseClient, GCPConfig
 
 
 @dataclass

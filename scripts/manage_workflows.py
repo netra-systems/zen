@@ -9,12 +9,12 @@ import json
 import os
 import subprocess
 import sys
-import yaml
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-from workflow_presets import WorkflowPresets
+import yaml
 from workflow_config_utils import WorkflowConfigUtils
+from workflow_presets import WorkflowPresets
 
 
 class WorkflowManager:

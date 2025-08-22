@@ -7,11 +7,12 @@ Follows CLAUDE.md requirements: intelligent splitting strategies.
 
 import ast
 import os
-import sys
 import re
-from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class SplitSuggestion:

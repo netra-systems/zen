@@ -4,16 +4,17 @@ Demonstrates how to use the comprehensive agent fixtures module
 ≤300 lines, ≤8 lines per function - ARCHITECTURAL COMPLIANCE
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from netra_backend.tests.test_utilities.agent_fixtures import (
+    AgentBuilder,
+    AgentOrchestrator,
+    create_agent_state,
     create_mock_supervisor,
     create_mock_triage_agent,
-    create_agent_state,
-    AgentBuilder,
-    AgentOrchestrator
 )
 
 

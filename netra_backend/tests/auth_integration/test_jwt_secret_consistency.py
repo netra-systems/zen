@@ -4,19 +4,21 @@ Ensures both services use the same JWT secret for token validation.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import os
 import sys
+from unittest.mock import MagicMock, patch
+
 import httpx
-from unittest.mock import patch, MagicMock
+import pytest
 
 # Add auth_service to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "auth_service"))
 
-from auth_service.auth_core.secret_loader import AuthSecretLoader
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.secret_loader import AuthSecretLoader
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.schemas.Config import AppConfig
 
@@ -196,9 +198,10 @@ class TestJWTSecretIntegration:
     
     async def test_backend_auth_integration_uses_same_secret(self):
         """Test that backend auth integration validates tokens consistently."""
+        from unittest.mock import AsyncMock
+
         from netra_backend.app.auth_integration.auth import get_current_user
         from netra_backend.app.clients.auth_client import auth_client
-        from unittest.mock import AsyncMock
         
         test_secret = "backend-integration-test-secret-32"
         

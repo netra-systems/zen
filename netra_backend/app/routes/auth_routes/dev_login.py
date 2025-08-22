@@ -1,14 +1,16 @@
 """
 Development Login Logic
 """
+import os
+
+import httpx
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.services.user_service import user_service
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.schemas.registry import UserCreate
+
 from netra_backend.app.schemas.auth_types import DevLoginRequest
-import httpx
-import os
+from netra_backend.app.schemas.registry import UserCreate
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.user_service import user_service
 
 
 def validate_dev_login_allowed(oauth_config) -> None:

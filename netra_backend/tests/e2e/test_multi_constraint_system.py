@@ -4,22 +4,33 @@ Tests system-wide optimization workflows with multiple constraints.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from typing import Dict, List
+
+import pytest
 from schemas import SubAgentLifecycle
 
 # Add project root to path
-
-from netra_backend.tests.e2e.multi_constraint_test_helpers import (
-
-# Add project root to path
-    create_agent_instances, build_multi_constraint_setup,
-    execute_multi_constraint_workflow, create_holistic_optimization_state,
-    create_infrastructure_app_state, validate_basic_workflow_execution,
-    validate_completed_or_fallback_states
+from tests.e2e.multi_constraint_test_helpers import (
+    build_multi_constraint_setup,
+    # Add project root to path
+    create_agent_instances,
+    create_holistic_optimization_state,
+    create_infrastructure_app_state,
+    execute_multi_constraint_workflow,
+    validate_basic_workflow_execution,
+    validate_completed_or_fallback_states,
 )
 
 

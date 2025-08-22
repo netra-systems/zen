@@ -13,9 +13,10 @@
 import hashlib
 import json
 import re
-from typing import Optional, Dict, Any
-from netra_backend.app.redis_manager import RedisManager
+from typing import Any, Dict, Optional
+
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.redis_manager import RedisManager
 
 
 def normalize_request(request: str) -> str:

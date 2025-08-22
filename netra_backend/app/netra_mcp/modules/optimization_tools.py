@@ -1,7 +1,7 @@
 """Optimization Tools Module - MCP tools for optimization operations"""
 
 import json
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class OptimizationTools:

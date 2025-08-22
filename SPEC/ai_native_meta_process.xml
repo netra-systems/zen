@@ -140,13 +140,13 @@
             </features>
             <usage>
                 # Default fast feedback
-                python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+                python unified_test_runner.py --level integration --no-coverage --fast-fail
                 
                 # Agent changes with real LLM
-                python -m test_framework.test_runner --level agents --real-llm
+                python unified_test_runner.py --level agents --real-llm
                 
                 # Pre-release comprehensive
-                python -m test_framework.test_runner --level all --staging
+                python unified_test_runner.py --level all --staging
             </usage>
         </tool>
 
@@ -494,11 +494,11 @@
                    - Database migrations
                    - Comprehensive tests
                 3. Run validation:
-                   python -m test_framework.test_runner --level integration
+                   python unified_test_runner.py --level integration
                 4. Deploy to staging:
                    python scripts/deploy_staging.py --service email_service
                 5. Validate in staging:
-                   python -m test_framework.test_runner --level e2e --staging
+                   python unified_test_runner.py --level e2e --staging
                 6. Merge and deploy to production
             </process>
             <result>
@@ -518,7 +518,7 @@
                    test_websocket_connection_persistence_beyond_30s()
                 4. AI implements fix based on test requirements
                 5. Validate fix:
-                   python -m test_framework.test_runner --level websocket
+                   python unified_test_runner.py --level websocket
                 6. Update learnings:
                    Add to SPEC/learnings/websocket_timeout_fix.xml
                 7. Deploy fix with monitoring
@@ -541,7 +541,7 @@
                 4. Execute migration:
                    python scripts/migrate_to_microservices.py --validate
                 5. Comprehensive validation:
-                   python -m test_framework.test_runner --level all
+                   python unified_test_runner.py --level all
                 6. Staged rollout with feature flags
             </process>
             <result>

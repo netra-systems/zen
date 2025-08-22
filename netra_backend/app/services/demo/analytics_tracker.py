@@ -1,8 +1,8 @@
 """Analytics tracking for demo service."""
 
 import json
-from datetime import datetime, timedelta, UTC
-from typing import Dict, Any
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager

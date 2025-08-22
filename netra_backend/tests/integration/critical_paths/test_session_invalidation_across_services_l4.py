@@ -12,19 +12,28 @@ Critical scenarios: Single logout invalidates all sessions, WebSocket terminatio
 Redis sessions removed, JWT tokens blacklisted, API calls rejected, multi-device invalidation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import httpx
-import websockets
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
+import httpx
+import pytest
+import websockets
 from l4_staging_critical_base import L4StagingCriticalPathTestBase
 
 

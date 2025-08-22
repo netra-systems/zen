@@ -1,27 +1,29 @@
 """Handlers Tests - Split from test_dev_launcher_errors.py"""
 
 import asyncio
-import pytest
-import time
-import sys
-import os
-import subprocess
-import signal
-import requests
-import logging
-import re
 import json
-import threading
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Pattern
-from concurrent.futures import ThreadPoolExecutor
-from queue import Queue, Empty
+import logging
+import os
+import re
+import signal
+import socket
+import subprocess
+import sys
 import tempfile
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from queue import Empty, Queue
+from typing import Dict, List, Optional, Pattern, Tuple
+
+import pytest
+import requests
+
 from dev_launcher import DevLauncher, LauncherConfig
+from dev_launcher.cache_manager import CacheManager
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager
-from dev_launcher.cache_manager import CacheManager
-import socket
 
 
 class TestSyntaxFix:

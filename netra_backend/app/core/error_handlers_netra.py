@@ -1,10 +1,10 @@
 """NetraException specialized error handler."""
 
-from typing import Optional, Union
 from datetime import datetime, timezone
+from typing import Optional, Union
 
 from netra_backend.app.core.error_response_models import ErrorResponse
-from netra_backend.app.core.exceptions import NetraException, ErrorSeverity
+from netra_backend.app.core.exceptions import ErrorSeverity, NetraException
 
 
 class NetraExceptionHandler:

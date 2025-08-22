@@ -3,10 +3,11 @@
 Verification script for startup issue resolution.
 """
 
-import sys
 import subprocess
+import sys
 import time
 from pathlib import Path
+
 
 def test_module_import():
     """Test that the module can be imported correctly."""

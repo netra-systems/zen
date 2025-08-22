@@ -13,30 +13,44 @@ Coverage: Real user service, subscription management, feature flags, usage meter
 WebSocket notifications, payment gateway (mocked), database transactions, audit logging
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any, Tuple
-from decimal import Decimal
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch, MagicMock
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
-
-from netra_backend.app.services.user_service import user_service
-from netra_backend.app.schemas.UserPlan import (
-
-# Add project root to path
-    PlanTier, UserPlan, PlanFeatures, PlanDefinition, 
-    PLAN_DEFINITIONS, PlanUpgrade, UsageRecord
-)
+import pytest
 from ws_manager import get_manager
+
+from netra_backend.app.schemas.UserPlan import (
+    PLAN_DEFINITIONS,
+    PlanDefinition,
+    PlanFeatures,
+    # Add project root to path
+    PlanTier,
+    PlanUpgrade,
+    UsageRecord,
+    UserPlan,
+)
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
+
+# Add project root to path
+from netra_backend.app.services.user_service import user_service
 
 logger = logging.getLogger(__name__)
 

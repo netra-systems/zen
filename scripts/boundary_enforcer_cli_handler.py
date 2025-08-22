@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from boundary_enforcer_core_types import BoundaryViolation
 
+
 class CLIArgumentParser:
     """Handles command line argument parsing"""
     

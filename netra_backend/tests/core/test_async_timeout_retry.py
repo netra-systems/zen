@@ -3,24 +3,36 @@ Tests for async timeout and retry functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.core.async_retry_logic import async_timeout, with_timeout, with_retry
+# Add project root to path
+from netra_backend.app.core.async_retry_logic import (
+    async_timeout,
+    with_retry,
+    with_timeout,
+)
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError
 from netra_backend.tests.helpers.async_utils_helpers import (
-
-# Add project root to path
-    create_quick_operation,
-    create_slow_operation,
-    create_retry_counter,
     create_eventually_successful,
+    # Add project root to path
+    create_quick_operation,
+    create_retry_counter,
+    create_slow_operation,
 )
 
 

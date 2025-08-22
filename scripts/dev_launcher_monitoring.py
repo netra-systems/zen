@@ -5,9 +5,9 @@ Provides service readiness checks and browser integration.
 """
 
 import time
-import webbrowser
-import urllib.request
 import urllib.error
+import urllib.request
+import webbrowser
 from typing import Optional
 
 

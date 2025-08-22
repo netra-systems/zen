@@ -1,15 +1,15 @@
 """
-Pytest configuration for auth service tests
-Fixtures and test setup
+Auth service specific test configuration.
+Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
-import pytest
 import asyncio
 import os
 from typing import AsyncGenerator
 from unittest.mock import patch
 
-# Set test environment variables
-os.environ["ENVIRONMENT"] = "test"
+import pytest
+
+# Set auth-specific environment variables (common ones handled by root conftest)
 os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
 os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
 os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
@@ -33,8 +33,8 @@ async def auth_db():
     await auth_db.close()
 
 @pytest.fixture
-def mock_redis():
-    """Mock Redis for session management"""
+def mock_auth_redis():
+    """Auth-specific Redis mock for session management"""
     with patch('auth_core.core.session_manager.redis') as mock:
         mock.ping.return_value = True
         mock.get.return_value = None

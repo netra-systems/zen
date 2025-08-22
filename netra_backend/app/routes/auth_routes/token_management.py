@@ -3,9 +3,10 @@ Token Management Logic
 """
 from fastapi import HTTPException, status
 from fastapi.responses import RedirectResponse
+
+from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
 from netra_backend.app.schemas.Token import TokenPayload
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
 
 
 def validate_user_auth(user) -> None:
@@ -43,7 +44,9 @@ def _handle_oauth_redirect_error(e: Exception) -> RedirectResponse:
 async def execute_oauth_redirect(request, redirect_uri: str) -> RedirectResponse:
     """Execute OAuth redirect with error handling."""
     try:
-        from netra_backend.app.clients.auth_client import oauth_client  # Import here to avoid circular imports
+        from netra_backend.app.clients.auth_client import (
+            oauth_client,  # Import here to avoid circular imports
+        )
         return await oauth_client.google.authorize_redirect(request, redirect_uri)
     except Exception as e:
         return _handle_oauth_redirect_error(e)

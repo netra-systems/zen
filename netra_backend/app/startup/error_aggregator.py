@@ -18,17 +18,22 @@ Usage:
     report = await aggregator.generate_report()
 """
 
-import aiosqlite
 import difflib
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
-from datetime import datetime, timezone, timedelta
+from typing import Dict, List, Optional, Tuple
 
-from netra_backend.app.schemas.startup_types import (
-    StartupError, ErrorPattern, ErrorTrend, ErrorPhase, ErrorType
-)
-from netra_backend.app.core.exceptions_base import NetraException
+import aiosqlite
+
 from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.schemas.startup_types import (
+    ErrorPattern,
+    ErrorPhase,
+    ErrorTrend,
+    ErrorType,
+    StartupError,
+)
 
 
 class ErrorAggregator:

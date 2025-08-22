@@ -1,13 +1,16 @@
 """Modernized Query Builder with BaseExecutionInterface support."""
 
 import time
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, 
-    ExecutionStatus, WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger as logger

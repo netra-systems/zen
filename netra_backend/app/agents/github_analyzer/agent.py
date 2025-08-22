@@ -4,28 +4,32 @@ Analyzes repositories to map AI/LLM operations and configurations.
 Integrates with existing supervisor, state management, and error handling.
 """
 
-from typing import Dict, Optional, List, Any
 import asyncio
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.schemas.strict_types import TypedAgentResult
-from netra_backend.app.core.type_validators import agent_type_safe
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.core.reliability import get_reliability_wrapper
-from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.github_analyzer.config_parser import (
+    ConfigurationExtractor,
+)
+from netra_backend.app.agents.github_analyzer.github_client import GitHubAPIClient
+from netra_backend.app.agents.github_analyzer.llm_mapper import LLMCallMapper
+from netra_backend.app.agents.github_analyzer.output_formatter import (
+    AIOperationsMapFormatter,
+)
+from netra_backend.app.agents.github_analyzer.pattern_detector import AIPatternDetector
 
 # Import modular components
 from netra_backend.app.agents.github_analyzer.scanner_core import RepositoryScanner
-from netra_backend.app.agents.github_analyzer.pattern_detector import AIPatternDetector
-from netra_backend.app.agents.github_analyzer.config_parser import ConfigurationExtractor
-from netra_backend.app.agents.github_analyzer.llm_mapper import LLMCallMapper
 from netra_backend.app.agents.github_analyzer.tool_analyzer import ToolUsageAnalyzer
-from netra_backend.app.agents.github_analyzer.output_formatter import AIOperationsMapFormatter
-from netra_backend.app.agents.github_analyzer.github_client import GitHubAPIClient
+from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.reliability import get_reliability_wrapper
+from netra_backend.app.core.type_validators import agent_type_safe
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
 class GitHubAnalyzerService(BaseSubAgent):

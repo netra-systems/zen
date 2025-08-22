@@ -3,9 +3,9 @@ Input sanitization and normalization functionality.
 Provides comprehensive sanitization for detected security threats.
 """
 
-import re
-import html
 import base64
+import html
+import re
 import urllib.parse
 from typing import List, Set
 

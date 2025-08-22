@@ -76,8 +76,8 @@
         <action>Delete/rewrite tests with 90%+ failure rate</action>
       </actions>
       <validation>
-        Backend: python scripts/test_backend.py --coverage
-        Frontend: python scripts/test_frontend.py --coverage
+        Backend: python unified_test_runner.py --service backend --coverage
+        Frontend: python unified_test_runner.py --service frontend --coverage
         Automated improvement: python scripts/test_updater.py --monitor
         Bad test detection: python -m test_framework.bad_test_reporter --summary
       </validation>
@@ -383,8 +383,8 @@
       <description>ALWAYS run these tests before committing</description>
       <commands>
         <command priority="1">python test_runner.py --mode quick</command>
-        <command priority="2">python scripts/test_backend.py --category unit</command>
-        <command priority="3">python scripts/test_frontend.py --category components</command>
+        <command priority="2">python unified_test_runner.py --service backend --category unit</command>
+        <command priority="3">python unified_test_runner.py --service frontend --category components</command>
       </commands>
     </checklist-item>
     
@@ -393,8 +393,8 @@
       <description>Run for major changes or before PR</description>
       <commands>
         <command>python test_runner.py --mode comprehensive</command>
-        <command>python scripts/test_backend.py --coverage</command>
-        <command>python scripts/test_frontend.py --coverage</command>
+        <command>python unified_test_runner.py --service backend --coverage</command>
+        <command>python unified_test_runner.py --service frontend --coverage</command>
       </commands>
     </checklist-item>
   </section>
@@ -701,23 +701,23 @@
     <command-group name="validation">
       <title>Validation Commands</title>
       <command>python test_runner.py --mode quick  # Quick smoke tests including imports</command>
-      <command>python scripts/test_backend.py --fail-fast  # Stop on first failure</command>
-      <command>python scripts/test_frontend.py --lint  # Run ESLint</command>
+      <command>python unified_test_runner.py --service backend --fail-fast  # Stop on first failure</command>
+      <command>python unified_test_runner.py --service frontend --lint  # Run ESLint</command>
     </command-group>
     
     <command-group name="specific-tests">
       <title>Run Specific Test Categories</title>
-      <command>python scripts/test_backend.py --category smoke  # Smoke tests only</command>
-      <command>python scripts/test_backend.py --category unit  # Unit tests only</command>
-      <command>python scripts/test_backend.py --category agent  # Agent tests only</command>
-      <command>python scripts/test_frontend.py --category components  # Component tests only</command>
+      <command>python unified_test_runner.py --service backend --category smoke  # Smoke tests only</command>
+      <command>python unified_test_runner.py --service backend --category unit  # Unit tests only</command>
+      <command>python unified_test_runner.py --service backend --category agent  # Agent tests only</command>
+      <command>python unified_test_runner.py --service frontend --category components  # Component tests only</command>
     </command-group>
     
     <command-group name="coverage">
       <title>Coverage Reports</title>
       <command>python test_runner.py --mode comprehensive  # Full coverage</command>
-      <command>python scripts/test_backend.py --coverage  # Backend coverage</command>
-      <command>python scripts/test_frontend.py --coverage  # Frontend coverage</command>
+      <command>python unified_test_runner.py --service backend --coverage  # Backend coverage</command>
+      <command>python unified_test_runner.py --service frontend --coverage  # Frontend coverage</command>
     </command-group>
   </section>
   

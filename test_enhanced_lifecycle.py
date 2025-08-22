@@ -11,18 +11,21 @@ Tests the key fixes implemented:
 
 import asyncio
 import time
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
+
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 # Import our enhanced components
 from netra_backend.app.websocket.enhanced_lifecycle_manager import (
+    ConnectionPool,
     EnhancedLifecycleManager,
     HeartbeatConfig,
-    ConnectionPool,
-    ShutdownConfig
+    ShutdownConfig,
 )
-from netra_backend.app.websocket.lifecycle_integration import WebSocketLifecycleIntegrator
-from netra_backend.app.websocket.connection import ConnectionInfo
-from datetime import datetime, timezone
+from netra_backend.app.websocket.lifecycle_integration import (
+    WebSocketLifecycleIntegrator,
+)
 
 
 async def test_enhanced_heartbeat_mechanism():

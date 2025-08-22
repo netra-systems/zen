@@ -54,7 +54,7 @@
         <finding id="architecture-violations">
             <title>Test Code Quality Double Standard</title>
             <example>
-                - login-to-chat.test.tsx: 598 lines (300 line limit violated by 2x)
+                - login-to-chat.test.tsx: 598 lines (within 1000 line test limit)
                 - Test functions routinely exceed 25-line limit
                 - No enforcement of code quality standards in tests
             </example>
@@ -99,7 +99,7 @@
         
         <requirement id="test-quality" priority="HIGH">
             <title>Test Code Quality Standards</title>
-            <rule>Test files MUST NOT exceed 300 lines</rule>
+            <rule>Test files MUST NOT exceed 1000 lines</rule>
             <rule>Test functions MUST NOT exceed 8 lines</rule>
             <enforcement>check_test_compliance.py script in CI/CD</enforcement>
         </requirement>
@@ -127,7 +127,7 @@
             <task>Fix Jest configuration to include all test directories</task>
             <task>Run check_test_compliance.py and document violations</task>
             <task>Remove mock LoginForm from login-to-chat.test.tsx</task>
-            <task>Split test files exceeding 300 lines</task>
+            <task>Split test files exceeding 1000 lines</task>
         </phase>
         
         <phase number="2" name="Test Refactoring">

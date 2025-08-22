@@ -4,22 +4,22 @@ Shared fixtures and utilities for service mesh critical path testing.
 Extracted from test_service_mesh_l4.py to maintain DRY principles.
 """
 
-import pytest
 import asyncio
+import json
+import logging
+import os
+import random
 import time
 import uuid
-import logging
-import json
-import os
-from typing import Dict, List, Optional, Any
-from unittest.mock import patch
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
-import random
+import pytest
 
 from netra_backend.app.core.config import get_config
 from netra_backend.app.redis_manager import RedisManager
-from unittest.mock import AsyncMock, MagicMock
 
 logger = logging.getLogger(__name__)
 

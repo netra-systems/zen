@@ -3,19 +3,33 @@ Basic LLM Agent E2E Tests
 Core functionality tests with ≤8 line functions for architectural compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
 import json
 import uuid
-import asyncio
 from unittest.mock import AsyncMock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.test_fixtures import supervisor_agent, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher
+from netra_backend.tests.test_fixtures import (
+    mock_llm_manager,
+    mock_tool_dispatcher,
+    mock_websocket_manager,
+    supervisor_agent,
+)
 from netra_backend.tests.test_helpers import setup_mock_llm_with_retry
 
 # Add project root to path

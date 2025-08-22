@@ -14,6 +14,8 @@ Admin Tool Dispatcher Module
 Modular implementation of admin tool dispatcher functionality
 split from monolithic file to comply with CLAUDE.md standards.
 """
-from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_core import AdminToolDispatcher
+from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_core import (
+    AdminToolDispatcher,
+)
 
 __all__ = ["AdminToolDispatcher"]

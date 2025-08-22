@@ -1,11 +1,20 @@
 """Quality Gate Service Validators and Threshold Checking"""
 
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
+from netra_backend.app.core.interfaces_quality import (
+    QualityValidator as CoreQualityValidator,
+)
+from netra_backend.app.core.quality_types import (
+    ContentType,
+    QualityLevel,
+    QualityMetrics,
+)
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
-from netra_backend.app.core.interfaces_quality import QualityValidator as CoreQualityValidator
-from netra_backend.app.core.quality_types import ContentType, QualityLevel, QualityMetrics
+from netra_backend.app.schemas.quality_types import (
+    QualityValidationResult,
+    QualityValidatorInterface,
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -63,7 +72,8 @@ class QualityValidator(QualityValidatorInterface):
         context: Optional[Dict[str, Any]] = None
     ) -> QualityValidationResult:
         """Validate content and return detailed quality results"""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
+
         from ..quality_gate_service import QualityGateService
         
         # Convert string content_type to ContentType enum

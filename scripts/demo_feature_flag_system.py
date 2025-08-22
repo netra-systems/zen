@@ -8,17 +8,17 @@ This script demonstrates the complete feature flag testing system capabilities:
 4. Feature status management
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.feature_flags import get_feature_flag_manager, FeatureStatus
-from test_framework.decorators import feature_flag, tdd_test, requires_feature
+from test_framework.decorators import feature_flag, requires_feature, tdd_test
+from test_framework.feature_flags import FeatureStatus, get_feature_flag_manager
 
 
 def print_header(title: str):
@@ -271,7 +271,7 @@ def main():
         print("   • Business value clearly demonstrated")
         
         print(f"\n📚 NEXT STEPS:")
-        print("   1. Run: python -m test_framework.test_runner --help")
+        print("   1. Run: python unified_test_runner.py --help")
         print("   2. View: app/tests/examples/test_tdd_workflow_demo.py")
         print("   3. Try: TEST_FEATURE_ENTERPRISE_SSO=enabled pytest ...")
         print("   4. Explore: test_framework/decorators.py for all options")

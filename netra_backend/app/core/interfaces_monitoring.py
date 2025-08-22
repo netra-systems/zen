@@ -1,8 +1,9 @@
 """Monitoring interfaces - compliance with 25-line function limit."""
 
-from typing import Dict, Any, Optional
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel
 
 
 class ComplianceMetrics(BaseModel):

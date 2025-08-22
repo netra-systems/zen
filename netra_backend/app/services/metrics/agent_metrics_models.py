@@ -4,12 +4,12 @@ Contains data classes and types for agent metrics collection.
 """
 
 import time
-from datetime import datetime, UTC
-from typing import Dict, List, Optional, Any, Set
-from collections import deque, defaultdict
-from dataclasses import dataclass, field
-from enum import Enum
 import uuid
+from collections import defaultdict, deque
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set
 
 
 class AgentMetricType(Enum):

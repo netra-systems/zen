@@ -3,9 +3,9 @@
 This module defines the core data models and enums used by the fallback response system.
 """
 
-from typing import List, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import List, Optional
 
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
 

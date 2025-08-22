@@ -3,23 +3,37 @@ Core SupplyResearcherAgent tests - LLM, WebSocket, State, Multi-provider
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.supply_researcher_fixtures import (
 
 # Add project root to path
-    mock_db, mock_llm_manager, mock_supply_service, agent, sample_state,
-    assert_websocket_updates_sent, assert_api_response_structure
+from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
+from netra_backend.tests.supply_researcher_fixtures import (
+    agent,
+    assert_api_response_structure,
+    assert_websocket_updates_sent,
+    # Add project root to path
+    mock_db,
+    mock_llm_manager,
+    mock_supply_service,
+    sample_state,
 )
 
 

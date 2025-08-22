@@ -4,24 +4,32 @@ This file shows best practices for using feature flags in tests,
 enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
+
 from test_framework.decorators import (
-
-# Add project root to path
-
-    feature_flag,
-    tdd_test,
-    requires_feature,
     experimental_test,
-    performance_test,
-    integration_only,
-    unit_only,
-    requires_env,
+    # Add project root to path
+    feature_flag,
     flaky_test,
-    skip_if_fast_mode
+    integration_only,
+    performance_test,
+    requires_env,
+    requires_feature,
+    skip_if_fast_mode,
+    tdd_test,
+    unit_only,
 )
 
 
@@ -103,6 +111,7 @@ def test_api_response_time():
     Skipped in fast mode unless ENABLE_PERFORMANCE_TESTS=true.
     """
     import time
+
     from netra_backend.app.routes.health import health_check
     
     start = time.time()
@@ -226,7 +235,9 @@ def test_authenticated_websocket_performance():
     - Is skipped in fast mode
     """
     from netra_backend.app.auth_integration.auth import create_auth_token
-    from netra_backend.app.websocket.authenticated_connection import AuthenticatedWebSocket
+    from netra_backend.app.websocket.authenticated_connection import (
+        AuthenticatedWebSocket,
+    )
     
     token = create_auth_token("user123")
     ws = AuthenticatedWebSocket(token)

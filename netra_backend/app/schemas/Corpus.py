@@ -1,7 +1,9 @@
-from datetime import datetime
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, ConfigDict
 import uuid
+from datetime import datetime
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, ConfigDict
+
 
 class CorpusBase(BaseModel):
     name: str

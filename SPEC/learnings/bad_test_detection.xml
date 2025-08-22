@@ -38,7 +38,7 @@
     </detection-criteria>
     <usage>
       <enable>Enabled by default in all test runs</enable>
-      <disable>python scripts/test_backend.py --no-bad-test-detection</disable>
+      <disable>python unified_test_runner.py --service backend --no-bad-test-detection</disable>
       <report>python -m test_framework.bad_test_reporter</report>
       <reset>python -m test_framework.bad_test_reporter --reset</reset>
     </usage>
@@ -116,7 +116,7 @@
         </hooks>
       </integration>
       <integration component="backend_tests">
-        <file>scripts/test_backend.py</file>
+        <file>unified_test_runner.py --service backend</file>
         <description>Command-line argument support and plugin activation</description>
         <flag>--no-bad-test-detection to disable</flag>
       </integration>

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Process test results and generate reports."""
 
-import json
 import argparse
-from pathlib import Path
-from typing import Dict, List, Any
+import json
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class TestResultProcessor:

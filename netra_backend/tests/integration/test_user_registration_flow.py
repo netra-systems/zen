@@ -10,30 +10,40 @@ Business Value Justification (BVJ):
 This test validates user registration and email verification flows.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
+import pytest
 from fastapi import status
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.tests.integration.helpers.user_flow_helpers import (
-
-# Add project root to path
-    generate_test_user_data, MockAuthService, simulate_user_journey
+    MockAuthService,
+    # Add project root to path
+    generate_test_user_data,
+    simulate_user_journey,
 )
+
 
 class TestUserRegistrationFlow:
     """Test user registration and verification flow"""

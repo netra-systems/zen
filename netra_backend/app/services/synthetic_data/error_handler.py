@@ -2,8 +2,10 @@
 Error Handler Module - Comprehensive error handling and recovery
 """
 
-from typing import Dict, Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:

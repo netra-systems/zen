@@ -11,35 +11,45 @@ Coverage: Real LLM integration, actual agent coordination, production billing ev
 L4 Realism: Tests against real staging services, actual LLM providers, production-like agent workflows
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
-from dataclasses import dataclass
-import json
-
-# Add project root to path
-
-from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.services.llm_cache_service import LLMCacheService
-from netra_backend.app.services.user_service import CRUDUser as UserService
-from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
-from netra_backend.app.services.audit_service import AuditService
-from netra_backend.app.schemas.UserPlan import PlanTier
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
 # from netra_backend.app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
-from unittest.mock import AsyncMock, MagicMock
 # from netra_backend.app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from netra_backend.app.schemas.UserPlan import PlanTier
+
+# Add project root to path
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.services.audit_service import AuditService
+from netra_backend.app.services.llm_cache_service import LLMCacheService
+from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
+from netra_backend.app.services.user_service import CRUDUser as UserService
+
 WebSocketService = AsyncMock
 # from netra_backend.app.services.state.state_manager import StateManager
 StateManager = AsyncMock

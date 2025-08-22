@@ -4,6 +4,7 @@
 import re
 from pathlib import Path
 
+
 def fix_auth_urls_in_file(filepath):
     """Fix auth URLs in a test file."""
     with open(filepath, 'r', encoding='utf-8') as f:

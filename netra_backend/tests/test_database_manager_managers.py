@@ -4,21 +4,31 @@ Tests real PostgreSQL integration using containerized databases to verify
 connection pooling, transaction management, and failover capabilities.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import psycopg2
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
+
 import asyncpg
+import psycopg2
+import pytest
 from testcontainers.postgres import PostgresContainer
 
 # Import database management components
 try:
-    from netra_backend.app.database.manager import DatabaseManager
     from netra_backend.app.database.connection_pool import ConnectionPool
+    from netra_backend.app.database.manager import DatabaseManager
 except ImportError:
     # Fallback if modules don't exist yet
     class DatabaseManager:

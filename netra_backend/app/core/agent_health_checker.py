@@ -7,8 +7,9 @@ Provides specialized health checking for agent components.
 
 import time
 from typing import Callable
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -16,7 +17,9 @@ logger = central_logger.get_logger(__name__)
 def register_agent_checker(register_func: Callable) -> None:
     """Register agent health checker if available."""
     try:
-        from netra_backend.app.services.metrics.agent_metrics import agent_metrics_collector
+        from netra_backend.app.services.metrics.agent_metrics import (
+            agent_metrics_collector,
+        )
         register_func("agents", create_agent_checker())
     except ImportError:
         logger.debug("Agent metrics not available, skipping agent health checker")

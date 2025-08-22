@@ -3,11 +3,11 @@ Validation functions for synthetic data
 """
 
 import re
-import uuid
 import statistics
-from datetime import datetime, UTC
-from typing import Dict, List, Optional
+import uuid
 from collections import namedtuple
+from datetime import UTC, datetime
+from typing import Dict, List, Optional
 
 
 class AuthValidationError(Exception):

@@ -4,23 +4,24 @@ Base classes and utilities for GCP integration.
 Provides common functionality for all GCP service integrations.
 """
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import asyncio
-from google.cloud import logging as gcp_logging
-from google.cloud import secretmanager
+from abc import ABC, abstractmethod
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 from google.auth import default
 from google.auth.exceptions import GoogleAuthError
-import aiohttp
-from contextlib import asynccontextmanager
+from google.cloud import logging as gcp_logging
+from google.cloud import secretmanager
 
 from ..unified.base_interfaces import (
     BaseTestComponent,
     ServiceConfig,
     ServiceStatus,
-    TestEnvironment
+    TestEnvironment,
 )
 
 
@@ -51,6 +52,7 @@ class GCPBaseClient(BaseTestComponent):
         try:
             if self.gcp_config.service_account_path:
                 import json
+
                 from google.oauth2 import service_account
                 with open(self.gcp_config.service_account_path, 'r') as f:
                     sa_info = json.load(f)

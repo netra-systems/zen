@@ -2,29 +2,31 @@
 FastAPI application factory module.
 Handles application creation, router registration, and middleware setup.
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
-from fastapi import HTTPException
 
+from netra_backend.app.core.app_factory_route_configs import (
+    get_all_route_configurations,
+)
+from netra_backend.app.core.app_factory_route_imports import import_all_route_modules
+from netra_backend.app.core.error_handlers import (
+    general_exception_handler,
+    http_exception_handler,
+    netra_exception_handler,
+    validation_exception_handler,
+)
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.lifespan_manager import lifespan
 from netra_backend.app.core.middleware_setup import (
-    setup_cors_middleware, 
     create_cors_redirect_middleware,
-    setup_session_middleware
+    setup_cors_middleware,
+    setup_session_middleware,
 )
 from netra_backend.app.core.request_context import (
     create_error_context_middleware,
-    create_request_logging_middleware
+    create_request_logging_middleware,
 )
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.error_handlers import (
-    netra_exception_handler,
-    validation_exception_handler,
-    http_exception_handler,
-    general_exception_handler,
-)
-from netra_backend.app.core.app_factory_route_imports import import_all_route_modules
-from netra_backend.app.core.app_factory_route_configs import get_all_route_configurations
+
 # OAuth now handled by auth service
 
 
@@ -60,14 +62,16 @@ def _add_ip_blocking_middleware(app: FastAPI) -> None:
 
 def _add_path_traversal_middleware(app: FastAPI) -> None:
     """Add path traversal protection middleware."""
-    from netra_backend.app.middleware.path_traversal_protection import path_traversal_protection_middleware
+    from netra_backend.app.middleware.path_traversal_protection import (
+        path_traversal_protection_middleware,
+    )
     app.middleware("http")(path_traversal_protection_middleware)
 
 
 def _add_security_headers_middleware(app: FastAPI) -> None:
     """Add security headers middleware."""
-    from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
     from netra_backend.app.config import settings
+    from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 
 

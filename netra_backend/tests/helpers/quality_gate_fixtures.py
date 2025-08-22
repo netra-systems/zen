@@ -1,19 +1,23 @@
 """Fixture helpers for Quality Gate Service tests"""
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 import hashlib
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.quality_gate_service import (
+    ContentType,
     QualityGateService,
     QualityLevel,
-    ContentType,
     QualityMetrics,
-    ValidationResult
+    ValidationResult,
 )
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.tests.helpers.quality_gate_helpers import create_redis_mock, create_quality_service
+from netra_backend.tests.helpers.quality_gate_helpers import (
+    create_quality_service,
+    create_redis_mock,
+)
 
 
 @pytest.fixture

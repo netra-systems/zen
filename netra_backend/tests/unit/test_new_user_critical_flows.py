@@ -13,26 +13,38 @@ to convert from free to paid. Any failure in these flows directly impacts revenu
 CRITICAL: Every test protects revenue by ensuring new user flows work perfectly.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
-from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash
-from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
+from netra_backend.app.auth_integration.auth import (
+    create_access_token,
+    get_password_hash,
+    validate_token_jwt,
+)
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.services.user_service import user_service
-from netra_backend.app.clients.auth_client import auth_client
 
 # Add project root to path
 

@@ -5,11 +5,12 @@ Supports access tokens, refresh tokens, and service tokens with proper claims.
 """
 
 import uuid
-import jwt
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
-from auth_service.auth_core.models.auth_models import TokenType, AuthProvider
+import jwt
+
+from auth_service.auth_core.models.auth_models import AuthProvider, TokenType
 
 
 class TokenFactory:

@@ -6,11 +6,11 @@ Each test gets isolated database state with proper cleanup.
 
 import asyncio
 import logging
-from typing import AsyncGenerator, Optional
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy import text
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Optional
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from auth_service.auth_core.database.models import Base
 

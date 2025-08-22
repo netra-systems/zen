@@ -3,7 +3,8 @@ Optimization Tool Handlers
 
 Contains handlers for advanced optimization and performance analysis tools.
 """
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
+
 from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
@@ -15,7 +16,9 @@ class OptimizationHandlers:
     
     async def _generic_optimization_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Generic handler for optimization tools"""
-        from netra_backend.app.services.apex_optimizer_service import ApexOptimizerService
+        from netra_backend.app.services.apex_optimizer_service import (
+            ApexOptimizerService,
+        )
         
         optimizer = ApexOptimizerService(self.db)
         

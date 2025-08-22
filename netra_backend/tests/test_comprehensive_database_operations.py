@@ -4,18 +4,27 @@ Testing database operations with mocked connections for reliability.
 Each function ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-import psutil
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import psutil
+import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession

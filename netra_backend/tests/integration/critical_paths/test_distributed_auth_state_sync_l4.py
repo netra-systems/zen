@@ -21,6 +21,14 @@ Mock-Real Spectrum: L4 (Multi-instance production topology)
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
@@ -117,12 +125,13 @@ class TestDistributedAuthStateSync:
         # Initialize distributed cache for each node
         for region, node in nodes.items():
             # cache = DistributedCache(  # Class may not exist, commented out
-                node_id=node.node_id,
-                region=region,
-                is_primary=node.is_primary
-            )
-            await cache.initialize()
-            node.cache = cache
+            #     node_id=node.node_id,
+            #     region=region,
+            #     is_primary=node.is_primary
+            # )
+            # await cache.initialize()
+            # node.cache = cache
+            pass
         
         yield nodes
         

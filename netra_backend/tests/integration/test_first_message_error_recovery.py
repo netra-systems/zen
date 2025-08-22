@@ -4,24 +4,34 @@ Components: Error Detection → Retry Logic → Circuit Breaker → State Recove
 Critical: System must gracefully recover from failures during first interaction
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, Mock, patch
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from schemas import UserInDB
+
+from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
+from netra_backend.app.services.agent_service_core import AgentService
 
 # Add project root to path
-
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket.unified.circuit_breaker import CircuitBreaker
 from netra_backend.app.websocket.unified.telemetry_manager import TelemetryManager
-from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
-from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

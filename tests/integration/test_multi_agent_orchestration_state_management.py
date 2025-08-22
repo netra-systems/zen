@@ -15,12 +15,13 @@ CRITICAL: Tests real agent coordination without mocking the core logic.
 
 import asyncio
 import json
-import pytest
 import time
-from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
 from datetime import datetime
-from unittest.mock import patch, AsyncMock, MagicMock
+from typing import Any, Dict, List, Optional, Set
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.mock_utils import mock_justified

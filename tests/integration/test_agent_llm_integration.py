@@ -1,9 +1,10 @@
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, AsyncMock
 
-from netra_backend.app.main import app
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.main import app
 from netra_backend.app.services.agent_service import AgentService
 
 client = TestClient(app)

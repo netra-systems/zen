@@ -7,12 +7,12 @@ in app.core.error_handlers. This file now provides backward compatibility.
 # Import from consolidated error handlers for backward compatibility
 from netra_backend.app.core.error_handlers import (
     ApiErrorHandler,
-    handle_exception,
+    general_exception_handler,
     get_http_status_code,
+    handle_exception,
+    http_exception_handler,
     netra_exception_handler,
     validation_exception_handler,
-    http_exception_handler,
-    general_exception_handler
 )
 
 # Maintain the original interface

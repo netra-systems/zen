@@ -18,12 +18,14 @@ Business Value Justification (BVJ):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -40,11 +42,17 @@ class TestStartupCheckResultImportIssue:
         The error demonstrates the exact issue seen in production.
         """
         # Import the EnvironmentChecker which has the wrong import
-        from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
-        
+        from netra_backend.app.services.apex_optimizer_agent.models import (
+            StartupCheckResult as WrongModel,
+        )
+        from netra_backend.app.startup_checks.environment_checks import (
+            EnvironmentChecker,
+        )
+
         # Import the correct StartupCheckResult for comparison
-        from netra_backend.app.startup_checks.models import StartupCheckResult as CorrectModel
-        from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult as WrongModel
+        from netra_backend.app.startup_checks.models import (
+            StartupCheckResult as CorrectModel,
+        )
         
         # Create an instance
         checker = EnvironmentChecker()
@@ -73,7 +81,9 @@ class TestStartupCheckResultImportIssue:
         
         This directly tests the method that fails in production.
         """
-        from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
+        from netra_backend.app.startup_checks.environment_checks import (
+            EnvironmentChecker,
+        )
         
         checker = EnvironmentChecker()
         
@@ -96,8 +106,12 @@ class TestStartupCheckResultImportIssue:
         """
         Test that demonstrates the signature mismatch between the two StartupCheckResult classes.
         """
-        from netra_backend.app.startup_checks.models import StartupCheckResult as CorrectModel
-        from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult as WrongModel
+        from netra_backend.app.services.apex_optimizer_agent.models import (
+            StartupCheckResult as WrongModel,
+        )
+        from netra_backend.app.startup_checks.models import (
+            StartupCheckResult as CorrectModel,
+        )
         
         # Test correct model accepts name as first positional argument
         correct_result = CorrectModel(
@@ -181,8 +195,9 @@ class TestStartupCheckIntegration:
         
         This test will fail if any startup check module has the wrong import.
         """
-        from netra_backend.app.startup_checks.checker import StartupChecker
         from unittest.mock import AsyncMock, MagicMock
+
+        from netra_backend.app.startup_checks.checker import StartupChecker
         
         # Create a mock app
         app = MagicMock()

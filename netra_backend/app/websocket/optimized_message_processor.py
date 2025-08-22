@@ -16,15 +16,15 @@ This module provides:
 """
 
 import asyncio
+import hashlib
+import heapq
 import json
 import time
-from typing import Dict, Any, List, Set, Optional, Union, Callable, Tuple
-from dataclasses import dataclass, field
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
 from enum import Enum
-import heapq
-import hashlib
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
@@ -239,8 +239,8 @@ class MessageCompressor:
             return message, False
         
         try:
-            import gzip
             import base64
+            import gzip
             
             start_time = time.time()
             
@@ -270,8 +270,8 @@ class MessageCompressor:
     def decompress_message(self, compressed_message: str) -> str:
         """Decompress message."""
         try:
-            import gzip
             import base64
+            import gzip
             
             # Decode from base64
             compressed_bytes = base64.b64decode(compressed_message.encode('ascii'))

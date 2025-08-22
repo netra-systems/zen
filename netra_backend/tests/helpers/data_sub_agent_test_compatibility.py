@@ -1,8 +1,8 @@
 """Test compatibility methods for DataSubAgent."""
 
 import json
-from typing import Dict, Optional, Any, List, Tuple
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger as logger

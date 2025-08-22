@@ -5,7 +5,8 @@ Handles JSON-RPC 2.0 request processing for MCP protocol.
 Separated from main service to maintain 450-line module limit.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from netra_backend.app.logging_config import CentralLogger
 
 logger = CentralLogger()

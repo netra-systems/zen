@@ -4,13 +4,13 @@ Comprehensive Import Issue Fixer v2 for Netra Backend
 Fixes ALL discovered import issues including data_sub_agent, demo_service, and more
 """
 
-import sys
-import os
-from pathlib import Path
-import re
-from typing import Dict, List, Tuple, Optional, Set
-import logging
 import ast
+import logging
+import os
+import re
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

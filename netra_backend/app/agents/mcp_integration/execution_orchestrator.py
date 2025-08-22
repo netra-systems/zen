@@ -8,27 +8,41 @@ eliminates duplicate patterns, ensures consistent performance monitoring.
 Revenue Impact: Reduces operational overhead by 40%, improves uptime SLA compliance.
 """
 
-from typing import Dict, List, Any, Optional, Callable, Set
-from dataclasses import dataclass, field
 import asyncio
 import time
+from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Set
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
-)
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
-from netra_backend.app.agents.mcp_integration.base_mcp_agent import (
-    BaseMCPAgent, MCPExecutionConfig, MCPExecutionResult
+from netra_backend.app.agents.base.interface import (
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector, MCPIntent
-from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager, MCPAgentContext
-from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability import (
+    CircuitBreakerConfig,
+    ReliabilityManager,
+)
+from netra_backend.app.agents.mcp_integration.base_mcp_agent import (
+    BaseMCPAgent,
+    MCPExecutionConfig,
+    MCPExecutionResult,
+)
+from netra_backend.app.agents.mcp_integration.context_manager import (
+    MCPAgentContext,
+    MCPContextManager,
+)
+from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
+    MCPIntent,
+    MCPIntentDetector,
+)
 from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.services.mcp_client_service import MCPClientService
 
 logger = central_logger.get_logger(__name__)

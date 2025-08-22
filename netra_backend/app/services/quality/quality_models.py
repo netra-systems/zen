@@ -3,9 +3,10 @@ Quality Validation Models and Configuration
 Defines all data models, enums, and configuration for quality validation
 """
 
-from typing import List, Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
