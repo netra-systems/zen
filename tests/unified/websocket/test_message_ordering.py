@@ -37,13 +37,13 @@ import pytest
 
 try:
     # Try relative imports first (for pytest execution)
-    from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-    from netra_backend.tests.unified.real_client_types import (
+    from tests.unified.jwt_token_helpers import JWTTestHelper
+    from tests.unified.real_client_types import (
         ClientConfig,
         ConnectionState,
     )
-    from netra_backend.tests.unified.real_services_manager import RealServicesManager
-    from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+    from tests.unified.real_services_manager import RealServicesManager
+    from tests.unified.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Fallback for standalone execution
     import os

@@ -46,7 +46,7 @@ from netra_backend.app.core.health.checks import (
 )
 from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.unified_system.mock_services import (
+from tests.unified_system.mock_services import (
     MockHTTPService,
     ServiceRegistry,
     # Add project root to path
@@ -488,7 +488,7 @@ async def test_mock_websocket_service():
     """
     import websockets
 
-    from netra_backend.tests.unified_system.mock_services import (
+    from tests.unified_system.mock_services import (
         create_mock_websocket_service,
     )
     

@@ -16,7 +16,7 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.tests.unified.e2e.fixtures.error_propagation_fixtures import (
+from tests.unified.e2e.fixtures.error_propagation_fixtures import (
     ErrorCorrelationContext,
     error_correlation_context,
     real_http_client,

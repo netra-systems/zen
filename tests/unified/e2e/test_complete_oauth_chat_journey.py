@@ -70,7 +70,7 @@ from helpers.oauth_journey_helpers import (
 )
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.unified.real_services_manager import (
+from tests.unified.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

@@ -51,10 +51,10 @@ from netra_backend.tests.integration.critical_paths.test_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-from netra_backend.tests.unified.e2e.clickhouse_billing_helper import (
+from tests.unified.e2e.clickhouse_billing_helper import (
     ClickHouseBillingHelper,
 )
-from netra_backend.tests.unified.e2e.payment_flow_manager import (
+from tests.unified.e2e.payment_flow_manager import (
     MockPaymentProvider,
     PaymentFlowManager,
 )

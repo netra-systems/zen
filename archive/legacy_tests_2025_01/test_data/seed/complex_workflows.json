@@ -1,0 +1,378 @@
+{
+  "metadata": {
+    "description": "Multi-agent coordination and complex optimizations",
+    "version": "1.0",
+    "created": "2025-01-20T00:00:00Z",
+    "record_count": {
+      "corpus_entries": 50,
+      "supply_chain_configs": 8,
+      "kv_cache_instances": 50,
+      "benchmarks": 25
+    }
+  },
+  "corpus_entries": [
+    {
+      "id": "corpus_ai_optimization_1",
+      "title": "AI Model Selection Best Practices",
+      "content": "Comprehensive guide for selecting optimal AI models based on cost, latency, and quality requirements. Covers decision trees for different use cases.",
+      "category": "optimization_strategies",
+      "tags": ["model_selection", "cost_optimization", "performance"],
+      "quality_score": 0.92,
+      "last_updated": "2025-01-19T10:00:00Z",
+      "usage_count": 145,
+      "effectiveness_rating": "high"
+    },
+    {
+      "id": "corpus_supply_chain_2",
+      "title": "AI Supply Chain Monitoring Framework",
+      "content": "Framework for monitoring AI service dependencies, including provider SLA tracking and automated failover strategies.",
+      "category": "supply_chain",
+      "tags": ["monitoring", "reliability", "failover"],
+      "quality_score": 0.88,
+      "last_updated": "2025-01-18T14:30:00Z",
+      "usage_count": 89,
+      "effectiveness_rating": "high"
+    },
+    {
+      "id": "corpus_cost_analysis_3",
+      "title": "Advanced Cost Analysis Methodologies",
+      "content": "Deep dive into sophisticated cost analysis techniques including predictive modeling and optimization algorithms.",
+      "category": "cost_analysis",
+      "tags": ["advanced_analytics", "predictive_modeling", "algorithms"],
+      "quality_score": 0.85,
+      "last_updated": "2025-01-17T09:15:00Z",
+      "usage_count": 67,
+      "effectiveness_rating": "medium-high"
+    },
+    {
+      "id": "corpus_latency_optimization_4",
+      "title": "Latency Optimization Patterns",
+      "content": "Collection of proven patterns for reducing AI response latency including caching strategies and request batching.",
+      "category": "performance_optimization",
+      "tags": ["latency", "caching", "batching", "performance"],
+      "quality_score": 0.90,
+      "last_updated": "2025-01-19T08:45:00Z",
+      "usage_count": 123,
+      "effectiveness_rating": "high"
+    },
+    {
+      "id": "corpus_multi_agent_coordination_5",
+      "title": "Multi-Agent System Coordination",
+      "content": "Strategies for coordinating multiple AI agents in complex workflows, including task distribution and result aggregation.",
+      "category": "agent_coordination",
+      "tags": ["multi_agent", "coordination", "workflow", "task_distribution"],
+      "quality_score": 0.87,
+      "last_updated": "2025-01-18T16:20:00Z",
+      "usage_count": 78,
+      "effectiveness_rating": "high"
+    }
+  ],
+  "supply_chain_configurations": [
+    {
+      "id": "supply_config_primary",
+      "name": "Primary AI Provider Configuration",
+      "providers": [
+        {
+          "name": "openai",
+          "priority": 1,
+          "models": ["gpt-4", "gpt-3.5-turbo"],
+          "sla_targets": {"availability": 0.999, "response_time_p95": 3000},
+          "cost_tier": "premium",
+          "rate_limits": {"requests_per_minute": 10000, "tokens_per_minute": 2000000}
+        },
+        {
+          "name": "anthropic",
+          "priority": 2,
+          "models": ["claude-3-opus", "claude-3-sonnet"],
+          "sla_targets": {"availability": 0.998, "response_time_p95": 3500},
+          "cost_tier": "premium",
+          "rate_limits": {"requests_per_minute": 8000, "tokens_per_minute": 1500000}
+        },
+        {
+          "name": "google",
+          "priority": 3,
+          "models": ["gemini-2.5-pro", "gemini-2.5-flash"],
+          "sla_targets": {"availability": 0.997, "response_time_p95": 2000},
+          "cost_tier": "budget",
+          "rate_limits": {"requests_per_minute": 15000, "tokens_per_minute": 3000000}
+        }
+      ],
+      "failover_strategy": "cascade_with_model_mapping",
+      "health_check_interval": 60,
+      "circuit_breaker_threshold": 5
+    },
+    {
+      "id": "supply_config_cost_optimized",
+      "name": "Cost-Optimized Provider Configuration",
+      "providers": [
+        {
+          "name": "google",
+          "priority": 1,
+          "models": ["gemini-2.5-flash"],
+          "sla_targets": {"availability": 0.995, "response_time_p95": 2000},
+          "cost_tier": "budget",
+          "rate_limits": {"requests_per_minute": 20000, "tokens_per_minute": 4000000}
+        },
+        {
+          "name": "openai",
+          "priority": 2,
+          "models": ["gpt-3.5-turbo"],
+          "sla_targets": {"availability": 0.999, "response_time_p95": 2500},
+          "cost_tier": "standard",
+          "rate_limits": {"requests_per_minute": 8000, "tokens_per_minute": 1000000}
+        }
+      ],
+      "failover_strategy": "cost_aware_cascade",
+      "health_check_interval": 30,
+      "circuit_breaker_threshold": 3
+    },
+    {
+      "id": "supply_config_performance_optimized",
+      "name": "Performance-Optimized Provider Configuration",
+      "providers": [
+        {
+          "name": "google",
+          "priority": 1,
+          "models": ["gemini-2.5-flash"],
+          "sla_targets": {"availability": 0.999, "response_time_p95": 1500},
+          "cost_tier": "premium",
+          "rate_limits": {"requests_per_minute": 25000, "tokens_per_minute": 5000000}
+        },
+        {
+          "name": "openai",
+          "priority": 2,
+          "models": ["gpt-4"],
+          "sla_targets": {"availability": 0.999, "response_time_p95": 2000},
+          "cost_tier": "premium",
+          "rate_limits": {"requests_per_minute": 12000, "tokens_per_minute": 2500000}
+        }
+      ],
+      "failover_strategy": "performance_aware_cascade",
+      "health_check_interval": 15,
+      "circuit_breaker_threshold": 2
+    }
+  ],
+  "kv_cache_instances": [
+    {
+      "id": "cache_optimization_patterns",
+      "category": "optimization_patterns",
+      "entries": [
+        {
+          "key": "cost_reduction_strategy_enterprise",
+          "value": {
+            "strategy": "tiered_model_selection",
+            "parameters": {"primary_model": "gemini-2.5-flash", "fallback_model": "gpt-3.5-turbo", "quality_threshold": 0.8},
+            "expected_savings": 0.45,
+            "confidence": 0.92
+          },
+          "ttl": 3600,
+          "hit_count": 234,
+          "last_accessed": "2025-01-19T12:30:00Z"
+        },
+        {
+          "key": "latency_optimization_batch_processing",
+          "value": {
+            "strategy": "request_batching",
+            "parameters": {"batch_size": 10, "max_wait_time": 500, "similarity_threshold": 0.85},
+            "expected_improvement": 0.35,
+            "confidence": 0.88
+          },
+          "ttl": 1800,
+          "hit_count": 156,
+          "last_accessed": "2025-01-19T11:45:00Z"
+        }
+      ]
+    },
+    {
+      "id": "cache_model_responses",
+      "category": "model_responses",
+      "entries": [
+        {
+          "key": "prompt_hash_7a3b2c1d",
+          "value": {
+            "model": "gpt-4",
+            "response": "Based on your usage patterns, I recommend switching to gemini-2.5-flash for 60% of your queries to achieve a 42% cost reduction while maintaining quality above 0.85 threshold.",
+            "tokens_used": 156,
+            "response_time_ms": 2350,
+            "quality_score": 0.91
+          },
+          "ttl": 7200,
+          "hit_count": 12,
+          "last_accessed": "2025-01-19T13:00:00Z"
+        },
+        {
+          "key": "prompt_hash_9f8e7d6c",
+          "value": {
+            "model": "claude-3-sonnet",
+            "response": "Your current AI spend shows inefficiencies in model selection. Implementing intelligent routing could reduce costs by 38% while improving average response times by 15%.",
+            "tokens_used": 189,
+            "response_time_ms": 1890,
+            "quality_score": 0.89
+          },
+          "ttl": 7200,
+          "hit_count": 8,
+          "last_accessed": "2025-01-19T12:15:00Z"
+        }
+      ]
+    }
+  ],
+  "performance_benchmarks": [
+    {
+      "id": "benchmark_multi_agent_coordination",
+      "name": "Multi-Agent Task Distribution Benchmark",
+      "description": "Tests the efficiency of task distribution across multiple specialized agents",
+      "test_scenarios": [
+        {
+          "scenario": "complex_optimization_request",
+          "agent_count": 5,
+          "task_complexity": "high",
+          "expected_duration_ms": 15000,
+          "success_criteria": {
+            "completion_rate": 0.95,
+            "quality_score": 0.85,
+            "cost_efficiency": 0.80
+          }
+        },
+        {
+          "scenario": "parallel_analysis_workflow",
+          "agent_count": 3,
+          "task_complexity": "medium",
+          "expected_duration_ms": 8000,
+          "success_criteria": {
+            "completion_rate": 0.98,
+            "quality_score": 0.82,
+            "cost_efficiency": 0.85
+          }
+        }
+      ]
+    },
+    {
+      "id": "benchmark_supply_chain_resilience",
+      "name": "Supply Chain Failover Performance",
+      "description": "Tests system behavior during provider outages and performance degradation",
+      "test_scenarios": [
+        {
+          "scenario": "primary_provider_outage",
+          "failure_type": "complete_outage",
+          "duration_seconds": 300,
+          "expected_fallback_time_ms": 2000,
+          "success_criteria": {
+            "fallback_success_rate": 0.99,
+            "performance_degradation": 0.15,
+            "cost_impact": 0.25
+          }
+        },
+        {
+          "scenario": "provider_performance_degradation",
+          "failure_type": "latency_increase",
+          "degradation_factor": 3.0,
+          "expected_circuit_breaker_trigger_ms": 10000,
+          "success_criteria": {
+            "detection_accuracy": 0.95,
+            "recovery_time_ms": 5000,
+            "request_loss_rate": 0.02
+          }
+        }
+      ]
+    },
+    {
+      "id": "benchmark_cost_optimization",
+      "name": "Real-time Cost Optimization Performance",
+      "description": "Tests the system's ability to optimize costs in real-time based on changing conditions",
+      "test_scenarios": [
+        {
+          "scenario": "dynamic_model_switching",
+          "trigger": "cost_threshold_exceeded",
+          "threshold_value": 50.0,
+          "expected_switch_time_ms": 1000,
+          "success_criteria": {
+            "cost_reduction": 0.40,
+            "quality_maintenance": 0.85,
+            "switch_success_rate": 0.98
+          }
+        },
+        {
+          "scenario": "batch_optimization",
+          "trigger": "queue_size_threshold",
+          "threshold_value": 20,
+          "expected_batch_formation_ms": 500,
+          "success_criteria": {
+            "throughput_improvement": 0.30,
+            "cost_efficiency_gain": 0.20,
+            "latency_impact": 0.10
+          }
+        }
+      ]
+    }
+  ],
+  "workflow_templates": [
+    {
+      "id": "template_comprehensive_analysis",
+      "name": "Comprehensive AI Spend Analysis",
+      "description": "Full analysis of AI usage patterns with optimization recommendations",
+      "steps": [
+        {
+          "step": 1,
+          "agent": "data_collection_agent",
+          "action": "gather_usage_metrics",
+          "parameters": {"lookback_days": 30, "include_costs": true, "include_performance": true}
+        },
+        {
+          "step": 2,
+          "agent": "analysis_agent",
+          "action": "identify_patterns",
+          "parameters": {"pattern_types": ["cost_spikes", "performance_bottlenecks", "usage_trends"]}
+        },
+        {
+          "step": 3,
+          "agent": "optimization_agent",
+          "action": "generate_recommendations",
+          "parameters": {"focus_areas": ["cost_reduction", "performance_improvement", "reliability"]}
+        },
+        {
+          "step": 4,
+          "agent": "validation_agent",
+          "action": "validate_recommendations",
+          "parameters": {"risk_threshold": 0.2, "quality_threshold": 0.8}
+        },
+        {
+          "step": 5,
+          "agent": "reporting_agent",
+          "action": "generate_report",
+          "parameters": {"format": "comprehensive", "include_visualizations": true}
+        }
+      ],
+      "estimated_duration_ms": 45000,
+      "success_rate": 0.92,
+      "average_cost": 12.50
+    },
+    {
+      "id": "template_quick_optimization",
+      "name": "Quick Optimization Assessment",
+      "description": "Rapid assessment with immediate optimization suggestions",
+      "steps": [
+        {
+          "step": 1,
+          "agent": "triage_agent",
+          "action": "assess_urgency",
+          "parameters": {"evaluation_criteria": ["cost_spike", "performance_degradation", "error_rate"]}
+        },
+        {
+          "step": 2,
+          "agent": "optimization_agent",
+          "action": "quick_analysis",
+          "parameters": {"focus": "immediate_wins", "complexity": "low"}
+        },
+        {
+          "step": 3,
+          "agent": "reporting_agent",
+          "action": "generate_summary",
+          "parameters": {"format": "executive_summary", "max_length": 500}
+        }
+      ],
+      "estimated_duration_ms": 8000,
+      "success_rate": 0.96,
+      "average_cost": 3.20
+    }
+  ]
+}

@@ -26,7 +26,7 @@ from netra_backend.app.core.resilience.circuit_breaker import (
     EnterpriseCircuitConfig,
     UnifiedCircuitBreaker,
 )
-from netra_backend.tests.unified.config import TEST_CONFIG, TEST_USERS, get_test_user
+from tests.unified.config import TEST_CONFIG, TEST_USERS, get_test_user
 
 
 class FailureScenario(Enum):

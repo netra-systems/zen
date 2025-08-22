@@ -19,20 +19,20 @@ import jwt
 import pytest
 import websockets
 
-from netra_backend.tests.unified.e2e.token_lifecycle_helpers import (
+from tests.unified.e2e.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,
 )
-from netra_backend.tests.unified.jwt_token_helpers import (
+from tests.unified.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestFixtures,
     JWTTestHelper,
 )
-from netra_backend.tests.unified.test_data_factory import (
+from tests.unified.test_data_factory import (
     create_test_service_credentials,
 )
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class JWTSecretSynchronizationValidator:

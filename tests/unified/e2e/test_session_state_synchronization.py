@@ -17,8 +17,8 @@ import json
 from typing import Dict, Any, List
 import pytest_asyncio
 
-from netra_backend.tests.unified.config import TEST_USERS, TEST_ENDPOINTS
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.jwt_token_helpers import JWTTestHelper
 from tests.unified.e2e.helpers.session_test_helpers import (
     SessionPersistenceManager, CrossServiceSessionValidator, MultiTabSessionManager, create_test_session_data, validate_session_timeout_behavior, create_session_test_scenarios,
     SessionPersistenceManager,

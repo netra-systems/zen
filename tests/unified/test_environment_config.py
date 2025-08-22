@@ -17,7 +17,7 @@ Architecture:
 
 Usage Examples:
     # Basic usage - automatically detects environment
-    from netra_backend.tests.unified.test_environment_config import get_test_environment_config
+    from tests.unified.test_environment_config import get_test_environment_config
     config = get_test_environment_config()
     
     # Access configuration properties
@@ -30,7 +30,7 @@ Usage Examples:
     staging_config = get_test_environment_config(environment="staging")
     
     # Convenience functions
-    from netra_backend.tests.unified.test_environment_config import (
+    from tests.unified.test_environment_config import (
         is_test_environment,
         get_service_urls,
         setup_test_environment

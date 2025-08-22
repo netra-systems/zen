@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 

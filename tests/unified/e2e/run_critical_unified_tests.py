@@ -44,8 +44,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    from netra_backend.tests.unified.real_services_health import check_service_health
-    from netra_backend.tests.unified.real_services_manager import (
+    from tests.unified.real_services_health import check_service_health
+    from tests.unified.real_services_manager import (
         create_real_services_manager,
     )
 except ImportError as e:

@@ -50,7 +50,7 @@ except ImportError:
         def build(self):
             return MockWebSocket()
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 logger = central_logger.get_logger(__name__)
 

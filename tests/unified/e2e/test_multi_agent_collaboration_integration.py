@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.unified.e2e.agent_response_test_utilities import (
+from tests.unified.e2e.agent_response_test_utilities import (
     AgentResponseSimulator,
 )
 

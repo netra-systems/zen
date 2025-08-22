@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.tests.unified.config import TestTier
+from tests.unified.config import TestTier
 
 
 @pytest.fixture

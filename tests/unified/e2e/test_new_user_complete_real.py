@@ -48,7 +48,7 @@ from helpers.new_user_journey_helpers import (
     validate_signup_completion,
 )
 
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 from tests.unified.database_test_connections import DatabaseTestConnections
 
 

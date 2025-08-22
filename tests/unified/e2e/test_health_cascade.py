@@ -33,14 +33,14 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from netra_backend.tests.unified.health_check_core import (
+from tests.unified.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,
     HealthCheckResult,
     create_healthy_result,
     create_service_error_result,
 )
-from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
+from tests.unified.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

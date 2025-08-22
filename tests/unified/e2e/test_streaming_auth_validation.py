@@ -37,8 +37,8 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.tests.unified.config import TEST_CONFIG, setup_test_environment
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.config import TEST_CONFIG, setup_test_environment
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class StreamingAuthManager:

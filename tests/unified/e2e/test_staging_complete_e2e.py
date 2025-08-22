@@ -22,9 +22,9 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-from netra_backend.tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from netra_backend.tests.unified.real_services_manager import RealServicesManager
-from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.unified.real_services_manager import RealServicesManager
+from tests.unified.test_environment_config import TestEnvironmentType
 
 logger = logging.getLogger(__name__)
 

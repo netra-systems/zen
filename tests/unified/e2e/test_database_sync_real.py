@@ -36,7 +36,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
-from netra_backend.tests.unified.database_test_connections import (
+from tests.unified.database_test_connections import (
     DatabaseTestConnections,
 )
 from tests.unified.database_test_operations import (

@@ -171,7 +171,7 @@ class ComprehensiveE2EImportFixer:
             
             # Fix unified test imports
             content = content.replace(
-                'from netra_backend.tests.unified',
+                'from tests.unified',
                 'from tests.unified'
             )
             

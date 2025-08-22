@@ -28,8 +28,8 @@ from netra_backend.app.core.auth_constants import (
     JWTConstants,
     OAuthConstants,
 )
-from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
-from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.unified.test_environment_config import TestEnvironmentType
 
 
 class StagingOAuthTestHelper:

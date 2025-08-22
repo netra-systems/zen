@@ -12,14 +12,14 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from netra_backend.tests.unified.clients.factory import TestClientFactory
-from netra_backend.tests.unified.e2e.error_cascade_core import (
+from tests.unified.clients.factory import TestClientFactory
+from tests.unified.e2e.error_cascade_core import (
     AutoRecoveryVerifier,
     GracefulDegradationValidator,
     ServiceFailureSimulator,
 )
-from netra_backend.tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

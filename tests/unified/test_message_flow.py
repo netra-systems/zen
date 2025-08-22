@@ -22,14 +22,14 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-from netra_backend.tests.unified.config import (
+from tests.unified.config import (
     TEST_CONFIG,
     TestDataFactory,
     TestUser,
     UnifiedTestConfig,
 )
-from netra_backend.tests.unified.harness_complete import TestHarnessContext
-from netra_backend.tests.unified.message_flow_helpers import (
+from tests.unified.harness_complete import TestHarnessContext
+from tests.unified.message_flow_helpers import (
     create_concurrent_messages,
     send_concurrent_message,
     test_cache_persistence,
@@ -41,7 +41,7 @@ from netra_backend.tests.unified.message_flow_helpers import (
     test_response_streaming,
     validate_complete_flow,
 )
-from netra_backend.tests.unified.message_flow_validators import (
+from tests.unified.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,
     StreamInterruptionHandler,

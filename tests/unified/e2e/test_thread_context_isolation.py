@@ -15,8 +15,8 @@ from typing import Any, Dict, List
 import pytest
 
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
-from netra_backend.tests.unified.config import TEST_USERS
-from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
+from tests.unified.config import TEST_USERS
+from tests.unified.e2e.thread_test_fixtures_core import (
     ThreadContextManager,
     ThreadTestDataFactory,
     ThreadWebSocketFixtures,

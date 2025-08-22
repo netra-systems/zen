@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

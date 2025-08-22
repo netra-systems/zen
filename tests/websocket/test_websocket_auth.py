@@ -22,7 +22,7 @@ from typing import Any, Dict, Optional
 import aiohttp
 import pytest
 
-from netra_backend.tests.unified.e2e.staging_test_helpers import (
+from tests.unified.e2e.staging_test_helpers import (
     create_test_user_with_token,
     get_staging_suite,
     test_websocket_connection_flow,

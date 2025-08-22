@@ -8,7 +8,7 @@ import os
 
 import pytest
 
-from netra_backend.tests.unified.config import (
+from tests.unified.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_SECRETS,

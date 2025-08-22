@@ -14,7 +14,7 @@ from uuid import uuid4
 import pytest
 
 from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-from netra_backend.tests.unified.e2e.database_consistency_fixtures import (
+from tests.unified.e2e.database_consistency_fixtures import (
     database_test_session,
 )
 

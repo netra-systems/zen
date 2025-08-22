@@ -13,7 +13,7 @@ from typing import Any, Dict, List
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.tests.unified.e2e.mock_services_manager import (
+from tests.unified.e2e.mock_services_manager import (
     MockDatabaseConnections,
     MockE2EServiceOrchestrator,
     MockHttpClient,

@@ -52,8 +52,8 @@ from netra_backend.app.services.websocket_manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage
-from netra_backend.tests.unified.config import TEST_CONFIG
-from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_CONFIG
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

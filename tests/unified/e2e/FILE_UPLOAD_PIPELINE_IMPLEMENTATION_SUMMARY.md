@@ -120,7 +120,7 @@ python test_runner.py --level e2e --include file_upload
 
 ### Direct Module Usage
 ```python
-from netra_backend.tests.unified.e2e.file_upload_pipeline_test_suite import (
+from tests.unified.e2e.file_upload_pipeline_test_suite import (
     test_complete_file_upload_pipeline,
     get_test_suite_info
 )

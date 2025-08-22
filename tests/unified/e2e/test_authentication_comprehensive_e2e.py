@@ -28,11 +28,11 @@ import jwt
 import pytest
 import pytest_asyncio
 
-from netra_backend.tests.unified.database_sync_fixtures import create_test_user_data
-from netra_backend.tests.unified.harness_complete import (
+from tests.unified.database_sync_fixtures import create_test_user_data
+from tests.unified.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class AuthenticationE2ETester:

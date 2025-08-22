@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
+from tests.unified.agent_orchestration_fixtures import (
     streaming_test_data,
     websocket_mock,
 )

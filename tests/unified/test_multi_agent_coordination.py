@@ -17,7 +17,7 @@ import asyncio
 
 import pytest
 
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
+from tests.unified.agent_orchestration_fixtures import (
     coordination_test_data,
     mock_sub_agents,
     mock_supervisor_agent,

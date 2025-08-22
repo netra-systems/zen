@@ -18,7 +18,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.tests.unified.config import (
+from tests.unified.config import (
     TestTier,
     UnifiedTestConfig,
     get_test_user,

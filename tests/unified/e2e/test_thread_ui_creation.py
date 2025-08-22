@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
+from tests.unified.e2e.thread_test_fixtures_core import (
     ThreadTestDataFactory,
     test_users,
     unified_harness,

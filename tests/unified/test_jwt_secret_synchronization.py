@@ -16,8 +16,8 @@ from typing import Any, Dict
 import pytest
 import websockets
 
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class JWTSecretSynchronizationTester:

@@ -16,14 +16,14 @@ from unittest.mock import patch
 
 import pytest
 
-from netra_backend.tests.unified.e2e.unified_e2e_harness import (
+from tests.unified.e2e.unified_e2e_harness import (
     UnifiedE2ETestHarness,
     create_e2e_harness,
 )
-from netra_backend.tests.unified.e2e.user_journey_executor import TestUser
-from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
-from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+from tests.unified.e2e.user_journey_executor import TestUser
+from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.test_environment_config import TestEnvironmentType
 
 
 class StagingWebSocketTester:

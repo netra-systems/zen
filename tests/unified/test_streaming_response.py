@@ -27,8 +27,8 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.tests.unified.config import setup_test_environment
-from netra_backend.tests.unified.test_harness import (
+from tests.unified.config import setup_test_environment
+from tests.unified.test_harness import (
     UnifiedTestHarness,
     WebSocketTestHelper,
 )

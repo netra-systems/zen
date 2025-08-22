@@ -15,7 +15,7 @@ Architecture: 450-line compliance through focused testing scope
 
 import pytest
 
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
+from tests.unified.agent_orchestration_fixtures import (
     mock_supervisor_agent,
     routing_test_data,
 )

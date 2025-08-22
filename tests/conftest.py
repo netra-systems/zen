@@ -359,7 +359,7 @@ async def service_discovery(dev_launcher):
 async def real_services(dev_launcher, service_discovery):
     """Provides real services with typed clients."""
     try:
-        from netra_backend.tests.unified.clients import TestClientFactory
+        from tests.unified.clients import TestClientFactory
     except ImportError:
         pytest.skip("Test client factory not available")
         return

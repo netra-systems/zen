@@ -44,7 +44,7 @@ from netra_backend.app.services.llm.llm_manager import LLMManager
 
 # Add project root to path
 # # from netra_backend.app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
-# from netra_backend.tests.unified.config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
+# from tests.unified.config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 class TestTier:
     FREE = "free"

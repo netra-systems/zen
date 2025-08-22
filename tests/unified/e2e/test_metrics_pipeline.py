@@ -30,7 +30,7 @@ from typing import Any, Dict, List
 import pytest
 import pytest_asyncio
 
-from netra_backend.tests.unified.e2e.metrics_pipeline_helpers import (
+from tests.unified.e2e.metrics_pipeline_helpers import (
     AggregationValidator,
     DashboardLatencyMeasurer,
     HighVolumeEventGenerator,

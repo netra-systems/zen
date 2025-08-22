@@ -28,7 +28,7 @@ from netra_backend.app.websocket.connection_manager import (
     ModernConnectionManager,
     get_connection_manager,
 )
-from netra_backend.tests.unified.e2e.agent_response_test_utilities import (
+from tests.unified.e2e.agent_response_test_utilities import (
     ResponseStreamingVerifier,
 )
 

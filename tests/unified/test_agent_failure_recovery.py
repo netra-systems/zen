@@ -15,7 +15,7 @@ Architecture: 450-line compliance through focused failure scenario testing
 
 import pytest
 
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
+from tests.unified.agent_orchestration_fixtures import (
     failure_recovery_data,
     mock_supervisor_agent,
 )

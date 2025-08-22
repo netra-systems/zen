@@ -72,8 +72,8 @@
 ```python
 import pytest
 import time
-from netra_backend.tests.unified.harness import UnifiedTestHarness
-from netra_backend.tests.unified.jwt_helper import JWTTestHelper
+from tests.unified.harness import UnifiedTestHarness
+from tests.unified.jwt_helper import JWTTestHelper
 
 class TestJWTCrossServiceValidation:
     """

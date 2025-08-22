@@ -38,7 +38,7 @@ import websockets
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
-    from netra_backend.tests.unified.harness_complete import (
+    from tests.unified.harness_complete import (
         TestClient,
         TestHarnessContext,
     )

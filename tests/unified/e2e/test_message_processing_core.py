@@ -13,7 +13,7 @@ from uuid import uuid4
 import pytest
 
 from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-from netra_backend.tests.unified.e2e.example_message_test_helpers import (
+from tests.unified.e2e.example_message_test_helpers import (
     BASIC_COST_OPTIMIZATION,
     assert_completed_response,
     assert_error_response,

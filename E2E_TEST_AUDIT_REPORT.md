@@ -65,7 +65,7 @@ The directory contains over 200 test files covering:
 Multiple import errors prevent test execution:
 ```python
 ModuleNotFoundError: No module named 'netra_backend.app.agents.supervisor.supervisor_agent'
-ModuleNotFoundError: No module named 'netra_backend.tests.unified'
+ModuleNotFoundError: No module named 'tests.unified'
 NameError: name 'JWTConstants' is not defined
 ```
 

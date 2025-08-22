@@ -16,7 +16,7 @@ from typing import Any, Dict
 import pytest
 from pydantic import ValidationError
 
-from netra_backend.tests.unified.clients.factory import TestClientFactory
+from tests.unified.clients.factory import TestClientFactory
 
 
 class TestWebSocketEventStructure:

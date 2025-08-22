@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlparse
 import httpx
 import websockets
 
-from netra_backend.tests.unified.oauth_test_providers import GoogleOAuthProvider
+from tests.unified.oauth_test_providers import GoogleOAuthProvider
 
 
 class OAuthFlowHelper:

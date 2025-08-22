@@ -42,12 +42,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
-from netra_backend.tests.unified.real_services_manager import (
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

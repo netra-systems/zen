@@ -25,14 +25,14 @@ import pytest
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.tests.unified.e2e.config import TEST_ENDPOINTS, TEST_USERS
-from netra_backend.tests.unified.e2e.real_client_types import (
+from tests.unified.e2e.config import TEST_ENDPOINTS, TEST_USERS
+from tests.unified.e2e.real_client_types import (
     ClientConfig,
     ConnectionState,
 )
-from netra_backend.tests.unified.e2e.real_http_client import RealHTTPClient
-from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketClient
-from netra_backend.tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.real_http_client import RealHTTPClient
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
 
 logger = logging.getLogger(__name__)
 

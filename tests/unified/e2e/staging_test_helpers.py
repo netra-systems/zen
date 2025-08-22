@@ -31,12 +31,12 @@ from netra_backend.app.core.configuration.base import (
     get_unified_config,
     validate_config_integrity,
 )
-from netra_backend.tests.unified.e2e.unified_e2e_harness import (
+from tests.unified.e2e.unified_e2e_harness import (
     UnifiedE2ETestHarness,
     create_e2e_harness,
 )
-from netra_backend.tests.unified.real_services_manager import RealServicesManager
-from netra_backend.tests.unified.test_environment_config import (
+from tests.unified.real_services_manager import RealServicesManager
+from tests.unified.test_environment_config import (
     TestEnvironment,
     TestEnvironmentType,
     get_test_environment_config,

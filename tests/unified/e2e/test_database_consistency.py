@@ -25,7 +25,7 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 import pytest
 import pytest_asyncio
 import asyncio
-from netra_backend.tests.unified.database_sync_fixtures import DatabaseSyncValidator
+from tests.unified.database_sync_fixtures import DatabaseSyncValidator
 
 def create_test_user_data(identifier: str):
     """Create test user data for testing."""

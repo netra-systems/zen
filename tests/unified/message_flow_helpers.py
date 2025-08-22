@@ -10,8 +10,8 @@ import asyncio
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.tests.unified.config import TestDataFactory, TestUser
-from netra_backend.tests.unified.message_flow_validators import (
+from tests.unified.config import TestDataFactory, TestUser
+from tests.unified.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,
     StreamInterruptionHandler,

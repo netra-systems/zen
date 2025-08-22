@@ -21,12 +21,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
+from tests.unified.agent_orchestration_fixtures import (
     mock_sub_agents,
     mock_supervisor_agent,
     websocket_mock,
 )
-from netra_backend.tests.unified.config import (
+from tests.unified.config import (
     TEST_USERS,
     TestTier,
     create_unified_config,

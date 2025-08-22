@@ -31,12 +31,12 @@ from netra_backend.app.tests.test_utilities.websocket_mocks import (
     MockWebSocket,
     WebSocketBuilder,
 )
-from netra_backend.tests.unified.config import (
+from tests.unified.config import (
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,
 )
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 logger = central_logger.get_logger(__name__)
 

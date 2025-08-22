@@ -15,8 +15,8 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.tests.unified.config import setup_test_environment
-from netra_backend.tests.unified.harness_complete import (
+from tests.unified.config import setup_test_environment
+from tests.unified.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,
     create_test_harness,

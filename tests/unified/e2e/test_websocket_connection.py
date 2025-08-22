@@ -21,10 +21,10 @@ from typing import Dict, List, Optional
 import pytest
 import websockets
 
-from netra_backend.tests.unified.harness_complete import (
+from tests.unified.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketConnectionTester:

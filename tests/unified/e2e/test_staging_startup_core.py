@@ -23,7 +23,7 @@ import pytest
 
 from netra_backend.app.core.auth_constants import CredentialConstants, JWTConstants
 from netra_backend.app.core.configuration.base import validate_config_integrity
-from netra_backend.tests.unified.e2e.staging_test_helpers import (
+from tests.unified.e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite,
 )
