@@ -2,7 +2,7 @@
 
 Docstrings, comments, and markdown content
 
-*Generated on 2025-08-21 22:03:09*
+*Generated on 2025-08-21 22:09:14*
 
 ## 📊 Category Statistics
 
@@ -378,7 +378,7 @@ Generated: ` | generate_security_report.py:37 | _build_security_report_header | 
 | `Warning: Could not read ` | deduplicate_types.py:210 | TypeDeduplicator.find_types... | `# Agent Modific...`, `# Agent Modifi... |
 | `Warning: Could not read ` | fix_e2e_connection_manager_imports.py:47 | find_files_with_connection_... | `# Agent Modific...`, `# Agent Modifi... |
 | `WARNING: Emergency level ` | emergency_boundary_actions.py:465 | main | `# Agent Modific...`, `# Agent Modifi... |
-| `WARNING: Enhanced modules not availab...` | scan_string_literals.py:290 | main | `# Agent Modific...`, `# Agent Modifi... |
+| `WARNING: Enhanced modules not availab...` | scan_string_literals.py:292 | main | `# Agent Modific...`, `# Agent Modifi... |
 | `Warning: Error scanning ` | scanner_core.py:166 | scan_directory | `# Agent Modific...`, `# Agent Modifi... |
 | `Warning: Existing index not found at ` | demo_enhanced_categorizer.py:24 | load_existing_index | `# Agent Modific...`, `# Agent Modifi... |
 | `Warning: Failed to fetch secret ` | fetch_secrets_to_env.py:16 | fetch_secret | `# Agent Modific...`, `# Agent Modifi... |
@@ -1681,7 +1681,7 @@ Total raw literals found: ` | enhanced_string_literals_docs.py:48 | scan_and_gen
 | `\_\_tests\_\_` | test_size_validator.py:132 | TestSizeValidator._discover... | `**Business Valu...`, `**` |
 | `\_\_tests\_\_` | enhanced_string_literals_docs.py:95 | main | `**Business Valu...`, `**` |
 | `\_\_tests\_\_` | remove_test_stubs.py:78 | TestStubDetector.__init__ | `**Business Valu...`, `**` |
-| `\_\_tests\_\_` | scan_string_literals.py:298 | main | `**Business Valu...`, `**` |
+| `\_\_tests\_\_` | scan_string_literals.py:304 | main | `**Business Valu...`, `**` |
 | `\_\_tests\_\_` | scan_string_literals_enhanced.py:84 | EnhancedStringLiteralIndexe... | `**Business Valu...`, `**` |
 | `\_\_tests\_\_` | standardize_l3_test_names.py:60 | find_references_to_file | `**Business Valu...`, `**` |
 | `\_\_tests\_\_` | status_agent_analyzer.py:188 | TestCoverageAnalyzer._count... | `**Business Valu...`, `**` |

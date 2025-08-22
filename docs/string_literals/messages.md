@@ -2,13 +2,13 @@
 
 Log messages, user messages, error messages, and notifications
 
-*Generated on 2025-08-21 22:03:12*
+*Generated on 2025-08-21 22:09:16*
 
 ## 📊 Category Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total Literals | 4,763 |
+| Total Literals | 4,764 |
 | Subcategories | 4 |
 | Average Confidence | 0.486 |
 
@@ -17,7 +17,7 @@ Log messages, user messages, error messages, and notifications
 - [error (409 literals)](#subcategory-error)
 - [log (129 literals)](#subcategory-log)
 - [success (45 literals)](#subcategory-success)
-- [user (4180 literals)](#subcategory-user)
+- [user (4181 literals)](#subcategory-user)
 
 ## Subcategory: error {subcategory-error}
 
@@ -697,7 +697,7 @@ Connecting to ` | reset_clickhouse_auto.py:78 | _display_connection_info | `[cya
 
 ## Subcategory: user {subcategory-user}
 
-**Count**: 4180 literals
+**Count**: 4181 literals
 
 ### 🟡 Medium (0.5-0.8) (1398 literals)
 
@@ -2061,7 +2061,7 @@ Wrapper script for the refactored de...` | dev_launcher.py:2 | module | `Wrapper
 | `Legacy app import` | check_netra_backend_imports.py:171 | ImportAnalyzer._create_issue | `Wrapper for ACT...`, `Check if comma... |
 | `Legacy app import` | fix_netra_backend_imports.py:111 | ImportFixer._determine_fix_... | `Wrapper for ACT...`, `Check if comma... |
 | `Legacy categorizer maintained for bac...` | scan_string_literals.py:44 | StringLiteralCategorizer | `Wrapper for ACT...`, `Check if comma... |
-| `Legacy scanning ` | scan_string_literals.py:286 | main | `Wrapper for ACT...`, `Check if comma... |
+| `Legacy scanning ` | scan_string_literals.py:288 | main | `Wrapper for ACT...`, `Check if comma... |
 | `Legacy tests import` | check_netra_backend_imports.py:174 | ImportAnalyzer._create_issue | `Wrapper for ACT...`, `Check if comma... |
 | `Legacy tests import` | fix_netra_backend_imports.py:113 | ImportFixer._determine_fix_... | `Wrapper for ACT...`, `Check if comma... |
 | `List stored secrets` | local_secrets_manager.py:212 | main | `Wrapper for ACT...`, `Check if comma... |
@@ -2417,7 +2417,7 @@ Che...` | websocket_coherence_review.py:1 | module | `Wrapper for ACT...`, `Chec
 | `XXX comment` | architecture_scanner_helpers.py:131 | ScannerHelpers.get_debt_pat... | `Wrapper for ACT...`, `Check if comma... |
 | `YAML syntax error: ` | workflow_validator.py:80 | WorkflowValidator._validate... | `Wrapper for ACT...`, `Check if comma... |
 
-### 🔴 Low (<0.5) (2782 literals)
+### 🔴 Low (<0.5) (2783 literals)
 
 | Literal | Files | Context | Related |
 |---------|-------|---------|---------|
@@ -4963,6 +4963,7 @@ Che...` | websocket_coherence_review.py:1 | module | `Wrapper for ACT...`, `Chec
 | `Sort violations by actual value desce...` | function_checker.py:123 | FunctionChecker._sort_viola... | `Wrapper for ACT...`, `Check if comma... |
 | `Sort violations by priority` | extract_function_violations.py:70 | FunctionViolationExtractor.... | `Wrapper for ACT...`, `Check if comma... |
 | `Sort violations by severity and impact` | reporter_utils.py:22 | ReporterUtils.sort_violatio... | `Wrapper for ACT...`, `Check if comma... |
+| `Specific directories to scan \(defaul...` | scan_string_literals.py:281 | main | `Wrapper for ACT...`, `Check if comma... |
 | `Specific directories to scan \(defaul...` | scan_string_literals_enhanced.py:375 | main | `Wrapper for ACT...`, `Check if comma... |
 | `Specific workflow ID to clean \(optio...` | cleanup_workflow_runs.py:187 | parse_args | `Wrapper for ACT...`, `Check if comma... |
 | `Split into 2\-3 smaller focused funct...` | boundary_enforcer_function_checks.py:152 | FunctionAnalyzer._get_size_... | `Wrapper for ACT...`, `Check if comma... |
@@ -5036,7 +5037,7 @@ Che...` | websocket_coherence_review.py:1 | module | `Wrapper for ACT...`, `Chec
 | `timeout\-minutes: $\{\{ env\.ACT` | fix_workflow_env_issues.py:80 | process_workflow_file | `Wrapper for ACT...`, `Check if comma... |
 | `timeout\-minutes: 5  \# Adjusted for ...` | fix_workflow_env_issues.py:42 | fix_timeout_conditionals | `Wrapper for ACT...`, `Check if comma... |
 | `timeout\-minutes: 60  \# Adjusted for...` | fix_workflow_env_issues.py:43 | fix_timeout_conditionals | `Wrapper for ACT...`, `Check if comma... |
-| `TIP: Consider switching to the enhanc...` | scan_string_literals.py:312 | main | `Wrapper for ACT...`, `Check if comma... |
+| `TIP: Consider switching to the enhanc...` | scan_string_literals.py:318 | main | `Wrapper for ACT...`, `Check if comma... |
 | `To apply these fixes, run without \-\...` | fix_netra_backend_imports.py:221 | ImportFixer.generate_report | `Wrapper for ACT...`, `Check if comma... |
 | `To install: https://clickhouse\.com/d...` | dependency_services.py:130 | check_clickhouse_installation | `Wrapper for ACT...`, `Check if comma... |
 | `To re\-enable: python scripts/manage\...` | manage_precommit.py:72 | disable_hooks | `Wrapper for ACT...`, `Check if comma... |
@@ -5113,7 +5114,7 @@ Che...` | websocket_coherence_review.py:1 | module | `Wrapper for ACT...`, `Chec
 | `Use webpack instead of turbopack` | dev_launcher_improved.py:74 | _add_feature_arguments | `Wrapper for ACT...`, `Check if comma... |
 | `User disabling the hooks` | manage_precommit.py:119 | main | `Wrapper for ACT...`, `Check if comma... |
 | `Uses gunicorn in Dockerfile` | validate_service_independence.py:126 | ServiceIndependenceValidato... | `Wrapper for ACT...`, `Check if comma... |
-| `Using enhanced categorizer in compati...` | scan_string_literals.py:288 | main | `Wrapper for ACT...`, `Check if comma... |
+| `Using enhanced categorizer in compati...` | scan_string_literals.py:290 | main | `Wrapper for ACT...`, `Check if comma... |
 | `Utility functions for compliance repo...` | reporter_utils.py:13 | ReporterUtils | `Wrapper for ACT...`, `Check if comma... |
 | `Validate a single job\.` | workflow_validator.py:108 | WorkflowValidator._validate... | `Wrapper for ACT...`, `Check if comma... |
 | `Validate a single workflow file\.` | act_wrapper.py:114 | ACTWrapper._validate_single... | `Wrapper for ACT...`, `Check if comma... |

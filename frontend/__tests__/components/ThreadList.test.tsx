@@ -399,23 +399,32 @@ describe('ThreadList Component Tests', () => {
         threads: [mockThreadData.basic, mockThreadData.withUnread]
       });
       
-      // Remove thread
-      rerender(
-        <TestProviders>
-          <ThreadList
-            threads={[mockThreadData.basic]}
-            isLoadingThreads={false}
-            loadError={null}
-            activeThreadId={null}
-            isProcessing={false}
-            showAllThreads={false}
-            onThreadClick={jest.fn().mockResolvedValue(undefined)}
-            onRetryLoad={jest.fn().mockResolvedValue(undefined)}
-          />
-        </TestProviders>
-      );
+      // Verify both threads are initially present
+      expect(screen.getByTestId('thread-item-thread-1')).toBeInTheDocument();
+      expect(screen.getByTestId('thread-item-thread-2')).toBeInTheDocument();
       
-      expect(screen.queryByTestId('thread-item-thread-2')).not.toBeInTheDocument();
+      // Remove thread with proper act wrapping for animations
+      await act(async () => {
+        rerender(
+          <TestProviders>
+            <ThreadList
+              threads={[mockThreadData.basic]}
+              isLoadingThreads={false}
+              loadError={null}
+              activeThreadId={null}
+              isProcessing={false}
+              showAllThreads={false}
+              onThreadClick={jest.fn().mockResolvedValue(undefined)}
+              onRetryLoad={jest.fn().mockResolvedValue(undefined)}
+            />
+          </TestProviders>
+        );
+      });
+      
+      // Wait for potential animation to complete
+      await waitFor(() => {
+        expect(screen.queryByTestId('thread-item-thread-2')).not.toBeInTheDocument();
+      });
     });
   });
 });

@@ -60,13 +60,19 @@ const mockAuthContext = {
 };
 
 describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
-  let server: WS;
+  let originalWebSocket: any;
   let mockWebSocket: any;
-  let webSocketConstructorSpy: jest.SpyInstance;
+  let capturedConnections: Array<{ url: string; protocols?: string | string[] }> = [];
   
   beforeEach(() => {
+    // Clear captured connections
+    capturedConnections = [];
+    
     // Disconnect any existing WebSocket connections
     webSocketService.disconnect();
+    
+    // Save original WebSocket
+    originalWebSocket = global.WebSocket;
     
     // Mock WebSocket constructor to capture connection attempts
     mockWebSocket = {
@@ -85,7 +91,10 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
     };
     
     // Create spy on WebSocket constructor
-    webSocketConstructorSpy = jest.spyOn(global, 'WebSocket').mockImplementation((url, protocols) => {
+    global.WebSocket = jest.fn().mockImplementation((url, protocols) => {
+      // Capture connection details
+      capturedConnections.push({ url, protocols });
+      
       // Store the URL and protocols for assertion
       mockWebSocket._url = url;
       mockWebSocket._protocols = protocols;
@@ -102,18 +111,19 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       return mockWebSocket;
     });
     
-    // Set up mock server for the secure endpoint
-    server = new WS('ws://localhost:8000/ws/secure');
+    // Add WebSocket constants
+    global.WebSocket.CONNECTING = 0;
+    global.WebSocket.OPEN = 1;
+    global.WebSocket.CLOSING = 2;
+    global.WebSocket.CLOSED = 3;
     
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    if (server) {
-      server.close();
-    }
+    // Restore original WebSocket
+    global.WebSocket = originalWebSocket;
     webSocketService.disconnect();
-    webSocketConstructorSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
