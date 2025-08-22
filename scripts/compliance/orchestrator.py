@@ -7,7 +7,7 @@ Coordinates all compliance checking modules and aggregates results.
 from collections import defaultdict
 from typing import Dict, List
 
-from .core import (
+from scripts.compliance.core import (
     ComplianceConfig,
     ComplianceResults,
     Violation,

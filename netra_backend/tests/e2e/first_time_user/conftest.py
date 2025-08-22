@@ -10,13 +10,32 @@ async def conversion_environment():
     metrics_tracker = Mock()
     metrics_tracker.upgrade_prompt_time = None
     
-    websocket_manager = Mock()
+    # Create comprehensive websocket manager with all needed async methods
+    websocket_manager = AsyncMock()
     websocket_manager.send_upgrade_prompt = AsyncMock()
     websocket_manager.send_tier_limits_warning = AsyncMock()
     websocket_manager.send_security_confirmation = AsyncMock()
     websocket_manager.send_dashboard_update = AsyncMock()
     websocket_manager.send_onboarding_update = AsyncMock()
     websocket_manager.send_optimization_results = AsyncMock()
+    websocket_manager.send_optimization_result = AsyncMock()
+    websocket_manager.send_dashboard_ready = AsyncMock()
+    websocket_manager.send_team_upgrade_offer = AsyncMock()
+    websocket_manager.send_purchase_confirmation = AsyncMock()
+    websocket_manager.send_sharing_ready = AsyncMock()
+    websocket_manager.send_message = AsyncMock()
+    
+    # Create auth client mock
+    auth_client = AsyncMock()
+    auth_client.signup = AsyncMock(return_value={"user_id": "test_user_123", "email": "newuser@test.com", "plan": "free"})
+    auth_client.validate_token = AsyncMock(return_value={"valid": True, "user_id": "test_user_123"})
+    auth_client.initiate_oauth = AsyncMock(return_value={"oauth_url": "https://auth.example.com", "state": "test_state"})
+    
+    # Create demo service mock
+    demo_service = AsyncMock()
+    demo_service.calculate_roi = AsyncMock(return_value={"roi_percentage": 300, "monthly_savings": 2400})
+    demo_service.get_optimization_preview = AsyncMock(return_value={"preview_data": "sample"})
+    demo_service.run_scenario = AsyncMock(return_value={"scenario_result": "success", "savings": 1200})
     
     return {
         "user_id": "test_user_123",
@@ -29,7 +48,9 @@ async def conversion_environment():
             "monthly_savings": 0
         },
         "metrics_tracker": metrics_tracker,
-        "websocket_manager": websocket_manager
+        "websocket_manager": websocket_manager,
+        "auth_client": auth_client,
+        "demo_service": demo_service
     }
 
 
@@ -43,6 +64,12 @@ async def cost_savings_calculator():
         "monthly_savings": 700.0,
         "annual_savings": 8400.0,
         "roi_percentage": 28.0
+    })
+    calculator.preview_optimization_value = Mock(return_value={
+        "monthly_savings": 2400.0,
+        "annual_savings": 28800.0,
+        "roi_percentage": 300.0,
+        "optimization_score": 85
     })
     return calculator
 
@@ -87,7 +114,7 @@ async def pricing_engine():
 @pytest.fixture
 async def ai_provider_simulator():
     """Mock AI provider simulator for API key testing."""
-    simulator = Mock()
+    simulator = AsyncMock()
     simulator.validate_api_key = AsyncMock(return_value={
         "valid": True,
         "provider": "openai",
@@ -98,6 +125,16 @@ async def ai_provider_simulator():
         "connected": True,
         "latency_ms": 45,
         "model_access": ["gpt-4", "gpt-3.5-turbo"]
+    })
+    simulator.connect_openai = AsyncMock(return_value={
+        "provider": "openai",
+        "api_key_status": "valid",
+        "connection_id": "conn_123"
+    })
+    simulator.analyze_current_usage = AsyncMock(return_value={
+        "monthly_cost": 2500,
+        "requests": 15000,
+        "tokens_used": 500000
     })
     return simulator
 
@@ -125,4 +162,35 @@ async def onboarding_flow_manager():
         "current_step": "welcome"
     })
     manager.complete_step = AsyncMock(return_value={"next_step": "api_setup"})
+    return manager
+
+
+@pytest.fixture
+async def real_llm_manager():
+    """Mock real LLM manager for testing with actual LLM interactions."""
+    manager = AsyncMock()
+    manager.generate_response = AsyncMock(return_value={
+        "content": "This is a sample AI response for testing",
+        "model": "gpt-3.5-turbo",
+        "tokens_used": 45,
+        "cost": 0.0012
+    })
+    manager.analyze_optimization = AsyncMock(return_value={
+        "optimization_suggestions": ["Use batch processing", "Implement caching"],
+        "confidence": 0.85,
+        "potential_savings": 1200
+    })
+    return manager
+
+
+@pytest.fixture
+async def real_websocket_manager():
+    """Mock real websocket manager for testing websocket functionality."""
+    manager = AsyncMock()
+    manager.connect = AsyncMock(return_value={"connection_id": "ws_123", "status": "connected"})
+    manager.send_message = AsyncMock()
+    manager.send_optimization_result = AsyncMock()
+    manager.send_upgrade_prompt = AsyncMock()
+    manager.broadcast = AsyncMock()
+    manager.disconnect = AsyncMock()
     return manager

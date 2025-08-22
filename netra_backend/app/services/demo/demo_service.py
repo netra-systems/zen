@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.database.session_manager import SessionManager
+from netra_backend.app.services.demo.session_manager import SessionManager
 from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
 from netra_backend.app.services.demo.metrics_generator import (
     calculate_roi,

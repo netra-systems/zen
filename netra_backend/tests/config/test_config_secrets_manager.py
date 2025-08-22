@@ -27,7 +27,7 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from config_secrets_manager import ConfigSecretsManager
+from netra_backend.app.core.configuration.secrets import SecretManager as ConfigSecretsManager
 
 from netra_backend.app.schemas.Config import AppConfig
 

@@ -28,7 +28,7 @@ import os
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from config_environment import ConfigEnvironment
+from netra_backend.app.core.configuration.environment import EnvironmentDetector as ConfigEnvironment
 
 from netra_backend.app.schemas.Config import (
     AppConfig,

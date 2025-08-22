@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Netra Apex Cold Start Validation Script
 Validates that the entire system works from cold start through customer interaction
@@ -12,6 +13,11 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+# Ensure proper encoding for Windows console
+if sys.platform.startswith('win'):
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
 
 # Color codes for output
 GREEN = '\033[92m'
@@ -38,13 +44,13 @@ class ColdStartValidator:
     def print_step(self, step: str, status: Optional[str] = None):
         """Print a step with optional status"""
         if status == "success":
-            print(f"{GREEN}✅ {step}{RESET}")
+            print(f"{GREEN}[OK] {step}{RESET}")
         elif status == "failure":
-            print(f"{RED}❌ {step}{RESET}")
+            print(f"{RED}[FAIL] {step}{RESET}")
         elif status == "warning":
-            print(f"{YELLOW}⚠️  {step}{RESET}")
+            print(f"{YELLOW}[WARN] {step}{RESET}")
         else:
-            print(f"🔍 {step}")
+            print(f"[INFO] {step}")
     
     def check_environment(self) -> bool:
         """Check environment setup"""
@@ -313,13 +319,13 @@ class ColdStartValidator:
         if self.critical_issues:
             print(f"\n{BOLD}{RED}Critical Issues Found:{RESET}")
             for issue in self.critical_issues:
-                print(f"  • {issue}")
+                print(f"  - {issue}")
         
         if passed_tests == total_tests:
-            print(f"\n{GREEN}{BOLD}✅ SYSTEM READY FOR COLD START!{RESET}")
+            print(f"\n{GREEN}{BOLD}[SUCCESS] SYSTEM READY FOR COLD START!{RESET}")
             print(f"{GREEN}All critical components validated successfully.{RESET}")
         else:
-            print(f"\n{RED}{BOLD}❌ SYSTEM NOT READY FOR COLD START{RESET}")
+            print(f"\n{RED}{BOLD}[FAILURE] SYSTEM NOT READY FOR COLD START{RESET}")
             print(f"{RED}Please fix the critical issues before proceeding.{RESET}")
         
         # Provide next steps

@@ -74,7 +74,8 @@ class DatabaseConfigManager:
         self._populate_postgres_config(config)
         self._populate_clickhouse_config(config)
         self._populate_redis_config(config)
-        self._logger.info(f"Populated database config for {self._environment}")
+        # Only log during initial startup or when explicitly requested
+        self._logger.debug(f"Populated database config for {self._environment}")
     
     def _populate_postgres_config(self, config: AppConfig) -> None:
         """Populate PostgreSQL configuration."""
@@ -117,7 +118,7 @@ class DatabaseConfigManager:
             self._logger.info(f"Loading DATABASE_URL: {masked_url}")
         else:
             url = self._get_default_postgres_url()
-            self._logger.info(f"Using default database URL for {self._environment}")
+            self._logger.debug(f"Using default database URL for {self._environment}")
         return url
     
     def _normalize_postgres_url(self, url: str) -> str:

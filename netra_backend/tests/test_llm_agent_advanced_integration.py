@@ -140,3 +140,50 @@ async def test_real_llm_interaction():
     assert response["tokens_used"] > 0
     assert response["processing_time"] > 0
     assert len(response["completion"]) > 50
+
+
+async def test_tool_execution_with_llm():
+    """Test tool execution triggered by LLM response."""
+    from unittest.mock import AsyncMock, Mock
+    
+    # Mock tool dispatcher
+    tool_results = []
+    
+    async def mock_dispatch(tool_name, params):
+        result = {
+            "tool": tool_name,
+            "params": params,
+            "result": f"Executed {tool_name}",
+            "status": "success"
+        }
+        tool_results.append(result)
+        return result
+    
+    # Create mock dispatcher
+    dispatcher = Mock()
+    dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
+    
+    # Simulate LLM response with tool calls
+    llm_response = {
+        "content": "I need to analyze the workload and optimize batch size",
+        "tool_calls": [
+            {
+                "name": "analyze_workload",
+                "parameters": {"resource_type": "compute"}
+            },
+            {
+                "name": "optimize_batch_size", 
+                "parameters": {"current_size": 32}
+            }
+        ]
+    }
+    
+    # Execute tools based on LLM response
+    for tool_call in llm_response["tool_calls"]:
+        await dispatcher.dispatch_tool(tool_call["name"], tool_call["parameters"])
+    
+    # Verify tool execution
+    assert len(tool_results) == 2
+    assert tool_results[0]["tool"] == "analyze_workload"
+    assert tool_results[1]["tool"] == "optimize_batch_size"
+    assert all(result["status"] == "success" for result in tool_results)

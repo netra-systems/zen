@@ -44,7 +44,7 @@ from netra_backend.tests.test_llm_agent_advanced_integration import (
 )
 
 # Import all basic tests (≤8 line functions)
-from netra_backend.tests.test_llm_agent_basic import (
+from netra_backend.tests.agents.test_llm_agent_basic import (
     test_agent_state_transitions,
     test_error_recovery,
     test_llm_response_parsing,

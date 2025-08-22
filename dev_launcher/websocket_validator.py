@@ -91,7 +91,7 @@ class WebSocketValidator:
     
     def _print_endpoint_discovered(self, name: str, url: str) -> None:
         """Print endpoint discovery message."""
-        emoji = "🔍" if self.use_emoji else ""
+        emoji = "[DISCOVER]" if not self.use_emoji else "🔍"
         print(f"{emoji} WEBSOCKET | Discovered endpoint: {name} -> {url}")
     
     async def validate_all_endpoints(self) -> bool:
@@ -130,21 +130,21 @@ class WebSocketValidator:
     
     def _print_no_endpoints(self) -> None:
         """Print message when no endpoints are configured."""
-        emoji = "ℹ️" if self.use_emoji else ""
+        emoji = "[INFO]" if not self.use_emoji else "ℹ️"
         print(f"{emoji} WEBSOCKET | No WebSocket endpoints configured")
     
     def _print_validation_start(self) -> None:
         """Print validation start message."""
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = "[VALIDATE]" if not self.use_emoji else "🔄"
         print(f"{emoji} WEBSOCKET | Validating {len(self.endpoints)} WebSocket endpoints...")
     
     def _print_validation_summary(self, all_healthy: bool) -> None:
         """Print validation summary."""
         if all_healthy:
-            emoji = "✅" if self.use_emoji else ""
+            emoji = "[OK]" if not self.use_emoji else "✅"
             print(f"{emoji} WEBSOCKET | All WebSocket endpoints validated successfully")
         else:
-            emoji = "❌" if self.use_emoji else ""
+            emoji = "[FAIL]" if not self.use_emoji else "❌"
             print(f"{emoji} WEBSOCKET | WebSocket validation failed - check logs for details")
     
     async def _validate_endpoint_with_retry(self, endpoint: WebSocketEndpoint) -> bool:
@@ -193,17 +193,17 @@ class WebSocketValidator:
     
     def _print_connection_attempt(self, endpoint: WebSocketEndpoint, attempt: int) -> None:
         """Print connection attempt message."""
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = "[CONNECT]" if not self.use_emoji else "🔄"
         print(f"{emoji} WS_CONNECT | {endpoint.name}: Attempt {attempt}/{self.max_retries}")
     
     def _print_connection_success(self, endpoint: WebSocketEndpoint) -> None:
         """Print connection success message."""
-        emoji = "✅" if self.use_emoji else ""
+        emoji = "[OK]" if not self.use_emoji else "✅"
         print(f"{emoji} WS_CONNECT | {endpoint.name}: WebSocket endpoint ready")
     
     def _print_connection_failed(self, endpoint: WebSocketEndpoint) -> None:
         """Print connection failure message."""
-        emoji = "❌" if self.use_emoji else ""
+        emoji = "[FAIL]" if not self.use_emoji else "❌"
         error_msg = endpoint.last_error or "Connection failed"
         print(f"{emoji} WS_CONNECT | {endpoint.name}: Failed after {self.max_retries} attempts - {error_msg}")
     
@@ -219,14 +219,14 @@ class WebSocketValidator:
         endpoint.last_error = str(exception)
         
         if attempt == self.max_retries - 1:
-            emoji = "⚠️" if self.use_emoji else ""
+            emoji = "[WARN]" if not self.use_emoji else "⚠️"
             print(f"{emoji} WS_ERROR | {endpoint.name}: {str(exception)}")
     
     def _handle_validation_exception(self, endpoint: WebSocketEndpoint, exception: Exception) -> None:
         """Handle validation exception during startup."""
         endpoint.status = WebSocketStatus.FAILED
         endpoint.last_error = str(exception)
-        emoji = "❌" if self.use_emoji else ""
+        emoji = "[FAIL]" if not self.use_emoji else "❌"
         print(f"{emoji} WS_ERROR | {endpoint.name}: Validation failed - {str(exception)}")
     
     async def _test_websocket_connection(self, endpoint: WebSocketEndpoint) -> bool:

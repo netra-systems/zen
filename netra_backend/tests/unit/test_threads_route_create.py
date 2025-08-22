@@ -68,11 +68,10 @@ class TestCreateThread:
             mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
-        with patch('netra_backend.app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \
              patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_get_logger:
             
-            thread_repo = MockThreadRepo.return_value
-            thread_repo.create = AsyncMock(side_effect=Exception("Database error"))
+            mock_handler.side_effect = Exception("Database error")
             thread_data = ThreadCreate(title="Test")
             
             with pytest.raises(HTTPException) as exc_info:
