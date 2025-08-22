@@ -113,6 +113,9 @@ class AuthService {
 
   async handleLogout(authConfig: AuthConfigResponse) {
     try {
+      console.log('Debug: authServiceClient in handleLogout:', authServiceClient);
+      console.log('Debug: authServiceClient.logout type:', typeof authServiceClient.logout);
+      console.log('Debug: is authServiceClient.logout a jest mock?', typeof jest !== 'undefined' ? jest.isMockFunction(authServiceClient.logout) : 'N/A');
       await authServiceClient.logout();
       this.removeToken();
       window.location.href = '/';

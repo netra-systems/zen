@@ -502,7 +502,7 @@ def _setup_agent_llm_manager():
 def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
     websocket_manager = WebSocketManager()
 
@@ -522,9 +522,9 @@ def _setup_websocket_tool_dispatcher():
 def _setup_core_services():
 
     """Create core business services."""
-    from app.services.synthetic_data_service import SyntheticDataService
-    from app.services.quality_gate_service import QualityGateService
-    from app.services.corpus_service import CorpusService
+    from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+    from netra_backend.app.services.quality_gate_service import QualityGateService
+    from netra_backend.app.services.corpus_service import CorpusService
 
     synthetic_service = SyntheticDataService()
 
@@ -557,8 +557,8 @@ def _setup_mock_services():
 def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     """Create supervisor and agent service with proper configuration."""
-    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-    from app.services.agent_service import AgentService
+    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+    from netra_backend.app.services.agent_service import AgentService
 
     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
 
