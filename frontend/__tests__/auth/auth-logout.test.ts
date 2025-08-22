@@ -99,7 +99,7 @@ describe('Auth Logout Flow', () => {
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(hrefSpy).toHaveBeenCalledWith('/');
     });
 
     it('should handle logout network error and still clear token', async () => {
@@ -111,7 +111,7 @@ describe('Auth Logout Flow', () => {
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(hrefSpy).toHaveBeenCalledWith('/');
     });
 
     it('should handle concurrent logout operations', async () => {

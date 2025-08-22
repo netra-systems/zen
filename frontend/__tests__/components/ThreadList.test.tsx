@@ -302,7 +302,8 @@ describe('ThreadList Component Tests', () => {
       renderThreadList({ threads: largeThreadList });
       
       const threadList = screen.getByTestId('thread-list');
-      expect(threadList).toHaveStyle('overflow-y: auto');
+      // Check for the CSS class that provides overflow-y auto
+      expect(threadList).toHaveClass('overflow-y-auto');
       
       // Verify scrollable container
       fireEvent.scroll(threadList, { target: { scrollTop: 1000 } });
