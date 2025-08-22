@@ -28,21 +28,6 @@ def organize_files():
             "debug_*.py",
             "demo_*.py"
         ],
-        "organized_root/deployment_configs": [
-            "*.yaml",
-            "*.yml",
-            "deploy*.py",
-            "setup*.py",
-            "*staging*.py",
-            "*deployment*.json",
-            "auth-service-env.yaml",
-            "cloud-run-*.yaml"
-        ],
-        "organized_root/docker_configs": [
-            "Dockerfile*",
-            "docker-compose*.yml",
-            ".dockerignore"
-        ],
         "organized_root/compliance_reports": [
             "*compliance*.json",
             "*violations*.json",

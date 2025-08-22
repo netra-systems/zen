@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification type="service_naming_conventions">
+    <metadata>
+        <title>Service Naming Conventions and Learnings</title>
+        <created>2025-08-22</created>
+        <purpose>Consolidated learnings about service naming patterns</purpose>
+    </metadata>
+
+    <naming_patterns>
+        <pattern name="microservices">
+            <rule>
+                <name>auth_service</name>
+                <format>snake_case</format>
+                <description>Auth service naming should use snake_case consistently</description>
+            </rule>
+            <rule>
+                <name>netra_backend</name>
+                <format>snake_case</format>
+                <description>Main backend service uses snake_case</description>
+            </rule>
+            <rule>
+                <name>frontend</name>
+                <format>lowercase</format>
+                <description>Frontend service uses simple lowercase</description>
+            </rule>
+        </pattern>
+
+        <pattern name="database_services">
+            <rule>
+                <name>postgres</name>
+                <format>lowercase</format>
+                <port>5432</port>
+            </rule>
+            <rule>
+                <name>redis</name>
+                <format>lowercase</format>
+                <port>6379</port>
+            </rule>
+            <rule>
+                <name>clickhouse</name>
+                <format>lowercase</format>
+                <port>8123</port>
+            </rule>
+        </pattern>
+    </naming_patterns>
+
+    <learnings>
+        <learning category="consistency">
+            <description>
+                Service names must be consistent across:
+                - Docker container names
+                - Environment variables
+                - Configuration files
+                - Test fixtures
+            </description>
+        </learning>
+
+        <learning category="environment_variables">
+            <description>
+                Service URLs follow pattern: {SERVICE_NAME}_URL
+                Example: AUTH_SERVICE_URL, REDIS_URL, POSTGRES_URL
+            </description>
+        </learning>
+
+        <learning category="ports">
+            <description>
+                Standard service ports:
+                - Backend: 8888
+                - Auth Service: 8001
+                - Frontend: 3000
+                - Postgres: 5432
+                - Redis: 6379
+                - ClickHouse: 8123
+            </description>
+        </learning>
+    </learnings>
+</specification>

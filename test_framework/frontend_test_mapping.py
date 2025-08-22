@@ -118,23 +118,26 @@ def get_test_patterns_for_level(level: str) -> list:
     return FRONTEND_TEST_MAPPING[level]["patterns"]
 
 def get_jest_command_for_level(level: str) -> str:
-    """Build Jest command for a specific test level."""
-    patterns = get_test_patterns_for_level(level)
+    """Build Jest command for a specific test level using unified Jest config."""
     
+    # Map test levels to appropriate Jest suite configurations
     if level == "smoke":
-        return "npm test -- --bail --maxWorkers=2"
+        return "node run-test.js TEST_SUITE=unit MAX_WORKERS=2 --config jest.config.unified.cjs --silent --bail"
     elif level == "unit":
-        return f"npm test -- --testPathPattern='({'|'.join(patterns)})'"
+        return "node run-test.js TEST_SUITE=unit --config jest.config.unified.cjs"
     elif level == "critical":
-        return f"npm test -- --testPathPattern='({'|'.join(patterns)})' --bail"
+        return "node run-test.js TEST_SUITE=critical --config jest.config.unified.cjs"
     elif level == "integration":
-        return f"npm test -- --testPathPattern='({'|'.join(patterns)})'"
+        return "node run-test.js TEST_SUITE=integration JEST_TIMEOUT=60000 --config jest.config.unified.cjs"
     elif level == "performance":
-        return f"npm test -- --testPathPattern='({'|'.join(patterns)})' --runInBand"
+        return "node run-test.js TEST_SUITE=performance JEST_TIMEOUT=120000 --config jest.config.unified.cjs"
     elif level == "comprehensive":
-        return "npm test -- --coverage"
+        return "node run-test.js TEST_SUITE=all --config jest.config.unified.cjs --coverage"
+    elif level == "agents":
+        # Frontend doesn't have agent tests, run integration instead
+        return "node run-test.js TEST_SUITE=integration --config jest.config.unified.cjs"
     else:
-        return "npm test"
+        return "node run-test.js TEST_SUITE=all --config jest.config.unified.cjs"
 
 def categorize_test_file(file_path: str) -> str:
     """Determine the category of a test file based on its path."""

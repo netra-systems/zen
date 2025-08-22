@@ -37,6 +37,7 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 
 ## 🚀 Developer Guidelines
 
+📚 **[INDEX OF INDEXES](INDEX_OF_INDEXES.md)** - Master navigation hub for all documentation and specifications
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
 🧪 **[TESTING.md](TESTING.md)** - Comprehensive testing guide and unified test runner
 🔧 **[TOOLING INDEX](TOOLING_INDEX.md)** - AI Native centric tools

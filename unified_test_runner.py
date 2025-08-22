@@ -10,22 +10,31 @@ USAGE:
     python unified_test_runner.py --help       # Show all options
     
 TEST LEVELS:
-    smoke           Quick validation (<30s)
-    unit            Component testing (1-2min)  
-    integration     Feature testing (3-5min)
-    comprehensive   Full coverage (30-45min)
-    critical        Essential paths (1-2min)
+    unit            Fast isolated component tests (1-3min)
+    integration     Service interaction tests (3-8min) [DEFAULT]
+    e2e             End-to-end real service tests (10-30min)
+    performance     Performance and load testing (3-10min)
+    comprehensive   Complete system validation (30-60min)
+    
+    Legacy levels (deprecated, will redirect):
+    smoke, critical, agents -> unit
+    real_e2e, real_services, staging* -> e2e
 
 SERVICES:
     backend         Main backend application
     auth            Auth service
     frontend        Frontend application
+    dev_launcher    Development launcher and system startup tests
     all             Run tests for all services
 
 EXAMPLES:
-    python unified_test_runner.py --level smoke
-    python unified_test_runner.py --service backend --level integration
-    python unified_test_runner.py --real-llm --env staging
+    python unified_test_runner.py                           # Run integration tests (default)
+    python unified_test_runner.py --level unit              # Quick development tests
+    python unified_test_runner.py --level e2e --real-llm    # Real service E2E tests
+    python unified_test_runner.py --level performance       # Performance validation
+    python unified_test_runner.py --level comprehensive     # Full release validation
+    python unified_test_runner.py --service dev_launcher    # Run only dev_launcher tests
+    python unified_test_runner.py --service dev_launcher --level unit  # Quick dev_launcher validation
 """
 
 import argparse
@@ -43,7 +52,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import test framework
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
-from test_framework.test_config import TEST_LEVELS, configure_dev_environment, configure_real_llm
+from test_framework.test_config import TEST_LEVELS, configure_dev_environment, configure_real_llm, resolve_test_level
 from test_framework.test_discovery import TestDiscovery
 from test_framework.test_validation import TestValidation
 
@@ -77,6 +86,12 @@ class UnifiedTestRunner:
                 "test_dir": "__tests__",
                 "config": "jest.config.cjs",
                 "command": "npm test"
+            },
+            "dev_launcher": {
+                "path": self.project_root,
+                "test_dir": "tests",
+                "config": "pytest.ini",
+                "command": "pytest"
             }
         }
         
@@ -129,7 +144,7 @@ class UnifiedTestRunner:
     def _get_services_to_test(self, args: argparse.Namespace) -> List[str]:
         """Determine which services to test based on arguments."""
         if args.service == "all":
-            return ["backend", "auth", "frontend"]
+            return ["backend", "auth", "frontend", "dev_launcher"]
         return [args.service]
     
     def _run_service_tests(self, service: str, args: argparse.Namespace) -> Dict:
@@ -139,6 +154,8 @@ class UnifiedTestRunner:
         # Build test command
         if service == "frontend":
             cmd = self._build_frontend_command(args)
+        elif service == "dev_launcher":
+            cmd = self._build_dev_launcher_command(args)
         else:
             cmd = self._build_pytest_command(service, args)
         
@@ -150,7 +167,9 @@ class UnifiedTestRunner:
                 cwd=config["path"],
                 capture_output=True,
                 text=True,
-                shell=True
+                shell=True,
+                encoding='utf-8',
+                errors='replace'
             )
             success = result.returncode == 0
         except Exception as e:
@@ -209,6 +228,87 @@ class UnifiedTestRunner:
         
         return " ".join(cmd_parts)
     
+    def _build_dev_launcher_command(self, args: argparse.Namespace) -> str:
+        """Build pytest command for dev_launcher tests."""
+        cmd_parts = ["pytest"]
+        
+        # Dev launcher test patterns - tests that validate dev_launcher functionality
+        dev_launcher_patterns = [
+            "tests/test_system_startup.py",
+            "tests/unified/test_dev_launcher_real_startup.py", 
+            "tests/e2e/integration/test_dev_launcher_startup_complete.py",
+            "-k", "dev_launcher"
+        ]
+        
+        # Add test level specific filtering
+        if args.level == "unit":
+            # For unit tests, focus on basic dev_launcher functionality
+            cmd_parts.extend([
+                "tests/test_system_startup.py::TestSystemStartup::test_dev_launcher_help",
+                "tests/test_system_startup.py::TestSystemStartup::test_dev_launcher_list_services",
+                "tests/test_system_startup.py::TestSystemStartup::test_dev_launcher_minimal_mode"
+            ])
+        elif args.level == "integration":
+            # For integration tests, include service interaction tests
+            cmd_parts.extend([
+                "tests/unified/test_dev_launcher_real_startup.py",
+                "tests/test_system_startup.py",
+                "--timeout=300"  # 5 minute timeout for integration tests
+            ])
+        elif args.level == "e2e":
+            # For e2e tests, include comprehensive startup tests
+            cmd_parts.extend(dev_launcher_patterns)
+            cmd_parts.extend(["--timeout=600"])  # 10 minute timeout for e2e tests
+        elif args.level == "performance":
+            # For performance tests, focus on startup performance
+            cmd_parts.extend([
+                "tests/unified/test_dev_launcher_real_startup.py::TestDevLauncherRealStartup::test_service_startup_order_validation",
+                "--timeout=300"
+            ])
+        elif args.level == "comprehensive":
+            # For comprehensive tests, run all dev_launcher tests
+            cmd_parts.extend(dev_launcher_patterns)
+            cmd_parts.extend(["--timeout=900"])  # 15 minute timeout for comprehensive tests
+        else:
+            # Default pattern
+            cmd_parts.extend(dev_launcher_patterns)
+        
+        # Add coverage options (skip for performance tests)
+        if not args.no_coverage and args.level not in ["performance", "e2e"]:
+            cmd_parts.extend([
+                "--cov=scripts.dev_launcher",
+                "--cov=scripts.dev_launcher_core", 
+                "--cov=scripts.dev_launcher_config",
+                "--cov-report=html:htmlcov/dev_launcher",
+                "--cov-report=term-missing"
+            ])
+        
+        # Add parallelization (limited for dev_launcher tests due to port conflicts)
+        if args.parallel and args.level not in ["e2e", "performance"]:
+            # Limited parallelization to avoid port conflicts
+            cmd_parts.append("-n 2")
+        
+        # Add verbosity
+        if args.verbose:
+            cmd_parts.append("-vv")
+        
+        # Add fast fail
+        if args.fast_fail:
+            cmd_parts.append("-x")
+        
+        # Add specific test pattern
+        if args.pattern:
+            cmd_parts.append(f"-k {args.pattern}")
+        
+        # Windows compatibility - ensure proper test isolation
+        cmd_parts.extend([
+            "--tb=short",  # Shorter tracebacks for cleaner output
+            "--strict-markers",  # Ensure test markers are defined
+            "--disable-warnings"  # Reduce noise in dev_launcher tests
+        ])
+        
+        return " ".join(cmd_parts)
+    
     def _build_frontend_command(self, args: argparse.Namespace) -> str:
         """Build test command for frontend using level mapping."""
         from test_framework.frontend_test_mapping import get_jest_command_for_level
@@ -259,7 +359,7 @@ class UnifiedTestRunner:
         print(f"\nService Results:")
         
         for service, result in results.items():
-            status = "✓ PASSED" if result["success"] else "✗ FAILED"
+            status = "PASSED" if result["success"] else "FAILED"
             print(f"  {service:10} {status:10} ({result['duration']:.2f}s)")
         
         print(f"\nOverall: {'PASSED' if report_data['overall_success'] else 'FAILED'}")
@@ -274,18 +374,21 @@ def main():
         epilog=__doc__
     )
     
-    # Test level selection
+    # Test level selection - new 5-level system with backward compatibility
     parser.add_argument(
         "--level",
-        choices=["smoke", "unit", "integration", "comprehensive", "critical", "agents"],
+        choices=["unit", "integration", "e2e", "performance", "comprehensive", 
+                # Legacy levels for backward compatibility
+                "smoke", "critical", "agents", "real_e2e", "real_services", 
+                "staging", "staging-real", "staging-quick"],
         default="integration",
-        help="Test level to run (default: integration)"
+        help="Test level to run (default: integration). See docs for 5-level system."
     )
     
     # Service selection
     parser.add_argument(
         "--service",
-        choices=["backend", "auth", "frontend", "all"],
+        choices=["backend", "auth", "frontend", "dev_launcher", "all"],
         default="all",
         help="Service to test (default: all)"
     )
@@ -378,7 +481,7 @@ def main():
             for issue in issues:
                 print(f"  - {issue}")
             return 1
-        print("✓ All tests validated successfully")
+        print("All tests validated successfully")
         return 0
     
     # Run tests

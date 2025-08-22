@@ -34,11 +34,11 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.process_manager import ProcessManager
+from dev_launcher.utils import wait_for_service
 
 
 class TestDevUserCreation:
     """Test development user creation and management"""
-    __test__ = False  # Disable until functionality is implemented
 
     @pytest.fixture
     def mock_dev_config(self):
@@ -338,7 +338,6 @@ class TestDevUserCreation:
 
 class TestDevWorkflowOptimization:
     """Test developer workflow optimizations"""
-    __test__ = False  # Disable until functionality is implemented
 
     async def test_rapid_iteration_cycle(self):
         """Test rapid development iteration cycle
@@ -487,7 +486,6 @@ class TestDevWorkflowOptimization:
 
 class TestDevLauncherIntegration:
     """Integration tests for dev launcher complete workflows"""
-    __test__ = False  # Disable until functionality is implemented
 
     async def test_complete_dev_setup_workflow(self):
         """Test complete development environment setup workflow

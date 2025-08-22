@@ -8,273 +8,174 @@ from typing import Any, Dict
 CPU_COUNT = multiprocessing.cpu_count()
 OPTIMAL_WORKERS = min(CPU_COUNT - 1, 8)  # Leave one CPU free
 
-# Define test levels with clear purposes
+# Define simplified 5-level test system with clear boundaries
 TEST_LEVELS: Dict[str, Dict[str, Any]] = {
-    "smoke": {
-        "description": "Quick smoke tests for basic functionality (< 30 seconds)",
-        "purpose": "Pre-commit validation, basic health checks",
-        "backend_args": ["--category", "smoke", "--fail-fast", "--coverage", "--markers", "not real_services"],
-        "frontend_args": [],
-        "timeout": 30,
-        "run_coverage": True,
-        "run_both": False  # Only run backend smoke tests for now
-    },
     "unit": {
-        "description": "Unit tests for isolated components (1-2 minutes)",
-        "purpose": "Development validation, component testing",
-        "backend_args": ["--category", "unit", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--markers", "not real_services"],
-        "frontend_args": ["--category", "unit"],
-        "timeout": 120,
-        "run_coverage": True,
-        "run_both": True
-    },
-    "agents": {
-        "description": "Agent-specific unit tests (2-3 minutes)",
-        "purpose": "Quick validation of agent functionality during development",
+        "description": "Fast isolated component tests for rapid development feedback (1-3 minutes)",
+        "purpose": "Daily development, pre-commit validation, isolated component testing",
         "backend_args": [
-            "--category", "agent", 
-            "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}",
-            "--markers", "not real_services"
+            "--category", "unit,smoke,critical,agent", 
+            "-v", "--coverage", "--fail-fast", 
+            f"--parallel={min(4, OPTIMAL_WORKERS)}", 
+            "--markers", "not real_services and not real_llm"
         ],
-        "frontend_args": [],
-        "timeout": 180,
+        "frontend_args": ["--category", "unit,smoke"],
+        "timeout": 180,  # 3 minutes max
         "run_coverage": True,
-        "run_both": False
-    },
-    "agent-startup": {
-        "description": "Agent startup E2E tests with real services (2-3 minutes)",
-        "purpose": "Comprehensive agent initialization and startup validation",
-        "backend_args": [
-            "tests/unified/test_agent_cold_start.py",
-            "tests/unified/test_concurrent_agents.py",
-            "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}",
-            "--markers", "real_services"
-        ],
-        "frontend_args": [],
-        "timeout": 300,
-        "run_coverage": True,
-        "run_both": False,
-        "supports_real_llm": True,
-        "business_critical": True,
-        "highlight": True
+        "run_both": True,
+        "includes_legacy": ["smoke", "unit", "critical", "agents", "code-quality"],
+        "default_for_development": True
     },
     "integration": {
-        "description": "Integration tests for component interaction (3-5 minutes)",
-        "purpose": "Feature validation, API testing",
-        "backend_args": ["--category", "integration", "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--markers", "not real_services"],
+        "description": "Service interaction and feature validation tests (3-8 minutes)",
+        "purpose": "Feature validation, API testing, service interaction validation",
+        "backend_args": [
+            "--category", "integration", 
+            "-v", "--coverage", "--fail-fast", 
+            f"--parallel={min(4, OPTIMAL_WORKERS)}", 
+            "--markers", "not real_llm"
+        ],
         "frontend_args": ["--category", "integration"],
-        "timeout": 300,
-        "run_coverage": True,
-        "run_both": True
-    },
-    "comprehensive": {
-        "description": "Full test suite with coverage including staging tests (30-45 minutes)",
-        "purpose": "Pre-release validation, full system testing including staging environment",
-        "backend_args": ["netra_backend/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
-        "frontend_args": ["--coverage"],
-        "timeout": 2700,  # 45 minutes to handle real LLM tests
+        "timeout": 480,  # 8 minutes max
         "run_coverage": True,
         "run_both": True,
-        "includes_staging": True
+        "includes_legacy": ["integration", "agent-startup"],
+        "business_critical": True,
+        "default_level": True  # This is the default level for CI/CD
     },
-    "comprehensive-backend": {
-        "description": "Comprehensive backend tests only (15-20 minutes)",
-        "purpose": "Full backend validation without frontend",
-        "backend_args": ["netra_backend/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast", "--markers", "not frontend"],
-        "frontend_args": [],
-        "timeout": 1200,  # 20 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-frontend": {
-        "description": "Comprehensive frontend tests only (10-15 minutes)",
-        "purpose": "Full frontend validation without backend",
-        "backend_args": [],
-        "frontend_args": ["--coverage", "--e2e", "--fail-fast"],
-        "timeout": 900,  # 15 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-core": {
-        "description": "Core functionality comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of core components only",
-        "backend_args": ["netra_backend/app/core", "netra_backend/app/config", "netra_backend/app/dependencies", "netra_backend/tests/unit/test_*core*", "netra_backend/tests/*core*", "tests/*core*", "tests/unified/test_*core*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,  # 15 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-agents": {
-        "description": "Agent system comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of multi-agent system",
-        "backend_args": ["netra_backend/app/agents", "netra_backend/app/services/agent*", "netra_backend/tests/*agent*", "netra_backend/tests/**/*agent*", "tests/*agent*", "tests/**/*agent*", "tests/unified/test_*agent*", "tests/agents", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,  # 15 minutes
-        "run_coverage": True,
-        "run_both": False,
-        "supports_real_llm": True,
-        "business_critical": True
-    },
-    "comprehensive-websocket": {
-        "description": "WebSocket comprehensive tests (5-10 minutes)",
-        "purpose": "Deep validation of WebSocket functionality",
-        "backend_args": ["netra_backend/app/websocket", "netra_backend/app/routes/websocket_secure.py", "netra_backend/tests/*websocket*", "netra_backend/tests/**/*websocket*", "tests/*websocket*", "tests/**/*websocket*", "integration_tests/test_websocket*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 600,  # 10 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-database": {
-        "description": "Database comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of all database operations",
-        "backend_args": ["netra_backend/app/db", "netra_backend/app/repositories", "netra_backend/tests/*database*", "netra_backend/tests/*db*", "netra_backend/tests/**/*database*", "tests/*database*", "tests/*db*", "tests/**/*database*", "tests/unified/test_*database*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,  # 15 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-api": {
-        "description": "API comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of all API endpoints",
-        "backend_args": ["netra_backend/app/routes", "netra_backend/app/handlers", "netra_backend/tests/*api*", "netra_backend/tests/*auth*", "netra_backend/tests/**/*api*", "tests/*api*", "tests/*auth*", "tests/**/*api*", "tests/unified/test_*api*", "integration_tests/test_*api*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,  # 15 minutes
-        "run_coverage": True,
-        "run_both": False
-    },
-    "code-quality": {
-        "description": "Code quality checks including circular imports (< 1 minute)",
-        "purpose": "Static code analysis and import validation",
-        "backend_args": [],
-        "frontend_args": [],
-        "timeout": 60,
-        "run_coverage": False,
-        "run_both": False,
-        "custom_validation": ["circular_imports"]
-    },
-    "critical": {
-        "description": "Critical path tests only (1-2 minutes)",
-        "purpose": "Essential functionality verification",
-        "backend_args": ["--category", "critical", "--fail-fast", "--coverage"],
-        "frontend_args": ["--category", "smoke"],
-        "timeout": 120,
-        "run_coverage": True,
-        "run_both": False  # Backend only for critical paths
-    },
-    "all": {
-        "description": "All tests including backend, frontend, e2e, integration (45-60 minutes)",
-        "purpose": "Complete system validation including all test types",
-        "backend_args": ["--coverage", f"--parallel={OPTIMAL_WORKERS}", "--html-output", "--fail-fast"],
-        "frontend_args": ["--coverage", "--e2e"],
-        "timeout": 3600,  # 60 minutes for complete test suite
-        "run_coverage": True,
+    "e2e": {
+        "description": "End-to-end tests with real services and user journeys (10-30 minutes)",
+        "purpose": "Real user scenario validation, pre-release testing with actual services",
+        "backend_args": [
+            "-m", "real_e2e or real_services or staging", 
+            "-v", "--fail-fast", 
+            f"--parallel={min(2, OPTIMAL_WORKERS)}",
+            "--markers", "real_llm or real_services or staging"
+        ],
+        "frontend_args": ["--e2e"],
+        "timeout": 1800,  # 30 minutes
+        "run_coverage": False,  # Focus on functionality over coverage
         "run_both": True,
-        "run_e2e": True
-    },
-    "real_e2e": {
-        "description": "Full end-to-end tests with real LLM and services (20-30 minutes)",
-        "purpose": "Complete user journey validation with actual services",
-        "backend_args": ["-m", "real_e2e", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
-        "frontend_args": [],
-        "timeout": 1800,  # 30 minutes for E2E tests
-        "run_coverage": False,
-        "run_both": False,
         "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
         "supports_real_llm": True,
-        "default_llm_timeout": 90,  # Higher timeout for E2E scenarios
-        "max_parallel_llm_calls": 2,  # Limit parallelism for stability
-        "business_critical": True
-    },
-    "real_services": {
-        "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
-        "purpose": "Validation with actual service dependencies",
-        "backend_args": ["-m", "real_services", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
-        "frontend_args": [],
-        "timeout": 2400,  # 40 minutes for real service tests with LLM retries
-        "run_coverage": False,
-        "run_both": False,
-        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
-        "supports_real_llm": True,
-        "default_llm_timeout": 60,  # Higher default timeout for real services
-        "max_parallel_llm_calls": 2  # Limit parallel LLM calls to avoid rate limits
+        "supports_real_services": True,
+        "includes_staging": True,
+        "includes_legacy": ["real_e2e", "real_services", "staging", "staging-real", "staging-quick"],
+        "business_critical": True,
+        "highlight": True,
+        "default_llm_timeout": 90,
+        "max_parallel_llm_calls": 2
     },
     "performance": {
-        "description": "Performance validation suite for SLA compliance (3-5 minutes)",
-        "purpose": "Validate response times meet business SLA requirements",
-        "backend_args": ["-m", "performance", "tests/test_unified_performance.py", "-v", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 300,
-        "run_coverage": False,
-        "run_both": False,
-        "highlight": True,
-        "business_critical": True
-    },
-    "staging": {
-        "description": "Staging environment configuration integration tests (10-15 minutes)",
-        "purpose": "Validate staging deployment configuration and GCP resource integration",
-        "backend_args": ["netra_backend/tests/integration/staging_config", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
-        "frontend_args": [],
-        "timeout": 900,
-        "run_coverage": False,
-        "run_both": False,
-        "requires_env": ["ENVIRONMENT=staging"],
-        "supports_real_services": True,
-        "business_critical": True,
-        "highlight": True,
-        "staging_urls": {
-            "app": "https://app.staging.netrasystems.ai",
-            "api": "https://api.staging.netrasystems.ai",
-            "auth": "https://auth.staging.netrasystems.ai",
-            "frontend": "https://app.staging.netrasystems.ai"
-        }
-    },
-    "staging-real": {
-        "description": "Tests against real staging environment at staging.netrasystems.ai (5-10 minutes)",
-        "purpose": "Validate actual staging deployment health and functionality",
+        "description": "Performance validation and load testing for SLA compliance (3-10 minutes)",
+        "purpose": "Response time validation, load testing, performance regression detection",
         "backend_args": [
-            "netra_backend/tests/integration/staging_config/test_health_checks.py",
-            "netra_backend/tests/integration/staging_config/test_cors_configuration.py",
-            "netra_backend/tests/integration/staging_config/test_deployment_rollback.py",
-            "netra_backend/tests/integration/staging_config/test_llm_integration.py",
-            "netra_backend/tests/integration/staging_config/test_observability_pipeline.py",
-            "netra_backend/tests/integration/staging_config/test_resource_limits.py",
-            "netra_backend/tests/integration/staging_config/test_websocket_load_balancer.py",
+            "-m", "performance", 
+            "tests/test_unified_performance.py",
             "-v", "--fail-fast"
         ],
-        "frontend_args": [],
-        "timeout": 600,
+        "frontend_args": ["--performance"],
+        "timeout": 600,  # 10 minutes
         "run_coverage": False,
-        "run_both": False,
-        "requires_env": ["ENVIRONMENT=staging"],
-        "supports_real_services": True,
+        "run_both": True,
+        "includes_legacy": ["performance"],
         "business_critical": True,
-        "highlight": True,
-        "staging_urls": {
-            "app": "https://app.staging.netrasystems.ai",
-            "api": "https://api.staging.netrasystems.ai",
-            "auth": "https://auth.staging.netrasystems.ai",
-            "frontend": "https://app.staging.netrasystems.ai"
-        }
-    },
-    "staging-quick": {
-        "description": "Quick staging validation tests (2-3 minutes)",
-        "purpose": "Fast staging health check for deployment verification",
-        "backend_args": [
-            "netra_backend/tests/integration/staging_config/test_secret_manager_integration.py",
-            "netra_backend/tests/integration/staging_config/test_health_checks.py",
-            "-v", "--fail-fast"
-        ],
-        "frontend_args": [],
-        "timeout": 180,
-        "run_coverage": False,
-        "run_both": False,
-        "requires_env": ["ENVIRONMENT=staging"],
         "highlight": True
+    },
+    "comprehensive": {
+        "description": "Complete system validation for releases (30-60 minutes)",
+        "purpose": "Full release validation, complete regression testing, all environments",
+        "backend_args": [
+            "netra_backend/tests", "tests", "integration_tests", 
+            "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", 
+            "--html-output", "--fail-fast"
+        ],
+        "frontend_args": ["--coverage", "--e2e"],
+        "timeout": 3600,  # 60 minutes
+        "run_coverage": True,
+        "run_both": True,
+        "run_e2e": True,
+        "includes_staging": True,
+        "includes_legacy": ["comprehensive", "comprehensive-backend", "comprehensive-frontend", "comprehensive-core", "comprehensive-agents", "comprehensive-websocket", "comprehensive-database", "comprehensive-api", "all"],
+        "supports_real_llm": True,
+        "supports_real_services": True,
+        "business_critical": True,
+        "release_validation": True
+    },
+    
+    # Backward compatibility aliases - maps old level names to new levels
+    # These are deprecated and will be removed in future versions
+    "smoke": {"alias_for": "unit", "deprecated": True},
+    "critical": {"alias_for": "unit", "deprecated": True},
+    "agents": {"alias_for": "unit", "deprecated": True},
+    "code-quality": {"alias_for": "unit", "deprecated": True},
+    "agent-startup": {"alias_for": "integration", "deprecated": True},
+    "real_e2e": {"alias_for": "e2e", "deprecated": True},
+    "real_services": {"alias_for": "e2e", "deprecated": True},
+    "staging": {"alias_for": "e2e", "deprecated": True},
+    "staging-real": {"alias_for": "e2e", "deprecated": True},
+    "staging-quick": {"alias_for": "e2e", "deprecated": True},
+    "comprehensive-backend": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-frontend": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-core": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-agents": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-websocket": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-database": {"alias_for": "comprehensive", "deprecated": True},
+    "comprehensive-api": {"alias_for": "comprehensive", "deprecated": True},
+    "all": {"alias_for": "comprehensive", "deprecated": True}
+}
+
+# Default test level for CI/CD and development
+DEFAULT_TEST_LEVEL = "integration"
+
+# Test level documentation and usage guidelines
+TEST_LEVEL_USAGE = {
+    "unit": {
+        "when_to_use": ["Daily development", "Pre-commit hooks", "Quick feedback", "Component isolation testing"],
+        "what_it_includes": ["Unit tests", "Smoke tests", "Critical path tests", "Agent unit tests", "Code quality checks"],
+        "typical_runtime": "1-3 minutes",
+        "coverage_focus": "Component isolation"
+    },
+    "integration": {
+        "when_to_use": ["Feature development", "CI/CD pipelines", "API validation", "Service interaction testing"],
+        "what_it_includes": ["Integration tests", "Service interaction tests", "Agent startup tests"],
+        "typical_runtime": "3-8 minutes", 
+        "coverage_focus": "Service interactions",
+        "default": True
+    },
+    "e2e": {
+        "when_to_use": ["Pre-release validation", "Real service testing", "User journey validation", "Staging validation"],
+        "what_it_includes": ["Real LLM tests", "Real service tests", "Staging tests", "Full user workflows"],
+        "typical_runtime": "10-30 minutes",
+        "coverage_focus": "Real user scenarios"
+    },
+    "performance": {
+        "when_to_use": ["Performance regression detection", "SLA validation", "Load testing", "Response time validation"],
+        "what_it_includes": ["Performance tests", "Load tests", "Response time validation"],
+        "typical_runtime": "3-10 minutes",
+        "coverage_focus": "Performance metrics"
+    },
+    "comprehensive": {
+        "when_to_use": ["Release validation", "Full system testing", "Complete regression testing"],
+        "what_it_includes": ["All test types", "All environments", "Full coverage", "Staging validation"],
+        "typical_runtime": "30-60 minutes",
+        "coverage_focus": "Complete system validation"
     }
 }
 
+# Resolve level aliases for backward compatibility
+def resolve_test_level(level: str) -> str:
+    """Resolve test level aliases to actual levels for backward compatibility."""
+    if level in TEST_LEVELS:
+        config = TEST_LEVELS[level]
+        if config.get("alias_for"):
+            if config.get("deprecated"):
+                print(f"[WARNING] Test level '{level}' is deprecated. Use '{config['alias_for']}' instead.")
+            return config["alias_for"]
+    return level
+
 # Test runner configurations - DEPRECATED (kept for backward compatibility)
-# Use test_runner.py as the single entry point
+# Use unified_test_runner.py as the single entry point
 RUNNERS = {
     "backend": "unified_test_runner.py --service backend", 
     "frontend": "unified_test_runner.py --service frontend"
@@ -304,6 +205,15 @@ COMPONENT_MAPPINGS = {
     },
     "websocket": {
         "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
+        "exclude": []
+    },
+    "dev_launcher": {
+        "paths": [
+            "tests/test_system_startup.py", 
+            "tests/unified/test_dev_launcher_real_startup.py",
+            "tests/e2e/integration/test_dev_launcher_startup_complete.py",
+            "tests/integration/test_dev_launcher*"
+        ],
         "exclude": []
     }
 }

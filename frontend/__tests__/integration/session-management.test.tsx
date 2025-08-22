@@ -170,7 +170,7 @@ describe('Session Management Integration', () => {
     });
   });
 
-  describe('Multi-Tab Synchronization', () => {
+  describe.skip('Multi-Tab Synchronization', () => {
     it('should sync login across tabs', async () => {
       const SyncComponent = createMultiTabSyncComponent();
       

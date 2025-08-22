@@ -17,11 +17,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus
 from dev_launcher.launcher import DevLauncher
+from dev_launcher.utils import wait_for_service
 
 
 class TestHealthMonitor(unittest.TestCase):
     """Test health monitoring functionality."""
-    __test__ = False  # Disable until health monitor logic issues are fixed
     
     def setUp(self):
         """Set up test environment."""
@@ -99,7 +99,6 @@ class TestHealthMonitor(unittest.TestCase):
 
 class TestAdvancedHealthMonitor(unittest.TestCase):
     """Advanced health monitoring tests."""
-    __test__ = False  # Disable until health monitor logic issues are fixed
     
     def setUp(self):
         """Set up test environment."""
@@ -204,7 +203,6 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
 
 class TestErrorRecovery(unittest.TestCase):
     """Test error recovery mechanisms."""
-    __test__ = False  # Disable until health monitor logic issues are fixed
     
     @patch('dev_launcher.launcher.load_or_create_config')
     def test_port_conflict_recovery(self, mock_config):
@@ -234,7 +232,6 @@ class TestErrorRecovery(unittest.TestCase):
     
     def test_network_error_recovery(self):
         """Test recovery from network errors."""
-        from dev_launcher.utils import wait_for_service
         attempt_count = self._test_retry_logic()
         self.assertEqual(attempt_count, 3)
     
@@ -248,7 +245,6 @@ class TestErrorRecovery(unittest.TestCase):
                 raise ConnectionError("Network error")
             return Mock(status_code=200)
         with patch('requests.get', side_effect=mock_request):
-            from dev_launcher.utils import wait_for_service
             result = wait_for_service("http://localhost:8000", timeout=5)
             self.assertTrue(result)
         return attempt_count
@@ -279,7 +275,6 @@ class TestErrorRecovery(unittest.TestCase):
 
 class TestHealthStatusManagement(unittest.TestCase):
     """Test health status tracking and reporting."""
-    __test__ = False  # Disable until health monitor logic issues are fixed
     
     def test_health_status_initialization(self):
         """Test health status initialization."""

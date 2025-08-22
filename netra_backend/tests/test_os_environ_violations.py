@@ -165,7 +165,6 @@ class TestOSEnvironViolations:
             'dev_launcher.py',
             'dev_launcher/',  # Dev launcher modules
             'scripts/',  # All scripts are infrastructure
-            'organized_root/deployment_configs/',  # Deployment scripts
             '.github/',  # CI/CD workflows
             
             # Setup and management files
