@@ -21,11 +21,12 @@ from netra_backend.tests.fixtures.realistic_test_fixtures import (
 class TestRealisticLogIngestion:
     """Test realistic log ingestion patterns"""
     
-    async def test_streaming_log_ingestion(self, generate_realistic_logs, mock_clickhouse_client):
+    async def test_streaming_log_ingestion(self):
         """Test streaming ingestion of logs"""
         logs = generate_realistic_logs(1000)
+        mock_clickhouse_client = create_mock_clickhouse_client()
         
-        with patch('app.db.clickhouse.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_client:
             mock_client.return_value.__aenter__.return_value = mock_clickhouse_client
             
             # Simulate batch inserts

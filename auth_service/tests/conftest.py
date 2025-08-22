@@ -177,3 +177,18 @@ def clean_environment():
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
+
+@pytest.fixture
+def mock_auth_redis():
+    """Mock Redis client for OAuth security testing"""
+    from unittest.mock import Mock
+    
+    redis_mock = Mock()
+    
+    # Set up default mock behaviors
+    redis_mock.exists.return_value = False  # By default, keys don't exist
+    redis_mock.get.return_value = None
+    redis_mock.setex.return_value = True
+    redis_mock.ping.return_value = True
+    
+    return redis_mock

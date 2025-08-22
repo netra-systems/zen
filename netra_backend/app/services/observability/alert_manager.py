@@ -13,6 +13,9 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set
 
+# Import health types
+from netra_backend.app.core.shared_health_types import ComponentHealth, SystemAlert
+
 
 class AlertSeverity(Enum):
     """Alert severity levels."""
@@ -188,6 +191,24 @@ class AlertManager:
         """Add a notification handler for alerts."""
         self._notification_handlers.append(handler)
     
+    def register_alert_callback(self, callback: Callable) -> None:
+        """Register a callback function for alerts (alias for add_notification_handler)."""
+        self.add_notification_handler(callback)
+    
+    @property
+    def alert_callbacks(self) -> List[Callable]:
+        """Get list of alert callbacks for testing."""
+        return self._notification_handlers
+    
+    async def emit_alert(self, alert) -> None:
+        """Emit alert to all registered callbacks."""
+        await self._notify_handlers(alert)
+    
+    def get_active_alerts(self) -> List[Alert]:
+        """Get all active alerts (non-blocking version)."""
+        return [alert for alert in self._alerts.values() 
+                if alert.status in [AlertStatus.PENDING, AlertStatus.FIRING]]
+    
     async def clear_alerts(self) -> None:
         """Clear all alerts."""
         async with self._lock:
@@ -332,6 +353,46 @@ class HealthAlertManager(AlertManager):
             'total_metrics': len(self._health_metrics),
             'check_time': current_time
         }
+    
+    async def create_status_change_alert(self, previous: ComponentHealth, current: ComponentHealth) -> SystemAlert:
+        """Generate alert for component status change."""
+        alert_id = f"status_change_{current.name}_{datetime.now().timestamp()}"
+        severity = "critical" if current.status.value == "critical" else "warning"
+        message = f"Component {current.name} status changed from {previous.status.value} to {current.status.value}"
+        
+        return SystemAlert(
+            alert_id=alert_id,
+            component=current.name,
+            severity=severity,
+            message=message,
+            timestamp=datetime.now(),
+            metadata={
+                'previous_status': previous.status.value,
+                'current_status': current.status.value,
+                'previous_health_score': previous.health_score,
+                'current_health_score': current.health_score
+            }
+        )
+    
+    async def create_threshold_alert(self, component: str, metric: str, value: float, threshold: float) -> SystemAlert:
+        """Generate alert for threshold breach."""
+        alert_id = f"threshold_{component}_{metric}_{datetime.now().timestamp()}"
+        severity = "critical" if value > threshold * 2 else "warning"
+        message = f"Component {component} {metric} threshold breached: {value} > {threshold}"
+        
+        return SystemAlert(
+            alert_id=alert_id,
+            component=component,
+            severity=severity,
+            message=message,
+            timestamp=datetime.now(),
+            metadata={
+                'metric': metric,
+                'value': value,
+                'threshold': threshold,
+                'breach_percentage': ((value - threshold) / threshold) * 100
+            }
+        )
 
 
 # Global alert manager instances

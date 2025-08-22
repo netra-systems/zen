@@ -39,6 +39,19 @@ def error_prone_agent():
 
 
 @pytest.fixture
+def orchestrator():
+    """Create a standard orchestrator for testing."""
+    orchestrator = MockOrchestrator()
+    orchestrator.metrics = {
+        "agents_created": 0,
+        "tasks_executed": 0,
+        "errors_handled": 0,
+        "total_execution_time": 0.0
+    }
+    return orchestrator
+
+
+@pytest.fixture
 def circuit_breaker_config():
     """Configuration for circuit breaker testing."""
     return {
@@ -47,3 +60,12 @@ def circuit_breaker_config():
         "recovery_timeout": 10.0,
         "max_retry_attempts": 3
     }
+
+
+def verify_orchestration_metrics(orchestrator, expected_agents=None, expected_tasks=None):
+    """Verify orchestration metrics match expected values."""
+    if expected_agents is not None:
+        assert orchestrator.metrics["agents_created"] == expected_agents
+    if expected_tasks is not None:
+        assert orchestrator.metrics["tasks_executed"] == expected_tasks
+    return True

@@ -60,6 +60,11 @@ class UserRepository(BaseRepository[User]):
         """Update user plan tier and related fields."""
         update_data = {"plan_tier": plan_tier, **kwargs}
         return await self.update_by_id(user_id, **update_data)
+    
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[User]:
+        """Find users by user ID (returns list for consistency with base class)."""
+        user = await self.get_by_id(user_id)
+        return [user] if user else []
 
 
 class SecretRepository(BaseRepository[Secret]):
@@ -99,6 +104,10 @@ class SecretRepository(BaseRepository[Secret]):
         except SQLAlchemyError as e:
             logger.error(f"Error getting user secret by key: {e}")
             return None
+    
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[Secret]:
+        """Find secrets by user ID."""
+        return await self.get_user_secrets(user_id)
 
 
 class ToolUsageRepository(BaseRepository[ToolUsageLog]):
@@ -148,3 +157,7 @@ class ToolUsageRepository(BaseRepository[ToolUsageLog]):
         except SQLAlchemyError as e:
             logger.error(f"Error getting tool usage by name: {e}")
             return []
+    
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[ToolUsageLog]:
+        """Find tool usage logs by user ID."""
+        return await self.get_user_usage(user_id)

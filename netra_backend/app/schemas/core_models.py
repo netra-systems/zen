@@ -136,10 +136,16 @@ class CircuitBreakerConfig:
 @dataclass
 class HealthCheckResult:
     """Result of a health check operation."""
-    status: str  # Using string to avoid enum dependency
-    response_time: float
+    component_name: str
+    success: bool
+    health_score: float
+    response_time_ms: float
+    status: Optional[str] = None  # Using string to avoid enum dependency
+    response_time: Optional[float] = None  # Legacy field for compatibility
+    error_message: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
     details: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass
