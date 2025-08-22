@@ -23,7 +23,7 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,30 +38,30 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.core.agent_recovery_base import BaseAgentRecoveryStrategy
+from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
 
 # Add project root to path
-from app.core.agent_recovery_strategies import (
+from netra_backend.app.core.agent_recovery_strategies import (
     DataAnalysisRecoveryStrategy,
     SupervisorRecoveryStrategy,
     # Add project root to path
     TriageAgentRecoveryStrategy,
 )
-from app.core.agent_recovery_types import (
+from netra_backend.app.core.agent_recovery_types import (
     AgentRecoveryConfig,
     AgentType,
     RecoveryPriority,
     create_default_config,
 )
-from app.core.error_codes import ErrorSeverity
-from app.core.error_recovery import (
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.error_recovery import (
     OperationType,
     RecoveryAction,
     RecoveryContext,
     RecoveryResult,
 )
-from app.core.interfaces_validation import FailureType
-from app.schemas.agent_state import AgentPhase, RecoveryStatus
+from netra_backend.app.core.interfaces_validation import FailureType
+from netra_backend.app.schemas.agent_state import AgentPhase, RecoveryStatus
 
 
 class TestRecoveryContext:

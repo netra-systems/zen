@@ -24,7 +24,7 @@ Mock-Real Spectrum: L4 (Production audit infrastructure)
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -46,7 +46,7 @@ import pytest
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 # Add project root to path
 # from app.schemas.auth_types import (
@@ -54,8 +54,8 @@ from app.clients.auth_client import auth_client
 # # #     ForensicAnalysis, IntegrityCheck  # Class may not exist, commented out  # Class may not exist, commented out
 # )
 # Note: These classes don't exist in auth_types, using generic dict structures instead
-from app.core.config import get_settings
-from app.db.postgres import get_async_db
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.db.postgres import get_async_db
 
 # from app.core.audit_logger import AuditLogger  # May not exist, commenting out
 # from app.core.monitoring import metrics_collector  # May not exist, commenting out

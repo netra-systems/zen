@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from pydantic import BaseModel
 
-from app.schemas.Config import AppConfig, LLMConfig
+from netra_backend.app.schemas.Config import AppConfig, LLMConfig
 
 
 class LLMProvider(Enum):

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,24 +18,24 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.services.quality_gate_service import (
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityLevel,
     QualityMetrics,
 )
 
 # Add project root to path
-from app.services.quality_monitoring_service import (
+from netra_backend.app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType,
     # Add project root to path
     QualityMonitoringService,
 )
-from .quality_monitoring_fixtures import (
+from netra_backend.tests.quality_monitoring_fixtures import (
     minimal_quality_metrics,
     service_with_mocks,
 )
-from .quality_monitoring_helpers import (
+from netra_backend.tests.quality_monitoring_helpers import (
     assert_alert_history_max_length,
     assert_buffer_max_length,
     create_alert_history_overflow,
@@ -56,7 +56,7 @@ class TestIntegrationWithOtherServices:
         assert service.trend_analyzer is not None
         
         # Test basic integration flow
-        from app.services.quality_gate_service import (
+        from netra_backend.app.services.quality_gate_service import (
             ContentType,
             QualityLevel,
             QualityMetrics,
@@ -76,7 +76,7 @@ class TestIntegrationWithOtherServices:
         await service.start_monitoring(interval_seconds=0.01)
         
         # Add some data
-        from app.services.quality_gate_service import (
+        from netra_backend.app.services.quality_gate_service import (
             ContentType,
             QualityLevel,
             QualityMetrics,

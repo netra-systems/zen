@@ -18,7 +18,7 @@ Tests cover:
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,21 +28,21 @@ setup_test_path()
 
 import pytest
 
-from .test_compression_auth import (
+from netra_backend.tests.test_compression_auth import (
     test_authentication_expiry_during_connection,
     test_websocket_compression,
 )
 
 # Import all test functions from specialized modules
-from .test_concurrent_connections import (
+from netra_backend.tests.test_concurrent_connections import (
     test_concurrent_connection_limit_1000_users,
     test_connection_pool_exhaustion_recovery,
     test_rapid_connect_disconnect_cycles,
 )
-from .test_memory_monitoring import (
+from netra_backend.tests.test_memory_monitoring import (
     test_memory_leak_detection_long_connections,
 )
-from .test_message_ordering import (
+from netra_backend.tests.test_message_ordering import (
     test_binary_data_transmission,
     test_message_ordering_under_load,
     test_protocol_version_mismatch,

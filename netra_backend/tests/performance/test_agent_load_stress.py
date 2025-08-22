@@ -7,9 +7,9 @@ Tests concurrent agent requests, resource isolation, and performance degradation
 
 # Add project root to path
 
-from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -35,11 +35,11 @@ import pytest
 from ws_manager import WebSocketManager
 
 # Add project root to path
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
-from app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path
 

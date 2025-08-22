@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,12 +19,12 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from app.schemas import Corpus, CorpusCreate, CorpusUpdate
+from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-from app.services.corpus_service import CorpusService, CorpusStatus
+from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
 from ..helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )

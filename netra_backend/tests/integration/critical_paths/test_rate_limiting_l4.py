@@ -15,7 +15,7 @@ L4 Realism: Tests against real staging infrastructure, real Redis, real rate lim
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,15 +35,15 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
-from app.schemas.user import UserTier
-from app.services.backpressure.backpressure_service import (
+from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, TokenBucket
+from netra_backend.app.schemas.user import UserTier
+from netra_backend.app.services.backpressure.backpressure_service import (
     BackpressureService,
 )
-from app.services.quota.quota_manager import QuotaManager
+from netra_backend.app.services.quota.quota_manager import QuotaManager
 
 # Add project root to path
-from app.services.rate_limiting.rate_limiter import RateLimiter
+from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 from .integration.staging_config.base import StagingConfigTestBase
 
 # Add project root to path

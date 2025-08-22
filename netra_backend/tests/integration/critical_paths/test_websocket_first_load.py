@@ -12,8 +12,8 @@ Performance target: WebSocket connection establishment < 2 seconds with 50+ conc
 """
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -40,13 +40,13 @@ import httpx
 
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
-from app.schemas import User
+from netra_backend.app.schemas import User
 from clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
 
-from tests.integration.helpers.redis_l3_helpers import (
+from integration.helpers.redis_l3_helpers import (
 
 # Add project root to path
 

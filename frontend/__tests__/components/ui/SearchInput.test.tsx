@@ -113,13 +113,19 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   describe('Text Entry and Search', () => {
     it('accepts search input correctly', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      // Use a stateful test component to properly handle controlled input
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
       await user.type(input, 'test');
-      expect(setSearchTerm).toHaveBeenCalledTimes(4);
-      expect(setSearchTerm).toHaveBeenLastCalledWith('test');
+      expect(input).toHaveValue('test');
     });
 
     it('handles rapid typing', async () => {
@@ -161,42 +167,66 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   describe('Special Characters and Query Types', () => {
     it('accepts emoji in search queries', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
-      await user.type(input, 'emoji');
-      expect(setSearchTerm).toHaveBeenLastCalledWith('emoji');
+      await user.type(input, '🚀📊');
+      expect(input).toHaveValue('🚀📊');
     });
 
     it('handles special search characters', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
-      await user.type(input, 'special');
-      expect(setSearchTerm).toHaveBeenLastCalledWith('special');
+      await user.type(input, '@#$%&*()');
+      expect(input).toHaveValue('@#$%&*()');
     });
 
     it('accepts Unicode characters', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
-      await user.type(input, 'unicode');
-      expect(setSearchTerm).toHaveBeenLastCalledWith('unicode');
+      await user.type(input, 'αβγδε中文');
+      expect(input).toHaveValue('αβγδε中文');
     });
 
     it('handles code search queries', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
-      await user.type(input, 'function');
-      expect(setSearchTerm).toHaveBeenLastCalledWith('function');
+      await user.type(input, 'function test = 42');
+      expect(input).toHaveValue('function test = 42');
     });
   });
 
@@ -520,25 +550,37 @@ describe('SearchInput Component - Comprehensive Tests', () => {
   describe('Performance', () => {
     it('handles rapid input changes efficiently', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
       // Simulate rapid typing
       await user.type(input, 'test', { delay: 1 });
-      expect(setSearchTerm).toHaveBeenCalledTimes(4);
-      expect(setSearchTerm).toHaveBeenLastCalledWith('test');
+      expect(input).toHaveValue('test');
     });
 
     it('maintains responsiveness with long search terms', async () => {
       const user = setupUser();
-      const setSearchTerm = jest.fn();
-      renderSearchInput({ setSearchTerm });
+      const TestComponent = () => {
+        const [searchTerm, setSearchTerm] = React.useState('');
+        return (
+          <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        );
+      };
+      
+      render(<TestComponent />);
       const input = screen.getByTestId('search-input');
       
       const longSearchTerm = 'a'.repeat(100);
-      await user.paste(longSearchTerm);
-      expect(setSearchTerm).toHaveBeenCalledWith(longSearchTerm);
+      await user.clear(input);
+      await user.type(input, longSearchTerm);
+      expect(input).toHaveValue(longSearchTerm);
     });
 
     it('efficiently updates UI on prop changes', () => {

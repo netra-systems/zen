@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -16,14 +16,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.registry import (
+from netra_backend.app.schemas.registry import (
     AgentMessage,
     UserMessage,
     WebSocketMessage,
 )
 
 # Add project root to path
-from app.services.message_handlers import MessageHandlerService
+from netra_backend.app.services.message_handlers import MessageHandlerService
 
 
 # Add project root to path

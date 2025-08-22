@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ import pytest
 from cryptography.fernet import Fernet
 
 # Add project root to path
-from .security_service_test_mocks import (
+from netra_backend.tests.security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
 )

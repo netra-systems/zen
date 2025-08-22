@@ -23,7 +23,7 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,7 +34,7 @@ setup_test_path()
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     # Add project root to path
     get_current_user,
     get_current_user_optional,
@@ -44,7 +44,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 
 class TestAuthenticationCore:

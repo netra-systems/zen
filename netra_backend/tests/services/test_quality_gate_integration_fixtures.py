@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,10 +17,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
-from app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.quality_gate_service import QualityGateService
 from ..helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )

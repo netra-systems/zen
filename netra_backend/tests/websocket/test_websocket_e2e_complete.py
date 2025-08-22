@@ -17,7 +17,7 @@ Business Value: Ensures WebSocket infrastructure supports real-time AI optimizat
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,19 +35,19 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 import websockets
 
-from app.core.network_constants import (
+from netra_backend.app.core.network_constants import (
     HostConstants,
     ServicePorts,
     URLConstants,
 )
-from app.routes.websocket_enhanced import connection_manager
-from app.schemas.websocket_models import (
+from netra_backend.app.routes.websocket_enhanced import connection_manager
+from netra_backend.app.schemas.websocket_models import (
     AgentUpdatePayload,
     UserMessagePayload,
 )
 
 # Add project root to path
-from tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 
@@ -290,7 +290,7 @@ class TestServiceDiscovery:
     
     async def test_websocket_config_discovery(self):
         """Test backend provides WebSocket configuration."""
-        from app.routes.websocket_enhanced import (
+        from netra_backend.app.routes.websocket_enhanced import (
             get_websocket_service_discovery,
         )
         
@@ -427,7 +427,7 @@ class TestManualDatabaseSessions:
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
-        from app.routes.websocket_enhanced import (
+        from netra_backend.app.routes.websocket_enhanced import (
             authenticate_websocket_with_database,
         )
         

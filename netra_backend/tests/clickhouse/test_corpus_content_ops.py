@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from app.schemas import ContentGenParams
+from netra_backend.app.schemas import ContentGenParams
 
-from app.services.corpus_service import CorpusService
+from netra_backend.app.services.corpus_service import CorpusService
 
 # Add project root to path
-from app.services.generation_service import (
+from netra_backend.app.services.generation_service import (
     get_corpus_from_clickhouse,
     # Add project root to path
     run_content_generation_job,

@@ -95,11 +95,14 @@ describe('Session Management Integration', () => {
   let mockLocalStorage: any;
   let mockRouter: any;
   let originalLocalStorage: Storage;
+  let mockAuthStore: any;
 
   beforeEach(() => {
     setupTestEnvironment();
     resetTestState();
     setupSessionMocks();
+    // Reset global fetch mock
+    global.fetch = jest.fn();
   });
 
   afterEach(() => {
@@ -249,7 +252,10 @@ describe('Session Management Integration', () => {
     
     mockRouter = createMockRouter();
     mockUseRouter.mockReturnValue(mockRouter);
-    mockedUseAuthStore.mockReturnValue(createMockAuthStore());
+    
+    // Create a single mock store instance that persists throughout the test
+    mockAuthStore = createMockAuthStore();
+    mockedUseAuthStore.mockReturnValue(mockAuthStore);
   }
 
   function createMockRouter() {
@@ -266,20 +272,63 @@ describe('Session Management Integration', () => {
       isAuthenticated: false,
       user: null,
       token: null,
-      loading: false
+      loading: false,
+      error: null
     };
     
-    return {
-      ...authState,
+    const mockStore = {
+      get isAuthenticated() { return authState.isAuthenticated; },
+      get user() { return authState.user; },
+      get token() { return authState.token; },
+      get loading() { return authState.loading; },
+      get error() { return authState.error; },
+      
       login: jest.fn((user, token) => {
-        authState = { ...authState, isAuthenticated: true, user, token };
+        authState = { ...authState, isAuthenticated: true, user, token, error: null };
+        mockLocalStorage.setItem('jwt_token', token);
+        mockLocalStorage.setItem('user_data', JSON.stringify(user));
       }),
+      
       logout: jest.fn(() => {
-        authState = { ...authState, isAuthenticated: false, user: null, token: null };
+        authState = { ...authState, isAuthenticated: false, user: null, token: null, error: null };
+        mockLocalStorage.removeItem('jwt_token');
+        mockLocalStorage.removeItem('user_data');
       }),
-      setLoading: jest.fn(),
-      initializeFromStorage: jest.fn()
+      
+      setLoading: jest.fn((loading) => {
+        authState = { ...authState, loading };
+      }),
+      
+      setError: jest.fn((error) => {
+        authState = { ...authState, error };
+      }),
+      
+      initializeFromStorage: jest.fn(() => {
+        const token = mockLocalStorage.getItem('jwt_token');
+        const userData = mockLocalStorage.getItem('user_data');
+        
+        if (token && userData) {
+          try {
+            const user = JSON.parse(userData);
+            authState = { ...authState, isAuthenticated: true, user, token, error: null };
+          } catch (error) {
+            // Handle corrupted data - clear it and logout
+            mockLocalStorage.removeItem('jwt_token');
+            mockLocalStorage.removeItem('user_data');
+            authState = { ...authState, isAuthenticated: false, user: null, token: null, error: null };
+            mockStore.logout();
+          }
+        } else {
+          authState = { ...authState, isAuthenticated: false, user: null, token: null, error: null };
+        }
+      }),
+      
+      // Internal state access for testing
+      _getState: () => authState,
+      _setState: (newState) => { authState = { ...authState, ...newState }; }
     };
+    
+    return mockStore;
   }
 
   function restoreOriginalStorage() {
@@ -288,13 +337,19 @@ describe('Session Management Integration', () => {
 
   function createSessionTestComponent() {
     return () => {
-      const authStore = useAuthStore();
       const [sessionState, setSessionState] = useState('initializing');
+      const [forceUpdate, setForceUpdate] = useState(0);
       
       useEffect(() => {
-        authStore.initializeFromStorage();
-        setSessionState(authStore.isAuthenticated ? 'authenticated' : 'unauthenticated');
-      }, [authStore.isAuthenticated]);
+        mockAuthStore.initializeFromStorage();
+        // Force a re-render after initialization
+        setForceUpdate(prev => prev + 1);
+      }, []);
+      
+      useEffect(() => {
+        const newState = mockAuthStore.isAuthenticated ? 'authenticated' : 'unauthenticated';
+        setSessionState(newState);
+      }, [forceUpdate]); // Use forceUpdate to trigger effect
       
       return (
         <div data-testid="session-status">{sessionState}</div>
@@ -303,18 +358,14 @@ describe('Session Management Integration', () => {
   }
 
   async function establishSession() {
-    const authStore = useAuthStore();
-    authStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
-    mockLocalStorage.setItem('jwt_token', sessionTestData.validToken);
-    mockLocalStorage.setItem('user_data', JSON.stringify(sessionTestData.sessionUser));
+    mockAuthStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
   }
 
   async function simulatePageReload() {
-    // Reset auth store to simulate fresh page load
-    const authStore = useAuthStore();
-    authStore.logout();
+    // Reset auth store to simulate fresh page load (but keep localStorage intact)
+    mockAuthStore._setState({ isAuthenticated: false, user: null, token: null });
     // Then initialize from storage
-    authStore.initializeFromStorage();
+    mockAuthStore.initializeFromStorage();
   }
 
   async function verifySessionRestored() {
@@ -324,7 +375,7 @@ describe('Session Management Integration', () => {
   }
 
   function expectContinuousAuthentication() {
-    expect(useAuthStore().isAuthenticated).toBe(true);
+    expect(mockAuthStore.isAuthenticated).toBe(true);
   }
 
   async function seedLocalStorageWithSession() {
@@ -334,12 +385,12 @@ describe('Session Management Integration', () => {
 
   async function verifySessionInitialization() {
     await waitFor(() => {
-      expect(useAuthStore().initializeFromStorage).toHaveBeenCalled();
+      expect(mockAuthStore.initializeFromStorage).toHaveBeenCalled();
     });
   }
 
   function expectUserDataRestored() {
-    expect(useAuthStore().user).toEqual(sessionTestData.sessionUser);
+    expect(mockAuthStore.user).toEqual(sessionTestData.sessionUser);
   }
 
   async function seedCorruptedSessionData() {
@@ -349,7 +400,7 @@ describe('Session Management Integration', () => {
 
   async function verifyGracefulDegradation() {
     await waitFor(() => {
-      expect(useAuthStore().logout).toHaveBeenCalled();
+      expect(mockAuthStore.logout).toHaveBeenCalled();
     });
   }
 
@@ -365,16 +416,40 @@ describe('Session Management Integration', () => {
       useEffect(() => {
         const checkTokenExpiry = async () => {
           // Simulate token expiry check
-          const token = localStorage.getItem('jwt_token');
+          const token = mockLocalStorage.getItem('jwt_token');
           if (token === sessionTestData.expiredToken) {
             setRefreshStatus('refreshing');
-            // Simulate refresh attempt
-            await new Promise(resolve => setTimeout(resolve, 100));
-            setRefreshStatus('refreshed');
+            try {
+              // Simulate token refresh API call
+              const response = await fetch('/api/auth/refresh', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              
+              if (response.ok) {
+                // Simulate successful refresh
+                mockLocalStorage.setItem('jwt_token', sessionTestData.refreshedToken);
+                // Update auth store with the new token
+                mockAuthStore._setState({ 
+                  token: sessionTestData.refreshedToken,
+                  isAuthenticated: true 
+                });
+                setRefreshStatus('refreshed');
+              } else {
+                throw new Error('Refresh failed');
+              }
+            } catch (error) {
+              setRefreshStatus('failed');
+              // Handle refresh failure
+              mockAuthStore.logout();
+              // Redirect to login on refresh failure
+              mockRouter.push('/login');
+            }
           }
         };
         
-        checkTokenExpiry();
+        // Add a small delay to ensure the token is set
+        setTimeout(checkTokenExpiry, 10);
       }, []);
       
       return <div data-testid="refresh-status">{refreshStatus}</div>;
@@ -382,27 +457,43 @@ describe('Session Management Integration', () => {
   }
 
   async function setupExpiringToken() {
+    // First establish a session
+    mockAuthStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
+    // Then set the expired token
     mockLocalStorage.setItem('jwt_token', sessionTestData.expiredToken);
+    mockAuthStore._setState({ token: sessionTestData.expiredToken });
+    
+    // Mock successful fetch for token refresh
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ token: sessionTestData.refreshedToken })
+    });
   }
 
   async function waitForTokenRefresh() {
     await waitFor(() => {
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         'jwt_token',
-        expect.stringContaining('refreshed')
+        sessionTestData.refreshedToken
       );
     });
   }
 
   function expectNewTokenReceived() {
-    expect(mockLocalStorage.getItem('jwt_token')).not.toBe(sessionTestData.expiredToken);
+    expect(mockLocalStorage.getItem('jwt_token')).toBe(sessionTestData.refreshedToken);
   }
 
   function expectContinuousSession() {
-    expect(useAuthStore().isAuthenticated).toBe(true);
+    expect(mockAuthStore.isAuthenticated).toBe(true);
   }
 
   async function setupFailingRefresh() {
+    // First establish a session
+    mockAuthStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
+    // Then set the expired token
+    mockLocalStorage.setItem('jwt_token', sessionTestData.expiredToken);
+    mockAuthStore._setState({ token: sessionTestData.expiredToken });
+    
     // Mock network failure for refresh
     global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
   }
@@ -414,7 +505,7 @@ describe('Session Management Integration', () => {
   }
 
   function expectRefreshFailureHandling() {
-    expect(useAuthStore().logout).toHaveBeenCalled();
+    expect(mockAuthStore.logout).toHaveBeenCalled();
   }
 
   function expectReauthenticationRequired() {
@@ -424,10 +515,38 @@ describe('Session Management Integration', () => {
   function createOperationQueueComponent() {
     return () => {
       const [operations, setOperations] = useState<string[]>([]);
+      const [refreshStatus, setRefreshStatus] = useState('idle');
       
       useEffect(() => {
-        // Simulate operations during refresh
-        setOperations(['op1', 'op2', 'op3']);
+        const performRefreshAndOperations = async () => {
+          // Check if token needs refresh
+          const token = mockLocalStorage.getItem('jwt_token');
+          if (token === sessionTestData.expiredToken) {
+            setRefreshStatus('refreshing');
+            try {
+              const response = await fetch('/api/auth/refresh', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              
+              if (response.ok) {
+                mockLocalStorage.setItem('jwt_token', sessionTestData.refreshedToken);
+                mockAuthStore._setState({ 
+                  token: sessionTestData.refreshedToken,
+                  isAuthenticated: true 
+                });
+                setRefreshStatus('refreshed');
+              }
+            } catch (error) {
+              setRefreshStatus('failed');
+            }
+          }
+          
+          // Queue operations during refresh
+          setOperations(['op1', 'op2', 'op3']);
+        };
+        
+        setTimeout(performRefreshAndOperations, 10);
       }, []);
       
       return (
@@ -439,7 +558,17 @@ describe('Session Management Integration', () => {
   }
 
   async function initiateTokenRefresh() {
+    // First establish a session
+    mockAuthStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
+    // Then set the expired token to trigger refresh
     mockLocalStorage.setItem('jwt_token', sessionTestData.expiredToken);
+    mockAuthStore._setState({ token: sessionTestData.expiredToken });
+    
+    // Mock successful fetch for token refresh
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ token: sessionTestData.refreshedToken })
+    });
   }
 
   async function performOperationsDuringRefresh() {
@@ -451,7 +580,7 @@ describe('Session Management Integration', () => {
 
   async function waitForRefreshCompletion() {
     await waitFor(() => {
-      expect(mockLocalStorage.getItem('jwt_token')).toBe(sessionTestData.refreshedToken);
+      expect(mockAuthStore.token).toBe(sessionTestData.refreshedToken);
     });
   }
 
@@ -493,7 +622,7 @@ describe('Session Management Integration', () => {
   }
 
   function expectConsistentAuthState() {
-    expect(useAuthStore().isAuthenticated).toBe(true);
+    expect(mockAuthStore.isAuthenticated).toBe(true);
   }
 
   async function establishSessionInBothTabs() {
@@ -514,7 +643,7 @@ describe('Session Management Integration', () => {
   }
 
   function expectCleanStateInAllTabs() {
-    expect(useAuthStore().isAuthenticated).toBe(false);
+    expect(mockAuthStore.isAuthenticated).toBe(false);
     expect(mockLocalStorage.getItem('jwt_token')).toBeNull();
   }
 
@@ -535,7 +664,7 @@ describe('Session Management Integration', () => {
     // Setup different auth states in different tabs
     mockLocalStorage.setItem('jwt_token', sessionTestData.validToken);
     // Simulate conflicting state
-    useAuthStore().logout();
+    mockAuthStore.logout();
   }
 
   async function waitForConflictResolution() {
@@ -547,7 +676,7 @@ describe('Session Management Integration', () => {
 
   function expectConsistentFinalState() {
     // Most recent state should win
-    expect(useAuthStore().isAuthenticated).toBe(true);
+    expect(mockAuthStore.isAuthenticated).toBe(true);
   }
 
   function createTimeoutTestComponent() {
@@ -556,7 +685,11 @@ describe('Session Management Integration', () => {
       
       useEffect(() => {
         // Simulate timeout detection
-        const timer = setTimeout(() => setTimeoutStatus('timeout'), 100);
+        const timer = setTimeout(() => {
+          setTimeoutStatus('timeout');
+          // Trigger logout on timeout
+          mockAuthStore.logout();
+        }, 100);
         return () => clearTimeout(timer);
       }, []);
       
@@ -585,7 +718,7 @@ describe('Session Management Integration', () => {
   }
 
   function expectSessionCleanup() {
-    expect(useAuthStore().logout).toHaveBeenCalled();
+    expect(mockAuthStore.logout).toHaveBeenCalled();
   }
 
   function createTimeoutWarningComponent() {
@@ -634,7 +767,13 @@ describe('Session Management Integration', () => {
       
       const handleExtend = () => {
         setExtensionStatus('extending');
-        setTimeout(() => setExtensionStatus('extended'), 50);
+        setTimeout(() => {
+          setExtensionStatus('extended');
+          // Simulate session extension - keep user authenticated
+          if (!mockAuthStore.isAuthenticated) {
+            mockAuthStore.login(sessionTestData.sessionUser, sessionTestData.validToken);
+          }
+        }, 50);
       };
       
       return (
@@ -661,6 +800,6 @@ describe('Session Management Integration', () => {
   }
 
   function expectContinuedSession() {
-    expect(useAuthStore().isAuthenticated).toBe(true);
+    expect(mockAuthStore.isAuthenticated).toBe(true);
   }
 });

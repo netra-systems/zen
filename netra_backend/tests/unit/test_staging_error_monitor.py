@@ -14,7 +14,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Console output formatting verification
 """
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 setup_test_path()
 
@@ -30,7 +30,7 @@ import pytest_asyncio
 
 # Import the staging error monitor components
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.schemas.monitoring_schemas import (
     ErrorResponse,
     ErrorSeverity,
     ErrorStatus,

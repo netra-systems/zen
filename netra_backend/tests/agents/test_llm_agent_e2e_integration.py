@@ -14,7 +14,7 @@ BVJ:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,13 +33,13 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.llm.llm_manager import LLMManager
-from app.services.agent_service import AgentService
-from .test_fixtures import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
+from test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -170,7 +170,7 @@ async def test_real_llm_interaction():
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []

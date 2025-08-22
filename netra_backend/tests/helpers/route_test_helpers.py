@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 
 def create_test_client():
     """Create test client for API testing."""
-    from app.main import app
+    from netra_backend.app.main import app
     return TestClient(app)
 
 

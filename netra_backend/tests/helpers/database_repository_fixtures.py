@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.database.unit_of_work import UnitOfWork
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
 
 
 @pytest.fixture

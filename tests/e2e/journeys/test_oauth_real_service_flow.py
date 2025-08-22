@@ -37,7 +37,7 @@ try:
         get_enterprise_config,
     )
     from tests.e2e.real_http_client import RealHTTPClient
-    from tests.e2e.service_manager import create_real_services_manager
+    from tests.e2e.real_services_manager import create_real_services_manager
 except ImportError:
     # Standalone execution - add parent directories to path
     import sys

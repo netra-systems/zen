@@ -5,7 +5,7 @@ Separated from the main configuration for clarity.
 
 **DEPRECATION NOTICE**: This module should be migrated to use the
 unified configuration system instead of direct os.environ access.
-For new code, use: from netra_backend.app.core.configuration import unified_config_manager
+For new code, use: from app.core.configuration import unified_config_manager
 """
 
 import os
@@ -21,7 +21,7 @@ from netra_backend.app.schemas.config import (
 )
 
 # MIGRATION NOTE: For new code, use the unified configuration system:
-# from netra_backend.app.core.configuration import unified_config_manager
+# from app.core.configuration import unified_config_manager
 # config = unified_config_manager.get_config()
 # This provides centralized, validated configuration access.
 

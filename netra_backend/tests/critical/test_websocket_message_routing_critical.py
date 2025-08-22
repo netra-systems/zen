@@ -12,7 +12,7 @@ them to agent_service.handle_websocket_message(), causing total system failure.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -29,12 +29,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 import pytest
 from fastapi import WebSocket
 
-from app.services.agent_service_core import AgentService
-from app.services.message_handlers import MessageHandlerService
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 # Add project root to path
-from app.websocket.unified.message_handlers import (
+from netra_backend.app.websocket.unified.message_handlers import (
     MessageHandler,
     MessageProcessor,
 )
@@ -256,7 +256,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_10_invalid_messages_not_forwarded(self, message_processor, connection_info):
         """Test 10: Invalid messages MUST NOT reach agent service."""
-        from app.websocket.unified.types import WebSocketValidationError
+        from netra_backend.app.websocket.unified.types import WebSocketValidationError
         
         # Make validation fail
         message_processor.handler.validate_message.return_value = WebSocketValidationError(

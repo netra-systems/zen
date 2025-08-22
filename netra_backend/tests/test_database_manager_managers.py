@@ -8,7 +8,7 @@ connection pooling, transaction management, and failover capabilities.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,8 +27,8 @@ from testcontainers.postgres import PostgresContainer
 
 # Import database management components
 try:
-    from app.database.connection_pool import ConnectionPool
-    from app.database.manager import DatabaseManager
+    from netra_backend.app.database.connection_pool import ConnectionPool
+    from netra_backend.app.database.manager import DatabaseManager
 except ImportError:
     # Fallback if modules don't exist yet
     class DatabaseManager:

@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Ensures smooth upgrade experience and retention
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 # Add project root to path
 import sys
@@ -35,10 +35,10 @@ from redis.asyncio import Redis
 
 # Add project root to path
 
-from app.services.user_service import UserService as UsageService
+from netra_backend.app.services.user_service import UserService as UsageService
 
-from .user_flow_base import UserFlowTestBase
-from .user_journey_data import BillingTestData
+from tests.user_flow_base import UserFlowTestBase
+from tests.user_journey_data import BillingTestData
 
 # Add project root to path
 

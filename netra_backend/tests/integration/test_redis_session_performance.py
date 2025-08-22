@@ -12,8 +12,8 @@ Performance and load testing for Redis session state synchronization.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -46,7 +46,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from logging_config import central_logger
 
-from .redis_session_mocks import (
+from tests.redis_session_mocks import (
 
     MockRedisConnection,
 

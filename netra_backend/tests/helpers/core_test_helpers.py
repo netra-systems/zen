@@ -161,7 +161,7 @@ def _assert_extra_fields(changes: Dict, expected_extra: List[str]):
 
 
 # Security and logging helpers moved to core_test_security_helpers.py
-from .core_test_security_helpers import (
+from netra_backend.tests.core_test_security_helpers import (
     assert_service_categorization,
     create_mock_secret_manager_with_rotation,
     create_startup_check_results,

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,9 +19,9 @@ import pytest
 
 # Add project root to path
 # Import the components we're testing
-from app.core.agent_reliability_mixin import AgentReliabilityMixin
-from app.core.agent_reliability_types import AgentError
-from app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
+from netra_backend.app.core.agent_reliability_types import AgentError
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class MockAgent(AgentReliabilityMixin):

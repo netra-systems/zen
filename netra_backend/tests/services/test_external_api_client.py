@@ -9,7 +9,7 @@ while ensuring each module is ≤300 lines and each function is ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,41 +20,41 @@ setup_test_path()
 import sys
 from pathlib import Path
 
-from .test_api_convenience_functions import (
+from netra_backend.tests.test_api_convenience_functions import (
     TestConvenienceFunctions,
 )
-from .test_external_api_config import TestExternalAPIConfig
-from .test_external_api_integration import (
+from netra_backend.tests.test_external_api_config import TestExternalAPIConfig
+from netra_backend.tests.test_external_api_integration import (
     TestIntegrationScenarios,
 )
-from .test_http_client_manager import (
+from netra_backend.tests.test_http_client_manager import (
     TestGetHTTPClient,
     TestGlobalClientManager,
     TestHTTPClientManager,
 )
-from .test_http_error import TestHTTPError
-from .test_resilient_client_circuit import (
+from netra_backend.tests.test_http_error import TestHTTPError
+from netra_backend.tests.test_resilient_client_circuit import (
     TestResilientHTTPClientCircuit,
 )
-from .test_resilient_client_health import (
+from netra_backend.tests.test_resilient_client_health import (
     TestResilientHTTPClientHealth,
 )
-from .test_resilient_client_init import (
+from netra_backend.tests.test_resilient_client_init import (
     TestResilientHTTPClientInit,
 )
-from .test_resilient_client_methods import (
+from netra_backend.tests.test_resilient_client_methods import (
     TestResilientHTTPClientMethods,
 )
-from .test_resilient_client_response import (
+from netra_backend.tests.test_resilient_client_response import (
     TestResilientHTTPClientResponse,
 )
-from .test_resilient_client_session import (
+from netra_backend.tests.test_resilient_client_session import (
     TestResilientHTTPClientSession,
 )
-from .test_resilient_client_url_headers import (
+from netra_backend.tests.test_resilient_client_url_headers import (
     TestResilientHTTPClientUrlHeaders,
 )
-from .test_retryable_client import TestRetryableHTTPClient
+from netra_backend.tests.test_retryable_client import TestRetryableHTTPClient
 
 # Re-export all test classes for compatibility
 __all__ = [

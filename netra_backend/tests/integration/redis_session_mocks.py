@@ -11,7 +11,7 @@ Mock utilities for Redis session state synchronization testing.
 """
 
 from datetime import datetime, timezone
-from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 import asyncio

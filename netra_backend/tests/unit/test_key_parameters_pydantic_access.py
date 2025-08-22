@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,9 +17,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 # Add project root to path
-from app.agents.data_sub_agent.execution_engine import ExecutionEngine
-from app.agents.state import DeepAgentState
-from app.agents.triage_sub_agent.models import KeyParameters, TriageResult
+from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.triage_sub_agent.models import KeyParameters, TriageResult
 
 # Add project root to path
 
@@ -132,7 +132,7 @@ class TestKeyParametersAccess:
         )
         
         # Create TriageResult with KeyParameters (using actual fields)
-        from app.agents.triage_sub_agent.models import UserIntent
+        from netra_backend.app.agents.triage_sub_agent.models import UserIntent
         
         triage_result = TriageResult(
             key_parameters=KeyParameters(

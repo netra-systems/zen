@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,12 +23,12 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.triage_sub_agent import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.triage_sub_agent import (
     Complexity,
     ExtractedEntities,
     Priority,
@@ -37,8 +37,8 @@ from app.agents.triage_sub_agent import (
     TriageResult,
     UserIntent,
 )
-from app.llm.llm_manager import LLMManager
-from app.services.agent_service import AgentService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ def mock_llm_manager():
         }))
         
         # Mock structured LLM for triage agent
-        from app.agents.triage_sub_agent import (
+        from netra_backend.app.agents.triage_sub_agent import (
             Complexity,
             ExtractedEntities,
             Priority,
@@ -122,7 +122,7 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={
         "status": "success",

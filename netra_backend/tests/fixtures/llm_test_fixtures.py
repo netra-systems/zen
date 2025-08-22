@@ -20,9 +20,9 @@ from unittest.mock import AsyncMock, Mock
 
 from pydantic import BaseModel
 
-from app.core.exceptions_base import NetraException
-from app.llm.llm_manager import LLMManager
-from .llm_fixtures_advanced import (
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.tests.llm_fixtures_advanced import (
     create_circuit_breaker_manager,
     create_error_simulating_manager,
     create_performance_monitoring_manager,
@@ -30,7 +30,7 @@ from .llm_fixtures_advanced import (
 )
 
 # Import specialized fixtures
-from .llm_fixtures_core import (
+from netra_backend.tests.llm_fixtures_core import (
     create_basic_llm_manager,
     create_streaming_llm_manager,
     create_structured_llm_manager,

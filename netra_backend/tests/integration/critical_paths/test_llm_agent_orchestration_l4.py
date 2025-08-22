@@ -19,7 +19,7 @@ This test validates real-world LLM agent orchestration including:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -65,13 +65,13 @@ LLMManager = AsyncMock
 # # # from app.agents.tool_dispatcher import ToolDispatcher
 from unittest.mock import AsyncMock
 
-from app.core.configuration.base import get_unified_config
+from netra_backend.app.core.configuration.base import get_unified_config
 
 ToolDispatcher = AsyncMock
 ToolDispatcher = AsyncMock
 # # from app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -274,7 +274,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             # Initialize supervisor agent with real dependencies
             from sqlalchemy.ext.asyncio import AsyncSession
 
-            from app.database.connection_manager import get_db_session
+            from netra_backend.app.database.connection_manager import get_db_session
             
             db_session = await get_db_session()
             

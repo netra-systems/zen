@@ -15,7 +15,7 @@ This package contains focused integration tests for:
 All tests maintain ≤8 lines per test function and ≤300 lines per module.
 """
 
-from tests.integration.security.shared_fixtures import (
+from netra_backend.tests.integration.security.shared_fixtures import (
     AuthenticationAuditHelper,
     ComplianceReportingHelper,
     DataAccessAuditHelper,

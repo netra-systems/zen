@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,7 +20,7 @@ import json
 import pytest
 
 # Add project root to path
-from app.core.json_parsing_utils import safe_json_parse
+from netra_backend.app.core.json_parsing_utils import safe_json_parse
 
 # Add project root to path
 

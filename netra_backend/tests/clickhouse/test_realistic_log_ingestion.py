@@ -7,7 +7,7 @@ Test realistic log ingestion patterns
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,8 +20,8 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from app.db.clickhouse_query_fixer import validate_clickhouse_query
-from .realistic_test_fixtures import (
+from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
+from netra_backend.tests.realistic_test_fixtures import (
     # Add project root to path
     generate_realistic_logs_fixture,
     mock_clickhouse_client,

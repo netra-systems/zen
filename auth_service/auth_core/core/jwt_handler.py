@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 import jwt
 
 from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.security.oauth_security import JWTSecurityValidator
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class JWTHandler:
         self.access_expiry = AuthConfig.get_jwt_access_expiry_minutes()
         self.refresh_expiry = AuthConfig.get_jwt_refresh_expiry_days()
         self.service_expiry = AuthConfig.get_jwt_service_expiry_minutes()
+        self.security_validator = JWTSecurityValidator()
     
     def _get_jwt_secret(self) -> str:
         """Get JWT secret with production safety"""
@@ -73,16 +75,33 @@ class JWTHandler:
     
     def validate_token(self, token: str, 
                       token_type: str = "access") -> Optional[Dict]:
-        """Validate and decode JWT token"""
+        """Validate and decode JWT token with enhanced security"""
         try:
+            # First validate token security (algorithm, etc.)
+            if not self.security_validator.validate_token_security(token):
+                logger.warning("Token failed security validation")
+                return None
+            
             payload = jwt.decode(
                 token, 
                 self.secret, 
-                algorithms=[self.algorithm]
+                algorithms=[self.algorithm],
+                # Enhanced security options
+                options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_iat": True,
+                    "require": ["exp", "iat", "sub"]
+                }
             )
             
             if payload.get("token_type") != token_type:
                 logger.warning(f"Invalid token type: expected {token_type}")
+                return None
+            
+            # Additional security checks
+            if not self._validate_token_claims(payload):
+                logger.warning("Token claims validation failed")
                 return None
                 
             return payload
@@ -134,11 +153,48 @@ class JWTHandler:
     def extract_user_id(self, token: str) -> Optional[str]:
         """Extract user ID from token without full validation"""
         try:
+            # Still validate basic security even without signature verification
+            if not self.security_validator.validate_token_security(token):
+                return None
+            
             # Decode without verification for user ID extraction
             payload = jwt.decode(
                 token, 
-                options={"verify_signature": False}
+                options={"verify_signature": False, "verify_exp": False}
             )
             return payload.get("sub")
         except Exception:
             return None
+    
+    def _validate_token_claims(self, payload: Dict) -> bool:
+        """Validate additional token claims for security"""
+        try:
+            # Check required claims
+            required_claims = ["sub", "iat", "exp", "iss"]
+            for claim in required_claims:
+                if claim not in payload:
+                    logger.warning(f"Missing required claim: {claim}")
+                    return False
+            
+            # Validate issuer
+            if payload.get("iss") != "netra-auth-service":
+                logger.warning(f"Invalid issuer: {payload.get('iss')}")
+                return False
+            
+            # Check token age (not too old)
+            issued_at = payload.get("iat")
+            if isinstance(issued_at, datetime):
+                age = datetime.now(timezone.utc) - issued_at
+            else:
+                age = datetime.now(timezone.utc) - datetime.fromtimestamp(issued_at, timezone.utc)
+            
+            # Reject tokens older than 24 hours for security
+            if age.total_seconds() > 24 * 60 * 60:
+                logger.warning("Token too old")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Token claims validation error: {e}")
+            return False

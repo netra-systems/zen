@@ -19,7 +19,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,35 +34,35 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.db.clickhouse_reliable_manager import (
+from netra_backend.app.db.clickhouse_reliable_manager import (
     ClickHouseHealth,
     MockClickHouseClient,
     ReliableClickHouseManager,
 )
-from app.db.comprehensive_health_monitor import (
+from netra_backend.app.db.comprehensive_health_monitor import (
     AlertSeverity,
     ComprehensiveHealthMonitor,
     HealthStatus,
 )
 
 # Add project root to path
-from app.db.fast_startup_connection_manager import (
+from netra_backend.app.db.fast_startup_connection_manager import (
     ConnectionHealth,
     # Add project root to path
     FastStartupConnectionManager,
     connection_registry,
 )
-from app.db.graceful_degradation_manager import (
+from netra_backend.app.db.graceful_degradation_manager import (
     DatabaseStatus,
     GracefulDegradationManager,
     ServiceLevel,
 )
-from app.db.intelligent_retry_system import (
+from netra_backend.app.db.intelligent_retry_system import (
     ErrorSeverity,
     IntelligentRetrySystem,
     RetryStrategy,
 )
-from app.db.optimized_startup_checks import (
+from netra_backend.app.db.optimized_startup_checks import (
     CheckPriority,
     CheckStatus,
     OptimizedStartupChecker,
@@ -347,7 +347,7 @@ class TestOptimizedStartupChecker:
         # Mock successful database checks
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
             with patch.object(startup_checker, '_quick_clickhouse_check') as mock_clickhouse:
-                from app.startup_checks.models import StartupCheckResult
+                from netra_backend.app.startup_checks.models import StartupCheckResult
                 
                 mock_postgres.return_value = StartupCheckResult(
                     name="postgres_quick_connect", success=True, critical=True,
@@ -371,7 +371,7 @@ class TestOptimizedStartupChecker:
         mock_app = Mock()
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
-            from app.startup_checks.models import StartupCheckResult
+            from netra_backend.app.startup_checks.models import StartupCheckResult
             
             mock_postgres.return_value = StartupCheckResult(
                 name="postgres_quick_connect", success=False, critical=True,
@@ -389,7 +389,7 @@ class TestOptimizedStartupChecker:
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
             with patch.object(startup_checker, '_quick_clickhouse_check') as mock_clickhouse:
-                from app.startup_checks.models import StartupCheckResult
+                from netra_backend.app.startup_checks.models import StartupCheckResult
                 
                 mock_postgres.return_value = StartupCheckResult(
                     name="postgres_quick_connect", success=True, critical=True,

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,22 +18,22 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 
 # Add project root to path
-from app.services.quality_monitoring_service import (
+from netra_backend.app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType,
     # Add project root to path
     QualityMonitoringService,
 )
-from .quality_monitoring_fixtures import (
+from netra_backend.tests.quality_monitoring_fixtures import (
     poor_quality_metrics,
     real_quality_monitoring_service,
     sample_quality_alert,
     sample_quality_metrics,
 )
-from .quality_monitoring_helpers import (
+from netra_backend.tests.quality_monitoring_helpers import (
     assert_event_in_buffer,
     assert_event_properties,
     assert_monitoring_methods_called,
@@ -111,7 +111,7 @@ class TestRealTimeMonitoring:
         
         dashboard_data = await real_quality_monitoring_service.get_dashboard_data()
         
-        from tests.helpers.quality_monitoring_helpers import (
+        from helpers.quality_monitoring_helpers import (
             assert_dashboard_data_structure,
         )
         assert_dashboard_data_structure(dashboard_data)
@@ -185,7 +185,7 @@ class TestDataClasses:
     
     def test_quality_alert_creation(self):
         """Test QualityAlert dataclass"""
-        from app.services.quality_monitoring_service import QualityAlert
+        from netra_backend.app.services.quality_monitoring_service import QualityAlert
         
         alert = QualityAlert(
             id="test_alert",
@@ -207,7 +207,7 @@ class TestDataClasses:
         
     def test_quality_trend_creation(self):
         """Test QualityTrend dataclass"""
-        from app.services.quality_monitoring_service import QualityTrend
+        from netra_backend.app.services.quality_monitoring_service import QualityTrend
         
         trend = QualityTrend(
             metric_type=MetricType.QUALITY_SCORE,
@@ -228,8 +228,8 @@ class TestDataClasses:
         
     def test_agent_quality_profile_creation(self):
         """Test AgentQualityProfile dataclass"""
-        from app.services.quality_gate_service import QualityLevel
-        from app.services.quality_monitoring_service import (
+        from netra_backend.app.services.quality_gate_service import QualityLevel
+        from netra_backend.app.services.quality_monitoring_service import (
             AgentQualityProfile,
         )
         

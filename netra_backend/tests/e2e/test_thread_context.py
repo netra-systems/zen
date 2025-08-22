@@ -6,7 +6,7 @@ Tests context preservation, message history, and state isolation.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,20 +23,20 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.state import DeepAgentState
-from app.db.models_postgres import Message, Run, Thread
-from app.schemas.agent_state import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     RecoveryType,
     # Add project root to path
     StatePersistenceRequest,
     StateRecoveryRequest,
 )
-from app.services.agent_service import AgentService
-from app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.state_persistence import state_persistence_service
 
 # Add project root to path
-from app.services.thread_service import ThreadService
+from netra_backend.app.services.thread_service import ThreadService
 
 
 class ContextPreservationTests:

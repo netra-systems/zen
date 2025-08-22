@@ -7,7 +7,7 @@ Tests session cleanup and garbage collection
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,10 +21,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.config import get_config
+from netra_backend.app.config import get_config
 
 # Add project root to path
-from app.services.session_service import SessionService
+from netra_backend.app.services.session_service import SessionService
 
 # Add project root to path
 

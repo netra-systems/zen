@@ -12,8 +12,8 @@ Coverage: Heartbeat intervals, zombie detection <60s, connection pruning, resour
 
 # Add project root to path
 
-from app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -38,11 +38,11 @@ from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.schemas import User
+from netra_backend.app.schemas import User
 
 # Add project root to path
-from app.core.cache.redis_manager import RedisManager
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.core.cache.redis_manager import RedisManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

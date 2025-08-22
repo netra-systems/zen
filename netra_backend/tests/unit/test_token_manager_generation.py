@@ -8,7 +8,7 @@ Tests for JWT token creation, validation, and claims extraction.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,9 +25,9 @@ from freezegun import freeze_time
 from jose import JWTError, jwt
 
 # Add project root to path
-from app.auth_integration.auth import JWTTokenManager, TokenClaims
-from app.core.exceptions_auth import AuthenticationError
-from app.core.exceptions_base import ValidationError
+from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
+from netra_backend.app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.core.exceptions_base import ValidationError
 
 # Add project root to path
 

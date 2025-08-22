@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     TEST_USER_DATA,
     CommonResponseValidators,
     basic_test_client,
@@ -43,7 +43,7 @@ class TestAdminRoute:
     
     def test_admin_role_verification(self):
         """Test admin role verification logic."""
-        from app.routes.admin import verify_admin_role
+        from netra_backend.app.routes.admin import verify_admin_role
         
         # Test admin user
         admin_user = TEST_USER_DATA["admin"]
@@ -55,7 +55,7 @@ class TestAdminRoute:
     
     async def test_admin_user_management(self):
         """Test admin user management operations."""
-        from app.routes.admin import get_all_users, update_user_role
+        from netra_backend.app.routes.admin import get_all_users, update_user_role
         
         with patch('app.services.user_service.get_all_users') as mock_get:
             mock_get.return_value = [
@@ -167,7 +167,7 @@ class TestAdminRoute:
     
     async def test_admin_audit_log_access(self):
         """Test admin access to audit logs."""
-        from app.routes.admin import get_audit_logs
+        from netra_backend.app.routes.admin import get_audit_logs
         
         with patch('app.services.audit_service.get_recent_logs') as mock_logs:
             mock_logs.return_value = [

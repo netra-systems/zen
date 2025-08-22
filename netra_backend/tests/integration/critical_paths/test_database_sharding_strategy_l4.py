@@ -16,7 +16,7 @@ Coverage: Real PostgreSQL sharding, ClickHouse distribution, cross-shard joins, 
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,11 +43,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from app.core.health_checkers import HealthChecker
-from app.db.client_clickhouse import ClickHouseClient
-from app.db.models_content import Message, Thread
-from app.db.models_user import User, UserPlan
-from app.db.postgres import AsyncSessionLocal, get_async_session
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.models_content import Message, Thread
+from netra_backend.app.db.models_user import User, UserPlan
+from netra_backend.app.db.postgres import AsyncSessionLocal, get_async_session
 
 
 # Mock sharding components for L4 testing

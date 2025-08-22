@@ -14,13 +14,13 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real components, No mock i
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+# Removed duplicate import - using WebSocketManager from services
 from tests.e2e.agent_response_test_utilities import (
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch
@@ -53,7 +53,7 @@ class UserMessagePipelineTester:
         self.message_flow_history = []
 
 
-    async def create_test_supervisor(self) -> ModernSupervisorAgent:
+    async def create_test_supervisor(self) -> SupervisorAgent:
 
         """Create supervisor agent for pipeline testing."""
         from unittest.mock import MagicMock
@@ -65,7 +65,7 @@ class UserMessagePipelineTester:
         mock_tool_dispatcher = MagicMock()
         
 
-        supervisor = ModernSupervisorAgent(
+        supervisor = SupervisorAgent(
 
             db_session=mock_db,
 
@@ -117,7 +117,7 @@ class UserMessagePipelineTester:
 
     async def route_message_to_supervisor(self, message_event: Dict[str, Any], 
 
-                                        supervisor: ModernSupervisorAgent) -> Dict[str, Any]:
+                                        supervisor: SupervisorAgent) -> Dict[str, Any]:
 
         """Route message to supervisor agent."""
 
@@ -148,7 +148,7 @@ class UserMessagePipelineTester:
         return routing_result
 
 
-    async def process_through_agent_pipeline(self, supervisor: ModernSupervisorAgent,
+    async def process_through_agent_pipeline(self, supervisor: SupervisorAgent,
 
                                            message_event: Dict[str, Any]) -> Dict[str, Any]:
 

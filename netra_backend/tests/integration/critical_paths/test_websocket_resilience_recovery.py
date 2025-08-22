@@ -12,8 +12,8 @@ Coverage: Connection resilience, state persistence, automatic recovery, message 
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -37,12 +37,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.schemas.registry import WebSocketMessage
-from app.services.state_persistence import StatePersistenceService
-from app.services.websocket.connection_recovery import ConnectionRecovery
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
 
 # Add project root to path
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

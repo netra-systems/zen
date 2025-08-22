@@ -28,7 +28,7 @@ Architecture Requirements:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -44,18 +44,18 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 import pytest
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 from clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth_constants import AuthConstants, JWTConstants
+from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
 
 # Add project root to path
-from app.db.session import get_db_session
-from app.schemas.registry import WebSocketMessage
-from .sso_saml_components import (
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.schemas.registry import WebSocketMessage
+from tests.sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,
     MockIdPErrorGenerator,

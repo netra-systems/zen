@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
 
-from .llm_manager_helpers import LLMProvider, MockLLMResponse
+from netra_backend.tests.llm_manager_helpers import LLMProvider, MockLLMResponse
 
 
 class MockLLMClient:

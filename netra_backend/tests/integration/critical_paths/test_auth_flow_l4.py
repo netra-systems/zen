@@ -16,7 +16,7 @@ Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, token re
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -61,7 +61,7 @@ JWTService = AsyncMock
 SessionManager = AsyncMock
 # Redis session manager replaced with mock
 RedisSessionManager = AsyncMock
-# from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 

@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for websocket functionality
 
 This module provides a compatibility layer for code that expects websocket manager
-imports from netra_backend.app.services.websocket.ws_manager. The actual implementation is in app.ws_manager.
+imports from app.services.websocket.ws_manager. The actual implementation is in app.ws_manager.
 """
 
 import sys

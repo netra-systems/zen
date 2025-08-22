@@ -7,7 +7,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,10 +19,10 @@ from datetime import datetime
 
 import pytest
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.triage_sub_agent import (
+from netra_backend.app.agents.triage_sub_agent import (
     Complexity,
     ExtractedEntities,
     KeyParameters,
@@ -31,8 +31,8 @@ from app.agents.triage_sub_agent import (
     TriageResult,
     UserIntent,
 )
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from .triage_test_helpers import (
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.tests.triage_test_helpers import (
     EdgeCaseHelpers,
     EntityExtractionHelpers,
     IntentHelpers,
@@ -210,7 +210,7 @@ class TestPydanticModelValidation:
     
     def _create_comprehensive_triage_result(self):
         """Create comprehensive triage result"""
-        from app.agents.triage_sub_agent.models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         key_params = self._create_test_key_parameters()
         metadata = TriageMetadata(triage_duration_ms=300, llm_tokens_used=100)
         return TriageResult(

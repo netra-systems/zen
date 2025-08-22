@@ -13,7 +13,7 @@ Comprehensive test to verify API rate limiting enforcement:
 This test ensures rate limiting protects the API from abuse.
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 

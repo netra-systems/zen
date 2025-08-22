@@ -7,7 +7,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,16 +20,16 @@ from typing import Any, Dict, List
 
 import pytest
 from pydantic import BaseModel
-from app.schemas import AppConfig
+from netra_backend.app.schemas import AppConfig
 
-from .enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
 
 # Add project root to path
-from .llm_manager_helpers import (
+from netra_backend.tests.llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
 )
-from .llm_mock_clients import MockLLMClient
+from netra_backend.tests.llm_mock_clients import MockLLMClient
 
 # Add project root to path
 

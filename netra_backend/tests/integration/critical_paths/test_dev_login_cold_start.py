@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -45,7 +45,7 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 from auth_dependencies import get_db_session, get_security_service
 from clients.auth_client import auth_client
 from clients.auth_client_config import Environment, OAuthConfig
-from main import app
+from netra_backend.app.main import app
 
 
 class TestDevLoginColdStart:
@@ -206,7 +206,7 @@ class TestDevLoginColdStart:
     async def test_oauth_config_environment_specific(self):
         """Test 5: OAuth config should be environment-specific."""
         # Get configs for different environments
-        from app.clients.auth_client_config import OAuthConfigGenerator
+        from netra_backend.app.clients.auth_client_config import OAuthConfigGenerator
         
         generator = OAuthConfigGenerator()
         

@@ -24,7 +24,7 @@ Mock-Real Spectrum: L3 (Real middleware with controlled requests)
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -44,15 +44,15 @@ import httpx
 import jwt
 import pytest
 
-from app.core.config import get_settings
-from app.core.monitoring import metrics_collector
-from app.middleware.audit_middleware import AuditMiddleware
-from app.middleware.auth_middleware import AuthMiddleware
-from app.middleware.cors_middleware import CORSMiddleware
-from app.middleware.rate_limit_middleware import RateLimitMiddleware
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.middleware.audit_middleware import AuditMiddleware
+from netra_backend.app.middleware.auth_middleware import AuthMiddleware
+from netra_backend.app.middleware.cors_middleware import CORSMiddleware
+from netra_backend.app.middleware.rate_limit_middleware import RateLimitMiddleware
 
 # Add project root to path
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     AuthError,
     MiddlewareContext,
     RequestContext,

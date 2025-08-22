@@ -7,7 +7,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,9 +22,9 @@ from typing import Any, Dict, List
 import pytest
 
 # Add project root to path
-from app.core.exceptions_base import NetraException
-from .enhanced_llm_manager import EnhancedLLMManager
-from .llm_manager_helpers import (
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.llm_manager_helpers import (
     assert_failure_count,
     assert_health_status,
     count_provider_usage,

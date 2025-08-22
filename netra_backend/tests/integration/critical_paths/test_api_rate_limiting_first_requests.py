@@ -17,7 +17,7 @@ Coverage: First request always allowed, rate limit enforcement, burst capacity, 
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,10 +38,10 @@ import pytest
 import redis.asyncio as redis
 
 # Add project root to path
-from app.core.async_rate_limiter import AsyncRateLimiter
-from app.logging_config import central_logger
-from app.redis_manager import RedisManager
-from ..config import TestTier
+from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from tests.config import TestTier
 
 # Add project root to path
 

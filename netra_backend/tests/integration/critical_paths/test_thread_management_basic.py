@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 # Add project root to path
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 setup_test_path()
 
 """
@@ -27,8 +27,8 @@ from typing import Any, Dict, List
 import aiohttp
 import pytest
 
-from app.db.models_postgres import Message, Thread
-from app.redis_manager import RedisManager
+from netra_backend.app.db.models_postgres import Message, Thread
+from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
 
 

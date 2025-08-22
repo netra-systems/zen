@@ -1,5 +1,8 @@
 """Test framework module for Netra AI Platform."""
 
+import sys
+from pathlib import Path
+
 # Import core unified components
 from .runner import UnifiedTestRunner
 from .test_config import COMPONENT_MAPPINGS, RUNNERS, SHARD_MAPPINGS, TEST_LEVELS
@@ -28,6 +31,29 @@ from .test_quality_analyzer import TestQualityAnalyzer, TestQualityIssue
 from .mock_utils import mock_justified
 from .feature_flags import FeatureFlagManager, FeatureStatus
 from .decorators import feature_flag, requires_feature, tdd_test
+
+
+def setup_test_path():
+    """Set up the project root in sys.path for test imports.
+    
+    This function ensures that the project root is in sys.path
+    so that all tests can import from the netra_backend module.
+    
+    Handles Windows and Unix path differences automatically.
+    
+    Returns:
+        Path: The project root path
+    """
+    # Navigate from test_framework/ -> project_root/
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent
+    
+    # Add project root to sys.path (for main imports)
+    project_root_str = str(project_root)
+    if project_root_str not in sys.path:
+        sys.path.insert(0, project_root_str)
+    
+    return project_root
 
 __all__ = [
     # Core runner classes
@@ -66,4 +92,5 @@ __all__ = [
     'feature_flag',
     'requires_feature',
     'tdd_test',
+    'setup_test_path',
 ]

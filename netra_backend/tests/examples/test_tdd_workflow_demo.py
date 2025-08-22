@@ -10,7 +10,7 @@ Scenario: Developing a new "smart_caching" feature
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -39,7 +39,7 @@ def test_cache_hit_optimization():
     """
     # This would fail now because SmartCache doesn't exist yet
     # But with TDD decorator, it won't break CI/CD
-    from app.core.smart_cache import SmartCache
+    from netra_backend.app.core.smart_cache import SmartCache
     
     cache = SmartCache()
     cache.set("key1", "value1", hit_probability=0.8)
@@ -56,7 +56,7 @@ def test_cache_eviction_policy():
     
     Another TDD test written before implementation.
     """
-    from app.core.smart_cache import SmartCache
+    from netra_backend.app.core.smart_cache import SmartCache
     
     cache = SmartCache(max_size=3)
     
@@ -80,7 +80,7 @@ def test_cache_performance_metrics():
     
     TDD test for metrics collection.
     """
-    from app.core.smart_cache import SmartCache
+    from netra_backend.app.core.smart_cache import SmartCache
     
     cache = SmartCache()
     
@@ -101,8 +101,8 @@ def test_cache_integration_with_database():
     
     This test runs only when smart_caching feature is enabled.
     """
-    from app.core.smart_cache import SmartCache
-    from app.db.database import get_database
+    from netra_backend.app.core.smart_cache import SmartCache
+    from netra_backend.app.db.database import get_database
     
     cache = SmartCache()
     db = get_database()
@@ -124,7 +124,7 @@ def test_ml_cache_prediction():
     1. Both smart_caching and ml_rate_limiting are enabled
     2. ENABLE_EXPERIMENTAL_TESTS=true
     """
-    from app.core.smart_cache import MLCachePredictor
+    from netra_backend.app.core.smart_cache import MLCachePredictor
     
     predictor = MLCachePredictor()
     

@@ -26,8 +26,8 @@ Architecture Compliance:
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -56,9 +56,9 @@ from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Add project root to path
-from app.db.postgres import get_postgres_session
-from app.logging_config import central_logger
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

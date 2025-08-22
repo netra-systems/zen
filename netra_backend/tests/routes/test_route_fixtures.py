@@ -7,7 +7,7 @@ Shared components extracted from oversized test file to maintain 450-line archit
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,11 +23,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import get_config
-from app.services.key_manager import KeyManager
+from netra_backend.app.config import get_config
+from netra_backend.app.services.key_manager import KeyManager
 
 # Add project root to path
-from app.services.security_service import SecurityService
+from netra_backend.app.services.security_service import SecurityService
 
 # Add project root to path
 
@@ -54,13 +54,13 @@ class MockDependencyManager:
 
         from sqlalchemy.ext.asyncio import AsyncSession
 
-        import app.db.postgres as postgres_module
+        import netra_backend.app.db.postgres as postgres_module
 
         # Ensure database is initialized first - but handle session factory properly
-        import app.db.session as session_module
-        from app.db.postgres import get_async_db, initialize_postgres
-        from app.db.session import get_db_session
-        from app.dependencies import get_db_dependency, get_llm_manager
+        import netra_backend.app.db.session as session_module
+        from netra_backend.app.db.postgres import get_async_db, initialize_postgres
+        from netra_backend.app.db.session import get_db_session
+        from netra_backend.app.dependencies import get_db_dependency, get_llm_manager
         
         # Mock the session factory to avoid the RuntimeError
         if postgres_module.async_session_factory is None:
@@ -115,11 +115,11 @@ class MockDependencyManager:
     @staticmethod
     def setup_auth_dependencies(app):
         """Set up authentication dependencies for testing."""
-        from app.auth_integration.auth import (
+        from netra_backend.app.auth_integration.auth import (
             get_current_active_user,
             get_current_user,
         )
-        from app.db.models_postgres import User
+        from netra_backend.app.db.models_postgres import User
         
         async def mock_get_current_user():
             # Create a mock user for testing - bypass all auth logic
@@ -145,8 +145,8 @@ class MockDependencyManager:
     @staticmethod
     def setup_agent_dependencies(app):
         """Set up agent-specific dependencies for testing."""
-        from app.services.agent_service import get_agent_service
-        from app.services.agent_service_core import AgentService
+        from netra_backend.app.services.agent_service import get_agent_service
+        from netra_backend.app.services.agent_service_core import AgentService
         
         def mock_get_agent_service(db_session=None, llm_manager=None):
             # Return a properly mocked AgentService
@@ -207,7 +207,7 @@ class MockAppStateManager:
 @pytest.fixture
 def basic_test_client():
     """Basic FastAPI test client with minimal setup."""
-    from app.main import app
+    from netra_backend.app.main import app
     MockAppStateManager.setup_app_state(app)
     return TestClient(app)
 
@@ -215,7 +215,7 @@ def basic_test_client():
 @pytest.fixture
 def authenticated_test_client(ensure_db_initialized):
     """FastAPI test client with authentication mocked."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_auth_dependencies(app)
@@ -230,7 +230,7 @@ def authenticated_test_client(ensure_db_initialized):
 @pytest.fixture  
 def configured_test_client():
     """Test client with core dependencies mocked."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockAppStateManager.setup_app_state(app)
@@ -244,7 +244,7 @@ def configured_test_client():
 @pytest.fixture
 def agent_test_client():
     """Test client configured for agent route testing."""
-    from app.main import app
+    from netra_backend.app.main import app
     
     MockDependencyManager.setup_core_dependencies(app)
     MockDependencyManager.setup_agent_dependencies(app)

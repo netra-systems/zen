@@ -86,7 +86,7 @@ describe('Authentication & Connection Tests', () => {
     
     test('1. Should display user information when authenticated', () => {
       render(<ChatHeader />);
-      expectElementByText('Test User').toBeInTheDocument();
+      expectElementByText('Test User');
     });
 
     test('2. Should show login prompt when not authenticated', () => {
@@ -98,7 +98,7 @@ describe('Authentication & Connection Tests', () => {
       
       jest.mocked(useAuthStore).mockReturnValueOnce(mockAuthStore);
       render(<ChatHeader />);
-      expectElementByText(/Please log in/i).toBeInTheDocument();
+      expectElementByText(/Please log in/i);
     });
 
     test('3. Should handle logout action', async () => {
@@ -202,7 +202,7 @@ describe('Authentication & Connection Tests', () => {
       
       render(<ChatHeader />);
       
-      expectElementByText('Connected User').toBeInTheDocument();
+      expectElementByText('Connected User');
       const status = expectElementByTestId('connection-status');
       expect(status).toHaveClass('connected');
     });
@@ -222,7 +222,7 @@ describe('Authentication & Connection Tests', () => {
       
       render(<ChatHeader />);
       
-      expectElementByText(/Please log in/i).toBeInTheDocument();
+      expectElementByText(/Please log in/i);
       const status = expectElementByTestId('connection-status');
       expect(status).toHaveClass('disconnected');
     });

@@ -8,7 +8,7 @@ BVJ: Protects $40K MRR from data inconsistency
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -30,8 +30,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from app.db.base import Base
-from app.db.models_postgres import Message, Thread, User
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_postgres import Message, Thread, User
 
 # Add project root to path
 

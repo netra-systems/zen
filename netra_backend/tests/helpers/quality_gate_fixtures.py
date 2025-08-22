@@ -6,15 +6,15 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.redis_manager import RedisManager
-from app.services.quality_gate_service import (
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
     QualityMetrics,
     ValidationResult,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     create_quality_service,
     create_redis_mock,
 )

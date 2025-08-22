@@ -13,7 +13,7 @@ Comprehensive test for agent collaboration workflow:
 This test validates the entire multi-agent collaboration system.
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 

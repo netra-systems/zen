@@ -11,7 +11,7 @@ for operational insights and user experience optimization.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,10 +24,10 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from fastapi import WebSocket
 
-from app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager
+from netra_backend.app.websocket.connection import ConnectionManager
 
 # Add project root to path
 

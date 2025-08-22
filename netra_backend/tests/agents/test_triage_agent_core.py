@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from app.agents.state import DeepAgentState
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.triage_sub_agent import ExtractedEntities, UserIntent
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from app.llm.llm_manager import LLMManager
-from app.redis_manager import RedisManager
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.triage_sub_agent import ExtractedEntities, UserIntent
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -15,11 +15,11 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from app.schemas import DataSource, RequestModel, TimeRange, Workload
+from netra_backend.app.schemas import DataSource, RequestModel, TimeRange, Workload
 
-from app.config import get_config
-from app.llm.llm_manager import LLMManager
-from app.main import app
+from netra_backend.app.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.main import app
 
 # Add project root to path
 
@@ -32,7 +32,7 @@ async def test_apex_optimizer_agent(prompt: str):
     mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
     
     # Override the dependency
-    from app.routes.agent_route import get_agent_supervisor
+    from netra_backend.app.routes.agent_route import get_agent_supervisor
     app.dependency_overrides[get_agent_supervisor] = lambda: mock_supervisor
     
     # Create test client

@@ -11,7 +11,7 @@ and edge cases that could lead to cost overruns.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from app.core.async_rate_limiter import AsyncRateLimiter
+from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 
 # Add project root to path
 

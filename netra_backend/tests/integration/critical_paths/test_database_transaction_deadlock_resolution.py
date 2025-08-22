@@ -15,7 +15,7 @@ and validate detection/resolution mechanisms work correctly.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,9 +38,9 @@ from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
 # Add project root to path
-from app.db.postgres import get_async_db
-from app.db.postgres_core import Database
-from app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.postgres_core import Database
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

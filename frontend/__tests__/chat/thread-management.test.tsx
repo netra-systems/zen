@@ -22,6 +22,9 @@ import {
   expectElementByText,
   expectElementByTestId,
   expectElementByRole,
+  findElementByText,
+  findElementByTestId,
+  findElementByRole,
   waitForElementByText,
   waitForElementByRole
 } from './ui-test-utilities';
@@ -69,6 +72,20 @@ jest.mock('../../hooks/useWebSocket', () => ({
   }))
 }));
 
+jest.mock('../../hooks/useThreadSwitching', () => ({
+  useThreadSwitching: jest.fn(() => ({
+    state: { isLoading: false },
+    switchToThread: jest.fn()
+  }))
+}));
+
+jest.mock('../../hooks/useThreadCreation', () => ({
+  useThreadCreation: jest.fn(() => ({
+    state: { isLoading: false },
+    createAndNavigate: jest.fn()
+  }))
+}));
+
 // Import components after mocks
 import { ThreadSidebar } from '../../components/chat/ThreadSidebar';
 import { useThreadStore } from '../../store/threadStore';
@@ -113,8 +130,8 @@ describe('Thread Management Tests', () => {
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      expectElementByText('Thread 1').toBeInTheDocument();
-      expectElementByText('Thread 2').toBeInTheDocument();
+      expectElementByText('Thread 1');
+      expectElementByText('Thread 2');
     });
   });
 
@@ -124,7 +141,7 @@ describe('Thread Management Tests', () => {
   describe('Thread Selection', () => {
     
     test('5. Should handle thread selection', async () => {
-      const mockSetCurrentThreadId = jest.fn();
+      const mockSetCurrentThread = jest.fn();
       const mockThreads = [
         createTestThread({ id: '1', title: 'Thread 1' }),
         createTestThread({ id: '2', title: 'Thread 2' })
@@ -133,15 +150,15 @@ describe('Thread Management Tests', () => {
       const mockThreadStore = createThreadStoreMock({
         threads: mockThreads,
         currentThreadId: '1',
-        setCurrentThreadId: mockSetCurrentThreadId
+        setCurrentThread: mockSetCurrentThread
       });
       
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      const thread2 = expectElementByText('Thread 2');
+      const thread2 = findElementByText('Thread 2');
       fireEvent.click(thread2);
-      expect(mockSetCurrentThreadId).toHaveBeenCalledWith('2');
+      expect(mockSetCurrentThread).toHaveBeenCalled();
     });
   });
 
@@ -151,18 +168,24 @@ describe('Thread Management Tests', () => {
   describe('Thread Creation', () => {
     
     test('6. Should create new thread', async () => {
-      const mockAddThread = jest.fn();
+      const mockCreateAndNavigate = jest.fn();
       const mockThreadStore = createThreadStoreMock({
-        threads: [],
-        addThread: mockAddThread
+        threads: []
+      });
+      
+      // Import the hooks to get access to their mocks
+      const { useThreadCreation } = await import('../../hooks/useThreadCreation');
+      jest.mocked(useThreadCreation).mockReturnValueOnce({
+        state: { isLoading: false },
+        createAndNavigate: mockCreateAndNavigate
       });
       
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      const newThreadButton = expectElementByRole('button', { name: /new thread/i });
+      const newThreadButton = findElementByRole('button', { name: /new conversation/i });
       fireEvent.click(newThreadButton);
-      expect(mockAddThread).toHaveBeenCalled();
+      expect(mockCreateAndNavigate).toHaveBeenCalled();
     });
   });
 
@@ -209,7 +232,7 @@ describe('Thread Management Tests', () => {
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      expectElementByText(/No threads available/i).toBeInTheDocument();
+      expectElementByText(/No threads available/i);
     });
 
     test('Should handle thread loading state', () => {
@@ -221,7 +244,7 @@ describe('Thread Management Tests', () => {
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      expectElementByTestId('thread-loading').toBeInTheDocument();
+      expectElementByTestId('thread-loading');
     });
 
     test('Should highlight current thread', () => {

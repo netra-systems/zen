@@ -4,8 +4,8 @@ Tests for WebSocketManager messaging functionality
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -27,8 +27,8 @@ import pytest
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from app.services.websocket.ws_manager import WebSocketManager
-from .test_base import MockWebSocket, WebSocketTestBase
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.tests.test_base import MockWebSocket, WebSocketTestBase
 
 # Add project root to path
 

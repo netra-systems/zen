@@ -10,7 +10,7 @@ and no regressions were introduced during the migration.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -77,7 +77,7 @@ class TestConfigurationMigrationValidation:
 
     def test_environment_detection_still_works(self):
         """Verify environment detection functions correctly."""
-        from app.core.environment_constants import EnvironmentDetector
+        from netra_backend.app.core.environment_constants import EnvironmentDetector
         
         # Test basic environment detection
         detector = EnvironmentDetector()
@@ -106,7 +106,7 @@ class TestConfigurationMigrationValidation:
                 "ENVIRONMENT": "testing"
             }):
                 # Import configuration components that should work
-                from app.core.environment_constants import (
+                from netra_backend.app.core.environment_constants import (
                     EnvironmentVariables,
                 )
                 
@@ -162,7 +162,7 @@ class TestConfigurationMigrationValidation:
 
     def test_configuration_constants_accessible(self):
         """Test that configuration constants are accessible."""
-        from app.core.environment_constants import EnvironmentVariables
+        from netra_backend.app.core.environment_constants import EnvironmentVariables
         
         # Test key environment variables are defined
         required_vars = [
@@ -211,7 +211,7 @@ class TestConfigurationMigrationValidation:
         with patch.dict(os.environ, {}, clear=True):
             # Test that missing configuration doesn't crash the system
             try:
-                from app.core.environment_constants import (
+                from netra_backend.app.core.environment_constants import (
                     EnvironmentDetector,
                 )
                 detector = EnvironmentDetector()

@@ -9,7 +9,7 @@ Provides comprehensive performance metrics and benchmark data.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,10 +26,10 @@ from unittest.mock import patch
 import psutil
 import pytest
 
-from app.schemas.Generation import ContentGenParams
+from netra_backend.app.schemas.Generation import ContentGenParams
 
 # Add project root to path
-from app.services.generation_service import run_content_generation_job
+from netra_backend.app.services.generation_service import run_content_generation_job
 
 # Add project root to path
 

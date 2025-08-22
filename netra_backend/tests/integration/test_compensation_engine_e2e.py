@@ -16,7 +16,7 @@ Critical for revenue generation and customer trust.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,11 +37,11 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.base import Base
-from app.db.models_user import ToolUsageLog, User
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_user import ToolUsageLog, User
 
 # Add project root to path
-from app.services.factory_status.business_core import (
+from netra_backend.app.services.factory_status.business_core import (
     BusinessObjective,
     # Add project root to path
     BusinessValueScore,
@@ -51,8 +51,8 @@ from app.services.factory_status.business_core import (
 
 # TODO: Implement ValueCalculator class in app.services.factory_status.value_calculator
 # from app.services.factory_status.value_calculator import ValueCalculator
-from app.services.factory_status.metrics_roi import ROICalculator
-from app.services.supply_research.schedule_manager import ScheduleManager
+from netra_backend.app.services.factory_status.metrics_roi import ROICalculator
+from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
 
 
 class TestCompensationEngineE2E:

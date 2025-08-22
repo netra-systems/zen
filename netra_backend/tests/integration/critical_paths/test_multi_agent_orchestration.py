@@ -14,7 +14,7 @@ Coverage: Real Agent Registry, Redis state management, PostgreSQL metadata, real
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,14 +32,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base import BaseSubAgent
 
 # Add project root to path
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.db.postgres import get_postgres_session
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
-from app.services.state.state_manager import StateManager, StateStorage
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.services.state.state_manager import StateManager, StateStorage
 
 # Add project root to path
 

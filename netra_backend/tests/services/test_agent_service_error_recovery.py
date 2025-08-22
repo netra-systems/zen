@@ -23,7 +23,7 @@ PERFORMANCE REQUIREMENTS:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,9 +37,9 @@ from unittest.mock import MagicMock
 import pytest
 
 # Add project root to path
-from app.core.exceptions_base import NetraException
-from .test_agent_service_fixtures import resilient_orchestrator
-from .test_agent_service_mock_classes import AgentState
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.tests.test_agent_service_fixtures import resilient_orchestrator
+from netra_backend.tests.test_agent_service_mock_classes import AgentState
 
 # Add project root to path
 

@@ -5,7 +5,7 @@ Tests cross-table correlation and realistic data volumes
 
 import pytest
 
-from app.db.clickhouse_query_fixer import (
+from netra_backend.app.db.clickhouse_query_fixer import (
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
 )

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -50,7 +50,7 @@ def test_health_endpoint_direct():
     
     from fastapi.testclient import TestClient
 
-    from app.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")
@@ -69,7 +69,7 @@ def test_live_endpoint():
     
     from fastapi.testclient import TestClient
 
-    from app.main import app
+    from netra_backend.app.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")

@@ -8,7 +8,7 @@ instantiated with all their forward references resolved.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ import pytest
 
 # Add project root to path
 # Import all required types
-from app.agents.triage_sub_agent.models import (
+from netra_backend.app.agents.triage_sub_agent.models import (
     TriageMetadata,
     TriageResult,
 )
-from app.schemas.agent_models import AgentMetadata, DeepAgentState
-from app.schemas.unified_tools import (
+from netra_backend.app.schemas.agent_models import AgentMetadata, DeepAgentState
+from netra_backend.app.schemas.unified_tools import (
     AgentCompleted,
     AgentResult,
     AgentState,

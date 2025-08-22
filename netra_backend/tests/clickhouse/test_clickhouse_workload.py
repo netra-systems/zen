@@ -7,7 +7,7 @@ Tests for workload_events table operations and complex queries
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,14 +25,14 @@ import pytest
 from logging_config import central_logger as logger
 
 # Add project root to path
-from app.db.clickhouse import get_clickhouse_client
-from app.db.clickhouse_init import (
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_init import (
     create_workload_events_table_if_missing,
     # Add project root to path
     initialize_clickhouse_tables,
     verify_workload_events_table,
 )
-from .test_clickhouse_permissions import (
+from netra_backend.tests.test_clickhouse_permissions import (
     _check_table_insert_permission,
 )
 

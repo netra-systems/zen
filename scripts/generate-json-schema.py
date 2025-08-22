@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from app import schemas
+from netra_backend.app import schemas
 
 
 def main():

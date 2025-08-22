@@ -17,6 +17,13 @@ export function setupAuthTestEnvironment() {
   global.fetch = fetchMock;
   global.localStorage = localStorageMock;
   
+  // Also set window.localStorage for JSDOM environment
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+    configurable: true
+  });
+  
   return { fetchMock, localStorageMock, locationUtils };
 }
 

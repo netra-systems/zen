@@ -24,7 +24,7 @@ Mock-Real Spectrum: L4 (Multi-region production topology)
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -42,14 +42,14 @@ from typing import Any, Dict, List, Optional, Tuple
 import httpx
 import pytest
 
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 # # # HealthStatus, FailoverEvent - these don't exist in auth_types, using generic structures  # Class may not exist, commented out  # Class may not exist, commented out
-from app.core.config import get_settings
-from app.redis_manager import redis_manager as get_redis_manager
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.redis_manager import redis_manager as get_redis_manager
 
 # Add project root to path
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     LoginRequest,
     LoginResponse,
     SessionInfo,

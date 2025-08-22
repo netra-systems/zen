@@ -14,7 +14,7 @@ Coverage: Complex routing rules, path matching, header-based routing, version ro
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,12 +34,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-from app.services.api_gateway.load_balancer import LoadBalancer
-from app.services.api_gateway.route_manager import RouteManager
+from netra_backend.app.services.api_gateway.load_balancer import LoadBalancer
+from netra_backend.app.services.api_gateway.route_manager import RouteManager
 
 # Add project root to path
-from app.services.api_gateway.router import ApiGatewayRouter
-from app.services.service_discovery.discovery_service import (
+from netra_backend.app.services.api_gateway.router import ApiGatewayRouter
+from netra_backend.app.services.service_discovery.discovery_service import (
     ServiceDiscoveryService,
 )
 

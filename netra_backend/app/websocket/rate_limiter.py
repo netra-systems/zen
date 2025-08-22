@@ -3,7 +3,7 @@
 Provides rate limiting capabilities for WebSocket connections to prevent abuse
 and ensure fair resource usage.
 
-UPDATED: Now uses canonical rate limit types from netra_backend.app.schemas.rate_limit_types
+UPDATED: Now uses canonical rate limit types from app.schemas.rate_limit_types
 """
 
 from datetime import datetime, timezone

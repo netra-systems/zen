@@ -18,7 +18,7 @@ REQUIREMENTS:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,7 +34,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from tests.integration.operational.shared_fixtures import (
+from integration.operational.shared_fixtures import (
     QualityMonitoringTestHelper,
     # Add project root to path
     operational_infrastructure,

@@ -27,9 +27,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from app.core.database_types import DatabaseType
-from app.core.exceptions_config import DatabaseError
-from app.logging_config import central_logger
+from netra_backend.app.core.database_types import DatabaseType
+from netra_backend.app.core.exceptions_config import DatabaseError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

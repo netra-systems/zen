@@ -12,8 +12,8 @@ Business Value Justification (BVJ):
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -49,12 +49,12 @@ os.environ["TESTING"] = "true"
 
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from main import app
+from netra_backend.app.main import app
 
-from app.config import get_config
-from app.middleware.auth_middleware import AuthMiddleware
-from app.services.auth_service import AuthService
-from app.utils.jwt_utils import JWTUtils
+from netra_backend.app.config import get_config
+from netra_backend.app.middleware.auth_middleware import AuthMiddleware
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.utils.jwt_utils import JWTUtils
 
 
 class TestAuthTokenValidationCrossService:

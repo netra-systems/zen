@@ -14,7 +14,7 @@ Coverage: Request/response transformation, data mapping, schema evolution, legac
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,14 +35,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-from app.services.api_gateway.data_converter import DataConverter
-from app.services.api_gateway.schema_mapper import SchemaMapper
+from netra_backend.app.services.api_gateway.data_converter import DataConverter
+from netra_backend.app.services.api_gateway.schema_mapper import SchemaMapper
 
 # Add project root to path
-from app.services.api_gateway.transformation_engine import (
+from netra_backend.app.services.api_gateway.transformation_engine import (
     TransformationEngine,
 )
-from app.services.validation.schema_validator import SchemaValidator
+from netra_backend.app.services.validation.schema_validator import SchemaValidator
 
 # Add project root to path
 

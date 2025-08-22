@@ -5,8 +5,8 @@ Tests designed to fail initially to expose integration gaps per testing.xml L3 r
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -161,7 +161,7 @@ class TestAgentOrchestrationIntegration:
 
         """Test deadlock detection in supervisor-subagent communication"""
         # Will fail - no deadlock detection mechanism
-        from app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
 
         supervisor = SupervisorAgent()
@@ -189,7 +189,7 @@ class TestAgentOrchestrationIntegration:
 
         """Test agent retry mechanism with proper exponential backoff"""
         # Will fail - no proper backoff implementation
-        from app.agents.base.agent import BaseSubAgent
+        from netra_backend.app.agents.base.agent import BaseSubAgent
         
 
         agent = BaseSubAgent()
@@ -266,7 +266,7 @@ class TestWebSocketIntegration:
 
         """Test WebSocket reconnection preserves message order"""
         # Will fail - no message replay on reconnect
-        from app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
 
         manager = WebSocketManager()
@@ -369,7 +369,7 @@ class TestSecurityIntegration:
 
         """Test SQL injection prevention across all database queries"""
         # Will fail - some endpoints vulnerable
-        from app.db.session import get_db
+        from netra_backend.app.db.session import get_db
         
 
         malicious_inputs = [
@@ -402,7 +402,7 @@ class TestSecurityIntegration:
 
         """Test JWT token rotation without disrupting active sessions"""
         # Will fail - no token rotation mechanism
-        from app.auth.jwt_handler import JWTHandler
+        from netra_backend.app.auth.jwt_handler import JWTHandler
         
 
         handler = JWTHandler()
@@ -434,7 +434,7 @@ class TestSecurityIntegration:
 
         """Test distributed rate limiting across multiple instances"""
         # Will fail - rate limiting not distributed
-        from app.middleware.rate_limiter import RateLimiter
+        from netra_backend.app.middleware.rate_limiter import RateLimiter
         
 
         limiter1 = RateLimiter(redis_url="redis://localhost")
@@ -472,7 +472,7 @@ class TestDataConsistencyIntegration:
 
         """Test distributed transaction rollback across services"""
         # Will fail - no distributed transaction support
-        from app.services.transaction_manager import TransactionManager
+        from netra_backend.app.services.transaction_manager import TransactionManager
         
 
         manager = TransactionManager()
@@ -505,7 +505,7 @@ class TestDataConsistencyIntegration:
 
         """Test event sourcing replay produces consistent state"""
         # Will fail - event replay not idempotent
-        from app.events.store import EventStore
+        from netra_backend.app.events.store import EventStore
         
 
         store = EventStore()
@@ -543,7 +543,7 @@ class TestDataConsistencyIntegration:
 
         """Test cache consistency during Redis failover"""
         # Will fail - no failover handling
-        from app.cache.manager import CacheManager
+        from netra_backend.app.cache.manager import CacheManager
         
 
         primary = RedisContainer("redis:7")
@@ -581,7 +581,7 @@ class TestPerformanceIntegration:
 
         """Test connection pool exhaustion and recovery"""
         # Will fail - poor pool recovery
-        from app.db.pool import ConnectionPool
+        from netra_backend.app.db.pool import ConnectionPool
         
 
         pool = ConnectionPool(max_connections=10)
@@ -626,7 +626,7 @@ class TestPerformanceIntegration:
 
         """Test batch processing optimizes database operations"""
         # Will fail - no batch optimization
-        from app.services.batch_processor import BatchProcessor
+        from netra_backend.app.services.batch_processor import BatchProcessor
         
 
         processor = BatchProcessor()
@@ -667,7 +667,7 @@ class TestPerformanceIntegration:
         # Will fail - no memory pressure handling
 
         resource
-        from app.monitoring.memory_manager import MemoryManager
+        from netra_backend.app.monitoring.memory_manager import MemoryManager
         
         # Limit memory to 100MB
 
@@ -698,7 +698,7 @@ class TestObservabilityIntegration:
         # Will fail - incomplete tracing
         from opentelemetry import trace
 
-        from app.tracing.manager import TracingManager
+        from netra_backend.app.tracing.manager import TracingManager
         
 
         tracer = trace.get_tracer(__name__)
@@ -728,7 +728,7 @@ class TestObservabilityIntegration:
 
         """Test metrics aggregation accuracy under load"""
         # Will fail - aggregation errors
-        from app.metrics.collector import MetricsCollector
+        from netra_backend.app.metrics.collector import MetricsCollector
         
 
         collector = MetricsCollector()
@@ -765,7 +765,7 @@ class TestObservabilityIntegration:
 
         """Test log correlation across async execution contexts"""
         # Will fail - context lost in async
-        from app.logging.context import LogContext
+        from netra_backend.app.logging.context import LogContext
         
 
         context = LogContext()
@@ -802,7 +802,7 @@ class TestErrorHandlingIntegration:
 
         """Test circuit breaker prevents cascade failures"""
         # Will fail - no circuit breaker
-        from app.resilience.circuit_breaker import CircuitBreaker
+        from netra_backend.app.resilience.circuit_breaker import CircuitBreaker
         
 
         breaker = CircuitBreaker(
@@ -840,7 +840,7 @@ class TestErrorHandlingIntegration:
 
         """Test poison message handling in message queue"""
         # Will fail - poison messages block queue
-        from app.queue.processor import QueueProcessor
+        from netra_backend.app.queue.processor import QueueProcessor
         
 
         processor = QueueProcessor()
@@ -880,7 +880,7 @@ class TestErrorHandlingIntegration:
 
         """Test graceful shutdown with in-flight requests"""
         # Will fail - abrupt shutdown
-        from app.server import Server
+        from netra_backend.app.server import Server
         
 
         server = Server()
@@ -928,7 +928,7 @@ class TestStateManagementIntegration:
 
         """Test distributed lock timeout and cleanup"""
         # Will fail - locks not cleaned up
-        from app.locks.manager import LockManager
+        from netra_backend.app.locks.manager import LockManager
         
 
         manager = LockManager(redis_url="redis://localhost")
@@ -960,7 +960,7 @@ class TestStateManagementIntegration:
 
         """Test state machine transitions are atomic"""
         # Will fail - non-atomic transitions
-        from app.state.machine import StateMachine
+        from netra_backend.app.state.machine import StateMachine
         
 
         machine = StateMachine()
@@ -1005,7 +1005,7 @@ class TestStateManagementIntegration:
 
         """Test session consistency across service replicas"""
         # Will fail - sessions not synchronized
-        from app.session.manager import SessionManager
+        from netra_backend.app.session.manager import SessionManager
         
 
         manager1 = SessionManager(node_id="node1")
@@ -1034,7 +1034,7 @@ class TestContractValidationIntegration:
 
         """Test API versioning maintains backward compatibility"""
         # Will fail - breaking changes in API
-        from app.api.versioning import APIVersionManager
+        from netra_backend.app.api.versioning import APIVersionManager
         
 
         manager = APIVersionManager()
@@ -1071,7 +1071,7 @@ class TestContractValidationIntegration:
 
         """Test schema evolution with zero-downtime migration"""
         # Will fail - migration causes downtime
-        from app.db.migrations import MigrationManager
+        from netra_backend.app.db.migrations import MigrationManager
         
 
         manager = MigrationManager()
@@ -1104,7 +1104,7 @@ class TestContractValidationIntegration:
 
         """Test GraphQL query depth limiting"""
         # Will fail - no depth limiting
-        from app.graphql.server import GraphQLServer
+        from netra_backend.app.graphql.server import GraphQLServer
         
 
         server = GraphQLServer()

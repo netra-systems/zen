@@ -18,7 +18,7 @@ Tests comprehensive usage metering pipeline:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,16 +37,16 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from app.db.clickhouse import get_clickhouse_client
-from app.db.clickhouse_init import create_workload_events_table_if_missing
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
-from app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
-from app.services.cost_calculator import (
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
+from netra_backend.app.services.cost_calculator import (
     BudgetManager,
     CostCalculatorService,
     CostTier,
 )
-from app.services.metrics.agent_metrics import AgentMetricsCollector
+from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
 
 # Add project root to path
 

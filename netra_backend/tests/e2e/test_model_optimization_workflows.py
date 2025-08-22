@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,11 +20,11 @@ import asyncio
 from typing import Dict, List
 
 import pytest
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 # Add project root to path
-from app.agents.state import DeepAgentState
-from app.core.exceptions import NetraException
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.exceptions import NetraException
 
 # Add project root to path
 
@@ -65,7 +65,7 @@ def _create_latency_cost_tradeoff_state() -> DeepAgentState:
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
-    from tests.e2e.test_model_effectiveness_workflows import (
+    from e2e.test_model_effectiveness_workflows import (
         _execute_model_selection_workflow as execute_workflow,
     )
     return await execute_workflow(setup, state)
@@ -125,7 +125,7 @@ class TestModelSelectionDataFlow:
 
 def _create_model_effectiveness_state() -> DeepAgentState:
     """Create state for model effectiveness analysis."""
-    from tests.e2e.test_model_effectiveness_workflows import (
+    from e2e.test_model_effectiveness_workflows import (
         _create_model_effectiveness_state as create_state,
     )
     return create_state()
@@ -133,7 +133,7 @@ def _create_model_effectiveness_state() -> DeepAgentState:
 
 def _create_gpt5_tool_selection_state() -> DeepAgentState:
     """Create state for GPT-5 tool selection."""
-    from tests.e2e.test_model_effectiveness_workflows import (
+    from e2e.test_model_effectiveness_workflows import (
         _create_gpt5_tool_selection_state as create_state,
     )
     return create_state()

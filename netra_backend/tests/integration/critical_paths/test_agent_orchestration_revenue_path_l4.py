@@ -15,7 +15,7 @@ L4 Realism: Tests against real staging services, actual LLM providers, productio
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -41,14 +41,14 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Add project root to path
-from app.services.agent_service_core import AgentService
-from app.services.audit_service import AuditService
-from app.services.llm_cache_service import LLMCacheService
-from app.services.metrics.billing_metrics import BillingMetricsCollector
-from app.services.user_service import CRUDUser as UserService
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.services.audit_service import AuditService
+from netra_backend.app.services.llm_cache_service import LLMCacheService
+from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
+from netra_backend.app.services.user_service import CRUDUser as UserService
 
 WebSocketService = AsyncMock
 # from app.services.state.state_manager import StateManager

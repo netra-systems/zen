@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,14 +21,14 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.exc import IntegrityError
 
-from app.core.error_context import (
+from netra_backend.app.core.error_context import (
     AsyncErrorContextManager as ErrorContextManager,
 )
-from app.core.error_context import (
+from netra_backend.app.core.error_context import (
     ErrorContext,
     get_enriched_error_context,
 )
-from app.core.error_handlers import (
+from netra_backend.app.core.error_handlers import (
     ApiErrorHandler,
     general_exception_handler,
     get_http_status_code,
@@ -37,10 +37,10 @@ from app.core.error_handlers import (
     netra_exception_handler,
     validation_exception_handler,
 )
-from app.core.error_response import ErrorResponse
+from netra_backend.app.core.error_response import ErrorResponse
 
 # Add project root to path
-from app.core.exceptions import (
+from netra_backend.app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfigurationError,

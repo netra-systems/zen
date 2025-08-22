@@ -8,7 +8,7 @@ Revenue Impact: Justifies premium pricing for enterprise tier with guaranteed pe
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from tests.integration.deployment_config_fixtures import (
+from integration.deployment_config_fixtures import (
     enterprise_deployment_infrastructure,
 )
 

@@ -47,7 +47,7 @@ class MessageRepository(BaseRepository[Message]):
                            metadata: Optional[Dict[str, Any]] = None) -> Optional[Message]:
         """Create a new message with proper structure"""
         return await self.create(
-            db,
+            db=db,
             id=f"msg_{uuid.uuid4()}",
             object="thread.message",
             created_at=int(time.time()),

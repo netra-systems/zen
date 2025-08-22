@@ -19,7 +19,7 @@ ARCHITECTURAL COMPLIANCE:
 
 from dataclasses import dataclass
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.thread_schemas import AgentRequest
+# Removed unused import: AgentRequest
 from tests.e2e.agent_conversation_helpers import (
 from typing import Dict, Any, List, Optional
 from unittest.mock import patch, AsyncMock

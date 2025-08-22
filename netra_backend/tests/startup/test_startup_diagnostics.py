@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.schemas.diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticError,
     DiagnosticResult,
     DiagnosticSeverity,

@@ -7,7 +7,7 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,14 +22,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from .debug_migration_test_helpers import (
+from netra_backend.tests.debug_migration_test_helpers import (
     # Add project root to path
     DebugTestHelpers,
     MigrationTestHelpers,
 )
 
 # Add project root to path
-from .rate_retry_monitoring_test_helpers import (
+from netra_backend.tests.rate_retry_monitoring_test_helpers import (
     MonitoringTestHelpers,
 )
 
@@ -39,7 +39,7 @@ class TestMonitoringUtilsMetrics:
     """test_monitoring_utils_metrics - Test metric collection and aggregation"""
     
     async def test_metric_collection(self):
-        from app.utils.monitoring_utils import MonitoringUtils
+        from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
         
         MonitoringTestHelpers.record_test_metrics(utils)
@@ -49,7 +49,7 @@ class TestMonitoringUtilsMetrics:
         self._assert_histogram_metrics(utils)
     
     async def test_metric_aggregation(self):
-        from app.utils.monitoring_utils import MonitoringUtils
+        from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
         
         self._record_time_based_metrics(utils)
@@ -89,14 +89,14 @@ class TestDebugUtilsProfiling:
     """test_debug_utils_profiling - Test profiling utilities and performance metrics"""
     
     async def test_profiling_utilities(self):
-        from app.utils.debug_utils import DebugUtils
+        from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
         
         await self._test_function_profiling(utils)
         self._test_memory_profiling(utils)
     
     async def test_performance_metrics(self):
-        from app.utils.debug_utils import DebugUtils
+        from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
         
         await self._test_timing_context_manager(utils)
@@ -160,7 +160,7 @@ class TestMigrationUtilsScripts:
     """test_migration_utils_scripts - Test migration utilities and data transformation"""
     
     async def test_migration_utilities(self):
-        from app.utils.migration_utils import MigrationUtils
+        from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()
         
         old_schema = MigrationTestHelpers.create_old_schema()
@@ -171,7 +171,7 @@ class TestMigrationUtilsScripts:
         self._test_data_migration(utils, migration_plan)
     
     async def test_data_transformation(self):
-        from app.utils.migration_utils import MigrationUtils
+        from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()
         
         self._test_field_transformation(utils)

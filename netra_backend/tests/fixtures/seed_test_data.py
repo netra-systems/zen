@@ -10,8 +10,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from app.core.exceptions import NetraException
-from .small_datasets import get_all_small_datasets
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.tests.small_datasets import get_all_small_datasets
 
 
 class TestDataSeeder:

@@ -23,7 +23,7 @@ Architecture Compliance: <450 lines, <25 line functions, real components (L2)
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -41,16 +41,16 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
 from sqlalchemy import select
 
-from app.db.models_postgres import User
+from netra_backend.app.db.models_postgres import User
 
 # Add project root to path
-from app.db.postgres import get_postgres_db
-from app.redis_manager import RedisManager
-from app.services.agent_service import get_agent_service
+from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.agent_service import get_agent_service
 
 # Add project root to path
 

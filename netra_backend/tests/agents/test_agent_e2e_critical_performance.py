@@ -7,13 +7,15 @@ Tests 9-10: Concurrent request handling, performance and timeout handling.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-setup_test_path()
+# Add netra_backend to path  
+NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
+if str(NETRA_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import asyncio
 import uuid
@@ -23,8 +25,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from app.services.state_persistence import state_persistence_service
-from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from netra_backend.app.services.state_persistence import state_persistence_service
+from .test_agent_e2e_critical_setup import AgentE2ETestBase
 
 # Add project root to path
 

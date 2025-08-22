@@ -15,7 +15,7 @@ Performance Requirements: TTL accuracy > 99.5%, expiration variance < 50ms, memo
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import pytest
 import redis.asyncio as aioredis
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 from .integration.helpers.redis_l3_helpers import (

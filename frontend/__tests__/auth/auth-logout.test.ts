@@ -9,7 +9,13 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+
+// Unmock the auth service to use the real implementation
+jest.unmock('@/auth/service');
+jest.unmock('@/auth');
+
 import { authService } from '@/auth';
+import { authService as authServiceClientCheck } from '@/lib/auth-service-config';
 import {
   setupAuthTestEnvironment,
   resetAuthTestMocks,
@@ -68,13 +74,7 @@ describe('Auth Logout Flow', () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       mockAuthServiceClient.logout.mockResolvedValue({});
 
-      console.log('Debug: mockAuthServiceClient.logout type:', typeof mockAuthServiceClient.logout);
-      console.log('Debug: is mockAuthServiceClient.logout a jest mock?', jest.isMockFunction(mockAuthServiceClient.logout));
-      console.log('Debug: mockAuthServiceClient.logout.mock.calls before:', mockAuthServiceClient.logout.mock.calls);
-      
       await authService.handleLogout(mockAuthConfig);
-
-      console.log('Debug: mockAuthServiceClient.logout.mock.calls after:', mockAuthServiceClient.logout.mock.calls);
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
       // Note: window.location.href assignment will cause JSDOM error but still executes
@@ -310,7 +310,7 @@ describe('Auth Logout Flow', () => {
       'dev_logout_flag',
       'true'
     );
-    expect(window.location.href).toBe('/');
+    expect(window.location.href).toBe('http://localhost/');
   }
 
   function setupFailedLogoutWithDevFlag() {
@@ -321,6 +321,6 @@ describe('Auth Logout Flow', () => {
   function verifyFailedLogoutCleanup() {
     expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(window.location.href).toBe('/');
+    expect(window.location.href).toBe('http://localhost/');
   }
 });

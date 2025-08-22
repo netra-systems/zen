@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,15 +19,15 @@ from unittest.mock import patch
 
 import pytest
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 
 # Helper imports removed since many methods don't exist in actual service
-from app.services.quality_monitoring_service import (
+from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
 
 # Add project root to path
-from .quality_monitoring_fixtures import (
+from netra_backend.tests.quality_monitoring_fixtures import (
     actual_metrics,
     # Add project root to path
     sample_quality_metrics,

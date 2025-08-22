@@ -11,7 +11,7 @@ preventing double billing or lost revenue scenarios.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,12 +26,12 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.core.error_recovery import OperationType, RecoveryContext
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 # Add project root to path
-from app.services.compensation_engine_core import CompensationEngine
-from app.services.compensation_models import (
+from netra_backend.app.services.compensation_engine_core import CompensationEngine
+from netra_backend.app.services.compensation_models import (
     BaseCompensationHandler,
     # Add project root to path
     CompensationAction,

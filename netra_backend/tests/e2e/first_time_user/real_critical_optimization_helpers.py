@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 
 # Import from the auth helpers module
-from .real_critical_auth_helpers import CriticalUserJourneyHelpers
+from netra_backend.tests.real_critical_auth_helpers import CriticalUserJourneyHelpers
 
 
 class OptimizationHelpers:

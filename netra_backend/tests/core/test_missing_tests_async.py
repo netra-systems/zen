@@ -11,7 +11,7 @@ Tests 13, 16, 17, 20 from original missing tests covering:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,7 +36,7 @@ class TestAsyncErrorHandlers:
     
     @pytest.fixture
     def error_handler(self):
-        from app.core.error_handlers import ErrorHandler
+        from netra_backend.app.core.error_handlers import ErrorHandler
         return ErrorHandler()
     async def test_retry_on_transient_error(self, error_handler):
         """Test retry mechanism for transient errors."""
@@ -85,7 +85,7 @@ class TestAsyncResourceManager:
     
     @pytest.fixture
     def resource_manager(self):
-        from app.core.resource_manager import ResourceManager
+        from netra_backend.app.core.resource_manager import ResourceManager
         return ResourceManager()
     async def test_async_resource_allocation(self, resource_manager):
         """Test async resource allocation within limits."""
@@ -128,7 +128,7 @@ class TestAsyncSchemaSync:
     
     @pytest.fixture
     def schema_sync(self):
-        from app.core.schema_sync import SchemaSync
+        from netra_backend.app.core.schema_sync import SchemaSync
         return SchemaSync()
     async def test_async_schema_validation(self, schema_sync):
         """Test async schema validation against database."""
@@ -173,7 +173,7 @@ class TestAsyncStartupChecks:
     
     @pytest.fixture
     def startup_checker(self):
-        from app.startup_checks import StartupChecker
+        from netra_backend.app.startup_checks import StartupChecker
         return StartupChecker()
     async def test_async_database_connectivity(self, startup_checker):
         """Test async database connectivity validation."""

@@ -14,7 +14,7 @@ Coverage: Real state serialization, Redis/DB persistence, migration, versioning
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,15 +33,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.state_manager import AgentStateManager
-from app.core.circuit_breaker import CircuitBreaker
-from app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
 # Add project root to path
 # Real components for L2 testing
-from app.services.redis_service import RedisService
+from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 

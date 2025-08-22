@@ -17,7 +17,7 @@ Target Coverage:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,7 +37,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     create_access_token,
     # Add project root to path
     get_current_user,
@@ -49,8 +49,8 @@ from app.auth_integration.auth import (
     validate_token_jwt,
     verify_password,
 )
-from app.clients.auth_client import auth_client
-from app.db.models_postgres import User
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_postgres import User
 
 
 class TestAuthIntegration:

@@ -9,23 +9,23 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
-from app.schemas.FinOps import CostComparison, FinOps
-from app.schemas.llm_request_types import (
+from netra_backend.app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
+from netra_backend.app.schemas.FinOps import CostComparison, FinOps
+from netra_backend.app.schemas.llm_request_types import (
     LLMFunction,
     LLMRequest,
     StructuredOutputSchema,
 )
-from app.schemas.Metrics import (
+from netra_backend.app.schemas.Metrics import (
     CorpusMetric,
     MetricType,
     QualityMetrics,
     ResourceType,
     ResourceUsage,
 )
-from app.schemas.Performance import Performance
-from app.schemas.Policy import LearnedPolicy, PredictedOutcome
-from app.schemas.Supply import ModelIdentifier, SupplyOption
+from netra_backend.app.schemas.Performance import Performance
+from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.Supply import ModelIdentifier, SupplyOption
 
 
 class SmallTestDatasets:

@@ -6,7 +6,7 @@ Tests for structured generation functionality in LLM Manager.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from pydantic import BaseModel, Field
-from app.schemas import AppConfig, LLMConfig
+from netra_backend.app.schemas import AppConfig, LLMConfig
 
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
-from .llm_mocks import MockLLM, MockStructuredLLM
+from netra_backend.tests.llm_mocks import MockLLM, MockStructuredLLM
 
 # Add project root to path
 
@@ -315,8 +315,8 @@ class TestIntegrationWithAgents:
     """Test integration of structured generation with agents."""
     async def test_triage_agent_structured_response(self):
         """Test that triage agent can use structured responses."""
-        from app.agents.triage_sub_agent import TriageResult
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         
         # This is more of an integration test placeholder
         # Real test would require full agent setup
@@ -332,7 +332,7 @@ class TestIntegrationWithAgents:
         assert result.priority.value == "medium"  # Default value
     async def test_triage_result_with_nested_json_parameters(self, llm_manager):
         """Test TriageResult validation with nested JSON in tool_recommendations."""
-        from app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         
         # Simulate the exact error case: parameters as JSON string
         raw_response = {
@@ -360,7 +360,7 @@ class TestIntegrationWithAgents:
         assert result.tool_recommendations[0].parameters["feature_X_latency"] == "50ms"
     async def test_data_agent_structured_response(self):
         """Test that data agent can use structured responses."""
-        from app.agents.data_sub_agent.models import DataAnalysisResponse
+        from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse
         
         # Verify the model is properly defined
         response = DataAnalysisResponse(

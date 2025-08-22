@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -42,11 +42,11 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 from cache.redis_manager import RedisManager
 
-from app.clients.auth_client import AuthClient
-from app.config import get_config
-from app.core.health_checkers import HealthChecker
-from app.db.postgres import AsyncSessionLocal
-from app.services.auth_service import AuthService
+from netra_backend.app.clients.auth_client import AuthClient
+from netra_backend.app.config import get_config
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.postgres import AsyncSessionLocal
+from netra_backend.app.services.auth_service import AuthService
 
 
 @dataclass

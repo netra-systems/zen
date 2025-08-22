@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     _is_allowed_return_domain,
     _is_valid_url,
     # Add project root to path
@@ -25,7 +25,7 @@ from app.auth_integration.auth import (
     _validate_pr_number_format,
     _validate_pr_with_github,
 )
-from app.core.exceptions_auth import (
+from netra_backend.app.core.exceptions_auth import (
     AuthenticationError,
     NetraSecurityException,
 )

@@ -2,6 +2,9 @@
  * Data Flow Integration Tests
  * Tests for WebSocket, chat, threads, and agent integration
  */
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';

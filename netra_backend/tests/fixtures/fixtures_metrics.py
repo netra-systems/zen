@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from app.services.realistic_test_data_service import (
+from netra_backend.app.services.realistic_test_data_service import (
     RealisticTestDataService,
 )
 

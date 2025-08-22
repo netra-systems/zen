@@ -15,7 +15,7 @@ REVENUE PROTECTION:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,11 +34,11 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.base import Base
+from netra_backend.app.db.base import Base
 
 # Add project root to path
-from app.db.models_user import ToolUsageLog, User
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.db.models_user import ToolUsageLog, User
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Add project root to path
 

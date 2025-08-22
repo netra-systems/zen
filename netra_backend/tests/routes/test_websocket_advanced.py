@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import WebSocket
-from routes.utils.websocket_helpers import (
+from netra_backend.app.routes.utils.websocket_helpers import (
     handle_pong_message,
     parse_json_message,
     receive_message_with_timeout,

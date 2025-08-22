@@ -8,7 +8,7 @@ Focuses on async session usage and datetime serialization issues.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,15 +26,15 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.agents.state import (
+from netra_backend.app.agents.state import (
     AgentMetadata,
     DeepAgentState,
     OptimizationsResult,
 )
-from app.db.models_postgres import Reference, Run
+from netra_backend.app.db.models_postgres import Reference, Run
 
 # Add project root to path
-from app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.state_persistence import state_persistence_service
 
 # Add project root to path
 

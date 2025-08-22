@@ -91,10 +91,14 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           const wsUrl = webSocketService.getSecureUrl(baseWsUrl);
           
           debugLogger.debug('[WebSocketProvider] Establishing secure WebSocket connection on app load', {
-            wsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
+            baseWsUrl: baseWsUrl,
+            finalWsUrl: wsUrl.replace(/jwt\.[^&]+/, 'jwt.***'), // Hide token in logs
             hasToken: !!token,
+            tokenLength: token ? token.length : 0,
             isSecure: true,
-            authMethod: 'subprotocol'
+            authMethod: 'subprotocol',
+            configWsUrl: appConfig.wsUrl,
+            configApiUrl: appConfig.apiUrl
           });
           
           webSocketService.connect(wsUrl, {

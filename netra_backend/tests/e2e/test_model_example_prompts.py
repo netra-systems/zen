@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,8 +21,8 @@ from typing import Dict, List
 import pytest
 
 # Add project root to path
-from app.agents.state import DeepAgentState
-from app.services.quality_gate_service import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
@@ -83,7 +83,7 @@ def _create_ep_009_state() -> DeepAgentState:
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
-    from tests.e2e.test_model_effectiveness_workflows import (
+    from e2e.test_model_effectiveness_workflows import (
         _execute_model_selection_workflow as execute_workflow,
     )
     return await execute_workflow(setup, state)
@@ -91,7 +91,7 @@ async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) 
 
 async def _validate_ep_005_results(results: List[Dict], state: DeepAgentState, setup: Dict):
     """Validate EP-005 results with enhanced quality checks."""
-    from tests.e2e.test_model_effectiveness_workflows import (
+    from e2e.test_model_effectiveness_workflows import (
         _validate_model_effectiveness_results,
     )
     _validate_model_effectiveness_results(results, state)

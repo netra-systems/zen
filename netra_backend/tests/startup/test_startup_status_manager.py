@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,12 +25,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.core.exceptions_base import NetraException
-from app.core.exceptions_file import DataParsingError, FileError
-from app.core.exceptions_file import (
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_file import DataParsingError, FileError
+from netra_backend.app.core.exceptions_file import (
     FileNotFoundError as NetraFileNotFoundError,
 )
-from app.schemas.startup_types import (
+from netra_backend.app.schemas.startup_types import (
     CrashEntry,
     Environment,
     HealthCheckHistory,
@@ -43,7 +43,7 @@ from app.schemas.startup_types import (
 )
 
 # Add project root to path
-from app.startup.status_manager import StartupStatusManager
+from netra_backend.app.startup.status_manager import StartupStatusManager
 
 
 @pytest.fixture

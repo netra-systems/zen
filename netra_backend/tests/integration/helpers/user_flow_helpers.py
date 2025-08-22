@@ -6,7 +6,7 @@ Extracted from test_first_time_user_flows_comprehensive.py to comply with size l
 # Test data generation
 from datetime import datetime, timedelta
 from fastapi import status
-from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional

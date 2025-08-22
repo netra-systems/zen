@@ -9,7 +9,7 @@ Test 15: Quality Gate First Response Validation - $12K MRR
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,7 +35,7 @@ class TestAgentHealthMonitoring:
     
     async def test_agent_health_check_cycle(self):
         """Test periodic health checks for all agents."""
-        from app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.registry import AgentRegistry
         
         registry = Mock(spec=AgentRegistry)
         registry.health_check_all = AsyncMock(return_value={
@@ -72,7 +72,7 @@ class TestAgentHealthMonitoring:
     
     async def test_agent_replacement_on_failure(self):
         """Test automatic agent replacement when unhealthy."""
-        from app.agents.registry import AgentRegistry
+        from netra_backend.app.agents.registry import AgentRegistry
         
         registry = Mock(spec=AgentRegistry)
         registry.replace_agent = AsyncMock(return_value={
@@ -94,7 +94,7 @@ class TestToolDispatcherInit:
     
     async def test_tool_registry_population(self):
         """Test tool dispatcher registers all required tools."""
-        from app.services.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.initialize = AsyncMock(return_value={
@@ -130,7 +130,7 @@ class TestToolDispatcherInit:
     
     async def test_tool_execution_routing(self):
         """Test proper routing of tool execution requests."""
-        from app.services.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch = AsyncMock(return_value={
@@ -153,7 +153,7 @@ class TestQualityGateValidation:
     
     async def test_response_quality_scoring(self):
         """Test quality scoring for agent responses."""
-        from app.services.quality_gate import QualityGate
+        from netra_backend.app.services.quality_gate import QualityGate
         
         quality_gate = Mock(spec=QualityGate)
         quality_gate.score_response = AsyncMock(return_value={
@@ -191,7 +191,7 @@ class TestQualityGateValidation:
     
     async def test_quality_improvement_retry(self):
         """Test retry mechanism for quality improvement."""
-        from app.services.quality_gate import QualityGate
+        from netra_backend.app.services.quality_gate import QualityGate
         
         quality_gate = Mock(spec=QualityGate)
         

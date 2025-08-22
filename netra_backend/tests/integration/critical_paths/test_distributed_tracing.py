@@ -14,7 +14,7 @@ Coverage: OpenTelemetry integration, trace propagation, distributed context, tra
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,11 +34,11 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from app.services.monitoring.metrics_service import MetricsService
+from netra_backend.app.services.monitoring.metrics_service import MetricsService
 
 # Add project root to path
-from app.services.tracing.otel_service import OpenTelemetryService
-from app.services.tracing.span_manager import SpanManager
+from netra_backend.app.services.tracing.otel_service import OpenTelemetryService
+from netra_backend.app.services.tracing.span_manager import SpanManager
 
 # Add project root to path
 

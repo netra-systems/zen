@@ -17,7 +17,7 @@ Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integr
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,12 +36,12 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from app.services.billing.cost_calculator import CostCalculator
-from app.services.billing.invoice_generator import InvoiceGenerator
-from app.services.billing.usage_tracker import UsageTracker
+from netra_backend.app.services.billing.cost_calculator import CostCalculator
+from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
+from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
 # Add project root to path
-from .l4_staging_critical_base import (
+from tests.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

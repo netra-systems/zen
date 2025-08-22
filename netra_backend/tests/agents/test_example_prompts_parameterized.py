@@ -7,7 +7,7 @@ Replaces 90 individual test methods with parameterized testing
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,17 +21,17 @@ from typing import Any, Dict
 import pytest
 import pytest_asyncio
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 
 # Add project root to path
-from .test_example_prompts_base import (
+from netra_backend.tests.test_example_prompts_base import (
     # Add project root to path
     EXAMPLE_PROMPTS,
     ExamplePromptsTestBase,
     setup_real_infrastructure,
 )
-from .test_example_prompts_contexts import ContextGenerator
-from .test_example_prompts_runner import TestRunner
+from netra_backend.tests.test_example_prompts_contexts import ContextGenerator
+from netra_backend.tests.test_example_prompts_runner import TestRunner
 
 
 @pytest_asyncio.fixture

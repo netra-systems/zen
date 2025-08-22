@@ -7,8 +7,8 @@ All functions maintain 25-line limit with single responsibility.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -27,17 +27,17 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 # Add project root to path
-from app.agents.corpus_admin import CorpusAdminSubAgent
-from app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
+from netra_backend.app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
 
 )
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

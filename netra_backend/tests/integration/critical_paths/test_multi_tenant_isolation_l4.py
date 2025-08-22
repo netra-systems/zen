@@ -15,7 +15,7 @@ L4 Realism: Tests against real staging database, real multi-tenant setup, real s
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -56,7 +56,7 @@ PermissionsService = AsyncMock
 # from app.services.database.connection_manager import DatabaseConnectionManager
 # from app.schemas.tenant import Tenant, TenantResource, Permission
 # from app.core.security import SecurityContext
-# from tests.integration.staging_config.base import StagingConfigTestBase
+# from integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
 DatabaseConnectionManager = AsyncMock
 Tenant = dict

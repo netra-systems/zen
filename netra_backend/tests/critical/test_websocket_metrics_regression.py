@@ -10,7 +10,7 @@ Business Value: Prevents metrics collection failures from impacting monitoring.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,11 +24,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from monitoring import WebSocketMetrics
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 # Add project root to path
-from app.agents.base.interface import ExecutionResult
-from app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.interface import ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 # Add project root to path
 
@@ -174,7 +174,7 @@ class TestWebSocketMetricsRegression:
         
         Direct test of the fixed method to ensure it handles all edge cases.
         """
-        from app.websocket.connection_manager import (
+        from netra_backend.app.websocket.connection_manager import (
             ConnectionManager,
         )
         

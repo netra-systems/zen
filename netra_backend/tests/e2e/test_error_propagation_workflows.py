@@ -15,7 +15,7 @@ Module ≤300 lines per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,15 +31,15 @@ import pytest
 from fastapi import Request, Response
 from logging_config import central_logger
 
-from app.agents.quality_hooks import QualityHooksManager
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import AgentExecutionContext
-from app.core.agent_reliability_mixin import AgentReliabilityMixin
-from app.core.exceptions_auth import NetraSecurityException
+from netra_backend.app.agents.quality_hooks import QualityHooksManager
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 # Add project root to path
-from app.middleware.security_middleware import SecurityMiddleware
-from app.services.quality_gate_service import (
+from netra_backend.app.middleware.security_middleware import SecurityMiddleware
+from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )

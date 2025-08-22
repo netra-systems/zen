@@ -12,7 +12,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,16 +20,16 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from .test_performance_batching import (
+from netra_backend.tests.test_performance_batching import (
     TestBatchProcessor,
     TestMessageBatcher,
 )
-from .test_performance_cache import (
+from netra_backend.tests.test_performance_cache import (
     # Add project root to path
     TestMemoryCache,
     TestQueryOptimizer,
 )
-from .test_performance_monitoring import (
+from netra_backend.tests.test_performance_monitoring import (
     TestDatabaseIndexOptimization,
     TestPerformanceMonitoring,
     TestPerformanceOptimizationIntegration,

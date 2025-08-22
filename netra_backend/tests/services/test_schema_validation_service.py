@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -15,11 +15,11 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 from pydantic import BaseModel, ValidationError
-from app.schemas import AgentMessage, WebSocketMessage
+from netra_backend.app.schemas import StartAgentMessage as AgentMessage, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 # Add project root to path
-from app.services.schema_validation_service import SchemaValidationService
+from netra_backend.app.services.schema_validation_service import SchemaValidationService
 
 # Add project root to path
 
@@ -93,7 +93,7 @@ class TestSchemaValidationService:
     def test_agent_message_schema(self):
         """Test agent message schema."""
         # AgentMessage is an alias for AgentUpdatePayload
-        from app.schemas.core_enums import AgentStatus
+        from netra_backend.app.schemas.core_enums import AgentStatus
         agent_msg = AgentMessage(
             run_id="run-123",
             agent_id="test-agent", 

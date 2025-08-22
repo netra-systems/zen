@@ -3,7 +3,7 @@
  * Centralized configuration for auth service endpoints
  */
 
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
 
 interface AuthServiceConfig {
   baseUrl: string;

@@ -8,7 +8,7 @@ This test demonstrates why the 'settings' is not defined error occurs.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,7 +32,7 @@ os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
 @pytest.fixture
 def client():
     """Create test client with proper app setup"""
-    from app.main import app
+    from netra_backend.app.main import app
     return TestClient(app)
 
 
@@ -44,7 +44,7 @@ def test_llm_health_check_missing_method(client):
     but this method doesn't exist in the services/llm_manager.py implementation.
     """
     # This should fail because llm_manager doesn't have is_healthy() method
-    from app.services.llm_manager import llm_manager
+    from netra_backend.app.services.llm_manager import llm_manager
     
     # This will raise AttributeError: 'LLMManager' object has no attribute 'is_healthy'
     with pytest.raises(AttributeError) as exc_info:
@@ -77,7 +77,7 @@ def test_health_standard_level_with_llm_dependency():
     
     This test directly exercises the code path that leads to the error.
     """
-    from app.core.health import HealthInterface, HealthLevel
+    from netra_backend.app.core.health import HealthInterface, HealthLevel
     
     # Create a health interface and try to get standard health status
     health_interface = HealthInterface("test-service", "1.0.0")
@@ -106,7 +106,7 @@ def test_dependency_health_checker_llm_check_directly():
     
     This is the most direct test of the problematic code path.
     """
-    from app.core.health.checks import DependencyHealthChecker
+    from netra_backend.app.core.health.checks import DependencyHealthChecker
     
     # Create an LLM dependency checker
     llm_checker = DependencyHealthChecker("llm")
@@ -133,8 +133,8 @@ def test_llm_manager_instantiation_without_settings():
     across the codebase.
     """
     # In llm/llm_manager.py, it requires settings parameter
-    from app.config import AppConfig
-    from app.llm.llm_manager import LLMManager as LLMManagerWithSettings
+    from netra_backend.app.config import AppConfig
+    from netra_backend.app.llm.llm_manager import LLMManager as LLMManagerWithSettings
     
     # This requires settings
     settings = AppConfig()
@@ -142,7 +142,7 @@ def test_llm_manager_instantiation_without_settings():
     assert llm_with_settings.settings == settings
     
     # In services/llm_manager.py, it doesn't require settings
-    from app.services.llm_manager import (
+    from netra_backend.app.services.llm_manager import (
         LLMManager as LLMManagerNoSettings,
     )
     
@@ -164,7 +164,7 @@ def test_health_check_with_mocked_llm_manager(mock_llm_manager):
     # Mock the is_healthy method to return True
     mock_llm_manager.is_healthy.return_value = True
     
-    from app.core.health.checks import DependencyHealthChecker
+    from netra_backend.app.core.health.checks import DependencyHealthChecker
     
     # Create an LLM dependency checker
     llm_checker = DependencyHealthChecker("llm")
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     print("-" * 50)
     
     # Create client for tests that need it
-    from app.main import app
+    from netra_backend.app.main import app
     test_client = TestClient(app)
     
     tests = [

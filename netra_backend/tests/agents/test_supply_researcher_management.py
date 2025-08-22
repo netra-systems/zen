@@ -7,7 +7,7 @@ Modular design with ≤300 lines, ≤8 lines per function
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,8 +21,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from app.agents.supply_researcher_sub_agent import ResearchType
-from .supply_researcher_fixtures import (
+from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
+from netra_backend.tests.supply_researcher_fixtures import (
     # Add project root to path
     agent,
     mock_supply_service,
@@ -42,7 +42,7 @@ class TestSupplyResearcherManagement:
 
     def _test_daily_schedule(self, now):
         """Test daily schedule calculation (≤8 lines)"""
-        from app.services.supply_research_scheduler import (
+        from netra_backend.app.services.supply_research_scheduler import (
             ResearchSchedule,
             ScheduleFrequency,
         )
@@ -61,7 +61,7 @@ class TestSupplyResearcherManagement:
 
     def _test_weekly_schedule(self, now):
         """Test weekly schedule calculation (≤8 lines)"""
-        from app.services.supply_research_scheduler import (
+        from netra_backend.app.services.supply_research_scheduler import (
             ResearchSchedule,
             ScheduleFrequency,
         )
@@ -80,7 +80,7 @@ class TestSupplyResearcherManagement:
 
     def _test_monthly_schedule(self, now):
         """Test monthly schedule calculation (≤8 lines)"""
-        from app.services.supply_research_scheduler import (
+        from netra_backend.app.services.supply_research_scheduler import (
             ResearchSchedule,
             ScheduleFrequency,
         )
@@ -201,7 +201,7 @@ class TestSupplyResearcherManagement:
 
     def _create_conflicting_schedules(self):
         """Create conflicting schedule scenarios (≤8 lines)"""
-        from app.services.supply_research_scheduler import (
+        from netra_backend.app.services.supply_research_scheduler import (
             ResearchSchedule,
             ScheduleFrequency,
         )

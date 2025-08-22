@@ -14,7 +14,7 @@ Coverage: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing, log agg
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,14 +31,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.services.observability.alert_manager import AlertManager
+from netra_backend.app.services.observability.alert_manager import AlertManager
 
 # Add project root to path
-from app.services.observability.metrics_collector import MetricsCollector
-from app.services.observability.prometheus_exporter import (
+from netra_backend.app.services.observability.metrics_collector import MetricsCollector
+from netra_backend.app.services.observability.prometheus_exporter import (
     PrometheusExporter,
 )
-from app.services.observability.tracing_service import TracingService
+from netra_backend.app.services.observability.tracing_service import TracingService
 
 # Add project root to path
 

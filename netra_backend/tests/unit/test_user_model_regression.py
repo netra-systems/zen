@@ -9,7 +9,7 @@ Tests to prevent:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.db.models_user import Secret, ToolUsageLog, User
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Add project root to path
 
@@ -65,7 +65,7 @@ async def test_user_creation_with_defaults():
 async def test_user_creation_datetime_defaults():
     """Test that datetime defaults are properly callable."""
     # Test that the defaults are lambdas
-    from app.db.models_user import User as UserModel
+    from netra_backend.app.db.models_user import User as UserModel
     assert callable(UserModel.created_at.default.arg)
     assert callable(UserModel.updated_at.default.arg)
     assert callable(UserModel.plan_started_at.default.arg)
@@ -83,7 +83,7 @@ async def test_user_creation_datetime_defaults():
 @pytest.mark.asyncio 
 async def test_tool_usage_log_datetime_defaults():
     """Test that ToolUsageLog datetime defaults are properly callable."""
-    from app.db.models_user import ToolUsageLog as LogModel
+    from netra_backend.app.db.models_user import ToolUsageLog as LogModel
     assert callable(LogModel.created_at.default.arg)
     
     log = ToolUsageLog(
@@ -100,7 +100,7 @@ async def test_tool_usage_log_datetime_defaults():
 @pytest.mark.asyncio
 async def test_secret_datetime_defaults():
     """Test that Secret datetime defaults are properly callable."""
-    from app.db.models_user import Secret as SecretModel
+    from netra_backend.app.db.models_user import Secret as SecretModel
     assert callable(SecretModel.created_at.default.arg)
     assert callable(SecretModel.updated_at.default.arg)
     

@@ -17,7 +17,7 @@ testing actual registration/discovery flow during system bootstrap.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,11 +36,11 @@ from typing import Any, Dict, List, Optional, Set
 
 import pytest
 
-from app.core.configuration.base import get_unified_config
-from app.logging_config import central_logger
+from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
-from app.services.redis_service import RedisService
+from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
 

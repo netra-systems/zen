@@ -1,6 +1,6 @@
 """Workflow and batch helper functions for Quality Gate Service tests"""
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 
 
 def create_mixed_content_batch():

@@ -18,6 +18,7 @@ from netra_backend.app.clients.auth_client_config import (
     OAuthConfig,
     OAuthConfigGenerator,
 )
+from netra_backend.app.core.tracing import TracingManager
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class AuthServiceClient:
         self.circuit_manager = AuthCircuitBreakerManager()
         self.environment_detector = EnvironmentDetector()
         self.oauth_generator = OAuthConfigGenerator()
+        self.tracing_manager = TracingManager()
         self._client = None
     
     def _create_http_client(self) -> httpx.AsyncClient:
@@ -111,8 +113,19 @@ class AuthServiceClient:
         }
     
     async def _send_validation_request(self, client: httpx.AsyncClient, request_data: Dict) -> Optional[Dict]:
-        """Send validation request and handle response."""
-        response = await client.post("/auth/validate", json=request_data)
+        """Send validation request with distributed tracing headers."""
+        # Add tracing headers for cross-service communication
+        trace_headers = self.tracing_manager.inject_trace_headers()
+        
+        response = await client.post(
+            "/auth/validate", 
+            json=request_data,
+            headers=trace_headers
+        )
+        
+        # Log the trace propagation for debugging
+        logger.debug(f"Auth validation request sent with trace headers: {trace_headers}")
+        
         if response.status_code == 200:
             return await self._parse_validation_response(response.json())
         return None

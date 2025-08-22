@@ -14,7 +14,7 @@ burst handling, and per-user rate limiting validation.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,11 +35,11 @@ import pytest
 import redis.asyncio as redis
 from logging_config import central_logger
 
-from app.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
-from app.services.monitoring.rate_limiter import GCPRateLimiter
-from tests.integration.helpers.redis_l3_helpers import (
+from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
+from integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )

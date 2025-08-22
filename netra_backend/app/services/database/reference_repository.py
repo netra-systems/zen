@@ -43,7 +43,7 @@ class ReferenceRepository(BaseRepository[Reference]):
                              metadata: Optional[Dict[str, Any]] = None) -> Optional[Reference]:
         """Create a new reference"""
         return await self.create(
-            db,
+            db=db,
             id=reference_id,
             type=reference_type,
             content=content,

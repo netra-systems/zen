@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -15,7 +15,7 @@ import pytest
 from langchain_core.tools import tool
 
 # Add project root to path
-from app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Add project root to path
 

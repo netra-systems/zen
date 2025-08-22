@@ -6,7 +6,7 @@ Core tests for SupplyResearcherAgent - Basic functionality
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,16 +19,16 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supply_researcher_sub_agent import (
+from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
     # Add project root to path
     SupplyResearcherAgent,
 )
-from app.llm.llm_manager import LLMManager
-from app.services.supply_research_service import SupplyResearchService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.supply_research_service import SupplyResearchService
 
 
 class TestSupplyResearcherAgentCore:

@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     # Add project root to path
     basic_test_client,
@@ -39,7 +39,7 @@ class TestThreadCRUD:
     
     def test_thread_creation(self, basic_test_client):
         """Test thread creation endpoint."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_data = {
             "title": "New Thread",
@@ -76,7 +76,7 @@ class TestThreadCRUD:
     
     async def test_thread_archival(self):
         """Test thread archival functionality."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         thread_id = "thread123"
         user_id = "user1"

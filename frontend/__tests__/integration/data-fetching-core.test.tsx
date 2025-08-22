@@ -29,31 +29,58 @@ interface Thread {
 // DATA FETCHING HOOK
 // ============================================================================
 
+// Global cache and pending requests for deduplication
+const globalCache = new Map<string, any>();
+const pendingRequests = new Map<string, Promise<any>>();
+
 const useDataFetcher = <T,>(url: string, options?: RequestInit) => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [cache] = useState(new Map<string, T>());
 
   const fetchData = async (bypassCache = false) => {
     const cacheKey = `${url}_${JSON.stringify(options)}`;
     
-    if (!bypassCache && cache.has(cacheKey)) {
-      setData(cache.get(cacheKey)!);
+    if (!bypassCache && globalCache.has(cacheKey)) {
+      setData(globalCache.get(cacheKey)!);
       return;
+    }
+
+    // Check if there's already a pending request for this URL
+    if (pendingRequests.has(cacheKey)) {
+      try {
+        const result = await pendingRequests.get(cacheKey);
+        setData(result);
+        return;
+      } catch (err) {
+        setError(err as Error);
+        return;
+      }
     }
 
     setLoading(true);
     setError(null);
     
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // Create and store the request promise
+    const requestPromise = (async () => {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        globalCache.set(cacheKey, result);
+        return result;
+      } finally {
+        pendingRequests.delete(cacheKey);
       }
-      
-      const result = await response.json();
-      cache.set(cacheKey, result);
+    })();
+    
+    pendingRequests.set(cacheKey, requestPromise);
+    
+    try {
+      const result = await requestPromise;
       setData(result);
     } catch (err) {
       setError(err as Error);
@@ -143,6 +170,9 @@ beforeAll(() => {
 afterEach(() => {
   server.resetHandlers();
   jest.clearAllMocks();
+  // Clear global cache and pending requests
+  globalCache.clear();
+  pendingRequests.clear();
   act(() => {
     jest.runAllTimers();
   });

@@ -13,8 +13,8 @@ session store → state sync pipeline with actual serialization/deserialization.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -37,13 +37,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 import redis.asyncio as redis
-from app.schemas import User
+from netra_backend.app.schemas import User
 
-from app.redis_manager import RedisManager
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
-from app.websocket.state_synchronization_manager import (
+from netra_backend.app.websocket.state_synchronization_manager import (
 
     ApplicationState,
 

@@ -16,7 +16,7 @@ def test_postgres_events_settings_not_defined():
     # This will fail with NameError: name 'settings' is not defined
     # when any of the event handlers are triggered
     
-    from app.db import postgres_events
+    from netra_backend.app.db import postgres_events
     
     # Create mock objects
     mock_engine = Mock(spec=AsyncEngine)
@@ -50,7 +50,7 @@ def test_postgres_events_settings_not_defined():
 
 def test_postgres_events_checkout_handler_settings_error():
     """Test checkout handler fails with undefined settings."""
-    from app.db import postgres_events
+    from netra_backend.app.db import postgres_events
     
     mock_engine = Mock(spec=AsyncEngine)
     mock_sync_engine = Mock()
@@ -85,7 +85,7 @@ async def test_postgres_session_integration_with_events():
         mock_factory.return_value.__aenter__ = MagicMock(return_value=mock_session)
         mock_factory.return_value.__aexit__ = MagicMock()
         
-        from app.db.postgres_session import get_async_db
+        from netra_backend.app.db.postgres_session import get_async_db
         
         # This should work if settings is properly initialized
         # But will fail if postgres_events triggers and settings is not defined
@@ -102,7 +102,7 @@ def test_all_settings_references_need_initialization():
     """Verify all places in postgres_events that reference settings."""
     import ast
     import inspect
-    from app.db import postgres_events
+    from netra_backend.app.db import postgres_events
     
     source = inspect.getsource(postgres_events)
     tree = ast.parse(source)

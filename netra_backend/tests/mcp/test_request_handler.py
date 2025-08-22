@@ -8,7 +8,7 @@ Test JSON-RPC 2.0 request processing.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,7 +27,7 @@ import pytest
 # Skip tests if RequestHandler module doesn't exist yet
 pytest.skip("MCP Request Handler not yet implemented", allow_module_level=True)
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class TestRequestHandler:

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,17 +20,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from logging_config import central_logger
-from app.routes.utils.websocket_helpers import (
+from netra_backend.app.routes.utils.websocket_helpers import (
     accept_websocket_connection,
     receive_message_with_timeout,
 )
 from starlette.websockets import WebSocketDisconnect
 
-from app.core.exceptions_websocket import WebSocketError
+from netra_backend.app.core.exceptions_websocket import WebSocketError
 
 # Add project root to path
-from .test_unified_message_flow import MessageFlowTracker
-from .websocket_mocks import MockWebSocket
+from tests.test_unified_message_flow import MessageFlowTracker
+from tests.websocket_mocks import MockWebSocket
 
 # Add project root to path
 

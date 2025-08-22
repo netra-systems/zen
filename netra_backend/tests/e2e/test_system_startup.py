@@ -24,7 +24,7 @@ COVERAGE:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -142,7 +142,7 @@ class TestSystemStartup:
     @pytest.mark.asyncio  
     async def test_database_connections_established(self):
         """Test database connections are properly established."""
-        from app.db.client import (
+        from netra_backend.app.db.client import (
             get_clickhouse_client,
             get_postgres_client,
         )
@@ -366,7 +366,7 @@ class TestStartupEnvironment:
     @pytest.mark.asyncio
     async def test_environment_variables_loaded(self):
         """Test required environment variables are loaded."""
-        from app.core.config import get_config
+        from netra_backend.app.core.config import get_config
         
         config = get_config()
         
@@ -378,7 +378,7 @@ class TestStartupEnvironment:
     @pytest.mark.asyncio
     async def test_database_schemas_exist(self):
         """Test database schemas are properly initialized."""
-        from app.db.client import get_postgres_client
+        from netra_backend.app.db.client import get_postgres_client
         
         client = await get_postgres_client()
         

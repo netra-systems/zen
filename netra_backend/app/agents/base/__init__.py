@@ -24,12 +24,12 @@ from netra_backend.app.agents.base.interface import (
 )
 
 # Note: Import executor separately to avoid circular import
-# from netra_backend.app.agents.base.executor import BaseExecutionEngine
+# from app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMetrics, ExecutionMonitor
 from netra_backend.app.agents.base_agent import BaseSubAgent
 
 # Note: Import reliability separately to avoid circular import  
-# from netra_backend.app.agents.base.reliability import ReliabilityManager
+# from app.agents.base.reliability import ReliabilityManager
 
 __all__ = [
     # Backward compatibility

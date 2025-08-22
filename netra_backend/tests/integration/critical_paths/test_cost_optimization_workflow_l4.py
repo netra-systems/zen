@@ -16,7 +16,7 @@ Coverage: Real billing accuracy, usage metering, budget enforcement, cost alerts
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,10 +43,10 @@ import pytest
 LLMManager = AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from app.core.health_checkers import HealthChecker
-from app.db.models_user import User
-from app.schemas.UserPlan import PlanTier
-from app.services.llm.llm_manager import LLMManager
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.models_user import User
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.services.llm.llm_manager import LLMManager
 
 
 # Mock cost optimization components for L4 testing

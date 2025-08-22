@@ -7,7 +7,7 @@ Common fixtures and mock classes used across all test modules
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,11 +21,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.services.corpus_service import CorpusService
+from netra_backend.app.services.corpus_service import CorpusService
 
 # Add project root to path
-from app.services.synthetic_data_service import SyntheticDataService
-from app.services.websocket.ws_manager import manager as ws_manager
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
 # Add project root to path
 

@@ -15,7 +15,7 @@ L3 Realism: Tests against actual database constraints, Redis namespaces, configu
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,17 +36,17 @@ from typing import Any, Dict, List, Optional, Set
 
 import pytest
 
-from app.core.cache.cache_manager import CacheManager
-from app.core.security.encryption_service import EncryptionService
-from app.redis_manager import RedisManager
-from app.schemas.UserPlan import PlanTier
-from app.services.audit_service import AuditService
+from netra_backend.app.core.cache.cache_manager import CacheManager
+from netra_backend.app.core.security.encryption_service import EncryptionService
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.services.audit_service import AuditService
 
 # Add project root to path
-from app.services.config_service import ConfigService
-from app.services.database.session_manager import SessionManager
-from app.services.metrics.analytics_collector import AnalyticsCollector
-from app.services.user_service import user_service as UserService
+from netra_backend.app.services.config_service import ConfigService
+from netra_backend.app.services.database.session_manager import SessionManager
+from netra_backend.app.services.metrics.analytics_collector import AnalyticsCollector
+from netra_backend.app.services.user_service import user_service as UserService
 from test_framework.test_config import configure_dedicated_test_environment
 
 # Add project root to path

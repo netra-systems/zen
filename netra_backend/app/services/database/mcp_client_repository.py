@@ -57,7 +57,10 @@ class MCPClientRepository(BaseRepository[MCPExternalServer]):
         try:
             server = self._create_server_instance(config)
             self._set_server_credentials_and_metadata(server, config)
-            return await self.create(db, server)
+            # Add the server directly to the session since it's already created
+            db.add(server)
+            await db.flush()
+            return server
         except IntegrityError as e:
             logger.error(f"Server name already exists: {config.name}")
             raise DatabaseConstraintError(f"Server name '{config.name}' already exists")

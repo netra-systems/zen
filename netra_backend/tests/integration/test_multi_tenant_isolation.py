@@ -11,7 +11,7 @@ Tests multi-tenant data isolation with real PostgreSQL containers.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,11 +27,11 @@ from typing import Any, Dict, List, Optional
 import asyncpg
 import docker
 import pytest
-from app.database.row_level_security import RowLevelSecurityManager
-from app.database.tenant_manager import TenantManager
+from netra_backend.app.database.row_level_security import RowLevelSecurityManager
+from netra_backend.app.database.tenant_manager import TenantManager
 
 # Add project root to path
-from app.services.tenant_service import TenantService
+from netra_backend.app.services.tenant_service import TenantService
 
 # Add project root to path
 

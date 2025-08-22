@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,10 +22,10 @@ import pytest
 
 # Add project root to path
 # Import components for integration testing
-from app.core.agent_reliability_mixin import AgentReliabilityMixin
-from app.core.agent_reliability_types import AgentError, AgentHealthStatus
-from app.core.fallback_coordinator import FallbackCoordinator
-from app.core.json_parsing_utils import (
+from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
+from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
+from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
+from netra_backend.app.core.json_parsing_utils import (
     comprehensive_json_fix,
     safe_json_parse,
 )

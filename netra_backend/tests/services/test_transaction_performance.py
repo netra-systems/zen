@@ -8,7 +8,7 @@ MODULAR VERSION: <300 lines, all functions ≤8 lines
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,10 +26,10 @@ import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-from app.services.database.base_repository import BaseRepository
+from netra_backend.app.services.database.base_repository import BaseRepository
 
 # Add project root to path
 

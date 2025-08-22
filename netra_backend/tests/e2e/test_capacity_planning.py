@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,17 +18,17 @@ setup_test_path()
 
 import pytest
 
-from app.agents.data_sub_agent.agent import DataSubAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from app.services.quality_gate_service import (
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
 )
-from tests.scaling_test_helpers import (
+from netra_backend.tests.scaling_test_helpers import (
     create_gradual_scaling_state,
     # Add project root to path
     create_scaling_setup,

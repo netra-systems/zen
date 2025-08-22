@@ -2,8 +2,8 @@
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -33,26 +33,26 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from starlette.websockets import WebSocketState
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
 
 )
-from app.db.base import Base
-from app.db.models_postgres import Run
-from app.schemas.Agent import AgentStarted
-from app.schemas.registry import UserBase
-from app.services.agent_service import AgentService
-from app.services.database.message_repository import MessageRepository
-from app.services.database.run_repository import RunRepository
-from app.services.database.thread_repository import ThreadRepository
-from app.services.state_persistence import StatePersistenceService
-from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_postgres import Run
+from netra_backend.app.schemas.Agent import AgentStarted
+from netra_backend.app.schemas.registry import UserBase
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.run_repository import RunRepository
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

@@ -3,7 +3,7 @@ ClickHouse Log Clustering and Pattern Analysis Tests
 Tests log clustering algorithms and pattern mining
 """
 
-from app.db.clickhouse_query_fixer import validate_clickhouse_query
+from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
 
 class TestLogClusteringAlgorithms:

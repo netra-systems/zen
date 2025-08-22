@@ -5,8 +5,8 @@ Validates full application startup in staging environment
 with all dependencies and configurations.
 """
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 
 setup_test_path()
 
@@ -17,7 +17,7 @@ import time
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
-from .base import StagingConfigTestBase
+from tests.base import StagingConfigTestBase
 
 # Add app to path for imports
 
@@ -50,10 +50,10 @@ class TestStagingStartup(StagingConfigTestBase):
             os.environ.update(env_vars)
             
             # Import app modules
-            from app.core.config import get_config
-            from app.db.session import get_db
-            from app.main import app
-            from app.services.websocket_manager import WebSocketManager
+            from netra_backend.app.core.config import get_config
+            from netra_backend.app.db.session import get_db
+            from netra_backend.app.main import app
+            from netra_backend.app.services.websocket_manager import WebSocketManager
             
             # Initialize configuration
 
@@ -84,7 +84,7 @@ class TestStagingStartup(StagingConfigTestBase):
                 self.fail(f"Database connection failed: {e}")
                 
             # Test Redis connection
-            from app.redis_manager import redis_manager
+            from netra_backend.app.redis_manager import redis_manager
 
             if redis_manager.redis_client:
 
@@ -414,7 +414,7 @@ class TestStagingStartup(StagingConfigTestBase):
             self.skipTest("Application startup failed")
             
         # Simulate shutdown
-        from app.routes.mcp.main import shutdown_handlers
+        from netra_backend.app.routes.mcp.main import shutdown_handlers
         
 
         shutdown_start = time.time()

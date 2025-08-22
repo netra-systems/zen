@@ -15,7 +15,7 @@ L3 Realism: Tests with real health check endpoints and actual service dependency
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,10 +35,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
-from app.routes.health import health_interface
+from netra_backend.app.routes.health import health_interface
 
 # Add project root to path
-from app.core.health_checkers import (
+from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,
     # Add project root to path
     check_postgres_health,
@@ -46,8 +46,8 @@ from app.core.health_checkers import (
     check_system_resources,
     check_websocket_health,
 )
-from app.core.health_types import HealthCheckResult
-from app.logging_config import central_logger
+from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.logging_config import central_logger
 
 logger = logging.getLogger(__name__)
 

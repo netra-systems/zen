@@ -19,18 +19,18 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.core.circuit_breaker import CircuitBreaker
-from app.core.error_recovery import ErrorRecoveryManager
-from app.core.health.interface import HealthInterface
-from app.services.demo.session_manager import SessionManager
-from app.services.permission_service import PermissionService
-from app.services.quality_monitoring.service import (
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.error_recovery import ErrorRecoveryManager
+from netra_backend.app.core.health.interface import HealthInterface
+from netra_backend.app.services.demo.session_manager import SessionManager
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.services.quality_monitoring.service import (
     QualityMonitoringService,
 )
-from app.services.supply_research_scheduler import SupplyResearchScheduler
+from netra_backend.app.services.supply_research_scheduler import SupplyResearchScheduler
 
 # Operational imports
-from app.services.unified_tool_registry.registry import (
+from netra_backend.app.services.unified_tool_registry.registry import (
     UnifiedToolRegistry,
 )
 

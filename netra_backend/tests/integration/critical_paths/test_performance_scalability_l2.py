@@ -6,8 +6,8 @@ Total MRR Protection: $80K
 
 # Add project root to path
 
-from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from tests.test_utils import setup_test_path
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -32,7 +32,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import psutil
 import pytest
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 logger = central_logger.get_logger(__name__)

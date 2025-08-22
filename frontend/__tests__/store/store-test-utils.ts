@@ -4,6 +4,9 @@
  */
 
 import { jest } from '@jest/globals';
+import { renderHook } from '@testing-library/react';
+import { useChatStore } from '@/store/chat';
+import { Message, MessageRole } from '@/types/chat';
 
 export class GlobalTestUtils {
   static setupStoreTestEnvironment() {
@@ -70,5 +73,70 @@ export class GlobalTestUtils {
   
   static waitForStoreUpdate(ms = 100) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+export class ChatStoreTestUtils {
+  static initializeStore() {
+    return renderHook(() => useChatStore());
+  }
+
+  static createMockMessage(
+    id: string,
+    role: MessageRole = 'user',
+    content: string = 'Test message',
+    options: Partial<Message> = {}
+  ): Message {
+    return {
+      id,
+      role,
+      content,
+      type: role === 'user' ? 'user' : 'ai',
+      created_at: new Date().toISOString(),
+      displayed_to_user: true,
+      timestamp: Date.now(),
+      ...options
+    };
+  }
+
+  static createMockAiMessage(id: string, content: string = 'AI response'): Message {
+    return this.createMockMessage(id, 'assistant', content);
+  }
+
+  static createMockUserMessage(id: string, content: string = 'User message'): Message {
+    return this.createMockMessage(id, 'user', content);
+  }
+
+  static createMockSystemMessage(id: string, content: string = 'System message'): Message {
+    return this.createMockMessage(id, 'system', content);
+  }
+
+  static createMockErrorMessage(id: string, error: string = 'Test error'): Message {
+    return {
+      id,
+      role: 'system',
+      content: error,
+      type: 'error',
+      created_at: new Date().toISOString(),
+      displayed_to_user: true,
+      timestamp: Date.now(),
+      error
+    };
+  }
+
+  static waitForState(hook: any, predicate: (state: any) => boolean, timeout = 1000) {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+      const checkState = () => {
+        if (predicate(hook.result.current)) {
+          resolve(hook.result.current);
+        } else if (Date.now() - startTime > timeout) {
+          reject(new Error('Timeout waiting for state condition'));
+        } else {
+          setTimeout(checkState, 10);
+        }
+      };
+      checkState();
+    });
   }
 }

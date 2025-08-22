@@ -14,7 +14,7 @@ Coverage: Health check orchestration, dependency mapping, cascading health statu
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,12 +31,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
 # Add project root to path
-from app.services.health_check_service import HealthCheckService
-from app.services.monitoring.alerting_service import AlertingService
-from app.services.redis_service import RedisService
+from netra_backend.app.services.health_check_service import HealthCheckService
+from netra_backend.app.services.monitoring.alerting_service import AlertingService
+from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
 

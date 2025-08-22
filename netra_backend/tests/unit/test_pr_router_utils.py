@@ -9,7 +9,7 @@ or removed as the functionality no longer exists in the current implementation.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ import pytest
 from fastapi import HTTPException
 
 # Add project root to path
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     PR_STATE_TTL,
     # Add project root to path
     build_pr_redirect_url,
@@ -33,7 +33,7 @@ from app.auth_integration.auth import (
     handle_pr_routing_error,
     route_pr_authentication,
 )
-from app.core.exceptions_auth import AuthenticationError
+from netra_backend.app.core.exceptions_auth import AuthenticationError
 
 
 class TestBuildPrRedirectUrl:

@@ -8,8 +8,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from .data_models import LogEntry
-from .generator_base import DataGeneratorBase
+from netra_backend.tests.data_models import LogEntry
+from netra_backend.tests.generator_base import DataGeneratorBase
 
 
 class LogEntryGenerator(DataGeneratorBase):

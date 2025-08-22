@@ -7,8 +7,8 @@ Test 12: Error Propagation to Frontend - $8K MRR
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -43,7 +43,7 @@ class TestRedisCacheBootstrap:
     async def test_redis_connection_initialization(self):
 
         """Test Redis connection pool initializes correctly."""
-        from app.services.redis_manager import RedisManager
+        from netra_backend.app.services.redis_manager import RedisManager
         
 
         redis_manager = Mock(spec=RedisManager)
@@ -150,7 +150,7 @@ class TestRateLimitingProtection:
     async def test_first_user_generous_limits(self):
 
         """Test first-time users get generous rate limits."""
-        from app.services.rate_limiter import RateLimiter
+        from netra_backend.app.services.rate_limiter import RateLimiter
         
 
         rate_limiter = Mock(spec=RateLimiter)
@@ -239,7 +239,7 @@ class TestErrorPropagation:
     async def test_backend_error_to_websocket(self):
 
         """Test backend errors propagate to WebSocket."""
-        from app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
 
         ws_manager = Mock(spec=WebSocketManager)

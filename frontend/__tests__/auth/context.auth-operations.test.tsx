@@ -3,6 +3,9 @@
  * Tests login and logout functionality
  * All functions ≤8 lines per architecture requirements
  */
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';

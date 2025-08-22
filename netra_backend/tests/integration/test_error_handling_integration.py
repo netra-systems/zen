@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -29,7 +29,7 @@ import pytest
 from logging_config import central_logger
 
 # Add project root to path
-from tests.integration.helpers.user_flow_helpers import (
+from integration.helpers.user_flow_helpers import (
     AgentTestHelpers,
     # Add project root to path
     AuthenticationTestHelpers,

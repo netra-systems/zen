@@ -13,8 +13,8 @@ L4 Realism: Tests against real staging services, real Redis propagation, real se
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -44,15 +44,15 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from app.core.config import Settings
-from app.services.config_service import ConfigService
-from app.services.redis_service import RedisService
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.core.config import Settings
+from netra_backend.app.services.config_service import ConfigService
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 
 SupervisorAgent = AsyncMock
-from app.services.health_check_service import HealthCheckService
-from app.services.secret_manager import SecretManager
+from netra_backend.app.services.health_check_service import HealthCheckService
+from netra_backend.app.services.secret_manager import SecretManager
 from .integration.staging_config.base import StagingConfigTestBase
 
 

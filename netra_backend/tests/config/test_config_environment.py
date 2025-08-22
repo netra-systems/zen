@@ -23,7 +23,7 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,7 +38,7 @@ import pytest
 from config_environment import ConfigEnvironment
 
 # Add project root to path
-from app.schemas.Config import (
+from netra_backend.app.schemas.Config import (
     # Add project root to path
     AppConfig,
     DevelopmentConfig,

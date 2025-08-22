@@ -16,8 +16,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app import schemas
-from app.db import models_postgres as models
-from app.services.realistic_test_data_service import (
+from netra_backend.app.db import models_postgres as models
+from netra_backend.app.services.realistic_test_data_service import (
     RealisticDataPatterns,
     RealisticTestDataService,
 )

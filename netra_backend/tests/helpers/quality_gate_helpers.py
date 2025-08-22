@@ -3,8 +3,8 @@
 import hashlib
 from unittest.mock import AsyncMock, Mock
 
-from app.redis_manager import RedisManager
-from app.services.quality_gate_service import (
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,

@@ -14,8 +14,8 @@ Coverage: Real LLM calls, agent lifecycle management, cross-agent state persiste
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -61,7 +61,7 @@ DeepAgentState = AsyncMock
 # from app.llm.llm_manager import LLMManager
 
 LLMManager = AsyncMock
-from app.services.database.postgres_service import PostgresService
+from netra_backend.app.services.database.postgres_service import PostgresService
 
 # from app.services.redis.session_manager import RedisSessionManager
 

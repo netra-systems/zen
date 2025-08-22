@@ -17,8 +17,8 @@ Test Coverage:
 """
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -46,21 +46,21 @@ from redis.asyncio import Redis
 
 # Add project root to path
 
-from app.models.user import User, UserPlan
-from app.models.thread import Thread
-from app.models.message import Message
-from app.services.user_service import UserService as UsageService
-from app.services.websocket_service import WebSocketService as WebSocketManager
-from app.services.agent_service import AgentService as AgentDispatcher
+from netra_backend.app.models.user import User, UserPlan
+from netra_backend.app.models.thread import Thread
+from netra_backend.app.models.message import Message
+from netra_backend.app.services.user_service import UserService as UsageService
+from netra_backend.app.services.websocket_service import WebSocketService as WebSocketManager
+from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
-from .user_flow_base import (
+from tests.user_flow_base import (
 
 # Add project root to path
 
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance
 
 )
-from .user_journey_data import UserTestData, UserJourneyScenarios
+from tests.user_journey_data import UserTestData, UserJourneyScenarios
 
 
 @pytest.mark.integration

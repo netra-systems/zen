@@ -12,7 +12,7 @@ import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/service';
 import '@testing-library/jest-dom';
 
-// Mock auth service
+// Mock auth service for component testing
 jest.mock('@/auth/service');
 
 // Import real UI components

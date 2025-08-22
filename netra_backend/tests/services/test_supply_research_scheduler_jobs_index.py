@@ -12,7 +12,7 @@ COMPLIANCE: Modular split from 549-line monolith
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,14 +20,14 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from .test_scheduler_concurrency import (
+from netra_backend.tests.test_scheduler_concurrency import (
     TestSupplyResearchSchedulerConcurrency,
 )
-from .test_scheduler_jobs_core import TestSupplyResearchSchedulerJobs
-from .test_scheduler_performance import (
+from netra_backend.tests.test_scheduler_jobs_core import TestSupplyResearchSchedulerJobs
+from netra_backend.tests.test_scheduler_performance import (
     TestSupplyResearchSchedulerPerformance,
 )
-from .test_scheduler_retry_logic import (
+from netra_backend.tests.test_scheduler_retry_logic import (
     TestSupplyResearchSchedulerRetryLogic,
 )
 

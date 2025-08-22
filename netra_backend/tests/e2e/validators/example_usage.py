@@ -7,13 +7,13 @@ Maximum 300 lines, functions ≤8 lines.
 import asyncio
 from typing import Any, Dict
 
-from app.agents.state import DeepAgentState
-from app.agents.triage_sub_agent.models import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.triage_sub_agent.models import (
     Priority,
     TriageResult,
     UserIntent,
 )
-from app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from ..e2e.validators import (
     DataIntegrityValidator,
     PerformanceValidator,

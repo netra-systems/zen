@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents 100% service outage affecting all customers
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 
@@ -42,15 +42,15 @@ class TestStartupCheckResultImportIssue:
         The error demonstrates the exact issue seen in production.
         """
         # Import the EnvironmentChecker which has the wrong import
-        from app.services.apex_optimizer_agent.models import (
+        from netra_backend.app.services.apex_optimizer_agent.models import (
             StartupCheckResult as WrongModel,
         )
-        from app.startup_checks.environment_checks import (
+        from netra_backend.app.startup_checks.environment_checks import (
             EnvironmentChecker,
         )
 
         # Import the correct StartupCheckResult for comparison
-        from app.startup_checks.models import (
+        from netra_backend.app.startup_checks.models import (
             StartupCheckResult as CorrectModel,
         )
         
@@ -81,7 +81,7 @@ class TestStartupCheckResultImportIssue:
         
         This directly tests the method that fails in production.
         """
-        from app.startup_checks.environment_checks import (
+        from netra_backend.app.startup_checks.environment_checks import (
             EnvironmentChecker,
         )
         
@@ -106,10 +106,10 @@ class TestStartupCheckResultImportIssue:
         """
         Test that demonstrates the signature mismatch between the two StartupCheckResult classes.
         """
-        from app.services.apex_optimizer_agent.models import (
+        from netra_backend.app.services.apex_optimizer_agent.models import (
             StartupCheckResult as WrongModel,
         )
-        from app.startup_checks.models import (
+        from netra_backend.app.startup_checks.models import (
             StartupCheckResult as CorrectModel,
         )
         
@@ -197,7 +197,7 @@ class TestStartupCheckIntegration:
         """
         from unittest.mock import AsyncMock, MagicMock
 
-        from app.startup_checks.checker import StartupChecker
+        from netra_backend.app.startup_checks.checker import StartupChecker
         
         # Create a mock app
         app = MagicMock()

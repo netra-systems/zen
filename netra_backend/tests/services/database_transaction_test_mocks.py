@@ -14,8 +14,8 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.database.base_repository import BaseRepository
-from .database_transaction_test_helpers import MockDatabaseModel
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.tests.database_transaction_test_helpers import MockDatabaseModel
 
 
 class MockRepository(BaseRepository[MockDatabaseModel]):

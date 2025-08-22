@@ -5,8 +5,8 @@ Business Value: $25K MRR - Critical authentication path validation
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import main app with error handling
 
 try:
-    from app.main import app
+    from netra_backend.app.main import app
 
 except ImportError:
     # Create a minimal FastAPI app for testing if import fails
@@ -46,7 +46,7 @@ except ImportError:
 # Import with error handling
 
 try:
-    from app.services.security_service import SecurityService
+    from netra_backend.app.services.security_service import SecurityService
 
 except ImportError:
 
@@ -54,7 +54,7 @@ except ImportError:
 
 
 try:
-    from app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client import auth_client
 
 except ImportError:
 
@@ -62,7 +62,7 @@ except ImportError:
 
 
 try:
-    from app.schemas.auth_types import DevLoginRequest
+    from netra_backend.app.schemas.auth_types import DevLoginRequest
 
 except ImportError:
     from pydantic import BaseModel
@@ -75,7 +75,7 @@ except ImportError:
 
 
 try:
-    from app.auth_integration.auth import get_current_user
+    from netra_backend.app.auth_integration.auth import get_current_user
 
 except ImportError:
 

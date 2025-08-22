@@ -23,10 +23,10 @@ from netra_backend.app.schemas.shared_types import (
     UsagePattern,
 )
 
-# Shared models are now imported from netra_backend.app.schemas.shared_types
+# Shared models are now imported from app.schemas.shared_types
 
 
-# Shared models are now imported from netra_backend.app.schemas.shared_types
+# Shared models are now imported from app.schemas.shared_types
 
 
 class BatchProcessingResult(BaseModel):

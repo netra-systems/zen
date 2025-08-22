@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.base import Base
+from netra_backend.app.db.base import Base
 
 
 def create_mock_session() -> AsyncMock:

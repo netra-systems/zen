@@ -12,8 +12,8 @@ Compression target: 70%+ reduction for large payloads with <50ms processing time
 """
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -40,13 +40,13 @@ from uuid import uuid4
 
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
-from app.redis_manager import RedisManager
-from app.schemas import User
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
 
-from tests.integration.helpers.redis_l3_helpers import (
+from integration.helpers.redis_l3_helpers import (
 
 # Add project root to path
 

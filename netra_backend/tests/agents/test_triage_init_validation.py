@@ -7,7 +7,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,11 +19,11 @@ from unittest.mock import patch
 
 import pytest
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from .triage_test_helpers import (
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.tests.triage_test_helpers import (
     AssertionHelpers,
     # Add project root to path
     TriageMockHelpers,

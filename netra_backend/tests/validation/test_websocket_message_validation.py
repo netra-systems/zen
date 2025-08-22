@@ -7,7 +7,7 @@ Tests message validation, field extraction, and error handling for malformed mes
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,16 +21,16 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.services.message_handlers import MessageHandlerService
-from app.websocket.connection import ConnectionInfo
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.websocket.connection import ConnectionInfo
 
 # Add project root to path
-from app.websocket.unified.message_handlers import (
+from netra_backend.app.websocket.unified.message_handlers import (
     MessageBuilder,
     MessageHandler,
     MessageProcessor,
 )
-from app.websocket.unified.types import WebSocketValidationError
+from netra_backend.app.websocket.unified.types import WebSocketValidationError
 
 # Add project root to path
 

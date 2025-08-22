@@ -7,7 +7,7 @@ Tests fundamental validation functionality
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,8 +18,8 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from app.services.quality_gate_service import ContentType
-from .quality_gate_content import (
+from netra_backend.app.services.quality_gate_service import ContentType
+from netra_backend.tests.quality_gate_content import (
     get_borderline_quality_content,
     get_circular_reasoning_content,
     # Add project root to path
@@ -28,13 +28,13 @@ from .quality_gate_content import (
     get_optimization_context,
     get_relevant_context,
 )
-from .quality_gate_fixtures import (
+from netra_backend.tests.quality_gate_fixtures import (
     quality_service,
     redis_mock,
     setup_quality_level_test_cases,
     setup_validation_error_mock,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.quality_gate_helpers import (
     assert_circular_reasoning_detected,
     assert_context_improves_relevance,
     assert_error_handling_result,

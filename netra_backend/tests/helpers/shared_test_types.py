@@ -187,7 +187,7 @@ class TestErrorContext:
     @pytest.fixture
     def error_context(self):
         """Provide error context for testing"""
-        from app.core.error_context import (
+        from netra_backend.app.core.error_context import (
             AsyncErrorContext as ErrorContext,
         )
         return ErrorContext()

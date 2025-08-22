@@ -7,7 +7,7 @@ Tests caching, batch processing, statistics, and system behavior
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,13 +21,13 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from app.services.quality_gate_service import ContentType, QualityLevel
-from .quality_gate_content import (
+from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
+from netra_backend.tests.quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
     get_brief_optimization_contents,
 )
-from .quality_gate_fixtures import (
+from netra_backend.tests.quality_gate_fixtures import (
     add_multiple_test_metrics,
     create_borderline_metrics,
     create_memory_overflow_metrics,
@@ -42,7 +42,7 @@ from .quality_gate_fixtures import (
     setup_pattern_test_texts,
     setup_redis_error_mocks,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.quality_gate_helpers import (
     assert_batch_validation_results,
     assert_cache_key_format,
     assert_caching_identical_results,
@@ -103,7 +103,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_suggestions_for_issues(self, quality_service):
         """Test suggestion generation for various quality issues"""
-        from tests.helpers.quality_gate_fixtures import (
+        from helpers.quality_gate_fixtures import (
             create_low_specificity_metrics,
         )
         low_spec_metrics = create_low_specificity_metrics()
@@ -113,7 +113,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_prompt_adjustments(self, quality_service):
         """Test prompt adjustment generation"""
-        from tests.helpers.quality_gate_fixtures import (
+        from helpers.quality_gate_fixtures import (
             create_poor_metrics,
         )
         poor_metrics = create_poor_metrics()

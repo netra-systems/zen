@@ -11,8 +11,8 @@ Tests seamless token rotation without disrupting real-time features.
 """
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -38,11 +38,11 @@ import redis.asyncio as redis
 
 # Add project root to path
 
-from app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
+from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
 from ws_manager import WebSocketManager
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger
-from tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
+from integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 # Add project root to path
 

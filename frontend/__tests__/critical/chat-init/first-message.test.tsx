@@ -11,6 +11,8 @@
  * Critical Test Focus: The complete journey from input focus to AI response
  */
 
+// Unmock auth service for proper store functionality
+jest.unmock('@/auth/service');
 import React, { useState, useEffect, useRef } from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

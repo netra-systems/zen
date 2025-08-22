@@ -7,7 +7,7 @@ Tests for thread conversation management - app/routes/threads_route.py
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from .test_utilities import base_client
+from netra_backend.tests.test_utilities import base_client
 
 # Add project root to path
 
@@ -31,7 +31,7 @@ class TestThreadsRoute:
     
     def test_thread_creation(self, base_client):
         """Test thread creation endpoint."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         with patch.object(ThreadService, 'create_thread') as mock_create:
             mock_create.return_value = {
@@ -51,7 +51,7 @@ class TestThreadsRoute:
     
     def test_thread_pagination(self, base_client):
         """Test thread list pagination."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         with patch.object(ThreadService, 'get_thread_messages') as mock_get:
             mock_get.return_value = [
@@ -68,7 +68,7 @@ class TestThreadsRoute:
 
     async def test_thread_archival(self):
         """Test thread archival functionality."""
-        from app.services.thread_service import ThreadService
+        from netra_backend.app.services.thread_service import ThreadService
         
         with patch.object(ThreadService, 'delete_thread') as mock_delete:
             mock_delete.return_value = True

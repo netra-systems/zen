@@ -7,13 +7,15 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-setup_test_path()
+# Add netra_backend to path  
+NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
+if str(NETRA_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import asyncio
 from unittest.mock import patch
@@ -21,14 +23,14 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     # Add project root to path
     AgentErrorHandler as ErrorHandler,
 )
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
 )
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     NetworkError,
     global_error_handler,
     handle_agent_error,
@@ -45,7 +47,7 @@ class TestGlobalErrorHandler:
     
     def test_global_error_handler_singleton(self):
         """Test global error handler is singleton."""
-        from app.agents.error_handler import (
+        from netra_backend.app.agents.error_handler import (
             global_error_handler as global_handler_2,
         )
         assert global_error_handler is global_handler_2

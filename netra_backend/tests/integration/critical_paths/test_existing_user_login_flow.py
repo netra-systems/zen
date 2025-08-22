@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,11 +43,11 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from app.config import get_config
-from app.db.models_postgres import User
-from app.main import app
-from app.services.auth_service import AuthService
-from app.services.session_service import SessionService
+from netra_backend.app.config import get_config
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.main import app
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.session_service import SessionService
 
 
 class TestExistingUserLoginFlow:

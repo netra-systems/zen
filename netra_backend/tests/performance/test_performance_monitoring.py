@@ -8,7 +8,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,20 +22,20 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from monitoring.performance_monitor import (
+from netra_backend.app.monitoring.performance_monitor import (
     MetricsCollector,
     PerformanceAlertManager,
     PerformanceMonitor,
 )
 
 # Add project root to path
-from app.core.performance_optimization_manager import (
+from netra_backend.app.core.performance_optimization_manager import (
     BatchProcessor,
     MemoryCache,
     # Add project root to path
     PerformanceOptimizationManager,
 )
-from app.db.index_optimizer import (
+from netra_backend.app.db.index_optimizer import (
     DatabaseIndexManager,
     PostgreSQLIndexOptimizer,
 )

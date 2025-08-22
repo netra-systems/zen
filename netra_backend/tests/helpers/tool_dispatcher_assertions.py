@@ -3,11 +3,11 @@
 from typing import Any, Dict
 from unittest.mock import AsyncMock
 
-from app.agents.tool_dispatcher import (
+from netra_backend.app.agents.tool_dispatcher import (
     ProductionTool,
     ToolDispatchResponse,
 )
-from app.schemas.unified_tools import (
+from netra_backend.app.schemas.unified_tools import (
     SimpleToolPayload,
     ToolResult,
     ToolStatus,

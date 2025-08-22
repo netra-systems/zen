@@ -11,7 +11,7 @@ Tests LLM response caching with real Redis containers and cache strategies.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,7 +31,7 @@ import pytest
 import redis.asyncio as aioredis
 from caching.cache_strategies import CacheStrategy
 from caching.llm_cache_manager import LLMCacheManager
-from llm.response_processor import LLMResponseProcessor
+from netra_backend.app.llm.response_processor import LLMResponseProcessor
 
 
 @pytest.mark.L3

@@ -8,7 +8,7 @@ Ensures all auth failures are loud and properly propagated.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
-from routes.utils.websocket_helpers import (
+from netra_backend.app.routes.utils.websocket_helpers import (
     # Add project root to path
     authenticate_websocket_user,
     decode_token_payload,
@@ -162,7 +162,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):
         """Test that malformed JSON is logged and error sent to client."""
-        from app.routes.utils.websocket_helpers import parse_json_message
+        from netra_backend.app.routes.utils.websocket_helpers import parse_json_message
         
         manager = Mock()
         manager.send_error = AsyncMock()
@@ -175,7 +175,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio  
     async def test_message_timeout_closes_stale_connections(self):
         """Test that message timeouts close stale connections."""
-        from app.routes.utils.websocket_helpers import (
+        from netra_backend.app.routes.utils.websocket_helpers import (
             check_connection_alive,
         )
         
@@ -193,7 +193,7 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_handler_exceptions_logged_with_context(self):
         """Test that message handler exceptions include full context."""
-        from app.routes.websocket_secure import _handle_validated_message
+        from netra_backend.app.routes.websocket_secure import _handle_validated_message
         
         websocket = Mock(spec=WebSocket)
         websocket.application_state = WebSocketState.CONNECTED

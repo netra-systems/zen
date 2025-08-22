@@ -15,8 +15,8 @@ identified WebSocket reliability concerns.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -38,10 +38,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.core.websocket_cors import SECURITY_CONFIG, WebSocketCORSHandler
+from netra_backend.app.core.websocket_cors import SECURITY_CONFIG, WebSocketCORSHandler
 
 # Add project root to path
-from app.routes.websocket_enhanced import (
+from netra_backend.app.routes.websocket_enhanced import (
     # Add project root to path
 
     DatabaseConnectionPool,
@@ -51,7 +51,7 @@ from app.routes.websocket_enhanced import (
     db_pool,
 
 )
-from app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 
 class TestDatabaseConnectionPooling:

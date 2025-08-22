@@ -11,7 +11,7 @@ Shows real-world usage patterns that can replace existing test code.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,7 +24,7 @@ from unittest.mock import Mock
 import pytest
 
 # Add project root to path
-from .database_test_fixtures import (
+from netra_backend.tests.database_test_fixtures import (
     # Add project root to path
     async_session_mock,
     clickhouse_mocker,

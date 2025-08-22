@@ -20,7 +20,7 @@ REQUIREMENTS:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -46,11 +46,11 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from logging_config import central_logger
 
-from app.agents.base_agent import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

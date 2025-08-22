@@ -28,11 +28,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 # Add project root to path
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 
-from .isolated_test_config import (
+from netra_backend.tests.isolated_test_config import (
     isolated_clickhouse,
     isolated_full_stack,
     isolated_postgres,

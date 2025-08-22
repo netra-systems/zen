@@ -7,7 +7,7 @@ Provides all fixtures and mock configurations for business value critical tests
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,12 +26,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
-from app.llm.llm_manager import LLMManager
-from app.services.agent_service import AgentService
-from app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
 

@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -16,11 +16,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # Add project root to path
-from app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
 

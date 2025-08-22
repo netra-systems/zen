@@ -161,6 +161,11 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_03_oauth_nonce_replay_attack(self, redis_container):
         """Test 3: OAuth nonce replay attack prevention (L3 with real Redis)"""
+        # Set environment variables for the OAuth security manager to find the test Redis
+        import os
+        os.environ["TEST_REDIS_HOST"] = redis_container.get_container_host_ip()
+        os.environ["TEST_REDIS_PORT"] = str(redis_container.get_exposed_port(6379))
+        
         # Connect to real Redis container
         redis_client = redis.Redis(
             host=redis_container.get_container_host_ip(),
@@ -176,11 +181,12 @@ class TestOAuthComprehensiveFailures:
         # Store nonce in Redis to simulate first use
         redis_client.setex(f"oauth_nonce:{nonce}", 600, "used")
         
-        # Try to reuse the same nonce
+        # Try to reuse the same nonce (use unique code to avoid code reuse check)
+        unique_code = f"unique_code_{secrets.token_urlsafe(8)}"
         response = client.post(
             "/auth/callback/google",
             json={
-                "code": "valid_code",
+                "code": unique_code,
                 "state": state,
             }
         )
@@ -227,10 +233,10 @@ class TestOAuthComprehensiveFailures:
         }
         state = base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
         
-        # Try with different session
+        # Try with different session (use unique code)
         response = client.post(
             "/auth/callback/google",
-            json={"code": "valid_code", "state": state},
+            json={"code": f"csrf_test_code_{secrets.token_urlsafe(8)}", "state": state},
             cookies={"session_id": "correct_session_67890"}
         )
         assert response.status_code == 401
@@ -260,7 +266,7 @@ class TestOAuthComprehensiveFailures:
         response = client.post(
             "/auth/callback/google",
             json={
-                "code": "valid_code",
+                "code": f"hmac_test_code_{secrets.token_urlsafe(8)}",
                 "state": tampered_state,
             }
         )
@@ -647,7 +653,7 @@ class TestOAuthComprehensiveFailures:
         response = client.post(
             "/auth/callback/google",
             json={
-                "code": "valid_code",
+                "code": f"redirect_test_code_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
                 "redirect_uri": "https://evil-site.com/steal-token",
             }

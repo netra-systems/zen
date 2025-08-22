@@ -7,7 +7,7 @@ Functions refactored to ≤8 lines each using helper functions
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,8 +21,8 @@ from datetime import UTC, datetime
 import pytest
 
 # Add project root to path
-from app.services.tool_permission_service import ToolPermissionService
-from .tool_permission_helpers import (
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.tests.tool_permission_helpers import (
     # Add project root to path
     MockRedisClient,
     assert_rate_limits_within_bounds,

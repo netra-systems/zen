@@ -43,7 +43,7 @@ class ThreadRepository(BaseRepository[Thread]):
             return thread
         
         return await self.create(
-            db,
+            db=db,
             id=thread_id,
             object="thread",
             created_at=int(time.time()),

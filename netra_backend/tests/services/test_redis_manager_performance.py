@@ -7,7 +7,7 @@ Tests high throughput, memory usage, latency, and concurrent safety
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,11 +22,11 @@ import tracemalloc
 import pytest
 
 # Add project root to path
-from .redis_test_fixtures import (
+from netra_backend.tests.redis_test_fixtures import (
     RedisConnectionPool,
     performance_redis_manager,
 )
-from .redis_test_helpers import (
+from netra_backend.tests.redis_test_helpers import (
     calculate_hit_rate,
     measure_operation_latency,
     setup_batch_operations,

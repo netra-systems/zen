@@ -7,8 +7,8 @@ Critical: Users can't interact without successful auth→WS flow
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -29,10 +29,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import jwt
 import pytest
-from app.schemas import User
+from netra_backend.app.schemas import User
 
 # Add project root to path
-from app.config import get_config
+from netra_backend.app.config import get_config
 
 # Add project root to path
 
@@ -87,8 +87,8 @@ class TestAuthToWebSocketFlow:
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
 
         """Test successful auth flow leading to WS connection."""
-        from app.services.auth_service import AuthService
-        from app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.services.auth_service import AuthService
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         # Setup mocks
 
@@ -203,7 +203,7 @@ class TestAuthToWebSocketFlow:
     async def test_auth_service_unavailable_fallback(self):
 
         """Test fallback when auth service is unavailable."""
-        from app.core.circuit_breaker import CircuitBreaker
+        from netra_backend.app.core.circuit_breaker import CircuitBreaker
         
 
         circuit_breaker = CircuitBreaker(
@@ -287,7 +287,7 @@ class TestAuthToWebSocketFlow:
     async def test_auth_to_websocket_with_redis_session(self, auth_token, mock_user):
 
         """Test auth flow with Redis session storage."""
-        from app.services.redis_manager import RedisManager
+        from netra_backend.app.services.redis_manager import RedisManager
         
 
         redis_manager = Mock(spec=RedisManager)

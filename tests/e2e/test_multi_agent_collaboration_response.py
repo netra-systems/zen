@@ -32,7 +32,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.db.models_postgres import Assistant, Message, Thread
 from netra_backend.app.db.postgres import get_postgres_db
@@ -134,7 +134,7 @@ class TestMultiAgentCollaborationResponse:
     @pytest.fixture
     async def supervisor_agent(self, postgres_session, llm_manager, websocket_manager, tool_dispatcher):
         """Create supervisor agent for collaboration testing"""
-        return ModernSupervisorAgent(
+        return SupervisorAgent(
             db_session=postgres_session,
             llm_manager=llm_manager,
             websocket_manager=websocket_manager,

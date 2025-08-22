@@ -8,7 +8,7 @@ Test classes: TestAgentPromptsTemplateRendering, TestEnhancedPromptsContextBuild
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from app.schemas import (
+from netra_backend.app.schemas import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,
@@ -31,8 +31,8 @@ from app.schemas import (
     WebSocketMessage,
 )
 
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     # Add project root to path
@@ -40,9 +40,9 @@ from app.agents.supervisor.execution_context import (
 )
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 # Mock classes for testing (would normally be imported)

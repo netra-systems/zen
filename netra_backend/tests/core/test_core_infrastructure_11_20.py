@@ -7,7 +7,7 @@ Tests for the missing core infrastructure components identified in the top 100 m
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,7 +33,7 @@ class TestConfigValidator:
     
     @pytest.fixture
     def validator(self):
-        from app.core.config_validator import ConfigValidator
+        from netra_backend.app.core.config_validator import ConfigValidator
         return ConfigValidator()
     
     @pytest.fixture
@@ -60,7 +60,7 @@ class TestConfigValidator:
     
     def test_invalid_database_url_rejected(self, validator, mock_config):
         """Test that invalid database URL is rejected."""
-        from app.core.config_validator import ConfigurationValidationError
+        from netra_backend.app.core.config_validator import ConfigurationValidationError
         
         mock_config.database_url = "mysql://user:pass@localhost/db"
         with pytest.raises(ConfigurationValidationError, match="Database URL must be a PostgreSQL"):
@@ -79,7 +79,7 @@ class TestErrorContext:
     
     @pytest.fixture
     def error_context(self):
-        from app.core.error_context import ErrorContext
+        from netra_backend.app.core.error_context import ErrorContext
         return ErrorContext()
     
     def test_trace_id_management(self, error_context):
@@ -105,7 +105,7 @@ class TestErrorHandlers:
     
     def test_error_response_structure(self):
         """Test standardized error response structure."""
-        from app.core.error_handlers import ErrorResponse
+        from netra_backend.app.core.error_handlers import ErrorResponse
         
         response = ErrorResponse(
             error_code="TEST_ERROR",
@@ -121,7 +121,7 @@ class TestErrorHandlers:
         """Test HTTP exception handling."""
         from fastapi import HTTPException
 
-        from app.core.error_handlers import http_exception_handler
+        from netra_backend.app.core.error_handlers import http_exception_handler
         
         request = Mock()
         request.state = Mock()
@@ -143,8 +143,8 @@ class TestCustomExceptions:
     
     def test_netra_exception_structure(self):
         """Test NetraException structure and properties."""
-        from app.core.error_codes import ErrorCode, ErrorSeverity
-        from app.core.exceptions_base import NetraException
+        from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+        from netra_backend.app.core.exceptions_base import NetraException
         
         exc = NetraException(
             message="Test error",
@@ -158,8 +158,8 @@ class TestCustomExceptions:
     
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""
-        from app.core.error_codes import ErrorCode
-        from app.core.exceptions_auth import AuthenticationError
+        from netra_backend.app.core.error_codes import ErrorCode
+        from netra_backend.app.core.exceptions_auth import AuthenticationError
         
         exc = AuthenticationError("Invalid token")
         assert "Invalid token" in str(exc)
@@ -172,7 +172,7 @@ class TestLoggingManager:
     
     def test_logging_configuration(self):
         """Test basic logging configuration."""
-        from app.core.logging_manager import (
+        from netra_backend.app.core.logging_manager import (
             LogLevel,
             configure_logging,
             get_logger,
@@ -185,7 +185,7 @@ class TestLoggingManager:
     
     def test_structured_logging(self):
         """Test structured logging output."""
-        from app.core.logging_manager import get_logger
+        from netra_backend.app.core.logging_manager import get_logger
         
         logger = get_logger("test_logger")
         
@@ -199,7 +199,7 @@ class TestResourceManager:
     """Test resource allocation - app/core/resource_manager.py"""
     async def test_resource_tracking(self):
         """Test basic resource tracking."""
-        from app.core.resource_manager import ResourceTracker
+        from netra_backend.app.core.resource_manager import ResourceTracker
         
         tracker = ResourceTracker()
         # Use register instead of track_resource
@@ -215,7 +215,7 @@ class TestResourceManager:
         assert tracker.get_resource("connection_conn_1") is None
     async def test_resource_limits(self):
         """Test resource limit enforcement with register/unregister."""
-        from app.core.resource_manager import ResourceTracker
+        from netra_backend.app.core.resource_manager import ResourceTracker
         
         tracker = ResourceTracker()
         
@@ -237,7 +237,7 @@ class TestSchemaSync:
     """Test schema synchronization - app/core/schema_sync.py"""
     async def test_schema_validation(self):
         """Test basic schema validation."""
-        from app.core.schema_sync import validate_schema
+        from netra_backend.app.core.schema_sync import validate_schema
         
         mock_db = AsyncMock()
         mock_db.execute.return_value.fetchall.return_value = [
@@ -250,7 +250,7 @@ class TestSchemaSync:
     
     def test_migration_safety_checks(self):
         """Test migration safety validation."""
-        from app.core.schema_sync import is_migration_safe
+        from netra_backend.app.core.schema_sync import is_migration_safe
         
         # Safe migration (adding column)
         assert is_migration_safe("ALTER TABLE users ADD COLUMN age INTEGER;")
@@ -265,7 +265,7 @@ class TestSecretManager:
     
     def test_secret_encryption(self):
         """Test basic secret encryption/decryption."""
-        from app.core.secret_manager import decrypt_secret, encrypt_secret
+        from netra_backend.app.core.secret_manager import decrypt_secret, encrypt_secret
         
         key = Fernet.generate_key()
         secret = "my_secret_password"
@@ -278,7 +278,7 @@ class TestSecretManager:
     
     def test_secret_validation(self):
         """Test secret format validation."""
-        from app.core.secret_manager import validate_secret_format
+        from netra_backend.app.core.secret_manager import validate_secret_format
         
         # Valid secrets
         assert validate_secret_format("valid_secret_123")
@@ -294,7 +294,7 @@ class TestUnifiedLogging:
     
     def test_log_correlation(self):
         """Test log correlation across services."""
-        from app.core.unified_logging import CorrelatedLogger
+        from netra_backend.app.core.unified_logging import CorrelatedLogger
         
         logger = CorrelatedLogger("test_service")
         logger.set_correlation_id("corr-123")
@@ -308,7 +308,7 @@ class TestUnifiedLogging:
     
     def test_log_aggregation(self):
         """Test aggregating logs from multiple sources."""
-        from app.core.unified_logging import LogAggregator
+        from netra_backend.app.core.unified_logging import LogAggregator
         
         aggregator = LogAggregator()
         
@@ -335,7 +335,7 @@ class TestStartupChecks:
         return app
     async def test_database_check(self, mock_app):
         """Test database connectivity check."""
-        from app.startup_checks.database_checks import DatabaseChecker
+        from netra_backend.app.startup_checks.database_checks import DatabaseChecker
         
         # Mock database session
         mock_session = AsyncMock()
@@ -356,7 +356,7 @@ class TestStartupChecks:
             assert result.name == "database_connection"
     async def test_service_health_checks(self, mock_app):
         """Test external service health checks."""
-        from app.startup_checks.service_checks import ServiceChecker
+        from netra_backend.app.startup_checks.service_checks import ServiceChecker
         
         checker = ServiceChecker(mock_app)
         
@@ -384,7 +384,7 @@ class TestStartupChecks:
             assert result.name == "clickhouse_connection"
     async def test_graceful_degradation(self, mock_app):
         """Test graceful degradation when optional services fail."""
-        from app.startup_checks import run_startup_checks
+        from netra_backend.app.startup_checks import run_startup_checks
         
         # Mock database session for successful connection
         mock_session = AsyncMock()

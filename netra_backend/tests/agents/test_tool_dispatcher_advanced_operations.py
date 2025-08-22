@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,11 +17,11 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from app.agents.tool_dispatcher import ToolDispatcher
-from .tool_dispatcher_assertions import (
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.tests.tool_dispatcher_assertions import (
     assert_execution_error_response,
 )
-from .tool_dispatcher_helpers import (
+from netra_backend.tests.tool_dispatcher_helpers import (
     # Add project root to path
     create_mock_tool,
     create_test_state,

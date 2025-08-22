@@ -14,7 +14,7 @@ Coverage: Rate limiting algorithms, quota enforcement, backpressure mechanisms, 
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,14 +33,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.schemas.user import UserTier
-from app.services.backpressure.backpressure_service import (
+from netra_backend.app.schemas.user import UserTier
+from netra_backend.app.services.backpressure.backpressure_service import (
     BackpressureService,
 )
-from app.services.quota.quota_manager import QuotaManager
+from netra_backend.app.services.quota.quota_manager import QuotaManager
 
 # Add project root to path
-from app.services.rate_limiting.rate_limiter import RateLimiter
+from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 
 # Add project root to path
 

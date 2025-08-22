@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,11 +22,11 @@ from unittest.mock import AsyncMock
 import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 
-from app.core.exceptions import DatabaseError
+from netra_backend.app.core.exceptions import DatabaseError
 
 # Add project root to path
-from app.db.transaction_core import with_deadlock_retry
-from .database_transaction_test_helpers import (
+from netra_backend.app.db.transaction_core import with_deadlock_retry
+from netra_backend.tests.database_transaction_test_helpers import (
     MockDatabaseModel,
     assert_all_sessions_closed,
     configure_mock_query_results,
@@ -35,7 +35,7 @@ from .database_transaction_test_helpers import (
     create_tracked_session_factory,
     run_multiple_transaction_cycles,
 )
-from .database_transaction_test_mocks import (
+from netra_backend.tests.database_transaction_test_mocks import (
     MockRepository,
     TransactionTestManager,
 )

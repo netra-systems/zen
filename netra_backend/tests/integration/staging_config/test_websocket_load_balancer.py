@@ -9,7 +9,7 @@ and ingress in the staging environment.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,7 +25,7 @@ from typing import List, Optional
 import websockets
 
 # Add project root to path
-from .base import StagingConfigTestBase
+from tests.base import StagingConfigTestBase
 
 # Add project root to path
 

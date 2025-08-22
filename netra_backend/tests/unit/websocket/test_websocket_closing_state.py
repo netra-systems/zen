@@ -7,7 +7,7 @@ Tests to prevent regression of the "Cannot call send once a close message has be
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,11 +22,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-from app.schemas.websocket_message_types import ServerMessage
-from app.websocket.broadcast_core import BroadcastManager
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.websocket.broadcast_core import BroadcastManager
 
 # Add project root to path
-from app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 
 # Add project root to path
 

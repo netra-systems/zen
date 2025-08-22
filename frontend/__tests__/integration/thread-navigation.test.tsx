@@ -10,20 +10,8 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-// Mock Next.js router
-const mockPush = jest.fn();
-const mockReplace = jest.fn();
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: mockReplace,
-    prefetch: jest.fn()
-  }),
-  usePathname: () => '/chat/thread-1'
-}));
-
-// Import components and utilities
-import { createTestSetup, renderWithProvider, sampleThreads, TestChatSidebar } from '../components/ChatSidebar/setup';
+// Import components and utilities FIRST (this will set up the router mocks)
+import { createTestSetup, renderWithProvider, sampleThreads, TestChatSidebar, mockRouter } from '../components/ChatSidebar/setup';
 
 const createThreadNavigationSetup = () => {
   const testSetup = createTestSetup();
@@ -50,8 +38,8 @@ describe('Thread Navigation Integration Tests', () => {
     testSetup.configureAuthState({ isAuthenticated: true, userTier: 'Early' });
     testSetup.configureAuth({ isDeveloperOrHigher: () => false, isAuthenticated: true });
     
-    mockPush.mockClear();
-    mockReplace.mockClear();
+    mockRouter.push.mockClear();
+    mockRouter.replace.mockClear();
     Object.values(mockNavigation).forEach(mock => mock.mockClear());
   });
 
@@ -145,7 +133,7 @@ describe('Thread Navigation Integration Tests', () => {
       await user.click(targetThread);
       
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/chat/thread-2');
+        expect(mockRouter.push).toHaveBeenCalledWith('/chat/thread-2');
       });
     });
 
@@ -177,7 +165,7 @@ describe('Thread Navigation Integration Tests', () => {
       await user.click(thread1);
       await user.click(thread2);
       
-      expect(mockPush).toHaveBeenCalledWith('/chat/thread-2');
+      expect(mockRouter.push).toHaveBeenCalledWith('/chat/thread-2');
     });
   });
 

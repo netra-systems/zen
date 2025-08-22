@@ -9,7 +9,7 @@ All functions maintain 25-line limit with single responsibility.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,13 +25,13 @@ from unittest.mock import AsyncMock, MagicMock
 import psutil
 import pytest
 
-from app.agents.corpus_admin import CorpusAdminSubAgent
-from app.agents.corpus_admin.models import CorpusMetadata
-from app.schemas.Corpus import Corpus
+from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
+from netra_backend.app.agents.corpus_admin.models import CorpusMetadata
+from netra_backend.app.schemas.Corpus import Corpus
 
 # Add project root to path
-from app.services.corpus_service import CorpusService
-from app.services.synthetic_data.core_service import SyntheticDataService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService
 
 # Add project root to path
 

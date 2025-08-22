@@ -16,7 +16,7 @@ Coverage: Multiple WebSocket servers, load balancer health checks, sticky sessio
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -44,10 +44,10 @@ import websockets
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from app.core.health_checkers import HealthChecker
-from app.redis_manager import RedisManager
-from app.websocket.enhanced_rate_limiter import DistributedRateLimiter
-from app.websocket.load_balanced_connection_manager import (
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.websocket.enhanced_rate_limiter import DistributedRateLimiter
+from netra_backend.app.websocket.load_balanced_connection_manager import (
     LoadBalancedConnectionManager,
 )
 

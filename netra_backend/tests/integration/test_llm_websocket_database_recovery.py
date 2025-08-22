@@ -7,8 +7,8 @@ Test 9: Database Transaction Rollback Safety - $15K MRR
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -43,7 +43,7 @@ class TestLLMManagerInit:
     async def test_connection_pool_creation(self):
 
         """Test LLM connection pool initializes properly."""
-        from app.services.llm_manager import LLMManager
+        from netra_backend.app.services.llm_manager import LLMManager
         
 
         llm_manager = Mock(spec=LLMManager)
@@ -139,7 +139,7 @@ class TestWebSocketRecovery:
     async def test_state_preservation_on_disconnect(self):
 
         """Test state is preserved when WebSocket disconnects."""
-        from app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
 
         ws_manager = Mock(spec=WebSocketManager)

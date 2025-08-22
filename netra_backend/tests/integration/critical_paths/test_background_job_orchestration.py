@@ -11,7 +11,7 @@ Comprehensive test to verify background job orchestration:
 This test ensures background jobs are properly orchestrated.
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 

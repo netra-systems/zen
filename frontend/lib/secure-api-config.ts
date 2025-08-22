@@ -59,10 +59,10 @@ export const getSecureApiConfig = (): ApiConfig => {
     : 'https://api.staging.netrasystems.ai';
   
   const defaultWsUrl = environment === 'development' 
-    ? 'ws://localhost:8000/ws' 
+    ? 'ws://localhost:8000/ws/secure' 
     : environment === 'production'
-    ? 'wss://api.netrasystems.ai/ws'
-    : 'wss://api.staging.netrasystems.ai/ws';
+    ? 'wss://api.netrasystems.ai/ws/secure'
+    : 'wss://api.staging.netrasystems.ai/ws/secure';
 
   const defaultAuthUrl = environment === 'development' 
     ? 'http://localhost:8001' 

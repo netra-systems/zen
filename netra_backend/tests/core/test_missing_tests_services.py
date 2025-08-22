@@ -10,7 +10,7 @@ Tests 15, 18, 19 from original missing tests covering:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,7 +37,7 @@ class TestLoggingManagerService:
     
     @pytest.fixture
     def logging_manager(self):
-        from app.core.logging_manager import LoggingManager
+        from netra_backend.app.core.logging_manager import LoggingManager
         return LoggingManager()
     
     def test_log_level_configuration(self, logging_manager):
@@ -101,7 +101,7 @@ class TestSecretManagerService:
     
     @pytest.fixture
     def secret_manager(self):
-        from app.core.secret_manager import SecretManager
+        from netra_backend.app.core.secret_manager import SecretManager
         key = Fernet.generate_key()
         return SecretManager(key)
     
@@ -165,7 +165,7 @@ class TestUnifiedLoggingService:
     
     @pytest.fixture
     def unified_logger(self):
-        from app.core.unified_logging import UnifiedLogger
+        from netra_backend.app.core.unified_logging import UnifiedLogger
         return UnifiedLogger()
     
     def test_correlation_id_propagation(self, unified_logger):
@@ -247,7 +247,7 @@ class TestServiceUtilities:
     
     def test_service_health_monitoring(self):
         """Test service health check utilities."""
-        from app.core.service_utils import ServiceHealthMonitor
+        from netra_backend.app.core.service_utils import ServiceHealthMonitor
         
         monitor = ServiceHealthMonitor()
         monitor.register_service("api", health_check_url="/health")
@@ -259,7 +259,7 @@ class TestServiceUtilities:
     
     def test_service_dependency_injection(self):
         """Test service dependency injection container."""
-        from app.core.service_container import ServiceContainer
+        from netra_backend.app.core.service_container import ServiceContainer
         
         container = ServiceContainer()
         container.register("logger", Mock())
@@ -273,7 +273,7 @@ class TestServiceUtilities:
     
     def test_service_configuration_management(self):
         """Test service configuration management."""
-        from app.core.service_config import ServiceConfigManager
+        from netra_backend.app.core.service_config import ServiceConfigManager
         
         config_manager = ServiceConfigManager()
         config_manager.set_service_config("api", {

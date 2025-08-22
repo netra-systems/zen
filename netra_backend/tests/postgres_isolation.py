@@ -27,8 +27,8 @@ from sqlalchemy import MetaData, Table, create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.exceptions_config import DatabaseError
-from app.logging_config import central_logger
+from netra_backend.app.core.exceptions_config import DatabaseError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,7 +7,7 @@ Tests tool validation functionality
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,11 +23,11 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 import pytest
 from langchain_core.tools import BaseTool
 
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-from app.services.tool_registry import ToolRegistry
-from .test_tool_registry_registration_core import MockTool
+from netra_backend.app.services.tool_registry import ToolRegistry
+from netra_backend.tests.test_tool_registry_registration_core import MockTool
 
 # Add project root to path
 

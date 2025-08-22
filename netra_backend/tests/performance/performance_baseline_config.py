@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 
 from dataclasses import asdict, dataclass
 from enum import Enum
-from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from typing import Any, Dict, List, Optional
 import json
 import os

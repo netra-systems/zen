@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -45,7 +45,7 @@ class TestSupervisorE2EWithRealLLM:
     @pytest.fixture
     def supervisor(self, mock_dependencies):
         """Modern supervisor agent instance."""
-        return ModernSupervisorAgent(
+        return SupervisorAgent(
             mock_dependencies["db_session"],
             mock_dependencies["llm_manager"],
             mock_dependencies["websocket_manager"],

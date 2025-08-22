@@ -6,8 +6,8 @@ Critical: Streaming responses provide immediate feedback for better UX
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -27,13 +27,13 @@ from typing import Any, AsyncGenerator, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from app.schemas import LLMStreamChunk, User
+from netra_backend.app.schemas import LLMStreamChunk, User
 
-from app.services.agent_service_core import AgentService
+from netra_backend.app.services.agent_service_core import AgentService
 
 # Add project root to path
-from app.services.streaming_service import TextStreamProcessor
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.services.streaming_service import TextStreamProcessor
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

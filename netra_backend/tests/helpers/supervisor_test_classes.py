@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 
 class QualitySupervisor:
@@ -29,7 +29,7 @@ class QualitySupervisor:
 
 # Import real AdminToolDispatcher - tests should use actual implementation
 # If mocking is needed, use unittest.mock.Mock or pytest fixtures
-from app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 
 class MockAdminToolDispatcher:

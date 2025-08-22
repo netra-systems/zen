@@ -8,7 +8,7 @@ Split from oversized test_llm_agent_e2e_real.py
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,12 +27,12 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.llm.llm_manager import LLMManager
-from .test_fixtures import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -262,7 +262,7 @@ def _create_e2e_supervisor(infrastructure):
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
-        from app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
         
@@ -278,7 +278,7 @@ def _create_e2e_supervisor(infrastructure):
 
 def _configure_e2e_pipeline(supervisor):
     """Configure supervisor pipeline for E2E testing"""
-    from app.agents.supervisor.execution_context import (
+    from netra_backend.app.agents.supervisor.execution_context import (
         AgentExecutionResult,
     )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[

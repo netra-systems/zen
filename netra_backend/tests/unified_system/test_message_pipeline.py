@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,14 +31,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.db.postgres import get_async_db
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-from app.logging_config import central_logger
-from app.schemas.Config import AppConfig
-from app.services.agent_service_core import AgentService
-from app.services.websocket.ws_manager import manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.services.websocket.ws_manager import manager
 
 # Add project root to path
 

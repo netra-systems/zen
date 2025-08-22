@@ -62,9 +62,11 @@ class SessionManager:
             logger.error(f"Redis connection failed: {e}")
             self.redis_client = None
     
-    def create_session(self, user_id: str, user_data: Dict) -> str:
+    def create_session(self, user_id: str, user_data: Dict, session_id: Optional[str] = None) -> str:
         """Create new session and return session ID"""
-        session_id = str(uuid.uuid4())
+        # Allow custom session ID for session fixation protection
+        if not session_id:
+            session_id = str(uuid.uuid4())
         session_data = {
             "user_id": user_id,
             "created_at": datetime.utcnow().isoformat(),
@@ -356,3 +358,20 @@ class SessionManager:
         except Exception as e:
             logger.error(f"Memory session deletion failed: {e}")
             return False
+    
+    def regenerate_session_id(self, old_session_id: str, user_id: str, user_data: Dict) -> str:
+        """Regenerate session ID for session fixation protection"""
+        import secrets
+        
+        # Create new session with cryptographically secure ID
+        new_session_id = secrets.token_urlsafe(32)
+        
+        # Create new session
+        self.create_session(user_id, user_data, new_session_id)
+        
+        # Delete old session if it exists
+        if old_session_id:
+            self.delete_session(old_session_id)
+        
+        logger.info(f"Session ID regenerated for user {user_id}")
+        return new_session_id

@@ -137,7 +137,7 @@ describe('First Load Integration Tests', () => {
       );
       
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/enterprise-demo');
+        expect(mockPush).toHaveBeenCalledWith('/chat');
       });
     });
 

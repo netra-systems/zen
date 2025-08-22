@@ -14,7 +14,7 @@ Coverage: Full agent lifecycle, state preservation, error recovery, resource man
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,21 +32,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.state_manager import AgentStateManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.core.config import get_settings
-from app.schemas.registry import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.schemas.registry import (
     AgentCompleted,
     AgentStarted,
     SubAgentUpdate,
 )
-from app.services.agent_service import AgentService
-from app.services.llm.llm_manager import LLMManager
-from app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.llm.llm_manager import LLMManager
+from netra_backend.app.services.state_persistence import StatePersistenceService
 
 # Add project root to path
 

@@ -7,9 +7,13 @@
  * - WebSocket message dispatch
  * - Success confirmation
  * - Performance requirements
+
  * 
  * CRITICAL: Phase 4, Agent 13 - Core chat functionality
  */
+
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';

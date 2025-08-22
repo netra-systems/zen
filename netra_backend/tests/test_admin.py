@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -15,12 +15,12 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
-from auth_integration.auth import ActiveUserWsDep
+from netra_backend.app.auth_integration.auth import ActiveUserWsDep
 from fastapi.testclient import TestClient
-from main import app
-from app.schemas import User
+from netra_backend.app.main import app
+from netra_backend.app.schemas import User
 
-from app.config import get_config
+from netra_backend.app.config import get_config
 
 
 @pytest.fixture(scope="function", autouse=True)

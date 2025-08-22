@@ -18,7 +18,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,9 +33,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 import pytest_asyncio
 
-from app.core.error_codes import ErrorCode
-from app.core.exceptions_base import NetraException
-from app.schemas.monitoring_schemas import (
+from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.schemas.monitoring_schemas import (
     ErrorDetailResponse,
     ErrorQuery,
     ErrorResolution,
@@ -50,7 +50,7 @@ from app.schemas.monitoring_schemas import (
 )
 
 # Add project root to path
-from app.services.monitoring.gcp_error_service import GCPErrorService
+from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
 
 
 class TestGCPErrorService:

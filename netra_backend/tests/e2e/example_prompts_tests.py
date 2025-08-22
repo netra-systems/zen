@@ -7,13 +7,13 @@ from typing import Dict, List
 
 import pytest
 
-from app.agents.state import DeepAgentState
-from app.services.quality_gate_service import (
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
 )
-from .model_effectiveness_tests import (
+from netra_backend.tests.model_effectiveness_tests import (
     _execute_model_selection_workflow,
     _validate_model_effectiveness_results,
 )

@@ -12,8 +12,8 @@ Coverage: End-to-end message flow, error handling, performance validation, state
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -41,15 +41,15 @@ import pytest
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt
 
-from app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
 # Add project root to path
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 
 JWTService = AsyncMock
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.schemas.registry import (
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.registry import (
 
     AgentCompleted,
 
@@ -58,8 +58,8 @@ from app.schemas.registry import (
     WebSocketMessage,
 
 )
-from app.services.database.message_repository import MessageRepository
-from app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
 logger = logging.getLogger(__name__)

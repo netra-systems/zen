@@ -22,7 +22,7 @@ Tests cover:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -41,16 +41,16 @@ import websockets
 from fastapi import WebSocket
 from fastapi.testclient import TestClient
 
-from app.core.websocket_cors import (
+from netra_backend.app.core.websocket_cors import (
     WebSocketCORSHandler,
     get_environment_origins,
     validate_websocket_origin,
 )
-from app.db.postgres import get_async_db
+from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-from app.main import app
-from app.routes.websocket_enhanced import (
+from netra_backend.app.main import app
+from netra_backend.app.routes.websocket_enhanced import (
     authenticate_websocket_with_database,
     connection_manager,
     # Add project root to path
@@ -58,7 +58,7 @@ from app.routes.websocket_enhanced import (
     get_websocket_service_discovery,
     validate_websocket_token_enhanced,
 )
-from tests.conftest import create_test_user, get_test_token
+from netra_backend.tests.conftest import create_test_user, get_test_token
 
 
 class WebSocketTestClient:

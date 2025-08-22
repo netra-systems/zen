@@ -6,8 +6,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -27,17 +27,17 @@ from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
-from app.schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 from ws_manager import WebSocketManager
 
-from app.agents.data_sub_agent.agent import DataSubAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from app.core.exceptions import NetraException
-from app.llm.llm_manager import LLMManager
-from app.services.quality_gate_service import (
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.quality_gate_service import (
 
     ContentType,
 
@@ -56,17 +56,17 @@ def cost_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_
 
     """Setup real agent environment for cost optimization testing."""
     # Import additional agents to avoid circular dependencies
-    from app.agents.actions_to_meet_goals_sub_agent import (
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
 
         ActionsToMeetGoalsSubAgent,
 
     )
-    from app.agents.optimizations_core_sub_agent import (
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
 
         OptimizationsCoreSubAgent,
 
     )
-    from app.agents.reporting_sub_agent import ReportingSubAgent
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
 
     agents = {

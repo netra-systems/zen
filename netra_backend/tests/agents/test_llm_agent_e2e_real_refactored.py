@@ -21,7 +21,7 @@ MODULES:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,7 +33,7 @@ import pytest
 
 # Add project root to path
 # Import all fixtures from modular structure
-from .test_fixtures import (
+from test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_persistence_service,
@@ -43,7 +43,7 @@ from .test_fixtures import (
 )
 
 # Import all integration tests (≤8 line functions)
-from .test_llm_agent_advanced_integration import (
+from netra_backend.tests.test_llm_agent_advanced_integration import (
     test_concurrent_request_handling,
     test_end_to_end_optimization_flow,
     test_performance_metrics,
@@ -52,7 +52,7 @@ from .test_llm_agent_advanced_integration import (
 )
 
 # Import all basic tests (≤8 line functions)
-from .test_llm_agent_basic import (
+from netra_backend.tests.test_llm_agent_basic import (
     test_agent_state_transitions,
     test_error_recovery,
     test_llm_response_parsing,

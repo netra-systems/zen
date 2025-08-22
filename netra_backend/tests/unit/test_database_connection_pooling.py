@@ -9,7 +9,7 @@ are correctly handled.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,11 +25,11 @@ from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db
+from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-from app.dependencies import DbDep, get_db_dependency
-from app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.dependencies import DbDep, get_db_dependency
+from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 # Add project root to path
 

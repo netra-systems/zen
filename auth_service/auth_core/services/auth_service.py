@@ -50,6 +50,7 @@ class AuthService:
         self._circuit_breaker_state = {}
         self._failure_counts = {}
         self._last_failure_times = {}
+        self._circuit_breaker_redis_prefix = "circuit_breaker:"
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
@@ -643,16 +644,30 @@ class AuthService:
             }
     
     def _is_circuit_breaker_open(self, service: str) -> bool:
-        """Check if circuit breaker is open for a service"""
-        state = self._circuit_breaker_state.get(service, "closed")
+        """Check if circuit breaker is open for a service with Redis persistence"""
+        try:
+            # Try to get state from Redis first
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                redis_state = self.session_manager.redis_client.get(redis_key)
+                if redis_state:
+                    state = redis_state
+                else:
+                    state = self._circuit_breaker_state.get(service, "closed")
+            else:
+                state = self._circuit_breaker_state.get(service, "closed")
+        except Exception as e:
+            logger.warning(f"Failed to read circuit breaker state from Redis: {e}")
+            state = self._circuit_breaker_state.get(service, "closed")
+        
         if state == "closed":
             return False
         
         if state == "open":
             # Check if we should transition to half-open
-            last_failure = self._last_failure_times.get(service, 0)
+            last_failure = self._get_last_failure_time(service)
             if time.time() - last_failure > 60:  # 60 second timeout
-                self._circuit_breaker_state[service] = "half-open"
+                self._set_circuit_breaker_state(service, "half-open")
                 logger.info(f"Circuit breaker for {service} transitioning to half-open")
                 return False
             return True
@@ -664,32 +679,102 @@ class AuthService:
     
     def _record_success(self, service: str):
         """Record successful call for circuit breaker"""
-        self._circuit_breaker_state[service] = "closed"
-        self._failure_counts[service] = 0
+        self._set_circuit_breaker_state(service, "closed")
+        self._set_failure_count(service, 0)
+        logger.info(f"Circuit breaker for {service} reset to closed state")
         
     def _record_failure(self, service: str):
         """Record failed call for circuit breaker"""
-        self._failure_counts[service] = self._failure_counts.get(service, 0) + 1
-        self._last_failure_times[service] = time.time()
+        current_failures = self._get_failure_count(service) + 1
+        self._set_failure_count(service, current_failures)
+        self._set_last_failure_time(service, time.time())
         
         # Open circuit breaker after 5 failures
-        if self._failure_counts[service] >= 5:
-            self._circuit_breaker_state[service] = "open"
-            logger.warning(f"Circuit breaker opened for {service} after {self._failure_counts[service]} failures")
-        elif self._circuit_breaker_state.get(service) == "half-open":
+        if current_failures >= 5:
+            self._set_circuit_breaker_state(service, "open")
+            logger.warning(f"Circuit breaker opened for {service} after {current_failures} failures")
+        elif self._get_circuit_breaker_state(service) == "half-open":
             # Failed in half-open state, go back to open
-            self._circuit_breaker_state[service] = "open"
+            self._set_circuit_breaker_state(service, "open")
             logger.warning(f"Circuit breaker for {service} returned to open state")
     
     async def _make_http_request_with_circuit_breaker(self, service: str, request_func):
         """Make HTTP request with circuit breaker protection"""
         if self._is_circuit_breaker_open(service):
+            logger.error(f"Circuit breaker is open for {service} - rejecting request")
             raise httpx.ConnectError(f"Circuit breaker is open for {service}")
         
         try:
             result = await request_func()
             self._record_success(service)
             return result
-        except (httpx.ConnectError, httpx.TimeoutException) as e:
+        except (httpx.ConnectError, httpx.TimeoutException, Exception) as e:
             self._record_failure(service)
+            logger.error(f"Request failed for {service}: {e}")
             raise e
+    
+    def _set_circuit_breaker_state(self, service: str, state: str):
+        """Set circuit breaker state with Redis persistence"""
+        self._circuit_breaker_state[service] = state
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                self.session_manager.redis_client.setex(redis_key, 3600, state)  # 1 hour TTL
+        except Exception as e:
+            logger.warning(f"Failed to persist circuit breaker state to Redis: {e}")
+    
+    def _get_circuit_breaker_state(self, service: str) -> str:
+        """Get circuit breaker state from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                redis_state = self.session_manager.redis_client.get(redis_key)
+                if redis_state:
+                    return redis_state
+        except Exception as e:
+            logger.warning(f"Failed to read circuit breaker state from Redis: {e}")
+        return self._circuit_breaker_state.get(service, "closed")
+    
+    def _set_failure_count(self, service: str, count: int):
+        """Set failure count with Redis persistence"""
+        self._failure_counts[service] = count
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
+                self.session_manager.redis_client.setex(redis_key, 3600, str(count))
+        except Exception as e:
+            logger.warning(f"Failed to persist failure count to Redis: {e}")
+    
+    def _get_failure_count(self, service: str) -> int:
+        """Get failure count from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
+                redis_count = self.session_manager.redis_client.get(redis_key)
+                if redis_count:
+                    return int(redis_count)
+        except Exception as e:
+            logger.warning(f"Failed to read failure count from Redis: {e}")
+        return self._failure_counts.get(service, 0)
+    
+    def _set_last_failure_time(self, service: str, timestamp: float):
+        """Set last failure time with Redis persistence"""
+        self._last_failure_times[service] = timestamp
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                self.session_manager.redis_client.setex(redis_key, 3600, str(timestamp))
+        except Exception as e:
+            logger.warning(f"Failed to persist last failure time to Redis: {e}")
+    
+    def _get_last_failure_time(self, service: str) -> float:
+        """Get last failure time from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                redis_time = self.session_manager.redis_client.get(redis_key)
+                if redis_time:
+                    return float(redis_time)
+        except Exception as e:
+            logger.warning(f"Failed to read last failure time from Redis: {e}")
+        return self._last_failure_times.get(service, 0)

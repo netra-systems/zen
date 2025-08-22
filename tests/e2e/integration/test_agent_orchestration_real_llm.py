@@ -18,7 +18,7 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.thread_schemas import AgentRequest
+# Removed unused import: AgentRequest
 from typing import Dict, Any, List
 
 from unittest.mock import patch, AsyncMock

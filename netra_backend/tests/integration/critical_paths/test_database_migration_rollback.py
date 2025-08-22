@@ -14,7 +14,7 @@ Coverage: Schema migration safety, data integrity, rollback mechanisms, multi-da
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,14 +34,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.db.migrations.migration_runner import MigrationRunner
-from app.services.database.backup_service import BackupService
-from app.services.database.connection_manager import (
+from netra_backend.app.db.migrations.migration_runner import MigrationRunner
+from netra_backend.app.services.database.backup_service import BackupService
+from netra_backend.app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
 # Add project root to path
-from app.services.database.migration_service import MigrationService
+from netra_backend.app.services.database.migration_service import MigrationService
 
 # Add project root to path
 

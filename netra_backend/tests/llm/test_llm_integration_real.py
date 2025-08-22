@@ -10,7 +10,7 @@ Maximum 300 lines, functions ≤8 lines per architecture requirements.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.llm.llm_response_processing import (
+from netra_backend.app.llm.llm_response_processing import (
     # Add project root to path
     attempt_json_fallback_parse,
     create_llm_response,
@@ -33,11 +33,11 @@ from app.llm.llm_response_processing import (
     parse_nested_json_recursive,
 )
 from pydantic import BaseModel, Field, ValidationError
-from app.schemas import AppConfig, LLMConfig
+from netra_backend.app.schemas import AppConfig, LLMConfig
 
-from app.llm.llm_manager import LLMManager
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
-from app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.llm_response_types import LLMResponse
 
 
 class ResponseModel(BaseModel):

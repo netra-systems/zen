@@ -8,7 +8,7 @@ Focuses on real component interactions with minimal mocking.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,13 +22,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.triage_sub_agent.agent import TriageSubAgent
-from app.core.agent_recovery_supervisor import SupervisorRecoveryStrategy
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.core.agent_recovery_supervisor import SupervisorRecoveryStrategy
 
 # Add project root to path
 # Agent interfaces imported as needed
@@ -235,7 +235,7 @@ class TestAgentInitializationIntegration:
         recovery_strategy = mock_recovery_strategy()
         
         # Simulate agent failure
-        from app.core.error_recovery import RecoveryContext
+        from netra_backend.app.core.error_recovery import RecoveryContext
         failure_context = RecoveryContext("test_operation_123", "Mock failure for testing")
         
         # Test recovery assessment

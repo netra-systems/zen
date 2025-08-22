@@ -10,7 +10,7 @@ Critical Path: Config change detection -> Validation -> Session preservation -> 
 Coverage: Auth config hot reload, session maintenance, validation, rollback, containerized service coordination
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 # Add project root to path
 import sys
@@ -35,9 +35,9 @@ from enum import Enum
 
 # Add project root to path
 
-from app.core.exceptions_base import NetraException
-from app.logging_config import central_logger
-from tests.integration.helpers.redis_l3_helpers import RedisContainer
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.logging_config import central_logger
+from integration.helpers.redis_l3_helpers import RedisContainer
 
 # Add project root to path
 

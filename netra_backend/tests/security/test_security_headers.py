@@ -7,7 +7,7 @@ Tests security headers middleware
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ import pytest
 from fastapi import Response
 
 # Add project root to path
-from app.middleware.security_headers import SecurityHeadersMiddleware
+from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 
 # Add project root to path
 
@@ -59,7 +59,7 @@ class TestSecurityHeaders:
     
     def test_csp_nonce_generation(self, security_headers_middleware):
         """Test CSP nonce generation and injection."""
-        from app.middleware.security_headers import NonceGenerator
+        from netra_backend.app.middleware.security_headers import NonceGenerator
         
         # Test nonce generation
         nonce1 = NonceGenerator.generate_nonce()

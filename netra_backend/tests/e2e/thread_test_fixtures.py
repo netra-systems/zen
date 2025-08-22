@@ -12,15 +12,15 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models_postgres import Message, Run, Thread
-from app.schemas.agent_state import (
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import (
     AgentPhase,
     CheckpointType,
     StatePersistenceRequest,
 )
-from app.services.state_persistence import state_persistence_service
-from app.services.thread_service import ThreadService
-from app.services.websocket.ws_manager import manager
+from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.websocket.ws_manager import manager
 
 
 class ThreadTestDataFactory:

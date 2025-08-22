@@ -14,7 +14,7 @@ Business Value Justification:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -29,13 +29,13 @@ from typing import Any, Dict, List
 
 import pytest
 
-from app.core.database_recovery_core import ConnectionPoolRefreshStrategy
-from app.core.exceptions_base import NetraException
-from app.db.models_agent import Message, Run, Thread
-from app.db.models_user import ToolUsageLog, User
+from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.db.models_agent import Message, Run, Thread
+from netra_backend.app.db.models_user import ToolUsageLog, User
 
 # Import from shared infrastructure
-from tests.integration.critical_missing.shared_infrastructure.containerized_services import (
+from integration.critical_missing.shared_infrastructure.containerized_services import (
     ServiceOrchestrator,
 )
 
@@ -274,7 +274,7 @@ class TestDatabaseTransactionRollback:
                 )
                 
                 # Simulate recovery scenario
-                from app.core.database_types import (
+                from netra_backend.app.core.database_types import (
                     PoolHealth,
                     PoolMetrics,
                 )

@@ -8,7 +8,7 @@ Critical: Seamless thread creation for new users without friction
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,15 +23,15 @@ from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from app.schemas import Thread, User
+from netra_backend.app.schemas import Thread, User
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db.models_postgres import Message, Run, Thread, User
-from app.services.message_handlers import MessageHandlerService
+from netra_backend.app.db.models_postgres import Message, Run, Thread, User
+from netra_backend.app.services.message_handlers import MessageHandlerService
 
 # Add project root to path
-from app.services.thread_service import ThreadService
+from netra_backend.app.services.thread_service import ThreadService
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

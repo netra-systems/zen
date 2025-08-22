@@ -12,7 +12,7 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,18 +20,18 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from .test_config_core import (
+from netra_backend.tests.test_config_core import (
     # Add project root to path
     TestConfigStatus,
     TestConfigValidationResult,
     TestValidationContext,
 )
-from .test_config_engine import (
+from netra_backend.tests.test_config_engine import (
     TestConfigDecisionEngine,
     TestMainValidationFunction,
     TestUtilityFunctions,
 )
-from .test_config_validation import (
+from netra_backend.tests.test_config_validation import (
     TestConfigFileChecking,
     TestConfigLoading,
     TestEndpointValidation,

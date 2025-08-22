@@ -16,7 +16,7 @@ L3 Realism Level: Real services with Docker containers, local networking
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -39,10 +39,10 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
 # Add project root to path
-from app.core.configuration.base import get_unified_config
-from app.services.database.postgres_service import PostgresService
-from app.services.health_checker import HealthChecker
-from app.services.redis.session_manager import RedisSessionManager
+from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.services.database.postgres_service import PostgresService
+from netra_backend.app.services.health_checker import HealthChecker
+from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from test_framework.docker_testing.compose_manager import DockerComposeManager
 
 # Add project root to path

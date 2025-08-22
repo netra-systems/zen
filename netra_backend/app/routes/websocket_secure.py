@@ -32,6 +32,7 @@ from netra_backend.app.core.websocket_cors import (
     check_websocket_cors,
     get_websocket_cors_handler,
 )
+from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.dependencies import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
@@ -39,6 +40,7 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketValidatio
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
+tracing_manager = TracingManager()
 
 # Security-first configuration
 SECURE_WEBSOCKET_CONFIG = {
@@ -163,37 +165,53 @@ class SecureWebSocketManager:
                 detail="Authentication required: Use Authorization header or Sec-WebSocket-Protocol"
             )
         
-        # Validate token with auth service
+        # Validate token with auth service using distributed tracing
         try:
             # Send only the token part (without Bearer prefix) to auth service
             clean_token = token.replace("Bearer ", "") if token.startswith("Bearer ") else token
-            validation_result = await auth_client.validate_token_jwt(clean_token)
             
-            if not validation_result or not validation_result.get("valid"):
-                self._stats["security_violations"] += 1
-                logger.error("WebSocket connection denied: Invalid JWT token")
-                raise HTTPException(
-                    status_code=1008,
-                    detail="Authentication failed: Invalid or expired token"
-                )
+            # Create trace span for token validation
+            with tracing_manager.start_span("websocket_jwt_validation") as span:
+                span.set_attribute("auth.method", auth_method)
+                span.set_attribute("token.length", len(clean_token))
+                span.set_attribute("websocket.validation", True)
+                
+                validation_result = await auth_client.validate_token_jwt(clean_token)
+                span.set_attribute("validation.success", bool(validation_result and validation_result.get("valid")))
             
-            user_id = str(validation_result.get("user_id", ""))
-            if not user_id:
-                self._stats["security_violations"] += 1
-                logger.error("WebSocket connection denied: No user_id in token")
-                raise HTTPException(
-                    status_code=1008,
-                    detail="Authentication failed: Invalid user information"
-                )
+                if not validation_result or not validation_result.get("valid"):
+                    self._stats["security_violations"] += 1
+                    span.set_attribute("error", True)
+                    span.set_attribute("error.type", "invalid_token")
+                    logger.error("WebSocket connection denied: Invalid JWT token")
+                    raise HTTPException(
+                        status_code=1008,
+                        detail="Authentication failed: Invalid or expired token"
+                    )
             
-            return {
-                "user_id": user_id,
-                "email": validation_result.get("email"),
-                "permissions": validation_result.get("permissions", []),
-                "auth_method": auth_method,
-                "token_expires": validation_result.get("expires_at"),
-                "authenticated_at": datetime.now(timezone.utc)
-            }
+                user_id = str(validation_result.get("user_id", ""))
+                if not user_id:
+                    self._stats["security_violations"] += 1
+                    span.set_attribute("error", True)
+                    span.set_attribute("error.type", "missing_user_id")
+                    logger.error("WebSocket connection denied: No user_id in token")
+                    raise HTTPException(
+                        status_code=1008,
+                        detail="Authentication failed: Invalid user information"
+                    )
+            
+                span.set_attribute("user.id", user_id)
+                span.set_attribute("user.email", validation_result.get("email", "unknown"))
+                logger.info(f"WebSocket JWT validation successful for user: {user_id}")
+                
+                return {
+                    "user_id": user_id,
+                    "email": validation_result.get("email"),
+                    "permissions": validation_result.get("permissions", []),
+                    "auth_method": auth_method,
+                    "token_expires": validation_result.get("expires_at"),
+                    "authenticated_at": datetime.now(timezone.utc)
+                }
             
         except HTTPException:
             raise

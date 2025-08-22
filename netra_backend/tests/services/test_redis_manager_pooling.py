@@ -7,7 +7,7 @@ Tests connection pool creation, management, and concurrent usage
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,13 +20,13 @@ import asyncio
 import pytest
 
 # Add project root to path
-from .redis_test_fixtures import (
+from netra_backend.tests.redis_test_fixtures import (
     MockRedisClient,
     connection_pool,
     # Add project root to path
     enhanced_redis_manager,
 )
-from .redis_test_helpers import (
+from netra_backend.tests.redis_test_helpers import (
     create_concurrent_tasks,
     verify_concurrent_results,
     verify_connection_pool_state,

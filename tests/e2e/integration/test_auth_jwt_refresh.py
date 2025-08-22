@@ -27,10 +27,9 @@ import logging
 import pytest
 import time
 
+from tests.e2e.auth_test_utils import (
     JWTGenerationTestManager,
-
     TokenSet,
-
 )
 
 

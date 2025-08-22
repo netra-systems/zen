@@ -7,7 +7,7 @@ Tests enhanced secret management functionality
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,12 +18,12 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from app.core.enhanced_secret_manager import (
+from netra_backend.app.core.enhanced_secret_manager import (
     EnhancedSecretManager,
     EnvironmentType,
     SecretAccessLevel,
 )
-from app.core.exceptions import NetraSecurityException
+from netra_backend.app.core.exceptions import NetraSecurityException
 
 # Add project root to path
 

@@ -862,6 +862,48 @@ class DevLauncher:
         logger.error(f"Unexpected error: {e}")
         self._print("❌", "ERROR", f"Unexpected error: {str(e)[:100]}")
     
+    def emergency_cleanup(self):
+        """Emergency cleanup method for signal handlers and critical errors."""
+        if self._shutting_down:
+            return  # Already shutting down
+        
+        self._shutting_down = True
+        print("🛑 EMERGENCY | Performing emergency cleanup...")
+        
+        try:
+            # Kill all processes immediately
+            if hasattr(self, 'process_manager') and self.process_manager:
+                services_order = ["Frontend", "Backend", "Auth"]
+                for service_name in services_order:
+                    if self.process_manager.is_running(service_name):
+                        print(f"🛑 KILL | Terminating {service_name} service...")
+                        self.process_manager.terminate_process(service_name)
+                self.process_manager.cleanup_all()
+            
+            # Force free ports
+            critical_ports = [8000, 3000, 8081]
+            for port in critical_ports:
+                if self._is_port_in_use(port):
+                    self._force_free_port(port)
+            
+            # Stop health monitoring
+            if hasattr(self, 'health_monitor') and self.health_monitor:
+                self.health_monitor.stop()
+            
+            # Stop log streamers
+            if hasattr(self, 'log_manager') and self.log_manager:
+                self.log_manager.stop_all()
+            
+            # Cleanup parallel executor
+            if hasattr(self, 'parallel_executor') and self.parallel_executor:
+                self.parallel_executor.cleanup()
+            
+            print("✅ EMERGENCY | Emergency cleanup completed")
+            
+        except Exception as e:
+            print(f"❌ EMERGENCY | Cleanup error: {e}")
+            logger.error(f"Emergency cleanup error: {e}")
+
     def _handle_cleanup(self) -> int:
         """Handle cleanup and return exit code."""
         if self._shutting_down:

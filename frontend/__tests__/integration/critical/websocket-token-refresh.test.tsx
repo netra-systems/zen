@@ -5,6 +5,9 @@
  * during long-lived connections. These tests validate the System Under Test (SUT)
  * rather than mocking away the functionality we're trying to test.
  */
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';

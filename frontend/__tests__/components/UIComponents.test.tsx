@@ -40,7 +40,7 @@ describe('test_ErrorFallback_recovery', () => {
     );
     
     expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test error/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Test error/i)).toHaveLength(2); // One in error message, one in stack trace
     expect(screen.getByRole('button', { name: /Try again/i })).toBeInTheDocument();
     
     // Restore original environment
@@ -127,9 +127,8 @@ describe('test_NavLinks_routing', () => {
 withRouter(<NavLinks />)
     );
     
-    // Note: Actual navigation items are Chat and Enterprise Demo based on the component
+    // Note: Actual navigation items are Chat based on the component
     expect(screen.getByRole('link', { name: /Chat/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Enterprise Demo/i })).toBeInTheDocument();
   });
 
   it('should render login link when user is not authenticated', () => {
@@ -153,14 +152,28 @@ withRouter(<NavLinks />)
   });
 
   it('should handle navigation correctly', () => {
+    // Reset the auth mock to ensure authenticated state
+    const { authService } = require('@/auth');
+    authService.useAuth.mockReturnValue({
+      user: {
+        id: 'test-user',
+        email: 'test@example.com',
+        name: 'Test User'
+      },
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: null,
+      token: 'mock-token'
+    });
+
     renderWithProviders(
 withRouter(<NavLinks />)
     );
     
-    const chatLink = screen.getByRole('link', { name: /Chat/i });
-    expect(chatLink).toHaveAttribute('href', '/chat');
-    
-    const enterpriseLink = screen.getByRole('link', { name: /Enterprise Demo/i });
-    expect(enterpriseLink).toHaveAttribute('href', '/enterprise-demo');
+    // Since the user is authenticated (from our mock), there should be a Chat link
+    const chatLinks = screen.getAllByRole('link', { name: /Chat/i });
+    expect(chatLinks).toHaveLength(1);
+    expect(chatLinks[0]).toHaveAttribute('href', '/chat');
   });
 });

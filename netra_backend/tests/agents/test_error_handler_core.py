@@ -7,13 +7,15 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-setup_test_path()
+# Add netra_backend to path  
+NETRA_BACKEND_ROOT = Path(__file__).parent.parent.parent
+if str(NETRA_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(NETRA_BACKEND_ROOT))
 
 import asyncio
 import time
@@ -21,22 +23,22 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     AgentError,
     DatabaseError,
     NetworkError,
 )
 
 # Add project root to path
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     # Add project root to path
     AgentErrorHandler as ErrorHandler,
 )
-from app.agents.error_handler import (
+from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
 )
-from app.core.error_codes import ErrorSeverity
-from app.schemas.shared_types import ErrorContext
+from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.schemas.shared_types import ErrorContext
 
 
 class TestErrorHandler:
@@ -109,7 +111,7 @@ class TestErrorHandler:
 
     def _create_websocket_error_for_handling_test(self):
         """Create WebSocket error for handling test"""
-        from app.core.exceptions_websocket import WebSocketError
+        from netra_backend.app.core.exceptions_websocket import WebSocketError
         return WebSocketError("WebSocket connection lost")
 
     async def test_handle_websocket_error(self, error_handler, sample_context):

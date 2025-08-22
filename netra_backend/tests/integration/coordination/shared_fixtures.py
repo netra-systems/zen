@@ -11,7 +11,7 @@ BVJ:
 # Set testing environment
 
 from datetime import datetime, timezone
-from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import asyncio
@@ -26,13 +26,13 @@ os.environ["ENVIRONMENT"] = "testing"
 
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from app.agents.base_agent import BaseSubAgent
-from app.agents.state import DeepAgentState
-from app.agents.supervisor.agent_registry import AgentRegistry
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
-from app.logging_config import central_logger
-from app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 
 logger = central_logger.get_logger(__name__)

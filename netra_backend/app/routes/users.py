@@ -6,16 +6,18 @@ that the frontend expects but were missing from the backend.
 """
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.dependencies import DbDep
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.tracing import TracingManager
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/users", tags=["users"])
+tracing_manager = TracingManager()
 
 # Pydantic models for request/response
 class UserProfile(BaseModel):
@@ -68,19 +70,44 @@ class SessionInfo(BaseModel):
 
 @router.get("/profile")
 async def get_user_profile(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(get_current_user),
+    request: Request = None
 ) -> UserProfile:
-    """Get current user profile information."""
+    """Get current user profile information with distributed tracing support."""
     try:
-        # Mock implementation - replace with actual database queries
-        return UserProfile(
-            name=current_user.get("name", ""),
-            email=current_user.get("email", ""),
-            avatar_url=current_user.get("avatar_url"),
-            bio=current_user.get("bio", ""),
-            company=current_user.get("company", ""),
-            location=current_user.get("location", "")
-        )
+        # Start distributed tracing span for OAuth integration test support
+        with tracing_manager.start_span("user_profile_request") as span:
+            if request:
+                # Extract and propagate trace context from headers
+                trace_headers = tracing_manager.extract_trace_headers(dict(request.headers))
+                span.set_attribute("trace.propagated", bool(trace_headers))
+                span.set_attribute("request.method", request.method)
+                span.set_attribute("request.url", str(request.url))
+                
+                # Log trace context for test verification
+                if trace_headers:
+                    logger.info(f"Trace context propagated: {trace_headers}")
+                    span.set_attribute("trace.headers.count", len(trace_headers))
+                
+                # Add user context for debugging
+                span.set_attribute("user.id", current_user.get("id", "unknown"))
+                span.set_attribute("user.email", current_user.get("email", "unknown"))
+            
+            # Mock implementation - replace with actual database queries
+            profile = UserProfile(
+                name=current_user.get("name", ""),
+                email=current_user.get("email", ""),
+                avatar_url=current_user.get("avatar_url"),
+                bio=current_user.get("bio", ""),
+                company=current_user.get("company", ""),
+                location=current_user.get("location", "")
+            )
+            
+            span.set_attribute("response.status", "success")
+            span.set_attribute("response.profile.complete", bool(profile.name and profile.email))
+            
+            return profile
+            
     except Exception as e:
         logger.error(f"Failed to get user profile: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve profile")

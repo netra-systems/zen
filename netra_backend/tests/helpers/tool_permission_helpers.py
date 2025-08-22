@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.schemas.ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionLevel,
@@ -19,8 +19,8 @@ from app.schemas.ToolPermission import (
     ToolExecutionContext,
     ToolPermission,
 )
-from app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
-from app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
 
 class MockRedisClient:

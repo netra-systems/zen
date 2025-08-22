@@ -6,8 +6,8 @@ These tests ensure the WebSocket-Agent integration remains functional.
 
 # Add project root to path
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 
 logger = central_logger.get_logger(__name__)
@@ -39,7 +39,7 @@ class TestCircularImportPrevention:
     def test_agent_executor_imports_independently(self):
 
         """Ensure agent executor can be imported without circular dependency."""
-        from app.agents.base.executor import BaseExecutionEngine
+        from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
         assert BaseExecutionEngine is not None
     
@@ -47,13 +47,13 @@ class TestCircularImportPrevention:
     def test_websocket_modules_import_independently(self):
 
         """Ensure WebSocket modules can be imported without circular dependency."""
-        from app.websocket.connection_executor import ConnectionExecutor
-        from app.websocket.message_handler_core import (
+        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from netra_backend.app.websocket.message_handler_core import (
 
             ReliableMessageHandler,
 
         )
-        from app.websocket.websocket_broadcast_executor import (
+        from netra_backend.app.websocket.websocket_broadcast_executor import (
 
             BroadcastExecutor,
 
@@ -69,7 +69,7 @@ class TestCircularImportPrevention:
     def test_supervisor_imports_successfully(self):
 
         """Ensure supervisor can be imported with all dependencies."""
-        from app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
         assert SupervisorAgent is not None
     
@@ -77,7 +77,7 @@ class TestCircularImportPrevention:
     def test_agent_registry_imports_successfully(self):
 
         """Ensure agent registry can be imported."""
-        from app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
         assert AgentRegistry is not None
     
@@ -85,7 +85,7 @@ class TestCircularImportPrevention:
     def test_no_websocket_imports_in_agent_base(self):
 
         """Verify agent base modules don't import WebSocket modules."""
-        import app.agents.base.executor as executor_module
+        import netra_backend.app.agents.base.executor as executor_module
 
         module_str = str(executor_module.__dict__)
 
@@ -102,9 +102,9 @@ class TestAgentRegistration:
     def real_components(self):
 
         """Create real components for testing."""
-        from app.agents.tool_dispatcher import ToolDispatcher
-        from app.llm.llm_manager import LLMManager
-        from app.websocket.unified.manager import UnifiedWebSocketManager
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
         
 
         llm_manager = LLMManager()
@@ -176,8 +176,8 @@ class TestWebSocketMessageFlow:
     async def test_user_message_triggers_agent_execution(self):
 
         """Test that user_message type triggers agent execution."""
-        from app.services.agent_service_core import AgentService
-        from app.services.message_handlers import MessageHandlerService
+        from netra_backend.app.services.agent_service_core import AgentService
+        from netra_backend.app.services.message_handlers import MessageHandlerService
         
         # Create mocks
 
@@ -250,7 +250,7 @@ class TestWebSocketMessageFlow:
     async def test_websocket_connection_lifecycle(self):
 
         """Test WebSocket connection establishment and message handling."""
-        from app.routes.utils.websocket_helpers import (
+        from netra_backend.app.routes.utils.websocket_helpers import (
 
             process_agent_message,
 
@@ -285,7 +285,7 @@ class TestAgentExecutionPipeline:
     def test_pipeline_executor_initialization(self):
 
         """Test pipeline executor can be initialized."""
-        from app.agents.supervisor.pipeline_executor import (
+        from netra_backend.app.agents.supervisor.pipeline_executor import (
 
             PipelineExecutor,
 
@@ -307,7 +307,7 @@ class TestAgentExecutionPipeline:
     def test_execution_engine_initialization(self):
 
         """Test execution engine can be initialized."""
-        from app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         
 
         mock_registry = Mock()
@@ -325,7 +325,7 @@ class TestAgentExecutionPipeline:
     async def test_agent_execution_core(self):
 
         """Test agent execution core functionality."""
-        from app.agents.supervisor.agent_execution_core import (
+        from netra_backend.app.agents.supervisor.agent_execution_core import (
 
             AgentExecutionCore,
 
@@ -373,7 +373,7 @@ class TestWebSocketBroadcasting:
     async def test_broadcast_to_user(self):
 
         """Test broadcasting message to specific user."""
-        from app.services.websocket.ws_manager import manager
+        from netra_backend.app.services.websocket.ws_manager import manager
         
 
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:

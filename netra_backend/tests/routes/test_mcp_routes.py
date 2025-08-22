@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     TEST_MCP_REQUEST,
     CommonResponseValidators,
     # Add project root to path
@@ -84,7 +84,7 @@ class TestMCPRoute:
     
     async def test_mcp_tool_execution(self):
         """Test MCP tool execution."""
-        from app.routes.mcp.handlers import execute_tool
+        from netra_backend.app.routes.mcp.handlers import execute_tool
         
         # Mock tool execution
         with patch('app.routes.mcp.handlers.execute_tool') as mock_execute:
@@ -172,7 +172,7 @@ class TestMCPRoute:
     
     async def test_mcp_resource_management(self):
         """Test MCP resource listing and access."""
-        from app.routes.mcp.main import list_resources, read_resource
+        from netra_backend.app.routes.mcp.main import list_resources, read_resource
         
         # Test resource listing
         with patch('app.routes.mcp.handlers.MCPHandlers.list_resources') as mock_list:

@@ -11,8 +11,8 @@ Tests complete logout propagation and audit trail persistence.
 """
 
 # Add project root to path
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -49,11 +49,11 @@ JWTService = AsyncMock
 
 SessionManager = AsyncMock
 from ws_manager import WebSocketManager
-from app.redis_manager import RedisManager
-from app.database.models import User, Session
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.database.models import User, Session
 from security.audit_compliance import SecurityAuditLogger
-from app.logging_config import central_logger
-from tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
+from netra_backend.app.logging_config import central_logger
+from integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 
 logger = central_logger.get_logger(__name__)

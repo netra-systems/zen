@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -40,12 +40,12 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from main import app
+from netra_backend.app.main import app
 
-from app.config import get_config
-from app.core.health_checkers import HealthChecker
-from app.db.client_clickhouse import clickhouse_client
-from app.db.postgres import engine as pg_engine
+from netra_backend.app.config import get_config
+from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.client_clickhouse import clickhouse_client
+from netra_backend.app.db.postgres import engine as pg_engine
 
 
 class TestBasicSystemColdStartup:
@@ -224,7 +224,7 @@ class TestBasicSystemColdStartup:
             # Startup should catch and log the error
             try:
                 # Simulate startup
-                from app.db.postgres import init_db
+                from netra_backend.app.db.postgres import init_db
                 await init_db()
             except Exception as e:
                 # Should get meaningful error

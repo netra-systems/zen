@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 # Add project root to path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 # Add project root to path
 import sys
@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from typing import Dict, List
 import asyncio
 import os
@@ -25,9 +25,9 @@ import pytest
 import uuid
 
 
-from app.agents.state import DeepAgentState
-from app.schemas import SubAgentLifecycle
-from tests.state_validation_utils import StateIntegrityChecker, StateValidationReporter
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.tests.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 # Add project root to path
 

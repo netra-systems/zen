@@ -15,7 +15,7 @@ L3 Realism: Tests with real distributed services and actual trace propagation
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,10 +34,10 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 # Add project root to path
-from app.core.alert_manager import HealthAlertManager
+from netra_backend.app.core.alert_manager import HealthAlertManager
 
 # Add project root to path
 

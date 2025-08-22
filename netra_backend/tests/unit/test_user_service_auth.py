@@ -33,7 +33,7 @@ Architecture: 450-line module limit, 25-line function limit enforced
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -55,7 +55,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     _check_password_rehash_needed,
     _validate_user_permission,
     create_access_token,
@@ -69,9 +69,9 @@ from app.auth_integration.auth import (
     validate_token_jwt,
     verify_password,
 )
-from app.clients.auth_client import auth_client
-from app.db.models_user import Secret, ToolUsageLog, User
-from app.schemas.auth_types import (
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
+from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthProvider,
     LoginRequest,

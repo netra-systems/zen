@@ -17,7 +17,7 @@ WebSocket notifications, payment gateway (mocked), database transactions, audit 
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from ws_manager import get_manager
 
-from app.schemas.UserPlan import (
+from netra_backend.app.schemas.UserPlan import (
     PLAN_DEFINITIONS,
     PlanDefinition,
     PlanFeatures,
@@ -47,10 +47,10 @@ from app.schemas.UserPlan import (
     UsageRecord,
     UserPlan,
 )
-from app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path
-from app.services.user_service import user_service
+from netra_backend.app.services.user_service import user_service
 
 logger = logging.getLogger(__name__)
 

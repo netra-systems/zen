@@ -25,7 +25,7 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -46,7 +46,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     # Add project root to path
     get_current_user,
     get_current_user_optional,
@@ -54,9 +54,9 @@ from app.auth_integration.auth import (
     require_developer,
     require_permission,
 )
-from app.clients.auth_client_core import AuthServiceClient
-from app.db.models_postgres import User
-from app.db.session import get_db_session
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.session import get_db_session
 
 
 class RealAuthServiceTestFixture:

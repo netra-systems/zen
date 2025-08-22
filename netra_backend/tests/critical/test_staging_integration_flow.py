@@ -12,7 +12,7 @@ Each function ≤8 lines, file ≤300 lines.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,11 +27,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
-from main import create_app
+from netra_backend.app.main import create_app
 
 # Add project root to path
-from app.core.configuration.base import UnifiedConfigManager
-from app.startup_checks.checker import StartupChecker
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.startup_checks.checker import StartupChecker
 
 # Add project root to path
 
@@ -104,19 +104,19 @@ class TestStagingHealthEndpoints:
     @pytest.mark.asyncio
     async def test_health_endpoint_response(self, staging_environment):
         """Test /health endpoint returns correct status."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
     
     @pytest.mark.asyncio
     async def test_readiness_endpoint_response(self, staging_environment):
         """Test /ready endpoint for staging readiness."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
     
     @pytest.mark.asyncio
     async def test_liveness_endpoint_response(self, staging_environment):
         """Test /live endpoint for staging liveness."""
-        from app.routes.health import router
+        from netra_backend.app.routes.health import router
         assert router is not None
 
 

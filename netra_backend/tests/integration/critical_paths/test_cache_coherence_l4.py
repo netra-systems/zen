@@ -15,7 +15,7 @@ Performance Requirements: Cache hit rate > 90%, invalidation propagation < 50ms,
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -42,13 +42,13 @@ import redis.asyncio as aioredis
 
 # Add project root to path
 # from app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
-from app.services.cache.cache_manager import (
+from netra_backend.app.services.cache.cache_manager import (
     LLMCacheManager as CacheManager,
 )
 
 # SessionCache = AsyncMock  # Class may not exist, commented out
 # from app.services.database.user_repository import UserRepository  # Class may not exist, commented out
-from ..config import TEST_CONFIG  # Comment out since config structure may vary
+from tests.config import TEST_CONFIG  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 
 logger = logging.getLogger(__name__)

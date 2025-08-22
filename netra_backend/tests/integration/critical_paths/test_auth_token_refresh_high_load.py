@@ -25,7 +25,7 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -46,13 +46,13 @@ import jwt
 import pytest
 from clients.auth_client import auth_client
 
-from app.core.circuit_breaker import CircuitBreaker
-from app.core.config import get_settings
-from app.core.monitoring import metrics_collector
-from app.db.redis_manager import get_redis_manager
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.db.redis_manager import get_redis_manager
 
 # Add project root to path
-from app.schemas.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     LoginRequest,
     LoginResponse,
     RefreshRequest,

@@ -7,7 +7,7 @@ All helper functions broken into ≤8 line functions for architectural complianc
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,8 +21,8 @@ from unittest.mock import AsyncMock, Mock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
 
@@ -94,7 +94,7 @@ def _setup_persistence_methods(mock_persistence):
 
 def _create_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     return dispatcher
@@ -109,7 +109,7 @@ def _setup_supervisor_ids(supervisor):
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from app.agents.supervisor.execution_context import (
+    from netra_backend.app.agents.supervisor.execution_context import (
         AgentExecutionResult,
     )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
@@ -169,7 +169,7 @@ def create_concurrent_tasks(supervisors):
 
 def verify_concurrent_results(results, expected_count):
     """Verify concurrent execution results"""
-    from app.agents.state import DeepAgentState
+    from netra_backend.app.agents.state import DeepAgentState
     assert len(results) == expected_count
     for result in results:
         if not isinstance(result, Exception):
@@ -191,7 +191,7 @@ def setup_mock_llm_with_retry():
 
 def create_tool_execution_mocks():
     """Create mocks for tool execution testing"""
-    from app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
     

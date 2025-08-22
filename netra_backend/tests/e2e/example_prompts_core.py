@@ -5,9 +5,9 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 from datetime import datetime, timezone
-from app.agents.state import DeepAgentState
-from app.agents.supervisor_consolidated import (
-from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import (
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest
@@ -16,9 +16,9 @@ import uuid
     SupervisorAgent as Supervisor,
 
 )
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
-from app.services.quality_gate_service import (
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.quality_gate_service import (
 
     ContentType,
 
@@ -27,7 +27,7 @@ from app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 # The 9 example prompts from EXAMPLE_PROMPTS list
 

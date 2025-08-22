@@ -14,7 +14,7 @@ const HomePage: NextPage = () => {
       if (!user) {
         router.push('/login');
       } else {
-        router.push('/enterprise-demo');
+        router.push('/chat');
       }
     }
   }, [loading, user, router]);

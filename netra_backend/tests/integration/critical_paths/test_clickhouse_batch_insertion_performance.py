@@ -15,7 +15,7 @@ memory usage, and data consistency under load.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,9 +37,9 @@ from testcontainers.clickhouse import ClickHouseContainer
 import asyncio_clickhouse
 
 # Add project root to path
-from app.db.clickhouse import get_clickhouse_client
-from app.db.clickhouse_base import ClickHouseDatabase
-from app.logging_config import central_logger
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

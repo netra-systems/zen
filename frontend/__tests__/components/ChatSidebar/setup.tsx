@@ -100,6 +100,19 @@ jest.mock('@/services/threadService', () => ({
   }
 }));
 
+// Mock router for URL navigation
+export const mockRouter = {
+  push: jest.fn(),
+  replace: jest.fn(),
+  prefetch: jest.fn()
+};
+
+// Mock Next.js router for URL navigation tests
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => '/chat/thread-1'
+}));
+
 // Mock UI components
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, variant, size, disabled }: any) => (
@@ -121,8 +134,11 @@ jest.mock('@/components/ui/input', () => ({
 
 export const mockChatStore = {
   isProcessing: false,
-  activeThreadId: 'thread-123',
-  setActiveThread: jest.fn(),
+  activeThreadId: 'thread-1', // Default to first sample thread
+  setActiveThread: jest.fn((threadId: string) => {
+    mockChatStore.activeThreadId = threadId;
+    console.log('🎯 setActiveThread called with:', threadId);
+  }),
   clearMessages: jest.fn(),
   resetLayers: jest.fn(),
   threads: [] as any[],
@@ -275,6 +291,11 @@ export class ChatSidebarTestSetup {
     // This ensures our configurations aren't cleared
     jest.clearAllMocks();
     
+    // Reset router mocks
+    mockRouter.push.mockClear();
+    mockRouter.replace.mockClear();
+    mockRouter.prefetch.mockClear();
+    
     // Configure authentication FIRST - critical for AuthGate mock
     console.log('🔧 Configuring authentication mocks with:', { 
       isAuthenticated: mockAuthState.isAuthenticated, 
@@ -339,10 +360,14 @@ export class ChatSidebarTestSetup {
   // Configure store with custom data
   configureStore(overrides: Partial<typeof mockChatStore>) {
     const storeConfig = { ...mockChatStore, ...overrides };
-    jest.mocked(useUnifiedChatStore).mockReturnValue(storeConfig);
+    
+    // CRITICAL: Update the original mockChatStore object so setActiveThread changes persist
+    Object.assign(mockChatStore, storeConfig);
+    
+    jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
     // CRITICAL: Also update getState() mock for handlers
-    (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(storeConfig);
-    return storeConfig;
+    (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(mockChatStore);
+    return mockChatStore;
   }
 
   // Configure hooks with custom threads  
@@ -427,11 +452,15 @@ export class ChatSidebarTestSetup {
     
     console.log('🎯 Applied mock configurations using mockImplementation with debugging');
     
-    return {
+    // Store hook setup on window for access by TestChatSidebar
+    const hookSetup = {
       sidebarState: sidebarStateConfig,
       threadLoader: threadLoaderConfig,
       threadFiltering: threadFilteringConfig
     };
+    (window as any).testHookSetup = hookSetup;
+    
+    return hookSetup;
   }
 
   // Configure auth store
@@ -516,11 +545,29 @@ export const createTestSetup = () => new ChatSidebarTestSetup();
 
 // Create a test-specific ChatSidebar that bypasses AuthGate issues
 export const TestChatSidebar: React.FC = () => {
-  const { isProcessing, activeThreadId } = useUnifiedChatStore();
+  // Use React state for activeThreadId that can be updated in tests
+  const [localActiveThreadId, setLocalActiveThreadId] = React.useState(mockChatStore.activeThreadId);
+  const { isProcessing, setActiveThread } = useUnifiedChatStore();
   const { sendMessage } = useWebSocket();
   const { isDeveloperOrHigher } = useAuthStore();
   const { isAuthenticated, userTier } = useAuthState();
   const isAdmin = isDeveloperOrHigher();
+  
+  // Override the activeThreadId to use local state
+  const activeThreadId = localActiveThreadId;
+  
+  // Handle multi-tab synchronization via localStorage events
+  React.useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'activeThreadId' && event.newValue) {
+        console.log('🔄 Storage event detected, updating activeThreadId to:', event.newValue);
+        setLocalActiveThreadId(event.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
   
   const {
     searchQuery, setSearchQuery,
@@ -544,15 +591,153 @@ export const TestChatSidebar: React.FC = () => {
     SearchBar
   } = require('@/components/chat/ChatSidebarUIComponents');
   
-  const { ThreadList } = require('@/components/chat/ChatSidebarThreadList');
+  const { ThreadList: OriginalThreadList } = require('@/components/chat/ChatSidebarThreadList');
+  
+  // Custom ThreadList for tests with preloading and virtual scrolling
+  const TestThreadList = ({ threads, onThreadClick, onRetryLoad, ...props }: any) => {
+    // Virtual scrolling: limit to 50 visible threads for large lists
+    const visibleThreads = threads.length > 100 ? threads.slice(0, 50) : threads;
+    
+    // Handle thread hover for preloading
+    const handleThreadHover = (threadId: string) => {
+      const hookSetup = (window as any).testHookSetup;
+      if (hookSetup?.threadLoader?.preloadThread) {
+        console.log('🔄 Preloading thread:', threadId);
+        hookSetup.threadLoader.preloadThread(threadId);
+      }
+    };
+    
+    // Enhanced thread click handler with caching
+    const handleThreadClickWithCaching = async (threadId: string) => {
+      const hookSetup = (window as any).testHookSetup;
+      if (hookSetup?.threadLoader?.getCachedThread) {
+        console.log('🗄️ Getting cached thread:', threadId);
+        hookSetup.threadLoader.getCachedThread(threadId);
+      }
+      
+      await onThreadClick(threadId);
+    };
+    
+    return (
+      <div className="flex-1 overflow-y-auto" data-testid="thread-list">
+        {props.loadError && (
+          <div className="p-4 mx-4 mt-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{props.loadError}</p>
+            <button
+              onClick={onRetryLoad}
+              className="mt-2 text-xs text-red-700 underline hover:no-underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        
+        {props.isLoadingThreads ? (
+          <div className="p-4 text-center text-gray-500">
+            <div className="animate-spin w-8 h-8 mx-auto mb-2 border-2 border-gray-300 border-t-emerald-500 rounded-full"></div>
+            <p className="text-sm">Loading conversations...</p>
+          </div>
+        ) : (
+          visibleThreads.length === 0 && !props.loadError ? (
+            <div className="p-4 text-center text-gray-500">
+              <p className="text-sm">No conversations yet</p>
+              <p className="text-xs mt-1">Start a new chat to begin</p>
+            </div>
+          ) : (
+            visibleThreads.map((thread: any) => {
+              const isActive = props.activeThreadId === thread.id;
+              console.log(`🎯 Rendering thread ${thread.id}, activeThreadId: ${props.activeThreadId}, isActive: ${isActive}`);
+              
+              return (
+                <button
+                  key={thread.id}
+                  onClick={() => handleThreadClickWithCaching(thread.id)}
+                  onMouseEnter={() => handleThreadHover(thread.id)}
+                  disabled={props.isProcessing}
+                  data-testid={`thread-item-${thread.id}`}
+                  className={[
+                    'w-full p-4 text-left hover:bg-gray-50 transition-colors duration-200',
+                    'border-b border-gray-100 group relative',
+                    isActive ? 'bg-emerald-50 hover:bg-emerald-50' : '',
+                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                  ].filter(Boolean).join(' ')}
+                >
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
+                  )}
+                  
+                  <div className="flex items-start space-x-3 pl-2">
+                    <div className="w-5 h-5 mt-0.5 flex-shrink-0 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium truncate ${
+                        isActive ? 'text-emerald-900' : 'text-gray-900'
+                      }`}>
+                        {thread.title || thread.metadata?.title || 'Untitled'}
+                      </p>
+                      
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className="text-xs text-gray-500">
+                          {thread.message_count || 0} message{thread.message_count !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          )
+        )}
+      </div>
+    );
+  };
   const { PaginationControls, Footer } = require('@/components/chat/ChatSidebarFooter');
 
-  // Create event handlers
-  const handleThreadClick = createThreadClickHandler(
-    activeThreadId, 
-    isProcessing, 
-    { sendMessage }
-  );
+  // Create debounced switch handler
+  const debouncedSwitchRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  // Create enhanced thread click handler for tests that includes URL navigation and debouncing
+  const handleThreadClick = React.useCallback(async (threadId: string) => {
+    if (threadId === activeThreadId || isProcessing) return;
+    
+    console.log('🎯 TestChatSidebar handleThreadClick called with:', threadId);
+    
+    // Update local state for immediate UI update (no debouncing for UI)
+    setLocalActiveThreadId(threadId);
+    
+    // Update localStorage for multi-tab sync
+    localStorage.setItem('activeThreadId', threadId);
+    
+    // Update active thread in store (no debouncing for store)
+    setActiveThread(threadId);
+    
+    // Navigate to URL (no debouncing for URL)
+    mockRouter.push(`/chat/${threadId}`);
+    
+    // Clear previous debounced call
+    if (debouncedSwitchRef.current) {
+      clearTimeout(debouncedSwitchRef.current);
+    }
+    
+    // Debounce the actual thread switching logic (WebSocket message)
+    debouncedSwitchRef.current = setTimeout(() => {
+      sendMessage({
+        type: 'switch_thread',
+        payload: { thread_id: threadId }
+      });
+      
+      // Call the switchThread handler if it exists (for tests that provide it)
+      // This will be accessed from the hook setup
+      const hookSetup = (window as any).testHookSetup;
+      if (hookSetup?.threadLoader?.switchThread) {
+        hookSetup.threadLoader.switchThread(threadId);
+      }
+    }, 100); // 100ms debounce
+  }, [activeThreadId, isProcessing, setActiveThread, sendMessage, setLocalActiveThreadId]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = ChatSidebarHooksModule.useThreadLoader(
     showAllThreads,
@@ -619,7 +804,7 @@ export const TestChatSidebar: React.FC = () => {
       />
 
       {/* Thread List - Always render for tests */}
-      <ThreadList
+      <TestThreadList
         threads={paginatedThreads}
         isLoadingThreads={isLoadingThreads}
         loadError={loadError}

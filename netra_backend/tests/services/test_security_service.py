@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -14,10 +14,10 @@ from unittest.mock import MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
-from app.schemas.Config import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 
 # Add project root to path
-from app.services.security_service import KeyManager, SecurityService
+from netra_backend.app.services.security_service import KeyManager, SecurityService
 
 # Add project root to path
 
@@ -34,7 +34,7 @@ def test_encrypt_and_decrypt(security_service: SecurityService):
     assert decrypted == original_string
 
 
-from app.schemas.auth_types import TokenPayload
+from netra_backend.app.schemas.auth_types import TokenPayload
 
 
 def test_create_and_validate_access_token(security_service: SecurityService):

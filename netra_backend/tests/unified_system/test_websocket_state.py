@@ -16,7 +16,7 @@ persistence for maintaining user session continuity across connection interrupti
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,16 +35,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.logging_config import central_logger
-from app.redis_manager import redis_manager
-from app.websocket.connection_info import ConnectionInfo, ConnectionState
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 
 # Add project root to path
-from app.websocket.connection_manager import (
+from netra_backend.app.websocket.connection_manager import (
     ConnectionManager,
     get_connection_manager,
 )
-from app.websocket.reconnection_handler import (
+from netra_backend.app.websocket.reconnection_handler import (
     ReconnectionContext,
     get_reconnection_handler,
 )

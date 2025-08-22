@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,17 +18,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import get_config, reload_config
-from app.core.config_validator import (
+from netra_backend.app.core.config import get_config, reload_config
+from netra_backend.app.core.config_validator import (
     ConfigurationValidationError,
     ConfigValidator,
 )
-from app.core.configuration.base import UnifiedConfigManager
-from app.core.exceptions_config import ConfigurationError
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from netra_backend.app.core.exceptions_config import ConfigurationError
 
 # Add project root to path
-from app.core.secret_manager import SecretManager, SecretManagerError
-from app.schemas.Config import AppConfig, DevelopmentConfig
+from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
+from netra_backend.app.schemas.Config import AppConfig, DevelopmentConfig
 
 # Add project root to path
 

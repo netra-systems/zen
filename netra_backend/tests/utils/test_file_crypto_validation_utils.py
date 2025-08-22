@@ -7,7 +7,7 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,12 +23,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from .json_file_crypto_test_helpers import (
+from netra_backend.tests.json_file_crypto_test_helpers import (
     CryptoTestHelpers,
     # Add project root to path
     FileTestHelpers,
 )
-from .validation_formatting_test_helpers import (
+from netra_backend.tests.validation_formatting_test_helpers import (
     ValidationTestHelpers,
 )
 
@@ -38,7 +38,7 @@ class TestFileUtilsOperations:
     """test_file_utils_operations - Test file operations and cleanup on error"""
     
     async def test_file_operations(self):
-        from app.utils.file_utils import FileUtils
+        from netra_backend.app.utils.file_utils import FileUtils
         utils = FileUtils()
         
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -48,7 +48,7 @@ class TestFileUtilsOperations:
             await self._test_file_deletion(utils, tmpdir)
     
     async def test_cleanup_on_error(self):
-        from app.utils.file_utils import FileUtils
+        from netra_backend.app.utils.file_utils import FileUtils
         utils = FileUtils()
         
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -101,7 +101,7 @@ class TestCryptoUtilsHashing:
     """test_crypto_utils_hashing - Test hashing algorithms and salt generation"""
     
     async def test_hashing_algorithms(self):
-        from app.utils.crypto_utils import CryptoUtils
+        from netra_backend.app.utils.crypto_utils import CryptoUtils
         utils = CryptoUtils()
         data = "test data"
         
@@ -115,7 +115,7 @@ class TestCryptoUtilsHashing:
         self._assert_different_data_different_hash(utils)
     
     async def test_salt_generation(self):
-        from app.utils.crypto_utils import CryptoUtils
+        from netra_backend.app.utils.crypto_utils import CryptoUtils
         utils = CryptoUtils()
         
         salt1, salt2 = utils.generate_salt(), utils.generate_salt()
@@ -154,7 +154,7 @@ class TestValidationUtilsSchemas:
     """test_validation_utils_schemas - Test schema validation and error messages"""
     
     async def test_schema_validation(self):
-        from app.utils.validation_utils import ValidationUtils
+        from netra_backend.app.utils.validation_utils import ValidationUtils
         utils = ValidationUtils()
         
         schema = ValidationTestHelpers.create_user_schema()
@@ -165,7 +165,7 @@ class TestValidationUtilsSchemas:
         self._assert_invalid_type_validation(utils, schema)
     
     async def test_error_messages(self):
-        from app.utils.validation_utils import ValidationUtils
+        from netra_backend.app.utils.validation_utils import ValidationUtils
         utils = ValidationUtils()
         
         schema = self._create_email_schema()

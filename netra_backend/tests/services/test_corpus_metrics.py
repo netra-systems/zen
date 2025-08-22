@@ -6,7 +6,7 @@ Tests for corpus metrics collection system
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,10 +20,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.schemas.Metrics import ExportFormat, QualityMetrics
+from netra_backend.app.schemas.Metrics import ExportFormat, QualityMetrics
 
 # Add project root to path
-from app.services.metrics import CorpusMetricsCollector
+from netra_backend.app.services.metrics import CorpusMetricsCollector
 
 # Add project root to path
 
@@ -190,7 +190,7 @@ class TestCoreMetricsCollector:
     """Test core metrics collector individually"""
     async def test_operation_timing(self):
         """Test operation timing functionality"""
-        from app.services.metrics.core_collector import (
+        from netra_backend.app.services.metrics.core_collector import (
             CoreMetricsCollector,
         )
         
@@ -213,7 +213,7 @@ class TestQualityMetricsCollector:
     """Test quality metrics collector individually"""
     async def test_quality_trend_tracking(self):
         """Test quality trend tracking"""
-        from app.services.metrics.quality_collector import (
+        from netra_backend.app.services.metrics.quality_collector import (
             QualityMetricsCollector,
         )
         
@@ -243,8 +243,8 @@ class TestMetricsExporter:
     """Test metrics exporter functionality"""
     async def test_json_export(self):
         """Test JSON export functionality"""
-        from app.schemas.Metrics import CorpusMetric, MetricType
-        from app.services.metrics.exporter import MetricsExporter
+        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.services.metrics.exporter import MetricsExporter
         
         exporter = MetricsExporter()
         
@@ -268,8 +268,8 @@ class TestMetricsExporter:
         assert "generation_time" in json_export
     async def test_prometheus_export(self):
         """Test Prometheus export functionality"""
-        from app.schemas.Metrics import CorpusMetric, MetricType
-        from app.services.metrics.exporter import MetricsExporter
+        from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
+        from netra_backend.app.services.metrics.exporter import MetricsExporter
         
         exporter = MetricsExporter()
         

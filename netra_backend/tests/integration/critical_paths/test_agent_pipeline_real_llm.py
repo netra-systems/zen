@@ -10,8 +10,8 @@ Critical Path: WebSocket auth -> Supervisor initialization -> SubAgent routing -
 Coverage: Full pipeline validation with real LLM providers, staging environment configuration, quality gates
 """
 
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from test_framework import setup_test_path
 
 setup_test_path()
 
@@ -40,22 +40,22 @@ if str(PROJECT_ROOT) not in sys.path:
 
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 
-from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path for tests
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.config import get_config
-from app.core.exceptions_base import NetraException
-from app.llm.llm_manager import LLMManager
-from app.schemas.llm_response_types import LLMResponse
-from app.schemas.registry import ServerMessage as WSResponse
-from app.schemas.registry import WebSocketMessage as WSMessage
-from app.services.cost_calculator import CostCalculatorService
-from app.services.quality_gate_service import QualityGateService
-from app.services.websocket_manager import WebSocketManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.config import get_config
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.schemas.registry import ServerMessage as WSResponse
+from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
+from netra_backend.app.services.cost_calculator import CostCalculatorService
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from ...e2e.real_client_types import (
 
     ClientConfig,

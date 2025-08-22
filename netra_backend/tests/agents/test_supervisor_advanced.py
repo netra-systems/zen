@@ -8,7 +8,7 @@ Test classes: TestSupervisorAdvancedFeatures
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from app.schemas import (
+from netra_backend.app.schemas import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,
@@ -31,10 +31,10 @@ from app.schemas import (
     WebSocketMessage,
 )
 
-from app.agents.state import (
+from netra_backend.app.agents.state import (
     DeepAgentState,  # Use the state module version with methods
 )
-from app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
     # Add project root to path
@@ -42,9 +42,9 @@ from app.agents.supervisor.execution_context import (
 )
 
 # Add project root to path
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.tool_dispatcher import ToolDispatcher
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 class TestSupervisorAdvancedFeatures:
@@ -74,7 +74,7 @@ class TestSupervisorAdvancedFeatures:
         )
         
         # Mock triage agent to fail
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = AsyncMock(side_effect=Exception("Agent failed"))
         supervisor.agents["triage"] = mock_triage
@@ -134,7 +134,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for concurrent test
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -214,7 +214,7 @@ class TestSupervisorAdvancedFeatures:
             return state
         
         # Mock triage agent for metrics test
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -276,7 +276,7 @@ class TestSupervisorAdvancedFeatures:
 
     def _setup_circuit_breaker_agent(self, supervisor):
         """Setup mock triage agent for circuit breaker test"""
-        from app.agents.triage_sub_agent.agent import TriageSubAgent
+        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = lambda state, run_id, stream_updates=True: self._mock_circuit_breaker_execute(supervisor, state, run_id, stream_updates)
         supervisor.agents["triage"] = mock_triage

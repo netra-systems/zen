@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Validates enterprise-grade security and compliance
 """
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 # Add project root to path
 import sys
@@ -34,7 +34,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 
-from .user_flow_base import UserFlowTestBase
+from tests.user_flow_base import UserFlowTestBase
 
 # Add project root to path
 

@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from tests.test_utils import setup_test_path
+from test_framework import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,10 +22,10 @@ from unittest.mock import AsyncMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.registry import Message, MessageType
+from netra_backend.app.schemas.registry import Message, MessageType
 
 # Add project root to path
-from app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.message_repository import MessageRepository
 
 # Add project root to path
 

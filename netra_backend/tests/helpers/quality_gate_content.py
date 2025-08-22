@@ -1,6 +1,6 @@
 """Test content generators for Quality Gate Service tests"""
 
-from app.services.quality_gate_service import ContentType
+from netra_backend.app.services.quality_gate_service import ContentType
 
 
 def get_high_quality_optimization_content():

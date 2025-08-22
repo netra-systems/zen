@@ -18,8 +18,8 @@ NO MOCKS - Uses real services and measures actual performance.
 
 # Add project root to path
 
-from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from ..test_utils import setup_test_path
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from test_framework import setup_test_path
 from pathlib import Path
 import sys
 
@@ -48,7 +48,7 @@ import psutil
 import pytest
 import websockets
 
-from app.config import get_config
+from netra_backend.app.config import get_config
 
 
 @dataclass
