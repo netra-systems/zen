@@ -96,7 +96,7 @@ class E2EImportFixer:
         # Missing classes that need to be created or imported differently
         self.class_fixes = {
             'PerformanceMetric': 'from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric',
-            'WebSocketManager': 'from netra_backend.app.websocket.connection_manager import ModernConnectionManager as WebSocketManager'
+            'WebSocketManager': 'from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager'
         }
     
     def fix_file(self, file_path: Path) -> bool:

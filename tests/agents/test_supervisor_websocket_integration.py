@@ -19,7 +19,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from netra_backend.app.ws_manager import WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from unittest.mock import AsyncMock, patch

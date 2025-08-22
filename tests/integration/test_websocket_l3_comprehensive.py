@@ -6,7 +6,7 @@ Tests WebSocket connections, messaging, reconnection, and real-time features
 
 # Add app to path
 from datetime import datetime, timedelta
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import asyncio

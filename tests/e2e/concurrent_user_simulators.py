@@ -12,7 +12,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design with focused responsibilities
 """
 
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.concurrent_user_models import (
 from typing import Dict, List, Any, Optional
 import asyncio

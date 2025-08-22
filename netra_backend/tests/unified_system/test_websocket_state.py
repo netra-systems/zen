@@ -41,7 +41,7 @@ from netra_backend.app.websocket.connection_info import ConnectionInfo, Connecti
 
 # Add project root to path
 from netra_backend.app.websocket.connection_manager import (
-    ModernModernConnectionManager,
+    ConnectionManager,
     get_connection_manager,
 )
 from netra_backend.app.websocket.reconnection_handler import (

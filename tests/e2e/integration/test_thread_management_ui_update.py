@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.schemas.websocket_message_types import (
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 import asyncio

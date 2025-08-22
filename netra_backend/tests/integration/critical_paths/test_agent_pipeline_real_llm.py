@@ -10,7 +10,7 @@ Critical Path: WebSocket auth -> Supervisor initialization -> SubAgent routing -
 Coverage: Full pipeline validation with real LLM providers, staging environment configuration, quality gates
 """
 
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 
 setup_test_path()

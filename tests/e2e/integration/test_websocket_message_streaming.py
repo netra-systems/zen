@@ -17,7 +17,7 @@ from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocke
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.connection_manager import (
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 import asyncio
@@ -25,7 +25,7 @@ import json
 import pytest
 import time
 
-    ModernModernConnectionManager,
+    ConnectionManager,
 
     get_connection_manager,
 
@@ -58,7 +58,7 @@ class WebSocketStreamingTester:
         """Create WebSocket manager for streaming tests."""
         # Create mock dependencies
 
-        mock_connection_manager = MagicMock(spec=ModernModernConnectionManager)
+        mock_connection_manager = MagicMock(spec=ConnectionManager)
 
         mock_connection_manager.add_connection = AsyncMock()
 

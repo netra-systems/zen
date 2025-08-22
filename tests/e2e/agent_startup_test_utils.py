@@ -18,7 +18,7 @@ Architecture:
 """
 
 from dataclasses import dataclass
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.load_test_utilities import SystemResourceMonitor
 from tests.real_client_factory import create_real_client_factory
 from tests.real_services_manager import create_real_services_manager

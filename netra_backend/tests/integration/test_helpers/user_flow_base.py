@@ -17,7 +17,7 @@ from netra_backend.app.schemas.UserPlan import UserPlan
 from netra_backend.app.schemas.registry import Message, Thread, User
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.services.cost_calculator import (
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional

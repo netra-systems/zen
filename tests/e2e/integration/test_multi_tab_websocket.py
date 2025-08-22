@@ -8,7 +8,7 @@ Requirements: 3 WebSocket connections, message broadcast, tab closure resilience
 Compliance: <300 lines, <8 lines per function, real connections only, <5s execution
 """
 
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.integration.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.integration.real_websocket_client import RealWebSocketClient
 from tests.e2e.jwt_token_helpers import JWTTestHelper

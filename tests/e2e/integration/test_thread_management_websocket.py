@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 Refactored for <300 lines using helpers.
 """
 
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.config import TEST_USERS
 from tests.e2e.integration.helpers.thread_management_helpers import (
 from tests.test_harness import UnifiedTestHarness

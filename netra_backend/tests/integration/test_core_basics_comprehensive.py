@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 # Import available modules (commented out - using mocks instead)
 # from netra_backend.app.clients.auth_client_core import AuthServiceClient
-# from netra_backend.app.core.websocket_connection_manager import WebSocketModernConnectionManager
+# from netra_backend.app.core.websocket_connection_manager import WebSocketConnectionManager
 # from netra_backend.app.db.postgres_core import get_async_session
 # from netra_backend.app.core.cache import CacheManager
 # from netra_backend.app.core.configuration.config import config_instance

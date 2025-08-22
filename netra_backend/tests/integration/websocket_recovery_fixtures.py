@@ -18,7 +18,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_models import WebSocketValidationError
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from netra_backend.app.websocket.reconnection_manager import (
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 from typing import Any, Dict, List, Optional, Tuple

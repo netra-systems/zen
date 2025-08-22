@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Fix E2E Test ModernConnectionManager Import Issues
+Fix E2E Test ConnectionManager Import Issues
 
 This script systematically fixes all e2e tests that are importing the old
-ModernConnectionManager class name, replacing it with the new ModernConnectionManager
+ConnectionManager class name, replacing it with the new ConnectionManager
 and proper import patterns.
 
 Business Value Justification (BVJ):
@@ -21,7 +21,7 @@ from typing import List, Set, Tuple
 
 
 def find_files_with_connection_manager_imports(root_dir: str) -> List[Path]:
-    """Find all Python files importing ModernConnectionManager from connection_manager."""
+    """Find all Python files importing ConnectionManager from connection_manager."""
     files = []
     
     # Search patterns for files that likely contain the problematic import
@@ -49,7 +49,7 @@ def find_files_with_connection_manager_imports(root_dir: str) -> List[Path]:
     return files
 
 def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
-    """Fix ModernConnectionManager imports in a single file."""
+    """Fix ConnectionManager imports in a single file."""
     changes = []
     
     try:
@@ -60,27 +60,27 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         
         # Pattern 1: Direct import replacement
         pattern1 = r'from app\.websocket\.connection_manager import ConnectionManager'
-        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager'
+        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ConnectionManager'
         if re.search(pattern1, content):
             content = re.sub(pattern1, replacement1, content)
-            changes.append("Updated import statement to use ModernConnectionManager")
+            changes.append("Updated import statement to use ConnectionManager")
         
-        # Pattern 2: Mixed imports with ModernConnectionManager
+        # Pattern 2: Mixed imports with ConnectionManager
         pattern2 = r'from app\.websocket\.connection_manager import ([^,]*,\s*)*ConnectionManager([^,\n]*)'
         def replace_mixed_import(match):
             full_match = match.group(0)
-            if 'get_connection_manager' not in full_match and 'ModernConnectionManager' not in full_match:
-                return full_match.replace('ConnectionManager', 'get_connection_manager, ModernConnectionManager')
-            elif 'ConnectionManager' in full_match and 'ModernConnectionManager' not in full_match:
-                return full_match.replace('ConnectionManager', 'ModernConnectionManager')
+            if 'get_connection_manager' not in full_match and 'ConnectionManager' not in full_match:
+                return full_match.replace('ConnectionManager', 'get_connection_manager, ConnectionManager')
+            elif 'ConnectionManager' in full_match and 'ConnectionManager' not in full_match:
+                return full_match.replace('ConnectionManager', 'ConnectionManager')
             return full_match
         
         content = re.sub(pattern2, replace_mixed_import, content)
         
         # Pattern 3: Fix type hints and instantiation
         # Type hint fixes
-        content = re.sub(r':\s*ConnectionManager\b', ': ModernConnectionManager', content)
-        content = re.sub(r'spec=ConnectionManager\b', 'spec=ModernConnectionManager', content)
+        content = re.sub(r':\s*ConnectionManager\b', ': ConnectionManager', content)
+        content = re.sub(r'spec=ConnectionManager\b', 'spec=ConnectionManager', content)
         
         # Instantiation fixes - replace ConnectionManager() with get_connection_manager()
         pattern3 = r'\bConnectionManager\(\)'
@@ -106,11 +106,11 @@ def main():
     """Main function to fix all e2e test import issues."""
     root_dir = Path(__file__).parent.parent.absolute()
     
-    print("Finding files with ModernConnectionManager import issues...")
+    print("Finding files with ConnectionManager import issues...")
     files_to_fix = find_files_with_connection_manager_imports(str(root_dir))
     
     if not files_to_fix:
-        print("No files found with ModernConnectionManager import issues")
+        print("No files found with ConnectionManager import issues")
         return
     
     print(f"Found {len(files_to_fix)} files to fix:")

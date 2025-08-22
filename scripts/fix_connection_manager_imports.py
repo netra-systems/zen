@@ -1,4 +1,4 @@
-"""Fix ModernConnectionManager import issues across the codebase."""
+"""Fix ConnectionManager import issues across the codebase."""
 import os
 import re
 import sys
@@ -16,20 +16,20 @@ def fix_imports_in_file(file_path: Path) -> bool:
     
     original_content = content
     
-    # Pattern 1: ModernConnectionManager direct import
+    # Pattern 1: ConnectionManager direct import
     pattern1 = r'from netra_backend\.app\.websocket\.connection_manager import ConnectionManager\b'
-    replacement1 = 'from netra_backend.app.websocket.connection_manager import ModernConnectionManager'
+    replacement1 = 'from netra_backend.app.websocket.connection_manager import ConnectionManager'
     content = re.sub(pattern1, replacement1, content)
     
-    # Pattern 2: ModernConnectionManager with alias
-    pattern2 = r'from netra_backend\.app\.websocket\.connection_manager import ModernConnectionManager as (\w+)'
-    replacement2 = r'from netra_backend.app.websocket.connection_manager import ModernConnectionManager as \1'
+    # Pattern 2: ConnectionManager with alias
+    pattern2 = r'from netra_backend\.app\.websocket\.connection_manager import ConnectionManager as (\w+)'
+    replacement2 = r'from netra_backend.app.websocket.connection_manager import ConnectionManager as \1'
     content = re.sub(pattern2, replacement2, content)
     
-    # Pattern 3: Multi-import with ModernConnectionManager
+    # Pattern 3: Multi-import with ConnectionManager
     pattern3 = r'ConnectionManager(?=[\s,\)])'
     if 'from netra_backend.app.websocket.connection_manager import' in content:
-        content = re.sub(pattern3, 'ModernConnectionManager', content)
+        content = re.sub(pattern3, 'ConnectionManager', content)
     
     if content != original_content:
         try:
@@ -70,7 +70,7 @@ def main():
     # Get project root
     project_root = Path(__file__).parent.parent
     
-    print("Fixing ModernConnectionManager imports...")
+    print("Fixing ConnectionManager imports...")
     print(f"Project root: {project_root}")
     
     # Find files to fix
@@ -87,23 +87,23 @@ def main():
     print(f"\nFixed {fixed_count} files")
     
     # Also check for any remaining bad imports
-    print("\nChecking for any remaining ModernConnectionManager imports...")
+    print("\nChecking for any remaining ConnectionManager imports...")
     remaining_issues = []
     for file_path in files_to_fix:
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
-            if 'from netra_backend.app.websocket.connection_manager import ModernConnectionManager' in content:
+            if 'from netra_backend.app.websocket.connection_manager import ConnectionManager' in content:
                 remaining_issues.append(file_path)
         except:
             pass
     
     if remaining_issues:
-        print(f"Warning: {len(remaining_issues)} files still have ModernConnectionManager imports:")
+        print(f"Warning: {len(remaining_issues)} files still have ConnectionManager imports:")
         for path in remaining_issues[:5]:
             print(f"  - {path.relative_to(project_root)}")
     else:
-        print("All ModernConnectionManager imports have been fixed!")
+        print("All ConnectionManager imports have been fixed!")
     
     return 0 if not remaining_issues else 1
 

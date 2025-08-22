@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Import components
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.test_harness import UnifiedTestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class ServiceManager:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.ServiceManager")
         # Import the real service manager
-        from tests.service_manager import ServiceManager as RealServiceManager
+        from tests.e2e.service_manager import ServiceManager as RealServiceManager
         self._real_manager = RealServiceManager(harness)
     
     async def start_auth_service(self) -> None:
@@ -147,7 +147,7 @@ class HealthMonitor:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.HealthMonitor")
         # Import the real health monitor
-        from tests.service_manager import HealthMonitor as RealHealthMonitor
+        from tests.e2e.service_manager import HealthMonitor as RealHealthMonitor
         self._real_monitor = RealHealthMonitor(harness)
     
     async def wait_for_all_ready(self) -> None:
@@ -288,7 +288,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     def _initialize_service_configs(self) -> None:
         """Initialize service configurations with proper settings."""
-        from tests.test_harness import ServiceConfig
+        from tests.e2e.test_harness import ServiceConfig
         
         self.state.services = {
             "auth_service": ServiceConfig(

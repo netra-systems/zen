@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.routes.websocket_secure import (
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch

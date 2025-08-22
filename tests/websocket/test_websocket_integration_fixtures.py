@@ -7,7 +7,7 @@ from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_secure import (
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
 from unittest.mock import AsyncMock, patch

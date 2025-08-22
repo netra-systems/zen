@@ -12,7 +12,7 @@ Coverage: Microservice startup orchestration, dependency resolution, graceful de
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -40,7 +40,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.config import Settings
 from netra_backend.app.services.database.connection_manager import (
 
-    DatabaseModernConnectionManager,
+    DatabaseConnectionManager,
 
 )
 
@@ -230,7 +230,7 @@ async def test_microservice_startup_orchestration(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseModernConnectionManager), 
+        ("database", DatabaseConnectionManager), 
 
         ("health_check", HealthCheckService),
 
@@ -291,7 +291,7 @@ async def test_dependency_resolution_chain(system_manager):
 
                side_effect=Exception("Database unavailable")):
 
-        db_started = await system_manager.start_service("database", DatabaseModernConnectionManager)
+        db_started = await system_manager.start_service("database", DatabaseConnectionManager)
 
         assert not db_started
     
@@ -320,7 +320,7 @@ async def test_health_check_endpoints_integration(system_manager):
 
     await system_manager.start_service("redis", RedisService)
 
-    await system_manager.start_service("database", DatabaseModernConnectionManager)
+    await system_manager.start_service("database", DatabaseConnectionManager)
 
     await system_manager.start_service("health_check", HealthCheckService)
     
@@ -368,7 +368,7 @@ async def test_graceful_shutdown_sequence(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseModernConnectionManager),
+        ("database", DatabaseConnectionManager),
 
         ("health_check", HealthCheckService),
 
@@ -427,7 +427,7 @@ async def test_startup_performance_benchmarks(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseModernConnectionManager),
+        ("database", DatabaseConnectionManager),
 
         ("health_check", HealthCheckService),
 

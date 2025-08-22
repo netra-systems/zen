@@ -5,7 +5,7 @@ Fix Import Issues Across E2E Test Files
 This script fixes common import issues found in the codebase:
 1. validate_token -> validate_token_jwt
 2. websockets module -> mcp.main module for websocket_endpoint
-3. ModernConnectionManager -> ModernConnectionManager (where applicable)
+3. ConnectionManager -> ConnectionManager (where applicable)
 """
 
 import glob
@@ -87,7 +87,7 @@ def fix_websockets_import(file_path: str) -> bool:
     return False
 
 def fix_connection_manager_specs(file_path: str) -> bool:
-    """Fix ModernConnectionManager mock specs to use ModernConnectionManager."""
+    """Fix ConnectionManager mock specs to use ConnectionManager."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -98,7 +98,7 @@ def fix_connection_manager_specs(file_path: str) -> bool:
         if 'from netra_backend.app.websocket.connection_manager import' in content:
             content = re.sub(
                 r'spec=ConnectionManager',
-                r'spec=ModernConnectionManager',
+                r'spec=ConnectionManager',
                 content
             )
             
@@ -163,12 +163,12 @@ def main():
                     fixed_files.append(f"websocket_endpoint: {file_path}")
                     print(f"  Fixed: {file_path}")
     
-    print("\n3. Fixing ModernConnectionManager mock specs...")
+    print("\n3. Fixing ConnectionManager mock specs...")
     for pattern in connection_patterns:
         for file_path in glob.glob(str(base_dir / pattern), recursive=True):
             if os.path.isfile(file_path):
                 if fix_connection_manager_specs(file_path):
-                    fixed_files.append(f"ModernConnectionManager spec: {file_path}")
+                    fixed_files.append(f"ConnectionManager spec: {file_path}")
                     print(f"  Fixed: {file_path}")
     
     print(f"\nImport fixes completed!")

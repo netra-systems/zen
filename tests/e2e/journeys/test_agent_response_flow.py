@@ -25,7 +25,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 import asyncio

@@ -20,7 +20,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.agent_response_test_utilities import (
 from typing import Any, Dict, List, Optional
 from unittest.mock import patch

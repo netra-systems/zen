@@ -1,4 +1,4 @@
-"""Unit tests for ModernModernConnectionManager information and stats.
+"""Unit tests for ConnectionManager information and stats.
 
 Tests WebSocket connection information retrieval and statistics.
 USER RETENTION CRITICAL - Real-time features keep users engaged.
@@ -27,7 +27,7 @@ from fastapi import WebSocket
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 
 # Add project root to path
 
