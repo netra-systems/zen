@@ -13,6 +13,10 @@ async def conversion_environment():
     websocket_manager = Mock()
     websocket_manager.send_upgrade_prompt = AsyncMock()
     websocket_manager.send_tier_limits_warning = AsyncMock()
+    websocket_manager.send_security_confirmation = AsyncMock()
+    websocket_manager.send_dashboard_update = AsyncMock()
+    websocket_manager.send_onboarding_update = AsyncMock()
+    websocket_manager.send_optimization_results = AsyncMock()
     
     return {
         "user_id": "test_user_123",
@@ -78,3 +82,47 @@ async def pricing_engine():
         "enterprise": {"api_calls": "unlimited", "storage": "unlimited", "support": "priority"}
     })
     return engine
+
+
+@pytest.fixture
+async def ai_provider_simulator():
+    """Mock AI provider simulator for API key testing."""
+    simulator = Mock()
+    simulator.validate_api_key = AsyncMock(return_value={
+        "valid": True,
+        "provider": "openai",
+        "balance": 100.0,
+        "rate_limits": {"requests_per_minute": 1000}
+    })
+    simulator.test_connection = AsyncMock(return_value={
+        "connected": True,
+        "latency_ms": 45,
+        "model_access": ["gpt-4", "gpt-3.5-turbo"]
+    })
+    return simulator
+
+
+@pytest.fixture
+async def enterprise_security_checker():
+    """Mock enterprise security checker."""
+    checker = Mock()
+    checker.validate_compliance = AsyncMock(return_value={
+        "gdpr_compliant": True,
+        "soc2_compliant": True,
+        "encryption": "AES-256",
+        "data_residency": "US"
+    })
+    return checker
+
+
+@pytest.fixture
+async def onboarding_flow_manager():
+    """Mock onboarding flow manager."""
+    manager = Mock()
+    manager.initialize_onboarding = AsyncMock(return_value={
+        "session_id": "onboard_123",
+        "steps": ["welcome", "api_setup", "optimization", "verification"],
+        "current_step": "welcome"
+    })
+    manager.complete_step = AsyncMock(return_value={"next_step": "api_setup"})
+    return manager

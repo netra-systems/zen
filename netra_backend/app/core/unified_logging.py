@@ -38,6 +38,7 @@ class UnifiedLogger:
     def __init__(self):
         self._initialized = False
         self._config = None  # Will be lazy-loaded
+        self._config_loaded = False  # Cache flag to prevent repeated loading
         self._filter = SensitiveDataFilter()
         self._context = LoggingContext()
         self._performance = PerformanceTracker(self)
@@ -45,11 +46,15 @@ class UnifiedLogger:
         # Don't setup logging during init to avoid circular imports
     
     def _load_config(self) -> Dict[str, Any]:
-        """Load logging configuration from unified config."""
+        """Load logging configuration from unified config with caching."""
+        # Return cached config if already loaded
+        if self._config_loaded and self._config is not None:
+            return self._config
+            
         try:
             from netra_backend.app.core.configuration import unified_config_manager
             config = unified_config_manager.get_config()
-            return {
+            loaded_config = {
                 'log_level': getattr(config, 'log_level', 'INFO').upper(),
                 'enable_file_logging': getattr(config, 'enable_file_logging', False),
                 'enable_json_logging': getattr(config, 'enable_json_logging', False),
@@ -57,13 +62,18 @@ class UnifiedLogger:
             }
         except ImportError:
             # Fallback configuration if config module not available
-            return {
+            loaded_config = {
                 # @marked: Logging bootstrap before config initialization
                 'log_level': self._get_fallback_log_level(),
                 'enable_file_logging': False,
                 'enable_json_logging': False,
                 'log_file_path': 'logs/netra.log'
             }
+        
+        # Cache the config and mark as loaded
+        self._config = loaded_config
+        self._config_loaded = True
+        return loaded_config
     
     def _get_fallback_log_level(self) -> str:
         """Get log level from unified config with fallback."""
@@ -72,16 +82,15 @@ class UnifiedLogger:
             config = get_unified_config()
             return config.logging.level.upper()
         except:
-            # Ultimate fallback
-            return "INFO"
+            # Ultimate fallback to environment variable or INFO
+            return os.environ.get('LOG_LEVEL', 'INFO').upper()
     
     def _setup_logging(self):
         """Initialize the logging system."""
         if self._initialized:
             return
-        # Load config if not already loaded
-        if self._config is None:
-            self._config = self._load_config()
+        # Load config (uses caching internally)
+        self._config = self._load_config()
         self._configure_handlers()
         setup_stdlib_interception()
         self._initialized = True

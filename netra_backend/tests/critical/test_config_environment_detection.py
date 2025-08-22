@@ -20,8 +20,8 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Core configuration environment components
-from config_environment import ConfigEnvironment
-from config_loader import detect_cloud_run_environment
+from netra_backend.app.core.configuration.environment import ConfigEnvironment
+from netra_backend.app.core.configuration.loader import detect_cloud_run_environment
 
 from netra_backend.app.schemas.Config import (
     AppConfig,
