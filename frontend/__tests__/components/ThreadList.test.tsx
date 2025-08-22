@@ -77,8 +77,8 @@ const renderThreadList = (props = {}) => {
     activeThreadId: null,
     isProcessing: false,
     showAllThreads: false,
-    onThreadClick: jest.fn(),
-    onRetryLoad: jest.fn()
+    onThreadClick: jest.fn().mockResolvedValue(undefined),
+    onRetryLoad: jest.fn().mockResolvedValue(undefined)
   };
 
   return render(
@@ -158,7 +158,8 @@ describe('ThreadList Component Tests', () => {
       renderThreadList({ threads: [mockThreadData.adminType] });
       
       const threadItem = screen.getByTestId('thread-item-thread-3');
-      const icon = within(threadItem).getByRole('img', { hidden: true });
+      // Admin threads should have Database icon for corpus type
+      const icon = within(threadItem).querySelector('svg');
       expect(icon).toBeInTheDocument();
     });
 

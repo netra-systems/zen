@@ -111,20 +111,20 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config import get_config
-from app.db.base import Base
-from app.db.models_agent_state import *  # Import all agent state models
-from app.db.models_content import *  # Import all content models
-from app.db.models_postgres import *  # Import all postgres models
+from netra_backend.app.config import get_config
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_content import *  # Import all content models
+from netra_backend.app.db.models_postgres import *  # Import all postgres models
 
 # Import all models to ensure they are registered with Base before creating tables
-from app.db.models_user import Secret, ToolUsageLog, User
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Initialize database on import to ensure async_session_factory is available
-from app.db.postgres import initialize_postgres
-from app.db.session import get_db_session
-from app.main import app
-from tests.conftest_helpers import (
+from netra_backend.app.db.postgres import initialize_postgres
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.main import app
+from netra_backend.tests.conftest_helpers import (
 
     _create_mock_tool_dispatcher,
 
