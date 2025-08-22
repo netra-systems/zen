@@ -63,15 +63,15 @@ class TestWebSocketValidatorFix:
     
     @pytest.mark.asyncio
     async def test_validator_sends_plain_json_to_secure_endpoints(self):
-        """Test that validator sends plain JSON to /ws/secure endpoints."""
+        """Test that validator sends plain JSON to /ws endpoints."""
         validator = WebSocketValidator(use_emoji=False)
         
         # Create a secure endpoint
         endpoint = WebSocketEndpoint(
             name="secure_ws",
-            url="ws://localhost:8000/ws/secure",
+            url="ws://localhost:8000/ws",
             port=8000,
-            path="/ws/secure"  # Secure endpoint
+            path="/ws"  # Secure endpoint
         )
         
         sent_messages = []
@@ -173,9 +173,9 @@ class TestWebSocketValidatorFix:
         
         endpoint = WebSocketEndpoint(
             name="secure_ws",
-            url="ws://localhost:8000/ws/secure",
+            url="ws://localhost:8000/ws",
             port=8000,
-            path="/ws/secure"
+            path="/ws"
         )
         
         # Mock timeout on recv

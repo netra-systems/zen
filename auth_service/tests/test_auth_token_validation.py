@@ -258,7 +258,8 @@ class TestJWTTokenValidation(unittest.TestCase):
             "token_type": "access",
             "iat": datetime.now(timezone.utc),
             "exp": near_expiry_time,
-            "jti": f"access_{int(time.time())}"
+            "jti": f"access_{int(time.time())}",
+            "iss": "netra-auth-service"
         }
         
         # Encode token with short expiry

@@ -21,10 +21,10 @@ import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.routes.websocket_secure import (
-    # Private functions not exposed for testing
-    secure_websocket_endpoint,
-    secure_websocket_health,
+from netra_backend.app.routes.websocket_unified import (
+    # Unified WebSocket functions
+    unified_websocket_endpoint,
+    unified_websocket_health,
 )
 
 from netra_backend.app.websocket.connection import ConnectionManager

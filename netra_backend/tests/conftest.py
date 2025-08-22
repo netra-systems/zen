@@ -122,6 +122,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Configuration imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.core.configuration.base import get_unified_config
@@ -254,9 +255,18 @@ async def test_engine():
     # Import Base lazily to avoid slow startup during test collection
     from netra_backend.app.db.base import Base
 
-    # Use unified config for test engine setup
-    config = get_unified_config()
-    engine = create_async_engine(config.database_url, echo=False)
+    # Use in-memory SQLite for tests to avoid requiring real database
+    # This ensures tests are isolated and fast
+    test_database_url = "sqlite+aiosqlite:///:memory:"
+    
+    engine = create_async_engine(
+        test_database_url,
+        echo=False,
+        poolclass=StaticPool,
+        connect_args={
+            "check_same_thread": False,
+        }
+    )
 
     async with engine.begin() as conn:
 

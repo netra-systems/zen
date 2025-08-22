@@ -19,7 +19,7 @@ import psycopg2
 from alembic import command
 from alembic.config import Config
 
-from netra_backend.tests.base import StagingConfigTestBase
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestDatabaseMigrations(StagingConfigTestBase):
     """Test database migrations in staging."""

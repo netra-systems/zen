@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.tests.test_unified_message_flow import MessageFlowTracker
+from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

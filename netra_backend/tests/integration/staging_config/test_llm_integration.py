@@ -16,7 +16,7 @@ from typing import Dict, Optional
 
 import httpx
 
-from netra_backend.tests.base import StagingConfigTestBase
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestLLMIntegration(StagingConfigTestBase):
     """Test LLM integrations in staging."""

@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Single point of WebSocket truth, eliminates confusion
 
 Architecture:
-- Single endpoint: /ws (replaces /ws, /ws/secure, /api/mcp/ws)
+- Single endpoint: /ws (replaces /ws, /ws, /api/mcp/ws)
 - Unified message envelope supporting regular JSON and JSON-RPC subtypes
 - Backward compatibility through automatic message format detection
 - Zero development mode authentication bypasses in production
@@ -707,7 +707,7 @@ async def unified_websocket_endpoint(websocket: WebSocket):
     
     Replaces:
     - /ws (insecure legacy endpoint)
-    - /ws/secure (secure endpoint) 
+    - /ws (secure endpoint) 
     - /api/mcp/ws (MCP JSON-RPC endpoint)
     
     Features:
@@ -871,7 +871,7 @@ async def unified_websocket_config():
             "security_stats": cors_handler.get_security_stats()
         },
         "migration_info": {
-            "replaces_endpoints": ["/ws", "/ws/secure", "/api/mcp/ws"],
+            "replaces_endpoints": ["/ws", "/ws", "/api/mcp/ws"],
             "backward_compatible": True,
             "security_level": "enterprise"
         },

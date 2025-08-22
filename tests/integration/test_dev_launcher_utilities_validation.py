@@ -18,8 +18,11 @@ import pytest
 
 # Add project root to path for imports
 
-from dev_launcher.config import LauncherConfig
+from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.launcher import DevLauncher
+
+# Get project root for tests
+project_root = find_project_root()
 
 
 class TestDevLauncherUtilities:

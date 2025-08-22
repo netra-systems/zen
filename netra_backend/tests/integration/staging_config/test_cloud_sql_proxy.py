@@ -18,7 +18,7 @@ import asyncpg
 import psycopg2
 from psycopg2 import sql
 
-from netra_backend.tests.base import StagingConfigTestBase
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestCloudSQLProxyConnectivity(StagingConfigTestBase):
     """Test Cloud SQL proxy connectivity in staging."""

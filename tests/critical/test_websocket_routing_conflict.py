@@ -515,7 +515,7 @@ class TestRootCauseAnalysis:
         # These paths might conflict or cause confusion
         potential_conflicts = [
             ('/ws', '/api/mcp/ws'),  # Different message formats
-            ('/ws', '/ws/secure'),    # Security differences
+            ('/ws', '/ws'),    # Security differences
             ('/ws/{user_id}', '/ws/v1/{user_id}')  # Parameter handling
         ]
         

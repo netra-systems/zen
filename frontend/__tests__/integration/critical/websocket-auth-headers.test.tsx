@@ -20,7 +20,7 @@ import { webSocketService } from '@/services/webSocketService';
 jest.mock('@/config', () => ({
   config: {
     apiUrl: 'http://localhost:8000',
-    wsUrl: 'ws://localhost:8000/ws/secure'
+    wsUrl: 'ws://localhost:8000/ws'
   }
 }));
 
@@ -166,7 +166,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       );
       
       // Should connect to secure endpoint
-      expect(url).toContain('/ws/secure');
+      expect(url).toContain('/ws');
     });
 
     it('should NOT send JWT token via query parameters (security verified)', async () => {
@@ -286,7 +286,7 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       const url = connection.url;
 
       // Should connect to secure endpoint with proper authentication
-      expect(url).toContain('/ws/secure');
+      expect(url).toContain('/ws');
       expect(url).not.toContain('/ws?token='); // Insecure patterns rejected
       expect(url).not.toContain('token='); // No query parameters
     });

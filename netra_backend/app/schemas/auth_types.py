@@ -48,6 +48,15 @@ class TokenType(str, Enum):
     SERVICE = "service"
 
 
+class TokenStatus(str, Enum):
+    """Token status enumeration for expiry handling."""
+    VALID = "valid"
+    EXPIRING_SOON = "expiring_soon"
+    EXPIRED = "expired"
+    REVOKED = "revoked"
+    INVALID = "invalid"
+
+
 class ServiceStatus(str, Enum):
     """Service status enumeration for health checks."""
     HEALTHY = "healthy"
@@ -417,6 +426,18 @@ class UserProfile(BaseModel):
     metadata: Dict[str, Any] = {}
 
 
+class TokenExpiryNotification(BaseModel):
+    """Token expiry notification model for testing expiry workflows."""
+    token_id: str
+    user_id: str
+    token_type: TokenType = TokenType.ACCESS
+    expires_at: datetime
+    warning_sent: bool = False
+    notification_type: str = "expiry_warning"
+    metadata: Dict[str, Any] = {}
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 class AuditLog(BaseModel):
     """Auth audit log entry."""
     event_id: str
@@ -460,6 +481,7 @@ AuthResponse = LoginResponse
 # Export all auth types
 __all__ = [
     "TokenType",
+    "TokenStatus",
     "AuthProvider", 
     "Token",
     "TokenPayload",
@@ -490,6 +512,7 @@ __all__ = [
     "Role",
     "ResourceAccess",
     "UserProfile",
+    "TokenExpiryNotification",
     "AuditLog",
     "AuditEvent",
     "AuthorizationResult",

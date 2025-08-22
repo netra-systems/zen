@@ -14,27 +14,27 @@ async def test_websocket_with_origins():
     test_cases = [
         {
             "description": "No origin header",
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "origin": None
         },
         {
             "description": "Valid localhost:3000 origin",
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "origin": "http://localhost:3000"
         },
         {
             "description": "Valid localhost:3001 origin",
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "origin": "http://localhost:3001"
         },
         {
             "description": "Invalid origin",
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "origin": "http://invalid-origin.com"
         },
         {
             "description": "Valid development port",
-            "url": "ws://localhost:8000/ws/secure", 
+            "url": "ws://localhost:8000/ws", 
             "origin": "http://localhost:4000"
         }
     ]

@@ -47,7 +47,7 @@ from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
 
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.tests.sso_saml_components import (
+from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,
     MockIdPErrorGenerator,

@@ -21,9 +21,9 @@ from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
-from netra_backend.tests.test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.integration.test_ws_connection_mocks import MockWebSocket
 
-from netra_backend.tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 
 def flow_tracker():
     """Create message flow tracker."""

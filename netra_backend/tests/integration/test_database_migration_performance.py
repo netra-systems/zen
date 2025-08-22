@@ -23,7 +23,7 @@ from pathlib import Path
 import asyncpg
 import pytest
 
-from netra_backend.tests.database_migration_validators import (
+from netra_backend.tests.integration.database_migration_validators import (
     ContainerizedDatabaseManager,
     MigrationValidator,
 )

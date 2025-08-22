@@ -113,7 +113,7 @@ class TestWebSocketCrossSystemFailures:
             headers = {"Authorization": f"Bearer {expired_token}"}
             
             with pytest.raises(Exception) as exc_info:
-                with client.websocket_connect("/ws/secure", headers=headers) as websocket:
+                with client.websocket_connect("/ws", headers=headers) as websocket:
                     # Send message that should trigger token validation
                     websocket.send_json({
                         "type": "ping",

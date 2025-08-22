@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.tests.test_fixtures_common import (
+from netra_backend.tests.integration.test_fixtures_common import (
     mock_infrastructure,
     setup_circuit_breakers_for_chain,
     test_database,

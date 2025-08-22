@@ -448,13 +448,13 @@ class ColdStartE2ETest:
         if ws_url:
             # Ensure it's the secure endpoint
             if '/secure' not in ws_url and '/v1' not in ws_url:
-                ws_url = ws_url.replace('/ws', '/ws/secure')
+                ws_url = ws_url.replace('/ws', '/ws')
             return ws_url
             
         # Fallback
         api_url = self.get_api_url()
         if api_url:
-            return api_url.replace('http://', 'ws://') + '/ws/secure'
+            return api_url.replace('http://', 'ws://') + '/ws'
             
         return None
         

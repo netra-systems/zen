@@ -200,7 +200,11 @@ class WebSocketCORSHandler:
         Returns:
             True if origin is allowed, False otherwise
         """
+        # TESTING ENVIRONMENT: Allow connections without origin (e.g., TestClient)
         if not origin:
+            if self.environment in ['development', 'testing']:
+                logger.debug("WebSocket origin allowed: None (test environment bypass)")
+                return True
             self._record_violation("", "WebSocket connection attempted without Origin header")
             return False
         

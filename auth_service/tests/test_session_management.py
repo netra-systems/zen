@@ -40,13 +40,17 @@ class TestSessionCreation:
         assert isinstance(session_id, str)
 
     def test_create_session_redis_failure(self, session_manager):
-        """Test session creation with Redis failure"""
+        """Test session creation with Redis failure falls back to memory"""
         user_data = {"email": "test@example.com"}
+        # Simulate Redis failure by setting client to None
         session_manager.redis_client = None
+        session_manager.redis_enabled = False
         
+        # Session should still be created using memory fallback
         session_id = session_manager.create_session("user123", user_data)
         
-        assert session_id is None
+        assert session_id is not None
+        assert isinstance(session_id, str)
 
 
 class TestSessionValidation:

@@ -30,7 +30,7 @@ from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 # Service URLs from running services
 BACKEND_URL = "http://localhost:8000"
 WEBSOCKET_URL = "ws://localhost:8000/ws"
-WEBSOCKET_SECURE_URL = "ws://localhost:8000/ws/secure"
+WEBSOCKET_SECURE_URL = "ws://localhost:8000/ws"
 
 class WebSocketAuthTester:
     """Test WebSocket authentication and real-time messaging for the Netra platform."""

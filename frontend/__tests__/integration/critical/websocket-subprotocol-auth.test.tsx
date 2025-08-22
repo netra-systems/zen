@@ -15,7 +15,7 @@ import { webSocketService } from '@/services/webSocketService';
 jest.mock('@/config', () => ({
   config: {
     apiUrl: 'http://localhost:8000',
-    wsUrl: 'ws://localhost:8000/ws/secure'
+    wsUrl: 'ws://localhost:8000/ws'
   }
 }));
 

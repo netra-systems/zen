@@ -108,7 +108,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
         route_modules = [
             'netra_backend.app.routes.health',
             'netra_backend.app.routes.agent_route',
-            'netra_backend.app.routes.websocket_secure',
+            'netra_backend.app.routes.websocket_unified',
             'netra_backend.app.routes.threads_route',
             'netra_backend.app.routes.corpus',
             'netra_backend.app.routes.admin',

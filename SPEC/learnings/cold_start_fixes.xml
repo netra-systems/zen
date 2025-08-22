@@ -16,7 +16,7 @@
     
     <issue id="2" severity="critical">
       <problem>WebSocket URL configuration issues - missing /secure path</problem>
-      <solution>Updated WebSocket URL to use /ws/secure endpoint</solution>
+      <solution>Updated WebSocket URL to use /ws endpoint</solution>
       <impact>WebSocket connections now establish correctly</impact>
     </issue>
     
@@ -179,7 +179,7 @@
     <practice>Implement fallback to static configuration</practice>
     <practice>Cache discovery results to reduce API calls</practice>
     <practice>Support pattern matching for localhost origins</practice>
-    <practice>Use /ws/secure endpoint for WebSocket</practice>
+    <practice>Use /ws endpoint for WebSocket</practice>
     <practice>Test with dynamic ports regularly</practice>
   </best_practices>
   
@@ -201,7 +201,7 @@
     
     <insight>
       WebSocket paths must be consistent between frontend and backend.
-      The /ws/secure endpoint provides proper authentication handling.
+      The /ws endpoint provides proper authentication handling.
     </insight>
     
     <insight>

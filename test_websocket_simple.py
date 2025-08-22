@@ -27,13 +27,13 @@ async def test_simple_websocket():
             "subprotocols": None
         },
         {
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "description": "Secure WebSocket endpoint",
             "headers": {},
             "subprotocols": None
         },
         {
-            "url": "ws://localhost:8000/ws/secure",
+            "url": "ws://localhost:8000/ws",
             "description": "Secure WebSocket with auth header",
             "headers": {"Authorization": "Bearer fake_token_123"},
             "subprotocols": None

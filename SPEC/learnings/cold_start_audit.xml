@@ -63,8 +63,8 @@
         
         <!-- Phase 5: WebSocket Fixes -->
         <fix priority="P0" component="websocket">
-            <issue>Frontend connecting to /ws but backend serves /ws/secure</issue>
-            <solution>Updated frontend config to use correct /ws/secure endpoint</solution>
+            <issue>Frontend connecting to /ws but backend serves /ws</issue>
+            <solution>Updated frontend config to use correct /ws endpoint</solution>
             <files_modified>
                 - frontend/lib/secure-api-config.ts
                 - frontend/services/webSocketService.ts
@@ -73,7 +73,7 @@
         </fix>
         
         <fix priority="P1" component="websocket">
-            <issue>URL conversion logic creating /ws/secure/secure</issue>
+            <issue>URL conversion logic creating /ws/secure</issue>
             <solution>Fixed getSecureUrl() method to avoid double conversion</solution>
             <files_modified>frontend/services/webSocketService.ts</files_modified>
             <impact>Correct WebSocket URLs without duplication</impact>
@@ -164,7 +164,7 @@
         </component>
         
         <component name="WebSockets" status="OPERATIONAL">
-            - Secure endpoint at /ws/secure
+            - Secure endpoint at /ws
             - JWT authentication via subprotocol
             - Auto-reconnection logic
             - Real-time message flow

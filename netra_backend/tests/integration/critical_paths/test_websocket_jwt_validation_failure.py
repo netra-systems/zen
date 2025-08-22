@@ -43,7 +43,7 @@ async def test_websocket_jwt_validation_failure():
             try:
                 # This should fail with authentication error
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[invalid_jwt],
                     headers={
                         "Origin": "http://localhost:3000"
@@ -95,7 +95,7 @@ async def test_websocket_auth_service_401_response():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[jwt_token],
                     headers={
                         "Origin": "http://localhost:3000",
@@ -125,7 +125,7 @@ async def test_websocket_no_token_provided():
         try:
             # Connect without any auth token
             with client.websocket_connect(
-                "/ws/secure",
+                "/ws",
                 headers={
                     "Origin": "http://localhost:3000"
                 }
@@ -152,7 +152,7 @@ async def test_websocket_auth_token_validation_flow():
     from netra_backend.app.main import app
     
     # Capture logs to verify proper error logging
-    with patch('netra_backend.app.routes.websocket_secure.logger') as mock_logger:
+    with patch('netra_backend.app.routes.websocket_unified.logger') as mock_logger:
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # Auth validation returns invalid
             mock_validate.return_value = {"valid": False}
@@ -162,7 +162,7 @@ async def test_websocket_auth_token_validation_flow():
                 
                 try:
                     with client.websocket_connect(
-                        "/ws/secure", 
+                        "/ws", 
                         subprotocols=[jwt_token],
                         headers={
                             "Origin": "http://localhost:3000",
@@ -200,7 +200,7 @@ async def test_websocket_successful_auth_dev_environment():
                 
                 try:
                     with client.websocket_connect(
-                        "/ws/secure",
+                        "/ws",
                         subprotocols=[jwt_token],
                         headers={
                             "Origin": "http://localhost:3000",
@@ -260,7 +260,7 @@ async def test_websocket_successful_valid_oauth_token():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[auth_header],
                     headers={
                         "Origin": "http://localhost:3000",
@@ -307,7 +307,7 @@ async def test_websocket_auth_with_authorization_header():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     headers={
                         "Authorization": jwt_token,
                         "Origin": "http://localhost:3000",
@@ -351,7 +351,7 @@ async def test_websocket_token_refresh_during_connection():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[jwt_token],
                     headers={
                         "Origin": "http://localhost:3000"

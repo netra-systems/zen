@@ -15,7 +15,7 @@ from typing import Dict, List
 
 import httpx
 
-from netra_backend.tests.base import StagingConfigTestBase
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestHealthChecks(StagingConfigTestBase):
     """Test health checks in staging."""

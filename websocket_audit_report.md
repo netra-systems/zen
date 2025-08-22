@@ -10,10 +10,10 @@ Comprehensive audit of WebSocket connections between frontend and backend reveal
 ## 1. Architecture Overview
 
 ### Backend WebSocket Implementation
-- **Primary Endpoint:** `/ws/secure` (secure WebSocket with JWT authentication)
-- **Implementation:** Consolidated unified WebSocket manager with backward compatibility
-- **Location:** `netra_backend/app/ws_manager.py` (delegates to unified system)
-- **Secure Router:** `netra_backend/app/routes/websocket_secure.py`
+- **Primary Endpoint:** `/ws` (unified WebSocket with JWT authentication and format detection)
+- **Implementation:** Unified WebSocket manager with comprehensive security and backward compatibility
+- **Location:** `netra_backend/app/routes/websocket_unified.py`
+- **Status:** LEGACY ENDPOINTS REMOVED - Single unified endpoint replaces all previous implementations
 
 ### Frontend WebSocket Implementation
 - **Service:** `frontend/services/webSocketService.ts`

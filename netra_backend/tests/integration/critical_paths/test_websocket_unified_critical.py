@@ -8,7 +8,7 @@ TESTED ENDPOINTS:
 - /ws - Basic WebSocket with regular JSON
 - /ws/{user_id} - User-specific endpoint forwarding to secure
 - /ws/v1/{user_id} - Versioned endpoint forwarding to secure  
-- /ws/secure - Comprehensive secure endpoint
+- /ws - Comprehensive secure endpoint
 - /ws/mcp - MCP JSON-RPC protocol endpoint
 
 CRITICAL AREAS COVERED:
@@ -46,7 +46,10 @@ from netra_backend.app.dependencies import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.main import app
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.tests.conftest import test_auth_token
+# Import test utilities
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 logger = central_logger.get_logger(__name__)
 
@@ -223,7 +226,7 @@ class TestWebSocketAuthentication:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 # Should connect successfully
@@ -258,7 +261,7 @@ class TestWebSocketAuthentication:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure")
+            client = WebSocketTestClient("/ws")
             
             try:
                 # Should connect successfully with subprotocol
@@ -278,7 +281,7 @@ class TestWebSocketAuthentication:
     
     async def test_secure_websocket_rejects_unauthenticated(self):
         """Test that secure WebSocket rejects connections without authentication."""
-        client = WebSocketTestClient("/ws/secure")
+        client = WebSocketTestClient("/ws")
         
         try:
             # Should fail to connect
@@ -300,7 +303,7 @@ class TestWebSocketAuthentication:
         with patch.object(auth_client, 'validate_token_jwt') as mock_validate:
             mock_validate.return_value = {"valid": False}
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 # Should fail to connect
@@ -341,7 +344,7 @@ class TestWebSocketAuthentication:
         with patch.object(unified_config_manager, 'get_config') as mock_config:
             mock_config.return_value.environment = "production"
             
-            client = WebSocketTestClient("/ws/secure")
+            client = WebSocketTestClient("/ws")
             
             try:
                 # Should fail to connect without auth in production
@@ -492,7 +495,7 @@ class TestWebSocketConnectionManagement:
             try:
                 # Create 4 connections (should only allow 3)
                 for i in range(4):
-                    client = WebSocketTestClient("/ws/secure", headers=headers)
+                    client = WebSocketTestClient("/ws", headers=headers)
                     connected = await client.connect()
                     
                     if i < 3:
@@ -525,7 +528,7 @@ class TestWebSocketConnectionManagement:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -561,7 +564,7 @@ class TestWebSocketConnectionManagement:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -584,7 +587,7 @@ class TestWebSocketConnectionManagement:
     async def test_connection_timeout_handling(self):
         """Test handling of connection timeouts and dead connections."""
         # This test verifies the timeout mechanism works
-        client = WebSocketTestClient("/ws/secure")
+        client = WebSocketTestClient("/ws")
         
         # Should fail quickly without auth
         start_time = time.time()
@@ -620,7 +623,7 @@ class TestWebSocketSecurity:
             with patch('netra_backend.app.core.websocket_cors.check_websocket_cors') as mock_cors:
                 mock_cors.return_value = False  # Simulate CORS failure
                 
-                client = WebSocketTestClient("/ws/secure", headers=headers)
+                client = WebSocketTestClient("/ws", headers=headers)
                 
                 try:
                     # Should fail due to CORS
@@ -643,7 +646,7 @@ class TestWebSocketSecurity:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -677,7 +680,7 @@ class TestWebSocketSecurity:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -707,7 +710,7 @@ class TestWebSocketSecurity:
                 "error": "Token expired"
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 # Should fail to connect with expired token
@@ -844,7 +847,7 @@ class TestWebSocketConcurrency:
                 # Create 3 concurrent connections (at the limit)
                 connect_tasks = []
                 for i in range(3):
-                    client = WebSocketTestClient("/ws/secure", headers=headers)
+                    client = WebSocketTestClient("/ws", headers=headers)
                     clients.append(client)
                     connect_tasks.append(client.connect())
                 
@@ -884,7 +887,7 @@ class TestWebSocketConcurrency:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 connected = await client.connect()
@@ -928,7 +931,7 @@ class TestWebSocketConcurrency:
             try:
                 # Create and immediately disconnect multiple connections
                 for i in range(5):
-                    client = WebSocketTestClient("/ws/secure", headers=headers)
+                    client = WebSocketTestClient("/ws", headers=headers)
                     clients.append(client)
                     
                     # Connect and disconnect quickly
@@ -967,7 +970,7 @@ class TestWebSocketErrorHandling:
             with patch('netra_backend.app.services.security_service.SecurityService.get_user_by_id') as mock_get_user:
                 mock_get_user.side_effect = Exception("Database connection failed")
                 
-                client = WebSocketTestClient("/ws/secure", headers=headers)
+                client = WebSocketTestClient("/ws", headers=headers)
                 
                 try:
                     # Should handle database error gracefully
@@ -993,7 +996,7 @@ class TestWebSocketErrorHandling:
         with patch.object(auth_client, 'validate_token_jwt') as mock_validate:
             mock_validate.side_effect = Exception("Auth service unavailable")
             
-            client = WebSocketTestClient("/ws/secure", headers=headers)
+            client = WebSocketTestClient("/ws", headers=headers)
             
             try:
                 # Should handle auth service failure gracefully
@@ -1071,7 +1074,7 @@ class TestWebSocketServiceDiscovery:
         ws_config = config["websocket_config"]
         
         # Verify expected endpoints are listed
-        expected_endpoints = ["/ws", "/ws/{user_id}", "/ws/v1/{user_id}", "/ws/secure"]
+        expected_endpoints = ["/ws", "/ws/{user_id}", "/ws/v1/{user_id}", "/ws"]
         assert ws_config["available_endpoints"] == expected_endpoints
         
         # Verify security configuration
@@ -1081,9 +1084,9 @@ class TestWebSocketServiceDiscovery:
         assert ws_config["heartbeat_interval"] == 45
     
     def test_secure_websocket_config_endpoint(self):
-        """Test /ws/secure/config endpoint provides detailed security configuration."""
+        """Test /ws/config endpoint provides detailed security configuration."""
         test_client = TestClient(app)
-        response = test_client.get("/ws/secure/config")
+        response = test_client.get("/ws/config")
         
         assert response.status_code == 200
         config = response.json()
@@ -1104,9 +1107,9 @@ class TestWebSocketServiceDiscovery:
         assert limits["max_message_size"] == 8192
     
     def test_websocket_health_endpoint(self):
-        """Test /ws/secure/health endpoint."""
+        """Test /ws/health endpoint."""
         test_client = TestClient(app)
-        response = test_client.get("/ws/secure/health")
+        response = test_client.get("/ws/health")
         
         assert response.status_code == 200
         health = response.json()

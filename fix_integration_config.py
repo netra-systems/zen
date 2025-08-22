@@ -210,16 +210,16 @@ async def websocket_endpoint(websocket: WebSocket):
     Standard WebSocket endpoint - redirects to secure implementation.
     
     This endpoint exists for backward compatibility with frontends
-    that expect a /ws endpoint. It forwards to /ws/secure.
+    that expect a /ws endpoint. It forwards to /ws.
     """
     # For WebSocket, we can't do HTTP redirects, so we need to
     # handle the connection here and forward to the secure endpoint
     
-    # Import the secure WebSocket handler
-    from netra_backend.app.routes.websocket_secure import secure_websocket_endpoint
+    # Import the unified WebSocket handler
+    from netra_backend.app.routes.websocket_unified import unified_websocket_endpoint
     
-    # Delegate to secure endpoint
-    await secure_websocket_endpoint(websocket)
+    # Delegate to unified endpoint
+    await unified_websocket_endpoint(websocket)
 
 @router.get("/ws")
 async def websocket_info():
@@ -227,7 +227,7 @@ async def websocket_info():
     return {
         "message": "WebSocket endpoint available",
         "endpoint": "/ws",
-        "secure_endpoint": "/ws/secure",
+        "secure_endpoint": "/ws",
         "status": "available"
     }
 '''

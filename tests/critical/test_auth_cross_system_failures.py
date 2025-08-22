@@ -41,6 +41,11 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only"
 
+# Force enable auth service for cross-system testing
+os.environ["AUTH_SERVICE_ENABLED"] = "true"
+os.environ["AUTH_FAST_TEST_MODE"] = "false"
+os.environ["AUTH_SERVICE_URL"] = "http://127.0.0.1:8001"
+
 # Add project root to path for imports
 import sys
 from pathlib import Path
@@ -170,10 +175,10 @@ class TestAuthCrossSystemFailures:
         assert login_response.status_code == 200
         token = login_response.json()["access_token"]
         
-        # Verify token works in backend
+        # Verify token works in backend - use authenticated demo endpoint
         backend_client_test = TestClient(backend_app)
         health_response = backend_client_test.get(
-            "/health",
+            "/api/demo/",
             headers={"Authorization": f"Bearer {token}"}
         )
         assert health_response.status_code == 200
@@ -191,7 +196,7 @@ class TestAuthCrossSystemFailures:
         # THIS ASSERTION WILL FAIL - invalidated token should be rejected by backend
         # But the backend service doesn't know the token was invalidated
         backend_health_response = backend_client_test.get(
-            "/health",
+            "/api/demo/",
             headers={"Authorization": f"Bearer {token}"}
         )
         assert backend_health_response.status_code == 401, (

@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-from netra_backend.tests.test_fixtures_common import (
+from netra_backend.tests.integration.test_fixtures_common import (
     create_test_user_with_oauth,
     mock_infrastructure,
     test_database,

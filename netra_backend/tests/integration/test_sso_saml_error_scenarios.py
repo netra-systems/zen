@@ -24,7 +24,7 @@ from typing import Dict
 
 import pytest
 
-from netra_backend.tests.sso_saml_components import (
+from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseTokenManager,
     MockIdPErrorGenerator,
     SAMLAssertionValidator,

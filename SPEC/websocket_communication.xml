@@ -33,7 +33,7 @@
       <implementation>
         <backend>
           <method>JWT via Sec-WebSocket-Protocol headers or Authorization headers</method>
-          <endpoint>/ws/secure</endpoint>
+          <endpoint>/ws</endpoint>
           <rejection>Query parameter tokens are rejected (security violation)</rejection>
         </backend>
         <frontend>

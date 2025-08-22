@@ -16,7 +16,11 @@ from fastapi import HTTPException, WebSocket
 from fastapi.testclient import TestClient
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
-from netra_backend.app.routes.websocket_secure import (
+from netra_backend.app.routes.websocket_unified import (
+    UNIFIED_WEBSOCKET_CONFIG,
+    UnifiedWebSocketManager,
+    get_unified_websocket_manager,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
@@ -25,12 +29,6 @@ import asyncio
 import json
 import pytest
 import time
-
-    SECURE_WEBSOCKET_CONFIG,
-
-    SecureWebSocketManager,
-
-    get_secure_websocket_manager,
 
 )
 from test_framework.mock_utils import mock_justified
@@ -145,9 +143,9 @@ class TestSyntaxFix:
 
     return handler
 
-class TestSecureWebSocketManager:
+class TestUnifiedWebSocketManager:
 
-    # """Test SecureWebSocketManager functionality."""
+    # """Test UnifiedWebSocketManager functionality."""
     
 
     # @mock_justified("External auth service API not available in test environment - testing JWT validation flow")
@@ -156,7 +154,7 @@ class TestSecureWebSocketManager:
 
     # """Test successful JWT authentication via Authorization header."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={"authorization": "Bearer valid_token_123"})
         
@@ -196,7 +194,7 @@ class TestSecureWebSocketManager:
 
     # """Test successful JWT authentication via Sec-WebSocket-Protocol."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={"sec-websocket-protocol": "jwt.valid_token_456, chat"})
         
@@ -232,7 +230,7 @@ class TestSecureWebSocketManager:
 
     # """Test authentication failure when no token provided."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={})
         
@@ -253,7 +251,7 @@ class TestSecureWebSocketManager:
 
     # """Test authentication failure with invalid token."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={"authorization": "Bearer invalid_token"})
         
@@ -279,7 +277,7 @@ class TestSecureWebSocketManager:
 
     # """Test authentication failure with malformed token."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={"authorization": "Bearer malformed"})
         
@@ -305,7 +303,7 @@ class TestSecureWebSocketManager:
 
     # """Test successful user validation with database."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
 
     # mock_user = MagicMock()
@@ -333,7 +331,7 @@ class TestSecureWebSocketManager:
 
     # """Test user validation with user not found in development mode."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
@@ -357,7 +355,7 @@ class TestSecureWebSocketManager:
 
     # """Test user validation with user not found in production mode."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
@@ -381,7 +379,7 @@ class TestSecureWebSocketManager:
 
     # """Test connection addition and removal."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -422,11 +420,11 @@ class TestSecureWebSocketManager:
 
     # """Test connection limit enforcement per user."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # user_id = "test_user"
 
-    # max_connections = SECURE_WEBSOCKET_CONFIG["limits"]["max_connections_per_user"]
+    # max_connections = UNIFIED_WEBSOCKET_CONFIG["limits"]["max_connections_per_user"]
         
     # # Add maximum connections
 
@@ -465,7 +463,7 @@ class TestSecureWebSocketManager:
 
     # """Test successful message handling."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -494,7 +492,7 @@ class TestSecureWebSocketManager:
 
     # """Test message handling with invalid JSON."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -522,7 +520,7 @@ class TestSecureWebSocketManager:
 
     # """Test message handling with missing type field."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -550,7 +548,7 @@ class TestSecureWebSocketManager:
 
     # """Test message handling with size limit exceeded."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -558,7 +556,7 @@ class TestSecureWebSocketManager:
         
     # # Create message larger than limit
 
-    # large_content = "x" * (SECURE_WEBSOCKET_CONFIG["limits"]["max_message_size"] + 1)
+    # large_content = "x" * (UNIFIED_WEBSOCKET_CONFIG["limits"]["max_message_size"] + 1)
 
     # large_message = json.dumps({"type": "user_message", "content": large_content})
         
@@ -581,7 +579,7 @@ class TestSecureWebSocketManager:
 
     # """Test system message handling (ping/pong)."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
         
@@ -607,7 +605,7 @@ class TestSecureWebSocketManager:
 
     # """Test sending message to user."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -630,7 +628,7 @@ class TestSecureWebSocketManager:
 
     # """Test sending message to user with no connections."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
 
     # message = {"type": "notification", "payload": {"text": "Hello"}}
@@ -645,7 +643,7 @@ class TestSecureWebSocketManager:
 
     # """Test statistics collection."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Add some activity
 
@@ -680,7 +678,7 @@ class TestSecureWebSocketManager:
 
     # """Test comprehensive cleanup of resources."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Add connections
 
@@ -752,10 +750,10 @@ class TestSecureWebSocketEndpoint:
 
         
         # Test that CORS validation is called
-        from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
+        from netra_backend.app.routes.websocket_unified import UnifiedWebSocketManager
         
 
-        async with get_secure_websocket_manager(mock_db_session) as manager:
+        async with get_unified_websocket_manager(mock_db_session) as manager:
 
             result = await manager.validate_secure_auth(mock_websocket)
             
@@ -790,7 +788,7 @@ class TestMemoryLeakPrevention:
 
     # """Test connection cleanup when errors occur."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 
@@ -817,7 +815,7 @@ class TestMemoryLeakPrevention:
 
     # """Test comprehensive resource cleanup on shutdown."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Add connections and simulate activity
 
@@ -858,7 +856,7 @@ class TestErrorHandling:
 
     # """Test handling of auth service errors."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket(headers={"authorization": "Bearer test_token"})
         
@@ -883,7 +881,7 @@ class TestErrorHandling:
 
     # """Test handling of database errors."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
         
     # # Simulate database error
     # # Mock justification: Database security service not available in test environment - testing user validation flow
@@ -907,7 +905,7 @@ class TestErrorHandling:
 
     # """Test handling of message processing errors."""
 
-    # manager = SecureWebSocketManager(mock_db_session)
+    # manager = UnifiedWebSocketManager(mock_db_session)
 
     # websocket = MockWebSocket()
 

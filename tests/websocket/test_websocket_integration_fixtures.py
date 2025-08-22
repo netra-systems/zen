@@ -6,7 +6,11 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.main import app
-from netra_backend.app.routes.websocket_secure import (
+from netra_backend.app.routes.websocket_unified import (
+    UNIFIED_WEBSOCKET_CONFIG,
+    UnifiedWebSocketManager,
+    get_unified_websocket_manager,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
@@ -16,12 +20,6 @@ import json
 import pytest
 import time
 import websockets
-
-    SECURE_WEBSOCKET_CONFIG,
-
-    SecureWebSocketManager,
-
-    get_secure_websocket_manager,
 
 )
 from test_framework.mock_utils import mock_justified
@@ -93,4 +91,4 @@ class TestSyntaxFix:
 
 #     """Secure WebSocket manager for testing.""" # Possibly broken comprehension
 
-    return get_secure_websocket_manager()
+    return get_unified_websocket_manager()

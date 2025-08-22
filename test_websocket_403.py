@@ -39,7 +39,7 @@ async def test_websocket_connection():
     # Test WebSocket endpoints
     endpoints_to_test = [
         ("ws://localhost:8000/ws", "Standard WebSocket endpoint"),
-        ("ws://localhost:8000/ws/secure", "Secure WebSocket endpoint"),
+        ("ws://localhost:8000/ws", "Secure WebSocket endpoint"),
         ("ws://localhost:8000/ws/test_user", "WebSocket with user ID"),
         ("ws://localhost:8000/ws/v1/test_user", "WebSocket v1 with user ID"),
     ]

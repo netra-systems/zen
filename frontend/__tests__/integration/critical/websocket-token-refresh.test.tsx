@@ -21,7 +21,7 @@ import { webSocketService } from '@/services/webSocketService';
 jest.mock('@/config', () => ({
   config: {
     apiUrl: 'http://localhost:8000',
-    wsUrl: 'ws://localhost:8000/ws/secure'
+    wsUrl: 'ws://localhost:8000/ws'
   }
 }));
 
@@ -148,7 +148,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
       });
 
       // Initialize with first token
-      webSocketService.connect('ws://localhost:8000/ws/secure', {
+      webSocketService.connect('ws://localhost:8000/ws', {
         token: initialToken,
         refreshToken: mockRefreshToken
       });
@@ -171,7 +171,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
       const validToken = createJWTToken(tokenPayload);
       
       // Test that the WebSocket service can work with JWT tokens
-      webSocketService.connect('ws://localhost:8000/ws/secure', {
+      webSocketService.connect('ws://localhost:8000/ws', {
         token: validToken,
         refreshToken: mockRefreshToken
       });
@@ -188,7 +188,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
       const secureUrl = webSocketService.getSecureUrl(baseUrl);
       
       // Should convert to secure endpoint
-      expect(secureUrl).toContain('/ws/secure');
+      expect(secureUrl).toContain('/ws');
       
       // Should not contain token parameters in URL
       expect(secureUrl).not.toContain('token=');
@@ -204,7 +204,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
       });
       
       // Connect with message queuing capabilities
-      webSocketService.connect('ws://localhost:8000/ws/secure', {
+      webSocketService.connect('ws://localhost:8000/ws', {
         token,
         refreshToken: mockRefreshToken,
         rateLimit: {
@@ -242,7 +242,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
         maxReconnectAttempts: 3
       };
       
-      webSocketService.connect('ws://localhost:8000/ws/secure', connectionConfig);
+      webSocketService.connect('ws://localhost:8000/ws', connectionConfig);
       
       // Verify connection configuration is accepted
       // Check that service handles the configuration without throwing errors
@@ -267,7 +267,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
       });
       
       // Should handle expired tokens gracefully
-      webSocketService.connect('ws://localhost:8000/ws/secure', {
+      webSocketService.connect('ws://localhost:8000/ws', {
         token: expiredToken,
         refreshToken: mockRefreshToken
       });
@@ -298,7 +298,7 @@ describe('WebSocket Token Refresh Management (CRITICAL)', () => {
         reconnectDelay: 1000
       };
       
-      webSocketService.connect('ws://localhost:8000/ws/secure', config);
+      webSocketService.connect('ws://localhost:8000/ws', config);
       
       // Verify service handles configuration
       const securityStatus = webSocketService.getSecurityStatus();

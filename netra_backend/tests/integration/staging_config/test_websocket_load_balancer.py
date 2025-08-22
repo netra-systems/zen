@@ -17,7 +17,7 @@ from typing import List, Optional
 
 import websockets
 
-from netra_backend.tests.base import StagingConfigTestBase
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestWebSocketLoadBalancer(StagingConfigTestBase):
     """Test WebSocket through load balancer in staging."""

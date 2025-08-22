@@ -311,7 +311,7 @@ class IntegrationTester:
         # Test multiple WebSocket endpoints
         ws_endpoints = [
             f"ws://{host}:{port}/ws",
-            f"ws://{host}:{port}/ws/secure",
+            f"ws://{host}:{port}/ws",
             f"ws://{host}:{port}/ws/v1/test_user"
         ]
         

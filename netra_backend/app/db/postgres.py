@@ -28,6 +28,9 @@ from netra_backend.app.db.postgres_session import (
     validate_session,
 )
 
+# Alias for backward compatibility - AsyncSessionLocal
+AsyncSessionLocal = async_session_factory
+
 # Import resilience features
 try:
     from .postgres_resilience import (
@@ -81,6 +84,7 @@ __all__ = [
     'DatabaseConfig', 
     'async_engine',
     'async_session_factory',
+    'AsyncSessionLocal',
     'get_converted_async_db_url',
     'initialize_postgres',
     

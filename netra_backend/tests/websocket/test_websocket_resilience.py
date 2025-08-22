@@ -17,10 +17,9 @@ import pytest
 
 from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 
-from netra_backend.app.routes.websocket_secure import (
-    get_secure_websocket_manager,
-    handle_websocket_message_enhanced,
-    send_error_message,
+from netra_backend.app.routes.websocket_unified import (
+    get_unified_websocket_manager,
+    unified_websocket_endpoint,
 )
 
 @pytest.mark.asyncio

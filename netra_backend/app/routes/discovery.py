@@ -71,7 +71,7 @@ def get_fallback_service_info() -> Dict[str, ServiceInfo]:
             port=8000,
             url="http://localhost:8000",
             api_url="http://localhost:8000",
-            ws_url="ws://localhost:8000/ws/secure",
+            ws_url="ws://localhost:8000/ws",
             timestamp=timestamp
         ),
         "frontend": ServiceInfo(

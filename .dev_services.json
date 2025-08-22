@@ -2,26 +2,41 @@
   "redis": {
     "mode": "mock",
     "config": {
-      "mock": true
+      "host": "localhost",
+      "port": 6379,
+      "db": 0
     }
   },
   "clickhouse": {
     "mode": "mock",
     "config": {
-      "mock": true
+      "host": "localhost",
+      "port": 9000,
+      "http_port": 8123,
+      "user": "default",
+      "password": "netra_dev_password",
+      "database": "netra_dev"
     }
   },
   "postgres": {
     "mode": "mock",
     "config": {
-      "mock": true
+      "host": "localhost",
+      "port": 5433,
+      "user": "postgres",
+      "password": "",
+      "database": "netra_dev"
     }
   },
   "llm": {
     "mode": "mock",
     "config": {
-      "mock": true,
-      "response": "Mock LLM response"
+      "providers": [
+        "anthropic",
+        "openai",
+        "gemini"
+      ],
+      "default_provider": "gemini"
     }
   }
 }

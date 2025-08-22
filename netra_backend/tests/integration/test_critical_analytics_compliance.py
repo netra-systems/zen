@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.tests.test_fixtures_common import mock_infrastructure, test_database
+from netra_backend.tests.integration.test_fixtures_common import mock_infrastructure, test_database
 
 class TestAnalyticsComplianceIntegration:
     """Analytics and compliance integration tests"""

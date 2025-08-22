@@ -20,7 +20,7 @@ def mock_auth_client():
 
 def test_websocket_connection_success(mock_auth_client):
     with client.websocket_connect(
-        "/ws/secure", headers={"Authorization": "Bearer valid_token"}
+        "/ws", headers={"Authorization": "Bearer valid_token"}
     ) as websocket:
         data = websocket.receive_json()
         assert data["type"] == "connection_established"
@@ -28,13 +28,13 @@ def test_websocket_connection_success(mock_auth_client):
 
 def test_websocket_connection_failure_no_token():
     with pytest.raises(Exception):
-        with client.websocket_connect("/ws/secure") as websocket:
+        with client.websocket_connect("/ws") as websocket:
             pass
 
 
 def test_websocket_send_receive(mock_auth_client):
     with client.websocket_connect(
-        "/ws/secure", headers={"Authorization": "Bearer valid_token"}
+        "/ws", headers={"Authorization": "Bearer valid_token"}
     ) as websocket:
         websocket.send_json({"type": "ping"})
         data = websocket.receive_json()
@@ -43,7 +43,7 @@ def test_websocket_send_receive(mock_auth_client):
 
 async def test_websocket_heartbeat(mock_auth_client):
     with client.websocket_connect(
-        "/ws/secure", headers={"Authorization": "Bearer valid_token"}
+        "/ws", headers={"Authorization": "Bearer valid_token"}
     ) as websocket:
         await asyncio.sleep(50)  # Wait for heartbeat
         data = websocket.receive_json(timeout=5)

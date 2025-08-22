@@ -64,8 +64,10 @@ class AuthServiceClient:
             # This provides additional security in case of race conditions
             try:
                 blacklist_check = await self._check_token_blacklist(token)
+                logger.info(f"Blacklist check result: {blacklist_check}")
                 if blacklist_check and blacklist_check.get("blacklisted", False):
                     # Token is blacklisted, mark as invalid and remove from cache
+                    logger.warning(f"Token is blacklisted, removing from cache and rejecting")
                     self.token_cache.invalidate_cached_token(token)
                     return None
             except Exception as e:
@@ -149,9 +151,17 @@ class AuthServiceClient:
         return client, request_data
     
     async def _validate_token_remote(self, token: str) -> Optional[Dict]:
-        """Remote token validation."""
+        """Remote token validation with blacklist checking."""
         client, request_data = await self._prepare_remote_validation(token)
         try:
+            # First check if token is blacklisted
+            blacklist_check = await self._check_token_blacklist(token)
+            logger.info(f"Remote validation blacklist check: {blacklist_check}")
+            if blacklist_check and blacklist_check.get("blacklisted", False):
+                logger.warning("Token is blacklisted, rejecting remote validation")
+                return None
+            
+            # If not blacklisted, proceed with normal validation
             return await self._send_validation_request(client, request_data)
         except Exception as e:
             logger.error(f"Remote validation error: {e}")

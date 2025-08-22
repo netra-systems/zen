@@ -258,7 +258,7 @@ class ColdStartValidator:
                 self.print_step("WebSocket security misconfigured", "warning")
             
             # Check WebSocket endpoint registration
-            self.print_step("WebSocket endpoint: /ws/secure", "success")
+            self.print_step("WebSocket endpoint: /ws", "success")
             self.print_step("WebSocket auth: JWT via subprotocol", "success")
             self.print_step("WebSocket CORS: Configured for development", "success")
             

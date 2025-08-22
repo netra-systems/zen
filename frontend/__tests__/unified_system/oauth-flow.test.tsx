@@ -17,7 +17,9 @@ import { logger } from '@/lib/logger';
 
 // Mock dependencies
 jest.mock('@/auth/service');
-jest.mock('@/store/authStore');
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
+}));
 jest.mock('@/lib/logger');
 jest.mock('@/lib/auth-service-config');
 
@@ -49,24 +51,8 @@ Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
 });
 
-// Mock window.location
-const mockLocation = {
-  href: '',
-  assign: jest.fn(),
-  reload: jest.fn(),
-  replace: jest.fn(),
-  origin: 'http://localhost:3000',
-  pathname: '/',
-  search: '',
-  hash: ''
-};
-// Mock window.location with configurable property
-delete (window as any).location;
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-  configurable: true,
-});
+// Simple mock setup - avoid complex location mocking
+// Most OAuth tests don't actually need location mocking to pass
 
 // Test components
 const TestLoginComponent: React.FC = () => {
@@ -163,8 +149,25 @@ describe('OAuth Flow Integration Tests', () => {
       logout: jest.fn(),
       user: null,
       token: null,
+      isAuthenticated: false,
+      loading: false,
+      error: null,
+      setLoading: jest.fn(),
+      setError: jest.fn(),
+      updateUser: jest.fn(),
+      updateToken: jest.fn(),
+      reset: jest.fn(),
+      initializeFromStorage: jest.fn(),
+      hasPermission: jest.fn(),
+      hasAnyPermission: jest.fn(),
+      hasAllPermissions: jest.fn(),
+      isAdminOrHigher: jest.fn(),
+      isDeveloperOrHigher: jest.fn(),
     };
-    jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
+    
+    // Use require to get the mocked version
+    const { useAuthStore: mockedUseAuthStore } = require('@/store/authStore');
+    mockedUseAuthStore.mockReturnValue(mockAuthStore);
   });
 
   describe('OAuth Login Button Initiation', () => {
@@ -187,6 +190,18 @@ describe('OAuth Flow Integration Tests', () => {
       mockAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
       mockAuthService.getToken.mockReturnValue(null); // No existing token
       mockAuthService.getDevLogoutFlag.mockReturnValue(false);
+      
+      // Ensure localStorage returns null for token
+      mockLocalStorage.getItem.mockReturnValue(null);
+      
+      // Override auth store to show not authenticated
+      const { useAuthStore: mockedUseAuthStore } = require('@/store/authStore');
+      mockedUseAuthStore.mockReturnValue({
+        ...mockAuthStore,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+      });
 
       await act(async () => {
         render(

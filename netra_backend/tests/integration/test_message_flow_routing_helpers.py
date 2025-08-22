@@ -21,8 +21,8 @@ from netra_backend.app.schemas.websocket_models import (
     WebSocketMessage,
 )
 
-from netra_backend.tests.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.websocket_mocks import MockWebSocket
+from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
+from netra_backend.tests.integration.websocket_mocks import MockWebSocket
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

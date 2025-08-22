@@ -33,16 +33,4 @@ from netra_backend.app.websocket.message_handler_core import (
 
 )
 
-class TestSyntaxFix:
-
-    """Test class for orphaned methods"""
-
-    def __init__(self):
-
-        self.messages_sent = []
-
-        self.messages_received = []
-
-        self.closed = False
-
-        self.accepted = False
+# Removed TestSyntaxFix class as it was broken and had __init__ method that prevented pytest collection
