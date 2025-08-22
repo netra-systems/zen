@@ -8,7 +8,7 @@ Tests ensure proper async/await usage and coroutine handling in WebSocket messag
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -177,7 +177,7 @@ class TestAsyncAwaitChain:
     @pytest.mark.asyncio
     async def test_full_message_processing_chain(self):
         """Verify entire message processing chain awaits properly."""
-        from netra_backend.app.routes.websocket_secure import _process_single_message
+        from app.routes.websocket_secure import _process_single_message
         
         websocket = Mock(spec=WebSocket)
         websocket.receive_text = AsyncMock(return_value='{"type": "test"}')
@@ -318,7 +318,7 @@ class TestRegressionPrevention:
         # This test checks that common async functions are awaited
         import inspect
 
-        from netra_backend.app.routes import websockets
+        from app.routes import websockets
         
         # Get the source of _process_single_message
         source = inspect.getsource(websockets._process_single_message)

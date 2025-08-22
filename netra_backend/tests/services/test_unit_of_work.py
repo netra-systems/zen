@@ -9,7 +9,7 @@ transaction management works correctly without requiring a real database.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,7 +22,7 @@ import asyncio
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.database.unit_of_work import UnitOfWork
+from app.services.database.unit_of_work import UnitOfWork
 from .database_repository_helpers import (
     assert_thread_created_correctly,
     create_test_message,

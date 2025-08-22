@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 import redis.asyncio as redis
 
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 
 
 class MockRedisClient:

@@ -8,7 +8,7 @@ Tests session creation, validation, expiration, and multi-device scenarios.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,8 +26,8 @@ import aiohttp
 import pytest
 
 # Add project root to path
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.session_service import SessionService
+from app.redis_manager import RedisManager
+from app.services.session_service import SessionService
 from test_framework.test_patterns import L3IntegrationTest
 
 # Add project root to path

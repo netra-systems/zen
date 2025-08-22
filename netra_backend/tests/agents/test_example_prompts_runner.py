@@ -6,7 +6,7 @@ Provides test execution functionality for parameterized tests
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,9 +18,9 @@ import asyncio
 from typing import Any, Dict, Optional
 from datetime import datetime
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType
-from netra_backend.app.schemas.Agent import SubAgentState
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from app.services.quality_gate_service import QualityGateService, ContentType
+from app.schemas.Agent import SubAgentState
 
 
 class TestRunner:

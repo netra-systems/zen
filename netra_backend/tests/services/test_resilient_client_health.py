@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,7 +17,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.external_api_client import ResilientHTTPClient
+from app.services.external_api_client import ResilientHTTPClient
 from .external_api_client_utils import (
     # Add project root to path
     create_healthy_circuit_mock,
@@ -63,7 +63,7 @@ class TestResilientHTTPClientHealth:
     
     def _setup_successful_connectivity_test(self):
         """Setup mock for successful connectivity test."""
-        from netra_backend.tests.services.external_api_client_utils import (
+        from tests.services.external_api_client_utils import (
             MockAsyncContextManager,
         )
         

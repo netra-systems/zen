@@ -11,9 +11,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.services.websocket.message_queue import (
+from app.core.exceptions_base import NetraException
+from app.services.websocket.message_handler import BaseMessageHandler
+from app.services.websocket.message_queue import (
     MessagePriority,
     QueuedMessage,
 )

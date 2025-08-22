@@ -4,8 +4,8 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.app.services.quality_monitoring_service import (
+from app.services.quality_gate_service import ContentType
+from app.services.quality_monitoring_service import (
     AlertSeverity,
     MetricType,
     QualityAlert,
@@ -155,7 +155,7 @@ def create_test_alert(alert_id, severity=AlertSeverity.WARNING, agent="test_agen
 async def record_test_quality_event(service, agent_name="test_agent", metrics=None):
     """Record a test quality event"""
     if metrics is None:
-        from netra_backend.app.services.quality_gate_service import (
+        from app.services.quality_gate_service import (
             QualityLevel,
             QualityMetrics,
         )

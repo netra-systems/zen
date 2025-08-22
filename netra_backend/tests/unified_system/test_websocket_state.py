@@ -35,16 +35,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
+from app.logging_config import central_logger
+from app.redis_manager import redis_manager
+from app.websocket.connection_info import ConnectionInfo, ConnectionState
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import (
+from app.websocket.connection_manager import (
     ConnectionManager,
     get_connection_manager,
 )
-from netra_backend.app.websocket.reconnection_handler import (
+from app.websocket.reconnection_handler import (
     ReconnectionContext,
     get_reconnection_handler,
 )

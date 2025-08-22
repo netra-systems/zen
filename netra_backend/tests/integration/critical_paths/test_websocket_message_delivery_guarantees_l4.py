@@ -7,7 +7,7 @@ Tests message ordering, delivery confirmation, and retry mechanisms
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,17 +22,17 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
 # Add project root to path
-# from netra_backend.app.services.websocket_service import WebSocketService
+# from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
 
 WebSocketService = AsyncMock
-from netra_backend.app.config import get_config
-from netra_backend.app.models.websocket_message import WebSocketMessage
-from netra_backend.app.services.message_queue_service import MessageQueueService
-from netra_backend.app.services.redis_service import RedisService
+from app.config import get_config
+from app.models.websocket_message import WebSocketMessage
+from app.services.message_queue_service import MessageQueueService
+from app.services.redis_service import RedisService
 
 
 class TestWebSocketMessageDeliveryGuaranteesL4:

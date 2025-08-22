@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.app.services.database.unit_of_work import UnitOfWork
+from app.services.database.unit_of_work import UnitOfWork
 from .database_transaction_test_helpers import (
     create_mock_session_factory,
 )

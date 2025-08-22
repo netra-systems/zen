@@ -11,7 +11,7 @@ Comprehensive test to verify authentication session expiry and refresh:
 This test ensures proper session lifecycle management.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

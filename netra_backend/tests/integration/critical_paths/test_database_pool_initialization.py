@@ -15,7 +15,7 @@ initialization, configuration limits, concurrent access, and failure handling.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -41,12 +41,12 @@ from sqlalchemy.orm import sessionmaker
 from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 
-from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
+from app.core.async_connection_pool import AsyncConnectionPool
 
 # Add project root to path
-from netra_backend.app.db.postgres_core import Database
-from netra_backend.app.db.postgres_pool import close_async_db, get_pool_status
-from netra_backend.app.logging_config import central_logger
+from app.db.postgres_core import Database
+from app.db.postgres_pool import close_async_db, get_pool_status
+from app.logging_config import central_logger
 
 # Add project root to path
 

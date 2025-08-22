@@ -14,7 +14,7 @@ Coverage: Service registry, discovery mechanisms, health integration, load balan
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,11 +32,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from netra_backend.app.core.health.interface import HealthStatus
+from app.core.health.interface import HealthStatus
 
 # Add project root to path
-from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.redis_manager import RedisManager
+from app.core.health_checkers import HealthChecker
+from app.redis_manager import RedisManager
 
 # Add project root to path
 

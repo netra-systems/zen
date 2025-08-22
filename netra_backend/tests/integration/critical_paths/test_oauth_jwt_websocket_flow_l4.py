@@ -19,7 +19,7 @@ Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session 
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -53,18 +53,18 @@ from .integration.critical_paths.l4_staging_critical_base import (
 OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # from auth_integration import create_access_token, validate_token_jwt
-# from netra_backend.app.auth_integration.auth import create_access_token
+# from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 
 create_access_token = AsyncMock()
-# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
+# from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock
 # Session manager replaced with mock
 SessionManager = AsyncMock
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

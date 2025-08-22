@@ -23,7 +23,7 @@ import pytest
 
 # Add project root to path
 # Import backend schemas
-from netra_backend.app.schemas.registry import (
+from app.schemas.registry import (
     StreamChunk,
     StreamComplete,
     WebSocketMessage,

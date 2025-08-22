@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 @pytest.mark.asyncio
 async def test_database_connectivity_check_success():
     """Test successful database connectivity check."""
-    from netra_backend.app.services.schema_validation_service import (
+    from app.services.schema_validation_service import (
         SchemaValidationService,
     )
     
@@ -45,7 +45,7 @@ async def test_database_connectivity_check_success():
 @pytest.mark.asyncio
 async def test_database_connectivity_check_failure():
     """Test failed database connectivity check."""
-    from netra_backend.app.services.schema_validation_service import (
+    from app.services.schema_validation_service import (
         SchemaValidationService,
     )
     
@@ -61,7 +61,7 @@ async def test_database_connectivity_check_failure():
 @pytest.mark.asyncio
 async def test_database_connectivity_with_none_engine():
     """Test database connectivity check with None engine."""
-    from netra_backend.app.services.schema_validation_service import (
+    from app.services.schema_validation_service import (
         SchemaValidationService,
     )
     
@@ -75,7 +75,7 @@ async def test_startup_schema_validation_with_uninitialized_engine():
     """Test schema validation in startup module with uninitialized engine."""
     import logging
 
-    from netra_backend.app.startup_module import validate_schema
+    from app.startup_module import validate_schema
     
     logger = logging.getLogger(__name__)
     
@@ -89,7 +89,7 @@ async def test_startup_schema_validation_with_uninitialized_engine():
 @pytest.mark.asyncio
 async def test_comprehensive_validation_with_engine():
     """Test comprehensive validation with proper engine."""
-    from netra_backend.app.services.schema_validation_service import (
+    from app.services.schema_validation_service import (
         run_comprehensive_validation,
     )
     

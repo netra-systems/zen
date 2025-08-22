@@ -11,7 +11,7 @@ Business Value: Prevents $8K MRR loss from WebSocket failures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,16 +25,16 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+from app.agents.base.executor import BaseExecutionEngine
+from app.websocket.connection import ConnectionInfo, ConnectionManager
+from app.websocket.connection_executor import ConnectionExecutor
 
 # Add project root to path
-from netra_backend.app.websocket.message_handler_core import (
+from app.websocket.message_handler_core import (
     ModernReliableMessageHandler,
 )
-from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-from netra_backend.app.websocket.websocket_broadcast_executor import (
+from app.websocket.message_router import ModernMessageTypeRouter
+from app.websocket.websocket_broadcast_executor import (
     WebSocketBroadcastExecutor,
 )
 
@@ -153,7 +153,7 @@ class TestWebSocketMessageFlow:
             mock_broadcast.return_value = Mock(successful=2, failed=0)
             
             # Create broadcast context
-            from netra_backend.app.websocket.broadcast_context import (
+            from app.websocket.broadcast_context import (
                 BroadcastContext,
                 BroadcastOperation,
             )
@@ -163,8 +163,8 @@ class TestWebSocketMessageFlow:
             )
             
             # Execute broadcast
-            from netra_backend.app.agents.base.interface import ExecutionContext
-            from netra_backend.app.agents.state import DeepAgentState
+            from app.agents.base.interface import ExecutionContext
+            from app.agents.state import DeepAgentState
             
             state = DeepAgentState(user_request="broadcast_test")
             context = ExecutionContext(
@@ -234,12 +234,12 @@ class TestCircularImportPrevention:
         # This test verifies the late import pattern doesn't cause issues
         
         # Import should work without circular dependency
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-        from netra_backend.app.websocket.message_handler_core import (
+        from app.websocket.connection_executor import ConnectionExecutor
+        from app.websocket.message_handler_core import (
             ModernReliableMessageHandler,
         )
-        from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-        from netra_backend.app.websocket.websocket_broadcast_executor import (
+        from app.websocket.message_router import ModernMessageTypeRouter
+        from app.websocket.websocket_broadcast_executor import (
             WebSocketBroadcastExecutor,
         )
         
@@ -264,7 +264,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_none_connection_manager(self):
         """Test metrics collector doesn't crash with None connection manager."""
-        from netra_backend.app.monitoring.models import MetricsCollector
+        from app.monitoring.models import MetricsCollector
         
         collector = MetricsCollector()
         
@@ -280,7 +280,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_connection_manager_error(self):
         """Test metrics collector handles errors from connection manager."""
-        from netra_backend.app.monitoring.models import MetricsCollector
+        from app.monitoring.models import MetricsCollector
         
         collector = MetricsCollector()
         

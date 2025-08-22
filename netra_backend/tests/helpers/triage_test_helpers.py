@@ -8,8 +8,8 @@ from datetime import datetime
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent import (
+from app.agents.state import DeepAgentState
+from app.agents.triage_sub_agent import (
     Complexity,
     ExtractedEntities,
     Priority,
@@ -92,7 +92,7 @@ class MockLLMManager:
         """Convert JSON response to TriageResult object asynchronously"""
         import json
 
-        from netra_backend.app.agents.triage_sub_agent.models import (
+        from app.agents.triage_sub_agent.models import (
             TriageMetadata,
             TriageResult,
         )

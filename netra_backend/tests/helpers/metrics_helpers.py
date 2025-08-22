@@ -1,6 +1,6 @@
 """Metrics creation helper functions for Quality Gate Service tests"""
 
-from netra_backend.app.services.quality_gate_service import (
+from app.services.quality_gate_service import (
     ContentType,
     QualityLevel,
     QualityMetrics,

@@ -12,10 +12,10 @@ Mock utilities for agent response pipeline testing.
 
 from datetime import datetime, timezone
 from fastapi import WebSocket
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from app.llm.llm_manager import LLMManager
+from app.redis_manager import RedisManager
+from app.services.websocket.ws_manager import WebSocketManager
+from app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 import asyncio

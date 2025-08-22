@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,8 +17,8 @@ from unittest.mock import Mock
 import pytest
 
 # Add project root to path
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.utils import extract_json_from_response
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.utils import extract_json_from_response
 
 # Add project root to path
 

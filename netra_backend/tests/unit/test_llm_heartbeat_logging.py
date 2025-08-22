@@ -8,7 +8,7 @@ Each test must be concise and focused as per architecture requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,12 +23,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.llm.observability import (
+from app.llm.observability import (
     HeartbeatLogger,
     generate_llm_correlation_id,
     get_heartbeat_logger,
 )
-from netra_backend.app.schemas.Config import AppConfig
+from app.schemas.Config import AppConfig
 
 # Add project root to path
 
@@ -121,7 +121,7 @@ class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
     async def test_heartbeat_with_app_config(self):
         """Test heartbeat logger with app configuration."""
-        from netra_backend.app.core.config import get_config
+        from app.core.config import get_config
         config = get_config()
         
         # Verify configuration has heartbeat settings
@@ -157,8 +157,8 @@ class TestHeartbeatIntegration:
 
     def test_heartbeat_configuration_integration(self):
         """Test heartbeat configuration is properly integrated."""
-        from netra_backend.app.core.config import get_config
-        from netra_backend.app.llm.llm_core_operations import LLMCoreOperations
+        from app.core.config import get_config
+        from app.llm.llm_core_operations import LLMCoreOperations
         
         config = get_config()
         operations = LLMCoreOperations(config)

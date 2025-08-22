@@ -12,8 +12,8 @@ L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -36,13 +36,13 @@ from unittest.mock import patch
 
 import pytest
 import redis.asyncio as redis
-from netra_backend.app.schemas import User
+from app.schemas import User
 
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.redis_manager import RedisManager
+from app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
-from netra_backend.tests.integration.helpers.redis_l3_helpers import (
+from tests.integration.helpers.redis_l3_helpers import (
 
     MockWebSocketForRedis,
     # Add project root to path

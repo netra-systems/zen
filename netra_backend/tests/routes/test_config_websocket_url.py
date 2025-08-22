@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,7 +18,7 @@ import pytest
 from auth_integration.auth import get_current_user, require_admin
 from fastapi.testclient import TestClient
 
-from netra_backend.app.main import app
+from app.main import app
 
 
 @pytest.fixture

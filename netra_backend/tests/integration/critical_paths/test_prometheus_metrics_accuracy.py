@@ -15,7 +15,7 @@ L3 Realism: Tests with actual Prometheus instances and real metric collection
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,12 +33,12 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+from app.monitoring.metrics_collector import MetricsCollector
 
-from netra_backend.app.core.alert_manager import HealthAlertManager
+from app.core.alert_manager import HealthAlertManager
 
 # Add project root to path
-from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
+from app.services.metrics.prometheus_exporter import PrometheusExporter
 from .integration.metrics.shared_fixtures import MetricEvent
 
 # Add project root to path

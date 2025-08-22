@@ -18,7 +18,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.enhanced_input_validation import (
+from app.core.enhanced_input_validation import (
     EnhancedInputValidator,
     SecurityThreat,
     ValidationLevel,

@@ -25,8 +25,8 @@ from typing import Any, AsyncGenerator, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.core.database_types import DatabaseType
-from netra_backend.app.logging_config import central_logger
+from app.core.database_types import DatabaseType
+from app.logging_config import central_logger
 from .clickhouse_isolation import ClickHouseTestIsolator
 from .database_snapshots import snapshot_manager
 from .database_state_validator import db_state_validator

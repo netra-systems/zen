@@ -35,10 +35,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.db.clickhouse import ClickHouseDatabase
-from netra_backend.app.db.postgres import Database as PostgresDatabase
-from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
-from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
+from app.db.clickhouse import ClickHouseDatabase
+from app.db.postgres import Database as PostgresDatabase
+from app.services.generation_service import save_corpus_to_clickhouse
+from app.websocket.performance_monitor import PerformanceMonitor
 
 # Add project root to path
 

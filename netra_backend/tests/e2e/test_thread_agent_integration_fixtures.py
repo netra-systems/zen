@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,20 +21,20 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.db.models_postgres import Message, Run, Thread
-from netra_backend.app.schemas.agent_state import (
+from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.core.exceptions import NetraException
+from app.db.models_postgres import Message, Run, Thread
+from app.schemas.agent_state import (
     AgentPhase,
     CheckpointType,
     StatePersistenceRequest,
 )
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.state_persistence import state_persistence_service
+from app.services.agent_service import AgentService
+from app.services.state_persistence import state_persistence_service
 
 # Add project root to path
-from netra_backend.app.services.thread_service import ThreadService
+from app.services.thread_service import ThreadService
 
 # Add project root to path
 

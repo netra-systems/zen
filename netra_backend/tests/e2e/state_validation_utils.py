@@ -6,12 +6,12 @@ Maximum 300 lines, functions ≤8 lines.
 
 from typing import Any, Dict, Optional, Type
 
-from netra_backend.app.agents.data_sub_agent.models import (
+from app.agents.data_sub_agent.models import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from app.agents.state import DeepAgentState
+from app.agents.triage_sub_agent.models import TriageResult
 
 
 class StateTransitionValidator:

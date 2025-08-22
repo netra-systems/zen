@@ -8,7 +8,7 @@ Prevents type mismatches and schema drift.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,10 +19,10 @@ setup_test_path()
 import pytest
 from sqlalchemy import JSON, Boolean, DateTime, Integer, String, inspect
 
-from netra_backend.app.db.base import Base
+from app.db.base import Base
 
 # Add project root to path
-from netra_backend.app.db.models_user import ToolUsageLog, User
+from app.db.models_user import ToolUsageLog, User
 
 # Add project root to path
 

@@ -5,8 +5,8 @@ Extracted from oversized test_critical_missing_integration.py
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -31,12 +31,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.db.base import Base
+from app.core.circuit_breaker import CircuitBreaker
+from app.db.base import Base
 
 # Add project root to path
-from netra_backend.app.db.models_postgres import Message, Run, Thread, User
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.db.models_postgres import Message, Run, Thread, User
+from app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

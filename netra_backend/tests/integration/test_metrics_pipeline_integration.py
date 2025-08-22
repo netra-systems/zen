@@ -8,7 +8,7 @@ Focuses on real component interactions with minimal mocking.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,12 +24,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.schemas.Metrics import CorpusMetric, MetricsSnapshot, MetricType
-from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
-from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
+from app.schemas.Metrics import CorpusMetric, MetricsSnapshot, MetricType
+from app.services.metrics.agent_metrics import AgentMetricsCollector
+from app.services.metrics.core_collector import CoreMetricsCollector
 
 # Add project root to path
-from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
+from app.services.metrics.prometheus_exporter import PrometheusExporter
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

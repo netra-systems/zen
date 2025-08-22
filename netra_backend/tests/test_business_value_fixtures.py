@@ -26,12 +26,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import (
+from app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+from app.llm.llm_manager import LLMManager
+from app.services.agent_service import AgentService
+from app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
 

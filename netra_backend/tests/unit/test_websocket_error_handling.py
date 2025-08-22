@@ -8,7 +8,7 @@ Tests to prevent regression of the error:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,7 +22,7 @@ import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.routes.websocket_secure import (
+from app.routes.websocket_secure import (
     _handle_general_exception,
     # Add project root to path
     _handle_websocket_error,
@@ -30,7 +30,7 @@ from netra_backend.app.routes.websocket_secure import (
 )
 
 # Add project root to path
-from netra_backend.app.websocket.connection import ConnectionManager
+from app.websocket.connection import ConnectionManager
 
 
 @pytest.fixture

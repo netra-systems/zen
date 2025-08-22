@@ -8,7 +8,7 @@ Follows strict 25-line function design for testability.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,16 +23,16 @@ import pytest
 from mcp_client import MCPTool
 
 # Add project root to path
-from netra_backend.app.agents.mcp_integration.context_manager import (
+from app.agents.mcp_integration.context_manager import (
     MCPAgentContext,
     # Add project root to path
     MCPContextManager,
     MCPPermissionContext,
 )
-from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
+from app.agents.mcp_integration.mcp_intent_detector import (
     MCPIntentDetector,
 )
-from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
+from app.services.agent_mcp_bridge import AgentMCPBridge
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ Tests Redis GET, SET, DELETE operations and connection management
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 
 # Add project root to path
 from .redis_test_fixtures import (
@@ -67,7 +67,7 @@ class TestRedisManagerOperations:
         manager.enabled = True
         
         with patch('redis.asyncio.Redis') as mock_redis_class:
-            from netra_backend.tests.helpers.redis_test_fixtures import MockRedisClient
+            from tests.helpers.redis_test_fixtures import MockRedisClient
             mock_client = MockRedisClient()
             setup_failing_redis_client(mock_client, "connection")
             mock_redis_class.return_value = mock_client

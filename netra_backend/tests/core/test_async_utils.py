@@ -12,7 +12,7 @@ Imports all modular test files to maintain test discovery while enforcing archit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,27 +20,27 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.core.test_async_batch_processor import TestAsyncBatchProcessor
-from netra_backend.tests.core.test_async_connection_pool import TestAsyncConnectionPool
-from netra_backend.tests.core.test_async_globals_threadpool import (
+from tests.core.test_async_batch_processor import TestAsyncBatchProcessor
+from tests.core.test_async_connection_pool import TestAsyncConnectionPool
+from tests.core.test_async_globals_threadpool import (
     # Add project root to path
     TestGlobalInstances,
     TestRunInThreadpool,
     TestShutdownAsyncUtils,
 )
-from netra_backend.tests.core.test_async_integration_scenarios import (
+from tests.core.test_async_integration_scenarios import (
     TestIntegrationScenarios,
 )
-from netra_backend.tests.core.test_async_lock_circuit_breaker import (
+from tests.core.test_async_lock_circuit_breaker import (
     TestAsyncCircuitBreaker,
     TestAsyncLock,
 )
-from netra_backend.tests.core.test_async_rate_limiter import TestAsyncRateLimiter
-from netra_backend.tests.core.test_async_resource_manager import (
+from tests.core.test_async_rate_limiter import TestAsyncRateLimiter
+from tests.core.test_async_resource_manager import (
     TestAsyncResourceManager,
 )
-from netra_backend.tests.core.test_async_task_pool import TestAsyncTaskPool
-from netra_backend.tests.core.test_async_timeout_retry import (
+from tests.core.test_async_task_pool import TestAsyncTaskPool
+from tests.core.test_async_timeout_retry import (
     TestAsyncTimeout,
     TestWithRetry,
 )

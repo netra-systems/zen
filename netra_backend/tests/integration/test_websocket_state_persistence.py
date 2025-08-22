@@ -16,8 +16,8 @@ All functions ≤8 lines per CLAUDE.md requirements.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -36,11 +36,11 @@ import time
 
 import pytest
 
-from netra_backend.app.websocket.reconnection_types import ReconnectionConfig
+from app.websocket.reconnection_types import ReconnectionConfig
 
 # Add project root to path
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from netra_backend.tests.integration.websocket_recovery_fixtures import (
+from app.websocket.unified.manager import UnifiedWebSocketManager
+from tests.integration.websocket_recovery_fixtures import (
     # Add project root to path
 
     MockWebSocket,

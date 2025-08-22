@@ -21,16 +21,16 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket.connection import ConnectionInfo
+from app.services.message_handlers import MessageHandlerService
+from app.websocket.connection import ConnectionInfo
 
 # Add project root to path
-from netra_backend.app.websocket.unified.message_handlers import (
+from app.websocket.unified.message_handlers import (
     MessageBuilder,
     MessageHandler,
     MessageProcessor,
 )
-from netra_backend.app.websocket.unified.types import WebSocketValidationError
+from app.websocket.unified.types import WebSocketValidationError
 
 # Add project root to path
 

@@ -15,7 +15,7 @@ Tests migration, rollback, performance, and zero data loss guarantees.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# from netra_backend.app.services.redis.session_manager import RedisSessionManager
+# from app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 
 import asyncpg
@@ -41,8 +41,8 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.db.clickhouse import ClickHouseDatabase
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from app.db.clickhouse import ClickHouseDatabase
+from app.db.client_clickhouse import ClickHouseClient
 
 # Add project root to path
 from .integration.critical_paths.l4_staging_critical_base import (
@@ -52,7 +52,7 @@ from .integration.critical_paths.l4_staging_critical_base import (
 )
 
 RedisSessionManager = AsyncMock
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

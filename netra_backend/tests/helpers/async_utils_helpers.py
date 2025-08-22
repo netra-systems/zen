@@ -9,14 +9,14 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.app.core.async_batch_processor import AsyncBatchProcessor
-from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
-from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
-from netra_backend.app.core.async_resource_manager import (
+from app.core.async_batch_processor import AsyncBatchProcessor
+from app.core.async_connection_pool import AsyncConnectionPool
+from app.core.async_rate_limiter import AsyncRateLimiter
+from app.core.async_resource_manager import (
     AsyncResourceManager,
     AsyncTaskPool,
 )
-from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, AsyncLock
+from app.core.async_retry_logic import AsyncCircuitBreaker, AsyncLock
 
 
 # Setup helpers (≤8 lines each)

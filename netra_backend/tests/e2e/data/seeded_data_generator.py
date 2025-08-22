@@ -33,9 +33,9 @@ import numpy as np
 from faker import Faker
 from faker.providers import BaseProvider
 
-from netra_backend.app.schemas.agent_models import AgentMetadata, ToolResultData
-from netra_backend.app.schemas.core_enums import MessageType
-from netra_backend.app.schemas.core_models import Message, Thread, User
+from app.schemas.agent_models import AgentMetadata, ToolResultData
+from app.schemas.core_enums import MessageType
+from app.schemas.core_models import Message, Thread, User
 
 
 @dataclass

@@ -16,7 +16,7 @@ Coverage: Real ClickHouse time-series, Prometheus aggregation, retention policie
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -42,8 +42,8 @@ import pytest
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from app.core.health_checkers import HealthChecker
+from app.db.client_clickhouse import ClickHouseClient
 
 
 # Mock metrics aggregation components for L4 testing

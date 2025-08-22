@@ -13,7 +13,7 @@ Comprehensive test to verify cache invalidation cascade:
 This test ensures cache consistency across all service layers.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

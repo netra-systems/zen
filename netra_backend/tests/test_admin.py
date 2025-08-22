@@ -18,9 +18,9 @@ import pytest
 from auth_integration.auth import ActiveUserWsDep
 from fastapi.testclient import TestClient
 from main import app
-from netra_backend.app.schemas import User
+from app.schemas import User
 
-from netra_backend.app.config import get_config
+from app.config import get_config
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.health_checkers import (
+from app.core.health_checkers import (
     _create_disabled_result,
     _create_failed_result,
     _create_success_result,
@@ -30,7 +30,7 @@ from netra_backend.app.core.health_checkers import (
     check_system_resources,
     check_websocket_health,
 )
-from netra_backend.app.core.health_types import HealthCheckResult
+from app.core.health_types import HealthCheckResult
 
 
 class TestHealthCheckerHelpers:

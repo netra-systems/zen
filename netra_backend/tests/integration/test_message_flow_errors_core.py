@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,7 +26,7 @@ from app.routes.utils.websocket_helpers import (
 )
 from starlette.websockets import WebSocketDisconnect
 
-from netra_backend.app.core.exceptions_websocket import WebSocketError
+from app.core.exceptions_websocket import WebSocketError
 
 # Add project root to path
 from .test_unified_message_flow import MessageFlowTracker

@@ -8,7 +8,7 @@ MODULAR VERSION: <300 lines, all functions ≤8 lines
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.async_utils import (
+from app.core.async_utils import (
     AsyncConnectionPool,
     # Add project root to path
     AsyncResourceManager,
@@ -36,7 +36,7 @@ from netra_backend.app.core.async_utils import (
     get_global_task_pool,
     run_in_threadpool,
 )
-from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
+from app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 
 class TestAsyncResourceManagerComplete:

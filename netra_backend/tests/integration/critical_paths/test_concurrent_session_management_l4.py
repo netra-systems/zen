@@ -7,7 +7,7 @@ Tests concurrent user sessions, resource contention, and consistency
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,12 +26,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.config import get_config
-from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.resource_manager import ResourceManager
+from app.config import get_config
+from app.services.auth_service import AuthService
+from app.services.resource_manager import ResourceManager
 
 # Add project root to path
-from netra_backend.app.services.session_service import SessionService
+from app.services.session_service import SessionService
 
 # Add project root to path
 

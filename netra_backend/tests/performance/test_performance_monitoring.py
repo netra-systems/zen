@@ -29,13 +29,13 @@ from monitoring.performance_monitor import (
 )
 
 # Add project root to path
-from netra_backend.app.core.performance_optimization_manager import (
+from app.core.performance_optimization_manager import (
     BatchProcessor,
     MemoryCache,
     # Add project root to path
     PerformanceOptimizationManager,
 )
-from netra_backend.app.db.index_optimizer import (
+from app.db.index_optimizer import (
     DatabaseIndexManager,
     PostgreSQLIndexOptimizer,
 )

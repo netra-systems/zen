@@ -14,7 +14,7 @@ Coverage: Data segregation, permission boundaries, resource quotas, security aud
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,13 +38,13 @@ import pytest
 from auth_integration import require_permission
 
 # Add project root to path
-from netra_backend.app.services.database.tenant_service import TenantService
+from app.services.database.tenant_service import TenantService
 
 PermissionsService = AsyncMock
-from netra_backend.app.core.security import SecurityContext
-from netra_backend.app.schemas.tenant import Permission, Tenant, TenantResource
-from netra_backend.app.services.audit.audit_logger import AuditLogger
-from netra_backend.app.services.database.connection_manager import (
+from app.core.security import SecurityContext
+from app.schemas.tenant import Permission, Tenant, TenantResource
+from app.services.audit.audit_logger import AuditLogger
+from app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 

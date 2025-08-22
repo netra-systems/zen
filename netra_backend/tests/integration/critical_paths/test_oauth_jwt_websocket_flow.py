@@ -27,7 +27,7 @@ Architecture Compliance:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -55,7 +55,7 @@ from ws_manager import get_manager
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
 # Add project root to path
-from netra_backend.app.schemas.auth_types import (
+from app.schemas.auth_types import (
     AuthProvider,
     HealthResponse,
     # Add project root to path
@@ -64,8 +64,8 @@ from netra_backend.app.schemas.auth_types import (
     SessionInfo,
     TokenData,
 )
-from netra_backend.app.services.database.session_manager import SessionManager
-from netra_backend.app.websocket.unified import get_unified_manager
+from app.services.database.session_manager import SessionManager
+from app.websocket.unified import get_unified_manager
 
 logger = logging.getLogger(__name__)
 

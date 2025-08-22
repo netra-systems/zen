@@ -11,7 +11,7 @@ Comprehensive test for Redis session management flow:
 8. Cluster failover handling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

@@ -3,8 +3,8 @@
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.quality_gate_service import (
+from app.redis_manager import RedisManager
+from app.services.quality_gate_service import (
     QualityGateService,
     QualityMetrics,
     ValidationResult,

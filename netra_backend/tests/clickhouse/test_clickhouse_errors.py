@@ -7,7 +7,7 @@ Tests for error handling and recovery mechanisms
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,11 +18,11 @@ setup_test_path()
 import pytest
 from logging_config import central_logger as logger
 
-from netra_backend.app.config import get_config
+from app.config import get_config
 
 # Add project root to path
-from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from app.db.clickhouse import get_clickhouse_client
+from app.db.clickhouse_base import ClickHouseDatabase
 
 # Add project root to path
 

@@ -16,7 +16,7 @@ circuit breaker behavior, and graceful degradation patterns.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -40,18 +40,18 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
 # Add project root to path
-from netra_backend.app.core.circuit_breaker import (
+from app.core.circuit_breaker import (
     CircuitBreaker,
     CircuitConfig,
     CircuitState,
 )
-from netra_backend.app.core.health_checkers import (
+from app.core.health_checkers import (
     check_clickhouse_health,
     # Add project root to path
     check_postgres_health,
     check_redis_health,
 )
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 logger = central_logger.get_logger(__name__)

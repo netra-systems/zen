@@ -17,9 +17,9 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.services.cost_calculator import CostCalculatorService
-from netra_backend.app.services.demo_service import DemoService
+from app.auth_integration.auth import get_current_user
+from app.services.cost_calculator import CostCalculatorService
+from app.services.demo_service import DemoService
 
 
 @dataclass

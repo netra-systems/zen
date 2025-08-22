@@ -8,7 +8,7 @@ Split from oversized test_llm_agent_e2e_real.py
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,11 +27,11 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState
+from app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.llm.llm_manager import LLMManager
 from .llm_agent_fixtures import (
     mock_db_session,
     # Add project root to path
@@ -60,7 +60,7 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.tool_dispatcher import ToolDispatcher
     
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
@@ -128,7 +128,7 @@ async def test_real_llm_interaction():
 
 async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.tool_dispatcher import ToolDispatcher
     
     dispatcher = Mock(spec=ToolDispatcher)
     execution_log = []

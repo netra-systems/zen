@@ -17,7 +17,7 @@ Test Level: L3 (Real Local Services)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,11 +36,11 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from app.db.clickhouse import get_clickhouse_client
 
 # Add project root to path
-from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
-from netra_backend.app.logging_config import central_logger
+from app.db.postgres import get_postgres_session, initialize_postgres
+from app.logging_config import central_logger
 
 # Add project root to path
 

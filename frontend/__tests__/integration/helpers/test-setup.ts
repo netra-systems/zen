@@ -5,9 +5,6 @@
 
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
-import { useAuthStore } from '@/store/authStore';
-import { useChatStore } from '@/store/chatStore';
-import { useThreadStore } from '@/store/threadStore';
 
 export const setupTestEnvironment = (): WS => {
   process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
@@ -23,9 +20,9 @@ export const clearStorages = (): void => {
 };
 
 export const resetStores = (): void => {
-  useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-  useChatStore.setState({ messages: [], currentThread: null });
-  useThreadStore.setState({ threads: [], currentThread: null, currentThreadId: null });
+  // Store resetting is handled by individual test mocks
+  // This function exists for compatibility but does nothing
+  console.debug('resetStores called - handled by test mocks');
 };
 
 export const setupGlobalFetch = (): void => {

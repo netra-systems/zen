@@ -12,8 +12,8 @@ Validates agent communication patterns, tool execution, state management, and er
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -37,21 +37,21 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from netra_backend.app.schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
+from app.schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.base import BaseSubAgent
+from app.agents.base import BaseSubAgent
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.core.exceptions_base import NetraException
+from app.llm.llm_manager import LLMManager
+from app.redis_manager import RedisManager
+from app.schemas.registry import AgentResult, DeepAgentState
+from app.services.state_persistence import state_persistence_service
+from app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

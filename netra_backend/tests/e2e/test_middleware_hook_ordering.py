@@ -15,7 +15,7 @@ Module ≤300 lines per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,10 +32,10 @@ from fastapi import HTTPException, Request, Response
 from logging_config import central_logger
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from netra_backend.app.middleware.metrics_middleware import AgentMetricsMiddleware
+from app.middleware.metrics_middleware import AgentMetricsMiddleware
 
 # Add project root to path
-from netra_backend.app.middleware.security_middleware import (
+from app.middleware.security_middleware import (
     RateLimitTracker,
     SecurityMiddleware,
 )
@@ -299,7 +299,7 @@ class TestMetricsMiddlewareIntegration:
     
     def test_metrics_context_manager(self):
         """Test metrics context manager functionality."""
-        from netra_backend.app.middleware.metrics_middleware import (
+        from app.middleware.metrics_middleware import (
             AgentMetricsContextManager,
         )
         

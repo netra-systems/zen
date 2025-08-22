@@ -13,7 +13,7 @@ Tests health check functionality:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -341,7 +341,7 @@ class TestServiceHealthIntegration:
 
     async def test_health_monitoring_in_startup_integration(self):
         """Test integration between health monitoring and startup checks."""
-        from netra_backend.app.core.app_factory import create_app
+        from app.core.app_factory import create_app
         app = create_app()
         startup_checker = StartupChecker(app)
         

@@ -20,8 +20,8 @@ The original comprehensive file was refactored into focused modules:
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 

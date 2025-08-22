@@ -16,7 +16,7 @@ Coverage: Real nginx/envoy gateway, JWT validation, Redis rate limiting, respons
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -40,23 +40,26 @@ import pytest
 # Add project root to path
 
 
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
-StagingTestSuite = AsyncMock
-get_staging_suite = AsyncMock
+# Import from correct e2e path or use mocks if not available
+try:
+    from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+except ImportError:
+    StagingTestSuite = AsyncMock
+    get_staging_suite = AsyncMock
 # from auth_integration import create_access_token, validate_token_jwt
-# from netra_backend.app.auth_integration.auth import create_access_token
+# from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 
 create_access_token = AsyncMock()
-# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
+# from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 
 validate_token_jwt = AsyncMock()
-from netra_backend.app.core.health_checkers import HealthChecker
+from app.core.health_checkers import HealthChecker
 
 
 # Mock API gateway components for L4 testing

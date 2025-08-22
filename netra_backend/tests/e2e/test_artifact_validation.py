@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,20 +23,20 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.app.agents.artifact_validator import (
+from app.agents.artifact_validator import (
     ArtifactValidationError,
     ArtifactValidator,
     ValidationContext,
     artifact_validator,
 )
-from netra_backend.app.agents.data_sub_agent.models import (
+from app.agents.data_sub_agent.models import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
 
 # Add project root to path
-from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
-from netra_backend.app.agents.triage_sub_agent.models import (
+from app.agents.state import DeepAgentState, OptimizationsResult
+from app.agents.triage_sub_agent.models import (
     Complexity,
     KeyParameters,
     Priority,
@@ -317,7 +317,7 @@ class TestArtifactValidation:
     
     async def test_global_validator_instance(self):
         """Test global validator instance is available."""
-        from netra_backend.app.agents.artifact_validator import artifact_validator
+        from app.agents.artifact_validator import artifact_validator
         assert isinstance(artifact_validator, ArtifactValidator)
         assert artifact_validator.validation_history == []
     

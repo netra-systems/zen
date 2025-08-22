@@ -13,7 +13,7 @@ Comprehensive test for Redis cluster coordination:
 This test validates Redis cluster coordination at scale.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

@@ -26,7 +26,7 @@ Mock-Real Spectrum: L4 (Production-like staging environment)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -49,14 +49,14 @@ import psutil
 import pytest
 import websockets
 
-from netra_backend.app.clients.auth_client import auth_client
+from app.clients.auth_client import auth_client
 
 # Test infrastructure
-from netra_backend.app.core.config import get_settings
+from app.core.config import get_settings
 
 # Add project root to path
 # Import auth types
-from netra_backend.app.schemas.auth_types import (
+from app.schemas.auth_types import (
     AuthError,
     HealthResponse,
     LoginRequest,

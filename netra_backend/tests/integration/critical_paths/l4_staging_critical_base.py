@@ -25,9 +25,9 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 import pytest
 
-from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.monitoring.models import MetricsCollector
-from netra_backend.app.services.redis_service import RedisService
+from app.core.configuration.base import get_unified_config
+from app.monitoring.models import MetricsCollector
+from app.services.redis_service import RedisService
 from ..e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite,

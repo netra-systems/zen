@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.database_env_service import (
+from app.services.database_env_service import (
     DatabaseEnvironmentValidator,
     validate_database_environment,
 )

@@ -13,7 +13,7 @@ L3 Test: Uses real local services with Testcontainers for agent spawning and coo
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,21 +33,21 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
+from app.agents.base import BaseSubAgent
+from app.agents.state import DeepAgentState
+from app.agents.supervisor.state_manager import AgentStateManager
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.schemas.registry import (
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.redis_manager import RedisManager
+from app.schemas.registry import (
     AgentCompleted,
     AgentStarted,
     SubAgentUpdate,
 )
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.database.postgres_service import PostgresService
-from netra_backend.app.services.llm.llm_manager import LLMManager
+from app.services.agent_service import AgentService
+from app.services.database.postgres_service import PostgresService
+from app.services.llm.llm_manager import LLMManager
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 # Add project root to path

@@ -7,7 +7,7 @@ Shared fixtures and mocks for route testing.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,10 +22,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.config import get_config
+from app.config import get_config
 
 # Add project root to path
-from netra_backend.app.services.security_service import KeyManager, SecurityService
+from app.services.security_service import KeyManager, SecurityService
 
 # Add project root to path
 
@@ -33,14 +33,14 @@ from netra_backend.app.services.security_service import KeyManager, SecurityServ
 @pytest.fixture
 def base_client():
     """Base FastAPI test client with minimal setup."""
-    from netra_backend.app.main import app
+    from app.main import app
     return TestClient(app)
 
 
 @pytest.fixture  
 def secured_client():
     """Test client with security service configured."""
-    from netra_backend.app.main import app
+    from app.main import app
     
     # Mock db session factory
     @asynccontextmanager
@@ -72,9 +72,9 @@ def create_admin_user(user_id: str = "admin1") -> Dict[str, Any]:
 
 def setup_agent_mocks(app):
     """Set up agent service mocks for testing."""
-    from netra_backend.app.db.postgres import get_async_db
-    from netra_backend.app.dependencies import get_llm_manager
-    from netra_backend.app.services.agent_service import get_agent_service
+    from app.db.postgres import get_async_db
+    from app.dependencies import get_llm_manager
+    from app.services.agent_service import get_agent_service
     
     def mock_get_async_db():
         return Mock()

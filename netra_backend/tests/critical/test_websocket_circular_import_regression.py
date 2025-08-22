@@ -20,7 +20,7 @@ REGRESSION HISTORY:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -59,7 +59,7 @@ class TestCircularImportRegression:
                 content = f.read()
             
             # Check for BaseExecutionEngine import
-            assert 'from netra_backend.app.agents.base.executor import BaseExecutionEngine' not in content, \
+            assert 'from app.agents.base.executor import BaseExecutionEngine' not in content, \
                 f"{module_name} imports BaseExecutionEngine - CIRCULAR DEPENDENCY!"
             
             # Also check for any reference to BaseExecutionEngine
@@ -68,7 +68,7 @@ class TestCircularImportRegression:
     
     def test_websocket_modules_use_local_execution(self):
         """Verify WebSocket modules use local execution patterns."""
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from app.websocket.connection_executor import ConnectionExecutor
         
         # Verify execution_engine is None or local implementation
         executor = ConnectionExecutor()
@@ -110,9 +110,9 @@ class TestCircularImportRegression:
     def test_agent_registry_accessible_after_imports(self):
         """Verify agent registry is accessible after all imports."""
         # Import in problematic order
-        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from app.agents.supervisor.agent_registry import AgentRegistry
+        from app.agents.supervisor_consolidated import SupervisorAgent
+        from app.websocket.connection_executor import ConnectionExecutor
         
         # Verify classes are accessible
         assert ConnectionExecutor is not None
@@ -132,7 +132,7 @@ class TestCircularImportRegression:
     
     def test_websocket_handler_without_execution_engine(self):
         """Test WebSocket handlers work without BaseExecutionEngine."""
-        from netra_backend.app.websocket.message_handler_core import (
+        from app.websocket.message_handler_core import (
             ReliableMessageHandler,
         )
         
@@ -146,7 +146,7 @@ class TestCircularImportRegression:
     
     def test_broadcast_executor_without_execution_engine(self):
         """Test broadcast executor works without BaseExecutionEngine."""
-        from netra_backend.app.websocket.websocket_broadcast_executor import (
+        from app.websocket.websocket_broadcast_executor import (
             BroadcastExecutor,
         )
         
@@ -172,7 +172,7 @@ class TestCircularImportRegression:
         """Test message flow works after circular dependency fix."""
         from unittest.mock import AsyncMock, Mock, patch
 
-        from netra_backend.app.services.agent_service_core import AgentService
+        from app.services.agent_service_core import AgentService
         
         # Create mock supervisor
         mock_supervisor = AsyncMock()
@@ -220,7 +220,7 @@ class TestConnectionModuleCircularImportPrevention:
                 del sys.modules[module]
         
         # Import connection module
-        from netra_backend.app.websocket.connection import (
+        from app.websocket.connection import (
             connection_manager,
             get_connection_manager_instance,
         )
@@ -280,7 +280,7 @@ class TestConnectionModuleCircularImportPrevention:
         
         Business Value: Prevents breaking changes in dependent services.
         """
-        from netra_backend.app.websocket import connection
+        from app.websocket import connection
         
         # All expected exports for backward compatibility
         required_exports = [
@@ -417,8 +417,8 @@ class TestIndirectCircularImportPrevention:
         
         try:
             # Import in the problematic order
-            from netra_backend.app.services import synthetic_data_service
-            from netra_backend.app.services.websocket import ws_manager
+            from app.services import synthetic_data_service
+            from app.services.websocket import ws_manager
             
             # If we get here, no circular import was detected
             assert True, "No circular import detected"
@@ -449,7 +449,7 @@ class TestIndirectCircularImportPrevention:
         
         lines = content.split('\n')
         for i, line in enumerate(lines):
-            if 'from netra_backend.app.services.websocket.ws_manager import' in line:
+            if 'from app.services.websocket.ws_manager import' in line:
                 # Check indentation to ensure it's not at module level
                 if line.startswith('from'):  # No indentation = module level
                     # Check if it's in TYPE_CHECKING block

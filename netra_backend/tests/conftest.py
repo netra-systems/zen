@@ -4,7 +4,7 @@ Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
 
 # Add the project root directory to Python path for imports
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from app.websocket.connection import ConnectionManager as WebSocketManager
 import os
 import sys
 
@@ -14,7 +14,7 @@ if project_root not in sys.path:
 
     sys.path.insert(0, project_root)
 
-from netra_backend.app.core.network_constants import (
+from app.core.network_constants import (
 
     DatabaseConstants,
 
@@ -115,20 +115,20 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.config import get_config
-from netra_backend.app.db.base import Base
-from netra_backend.app.db.models_agent_state import *  # Import all agent state models
-from netra_backend.app.db.models_content import *  # Import all content models
-from netra_backend.app.db.models_postgres import *  # Import all postgres models
+from app.config import get_config
+from app.db.base import Base
+from app.db.models_agent_state import *  # Import all agent state models
+from app.db.models_content import *  # Import all content models
+from app.db.models_postgres import *  # Import all postgres models
 
 # Import all models to ensure they are registered with Base before creating tables
-from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
+from app.db.models_user import Secret, ToolUsageLog, User
 
 # Initialize database on import to ensure async_session_factory is available
-from netra_backend.app.db.postgres import initialize_postgres
-from netra_backend.app.db.session import get_db_session
-from netra_backend.app.main import app
-from netra_backend.tests.conftest_helpers import (
+from app.db.postgres import initialize_postgres
+from app.db.session import get_db_session
+from app.main import app
+from tests.conftest_helpers import (
 
     _create_mock_tool_dispatcher,
 
@@ -237,7 +237,7 @@ except Exception as e:
 def ensure_db_initialized():
 
     """Ensure database is initialized for tests that need it."""
-    from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
+    from app.db.postgres import async_session_factory, initialize_postgres
     
 
     if async_session_factory is None:
@@ -312,8 +312,8 @@ def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
 
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from netra_backend.app.config import get_config
-        from netra_backend.app.llm.llm_manager import LLMManager
+        from app.config import get_config
+        from app.llm.llm_manager import LLMManager
 
         config = get_config()
         return LLMManager(config)
@@ -342,7 +342,7 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
 
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from app.services.websocket.ws_manager import WebSocketManager
 
     manager = WebSocketManager()
 
@@ -455,7 +455,7 @@ async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
     """Mock structured LLM call with TriageResult support."""
     from unittest.mock import Mock
-    from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    from app.agents.triage_sub_agent.models import TriageResult
 
     if schema == TriageResult or hasattr(schema, '__name__') and 'TriageResult' in schema.__name__:
 
@@ -488,7 +488,7 @@ def _setup_agent_llm_manager():
 
     """Create LLM manager mock with realistic response methods."""
     from unittest.mock import AsyncMock, Mock
-    from netra_backend.app.llm.llm_manager import LLMManager
+    from app.llm.llm_manager import LLMManager
 
     llm_manager = Mock(spec=LLMManager)
 
@@ -506,7 +506,7 @@ def _setup_agent_llm_manager():
 def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.tool_dispatcher import ToolDispatcher
 
     websocket_manager = WebSocketManager()
 
@@ -526,9 +526,9 @@ def _setup_websocket_tool_dispatcher():
 def _setup_core_services():
 
     """Create core business services."""
-    from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-    from netra_backend.app.services.quality_gate_service import QualityGateService
-    from netra_backend.app.services.corpus_service import CorpusService
+    from app.services.synthetic_data_service import SyntheticDataService
+    from app.services.quality_gate_service import QualityGateService
+    from app.services.corpus_service import CorpusService
 
     synthetic_service = SyntheticDataService()
 
@@ -561,8 +561,8 @@ def _setup_mock_services():
 def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     """Create supervisor and agent service with proper configuration."""
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-    from netra_backend.app.services.agent_service import AgentService
+    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+    from app.services.agent_service import AgentService
 
     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
 
@@ -596,7 +596,7 @@ def agent(mock_dependencies):
 
     """Create DataSubAgent instance with mocked dependencies for test compatibility"""
     from unittest.mock import patch, Mock, AsyncMock
-    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+    from app.agents.data_sub_agent.agent import DataSubAgent
     
 
     llm_manager, tool_dispatcher = mock_dependencies
@@ -734,7 +734,7 @@ def sample_usage_patterns():
 def setup_real_infrastructure():
 
     """Setup infrastructure for real LLM tests."""
-    from netra_backend.app.core.config import get_config
+    from app.core.config import get_config
 
     config = get_config()
 

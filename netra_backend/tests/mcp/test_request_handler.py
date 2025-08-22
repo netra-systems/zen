@@ -27,7 +27,7 @@ import pytest
 # Skip tests if RequestHandler module doesn't exist yet
 pytest.skip("MCP Request Handler not yet implemented", allow_module_level=True)
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class TestRequestHandler:

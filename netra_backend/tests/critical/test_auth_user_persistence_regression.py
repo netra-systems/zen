@@ -10,7 +10,7 @@ where tokens were created but users didn't exist in the database.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -29,8 +29,8 @@ from routes.utils.websocket_helpers import authenticate_websocket_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.services.security_service import SecurityService
+from app.db.models_postgres import User
+from app.services.security_service import SecurityService
 
 # Add project root to path
 
@@ -69,7 +69,7 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_dev_user_123_exists_in_database(self):
         """Test that dev-user-123 is created in the database."""
-        from netra_backend.app.db.postgres import get_async_db
+        from app.db.postgres import get_async_db
         
         async with get_async_db() as db:
             # Query for dev user
@@ -89,7 +89,7 @@ class TestAuthUserPersistenceRegression:
         """Test that OAuth flow creates users in the database."""
         from sqlalchemy import select
 
-        from netra_backend.app.db.postgres import get_async_db
+        from app.db.postgres import get_async_db
         
         # Simulate OAuth user info
         oauth_user_info = {
@@ -137,10 +137,10 @@ class TestAuthUserPersistenceRegression:
         """Test that JWT token user_id matches the database user.id."""
         from sqlalchemy import select
 
-        from netra_backend.app.config import get_config
-        from netra_backend.app.db.postgres import get_async_db
-        from netra_backend.app.services.key_manager import KeyManager
-        from netra_backend.app.services.security_service import SecurityService
+        from app.config import get_config
+        from app.db.postgres import get_async_db
+        from app.services.key_manager import KeyManager
+        from app.services.security_service import SecurityService
         
         # Setup security service
         key_manager = KeyManager.load_from_settings(get_config())
@@ -208,7 +208,7 @@ class TestAuthUserPersistenceRegression:
         """Test that auth service syncs users to main database."""
         from sqlalchemy import select
 
-        from netra_backend.app.db.postgres import get_async_db
+        from app.db.postgres import get_async_db
         
         # Test user data
         test_user = {
@@ -264,7 +264,7 @@ class TestAuthUserPersistenceRegression:
         
         from sqlalchemy import select
 
-        from netra_backend.app.db.postgres import get_async_db
+        from app.db.postgres import get_async_db
         
         async with get_async_db() as db:
             for test_case in test_cases:
@@ -325,7 +325,7 @@ class TestAuthServiceIntegration:
         """Test that users persist across auth service and main app."""
         from sqlalchemy import select
 
-        from netra_backend.app.db.postgres import get_async_db
+        from app.db.postgres import get_async_db
         
         # User created by auth service
         auth_user = {
@@ -356,9 +356,9 @@ class TestAuthServiceIntegration:
             assert app_user.email == auth_user["email"]
             
             # Verify WebSocket auth would find this user
-            from netra_backend.app.config import get_config
-            from netra_backend.app.services.key_manager import KeyManager
-            from netra_backend.app.services.security_service import SecurityService
+            from app.config import get_config
+            from app.services.key_manager import KeyManager
+            from app.services.security_service import SecurityService
             
             key_manager = KeyManager.load_from_settings(get_config())
             security_service = SecurityService(key_manager)

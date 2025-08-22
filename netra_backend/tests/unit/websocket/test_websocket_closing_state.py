@@ -22,11 +22,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket.broadcast_core import BroadcastManager
+from app.schemas.websocket_message_types import ServerMessage
+from app.websocket.broadcast_core import BroadcastManager
 
 # Add project root to path
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from app.websocket.connection import ConnectionInfo, ConnectionManager
 
 # Add project root to path
 

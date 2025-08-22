@@ -28,7 +28,7 @@ Architecture Requirements:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -50,11 +50,11 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
+from app.core.auth_constants import AuthConstants, JWTConstants
 
 # Add project root to path
-from netra_backend.app.db.session import get_db_session
-from netra_backend.app.schemas.registry import WebSocketMessage
+from app.db.session import get_db_session
+from app.schemas.registry import WebSocketMessage
 from .sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,

@@ -22,7 +22,7 @@ ARCHITECTURE COMPLIANCE:
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from ..test_utils import setup_test_path
 from pathlib import Path
 import sys

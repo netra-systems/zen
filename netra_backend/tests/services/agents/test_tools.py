@@ -15,7 +15,7 @@ import pytest
 from langchain_core.tools import tool
 
 # Add project root to path
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.tool_dispatcher import ToolDispatcher
 
 # Add project root to path
 

@@ -14,7 +14,7 @@ Coverage: Agent pipeline overload scenarios, circuit breaker coordination, load 
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,15 +34,15 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.base import BaseSubAgent
+from app.agents.state import DeepAgentState
+from app.agents.supervisor_consolidated import SupervisorAgent
 
 # Add project root to path
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
-from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
+from app.core.circuit_breaker_core import CircuitBreaker
+from app.core.circuit_breaker_types import CircuitConfig, CircuitState
+from app.core.exceptions_base import NetraException
+from app.schemas.registry import AgentMessage, TaskPriority
 
 # Add project root to path
 

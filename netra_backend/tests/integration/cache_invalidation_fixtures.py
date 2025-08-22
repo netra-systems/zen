@@ -17,21 +17,21 @@ from typing import Any, Dict, List, Optional, Set
 
 import redis.asyncio as redis
 
-from netra_backend.app.core.interfaces_cache import CacheManager, resource_monitor
-from netra_backend.app.db.cache_config import (
+from app.core.interfaces_cache import CacheManager, resource_monitor
+from app.db.cache_config import (
     CacheMetrics,
     CacheStrategy,
     QueryCacheConfig,
 )
-from netra_backend.app.db.cache_storage import CacheMetricsBuilder, CacheStorage
-from netra_backend.app.db.cache_strategies import (
+from app.db.cache_storage import CacheMetricsBuilder, CacheStorage
+from app.db.cache_strategies import (
     CacheTaskManager,
     EvictionStrategyFactory,
 )
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 
 # Project imports
-from netra_backend.app.services.redis_service import redis_service
+from app.services.redis_service import redis_service
 
 logger = central_logger.get_logger(__name__)
 

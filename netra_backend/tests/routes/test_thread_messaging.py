@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -39,7 +39,7 @@ class TestThreadMessaging:
     
     def test_thread_pagination(self, basic_test_client):
         """Test thread list pagination."""
-        from netra_backend.app.services.thread_service import ThreadService
+        from app.services.thread_service import ThreadService
         
         with patch.object(ThreadService, 'get_thread_messages') as mock_get:
             mock_get.return_value = [

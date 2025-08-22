@@ -25,8 +25,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import aiosqlite
 import pytest
 
-from netra_backend.app.core.error_codes import ErrorSeverity
-from netra_backend.app.schemas.startup_types import (
+from app.core.error_codes import ErrorSeverity
+from app.schemas.startup_types import (
     ErrorPattern,
     ErrorPhase,
     ErrorTrend,
@@ -36,7 +36,7 @@ from netra_backend.app.schemas.startup_types import (
 )
 
 # Add project root to path
-from netra_backend.app.startup.error_aggregator import ErrorAggregator
+from app.startup.error_aggregator import ErrorAggregator
 
 
 @pytest.fixture

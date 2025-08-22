@@ -11,6 +11,9 @@ from netra_backend.app.schemas.registry import (
     UserCreateOAuth,
 )
 
+# Import PlanTier as UserTier for compatibility with rate limiting tests
+from netra_backend.app.schemas.UserPlan import PlanTier as UserTier
+
 
 class UserUpdate(UserBase):
     """User update model."""

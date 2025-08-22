@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import redis.asyncio as redis
 
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 
 
 def setup_redis_settings_mock(mock_settings, host="localhost", port=6379, username=None, password=None):

@@ -15,7 +15,7 @@ L4 Realism: Tests against real staging services, actual LLM providers, productio
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,24 +34,24 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-# from netra_backend.app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
+# from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
-# from netra_backend.app.services.websocket_service import WebSocketService
+# from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.schemas.UserPlan import PlanTier
+from app.schemas.UserPlan import PlanTier
 
 # Add project root to path
-from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.services.audit_service import AuditService
-from netra_backend.app.services.llm_cache_service import LLMCacheService
-from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
-from netra_backend.app.services.user_service import CRUDUser as UserService
+from app.services.agent_service_core import AgentService
+from app.services.audit_service import AuditService
+from app.services.llm_cache_service import LLMCacheService
+from app.services.metrics.billing_metrics import BillingMetricsCollector
+from app.services.user_service import CRUDUser as UserService
 
 WebSocketService = AsyncMock
-# from netra_backend.app.services.state.state_manager import StateManager
+# from app.services.state.state_manager import StateManager
 StateManager = AsyncMock
 from test_framework.test_config import configure_dedicated_test_environment
 

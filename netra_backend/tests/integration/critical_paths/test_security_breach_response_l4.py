@@ -17,7 +17,7 @@ security event logging, incident response orchestration, multi-stage attack simu
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -39,12 +39,12 @@ from urllib.parse import quote
 import httpx
 import pytest
 import websockets
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+from app.monitoring.metrics_collector import MetricsCollector
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
-from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket.rate_limiter import RateLimiter
+from app.core.circuit_breaker_core import CircuitBreaker
+from app.services.redis_service import RedisService
+from app.services.security_service import SecurityService
+from app.websocket.rate_limiter import RateLimiter
 
 # Add project root to path
 from .l4_staging_critical_base import (

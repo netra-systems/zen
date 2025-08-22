@@ -10,7 +10,7 @@ Includes specific regression tests for coroutine handling in auth flow.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -29,13 +29,13 @@ import pytest
 from starlette.websockets import WebSocketDisconnect
 from ws_manager import manager
 
-from netra_backend.app.db.models_postgres import Run, Thread
-from netra_backend.app.schemas.websocket_models import UserMessagePayload
+from app.db.models_postgres import Run, Thread
+from app.schemas.websocket_models import UserMessagePayload
 
 # Add project root to path
-from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.services.message_handler_base import MessageHandlerBase
-from netra_backend.app.services.message_handlers import MessageHandlerService
+from app.services.agent_service_core import AgentService
+from app.services.message_handler_base import MessageHandlerBase
+from app.services.message_handlers import MessageHandlerService
 
 # Add project root to path
 
@@ -495,10 +495,10 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_decode_access_token_coroutine_await(self):
         """Critical: Verify decode_access_token coroutine is properly awaited."""
-        from netra_backend.app.routes.utils.websocket_helpers import (
+        from app.routes.utils.websocket_helpers import (
             decode_token_payload,
         )
-        from netra_backend.app.services.security_service import SecurityService
+        from app.services.security_service import SecurityService
         
         mock_service = AsyncMock(spec=SecurityService)
         test_payload = {"sub": "user123", "email": "test@example.com"}
@@ -520,10 +520,10 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_auth_flow_no_coroutine_attribute_error(self):
         """Verify auth flow doesn't cause 'coroutine has no attribute' error."""
-        from netra_backend.app.routes.utils.websocket_helpers import (
+        from app.routes.utils.websocket_helpers import (
             authenticate_websocket_user,
         )
-        from netra_backend.app.services.security_service import SecurityService
+        from app.services.security_service import SecurityService
         
         mock_websocket = Mock()
         mock_service = AsyncMock(spec=SecurityService)
@@ -553,7 +553,7 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_websocket_error_handler_with_coroutine_error(self):
         """Test error handler properly logs coroutine-related errors."""
-        from netra_backend.app.routes.websocket_secure import _handle_general_exception
+        from app.routes.websocket_secure import _handle_general_exception
         
         mock_websocket = Mock()
         error = RuntimeError("'coroutine' object has no attribute 'get'")
@@ -568,8 +568,8 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_security_service_validate_token_awaits_decode(self):
         """Test EnhancedSecurityService validate_token properly awaits decode."""
-        from netra_backend.app.services.key_manager import KeyManager
-        from netra_backend.tests.services.security_service_test_mocks import (
+        from app.services.key_manager import KeyManager
+        from tests.services.security_service_test_mocks import (
             EnhancedSecurityService,
         )
         

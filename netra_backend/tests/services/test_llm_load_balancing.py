@@ -7,7 +7,7 @@ Refactored to comply with 25-line function limit and 450-line file limit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,7 +20,7 @@ import time
 from typing import Any, Dict, List
 
 import pytest
-from netra_backend.app.schemas import AppConfig
+from app.schemas import AppConfig
 
 from .enhanced_llm_manager import EnhancedLLMManager
 

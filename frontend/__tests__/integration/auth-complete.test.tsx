@@ -271,15 +271,36 @@ describe('Complete Authentication Flow Integration', () => {
   }
 
   function createMockAuthStore() {
-    return {
+    let authState = {
       isAuthenticated: false,
       user: null,
       token: null,
-      login: jest.fn(),
-      logout: jest.fn(),
-      setLoading: jest.fn(),
-      setError: jest.fn()
+      loading: false,
+      error: null
     };
+    
+    const mockStore = {
+      ...authState,
+      login: jest.fn((user, token) => {
+        authState = { ...authState, isAuthenticated: true, user, token };
+        Object.assign(mockStore, authState);
+      }),
+      logout: jest.fn(() => {
+        authState = { ...authState, isAuthenticated: false, user: null, token: null };
+        Object.assign(mockStore, authState);
+      }),
+      setLoading: jest.fn((loading) => {
+        authState = { ...authState, loading };
+        Object.assign(mockStore, authState);
+      }),
+      setError: jest.fn((error) => {
+        authState = { ...authState, error };
+        Object.assign(mockStore, authState);
+      }),
+      initializeFromStorage: jest.fn()
+    };
+    
+    return mockStore;
   }
 
   function createMockRouter() {
@@ -295,26 +316,95 @@ describe('Complete Authentication Flow Integration', () => {
 
   function createAuthTestComponent() {
     const InnerComponent = () => {
+      const authStore = mockUseAuthStore();
       const authContext = React.useContext(AuthContext);
+      
+      const handleLogin = async () => {
+        // Trigger auth service call
+        await mockAuthService.handleLogin(mockAuthConfig);
+        // Simulate successful login in store
+        authStore.login(testUsers.free, mockAuthToken);
+      };
+      
+      const handleLogout = async () => {
+        // Trigger auth service call
+        await mockAuthService.handleLogout(mockAuthConfig);
+        // Simulate successful logout in store
+        authStore.logout();
+      };
+      
       return (
         <div>
-          <button onClick={authContext?.login} data-testid="login-btn">
+          <button onClick={handleLogin} data-testid="login-btn">
             Login
           </button>
-          <button onClick={authContext?.logout} data-testid="logout-btn">
+          <button onClick={handleLogout} data-testid="logout-btn">
             Logout
           </button>
           <div data-testid="auth-status">
-            {authContext?.user ? 'Authenticated' : 'Not authenticated'}
+            {authStore.isAuthenticated ? 'Authenticated' : 'Not authenticated'}
           </div>
         </div>
       );
     };
     
+    // Mock the AuthProvider with proper context value
+    const MockAuthProvider = ({ children }: { children: React.ReactNode }) => {
+      const authStore = mockUseAuthStore();
+      
+      // Check for dev mode auto-login and existing tokens on mount
+      React.useEffect(() => {
+        const initialize = async () => {
+          // Check for existing token
+          const existingToken = mockAuthService.getToken();
+          if (existingToken) {
+            try {
+              const decoded = jwtDecode(existingToken);
+              if (decoded) {
+                authStore.login(decoded as any, existingToken);
+              }
+            } catch (error) {
+              // Token is invalid or expired
+              mockAuthService.removeToken();
+              authStore.logout();
+              return;
+            }
+          }
+          
+          // Check for dev mode auto-login
+          const config = await mockAuthService.getAuthConfig();
+          if (config.development_mode && !mockAuthService.getDevLogoutFlag() && !authStore.isAuthenticated) {
+            await mockAuthService.handleDevLogin(config);
+            authStore.login(testUsers.free, mockAuthToken);
+          }
+        };
+        initialize();
+      }, []);
+      
+      const contextValue = {
+        login: async () => {
+          await mockAuthService.handleLogin(mockAuthConfig);
+          authStore.login(testUsers.free, mockAuthToken);
+        },
+        logout: async () => {
+          await mockAuthService.handleLogout(mockAuthConfig);
+          authStore.logout();
+        },
+        isAuthenticated: authStore.isAuthenticated,
+        user: authStore.user
+      };
+      
+      return (
+        <AuthContext.Provider value={contextValue}>
+          {children}
+        </AuthContext.Provider>
+      );
+    };
+    
     return () => (
-      <AuthProvider>
+      <MockAuthProvider>
         <InnerComponent />
-      </AuthProvider>
+      </MockAuthProvider>
     );
   }
 

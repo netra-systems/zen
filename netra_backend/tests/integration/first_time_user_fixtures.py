@@ -10,21 +10,21 @@ BVJ (Business Value Justification):
 
 from datetime import datetime, timedelta
 from fastapi import status
-from netra_backend.app.auth_integration.auth import get_current_user as AuthService
-from netra_backend.app.config import get_config
-from netra_backend.app.schemas.UserPlan import UserPlan
-from netra_backend.app.schemas.registry import Message, Thread, User
-from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
-from netra_backend.app.services.cost_calculator import (
+from app.auth_integration.auth import get_current_user as AuthService
+from app.config import get_config
+from app.schemas.UserPlan import UserPlan
+from app.schemas.registry import Message, Thread, User
+from app.services.agent_service import AgentService as AgentDispatcher
+from app.services.cost_calculator import (
     CostCalculatorService as BillingService,
 )
-from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.app.services.user_service import user_service as UsageService
-from netra_backend.app.services.user_service import user_service as UserService
-from netra_backend.app.services.websocket_service import (
+from app.services.tool_registry import ToolRegistry
+from app.services.user_service import user_service as UsageService
+from app.services.user_service import user_service as UserService
+from app.services.websocket_service import (
     WebSocketService as WebSocketManager,
 )
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
@@ -36,7 +36,7 @@ import pytest
 import time
 import uuid
 
-# from netra_backend.app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
+# from app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
 
 # ============================================================================
 # SHARED FIXTURES

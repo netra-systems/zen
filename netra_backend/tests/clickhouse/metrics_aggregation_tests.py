@@ -4,8 +4,8 @@ Tests LLM metrics and performance metrics aggregation
 """
 
 from datetime import datetime, timedelta
-from netra_backend.app.db.clickhouse_query_fixer import (
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from app.db.clickhouse_query_fixer import (
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from typing import Dict, List
 import random
 import uuid

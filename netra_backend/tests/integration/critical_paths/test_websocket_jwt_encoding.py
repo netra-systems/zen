@@ -12,8 +12,8 @@ to prevent "SyntaxError: Failed to construct 'WebSocket'" errors.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -40,7 +40,7 @@ from app.routes.websocket_secure import SecureWebSocketManager, secure_websocket
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.app.db.postgres import get_async_db
+from app.db.postgres import get_async_db
 
 # Add project root to path
 

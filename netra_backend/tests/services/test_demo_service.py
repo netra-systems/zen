@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.demo_service import DemoService
+from app.services.demo_service import DemoService
 
 
 # Add project root to path
@@ -407,7 +407,7 @@ class TestDemoService:
     async def test_generate_demo_response(self, demo_service):
         """Test demo response generation."""
         # Import the function directly for testing
-        from netra_backend.app.services.demo.response_generator import (
+        from app.services.demo.response_generator import (
             generate_demo_response,
         )
         

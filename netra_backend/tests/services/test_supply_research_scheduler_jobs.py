@@ -7,7 +7,7 @@ Tests scheduling, execution, background tasks, retry mechanisms, and error handl
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,14 +23,14 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-from netra_backend.app.agents.supply_researcher.models import ResearchType
-from netra_backend.app.background import BackgroundTaskManager
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.redis_manager import RedisManager
+from app.agents.supply_researcher.models import ResearchType
+from app.background import BackgroundTaskManager
+from app.core.exceptions_base import NetraException
+from app.llm.llm_manager import LLMManager
+from app.redis_manager import RedisManager
 
 # Add project root to path
-from netra_backend.app.services.supply_research_scheduler import (
+from app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
     # Add project root to path

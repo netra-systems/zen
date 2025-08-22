@@ -17,7 +17,7 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -45,9 +45,9 @@ import pytest
 from docker.errors import DockerException
 from logging_config import central_logger
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
-from netra_backend.app.services.transaction_manager import TransactionManager
+from app.db.clickhouse import get_clickhouse_client
+from app.db.postgres import get_postgres_session, initialize_postgres
+from app.services.transaction_manager import TransactionManager
 
 logger = central_logger.get_logger(__name__)
 

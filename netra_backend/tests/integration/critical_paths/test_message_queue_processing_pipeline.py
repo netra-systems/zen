@@ -11,7 +11,7 @@ Comprehensive test for message queue processing pipeline:
 8. Queue overflow handling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

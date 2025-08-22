@@ -17,8 +17,8 @@ These L3 integration tests validate:
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -44,13 +44,13 @@ from uuid import uuid4
 import psutil
 import pytest
 from fastapi import WebSocket
-from netra_backend.app.schemas import User
+from app.schemas import User
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 
 # Add project root to path
-from netra_backend.app.websocket.enhanced_rate_limiter import (
+from app.websocket.enhanced_rate_limiter import (
 
     BackpressureManager,
 
@@ -59,26 +59,26 @@ from netra_backend.app.websocket.enhanced_rate_limiter import (
     RateLimitConfig,
 
 )
-from netra_backend.app.websocket.high_performance_broadcast import (
+from app.websocket.high_performance_broadcast import (
 
     BroadcastPerformanceConfig,
 
     HighPerformanceBroadcaster,
 
 )
-from netra_backend.app.websocket.load_balanced_connection_manager import (
+from app.websocket.load_balanced_connection_manager import (
 
     LoadBalancedConnectionManager,
 
     LoadBalancingStrategy,
 
 )
-from netra_backend.app.websocket.memory_efficient_manager import (
+from app.websocket.memory_efficient_manager import (
 
     MemoryEfficientWebSocketManager,
 
 )
-from netra_backend.app.websocket.optimized_message_processor import (
+from app.websocket.optimized_message_processor import (
 
     MessagePriority,
 

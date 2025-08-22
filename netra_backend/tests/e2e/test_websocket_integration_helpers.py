@@ -2,8 +2,8 @@
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -30,17 +30,17 @@ from main import app
 from routes.mcp.main import websocket_endpoint
 from ws_manager import WebSocketManager
 
-from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
+from app.schemas.websocket_message_types import WebSocketMessage
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import (
+from app.websocket.connection_manager import (
 
     ConnectionManager,
 
     get_connection_manager,
 
 )
-from netra_backend.app.websocket.message_handler_core import (
+from app.websocket.message_handler_core import (
 
     ModernReliableMessageHandler,
 

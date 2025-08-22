@@ -19,12 +19,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.db.models_postgres import CorpusAuditLog
+from app.core.exceptions_base import NetraException
+from app.db.models_postgres import CorpusAuditLog
 
 # Security and audit imports
-from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
-from netra_backend.app.schemas.registry import (
+from app.schemas.auth_types import AuditLog, AuthProvider, TokenType
+from app.schemas.registry import (
     CorpusAuditAction,
     CorpusAuditMetadata,
     CorpusAuditRecord,
@@ -32,11 +32,11 @@ from netra_backend.app.schemas.registry import (
     CorpusAuditSearchFilter,
     CorpusAuditStatus,
 )
-from netra_backend.app.services.audit.corpus_audit import (
+from app.services.audit.corpus_audit import (
     CorpusAuditLogger,
     create_audit_logger,
 )
-from netra_backend.app.services.audit_service import (
+from app.services.audit_service import (
     get_audit_summary,
     get_recent_logs,
     log_admin_action,

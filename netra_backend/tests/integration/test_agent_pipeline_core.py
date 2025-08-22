@@ -14,7 +14,7 @@ Core agent response pipeline tests including complete pipeline and routing accur
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -41,7 +41,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from logging_config import central_logger
 
-from netra_backend.app.agents.state import DeepAgentState
+from app.agents.state import DeepAgentState
 from .agent_pipeline_mocks import AgentPipelineMocks
 
 logger = central_logger.get_logger(__name__)

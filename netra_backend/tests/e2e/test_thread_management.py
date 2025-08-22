@@ -6,7 +6,7 @@ Tests comprehensive thread lifecycle, persistence, and isolation.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,15 +24,15 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from ws_manager import manager
 
-from netra_backend.app.db.models_postgres import Message, Thread
-from netra_backend.app.schemas.agent_state import (
+from app.db.models_postgres import Message, Thread
+from app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,
 )
-from netra_backend.app.services.state_persistence import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 
 # Add project root to path
-from netra_backend.app.services.thread_service import ThreadService
+from app.services.thread_service import ThreadService
 from .thread_test_helpers import (
     # Add project root to path
     create_mock_thread,

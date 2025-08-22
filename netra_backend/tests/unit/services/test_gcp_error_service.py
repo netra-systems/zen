@@ -33,9 +33,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.core.error_codes import ErrorCode
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.monitoring_schemas import (
+from app.core.error_codes import ErrorCode
+from app.core.exceptions_base import NetraException
+from app.schemas.monitoring_schemas import (
     ErrorDetailResponse,
     ErrorQuery,
     ErrorResolution,
@@ -50,7 +50,7 @@ from netra_backend.app.schemas.monitoring_schemas import (
 )
 
 # Add project root to path
-from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
+from app.services.monitoring.gcp_error_service import GCPErrorService
 
 
 class TestGCPErrorService:

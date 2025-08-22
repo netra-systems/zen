@@ -24,7 +24,7 @@ All examples follow CLAUDE.md requirements: ≤8 lines per function, ≤300 line
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -42,15 +42,15 @@ import pytest
 from database.database_manager import get_database_session
 from logging_config import central_logger
 
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.models.thread import Thread
+from app.agents.base import BaseSubAgent
+from app.models.thread import Thread
 
 # Add project root to path
 # Real imports - not mocked unless external API
-from netra_backend.app.models.user import User
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.user_service import UserService
-from netra_backend.app.websocket.connection import ConnectionInfo
+from app.models.user import User
+from app.services.thread_service import ThreadService
+from app.services.user_service import UserService
+from app.websocket.connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 

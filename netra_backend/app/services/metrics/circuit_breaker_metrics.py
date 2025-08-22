@@ -94,3 +94,22 @@ class CircuitBreakerMetricsCollector:
     async def record_endpoint_success(self, endpoint: str, response_time: float = None):
         """Record success for an endpoint."""
         self.metrics.record_success(endpoint, response_time)
+
+
+class CircuitBreakerMetricsService:
+    """Service interface for circuit breaker metrics."""
+    
+    def __init__(self):
+        self.collector = CircuitBreakerMetricsCollector()
+    
+    async def get_endpoint_metrics(self, endpoint: str) -> Dict:
+        """Get metrics for a specific endpoint."""
+        return await self.collector.collect_endpoint_metrics(endpoint)
+    
+    async def record_failure(self, endpoint: str, error_type: str = None):
+        """Record a failure for an endpoint."""
+        await self.collector.record_endpoint_failure(endpoint, error_type)
+    
+    async def record_success(self, endpoint: str, response_time: float = None):
+        """Record a success for an endpoint."""
+        await self.collector.record_endpoint_success(endpoint, response_time)

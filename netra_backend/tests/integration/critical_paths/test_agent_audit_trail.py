@@ -14,7 +14,7 @@ Coverage: Real audit logging, compliance tracking, forensic analysis
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,14 +36,14 @@ from uuid import uuid4
 
 import pytest
 
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from app.agents.base import BaseSubAgent
+from app.core.circuit_breaker import CircuitBreaker
+from app.core.config import get_settings
+from app.core.database_connection_manager import DatabaseConnectionManager
 
 # Add project root to path
 # Real components for L2 testing
-from netra_backend.app.services.redis_service import RedisService
+from app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 

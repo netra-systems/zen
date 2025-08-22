@@ -14,7 +14,7 @@ Coverage: Migration safety, rollback mechanisms, data integrity, recovery valida
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,15 +32,15 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.sql import text
 
-from netra_backend.app.db.postgres_core import initialize_postgres
+from app.db.postgres_core import initialize_postgres
 
 # Add project root to path
-from netra_backend.app.services.database.rollback_manager_core import (
+from app.services.database.rollback_manager_core import (
     RollbackManager,
     RollbackState,
     rollback_manager,
 )
-from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
+from app.services.monitoring.rate_limiter import GCPRateLimiter
 
 # Add project root to path
 

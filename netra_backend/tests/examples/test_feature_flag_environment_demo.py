@@ -8,7 +8,7 @@ for different testing scenarios and CI/CD environments.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -63,7 +63,7 @@ def test_enterprise_sso_when_enabled():
     """
     # This test would normally be skipped because enterprise_sso is disabled
     # But with environment override, it can be enabled for specific test runs
-    from netra_backend.app.auth_integration.auth import validate_enterprise_token
+    from app.auth_integration.auth import validate_enterprise_token
     
     token = "enterprise_test_token"
     result = validate_enterprise_token(token)

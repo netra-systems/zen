@@ -13,7 +13,7 @@ Comprehensive test to verify API rate limiting enforcement:
 This test ensures rate limiting protects the API from abuse.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

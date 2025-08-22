@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.pool import Pool
 
-from netra_backend.app.db.postgres import Database, async_engine
+from netra_backend.app.db.postgres import Database
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -49,6 +49,8 @@ class ConnectionPoolMetrics:
     def _collect_async_pool_status(self, status: Dict[str, Any]) -> None:
         """Collect async pool metrics"""
         try:
+            # Get fresh engine reference to avoid stale None reference
+            from netra_backend.app.db.postgres_core import async_engine
             if async_engine:
                 async_pool = async_engine.pool
                 status["async_pool"] = self._extract_pool_metrics(async_pool, "async")

@@ -7,7 +7,7 @@ Tests 7-8: Authentication/authorization, multi-agent collaboration.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,8 +23,8 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
-from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from app.agents.state import DeepAgentState, OptimizationsResult
+from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 # Add project root to path
 

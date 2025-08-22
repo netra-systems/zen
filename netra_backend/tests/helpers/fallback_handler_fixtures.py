@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple
 
 import pytest
 
-from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
+from app.core.fallback_handler import FallbackHandler, FallbackMetadata
 
 
 @pytest.fixture

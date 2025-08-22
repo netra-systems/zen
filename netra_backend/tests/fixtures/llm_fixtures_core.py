@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, Mock
 
 from pydantic import BaseModel
 
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.llm.llm_manager import LLMManager
 
 # Type alias
 MockResponse = Dict[str, Any]

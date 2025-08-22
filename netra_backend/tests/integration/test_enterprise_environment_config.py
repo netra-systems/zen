@@ -8,7 +8,7 @@ Revenue Impact: Unlocks regulated industry customers requiring custom env config
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.integration.deployment_config_fixtures import (
+from tests.integration.deployment_config_fixtures import (
     assert_enterprise_success,
     create_enterprise_customer_config,
     create_service_startup_config,

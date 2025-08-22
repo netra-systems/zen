@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,12 +19,12 @@ from unittest.mock import Mock, patch
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
-from netra_backend.app.schemas.registry import WebSocketMessageType
+from app.schemas.registry import WebSocketMessageType
 
 # Add project root to path
-from netra_backend.app.schemas.shared_types import ApiResponse
-from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
-from netra_backend.app.websocket.validation import MessageValidator
+from app.schemas.shared_types import ApiResponse
+from app.schemas.websocket_message_types import WebSocketValidationError
+from app.websocket.validation import MessageValidator
 
 # Add project root to path
 

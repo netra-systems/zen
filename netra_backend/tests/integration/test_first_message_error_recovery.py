@@ -8,7 +8,7 @@ Critical: System must gracefully recover from failures during first interaction
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,15 +23,15 @@ from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from netra_backend.app.schemas import User
+from app.schemas import User
 
-from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
-from netra_backend.app.services.agent_service_core import AgentService
+from app.core.error_handlers import ErrorRecoveryStrategy
+from app.services.agent_service_core import AgentService
 
 # Add project root to path
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket.unified.circuit_breaker import CircuitBreaker
-from netra_backend.app.websocket.unified.telemetry_manager import TelemetryManager
+from app.services.message_handlers import MessageHandlerService
+from app.websocket.unified.circuit_breaker import CircuitBreaker
+from app.websocket.unified.telemetry_manager import TelemetryManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

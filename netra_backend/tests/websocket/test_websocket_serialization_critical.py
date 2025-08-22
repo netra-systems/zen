@@ -9,7 +9,7 @@ Maximum 300 lines, functions ≤8 lines each.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.schemas.registry import (
+from app.schemas.registry import (
     DeepAgentState,
     Message,
     MessageType,
@@ -37,7 +37,7 @@ from netra_backend.app.schemas.registry import (
     WebSocketMessage,
     WebSocketMessageType,
 )
-from netra_backend.app.schemas.websocket_message_types import (
+from app.schemas.websocket_message_types import (
     AgentCompletedMessage,
     AgentStartedMessage,
     BroadcastResult,
@@ -45,9 +45,9 @@ from netra_backend.app.schemas.websocket_message_types import (
     StartAgentMessage,
     UserMessage,
 )
-from netra_backend.app.services.state_persistence import DateTimeEncoder
-from netra_backend.app.websocket.broadcast import BroadcastManager
-from netra_backend.app.websocket.validation import MessageValidator
+from app.services.state_persistence import DateTimeEncoder
+from app.websocket.broadcast import BroadcastManager
+from app.websocket.validation import MessageValidator
 
 
 class TestWebSocketSerializationCritical:

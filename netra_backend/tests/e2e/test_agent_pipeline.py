@@ -27,7 +27,7 @@ COVERAGE:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,15 +43,15 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
-from netra_backend.app.services.agent_service import AgentService
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.llm.llm_manager import LLMManager
+from app.schemas.websocket_message_types import WebSocketMessage
+from app.services.agent_service import AgentService
 
 # Add project root to path
 

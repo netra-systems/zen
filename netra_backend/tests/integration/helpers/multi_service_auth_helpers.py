@@ -11,8 +11,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.integration.helpers.redis_l3_helpers import MockWebSocketForRedis
+from app.logging_config import central_logger
+from tests.integration.helpers.redis_l3_helpers import MockWebSocketForRedis
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,7 +7,7 @@ Tests for cache invalidation and metrics - app/routes/llm_cache.py
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -59,7 +59,7 @@ class TestLLMCacheRoute:
 
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation."""
-        from netra_backend.app.routes.llm_cache import clear_cache_pattern
+        from app.routes.llm_cache import clear_cache_pattern
         
         with patch('app.services.llm_cache_service.llm_cache_service.clear_cache_pattern') as mock_clear:
             mock_clear.return_value = 10

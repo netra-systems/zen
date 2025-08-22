@@ -7,7 +7,7 @@ Tests to validate that the implementation matches the specification
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -177,7 +177,7 @@ class TestImplementationConsistency:
 
     def test_workload_categories_match_spec(self):
         """Verify workload categories in code match specification"""
-        from netra_backend.app.services.synthetic_data_service import WorkloadCategory
+        from app.services.synthetic_data_service import WorkloadCategory
         
         expected_categories = [
             'simple_chat',
@@ -194,7 +194,7 @@ class TestImplementationConsistency:
 
     def test_generation_status_enum_matches_spec(self):
         """Verify generation status enum matches specification"""
-        from netra_backend.app.services.synthetic_data_service import GenerationStatus
+        from app.services.synthetic_data_service import GenerationStatus
         
         expected_statuses = [
             'initiated',
@@ -210,7 +210,7 @@ class TestImplementationConsistency:
 
     def test_corpus_service_exists(self):
         """Verify corpus service implementation exists"""
-        from netra_backend.app.services.corpus_service import (
+        from app.services.corpus_service import (
             CorpusService,
             CorpusStatus,
         )
@@ -225,7 +225,7 @@ class TestImplementationConsistency:
 
     def test_websocket_manager_exists(self):
         """Verify WebSocket manager exists for real-time updates"""
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from app.services.websocket.ws_manager import manager
         
         assert manager != None
         assert hasattr(manager, 'connect')
@@ -234,7 +234,7 @@ class TestImplementationConsistency:
 
     def test_synthetic_data_service_has_required_methods(self):
         """Verify synthetic data service has required methods"""
-        from netra_backend.app.services.synthetic_data_service import (
+        from app.services.synthetic_data_service import (
             SyntheticDataService,
         )
         
@@ -249,19 +249,19 @@ class TestImplementationConsistency:
 
     def test_clickhouse_integration_configured(self):
         """Verify ClickHouse integration is configured"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from app.db.clickhouse import get_clickhouse_client
         
         assert get_clickhouse_client != None
 
     def test_agent_tools_available(self):
         """Verify agent tools are available"""
-        from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+        from app.agents.admin_tool_dispatcher import AdminToolDispatcher
         
         assert AdminToolDispatcher != None
 
     def test_data_clustering_tool_exists(self):
         """Verify data clustering tool exists"""
-        from netra_backend.app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import (
+        from app.services.apex_optimizer_agent.tools.log_enricher_and_clusterer import (
             log_enricher_and_clusterer,
         )
         
@@ -328,7 +328,7 @@ class TestKeyFeatureImplementation:
 
     def test_corpus_lifecycle_states(self):
         """Test corpus lifecycle state transitions"""
-        from netra_backend.app.services.corpus_service import CorpusStatus
+        from app.services.corpus_service import CorpusStatus
         
         # Define valid transitions as per spec
         valid_transitions = {

@@ -7,7 +7,7 @@ Testing end-to-end integration scenarios
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,11 +23,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app import schemas
-from netra_backend.app.services.corpus_service import CorpusService
+from app.services.corpus_service import CorpusService
 
 # Add project root to path
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
+from app.services.synthetic_data_service import SyntheticDataService
+from app.services.websocket.ws_manager import manager as ws_manager
 from ..helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )

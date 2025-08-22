@@ -6,7 +6,7 @@ Tests comprehensive error scenarios and recovery mechanisms for thread operation
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,18 +23,18 @@ import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.core.exceptions_agent import AgentError
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.exceptions_database import (
+from app.core.exceptions_agent import AgentError
+from app.core.exceptions_base import NetraException
+from app.core.exceptions_database import (
     DatabaseError,
     RecordNotFoundError,
 )
-from netra_backend.app.db.models_postgres import Message, Run, Thread
-from netra_backend.app.schemas.agent_state import RecoveryType, StateRecoveryRequest
-from netra_backend.app.services.state_persistence import state_persistence_service
+from app.db.models_postgres import Message, Run, Thread
+from app.schemas.agent_state import RecoveryType, StateRecoveryRequest
+from app.services.state_persistence import state_persistence_service
 
 # Add project root to path
-from netra_backend.app.services.thread_service import ThreadService
+from app.services.thread_service import ThreadService
 
 # Add project root to path
 
@@ -141,7 +141,7 @@ class ThreadStateErrorTests:
             
             # Attempt to save state
             try:
-                from netra_backend.app.schemas.agent_state import (
+                from app.schemas.agent_state import (
                     CheckpointType,
                     StatePersistenceRequest,
                 )

@@ -8,7 +8,7 @@ enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -58,7 +58,7 @@ def test_first_time_user_onboarding():
     
     Written using TDD approach - expected to fail until feature is complete.
     """
-    from netra_backend.app.services.onboarding import create_first_time_user
+    from app.services.onboarding import create_first_time_user
     
     user = create_first_time_user(
         email="newuser@example.com",
@@ -77,8 +77,8 @@ def test_authenticated_usage_tracking():
     
     Both features must be enabled for this test to run.
     """
-    from netra_backend.app.auth_integration.auth import authenticate_user
-    from netra_backend.app.services.usage_tracker import track_usage
+    from app.auth_integration.auth import authenticate_user
+    from app.services.usage_tracker import track_usage
     
     user = authenticate_user("test@example.com", "password")
     usage = track_usage(user.id, "api_call", 1)
@@ -94,7 +94,7 @@ def test_ml_rate_limiter():
     
     Only runs when ENABLE_EXPERIMENTAL_TESTS=true.
     """
-    from netra_backend.app.websocket.ml_rate_limiter import MLRateLimiter
+    from app.websocket.ml_rate_limiter import MLRateLimiter
     
     limiter = MLRateLimiter()
     pattern = limiter.analyze_pattern([1, 2, 4, 8, 16])
@@ -112,7 +112,7 @@ def test_api_response_time():
     """
     import time
 
-    from netra_backend.app.routes.health import health_check
+    from app.routes.health import health_check
     
     start = time.time()
     response = health_check()
@@ -130,7 +130,7 @@ def test_websocket_integration():
     
     Only runs during integration testing and when websocket_streaming is enabled.
     """
-    from netra_backend.app.websocket.connection import WebSocketConnection
+    from app.websocket.connection import WebSocketConnection
     
     conn = WebSocketConnection()
     conn.connect("ws://localhost:8000/ws")
@@ -145,7 +145,7 @@ def test_websocket_integration():
 @unit_only()
 def test_utility_function():
     """Simple unit test that only runs during unit testing."""
-    from netra_backend.app.core.utils import format_currency
+    from app.core.utils import format_currency
     
     assert format_currency(1000) == "$1,000.00"
     assert format_currency(0) == "$0.00"
@@ -156,7 +156,7 @@ def test_utility_function():
 @feature_flag("agent_orchestration")
 def test_multi_llm_orchestration():
     """Test that requires API keys and agent orchestration feature."""
-    from netra_backend.app.agents.orchestrator import MultiLLMOrchestrator
+    from app.agents.orchestrator import MultiLLMOrchestrator
     
     orchestrator = MultiLLMOrchestrator()
     result = orchestrator.process("Analyze this text", models=["gemini", "openai"])
@@ -173,7 +173,7 @@ def test_github_api_integration():
     
     May fail due to network issues, will retry up to 3 times.
     """
-    from netra_backend.app.services.github_analyzer import GitHubAnalyzer
+    from app.services.github_analyzer import GitHubAnalyzer
     
     analyzer = GitHubAnalyzer()
     repo_data = analyzer.analyze_repo("anthropics/netra")
@@ -190,7 +190,7 @@ def test_clickhouse_analytics_pipeline():
     
     Skipped in fast mode and when clickhouse_analytics is disabled.
     """
-    from netra_backend.app.db.clickhouse import ClickHouseClient
+    from app.db.clickhouse import ClickHouseClient
     
     client = ClickHouseClient()
     client.insert_events([
@@ -209,7 +209,7 @@ def test_enterprise_sso_flow():
     
     Currently disabled as enterprise_sso depends on features not yet launched.
     """
-    # from netra_backend.app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
+    # from app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
     pytest.skip("enterprise_sso module not available - use auth_integration")
     return
     
@@ -234,8 +234,8 @@ def test_authenticated_websocket_performance():
     - Must complete within 500ms
     - Is skipped in fast mode
     """
-    from netra_backend.app.auth_integration.auth import create_auth_token
-    from netra_backend.app.websocket.authenticated_connection import (
+    from app.auth_integration.auth import create_auth_token
+    from app.websocket.authenticated_connection import (
         AuthenticatedWebSocket,
     )
     

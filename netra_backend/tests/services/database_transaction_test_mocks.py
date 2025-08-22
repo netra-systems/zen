@@ -14,7 +14,7 @@ from sqlalchemy.exc import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.database.base_repository import BaseRepository
+from app.services.database.base_repository import BaseRepository
 from .database_transaction_test_helpers import MockDatabaseModel
 
 

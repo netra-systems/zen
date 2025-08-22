@@ -10,7 +10,7 @@ Business Value: Prevents runtime crashes from type errors.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,13 +25,13 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from app.agents.base.error_handler import ExecutionErrorHandler
 
 # Add project root to path
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.schemas.agent_models import DeepAgentState
-from netra_backend.app.schemas.core_enums import ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.agents.base.monitoring import ExecutionMonitor
+from app.schemas.agent_models import DeepAgentState
+from app.schemas.core_enums import ExecutionStatus
 
 # Add project root to path
 
@@ -155,7 +155,7 @@ class TestExecutionContextHashableRegression:
     @pytest.mark.asyncio
     async def test_websocket_connection_executor_context_handling(self):
         """Test WebSocket connection executor handles context correctly."""
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from app.websocket.connection_executor import ConnectionExecutor
         
         executor = ConnectionExecutor()
         
@@ -178,7 +178,7 @@ class TestExecutionContextHashableRegression:
     def test_mcp_context_manager_storage(self):
         """Test MCP context manager doesn't use ExecutionContext as key."""
         try:
-            from netra_backend.app.agents.mcp_integration.context_manager import (
+            from app.agents.mcp_integration.context_manager import (
                 MCPContextManager,
             )
             

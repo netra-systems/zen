@@ -10,7 +10,7 @@ L3 Test: Real Redis rate limiting with concurrent auth requests, per-IP/user lim
 proper error responses, and rate limit reset validation.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 # Add project root to path
 import sys
@@ -33,9 +33,9 @@ import redis.asyncio as redis
 
 # Add project root to path
 
-from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
-from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
+from app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
+from app.logging_config import central_logger
+from tests.integration.helpers.redis_l3_helpers import RedisContainer
 
 # Add project root to path
 

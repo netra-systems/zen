@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Validates enterprise-grade security and compliance
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 # Add project root to path
 import sys

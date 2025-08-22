@@ -14,7 +14,7 @@ Coverage: OAuth/JWT flows, permission validation, session persistence, token ref
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -45,7 +45,7 @@ from auth_integration import (
     validate_token_jwt,
 )
 
-from netra_backend.app.services.user_service import user_service as UserService
+from app.services.user_service import user_service as UserService
 
 logger = logging.getLogger(__name__)
 

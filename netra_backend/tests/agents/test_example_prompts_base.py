@@ -5,8 +5,8 @@ Provides shared fixtures and helper methods for test execution
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -30,29 +30,29 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas.Agent import SubAgentState
+from app.schemas.Agent import SubAgentState
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.ws_manager import WebSocketManager
+from app.ws_manager import WebSocketManager
 
-from netra_backend.app.config import get_config
-from netra_backend.app.agents.state import DeepAgentState
+from app.config import get_config
+from app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import (
+from app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
 
 )
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.llm.llm_manager import LLMManager
+from app.services.agent_service import AgentService
+from app.services.apex_optimizer_agent.tools.tool_dispatcher import (
 
     ApexToolSelector,
 
 )
-from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.services.quality_gate_service import (
+from app.services.corpus_service import CorpusService
+from app.services.quality_gate_service import (
 
     ContentType,
 
@@ -61,8 +61,8 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.synthetic_data_service import (
+from app.services.state_persistence import state_persistence_service
+from app.services.synthetic_data_service import (
 
     SyntheticDataService,
 
@@ -162,7 +162,7 @@ def _get_mock_ask_structured_llm():
     """Get mock ask_structured_llm async function"""
 
     async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
-        from netra_backend.app.schemas.unified_tools import TriageResult
+        from app.schemas.unified_tools import TriageResult
 
         if schema == TriageResult:
 

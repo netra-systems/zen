@@ -3,7 +3,7 @@ ClickHouse Time Series Analysis Tests
 Tests time-series analysis capabilities and anomaly detection
 """
 
-from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
+from app.db.clickhouse_query_fixer import validate_clickhouse_query
 
 
 class TestTimeSeriesAnalysis:

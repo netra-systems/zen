@@ -7,7 +7,7 @@ Tests context-aware fallback response generation for various failure scenarios
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,15 +21,15 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from netra_backend.app.services.fallback_response.models import (
+from app.services.fallback_response.models import (
     # Add project root to path
     FailureReason,
     FallbackContext,
 )
 
 # Add project root to path
-from netra_backend.app.services.fallback_response_service import FallbackResponseService
-from netra_backend.app.services.quality_gate_service import (
+from app.services.fallback_response_service import FallbackResponseService
+from app.services.quality_gate_service import (
     ContentType,
     QualityLevel,
     QualityMetrics,

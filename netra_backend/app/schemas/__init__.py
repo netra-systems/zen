@@ -646,7 +646,7 @@ from .unified_tools import (
     ToolExecutionRequest,
     UserPlanResponse,
 )
-from .User import UserUpdate
+from .user import UserUpdate
 from .UserPlan import (
     AutoUpgradeRule,
     PlanDefinition,

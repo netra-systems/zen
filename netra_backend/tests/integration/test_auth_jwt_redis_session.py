@@ -14,7 +14,7 @@ refresh flows, and revocation testing with actual auth service integration.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,9 +35,9 @@ import redis.asyncio as redis
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.tests.integration.helpers.redis_l3_helpers import (
+from app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
+from app.redis_manager import RedisManager
+from tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )

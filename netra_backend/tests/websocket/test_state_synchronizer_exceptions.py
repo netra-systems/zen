@@ -7,7 +7,7 @@ Tests for critical exception handling requirements from websocket_reliability.xm
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,11 +20,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from app.websocket.connection import ConnectionInfo, ConnectionManager
 
 # Add project root to path
-from netra_backend.app.websocket.state_synchronizer import ConnectionStateSynchronizer
-from netra_backend.app.websocket.sync_types import CriticalCallbackFailure
+from app.websocket.state_synchronizer import ConnectionStateSynchronizer
+from app.websocket.sync_types import CriticalCallbackFailure
 
 # Add project root to path
 
@@ -174,7 +174,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_explicit_exception_inspection(self):
         """Test explicit exception inspection per specification."""
-        from netra_backend.app.websocket.callback_handler import CallbackHandler
+        from app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         
@@ -195,7 +195,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_no_exceptions_in_results(self):
         """Test behavior when no exceptions are in results."""
-        from netra_backend.app.websocket.callback_handler import CallbackHandler
+        from app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         
@@ -206,7 +206,7 @@ class TestCallbackHandlerDirectly:
     
     async def test_only_non_critical_exceptions(self):
         """Test behavior with only non-critical exceptions."""
-        from netra_backend.app.websocket.callback_handler import CallbackHandler
+        from app.websocket.callback_handler import CallbackHandler
         
         handler = CallbackHandler()
         

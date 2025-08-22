@@ -7,7 +7,7 @@ Tests Redis data persistence and caching
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,10 +23,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import redis.asyncio as redis
 
-from netra_backend.app.config import get_config
+from app.config import get_config
 
 # Add project root to path
-from netra_backend.app.services.redis_service import RedisService
+from app.services.redis_service import RedisService
 
 # Add project root to path
 

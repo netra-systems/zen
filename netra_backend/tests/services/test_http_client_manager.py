@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.external_api_client import (
+from app.services.external_api_client import (
     # Add project root to path
     HTTPClientManager,
     ResilientHTTPClient,
@@ -163,7 +163,7 @@ class TestGlobalClientManager:
     
     def test_global_manager_singleton_behavior(self):
         """Test that importing returns the same instance."""
-        from netra_backend.app.services.external_api_client import (
+        from app.services.external_api_client import (
             http_client_manager as imported_manager,
         )
         assert imported_manager is http_client_manager

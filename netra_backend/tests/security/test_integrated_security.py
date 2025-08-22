@@ -22,10 +22,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
 
 # Add project root to path
-from netra_backend.app.middleware.security_middleware import SecurityMiddleware
+from app.middleware.security_middleware import SecurityMiddleware
 
 # Add project root to path
 

@@ -7,8 +7,8 @@ from typing import Dict, List
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import (
+from app.agents.state import DeepAgentState
+from app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,

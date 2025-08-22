@@ -7,7 +7,7 @@ Tests tool selection logic, helper classes, and basic optimization routing
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,20 +23,20 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from netra_backend.app.schemas import AppConfig, RequestModel
+from app.schemas import AppConfig, RequestModel
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.services.apex_optimizer_agent.models import AgentState
-from netra_backend.app.services.apex_optimizer_agent.tools.base import (
+from app.core.exceptions_base import NetraException
+from app.services.apex_optimizer_agent.models import AgentState
+from app.services.apex_optimizer_agent.tools.base import (
     BaseTool,
     ToolMetadata,
 )
 
 # Add project root to path
-from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+from app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
-from netra_backend.app.services.context import ToolContext
+from app.services.context import ToolContext
 
 # Add project root to path
 
@@ -220,12 +220,12 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        from netra_backend.app.schemas.unified_tools import (
+        from app.schemas.unified_tools import (
             DataSource,
             TimeRange,
             Workload,
         )
-        from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
+        from app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
             query="Optimize our AI workload to reduce costs by 20%",

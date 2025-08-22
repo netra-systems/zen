@@ -13,8 +13,8 @@ Performance target: <2s upload time for 5MB files, <5% corruption rate.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -38,9 +38,9 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
-from netra_backend.app.schemas import User
+from app.schemas import User
 
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 

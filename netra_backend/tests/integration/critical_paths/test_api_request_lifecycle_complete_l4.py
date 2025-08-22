@@ -7,7 +7,7 @@ Tests complete API request lifecycle from ingress to response
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -25,13 +25,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.config import get_config
+from app.config import get_config
 
 # Add project root to path
-from netra_backend.app.services.api_gateway import APIGateway
-from netra_backend.app.services.middleware_chain import MiddlewareChain
-from netra_backend.app.services.rate_limiter import RateLimiter
-from netra_backend.app.services.request_validator import RequestValidator
+from app.services.api_gateway import APIGateway
+from app.services.middleware_chain import MiddlewareChain
+from app.services.rate_limiter import RateLimiter
+from app.services.request_validator import RequestValidator
 
 # Add project root to path
 

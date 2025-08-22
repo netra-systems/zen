@@ -24,10 +24,10 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger
+from app.agents.base_agent import BaseSubAgent
+from app.agents.state import DeepAgentState
+from app.llm.llm_manager import LLMManager
+from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

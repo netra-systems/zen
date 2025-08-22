@@ -9,7 +9,7 @@ from typing import Any, Dict, List
 
 from langchain_core.tools import BaseTool
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class ToolStatus(Enum):

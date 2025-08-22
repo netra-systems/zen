@@ -20,7 +20,7 @@ ARCHITECTURAL COMPLIANCE:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -39,9 +39,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.db.clickhouse import ClickHouseService
-from netra_backend.app.services.thread_analytics import get_analytics_dashboard
-from netra_backend.tests.integration.helpers.analytics_export_helpers import (
+from app.db.clickhouse import ClickHouseService
+from app.services.thread_analytics import get_analytics_dashboard
+from tests.integration.helpers.analytics_export_helpers import (
     AdvancedAnalyticsExportInfrastructure,
     AnalyticsDataGenerator,
     ExportConfigFactory,

@@ -17,7 +17,7 @@ Test Level: L2 (Real Internal Dependencies)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,25 +37,25 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import (
+from app.core.exceptions_base import (
     NetraException,
     ServiceUnavailableException,
 )
-from netra_backend.app.core.logging_config import get_logger
-from netra_backend.app.services.observability.error_tracker import ErrorTracker
+from app.core.logging_config import get_logger
+from app.services.observability.error_tracker import ErrorTracker
 
 # Add project root to path
-from netra_backend.app.services.resilience.circuit_breaker import (
+from app.services.resilience.circuit_breaker import (
     CircuitBreaker,
     CircuitState,
 )
-from netra_backend.app.services.resilience.error_aggregator import ErrorAggregator
-from netra_backend.app.services.resilience.health_checker import HealthChecker
-from netra_backend.app.services.resilience.retry_manager import (
+from app.services.resilience.error_aggregator import ErrorAggregator
+from app.services.resilience.health_checker import HealthChecker
+from app.services.resilience.retry_manager import (
     RetryManager,
     RetryStrategy,
 )
-from netra_backend.app.services.resilience.timeout_manager import TimeoutManager
+from app.services.resilience.timeout_manager import TimeoutManager
 
 # Add project root to path
 

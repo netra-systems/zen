@@ -295,6 +295,34 @@
             <note>Test isolation critical for singleton patterns</note>
         </learning>
         
+        <learning id="containerized-services-backend-location">
+            <title>Containerized Services Test Infrastructure Location</title>
+            <problem>
+                Uncertainty about whether containerized_services module should be in backend or root testing
+                Import pattern: from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services
+                Question of whether this violates service boundary rules
+            </problem>
+            <solution>
+                Containerized services infrastructure CORRECTLY belongs in backend testing (/netra_backend/tests/)
+                These are backend-specific integration tests, not cross-service E2E tests
+                Module provides L2-L3 realism testing with containers (PostgreSQL, ClickHouse, Redis) for backend logic
+                Import correctly uses netra_backend.tests namespace prefix for backend service tests
+            </solution>
+            <rationale>
+                1. Service boundaries: /netra_backend/tests/ is for backend-specific tests ONLY
+                2. Test organization: Used by tier1_critical tests within backend service (subscription enforcement, transactions)
+                3. Not cross-service: These test backend business logic with real dependencies, not multi-service interactions
+                4. Correct location: Cross-service tests would go in /tests/e2e/, but these are backend integration tests
+            </rationale>
+            <files_affected>
+                <file>netra_backend/tests/integration/critical_missing/shared_infrastructure/containerized_services.py</file>
+                <file>netra_backend/tests/integration/critical_missing/tier1_critical/test_subscription_tier_enforcement.py</file>
+                <file>netra_backend/tests/integration/critical_missing/tier1_critical/test_database_transaction_rollback.py</file>
+                <file>netra_backend/tests/integration/critical_missing/tier1_critical/test_agent_tool_execution_pipeline.py</file>
+            </files_affected>
+            <verification>Import patterns follow SPEC service boundary rules correctly</verification>
+        </learning>
+        
         <learning id="test-discovery-all-directories">
             <title>Test Discovery Must Include All Test Directories</title>
             <problem>

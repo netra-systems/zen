@@ -11,7 +11,7 @@ Comprehensive test for API gateway load distribution:
 8. Failover handling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

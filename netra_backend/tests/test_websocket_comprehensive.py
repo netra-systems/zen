@@ -42,10 +42,10 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from fastapi import WebSocket
 
-from netra_backend.app.websocket.connection_info import ConnectionInfo
+from app.websocket.connection_info import ConnectionInfo
 
 # Add project root to path
-from netra_backend.app.websocket.connection import ConnectionManager
+from app.websocket.connection import ConnectionManager
 
 # Add project root to path
 

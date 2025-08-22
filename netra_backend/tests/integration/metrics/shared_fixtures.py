@@ -25,7 +25,7 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

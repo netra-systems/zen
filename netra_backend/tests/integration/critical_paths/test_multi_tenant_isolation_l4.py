@@ -15,7 +15,7 @@ L4 Realism: Tests against real staging database, real multi-tenant setup, real s
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,26 +37,26 @@ import pytest
 # Add project root to path
 
 
-# from netra_backend.app.services.database.tenant_service import TenantService
+# from app.services.database.tenant_service import TenantService
 TenantService = AsyncMock
 # Permissions service replaced with auth_integration
 # from auth_integration import require_permission
-# from netra_backend.app.auth_integration.auth import create_access_token
+# from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 
 create_access_token = AsyncMock()
-# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
+# from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 
 validate_token_jwt = AsyncMock()
 from unittest.mock import AsyncMock
 
 PermissionsService = AsyncMock
-# from netra_backend.app.services.audit.audit_logger import AuditLogger
-# from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
-# from netra_backend.app.schemas.tenant import Tenant, TenantResource, Permission
-# from netra_backend.app.core.security import SecurityContext
-# from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+# from app.services.audit.audit_logger import AuditLogger
+# from app.services.database.connection_manager import DatabaseConnectionManager
+# from app.schemas.tenant import Tenant, TenantResource, Permission
+# from app.core.security import SecurityContext
+# from tests.integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
 DatabaseConnectionManager = AsyncMock
 Tenant = dict

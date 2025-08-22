@@ -12,9 +12,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.llm_config_types import LLMConfig
-from netra_backend.app.schemas.llm_response_types import LLMResponse
+from app.core.exceptions_base import NetraException
+from app.schemas.llm_config_types import LLMConfig
+from app.schemas.llm_response_types import LLMResponse
 
 
 class LLMTestModel(str, Enum):

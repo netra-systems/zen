@@ -15,7 +15,7 @@ Recovery target: <30 seconds recovery time with full context preservation.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,19 +37,19 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from netra_backend.app.schemas import User
+from app.schemas import User
 
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
+from app.agents.base import BaseSubAgent
+from app.agents.state import DeepAgentState
+from app.agents.supervisor.state_manager import AgentStateManager
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.exceptions_base import (
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.core.exceptions_base import (
     NetraException,
     StateRecoveryException,
 )
-from netra_backend.app.redis_manager import RedisManager
+from app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

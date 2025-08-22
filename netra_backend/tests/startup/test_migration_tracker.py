@@ -25,10 +25,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions import NetraException
+from app.core.exceptions import NetraException
 
 # Add project root to path
-from netra_backend.app.startup.migration_tracker import (
+from app.startup.migration_tracker import (
     FailedMigration,
     MigrationState,
     MigrationTracker,

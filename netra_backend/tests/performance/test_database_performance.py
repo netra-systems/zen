@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.generation_service import (
+from app.services.generation_service import (
     get_corpus_from_clickhouse,
     # Add project root to path
     save_corpus_to_clickhouse,

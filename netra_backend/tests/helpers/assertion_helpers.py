@@ -1,6 +1,6 @@
 """Assertion helper functions for Quality Gate Service tests"""
 
-from netra_backend.app.services.quality_gate_service import QualityLevel
+from app.services.quality_gate_service import QualityLevel
 
 
 def assert_complete_workflow_metrics(metrics):

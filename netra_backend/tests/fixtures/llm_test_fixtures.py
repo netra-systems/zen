@@ -20,8 +20,8 @@ from unittest.mock import AsyncMock, Mock
 
 from pydantic import BaseModel
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.core.exceptions_base import NetraException
+from app.llm.llm_manager import LLMManager
 from .llm_fixtures_advanced import (
     create_circuit_breaker_manager,
     create_error_simulating_manager,

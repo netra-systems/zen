@@ -33,7 +33,7 @@ class TestStartupCheckResultImport:
     
     def test_startup_check_result_has_correct_signature(self):
         """Test that StartupCheckResult from startup_checks has the expected signature"""
-        from netra_backend.app.startup_checks.models import StartupCheckResult
+        from app.startup_checks.models import StartupCheckResult
         
         # Should be able to instantiate with name parameter
         result = StartupCheckResult(
@@ -53,7 +53,7 @@ class TestStartupCheckResultImport:
     def test_startup_checks_imports_correct_model(self):
         """Test that startup_checks module imports the correct StartupCheckResult"""
         # This will fail because __init__.py imports from apex_optimizer_agent
-        from netra_backend.app.startup_checks import StartupCheckResult
+        from app.startup_checks import StartupCheckResult
         
         # Try to instantiate with name parameter (should work with correct import)
         result = StartupCheckResult(
@@ -69,7 +69,7 @@ class TestStartupCheckResultImport:
     @pytest.mark.asyncio
     async def test_environment_checker_uses_correct_model(self):
         """Test that EnvironmentChecker can create results with name parameter"""
-        from netra_backend.app.startup_checks.environment_checks import (
+        from app.startup_checks.environment_checks import (
             EnvironmentChecker,
         )
         
@@ -93,7 +93,7 @@ class TestExecutionMonitor:
     
     def test_execution_monitor_has_start_monitoring(self):
         """Test that ExecutionMonitor has start_monitoring method"""
-        from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+        from app.agents.base.monitoring import ExecutionMonitor
         
         monitor = ExecutionMonitor()
         
@@ -103,7 +103,7 @@ class TestExecutionMonitor:
     
     def test_performance_monitor_can_start(self):
         """Test that the global performance_monitor can start monitoring"""
-        from netra_backend.app.agents.base.monitoring import performance_monitor
+        from app.agents.base.monitoring import performance_monitor
         
         # This should not raise AttributeError
         assert hasattr(performance_monitor, 'start_monitoring'), \
@@ -112,7 +112,7 @@ class TestExecutionMonitor:
     @pytest.mark.asyncio
     async def test_startup_module_can_start_monitoring(self):
         """Test that startup module can successfully start monitoring"""
-        from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+        from app.agents.base.monitoring import ExecutionMonitor
         
         # Create mock with start_monitoring method
         monitor = ExecutionMonitor()
@@ -131,7 +131,7 @@ class TestSchemaValidationService:
     @pytest.mark.asyncio
     async def test_schema_validation_imports(self):
         """Test that schema validation service has all required imports"""
-        from netra_backend.app.services.schema_validation_service import (
+        from app.services.schema_validation_service import (
             SchemaValidationService,
         )
         
@@ -143,7 +143,7 @@ class TestSchemaValidationService:
         """Test that check_database_connectivity doesn't reference undefined 'settings'"""
         from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-        from netra_backend.app.services.schema_validation_service import (
+        from app.services.schema_validation_service import (
             SchemaValidationService,
         )
         
@@ -165,7 +165,7 @@ class TestSchemaValidationService:
         """Test that run_comprehensive_validation handles errors properly"""
         from sqlalchemy.ext.asyncio import AsyncEngine
 
-        from netra_backend.app.services.schema_validation_service import (
+        from app.services.schema_validation_service import (
             run_comprehensive_validation,
         )
         
@@ -202,7 +202,7 @@ class TestStartupIntegration:
         """Test that startup checks can run without critical errors"""
         from fastapi import FastAPI
 
-        from netra_backend.app.startup_checks import run_startup_checks
+        from app.startup_checks import run_startup_checks
         
         app = FastAPI()
         

@@ -7,7 +7,7 @@ Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,8 +21,8 @@ from unittest.mock import Mock
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
-from netra_backend.app.core.exceptions_service import ServiceError
+from app.core.async_connection_pool import AsyncConnectionPool
+from app.core.exceptions_service import ServiceError
 from .async_utils_helpers import (
     create_close_connection,
     # Add project root to path

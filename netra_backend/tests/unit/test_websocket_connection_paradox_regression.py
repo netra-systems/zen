@@ -9,8 +9,8 @@ Reference: SPEC/learnings.xml
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -30,8 +30,8 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.websocket.connection import ConnectionInfo
+from app.services.websocket.ws_manager import WebSocketManager
+from app.websocket.connection import ConnectionInfo
 
 # Add project root to path
 

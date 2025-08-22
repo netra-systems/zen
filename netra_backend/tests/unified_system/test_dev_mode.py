@@ -40,13 +40,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.core.config import get_config
+from app.auth_integration.auth import get_current_user
+from app.core.config import get_config
 
 # Add project root to path
-from netra_backend.app.main import app
-from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.schemas.core_models import User
+from app.main import app
+from app.schemas.Config import AppConfig
+from app.schemas.core_models import User
 
 # Add project root to path
 
@@ -113,8 +113,8 @@ class TestDevModeAuthentication:
                 from fastapi.security import HTTPAuthorizationCredentials
                 from sqlalchemy.ext.asyncio import AsyncSession
 
-                from netra_backend.app.auth_integration.auth import get_current_user
-                from netra_backend.app.db.models_postgres import User as DBUser
+                from app.auth_integration.auth import get_current_user
+                from app.db.models_postgres import User as DBUser
                 
                 # Mock database user
                 mock_db_user = DBUser(
@@ -341,7 +341,7 @@ class TestDevModeAuthentication:
         Business Value: Enables development without API costs
         and consistent testing with predictable responses
         """
-        from netra_backend.app.core.config import get_config
+        from app.core.config import get_config
         
         with patch('app.config.get_config') as mock_config:
             mock_config.return_value.DEV_MODE = True
@@ -362,7 +362,7 @@ class TestDevModeAuthentication:
                     "mock": True
                 }
 
-                from netra_backend.app.llm.llm_client import LLMClient
+                from app.llm.llm_client import LLMClient
                 llm_client = LLMClient()
                 
                 result = await llm_client.generate("Test prompt")

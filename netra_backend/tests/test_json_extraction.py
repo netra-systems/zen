@@ -15,7 +15,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.agents.utils import (
+from app.agents.utils import (
     # Add project root to path
     extract_json_from_response,
     extract_partial_json,

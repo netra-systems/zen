@@ -18,12 +18,12 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.enhanced_secret_manager import (
+from app.core.enhanced_secret_manager import (
     EnhancedSecretManager,
     EnvironmentType,
     SecretAccessLevel,
 )
-from netra_backend.app.core.exceptions import NetraSecurityException
+from app.core.exceptions import NetraSecurityException
 
 # Add project root to path
 

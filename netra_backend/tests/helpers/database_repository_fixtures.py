@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.database.unit_of_work import UnitOfWork
+from app.services.database.unit_of_work import UnitOfWork
 
 
 @pytest.fixture
@@ -96,7 +96,7 @@ def _create_reference_mock(**kwargs):
 @pytest.fixture
 def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked repositories."""
-    from netra_backend.tests.helpers.database_repository_helpers import (
+    from tests.helpers.database_repository_helpers import (
         setup_message_mock_behavior,
         setup_reference_mock_behavior,
         setup_run_mock_behavior,

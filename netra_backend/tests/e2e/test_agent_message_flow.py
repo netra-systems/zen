@@ -15,8 +15,8 @@ Follows CLAUDE.md patterns for async testing and agent integration.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -40,14 +40,14 @@ import pytest
 from logging_config import central_logger
 from ws_manager import WebSocketManager, manager
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.db.models_postgres import Message, Thread
-from netra_backend.app.schemas.registry import WebSocketMessage
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.db.models_postgres import Message, Thread
+from app.schemas.registry import WebSocketMessage
 
 # Add project root to path
-from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.services.thread_service import ThreadService
+from app.services.agent_service_core import AgentService
+from app.services.message_handlers import MessageHandlerService
+from app.services.thread_service import ThreadService
 
 # Add project root to path
 
@@ -202,12 +202,12 @@ def websocket_capture():
 async def real_thread_service():
 
     """Fixture providing real thread service."""
-    from netra_backend.app.agents.supply_researcher.database_manager import (
+    from app.agents.supply_researcher.database_manager import (
 
         get_database_manager,
 
     )
-    from netra_backend.app.core.config import get_config
+    from app.core.config import get_config
     
     # Use real components with test configuration
 
@@ -223,7 +223,7 @@ async def real_thread_service():
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
 
     """Fixture providing real supervisor agent with real components."""
-    from netra_backend.app.llm.llm_manager import LLMManager
+    from app.llm.llm_manager import LLMManager
     
 
     try:

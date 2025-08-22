@@ -14,7 +14,7 @@ Coverage: Metrics collection, Prometheus integration, time series data, alerting
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,11 +31,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import requests
 
-from netra_backend.app.services.health_check_service import HealthCheckService
+from app.services.health_check_service import HealthCheckService
 
 # Add project root to path
-from netra_backend.app.services.monitoring.metrics_service import MetricsService
-from netra_backend.app.services.monitoring.prometheus_exporter import PrometheusExporter
+from app.services.monitoring.metrics_service import MetricsService
+from app.services.monitoring.prometheus_exporter import PrometheusExporter
 
 # Add project root to path
 

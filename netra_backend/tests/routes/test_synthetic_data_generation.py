@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -138,7 +138,7 @@ class TestSyntheticDataGeneration:
         """Test synthetic data template management."""
         from unittest.mock import AsyncMock
 
-        from netra_backend.app.routes.synthetic_data import _fetch_templates
+        from app.routes.synthetic_data import _fetch_templates
         
         # Mock the database dependency
         mock_db = AsyncMock()

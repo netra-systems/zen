@@ -15,7 +15,7 @@ usage tracking, and upgrade prompts. Critical for conversion funnel and cost con
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -30,10 +30,10 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 import redis
 
-from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
+from app.schemas.ToolPermission import ToolExecutionContext
 
 # Add project root to path
-from netra_backend.app.services.tool_permissions.rate_limiter import (
+from app.services.tool_permissions.rate_limiter import (
     ToolPermissionRateLimiter,
 )
 

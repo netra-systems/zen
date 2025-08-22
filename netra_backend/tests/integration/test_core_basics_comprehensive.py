@@ -3,8 +3,8 @@ L3 Integration Tests - Core Basic Functionality (120 Tests)
 Designed to reveal system flaws in auth, login, websockets, and core operations
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 
@@ -30,13 +30,13 @@ from sqlalchemy.orm import sessionmaker
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Import available modules (commented out - using mocks instead)
-# from netra_backend.app.clients.auth_client_core import AuthServiceClient
-# from netra_backend.app.core.websocket_connection_manager import WebSocketConnectionManager
-# from netra_backend.app.db.postgres_core import get_async_session
-# from netra_backend.app.core.cache import CacheManager
-# from netra_backend.app.core.configuration.config import config_instance
-# from netra_backend.app.services.apex_optimizer_agent.models import User, Organization
-# from netra_backend.app.core.cross_service_auth import CrossServiceAuth
+# from app.clients.auth_client_core import AuthServiceClient
+# from app.core.websocket_connection_manager import WebSocketConnectionManager
+# from app.db.postgres_core import get_async_session
+# from app.core.cache import CacheManager
+# from app.core.configuration.config import config_instance
+# from app.services.apex_optimizer_agent.models import User, Organization
+# from app.core.cross_service_auth import CrossServiceAuth
 
 # Mock implementations for testing
 

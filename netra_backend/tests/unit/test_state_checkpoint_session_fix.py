@@ -8,7 +8,7 @@ db_session_factory as an async context manager.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,16 +22,16 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from netra_backend.app.agents.state import DeepAgentState
+from app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.app.agents.supervisor.state_checkpoint_manager import (
+from app.agents.supervisor.state_checkpoint_manager import (
     StateCheckpointManager,
 )
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.agent_state import AgentPhase, CheckpointType
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.tool_dispatcher import ToolDispatcher
+from app.llm.llm_manager import LLMManager
+from app.schemas.agent_state import AgentPhase, CheckpointType
 
 # Add project root to path
 

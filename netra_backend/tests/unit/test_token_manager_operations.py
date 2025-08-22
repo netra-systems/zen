@@ -8,7 +8,7 @@ Tests for token lifecycle operations and module-level convenience functions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,8 +22,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
-from netra_backend.app.core.exceptions_auth import AuthenticationError
+from app.auth_integration.auth import JWTTokenManager, TokenClaims
+from app.core.exceptions_auth import AuthenticationError
 
 # Add project root to path
 

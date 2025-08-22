@@ -6,8 +6,8 @@ Critical: First user message must seamlessly authenticate and process
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -29,17 +29,17 @@ from unittest.mock import AsyncMock, Mock, patch
 import jwt
 import pytest
 from fastapi import WebSocket
-from netra_backend.app.schemas import User
+from app.schemas import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.db.models_postgres import Message, Thread, User
-from netra_backend.app.services.agent_service_core import AgentService
+from app.db.models_postgres import Message, Thread, User
+from app.services.agent_service_core import AgentService
 
 # Add project root to path
-from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.services.auth_service import AuthService
+from app.services.message_handlers import MessageHandlerService
+from app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

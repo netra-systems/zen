@@ -20,7 +20,7 @@ L3 Integration Test Level:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,11 +38,11 @@ from typing import Any, Dict, List, Optional, Set
 
 import pytest
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.redis_manager import redis_manager
+from app.logging_config import central_logger
+from app.redis_manager import redis_manager
 
 # Add project root to path
-from netra_backend.app.services.websocket.message_queue import (
+from app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
     MessageStatus,

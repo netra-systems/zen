@@ -8,7 +8,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,11 +23,11 @@ import pytest
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.base import Base
-from netra_backend.app.db.models_postgres import User
+from app.db.base import Base
+from app.db.models_postgres import User
 
 # Add project root to path
-from netra_backend.app.db.repositories.user_repository import UserRepository
+from app.db.repositories.user_repository import UserRepository
 
 # Add project root to path
 

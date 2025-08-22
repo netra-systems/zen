@@ -14,7 +14,7 @@ Tests configuration from multiple sources:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,11 +32,11 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
-from netra_backend.app.config import get_config, reload_config, validate_configuration
+from app.config import get_config, reload_config, validate_configuration
 
 # Add project root to path
-from netra_backend.app.core.configuration.base import config_manager, get_unified_config
-from netra_backend.app.schemas.Config import AppConfig
+from app.core.configuration.base import config_manager, get_unified_config
+from app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

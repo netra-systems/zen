@@ -7,8 +7,8 @@ from typing import Dict, List
 
 import pytest
 
-from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from app.agents.state import AgentMetadata, DeepAgentState
+from app.schemas.unified_tools import SubAgentLifecycle
 
 
 class TestModelEffectivenessAnalysis:

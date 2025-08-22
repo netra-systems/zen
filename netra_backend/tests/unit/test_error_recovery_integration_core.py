@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,11 +18,11 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.agent_recovery_types import AgentType
-from netra_backend.app.core.error_codes import ErrorSeverity
+from app.core.agent_recovery_types import AgentType
+from app.core.error_codes import ErrorSeverity
 
 # Add project root to path
-from netra_backend.app.core.error_recovery import OperationType
+from app.core.error_recovery import OperationType
 
 # Add project root to path
 
@@ -83,7 +83,7 @@ class EnhancedErrorRecoverySystem:
 
     def _get_agent_type_enum(self, agent_name):
         """Mock agent type enum conversion."""
-        from netra_backend.app.core.agent_recovery_types import AgentType
+        from app.core.agent_recovery_types import AgentType
         mapping = {
             'triage': AgentType.TRIAGE,
             'data_analysis': AgentType.DATA_ANALYSIS
@@ -161,7 +161,7 @@ class TestErrorRecoveryIntegration:
 
     def test_get_agent_type_enum(self, recovery_system):
         """Test agent type enum conversion."""
-        from netra_backend.app.core.agent_recovery_types import AgentType
+        from app.core.agent_recovery_types import AgentType
         
         assert recovery_system._get_agent_type_enum('triage') == AgentType.TRIAGE
         assert recovery_system._get_agent_type_enum('data_analysis') == AgentType.DATA_ANALYSIS

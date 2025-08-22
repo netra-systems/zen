@@ -18,8 +18,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from netra_backend.app.core.config import get_config
-from netra_backend.app.redis_manager import RedisManager
+from app.core.config import get_config
+from app.redis_manager import RedisManager
 
 logger = logging.getLogger(__name__)
 

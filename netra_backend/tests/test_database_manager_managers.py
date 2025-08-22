@@ -27,8 +27,8 @@ from testcontainers.postgres import PostgresContainer
 
 # Import database management components
 try:
-    from netra_backend.app.database.connection_pool import ConnectionPool
-    from netra_backend.app.database.manager import DatabaseManager
+    from app.database.connection_pool import ConnectionPool
+    from app.database.manager import DatabaseManager
 except ImportError:
     # Fallback if modules don't exist yet
     class DatabaseManager:

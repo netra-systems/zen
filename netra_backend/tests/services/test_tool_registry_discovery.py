@@ -7,7 +7,7 @@ Tests tool discovery and search functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,7 +22,7 @@ import pytest
 from langchain_core.tools import BaseTool
 
 # Add project root to path
-from netra_backend.app.services.tool_registry import ToolRegistry
+from app.services.tool_registry import ToolRegistry
 from .test_tool_registry_registration_core import MockTool
 
 # Add project root to path

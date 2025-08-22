@@ -11,8 +11,8 @@ Tests cross-device state consistency and conflict resolution.
 """
 
 # Add project root to path
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -47,9 +47,9 @@ JWTService = AsyncMock
 
 SessionManager = AsyncMock
 from ws_manager import WebSocketManager
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
+from app.redis_manager import RedisManager
+from app.logging_config import central_logger
+from tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 
 logger = central_logger.get_logger(__name__)

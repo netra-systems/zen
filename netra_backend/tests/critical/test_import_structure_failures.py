@@ -10,7 +10,7 @@ and that modules are in expected locations.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,12 +31,12 @@ class TestImportStructureFailures:
     
     def test_startup_checker_import_from_app_checker_fails(self):
         """
-        Test that importing StartupChecker from netra_backend.app.checker fails.
+        Test that importing StartupChecker from app.checker fails.
         This test exposes the issue where StartupChecker is incorrectly 
-        referenced from netra_backend.app.checker instead of app.startup_checks.checker.
+        referenced from app.checker instead of app.startup_checks.checker.
         """
         with pytest.raises(ImportError) as exc_info:
-            from netra_backend.app.checker import StartupChecker
+            from app.checker import StartupChecker
         
         assert "cannot import name 'StartupChecker'" in str(exc_info.value)
         assert "from 'netra_backend.app.checker'" in str(exc_info.value)
@@ -47,7 +47,7 @@ class TestImportStructureFailures:
         This validates the actual location of the StartupChecker class.
         """
         try:
-            from netra_backend.app.startup_checks.checker import StartupChecker
+            from app.startup_checks.checker import StartupChecker
             assert StartupChecker is not None
             assert hasattr(StartupChecker, 'run_all_checks')
         except ImportError as e:
@@ -68,7 +68,7 @@ class TestImportStructureFailures:
             if full_path.exists():
                 content = full_path.read_text()
                 # Check for incorrect import pattern
-                assert "from netra_backend.app.checker import StartupChecker" in content, \
+                assert "from app.checker import StartupChecker" in content, \
                     f"File {file_path} should have incorrect import (this test should fail when fixed)"
     
     def test_system_checker_vs_startup_checker_confusion(self):
@@ -76,7 +76,7 @@ class TestImportStructureFailures:
         Test that SystemChecker in app.checker is different from StartupChecker.
         This exposes the naming confusion between these two classes.
         """
-        from netra_backend.app.checker import SystemChecker
+        from app.checker import SystemChecker
         
         # SystemChecker should exist in app.checker
         assert SystemChecker is not None
@@ -86,7 +86,7 @@ class TestImportStructureFailures:
         assert hasattr(SystemChecker, 'check_system_health')
         
         # Verify StartupChecker has different interface
-        from netra_backend.app.startup_checks.checker import StartupChecker
+        from app.startup_checks.checker import StartupChecker
         assert hasattr(StartupChecker, 'run_all_checks')
         assert not hasattr(StartupChecker, 'check_system_health')
     
@@ -97,7 +97,7 @@ class TestImportStructureFailures:
         """
         # This should fail because __init__ tries to import from wrong location
         with pytest.raises(ImportError) as exc_info:
-            from netra_backend.app.startup_checks import StartupChecker
+            from app.startup_checks import StartupChecker
         
         assert "cannot import name 'StartupChecker'" in str(exc_info.value)
     
@@ -126,14 +126,14 @@ class TestImportStructureFailures:
         This validates that fixing the import won't create circular dependencies.
         """
         # First import the correct StartupChecker
-        from netra_backend.app.startup_checks.checker import StartupChecker
+        from app.startup_checks.checker import StartupChecker
         
         # Then try to import modules that StartupChecker depends on
         try:
-            from netra_backend.app.database_checks import DatabaseChecker
-            from netra_backend.app.environment_checks import EnvironmentChecker
-            from netra_backend.app.service_checks import ServiceChecker
-            from netra_backend.app.system_checks import (
+            from app.database_checks import DatabaseChecker
+            from app.environment_checks import EnvironmentChecker
+            from app.service_checks import ServiceChecker
+            from app.system_checks import (
                 SystemChecker as SystemChecksModule,
             )
         except ImportError as e:
@@ -160,8 +160,8 @@ class TestImportStructureFailures:
         This validates that the fix won't create naming conflicts.
         """
         # Import both checker types
-        from netra_backend.app.checker import SystemChecker
-        from netra_backend.app.startup_checks.checker import StartupChecker
+        from app.checker import SystemChecker
+        from app.startup_checks.checker import StartupChecker
         
         # They should be different classes
         assert SystemChecker != StartupChecker
@@ -192,7 +192,7 @@ class TestImportErrorConsequences:
         with pytest.raises(ImportError):
             from fastapi import FastAPI
 
-            from netra_backend.app.startup_checks import run_startup_checks
+            from app.startup_checks import run_startup_checks
             
             app = FastAPI()
             # This would fail due to import error
@@ -206,7 +206,7 @@ class TestImportErrorConsequences:
         with pytest.raises(ImportError):
             from fastapi import FastAPI
 
-            from netra_backend.app.startup_checks import StartupChecker
+            from app.startup_checks import StartupChecker
             
             app = FastAPI()
             checker = StartupChecker(app)
@@ -217,7 +217,7 @@ class TestImportErrorConsequences:
         This validates that utility functions are inaccessible.
         """
         with pytest.raises(ImportError):
-            from netra_backend.app.startup_checks.utils import run_startup_checks
+            from app.startup_checks.utils import run_startup_checks
     
     def test_type_hints_broken_in_dependent_modules(self):
         """
@@ -230,7 +230,7 @@ class TestImportErrorConsequences:
         
         try:
             # This will fail
-            from netra_backend.app.startup_checks import StartupChecker
+            from app.startup_checks import StartupChecker
             
             # If it somehow succeeds, check type annotations
             sig = inspect.signature(StartupChecker.__init__)
@@ -245,7 +245,7 @@ class TestImportErrorConsequences:
         This validates that developers get useful error messages.
         """
         try:
-            from netra_backend.app.checker import StartupChecker
+            from app.checker import StartupChecker
             pytest.fail("Import should have failed")
         except ImportError as e:
             error_msg = str(e)
@@ -266,7 +266,7 @@ class TestCorrectImportStructure:
         Test that StartupChecker is importable from its actual location.
         This should pass, validating the correct import path.
         """
-        from netra_backend.app.startup_checks.checker import StartupChecker
+        from app.startup_checks.checker import StartupChecker
         
         assert StartupChecker is not None
         assert callable(StartupChecker)
@@ -288,10 +288,10 @@ class TestCorrectImportStructure:
         Test that all checker types have distinct purposes and interfaces.
         This validates the separation of concerns.
         """
-        from netra_backend.app.checker import SystemChecker
-        from netra_backend.app.startup_checks.checker import StartupChecker
-        from netra_backend.app.startup_checks.database_checks import DatabaseChecker
-        from netra_backend.app.startup_checks.environment_checks import (
+        from app.checker import SystemChecker
+        from app.startup_checks.checker import StartupChecker
+        from app.startup_checks.database_checks import DatabaseChecker
+        from app.startup_checks.environment_checks import (
             EnvironmentChecker,
         )
         
@@ -317,7 +317,7 @@ class TestCorrectImportStructure:
         
         # Check that both modules are distinct in sys.modules
         from netra_backend.app import checker
-        from netra_backend.app.startup_checks import checker as startup_checker_module
+        from app.startup_checks import checker as startup_checker_module
         
         assert checker != startup_checker_module
         assert 'netra_backend.app.checker' in sys.modules

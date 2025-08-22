@@ -5,8 +5,8 @@ This addresses CRITICAL validation errors where LLM returns strings instead of d
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from pydantic import ValidationError
 
-from netra_backend.app.agents.data_sub_agent.models import (
+from app.agents.data_sub_agent.models import (
 
     AnomalyDetectionResponse,
 
@@ -41,12 +41,12 @@ from netra_backend.app.agents.data_sub_agent.models import (
     UsagePattern,
 
 )
-from netra_backend.app.agents.optimizations_core_sub_agent import (
+from app.agents.optimizations_core_sub_agent import (
 
     OptimizationsCoreSubAgent,
 
 )
-from netra_backend.app.agents.state import (
+from app.agents.state import (
 
     ActionPlanResult,
 
@@ -59,10 +59,10 @@ from netra_backend.app.agents.state import (
     PlanStep,
 
 )
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.triage_sub_agent.agent import TriageSubAgent
 
 # Add project root to path
-from netra_backend.app.agents.triage_sub_agent.models import (
+from app.agents.triage_sub_agent.models import (
 
     Complexity,
 
@@ -80,7 +80,7 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     UserIntent,
 
 )
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.llm.llm_manager import LLMManager
 
 
 class TestPydanticValidationCritical:
@@ -104,7 +104,7 @@ class TestPydanticValidationCritical:
     def mock_tool_dispatcher(self):
 
         """Create mock tool dispatcher"""
-        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from app.agents.tool_dispatcher import ToolDispatcher
 
         return Mock(spec=ToolDispatcher)
 
@@ -401,7 +401,7 @@ class TestPydanticValidationCritical:
         }
 
         with pytest.raises(ValidationError) as exc_info:
-            from netra_backend.app.agents.data_sub_agent.models import (
+            from app.agents.data_sub_agent.models import (
 
                 BatchProcessingResult,
 
@@ -519,7 +519,7 @@ class TestPydanticValidationCritical:
         mock_llm_manager.ask_llm = AsyncMock(return_value='{"category": "General Inquiry"}')
         
         # Should retry and succeed on second attempt
-        from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        from app.agents.triage_sub_agent.agent import TriageSubAgent
 
         agent = TriageSubAgent(mock_llm_manager, Mock())
 

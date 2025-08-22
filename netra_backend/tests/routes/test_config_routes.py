@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -61,7 +61,7 @@ class TestConfigRoute:
     
     async def test_config_persistence(self):
         """Test configuration persistence."""
-        from netra_backend.app.routes.config import update_config
+        from app.routes.config import update_config
         
         new_config = {
             "log_level": "DEBUG",
@@ -150,7 +150,7 @@ class TestConfigRoute:
     
     async def test_config_backup_and_restore(self):
         """Test configuration backup and restore functionality."""
-        from netra_backend.app.routes.config import backup_config, restore_config
+        from app.routes.config import backup_config, restore_config
         
         # Mock config backup
         with patch('app.services.config_service.create_backup') as mock_backup:

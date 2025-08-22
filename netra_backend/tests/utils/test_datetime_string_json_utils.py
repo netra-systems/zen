@@ -7,7 +7,7 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -38,7 +38,7 @@ class TestDatetimeUtilsTimezone:
     """test_datetime_utils_timezone - Test timezone conversions and DST handling"""
     
     async def test_timezone_conversions(self):
-        from netra_backend.app.utils.datetime_utils import DatetimeUtils
+        from app.utils.datetime_utils import DatetimeUtils
         utils = DatetimeUtils()
         utc_time = DatetimeTestHelpers.create_utc_time()
         
@@ -51,7 +51,7 @@ class TestDatetimeUtilsTimezone:
         self._assert_timezone_difference(utils, utc_time)
     
     async def test_dst_handling(self):
-        from netra_backend.app.utils.datetime_utils import DatetimeUtils
+        from app.utils.datetime_utils import DatetimeUtils
         utils = DatetimeUtils()
         
         before_dst = DatetimeTestHelpers.create_dst_spring_time()
@@ -87,7 +87,7 @@ class TestStringUtilsSanitization:
     """test_string_utils_sanitization - Test string sanitization and XSS prevention"""
     
     async def test_xss_prevention(self):
-        from netra_backend.app.utils.string_utils import StringUtils
+        from app.utils.string_utils import StringUtils
         utils = StringUtils()
         
         malicious = StringTestHelpers.create_xss_payload()
@@ -99,7 +99,7 @@ class TestStringUtilsSanitization:
         self._assert_path_traversal_prevention(utils)
     
     async def test_input_validation(self):
-        from netra_backend.app.utils.string_utils import StringUtils
+        from app.utils.string_utils import StringUtils
         utils = StringUtils()
         
         self._assert_email_validation(utils)
@@ -151,7 +151,7 @@ class TestJsonUtilsSerialization:
     """test_json_utils_serialization - Test custom serialization and circular reference handling"""
     
     async def test_custom_serialization(self):
-        from netra_backend.app.utils.json_utils import JsonUtils
+        from app.utils.json_utils import JsonUtils
         utils = JsonUtils()
         
         data = JsonTestHelpers.create_datetime_data()
@@ -164,7 +164,7 @@ class TestJsonUtilsSerialization:
         self._assert_custom_object_serialization(utils)
     
     async def test_circular_reference_handling(self):
-        from netra_backend.app.utils.json_utils import JsonUtils
+        from app.utils.json_utils import JsonUtils
         utils = JsonUtils()
         
         obj1 = JsonTestHelpers.create_circular_reference()

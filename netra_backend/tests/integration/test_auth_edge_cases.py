@@ -24,7 +24,7 @@ Test Coverage:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -58,8 +58,8 @@ os.environ["TESTING"] = "true"
 
 # Import auth types
 # Test infrastructure  
-from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
-from netra_backend.app.schemas.auth_types import (
+from app.core.exceptions_websocket import WebSocketAuthenticationError
+from app.schemas.auth_types import (
     AuthError,
     LoginRequest,
     Token,

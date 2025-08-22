@@ -5,8 +5,8 @@ Validates full application startup in staging environment
 with all dependencies and configurations.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 
@@ -50,10 +50,10 @@ class TestStagingStartup(StagingConfigTestBase):
             os.environ.update(env_vars)
             
             # Import app modules
-            from netra_backend.app.core.config import get_config
-            from netra_backend.app.db.session import get_db
-            from netra_backend.app.main import app
-            from netra_backend.app.services.websocket_manager import WebSocketManager
+            from app.core.config import get_config
+            from app.db.session import get_db
+            from app.main import app
+            from app.services.websocket_manager import WebSocketManager
             
             # Initialize configuration
 
@@ -84,7 +84,7 @@ class TestStagingStartup(StagingConfigTestBase):
                 self.fail(f"Database connection failed: {e}")
                 
             # Test Redis connection
-            from netra_backend.app.redis_manager import redis_manager
+            from app.redis_manager import redis_manager
 
             if redis_manager.redis_client:
 
@@ -414,7 +414,7 @@ class TestStagingStartup(StagingConfigTestBase):
             self.skipTest("Application startup failed")
             
         # Simulate shutdown
-        from netra_backend.app.routes.mcp.main import shutdown_handlers
+        from app.routes.mcp.main import shutdown_handlers
         
 
         shutdown_start = time.time()

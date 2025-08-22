@@ -47,8 +47,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Add project root to path
-from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
-from netra_backend.app.core.exceptions_config import DatabaseError
+from app.core.database_types import DatabaseConfig, DatabaseType
+from app.core.exceptions_config import DatabaseError
 from .database_test_fixtures import (
     create_mock_message,
     create_mock_thread,

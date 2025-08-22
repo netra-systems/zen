@@ -27,7 +27,7 @@ Architecture Compliance:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -47,10 +47,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import redis.asyncio as aioredis
 
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 
 # Add project root to path
-from netra_backend.app.schemas.auth_types import TokenData, UserInfo
+from app.schemas.auth_types import TokenData, UserInfo
 
 # Add project root to path
 

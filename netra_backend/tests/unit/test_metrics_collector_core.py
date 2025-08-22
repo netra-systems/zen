@@ -9,8 +9,8 @@ preventing revenue loss and customer disputes.
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.monitoring.metrics_collector import (
+from app.monitoring.metrics_collector import (
 
     DatabaseMetrics,
     # Add project root to path

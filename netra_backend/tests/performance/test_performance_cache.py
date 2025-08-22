@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.performance_optimization_manager import (
+from app.core.performance_optimization_manager import (
     # Add project root to path
     MemoryCache,
     QueryOptimizer,

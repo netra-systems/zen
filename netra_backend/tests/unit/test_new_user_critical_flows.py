@@ -17,7 +17,7 @@ CRITICAL: Every test protects revenue by ensuring new user flows work perfectly.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,15 +36,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.app.auth_integration.auth import (
+from app.auth_integration.auth import (
     create_access_token,
     get_password_hash,
     validate_token_jwt,
 )
-from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
-from netra_backend.app.schemas.registry import UserCreate
-from netra_backend.app.services.user_service import user_service
+from app.clients.auth_client import auth_client
+from app.db.models_postgres import Secret, ToolUsageLog, User
+from app.schemas.registry import UserCreate
+from app.services.user_service import user_service
 
 # Add project root to path
 

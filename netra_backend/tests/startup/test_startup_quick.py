@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 @pytest.mark.asyncio
 async def test_clickhouse_configuration():
     """Test ClickHouse is properly configured"""
-    from netra_backend.app.db.clickhouse import (
+    from app.db.clickhouse import (
         get_clickhouse_config,
         use_mock_clickhouse,
     )
@@ -50,7 +50,7 @@ async def test_clickhouse_configuration():
 @pytest.mark.asyncio
 async def test_clickhouse_service_initialization():
     """Test ClickHouse service can initialize"""
-    from netra_backend.app.db.clickhouse import ClickHouseService
+    from app.db.clickhouse import ClickHouseService
     
     service = ClickHouseService(force_mock=True)  # Use mock for quick test
     
@@ -131,13 +131,13 @@ async def test_environment_variables():
 async def test_websocket_types_exist():
     """Test WebSocket types are properly defined"""
     try:
-        from netra_backend.app.schemas.websocket_payloads import (
+        from app.schemas.websocket_payloads import (
             AgentStartedPayload,
         )
-        from netra_backend.app.schemas.websocket_models import (
+        from app.schemas.websocket_models import (
             AgentUpdatePayload,
         )
-        from netra_backend.app.schemas.registry import (
+        from app.schemas.registry import (
             WebSocketMessage,
             WebSocketMessageType,
         )

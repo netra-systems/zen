@@ -9,7 +9,7 @@ maintain, and debug. Use these patterns as templates for new tests.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.services.agent_service import AgentService
+from app.services.agent_service import AgentService
 
 # Add project root to path
 from ..helpers.shared_test_types import (
@@ -85,7 +85,7 @@ class TestAgentServiceUnit:
         }
         
         # Act: Call the service method
-        from netra_backend.app.services.agent_service import AgentService
+        from app.services.agent_service import AgentService
         service = AgentService(**mock_dependencies)
         result = await service.process_request(
             user_id='user123',
@@ -124,7 +124,7 @@ class TestAgentServiceIntegration:
         This fixture uses a REAL database for integration testing.
         It's cleaned up after each test to ensure isolation.
         """
-        from netra_backend.app.db import create_test_database
+        from app.db import create_test_database
         
         # Setup: Create test database
         db = await create_test_database()

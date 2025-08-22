@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,18 +24,18 @@ import pytest
 import pytest_asyncio
 from logging_config import central_logger as logger
 
-from netra_backend.app.config import get_config
-from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
-from netra_backend.app.db.clickhouse_init import (
+from app.config import get_config
+from app.db.clickhouse import get_clickhouse_client
+from app.db.clickhouse_base import ClickHouseDatabase
+from app.db.clickhouse_init import (
     # Add project root to path
     create_workload_events_table_if_missing,
     verify_workload_events_table,
 )
-from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
+from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 
 # Add project root to path
-from netra_backend.app.services.clickhouse_service import list_corpus_tables
+from app.services.clickhouse_service import list_corpus_tables
 
 
 @pytest.fixture(scope="function")
@@ -134,7 +134,7 @@ class TestClickHouseConnection:
         mock_client.fetch.return_value = mock_tables_response
         
         # Test the service function
-        from netra_backend.app.services.clickhouse_service import list_corpus_tables
+        from app.services.clickhouse_service import list_corpus_tables
         tables = await list_corpus_tables()
         
         # Verify results

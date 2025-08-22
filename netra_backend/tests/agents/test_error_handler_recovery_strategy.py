@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,7 +18,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.agents.error_handler import (
+from app.agents.error_handler import (
     # Add project root to path
     AgentError,
     DatabaseError,
@@ -26,10 +26,10 @@ from netra_backend.app.agents.error_handler import (
     ErrorRecoveryStrategy,
     NetworkError,
 )
-from netra_backend.app.agents.error_handler import (
+from app.agents.error_handler import (
     AgentValidationError as ValidationError,
 )
-from netra_backend.app.core.error_codes import ErrorSeverity
+from app.core.error_codes import ErrorSeverity
 
 
 class TestErrorRecoveryStrategy:

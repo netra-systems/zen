@@ -7,7 +7,7 @@ Tests for basic ClickHouse connectivity and database operations
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -16,10 +16,10 @@ if str(PROJECT_ROOT) not in sys.path:
 setup_test_path()
 
 import pytest
-from netra_backend.app.core.unified_logging import central_logger as logger
+from app.core.unified_logging import central_logger as logger
 
 # Add project root to path
-from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
+from tests.clickhouse.test_clickhouse_permissions import (
     _check_system_metrics_permission,
     # Add project root to path
     real_clickhouse_client,
@@ -88,8 +88,8 @@ class TestClickHouseIntegration:
     
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
-        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+        from app.db.clickhouse import get_clickhouse_client
+        from app.db.clickhouse_init import initialize_clickhouse_tables
         
         # Run initialization
         await initialize_clickhouse_tables()
@@ -99,7 +99,7 @@ class TestClickHouseIntegration:
 
     async def _verify_expected_tables(self):
         """Verify expected tables exist after initialization"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             tables_result = await client.execute_query("SHOW TABLES")

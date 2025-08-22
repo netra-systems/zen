@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,8 +20,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.alert_manager import HealthAlertManager
-from netra_backend.app.core.health_types import (
+from app.core.alert_manager import HealthAlertManager
+from app.core.health_types import (
     AlertSeverity,
     ComponentHealth,
     HealthStatus,

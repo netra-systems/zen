@@ -14,7 +14,7 @@ BVJ:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -33,26 +33,27 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState
+from app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.agent_service import AgentService
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.llm.llm_manager import LLMManager
+from app.services.agent_service import AgentService
 from .test_fixtures import (
-    create_mock_infrastructure,
-    create_supervisor_with_mocks,
     mock_db_session,
-    # Add project root to path
     mock_llm_manager,
     mock_persistence_service,
     mock_tool_dispatcher,
     mock_websocket_manager,
-    setup_llm_responses,
-    setup_websocket_manager,
     supervisor_agent,
 )
-from .performance_test_helpers import (
+from .fixtures.llm_agent_fixtures import (
+    create_mock_infrastructure,
+    create_supervisor_with_mocks,
+    setup_llm_responses,
+    setup_websocket_manager,
+)
+from .helpers.performance_test_helpers import (
     create_benchmark_supervisor,
     create_e2e_persistence_mock,
     create_flow_persistence_mock,
@@ -348,6 +349,37 @@ def _verify_performance_metrics(performance_metrics):
         assert metric["success_rate"] >= 0.8  # At least 80% success rate
 
 
+def _create_mock_infrastructure_light():
+    """Create lightweight mock infrastructure"""
+    db_session = AsyncMock(spec=AsyncSession)
+    llm_manager = Mock(spec=LLMManager)
+    ws_manager = Mock()
+    return (db_session, llm_manager, ws_manager)
+
+
+def _create_lightweight_infrastructure():
+    """Create lightweight infrastructure for testing"""
+    return _create_mock_infrastructure_light()
+
+
+def _create_lightweight_supervisor(infrastructure):
+    """Create lightweight supervisor"""
+    return create_lightweight_supervisor(infrastructure)
+
+
+async def _execute_lightweight_flow(supervisor):
+    """Execute lightweight flow"""
+    return await execute_lightweight_flow(supervisor)
+
+
+def _create_benchmark_infrastructure():
+    """Create benchmark infrastructure"""
+    return create_mock_infrastructure()
+
+
+def _create_benchmark_supervisor(infrastructure, index):
+    """Create benchmark supervisor"""
+    return create_benchmark_supervisor(infrastructure, index)
 
 
 if __name__ == "__main__":

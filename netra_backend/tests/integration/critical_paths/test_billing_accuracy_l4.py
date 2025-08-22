@@ -13,8 +13,8 @@ Performance Requirements: p99 < 500ms for billing calculations, 99.9% accuracy u
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -39,15 +39,15 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.services.billing.billing_engine import BillingEngine
-from netra_backend.app.services.billing.token_counter import TokenCounter
+from app.services.billing.billing_engine import BillingEngine
+from app.services.billing.token_counter import TokenCounter
 
 # Add project root to path
-from netra_backend.app.services.billing.usage_tracker import UsageTracker
-from netra_backend.app.services.llm.llm_manager import LLMManager
+from app.services.billing.usage_tracker import UsageTracker
+from app.services.llm.llm_manager import LLMManager
 
 # Add project root to path
-# # from netra_backend.app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
+# # from app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
 from ..config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
 
 TEST_CONFIG = {"mock": True}

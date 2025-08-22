@@ -21,7 +21,7 @@ Mock-Real Spectrum: L4 (Production-like environment)
 - Real cross-service auth
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 # Add project root to path
 import sys
@@ -45,18 +45,18 @@ import jwt
 
 # Add project root to path
 
-from netra_backend.app.schemas.auth_types import (
+from app.schemas.auth_types import (
 
 # Add project root to path
     Token, LoginRequest, LoginResponse,
     UserProfile, Permission, Role, ResourceAccess,
     # AuditEvent, AuthorizationResult  # Class may not exist, commented out
 )
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.db.redis_manager import get_redis_manager
-from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.core.monitoring import metrics_collector
+from app.core.config import get_settings
+from app.db.postgres import get_async_db
+from app.db.redis_manager import get_redis_manager
+from app.clients.auth_client import auth_client
+from app.core.monitoring import metrics_collector
 
 
 class PermissionLevel(Enum):

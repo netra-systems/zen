@@ -12,7 +12,7 @@ background task handling, and shutdown procedures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,7 +28,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.async_resource_manager import (
+from app.core.async_resource_manager import (
     # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
@@ -37,7 +37,7 @@ from netra_backend.app.core.async_resource_manager import (
     run_in_threadpool,
     shutdown_async_utils,
 )
-from netra_backend.app.core.exceptions_service import ServiceError
+from app.core.exceptions_service import ServiceError
 
 
 # Test fixtures for setup
@@ -351,7 +351,7 @@ class TestThreadPoolExecution:
 
     def test_thread_pool_executor_creation(self):
         """Thread pool executor is created on demand."""
-        from netra_backend.app.core.async_resource_manager import (
+        from app.core.async_resource_manager import (
             _get_thread_pool_executor,
         )
         executor = _get_thread_pool_executor()
@@ -359,7 +359,7 @@ class TestThreadPoolExecution:
 
     def test_thread_pool_executor_reuse(self):
         """Thread pool executor is reused."""
-        from netra_backend.app.core.async_resource_manager import (
+        from app.core.async_resource_manager import (
             _get_thread_pool_executor,
         )
         executor1 = _get_thread_pool_executor()

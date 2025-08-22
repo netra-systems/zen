@@ -7,7 +7,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,7 +18,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
+from app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 from .clickhouse_query_fixtures import get_all_test_queries
 from .clickhouse_test_helpers import (
     # Add project root to path

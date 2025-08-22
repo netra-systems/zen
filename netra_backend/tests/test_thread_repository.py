@@ -18,10 +18,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.models_postgres import Thread
+from app.db.models_postgres import Thread
 
 # Add project root to path
-from netra_backend.app.services.database.thread_repository import ThreadRepository
+from app.services.database.thread_repository import ThreadRepository
 
 # Add project root to path
 

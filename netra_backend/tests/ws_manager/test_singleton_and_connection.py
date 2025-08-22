@@ -4,7 +4,7 @@ Tests for WebSocketManager singleton pattern and connection management
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from app.websocket.connection import ConnectionManager as WebSocketManager
 from ..test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ import pytest
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.app.services.websocket.ws_manager import (
+from app.services.websocket.ws_manager import (
 
     ConnectionInfo,
 
@@ -127,7 +127,7 @@ class TestSingletonPattern(WebSocketTestBase):
         self.reset_manager_singleton()
         
         from netra_backend.app import ws_manager as ws_module
-        from netra_backend.app.services.websocket.ws_manager import (
+        from app.services.websocket.ws_manager import (
 
             WebSocketManager as WSM1,
 

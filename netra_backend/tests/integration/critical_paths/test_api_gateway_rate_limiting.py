@@ -14,7 +14,7 @@ Coverage: API gateway rate limiting, per-endpoint limits, burst handling, tier-b
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,12 +34,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-from netra_backend.app.schemas.user import UserTier
-from netra_backend.app.services.api_gateway.gateway_manager import ApiGatewayManager
+from app.schemas.user import UserTier
+from app.services.api_gateway.gateway_manager import ApiGatewayManager
 
 # Add project root to path
-from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
-from netra_backend.app.services.metrics.gateway_metrics import GatewayMetricsService
+from app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
+from app.services.metrics.gateway_metrics import GatewayMetricsService
 
 # Add project root to path
 

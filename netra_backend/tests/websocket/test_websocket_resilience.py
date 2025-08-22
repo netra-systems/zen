@@ -7,7 +7,7 @@ Tests focused on connection resilience, error recovery, and network instability 
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,10 +22,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
+from app.core.websocket_cors import WebSocketCORSHandler
 
 # Add project root to path
-from netra_backend.app.routes.websocket_enhanced import (
+from app.routes.websocket_enhanced import (
     # Add project root to path
     connection_manager,
     handle_websocket_message_enhanced,
@@ -459,7 +459,7 @@ class TestWebSocketCORSResilience:
         
     async def test_cors_enforcement_in_connection(self):
         """Test CORS enforcement during connection establishment."""
-        from netra_backend.app.core.websocket_cors import validate_websocket_origin
+        from app.core.websocket_cors import validate_websocket_origin
         
         cors_handler = WebSocketCORSHandler(["http://localhost:3000"])
         

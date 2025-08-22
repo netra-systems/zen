@@ -7,7 +7,7 @@ Testing advanced and specialized features
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,16 +22,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.services.synthetic_data.generation_patterns import (
+from app.services.synthetic_data.generation_patterns import (
     generate_with_anomalies,
 )
-from netra_backend.app.services.synthetic_data.metrics import (
+from app.services.synthetic_data.metrics import (
     calculate_correlation,
     detect_anomalies,
 )
 
 # Add project root to path
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from app.services.synthetic_data_service import SyntheticDataService
 from .test_synthetic_data_service_basic import GenerationConfig
 
 # Add project root to path
@@ -106,7 +106,7 @@ class TestAdvancedFeatures:
                 'status': 'success'
             }
         
-        from netra_backend.app.services.synthetic_data.generation_patterns import (
+        from app.services.synthetic_data.generation_patterns import (
             generate_with_correlations,
         )
         records = await generate_with_correlations(config, mock_generate_fn)

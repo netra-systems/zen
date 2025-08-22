@@ -200,7 +200,7 @@ class TestCentralConfigUsage:
                         modules_needing_config.append(filepath)
                         
                         # Check if using central config
-                        if 'from netra_backend.app.config import' in content or \
+                        if 'from app.config import' in content or \
                            'get_config()' in content:
                             modules_using_central.append(filepath)
             except:
@@ -332,7 +332,7 @@ class TestCentralConfigUsage:
                 try:
                     with open(filepath, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        assert ('from netra_backend.app.config import' in content or
+                        assert ('from app.config import' in content or
                                'get_config()' in content), (
                             f"File {filepath} uses config key '{key}' but doesn't import central config"
                         )

@@ -23,13 +23,13 @@ import pytest
 
 # Add project root to path
 # Import backend schemas
-from netra_backend.app.schemas.Agent import (
+from app.schemas.Agent import (
     AgentCompleted,
     AgentErrorMessage,
     AgentStarted,
 )
-from netra_backend.app.schemas.registry import AgentUpdate
-from netra_backend.app.schemas.Tool import ToolCompleted, ToolStarted, ToolStatus
+from app.schemas.registry import AgentUpdate
+from app.schemas.Tool import ToolCompleted, ToolStarted, ToolStatus
 
 
 class TestAgentResponseSerialization:

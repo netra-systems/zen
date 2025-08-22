@@ -15,8 +15,8 @@ Coverage: WebSocket resilience, state persistence, automatic recovery, cross-ser
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -39,8 +39,8 @@ from typing import Any, Dict, List, Optional
 import pytest
 import websockets
 
-from netra_backend.app.services.redis.session_manager import RedisSessionManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from app.services.redis.session_manager import RedisSessionManager
+from app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 from .l4_staging_critical_base import (

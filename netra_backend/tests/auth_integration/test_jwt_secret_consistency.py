@@ -3,7 +3,7 @@ Test JWT secret consistency between auth service and backend service.
 Ensures both services use the same JWT secret for token validation.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 
@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.secret_loader import AuthSecretLoader
-from netra_backend.app.core.configuration.secrets import SecretManager
-from netra_backend.app.schemas.Config import AppConfig
+from app.core.configuration.secrets import SecretManager
+from app.schemas.Config import AppConfig
 
 
 class TestJWTSecretConsistency:
@@ -176,7 +176,7 @@ class TestJWTSecretIntegration:
     
     async def test_auth_client_and_auth_service_consistency(self):
         """Test that auth client fallback uses same logic as auth service."""
-        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        from app.clients.auth_client_core import AuthServiceClient
         
         test_secret = "integration-test-secret-32-chars-min"
         
@@ -200,8 +200,8 @@ class TestJWTSecretIntegration:
         """Test that backend auth integration validates tokens consistently."""
         from unittest.mock import AsyncMock
 
-        from netra_backend.app.auth_integration.auth import get_current_user
-        from netra_backend.app.clients.auth_client import auth_client
+        from app.auth_integration.auth import get_current_user
+        from app.clients.auth_client import auth_client
         
         test_secret = "backend-integration-test-secret-32"
         

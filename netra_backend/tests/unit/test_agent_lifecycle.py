@@ -12,7 +12,7 @@ error handling, and state transitions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,9 +28,9 @@ import pytest
 from starlette.websockets import WebSocketDisconnect
 
 # Add project root to path
-from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
+from app.agents.agent_lifecycle import AgentLifecycleMixin
+from app.agents.state import DeepAgentState
+from app.schemas.unified_tools import SubAgentLifecycle
 
 # Add project root to path
 

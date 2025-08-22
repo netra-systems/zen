@@ -2,20 +2,52 @@
 """
 String Literals Scanner for Netra Platform
 Scans codebase for string literals and maintains a master index.
+
+DEPRECATION NOTICE:
+This is the legacy scanner maintained for backward compatibility.
+For new projects and enhanced features, use scan_string_literals_enhanced.py instead.
+
+The enhanced scanner provides:
+- Better categorization with confidence scores
+- Markdown documentation generation
+- Improved pattern matching
+- Validation capabilities
+- Multiple output formats
+
+Usage:
+    # Continue using this scanner (legacy mode)
+    python scripts/scan_string_literals.py
+    
+    # Switch to enhanced scanner (recommended)
+    python scripts/scan_string_literals_enhanced.py
 """
 
 import json
 import re
+import warnings
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set, Tuple
 
-from string_literals import RawLiteral, scan_directory as scan_directory_core
+# Import from the new modular components while maintaining compatibility
+try:
+    from string_literals.scanner_core import RawLiteral, scan_directory as scan_directory_core
+    from string_literals.categorizer_enhanced import EnhancedStringLiteralCategorizer
+    ENHANCED_AVAILABLE = True
+except ImportError:
+    # Fallback to embedded implementation for compatibility
+    from string_literals import RawLiteral, scan_directory as scan_directory_core
+    ENHANCED_AVAILABLE = False
 
 class StringLiteralCategorizer:
-    """Categorizes string literals based on patterns and context."""
+    """Legacy categorizer maintained for backward compatibility.
     
+    This class now uses the enhanced categorizer when available,
+    but falls back to the original implementation for compatibility.
+    """
+    
+    # Original patterns preserved for backward compatibility
     PATTERNS = {
         'configuration': [
             (r'^[A-Z_]+$', 'env_var'),  # Environment variables
@@ -60,8 +92,47 @@ class StringLiteralCategorizer:
         ],
     }
     
+    def __init__(self):
+        """Initialize categorizer, using enhanced version if available."""
+        if ENHANCED_AVAILABLE:
+            self._enhanced_categorizer = EnhancedStringLiteralCategorizer()
+            self._use_enhanced = True
+        else:
+            self._use_enhanced = False
+    
     def categorize(self, literal: str, context: str = '') -> Tuple[str, str]:
-        """Categorize a string literal based on patterns."""
+        """Categorize a string literal based on patterns.
+        
+        Uses enhanced categorizer when available, falls back to legacy implementation.
+        """
+        if self._use_enhanced:
+            # Use enhanced categorizer but convert to legacy format
+            # Create a pseudo-context from the context string
+            if 'func:' in context:
+                func_context = context.split('func:')[-1].strip()
+            else:
+                func_context = None
+                
+            if 'class:' in context:
+                class_context = context.split('class:')[1].split('.')[0].strip()
+            else:
+                class_context = None
+                
+            raw_literal = RawLiteral(literal, "legacy", 1, class_context, func_context)
+            categorized = self._enhanced_categorizer.categorize(raw_literal)
+            
+            # Skip ignored literals
+            if categorized.category == 'ignored':
+                return ('uncategorized', 'message')
+            
+            # Convert to legacy format
+            return (categorized.category, categorized.subcategory or 'unknown')
+        else:
+            # Use original implementation
+            return self._legacy_categorize(literal, context)
+    
+    def _legacy_categorize(self, literal: str, context: str = '') -> Tuple[str, str]:
+        """Original categorization logic for fallback compatibility."""
         # Skip if too short or too long
         if len(literal) < 2 or len(literal) > 200:
             return ('uncategorized', 'unknown')
@@ -180,29 +251,51 @@ class StringLiteralIndexer:
             print(f"  {category}: {data['count']} unique literals")
 
 def main():
-    """Main entry point."""
+    """Main entry point for the legacy scanner."""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Scan codebase for string literals')
+    # Show deprecation warning
+    if ENHANCED_AVAILABLE:
+        warnings.warn(
+            "This is the legacy string literals scanner. "
+            "Consider switching to scan_string_literals_enhanced.py for improved features and performance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        print("INFO: Enhanced scanner available at scripts/scan_string_literals_enhanced.py")
+        print("   Features: Better categorization, confidence scores, markdown docs, validation")
+        print()
+    
+    parser = argparse.ArgumentParser(
+        description='Legacy String Literals Scanner (Backward Compatible)',
+        epilog="For enhanced features, use scan_string_literals_enhanced.py instead."
+    )
     parser.add_argument('--root', default='.', help='Root directory to scan')
     parser.add_argument('--output', default='SPEC/generated/string_literals.json', 
                         help='Output file path')
     parser.add_argument('--include-tests', action='store_true', 
                         help='Include test directories')
+    parser.add_argument('--enhanced-mode', action='store_true',
+                        help='Use enhanced categorizer when available (preview)')
     
     args = parser.parse_args()
     
     root_dir = Path(args.root).resolve()
     output_path = root_dir / args.output
     
-    print(f"Scanning {root_dir} for string literals...")
+    print(f"Legacy scanning {root_dir} for string literals...")
+    if args.enhanced_mode and ENHANCED_AVAILABLE:
+        print("Using enhanced categorizer in compatibility mode")
+    elif not ENHANCED_AVAILABLE:
+        print("WARNING: Enhanced modules not available, using legacy implementation")
+    print()
     
     indexer = StringLiteralIndexer(root_dir)
     
-    # Scan main directories
-    dirs_to_scan = ['app', 'frontend', 'auth_service', 'scripts', 'dev_launcher']
+    # Scan main directories (updated directory list)
+    dirs_to_scan = ['netra_backend', 'frontend', 'auth_service', 'scripts', 'shared']
     if args.include_tests:
-        dirs_to_scan.append('tests')
+        dirs_to_scan.extend(['tests', '__tests__'])
         
     for dir_name in dirs_to_scan:
         dir_path = root_dir / dir_name
@@ -212,6 +305,12 @@ def main():
             
     # Save the index
     indexer.save_index(output_path)
+    
+    # Show migration suggestion
+    if ENHANCED_AVAILABLE:
+        print()
+        print("TIP: Consider switching to the enhanced scanner:")
+        print("   python scripts/scan_string_literals_enhanced.py --format all")
     
     return 0
 

@@ -37,7 +37,7 @@ import pytest
 from config_secrets_manager import ConfigSecretsManager
 
 # Add project root to path
-from netra_backend.app.schemas.Config import AppConfig
+from app.schemas.Config import AppConfig
 
 # Add project root to path
 

@@ -24,7 +24,7 @@ Test Coverage:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -59,8 +59,8 @@ os.environ["TESTING"] = "true"
 from clients.auth_client import auth_client
 
 # Test infrastructure
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.schemas.auth_types import (
+from app.core.config import get_settings
+from app.schemas.auth_types import (
     AuditLog,
     AuthError,
     AuthProvider,

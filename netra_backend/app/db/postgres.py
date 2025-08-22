@@ -13,6 +13,7 @@ from netra_backend.app.db.postgres_core import (
     Database,
     async_engine,
     async_session_factory,
+    get_converted_async_db_url,
     initialize_postgres,
 )
 
@@ -80,6 +81,7 @@ __all__ = [
     'DatabaseConfig', 
     'async_engine',
     'async_session_factory',
+    'get_converted_async_db_url',
     'initialize_postgres',
     
     # Session management

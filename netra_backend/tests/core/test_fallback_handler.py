@@ -7,7 +7,7 @@ All functions are ≤8 lines, file is <300 lines
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,9 +18,9 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
-from netra_backend.app.schemas.quality_types import ContentType
-from netra_backend.app.services.fallback_response.models import (
+from app.core.fallback_handler import FallbackHandler, FallbackMetadata
+from app.schemas.quality_types import ContentType
+from app.services.fallback_response.models import (
     FailureReason,
     FallbackContext,
 )

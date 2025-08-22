@@ -10,7 +10,7 @@ L3 Test: Real multi-service auth token propagation with containerized services.
 Tests JWT token generation, Redis storage, cross-service validation, and WebSocket authentication.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 # Add project root to path
 import sys
@@ -33,12 +33,12 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.logging_config import central_logger
+from app.logging_config import central_logger
 
 # Add project root to path
 
-from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
-from netra_backend.tests.integration.helpers.multi_service_auth_helpers import (
+from tests.integration.helpers.redis_l3_helpers import RedisContainer
+from tests.integration.helpers.multi_service_auth_helpers import (
 
 # Add project root to path
     PostgreSQLContainer, AuthServiceSimulator, 

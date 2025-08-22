@@ -39,13 +39,13 @@ import httpx
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.health import HealthInterface, HealthLevel
-from netra_backend.app.core.health.checks import (
+from app.core.health import HealthInterface, HealthLevel
+from app.core.health.checks import (
     DependencyHealthChecker,
     UnifiedDatabaseHealthChecker,
 )
-from netra_backend.app.db.postgres import async_engine
-from netra_backend.app.logging_config import central_logger
+from app.db.postgres import async_engine
+from app.logging_config import central_logger
 from .mock_services import (
     MockHTTPService,
     ServiceRegistry,

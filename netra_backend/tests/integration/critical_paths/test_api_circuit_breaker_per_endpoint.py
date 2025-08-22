@@ -14,7 +14,7 @@ Coverage: Per-endpoint circuit breakers, failure thresholds, recovery mechanisms
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -35,12 +35,12 @@ import aiohttp
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
-from netra_backend.app.services.api_gateway.circuit_breaker_manager import (
+from app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
+from app.services.api_gateway.circuit_breaker_manager import (
     CircuitBreakerManager,
 )
-from netra_backend.app.services.api_gateway.fallback_service import ApiFallbackService
-from netra_backend.app.services.metrics.circuit_breaker_metrics import (
+from app.services.api_gateway.fallback_service import ApiFallbackService
+from app.services.metrics.circuit_breaker_metrics import (
     CircuitBreakerMetricsService,
 )
 

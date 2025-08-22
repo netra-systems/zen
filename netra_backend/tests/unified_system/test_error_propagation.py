@@ -31,13 +31,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import websockets
 
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.core.error_handlers import get_http_status_code, handle_exception
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.core.error_handlers import get_http_status_code, handle_exception
 
 # Add project root to path
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.websocket.error_recovery_handler import (
+from app.logging_config import central_logger
+from app.schemas.shared_types import RetryConfig
+from app.websocket.error_recovery_handler import (
     ErrorContext,
     ErrorType,
     # Add project root to path

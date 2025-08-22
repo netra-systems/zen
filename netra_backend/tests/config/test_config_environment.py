@@ -38,7 +38,7 @@ import pytest
 from config_environment import ConfigEnvironment
 
 # Add project root to path
-from netra_backend.app.schemas.Config import (
+from app.schemas.Config import (
     # Add project root to path
     AppConfig,
     DevelopmentConfig,

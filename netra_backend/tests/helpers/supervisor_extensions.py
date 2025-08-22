@@ -5,7 +5,7 @@ These methods are monkey-patched onto the SupervisorAgent for testing purposes.
 
 import asyncio
 
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+from app.agents.supervisor.execution_context import AgentExecutionResult
 
 
 async def _route_to_agent(self, state, context, agent_name):
@@ -61,7 +61,7 @@ async def _route_to_agent_with_circuit_breaker(self, state, context, agent_name)
 
 def install_supervisor_extensions():
     """Install extension methods on SupervisorAgent for testing."""
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from app.agents.supervisor_consolidated import SupervisorAgent
     
     SupervisorAgent._route_to_agent = _route_to_agent
     SupervisorAgent._route_to_agent_with_retry = _route_to_agent_with_retry

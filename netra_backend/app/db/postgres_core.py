@@ -322,6 +322,11 @@ def _handle_engine_creation_error(e):
 
 def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     """Create engine and setup global objects with resilient configuration."""
+    # CRITICAL: Validate URL conversion to prevent sslmode regression
+    if "sslmode=" in async_db_url:
+        raise RuntimeError(f"CRITICAL: Database URL contains 'sslmode' parameter which is incompatible with asyncpg. "
+                          f"URL should have been converted to use 'ssl=' instead. URL: {async_db_url}")
+    
     # Add resilient connection arguments
     if "connect_args" not in engine_args:
         engine_args["connect_args"] = {}
@@ -363,6 +368,22 @@ def _initialize_async_engine():
 
 # Initialize the async engine - moved to lazy initialization
 # _initialize_async_engine() is now called via initialize_postgres()
+
+def get_converted_async_db_url(db_url: str) -> str:
+    """
+    CRITICAL: Get properly converted async database URL with sslmode->ssl conversion.
+    
+    This function MUST be used by any component creating async engines to prevent
+    the recurring 'sslmode' parameter error with asyncpg.
+    
+    Args:
+        db_url: Original database URL (may contain sslmode parameter)
+        
+    Returns:
+        Converted URL safe for use with asyncpg (sslmode converted to ssl)
+    """
+    return _get_async_db_url(db_url)
+
 
 def initialize_postgres():
     """Initialize PostgreSQL connection if not already initialized."""

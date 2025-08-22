@@ -19,7 +19,7 @@ const mockWebSocketService = {
 
 // Mock auth store
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: jest.fn()
 }));
 
 // Mock Next.js navigation
@@ -79,6 +79,9 @@ import { render, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useAuthStore } from '@/store/authStore';
 import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '@/__tests__/test-utils/integration-test-setup';
+
+// Get access to the mocked store
+const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
 
 // Test data for session scenarios
 const sessionTestData = {
@@ -246,7 +249,7 @@ describe('Session Management Integration', () => {
     
     mockRouter = createMockRouter();
     mockUseRouter.mockReturnValue(mockRouter);
-    mockUseAuthStore.mockReturnValue(createMockAuthStore());
+    mockedUseAuthStore.mockReturnValue(createMockAuthStore());
   }
 
   function createMockRouter() {

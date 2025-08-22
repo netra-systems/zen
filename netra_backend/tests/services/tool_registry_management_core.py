@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 
 from langchain_core.tools import BaseTool
 
-from netra_backend.app.services.tool_registry import ToolRegistry
+from app.services.tool_registry import ToolRegistry
 
 
 class UnifiedToolRegistry:

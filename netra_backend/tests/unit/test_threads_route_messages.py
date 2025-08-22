@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,7 +18,7 @@ import pytest
 from fastapi import HTTPException
 
 # Add project root to path
-from netra_backend.app.routes.threads_route import get_thread_messages
+from app.routes.threads_route import get_thread_messages
 from .thread_test_helpers import (
     assert_http_exception,
     assert_thread_messages_response,

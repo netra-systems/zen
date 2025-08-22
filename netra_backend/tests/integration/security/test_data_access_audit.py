@@ -18,7 +18,7 @@ REQUIREMENTS:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,10 +31,10 @@ from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
+from app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
 
 # Add project root to path
-from netra_backend.tests.integration.security.shared_fixtures import (
+from tests.integration.security.shared_fixtures import (
     DataAccessAuditHelper,
     data_access_helper,
     # Add project root to path

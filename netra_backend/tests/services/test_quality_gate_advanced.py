@@ -7,7 +7,7 @@ Tests caching, batch processing, statistics, and system behavior
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
+from app.services.quality_gate_service import ContentType, QualityLevel
 from .quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
@@ -103,7 +103,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_suggestions_for_issues(self, quality_service):
         """Test suggestion generation for various quality issues"""
-        from netra_backend.tests.helpers.quality_gate_fixtures import (
+        from tests.helpers.quality_gate_fixtures import (
             create_low_specificity_metrics,
         )
         low_spec_metrics = create_low_specificity_metrics()
@@ -113,7 +113,7 @@ class TestQualityGateAdvanced:
 
     def test_generate_prompt_adjustments(self, quality_service):
         """Test prompt adjustment generation"""
-        from netra_backend.tests.helpers.quality_gate_fixtures import (
+        from tests.helpers.quality_gate_fixtures import (
             create_poor_metrics,
         )
         poor_metrics = create_poor_metrics()

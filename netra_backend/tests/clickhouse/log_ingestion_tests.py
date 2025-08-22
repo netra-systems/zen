@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
+from app.db.clickhouse_query_fixer import validate_clickhouse_query
 
 
 class TestRealisticLogIngestion:

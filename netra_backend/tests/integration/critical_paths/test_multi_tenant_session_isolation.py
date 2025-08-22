@@ -10,7 +10,7 @@ Comprehensive test to verify multi-tenant session isolation:
 This test ensures complete isolation between different tenant sessions.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

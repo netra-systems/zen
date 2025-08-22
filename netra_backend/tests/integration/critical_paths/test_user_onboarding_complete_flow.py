@@ -13,7 +13,7 @@ Comprehensive test for complete user onboarding flow:
 This test validates the entire new user journey from signup to first AI agent deployment.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

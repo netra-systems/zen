@@ -7,7 +7,7 @@ Tests for supply chain endpoints - app/routes/supply.py
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -72,7 +72,7 @@ class TestSupplyRoute:
 
     async def test_supply_validation(self):
         """Test supply chain validation."""
-        from netra_backend.app.routes.supply import validate_supply_chain
+        from app.routes.supply import validate_supply_chain
         
         chain_data = {
             "suppliers": ["sup1", "sup2"],

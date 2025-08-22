@@ -22,6 +22,7 @@ interface AuthState {
   setError: (error: string | null) => void;
   updateUser: (user: Partial<ExtendedUser>) => void;
   reset: () => void;
+  initializeFromStorage: () => void;
   
   // Permission helpers
   hasPermission: (permission: string) => boolean;
@@ -74,6 +75,11 @@ export const useAuthStore = create<AuthState>()(
         removeTokenFromLocalStorage();
       }),
 
+    initializeFromStorage: () =>
+      set((state) => {
+        initializeAuthFromStorage(state);
+      }),
+
     hasPermission: (permission) => {
       const state = get();
       if (!state.user) return false;
@@ -115,6 +121,10 @@ const setUserLoginState = (state: any, user: User, token: string): void => {
   state.user = user;
   state.token = token;
   state.error = null;
+  // Store user data for persistence
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('user_data', JSON.stringify(user));
+  }
 };
 
 const clearUserAuthState = (state: any): void => {
@@ -122,6 +132,10 @@ const clearUserAuthState = (state: any): void => {
   state.user = null;
   state.token = null;
   state.error = null;
+  // Clear stored user data
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('user_data');
+  }
 };
 
 const resetAuthState = (state: any): void => {
@@ -141,5 +155,29 @@ const storeTokenInLocalStorage = (token: string): void => {
 const removeTokenFromLocalStorage = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('jwt_token');
+  }
+};
+
+const initializeAuthFromStorage = (state: any): void => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('jwt_token');
+    const userData = localStorage.getItem('user_data');
+    
+    if (token && userData) {
+      try {
+        const user = JSON.parse(userData);
+        state.isAuthenticated = true;
+        state.user = user;
+        state.token = token;
+        state.error = null;
+      } catch (error) {
+        // Clear corrupted data
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_data');
+        clearUserAuthState(state);
+      }
+    } else {
+      clearUserAuthState(state);
+    }
   }
 };

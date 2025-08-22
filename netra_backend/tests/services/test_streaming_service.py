@@ -5,7 +5,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.streaming_service import (
+from app.services.streaming_service import (
     StreamChunk,
     # Add project root to path
     StreamingService,

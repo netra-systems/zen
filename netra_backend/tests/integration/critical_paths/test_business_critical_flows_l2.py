@@ -17,7 +17,7 @@ Test Level: L2 (Real Internal Dependencies)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,16 +36,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException, PaymentException
-from netra_backend.app.core.logging_config import get_logger
-from netra_backend.app.db.models_postgres import Subscription, UsageRecord, User
-from netra_backend.app.schemas.UserPlan import PlanDefinition, PlanTier, UserPlan
-from netra_backend.app.services.billing.payment_processor import PaymentProcessor
-from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
-from netra_backend.app.services.billing.subscription_manager import SubscriptionManager
+from app.core.exceptions_base import NetraException, PaymentException
+from app.core.logging_config import get_logger
+from app.db.models_postgres import Subscription, UsageRecord, User
+from app.schemas.UserPlan import PlanDefinition, PlanTier, UserPlan
+from app.services.billing.payment_processor import PaymentProcessor
+from app.services.billing.revenue_calculator import RevenueCalculator
+from app.services.billing.subscription_manager import SubscriptionManager
 
 # Add project root to path
-from netra_backend.app.services.billing.usage_metering import UsageMeteringService
+from app.services.billing.usage_metering import UsageMeteringService
 
 # Add project root to path
 

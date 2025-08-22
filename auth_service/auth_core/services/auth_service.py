@@ -2,10 +2,12 @@
 Auth Service - Core authentication business logic
 Single Source of Truth for authentication operations
 """
+import asyncio
 import hashlib
 import logging
 import os
 import secrets
+import time
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
 
@@ -43,6 +45,11 @@ class AuthService:
         self.max_login_attempts = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
         self.lockout_duration = int(os.getenv("LOCKOUT_DURATION_MINUTES", "15"))
         self.db_session = None  # Initialize as None, set later if database available
+        
+        # Circuit breaker for external API calls
+        self._circuit_breaker_state = {}
+        self._failure_counts = {}
+        self._last_failure_times = {}
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
@@ -326,9 +333,9 @@ class AuthService:
         return None
     
     async def _validate_google_oauth(self, token: str) -> Optional[Dict]:
-        """Validate Google OAuth token"""
-        try:
-            async with httpx.AsyncClient() as client:
+        """Validate Google OAuth token with circuit breaker"""
+        async def make_request():
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 # Verify token with Google
                 response = await client.get(
                     "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -345,6 +352,12 @@ class AuthService:
                     "name": user_info.get("name", ""),
                     "permissions": ["read", "write"]
                 }
+        
+        try:
+            return await self._make_http_request_with_circuit_breaker("google_oauth", make_request)
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            logger.error(f"Google OAuth validation failed: {e}")
+            return None
         except Exception as e:
             logger.error(f"Google OAuth validation failed: {e}")
             return None
@@ -560,3 +573,123 @@ class AuthService:
         
         # Real email sending logic would go here
         logger.info(f"Password reset email sent to {email}")
+    
+    async def _retry_with_exponential_backoff(self, operation, max_retries: int = 3, base_delay: float = 1.0):
+        """Execute operation with exponential backoff retry logic"""
+        for attempt in range(max_retries):
+            try:
+                return await operation()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    # Last attempt failed, re-raise the exception
+                    raise e
+                
+                # Calculate delay with exponential backoff
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"Operation failed on attempt {attempt + 1}/{max_retries}, retrying in {delay}s: {e}")
+                await asyncio.sleep(delay)
+    
+    async def _audit_log_with_retry(self, event_type: str, 
+                                  user_id: Optional[str] = None,
+                                  success: bool = True, 
+                                  metadata: Dict = None,
+                                  client_info: Optional[Dict] = None):
+        """Log authentication events with retry logic"""
+        try:
+            await self._retry_with_exponential_backoff(
+                lambda: self._audit_log(event_type, user_id, success, metadata, client_info)
+            )
+        except Exception as e:
+            logger.error(f"Audit logging failed after retries: {e}")
+            # Don't fail the main operation if audit logging fails
+    
+    async def create_oauth_user_with_retry(self, user_info: Dict) -> Dict:
+        """Create or update user from OAuth info with database retry logic"""
+        if not self.db_session:
+            # Fallback for when no database is available
+            return {
+                "id": user_info.get("id", user_info.get("sub")),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": user_info.get("provider", "google"),
+                "permissions": ["read", "write"]
+            }
+        
+        # Use database with retry logic
+        async def create_user_operation():
+            user_repo = AuthUserRepository(self.db_session)
+            auth_user = await user_repo.create_oauth_user(user_info)
+            return {
+                "id": auth_user.id,
+                "email": auth_user.email,
+                "name": auth_user.full_name,
+                "provider": auth_user.auth_provider,
+                "permissions": ["read", "write"],
+                "is_verified": auth_user.is_verified
+            }
+        
+        try:
+            return await self._retry_with_exponential_backoff(create_user_operation)
+        except Exception as e:
+            logger.error(f"Database user creation failed after retries: {e}")
+            # Return fallback user for graceful degradation
+            return {
+                "id": user_info.get("id", user_info.get("sub")),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": user_info.get("provider", "google"),
+                "permissions": ["read", "write"],
+                "error": "database_unavailable"
+            }
+    
+    def _is_circuit_breaker_open(self, service: str) -> bool:
+        """Check if circuit breaker is open for a service"""
+        state = self._circuit_breaker_state.get(service, "closed")
+        if state == "closed":
+            return False
+        
+        if state == "open":
+            # Check if we should transition to half-open
+            last_failure = self._last_failure_times.get(service, 0)
+            if time.time() - last_failure > 60:  # 60 second timeout
+                self._circuit_breaker_state[service] = "half-open"
+                logger.info(f"Circuit breaker for {service} transitioning to half-open")
+                return False
+            return True
+        
+        if state == "half-open":
+            return False
+        
+        return False
+    
+    def _record_success(self, service: str):
+        """Record successful call for circuit breaker"""
+        self._circuit_breaker_state[service] = "closed"
+        self._failure_counts[service] = 0
+        
+    def _record_failure(self, service: str):
+        """Record failed call for circuit breaker"""
+        self._failure_counts[service] = self._failure_counts.get(service, 0) + 1
+        self._last_failure_times[service] = time.time()
+        
+        # Open circuit breaker after 5 failures
+        if self._failure_counts[service] >= 5:
+            self._circuit_breaker_state[service] = "open"
+            logger.warning(f"Circuit breaker opened for {service} after {self._failure_counts[service]} failures")
+        elif self._circuit_breaker_state.get(service) == "half-open":
+            # Failed in half-open state, go back to open
+            self._circuit_breaker_state[service] = "open"
+            logger.warning(f"Circuit breaker for {service} returned to open state")
+    
+    async def _make_http_request_with_circuit_breaker(self, service: str, request_func):
+        """Make HTTP request with circuit breaker protection"""
+        if self._is_circuit_breaker_open(service):
+            raise httpx.ConnectError(f"Circuit breaker is open for {service}")
+        
+        try:
+            result = await request_func()
+            self._record_success(service)
+            return result
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            self._record_failure(service)
+            raise e

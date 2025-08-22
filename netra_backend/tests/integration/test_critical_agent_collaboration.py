@@ -7,7 +7,7 @@ Business Value: Ensures $20K MRR from multi-agent optimization workflows.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,8 +23,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.triage_sub_agent.agent import TriageSubAgent
 from .test_fixtures_common import mock_infrastructure, test_database
 
 # Add project root to path

@@ -7,7 +7,7 @@ Tests circuit breakers, retry logic, timeouts, and system resilience.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,20 +22,20 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
+from app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 # Add project root to path
-from netra_backend.app.core.reliability import (
+from app.core.reliability import (
     AgentReliabilityWrapper,
     get_reliability_wrapper,
 )
-from netra_backend.app.core.reliability_circuit_breaker import (
+from app.core.reliability_circuit_breaker import (
     # Add project root to path
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerState,
 )
-from netra_backend.app.core.reliability_retry import RetryConfig, RetryHandler
+from app.core.reliability_retry import RetryConfig, RetryHandler
 
 
 class TestCircuitBreakerCore:

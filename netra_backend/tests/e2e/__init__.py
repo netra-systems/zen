@@ -17,7 +17,7 @@ __version__ = "1.0.0"
 
 # Re-export key test utilities for easy access
 try:
-    from netra_backend.tests.helpers.model_setup_helpers import (
+    from tests.helpers.model_setup_helpers import (
         create_test_thread,
         create_test_user,
     )

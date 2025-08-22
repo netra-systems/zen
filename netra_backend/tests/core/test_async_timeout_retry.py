@@ -7,7 +7,7 @@ Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,12 +21,12 @@ import time
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.async_retry_logic import (
+from app.core.async_retry_logic import (
     async_timeout,
     with_retry,
     with_timeout,
 )
-from netra_backend.app.core.exceptions_service import ServiceTimeoutError
+from app.core.exceptions_service import ServiceTimeoutError
 from .async_utils_helpers import (
     create_eventually_successful,
     # Add project root to path

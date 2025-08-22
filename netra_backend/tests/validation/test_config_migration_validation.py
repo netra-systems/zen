@@ -77,7 +77,7 @@ class TestConfigurationMigrationValidation:
 
     def test_environment_detection_still_works(self):
         """Verify environment detection functions correctly."""
-        from netra_backend.app.core.environment_constants import EnvironmentDetector
+        from app.core.environment_constants import EnvironmentDetector
         
         # Test basic environment detection
         detector = EnvironmentDetector()
@@ -106,7 +106,7 @@ class TestConfigurationMigrationValidation:
                 "ENVIRONMENT": "testing"
             }):
                 # Import configuration components that should work
-                from netra_backend.app.core.environment_constants import (
+                from app.core.environment_constants import (
                     EnvironmentVariables,
                 )
                 
@@ -162,7 +162,7 @@ class TestConfigurationMigrationValidation:
 
     def test_configuration_constants_accessible(self):
         """Test that configuration constants are accessible."""
-        from netra_backend.app.core.environment_constants import EnvironmentVariables
+        from app.core.environment_constants import EnvironmentVariables
         
         # Test key environment variables are defined
         required_vars = [
@@ -211,7 +211,7 @@ class TestConfigurationMigrationValidation:
         with patch.dict(os.environ, {}, clear=True):
             # Test that missing configuration doesn't crash the system
             try:
-                from netra_backend.app.core.environment_constants import (
+                from app.core.environment_constants import (
                     EnvironmentDetector,
                 )
                 detector = EnvironmentDetector()

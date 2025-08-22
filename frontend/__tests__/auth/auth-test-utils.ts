@@ -6,17 +6,18 @@
  * Architecture: ≤300 lines, functions ≤8 lines
  */
 
-import { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, mockUseContext } from './auth-test-setup';
+import { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, mockUseContext, offlineFallbackConfig } from './auth-test-setup';
 
 // Test Environment Setup
 export function setupAuthTestEnvironment() {
   const fetchMock = jest.fn();
   const localStorageMock = createLocalStorageMock();
+  const locationUtils = createLocationMock();
   
   global.fetch = fetchMock;
   global.localStorage = localStorageMock;
   
-  return { fetchMock, localStorageMock };
+  return { fetchMock, localStorageMock, locationUtils };
 }
 
 export function resetAuthTestMocks(testEnv: any) {
@@ -199,6 +200,18 @@ export function createMockAuthContext() {
   };
 }
 
+// Security validation helpers
+export function validateSecureHeaders(headers: Record<string, string>) {
+  // Headers should only contain Authorization if token exists
+  const expectedKeys = headers.Authorization ? ['Authorization'] : [];
+  expect(Object.keys(headers)).toEqual(expectedKeys);
+  
+  // Should not contain sensitive patterns
+  const headerValues = Object.values(headers).join(' ');
+  expect(headerValues).not.toContain('password');
+  expect(headerValues).not.toContain('secret');
+}
+
 // LocalStorage Mock
 export function createLocalStorageMock() {
   let store: Record<string, string> = {};
@@ -229,6 +242,19 @@ export function createLocalStorageMock() {
   return mock;
 }
 
+// Location mock for testing navigation
+export function createLocationMock() {
+  const mock = {
+    href: 'http://localhost:3000',
+    getMockHref: jest.fn(() => 'http://localhost:3000'),
+    setMockHref: jest.fn((url: string) => {
+      mock.href = url;
+    })
+  };
+  
+  return mock;
+}
+
 // Export mocks for direct access
-export { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, mockAuthService };
+export { mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig, offlineFallbackConfig };
 

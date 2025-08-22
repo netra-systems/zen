@@ -13,7 +13,7 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,7 +37,7 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketState
 
 # Core business components - simplified and verified
-from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
+from app.services.metrics.agent_metrics import AgentMetricsCollector
 
 
 @pytest.mark.critical

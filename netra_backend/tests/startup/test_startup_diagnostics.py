@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.schemas.diagnostic_types import (
+from app.schemas.diagnostic_types import (
     DiagnosticError,
     DiagnosticResult,
     DiagnosticSeverity,

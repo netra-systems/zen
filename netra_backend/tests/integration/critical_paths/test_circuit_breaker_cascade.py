@@ -15,7 +15,7 @@ Level: L2-L3 (Real SUT with Real Internal Dependencies + Real Local Services)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -34,17 +34,17 @@ import pytest
 
 # Add project root to path
 # Real services for L2-L3 testing
-from netra_backend.app.core.circuit_breaker import (
+from app.core.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerRegistry,
 )
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.core.health_checkers import (
+from app.core.database_connection_manager import DatabaseConnectionManager
+from app.core.health_checkers import (
     check_postgres_health,
     check_redis_health,
 )
-from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.services.websocket.connection_manager import (
+from app.services.redis_service import RedisService
+from app.services.websocket.connection_manager import (
     WebSocketConnectionManager,
 )
 

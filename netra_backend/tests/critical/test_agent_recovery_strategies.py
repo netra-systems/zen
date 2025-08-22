@@ -12,7 +12,7 @@ All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -26,16 +26,16 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
+from app.core.agent_recovery_base import BaseAgentRecoveryStrategy
 
 # Add project root to path
 # Core agent recovery components
-from netra_backend.app.core.agent_recovery_strategies import (
+from app.core.agent_recovery_strategies import (
     DataAnalysisRecoveryStrategy,
     TriageAgentRecoveryStrategy,
 )
-from netra_backend.app.core.agent_recovery_types import AgentRecoveryConfig
-from netra_backend.app.core.error_recovery import RecoveryContext
+from app.core.agent_recovery_types import AgentRecoveryConfig
+from app.core.error_recovery import RecoveryContext
 
 
 @pytest.mark.critical

@@ -7,7 +7,7 @@ Tests 1-3: Complete agent lifecycle, WebSocket real-time streaming, supervisor o
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,8 +22,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
+from app.services.state_persistence import state_persistence_service
+from tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 # Add project root to path
 

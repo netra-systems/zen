@@ -12,7 +12,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_capacity_planning import TestCapacityPlanningWorkflows
-from netra_backend.tests.test_rate_limit_analysis import TestRateLimitImpactAnalysis
-from netra_backend.tests.test_scaling_edge_cases import TestScalingEdgeCases
-from netra_backend.tests.test_scaling_integrity import TestScalingWorkflowIntegrity
-from netra_backend.tests.test_scaling_metrics import TestScalingMetricsValidation
-from netra_backend.tests.test_usage_increase_analysis import (
+from tests.test_capacity_planning import TestCapacityPlanningWorkflows
+from tests.test_rate_limit_analysis import TestRateLimitImpactAnalysis
+from tests.test_scaling_edge_cases import TestScalingEdgeCases
+from tests.test_scaling_integrity import TestScalingWorkflowIntegrity
+from tests.test_scaling_metrics import TestScalingMetricsValidation
+from tests.test_usage_increase_analysis import (
     TestUsageIncreaseAnalysis,
 )
 

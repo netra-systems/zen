@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,7 +24,7 @@ import pytest
 sys.modules['app.db.clickhouse'] = MagicMock()
 sys.modules['app.db.clickhouse'].ClickHouseManager = MagicMock
 
-from netra_backend.app.services.quality_monitoring_service import (
+from app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
 from .quality_monitoring_fixtures import (
@@ -73,7 +73,7 @@ class TestQualityThresholds:
     def test_alert_thresholds_exist(self):
         """Test that alert thresholds are defined"""
         service = QualityMonitoringService()
-        from netra_backend.app.services.quality_monitoring.models import (
+        from app.services.quality_monitoring.models import (
             AlertSeverity,
             MetricType,
         )
@@ -106,7 +106,7 @@ class TestServiceConstants:
     
     def test_alert_thresholds_structure(self):
         """Test alert thresholds are properly defined"""
-        from netra_backend.app.services.quality_monitoring.models import (
+        from app.services.quality_monitoring.models import (
             AlertSeverity,
             MetricType,
         )
@@ -127,14 +127,14 @@ class TestServiceConstants:
     
     def _assert_severity_thresholds_exist(self, thresholds, metric_type):
         """Assert all severity thresholds exist"""
-        from netra_backend.app.services.quality_monitoring.models import AlertSeverity
+        from app.services.quality_monitoring.models import AlertSeverity
         assert AlertSeverity.WARNING in thresholds[metric_type]
         assert AlertSeverity.ERROR in thresholds[metric_type]
         assert AlertSeverity.CRITICAL in thresholds[metric_type]
         
     def test_alert_threshold_values(self):
         """Test alert threshold values are reasonable"""
-        from netra_backend.app.services.quality_monitoring.models import (
+        from app.services.quality_monitoring.models import (
             AlertSeverity,
             MetricType,
         )
@@ -159,7 +159,7 @@ class TestEnumValues:
     
     def test_alert_severity_enum_values(self):
         """Test AlertSeverity enum values"""
-        from netra_backend.app.services.quality_monitoring.models import AlertSeverity
+        from app.services.quality_monitoring.models import AlertSeverity
         assert AlertSeverity.INFO.value == "info"
         assert AlertSeverity.WARNING.value == "warning"
         assert AlertSeverity.ERROR.value == "error"
@@ -167,7 +167,7 @@ class TestEnumValues:
     
     def test_metric_type_enum_values(self):
         """Test MetricType enum values"""
-        from netra_backend.app.services.quality_monitoring.models import MetricType
+        from app.services.quality_monitoring.models import MetricType
         assert MetricType.QUALITY_SCORE.value == "quality_score"
         assert MetricType.SLOP_DETECTION_RATE.value == "slop_detection_rate"
         assert MetricType.RETRY_RATE.value == "retry_rate"

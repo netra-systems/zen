@@ -264,10 +264,9 @@ COPY shared/ ./shared/
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV PORT=8888
 
-# Run the application
-CMD ["uvicorn", "netra_backend.app.main:app", "--host", "0.0.0.0", "--port", "8888"]
+# Run the application - use sh to evaluate PORT env var
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8888}"]
 """
         elif service.name == "auth":
             content = """FROM python:3.11-slim
@@ -290,10 +289,9 @@ COPY shared/ ./shared/
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV PORT=8001
 
-# Run the application
-CMD ["uvicorn", "auth_service.main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Run the application - use sh to evaluate PORT env var
+CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port ${PORT:-8001}"]
 """
         elif service.name == "frontend":
             content = """FROM node:18-alpine AS builder
@@ -327,7 +325,6 @@ RUN npm ci --production
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
 
 EXPOSE 3000
 

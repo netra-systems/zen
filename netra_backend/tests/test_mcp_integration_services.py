@@ -20,7 +20,7 @@ import pytest
 from netra_mcp.netra_mcp_server import NetraMCPServer
 
 # Add project root to path
-from netra_backend.app.services.mcp_service import (
+from app.services.mcp_service import (
     MCPClient,
     MCPService,
     MCPToolExecution,

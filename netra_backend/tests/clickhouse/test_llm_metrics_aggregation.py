@@ -7,7 +7,7 @@ Test LLM-specific metrics and optimizations
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,7 +18,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
+from app.db.clickhouse_query_fixer import validate_clickhouse_query
 from .realistic_test_fixtures import (
     # Add project root to path
     generate_llm_metrics,

@@ -30,15 +30,15 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.base_agent import BaseSubAgent
+from app.agents.state import DeepAgentState
+from app.agents.supervisor.agent_registry import AgentRegistry
+from app.agents.supervisor.execution_context import AgentExecutionContext
+from app.agents.supervisor_consolidated import SupervisorAgent
 
 # Add project root to path
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.Config import AppConfig
+from app.logging_config import central_logger
+from app.schemas.Config import AppConfig
 
 # Add project root to path
 

@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,7 +21,7 @@ from typing import Dict, List
 import pytest
 
 # Add project root to path
-from netra_backend.tests.multi_constraint_test_helpers import (
+from tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
     # Add project root to path
     create_agent_instances,

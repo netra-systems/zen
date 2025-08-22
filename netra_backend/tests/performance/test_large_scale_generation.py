@@ -26,13 +26,13 @@ from unittest.mock import patch
 import psutil
 import pytest
 
-from netra_backend.app.schemas.Generation import (
+from app.schemas.Generation import (
     ContentCorpusGenParams,
     ContentGenParams,
 )
 
 # Add project root to path
-from netra_backend.app.services.generation_service import run_content_generation_job
+from app.services.generation_service import run_content_generation_job
 
 # Add project root to path
 

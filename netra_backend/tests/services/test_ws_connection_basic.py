@@ -5,8 +5,8 @@ Tests core connection management, pooling, heartbeat, and cleanup
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -29,10 +29,10 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 # Add project root to path
-from netra_backend.app.services.websocket.ws_manager import (
+from app.services.websocket.ws_manager import (
 
     ConnectionInfo,
 

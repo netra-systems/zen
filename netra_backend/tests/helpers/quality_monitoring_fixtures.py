@@ -5,12 +5,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.services.quality_gate_service import (
+from app.services.quality_gate_service import (
     ContentType,
     QualityLevel,
     QualityMetrics,
 )
-from netra_backend.app.services.quality_monitoring_service import (
+from app.services.quality_monitoring_service import (
     AgentQualityProfile,
     AlertSeverity,
     MetricType,

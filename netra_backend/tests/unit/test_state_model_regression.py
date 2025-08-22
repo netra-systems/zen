@@ -7,7 +7,7 @@ Ensures all state models can be instantiated with minimal required data.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -22,11 +22,11 @@ from pydantic import ValidationError
 
 # Add project root to path
 # Import both versions of DeepAgentState to test consistency
-from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentState
-from netra_backend.app.schemas.agent_models import (
+from app.agents.state import DeepAgentState as AgentsDeepAgentState
+from app.schemas.agent_models import (
     DeepAgentState as SchemaDeepAgentState,
 )
-from netra_backend.app.websocket.connection_executor import ConnectionOperationBuilder
+from app.websocket.connection_executor import ConnectionOperationBuilder
 
 
 class TestDeepAgentStateRegression:
@@ -96,7 +96,7 @@ class TestAllStateModelsInit:
     
     def test_migration_state_init(self):
         """Test MigrationState initialization."""
-        from netra_backend.app.startup.migration_models import MigrationState
+        from app.startup.migration_models import MigrationState
         
         # Test with default initialization
         state = MigrationState()
@@ -108,7 +108,7 @@ class TestAllStateModelsInit:
         """Test LangChainAgentState initialization."""
         from langchain_core.messages import HumanMessage
 
-        from netra_backend.app.schemas.Agent import LangChainAgentState
+        from app.schemas.Agent import LangChainAgentState
         
         # Test with required fields
         state = LangChainAgentState(
@@ -121,7 +121,7 @@ class TestAllStateModelsInit:
         """Test SubAgentState initialization."""
         from langchain_core.messages import HumanMessage
 
-        from netra_backend.app.schemas.Agent import SubAgentState
+        from app.schemas.Agent import SubAgentState
         
         # Test with required fields
         state = SubAgentState(
@@ -134,7 +134,7 @@ class TestAllStateModelsInit:
         """Test AgentState from apex_optimizer."""
         from langchain_core.messages import HumanMessage
 
-        from netra_backend.app.services.apex_optimizer_agent.models import AgentState
+        from app.services.apex_optimizer_agent.models import AgentState
         
         # Test with required fields
         state = AgentState(
@@ -146,7 +146,7 @@ class TestAllStateModelsInit:
         
     def test_current_system_state_init(self):
         """Test CurrentSystemState initialization."""
-        from netra_backend.app.schemas.llm_config_types import CurrentSystemState
+        from app.schemas.llm_config_types import CurrentSystemState
         
         # Test with required fields
         state = CurrentSystemState(
@@ -160,7 +160,7 @@ class TestAllStateModelsInit:
         
     def test_system_state_diagnostic_init(self):
         """Test SystemState from diagnostics initialization."""
-        from netra_backend.app.schemas.diagnostic_types import SystemState
+        from app.schemas.diagnostic_types import SystemState
         
         # Should have sensible defaults
         state = SystemState()
@@ -174,7 +174,7 @@ class TestValidationErrorMessages:
     
     def test_missing_required_field_error_message(self):
         """Test error message when required field is missing."""
-        from netra_backend.app.schemas.Agent import LangChainAgentState
+        from app.schemas.Agent import LangChainAgentState
         
         with pytest.raises(ValidationError) as exc_info:
             # Missing required 'messages' field

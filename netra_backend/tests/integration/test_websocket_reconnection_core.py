@@ -6,8 +6,8 @@ using real WebSocket connections to verify production-grade reliability.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -33,17 +33,17 @@ import websockets
 # Import WebSocket components with fallback for missing modules
 
 try:
-    from netra_backend.app.services.websocket.connection_handler import (
+    from app.services.websocket.connection_handler import (
 
         ConnectionHandler,
 
     )
-    from netra_backend.app.services.websocket.reconnection_manager import (
+    from app.services.websocket.reconnection_manager import (
 
         ReconnectionManager,
 
     )
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from app.services.websocket.ws_manager import WebSocketManager
 
 except ImportError:
     # Provide fallback implementations if modules don't exist

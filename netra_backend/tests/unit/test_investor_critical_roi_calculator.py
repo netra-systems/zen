@@ -9,7 +9,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -24,10 +24,10 @@ from typing import Dict, List, Tuple
 
 import pytest
 
-from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 # Add project root to path
-from netra_backend.app.services.cost_calculator import (
+from app.services.cost_calculator import (
     # Add project root to path
     CostCalculatorService,
     CostTier,

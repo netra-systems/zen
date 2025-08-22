@@ -14,7 +14,7 @@ User experience testing including mobile responsiveness and error recovery.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,8 +28,8 @@ from datetime import datetime, timezone
 import pytest
 
 # Add project root to path
-from netra_backend.app.db.models_user import User
-from netra_backend.tests.integration.first_time_user_fixtures import FirstTimeUserFixtures
+from app.db.models_user import User
+from tests.integration.first_time_user_fixtures import FirstTimeUserFixtures
 from test_framework.decorators import tdd_test
 
 # Add project root to path
@@ -70,7 +70,7 @@ class TestFirstTimeUserExperience:
 
     async def _simulate_approaching_limits(self, setup, user):
         """Simulate user approaching free tier limits"""
-        from netra_backend.app.db.models_user import ToolUsageLog
+        from app.db.models_user import ToolUsageLog
         
         for i in range(4):
             usage_log = ToolUsageLog(user_id=user.id, tool_name="basic_optimizer", category="optimization", execution_time_ms=3000, tokens_used=500, cost_cents=0, status="success", plan_tier="free")
@@ -83,7 +83,7 @@ class TestFirstTimeUserExperience:
 
     async def _trigger_limit_enforcement(self, setup, usage_tracking):
         """Trigger limit enforcement and upgrade prompts"""
-        from netra_backend.app.db.models_user import ToolUsageLog
+        from app.db.models_user import ToolUsageLog
         
         user = usage_tracking["user"]
         

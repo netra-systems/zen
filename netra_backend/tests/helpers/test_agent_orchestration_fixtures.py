@@ -9,7 +9,7 @@ including mock agents, orchestrators, and service configurations.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,12 +23,12 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 # Add project root to path
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.services.thread_service import ThreadService
+from app.services.agent_service import AgentService
+from app.services.message_handlers import MessageHandlerService
+from app.services.thread_service import ThreadService
 
 # Add project root to path
 

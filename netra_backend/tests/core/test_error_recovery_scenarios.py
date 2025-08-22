@@ -27,7 +27,7 @@ Performance Targets:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,19 +43,19 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
-from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
+from app.agents.state import DeepAgentState
+from app.core.error_codes import ErrorCode, ErrorSeverity
+from app.core.exceptions_base import ErrorDetails, NetraException
 
 # Add project root to path
-from netra_backend.app.core.reliability import AgentReliabilityWrapper
-from netra_backend.app.core.reliability_circuit_breaker import (
+from app.core.reliability import AgentReliabilityWrapper
+from app.core.reliability_circuit_breaker import (
     CircuitBreakerConfig,
     CircuitBreakerState,
 )
-from netra_backend.app.core.reliability_retry import RetryConfig
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.websocket.recovery import (
+from app.core.reliability_retry import RetryConfig
+from app.services.state_persistence import state_persistence_service
+from app.websocket.recovery import (
     RecoveryStrategy,
     WebSocketError,
     WebSocketRecoveryManager,

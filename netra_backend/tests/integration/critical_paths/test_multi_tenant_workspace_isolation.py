@@ -18,7 +18,7 @@ All workspace isolation must be validated in real staging environment conditions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,7 +43,7 @@ import pytest
 # Permissions service replaced with auth_integration
 from auth_integration import require_permission
 
-from netra_backend.app.services.database.connection_manager import (
+from app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
@@ -51,8 +51,8 @@ from netra_backend.app.services.database.connection_manager import (
 from .integration.staging_config.base import StagingConfigTestBase
 
 PermissionsService = AsyncMock
-from netra_backend.app.core.security import SecurityContext
-from netra_backend.app.services.audit.audit_logger import AuditLogger
+from app.core.security import SecurityContext
+from app.services.audit.audit_logger import AuditLogger
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,8 @@ Critical: Thread context required for all agent interactions
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -96,8 +96,8 @@ class TestFirstMessageThreadInit:
     async def test_new_thread_creation_first_message(self, db_session, thread_data):
 
         """Test thread creation when user sends first message."""
-        from netra_backend.app.services.message_service import MessageService
-        from netra_backend.app.services.thread_service import ThreadService
+        from app.services.message_service import MessageService
+        from app.services.thread_service import ThreadService
         
 
         thread_service = Mock(spec=ThreadService)
@@ -169,7 +169,7 @@ class TestFirstMessageThreadInit:
     async def test_thread_persistence_to_database(self, db_session):
 
         """Test thread data persists correctly to database."""
-        from netra_backend.app.services.apex_optimizer_agent.models import Thread
+        from app.services.apex_optimizer_agent.models import Thread
         
         # Create thread model
 
@@ -205,7 +205,7 @@ class TestFirstMessageThreadInit:
     async def test_thread_context_initialization(self, thread_data):
 
         """Test thread context properly initialized for agents."""
-        from netra_backend.app.services.context_service import ContextService
+        from app.services.context_service import ContextService
         
 
         context_service = Mock(spec=ContextService)
@@ -326,7 +326,7 @@ class TestFirstMessageThreadInit:
     async def test_thread_metadata_includes_agent_routing(self, thread_data):
 
         """Test thread metadata includes agent routing information."""
-        from netra_backend.app.services.agent_router import AgentRouter
+        from app.services.agent_router import AgentRouter
         
 
         router = Mock(spec=AgentRouter)
@@ -363,7 +363,7 @@ class TestFirstMessageThreadInit:
     async def test_websocket_notification_on_thread_creation(self, thread_data):
 
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from app.services.websocket_manager import WebSocketManager
         
 
         ws_manager = Mock(spec=WebSocketManager)

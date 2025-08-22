@@ -25,7 +25,7 @@ ensuring enterprise customers maintain regulatory compliance.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -43,9 +43,9 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
-from netra_backend.app.schemas.registry import (
+from app.core.exceptions_base import NetraException
+from app.schemas.auth_types import AuditLog, AuthProvider, TokenType
+from app.schemas.registry import (
     CorpusAuditAction,
     CorpusAuditMetadata,
     # Add project root to path
@@ -54,8 +54,8 @@ from netra_backend.app.schemas.registry import (
     CorpusAuditSearchFilter,
     CorpusAuditStatus,
 )
-from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger
-from netra_backend.app.services.audit_service import (
+from app.services.audit.corpus_audit import CorpusAuditLogger
+from app.services.audit_service import (
     get_audit_summary,
     get_recent_logs,
     log_admin_action,

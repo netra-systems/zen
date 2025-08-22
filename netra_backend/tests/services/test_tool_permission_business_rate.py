@@ -8,7 +8,7 @@ Test classes: TestBusinessRequirements, TestRateLimiting, TestRecordToolUsage
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.schemas.ToolPermission import (
+from app.schemas.ToolPermission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionLevel,
@@ -33,10 +33,10 @@ from netra_backend.app.schemas.ToolPermission import (
     # Add project root to path
     ToolPermission,
 )
-from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+from app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 # Add project root to path
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from app.services.tool_permission_service import ToolPermissionService
 
 
 class MockRedisClient:
@@ -150,7 +150,7 @@ class TestBusinessRequirements:
         """Test business requirements check with valid feature flags"""
         requirements = BusinessRequirement(feature_flags=["data_operations"])
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -165,7 +165,7 @@ class TestBusinessRequirements:
         """Test business requirements check with missing feature flags"""
         requirements = BusinessRequirement(feature_flags=["advanced_optimization"])
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="test_user",
             tier=PlanTier.PRO,
@@ -230,7 +230,7 @@ class TestBusinessRequirements:
             environment=["development"]
         )
         
-        from netra_backend.app.schemas.UserPlan import PlanFeatures
+        from app.schemas.UserPlan import PlanFeatures
         user_plan = UserPlan(
             user_id="dev_user",
             tier=PlanTier.ENTERPRISE,

@@ -22,10 +22,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 # Add project root to path
-from netra_backend.app.services.mcp_service import (
+from app.services.mcp_service import (
     MCPClient,
     MCPService,
     MCPToolExecution,

@@ -7,7 +7,7 @@ All fixtures broken into ≤8 line functions for architectural compliance
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -23,8 +23,8 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.llm.llm_manager import LLMManager
 
 # Add project root to path
 
@@ -51,7 +51,7 @@ def _create_structured_llm_responses():
 
 def _create_triage_entities():
     """Create triage extracted entities"""
-    from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
+    from app.agents.triage_sub_agent import ExtractedEntities
     return ExtractedEntities(
         models_mentioned=["GPT-4", "Claude"],
         metrics_mentioned=["latency", "throughput"],
@@ -61,7 +61,7 @@ def _create_triage_entities():
 
 def _create_triage_intent():
     """Create triage user intent"""
-    from netra_backend.app.agents.triage_sub_agent import UserIntent
+    from app.agents.triage_sub_agent import UserIntent
     return UserIntent(
         primary_intent="optimize",
         secondary_intents=["analyze", "monitor"]
@@ -70,7 +70,7 @@ def _create_triage_intent():
 
 def _create_triage_metadata():
     """Create triage metadata"""
-    from netra_backend.app.agents.triage_sub_agent import TriageMetadata
+    from app.agents.triage_sub_agent import TriageMetadata
     return TriageMetadata(
         triage_duration_ms=150,
         cache_hit=False,
@@ -81,7 +81,7 @@ def _create_triage_metadata():
 
 def _create_triage_result():
     """Create complete triage result"""
-    from netra_backend.app.agents.triage_sub_agent import (
+    from app.agents.triage_sub_agent import (
         Complexity,
         Priority,
         TriageResult,
@@ -154,7 +154,7 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
-    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.tool_dispatcher import ToolDispatcher
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={
         "status": "success",
@@ -184,6 +184,14 @@ def _setup_persistence_methods(mock_persistence):
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
 
 
+@pytest.fixture
+def mock_persistence_service():
+    """Create mock persistence service fixture"""
+    mock_persistence = _create_persistence_mock()
+    _setup_persistence_methods(mock_persistence)
+    return mock_persistence
+
+
 def _configure_supervisor_agent(supervisor):
     """Configure supervisor agent with required IDs and mocks"""
     supervisor.thread_id = str(uuid.uuid4())
@@ -193,12 +201,9 @@ def _configure_supervisor_agent(supervisor):
 
 @pytest.fixture
 def supervisor_agent(mock_db_session, mock_llm_manager, 
-                    mock_websocket_manager, mock_tool_dispatcher):
+                    mock_websocket_manager, mock_tool_dispatcher, mock_persistence_service):
     """Create supervisor agent with all dependencies mocked"""
-    mock_persistence = _create_persistence_mock()
-    _setup_persistence_methods(mock_persistence)
-    
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence_service):
         supervisor = SupervisorAgent(
             mock_db_session,
             mock_llm_manager,
@@ -206,5 +211,5 @@ def supervisor_agent(mock_db_session, mock_llm_manager,
             mock_tool_dispatcher
         )
         _configure_supervisor_agent(supervisor)
-        supervisor.state_persistence = mock_persistence
+        supervisor.state_persistence = mock_persistence_service
         return supervisor

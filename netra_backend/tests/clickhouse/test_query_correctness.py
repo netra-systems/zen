@@ -5,8 +5,8 @@ Tests the correctness of ClickHouse queries and their results
 
 # Add project root to path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+from app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -26,8 +26,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
-from netra_backend.app.db.models_clickhouse import (
+from app.agents.data_sub_agent.query_builder import QueryBuilder
+from app.db.models_clickhouse import (
 
     WORKLOAD_EVENTS_TABLE_SCHEMA,
     # Add project root to path
@@ -39,7 +39,7 @@ from netra_backend.app.db.models_clickhouse import (
 )
 
 # Add project root to path
-from netra_backend.app.services.corpus_service import CorpusService
+from app.services.corpus_service import CorpusService
 from ..helpers.shared_test_types import (
 
     TestErrorHandling as SharedTestErrorHandling,
@@ -551,7 +551,7 @@ class TestGenerationServiceQueries:
     async def test_get_corpus_from_clickhouse_query(self):
 
         """Test 14: Verify corpus loading query from generation service"""
-        from netra_backend.app.services.generation_service import (
+        from app.services.generation_service import (
 
             get_corpus_from_clickhouse,
 
@@ -637,7 +637,7 @@ class TestTableInitializationQueries:
     async def test_initialize_clickhouse_tables(self):
 
         """Test 16: Verify all tables are created on initialization"""
-        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
+        from app.db.clickhouse_init import initialize_clickhouse_tables
         
 
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
@@ -677,7 +677,7 @@ class TestTableInitializationQueries:
     async def test_verify_workload_events_table(self):
 
         """Test 17: Verify workload_events table verification"""
-        from netra_backend.app.db.clickhouse_init import verify_workload_events_table
+        from app.db.clickhouse_init import verify_workload_events_table
         
 
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:

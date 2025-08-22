@@ -6,8 +6,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -26,16 +26,16 @@ from typing import Dict, List, Optional
 
 import pytest
 import pytest_asyncio
-from netra_backend.app.schemas import SubAgentLifecycle
+from app.schemas import SubAgentLifecycle
 from ws_manager import WebSocketManager
 
-from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
+from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.state import AgentMetadata, DeepAgentState
 
 # Add project root to path
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.llm.llm_manager import LLMManager
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.core.exceptions import NetraException
+from app.llm.llm_manager import LLMManager
 
 # Add project root to path
 
@@ -45,17 +45,17 @@ from netra_backend.app.llm.llm_manager import LLMManager
 def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
 
     """Setup real agent environment for model selection testing."""
-    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+    from app.agents.actions_to_meet_goals_sub_agent import (
 
         ActionsToMeetGoalsSubAgent,
 
     )
-    from netra_backend.app.agents.optimizations_core_sub_agent import (
+    from app.agents.optimizations_core_sub_agent import (
 
         OptimizationsCoreSubAgent,
 
     )
-    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+    from app.agents.reporting_sub_agent import ReportingSubAgent
     
 
     agents = _create_agent_dictionary(real_llm_manager, real_tool_dispatcher)

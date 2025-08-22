@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.main import app
+from app.main import app
 
 # Add project root to path
 
@@ -69,7 +69,7 @@ class TestConfigEndpoint:
     
     def test_update_config_authorized(self):
         """Test updating configuration with proper authorization"""
-        from netra_backend.app.auth_integration.auth import require_admin
+        from app.auth_integration.auth import require_admin
         
         update_data = {
             "features": {
@@ -107,7 +107,7 @@ class TestConfigEndpoint:
         """Test config update rejection without authorization"""
         from fastapi import HTTPException, status
 
-        from netra_backend.app.auth_integration.auth import require_admin
+        from app.auth_integration.auth import require_admin
         
         update_data = {
             "features": {

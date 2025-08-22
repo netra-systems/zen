@@ -25,11 +25,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from starlette.websockets import WebSocketDisconnect
 
-from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.schemas.Request import StartAgentPayload
+from app.core.exceptions import NetraException
+from app.schemas.Request import StartAgentPayload
 
 # Add project root to path
-from netra_backend.app.services.agent_service import AgentService
+from app.services.agent_service import AgentService
 
 # Add project root to path
 

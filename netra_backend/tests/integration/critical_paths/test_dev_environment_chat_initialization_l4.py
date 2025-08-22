@@ -19,7 +19,7 @@ BVJ:
 - Strategic Impact: Foundation for all user-agent conversations and value delivery
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 setup_test_path()
 

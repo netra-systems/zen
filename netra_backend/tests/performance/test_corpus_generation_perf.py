@@ -25,13 +25,13 @@ from unittest.mock import AsyncMock, MagicMock
 import psutil
 import pytest
 
-from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
-from netra_backend.app.agents.corpus_admin.models import CorpusMetadata
-from netra_backend.app.schemas.Corpus import Corpus
+from app.agents.corpus_admin import CorpusAdminSubAgent
+from app.agents.corpus_admin.models import CorpusMetadata
+from app.schemas.Corpus import Corpus
 
 # Add project root to path
-from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService
+from app.services.corpus_service import CorpusService
+from app.services.synthetic_data.core_service import SyntheticDataService
 
 # Add project root to path
 

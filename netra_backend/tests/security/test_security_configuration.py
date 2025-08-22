@@ -18,11 +18,11 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.enhanced_secret_manager import (
+from app.core.enhanced_secret_manager import (
     EnhancedSecretManager,
     EnvironmentType,
 )
-from netra_backend.app.core.exceptions import NetraSecurityException
+from app.core.exceptions import NetraSecurityException
 
 # Add project root to path
 
@@ -32,7 +32,7 @@ class TestSecurityConfiguration:
     
     def test_environment_specific_config(self):
         """Test environment-specific security configuration."""
-        from netra_backend.app.middleware.security_headers import SecurityHeadersConfig
+        from app.middleware.security_headers import SecurityHeadersConfig
         
         # Production config should be strictest
         prod_headers = SecurityHeadersConfig.get_headers("production")

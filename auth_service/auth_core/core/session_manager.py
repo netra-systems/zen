@@ -34,6 +34,10 @@ class SessionManager:
         # Initialize race condition protection
         self.used_refresh_tokens = set()
         self._session_locks = {}
+        
+        # In-memory fallback for when Redis fails
+        self._memory_sessions = {}
+        self._fallback_mode = False
             
     def _should_enable_redis(self) -> bool:
         """Determine if Redis should be enabled based on environment"""
@@ -69,20 +73,30 @@ class SessionManager:
         }
         
         if not self.redis_enabled:
-            # Return session ID but don't store when Redis is disabled
-            logger.debug(f"Created session {session_id} (Redis disabled - not stored)")
-            return session_id
+            # Use memory fallback when Redis is disabled
+            if self._store_session_memory(session_id, session_data):
+                return session_id
+            return None
         
+        # Try Redis first, fallback to memory if Redis fails
         if self._store_session(session_id, session_data):
             return session_id
-        return None
+        else:
+            # Redis failed, try memory fallback
+            self._enable_fallback_mode()
+            if self._store_session_memory(session_id, session_data):
+                return session_id
+            return None
     
     async def get_session(self, session_id: str) -> Optional[Dict]:
-        """Retrieve session data"""
-        if not self.redis_enabled or not self.redis_client:
-            # Return None when Redis is disabled - sessions won't be stored/retrieved
-            logger.debug(f"Session retrieval skipped for {session_id} (Redis disabled)")
-            return None
+        """Retrieve session data with fallback support"""
+        if not self.redis_enabled:
+            # Use memory fallback when Redis is disabled
+            return self._get_session_memory(session_id)
+        
+        if self._fallback_mode:
+            # Already in fallback mode, use memory
+            return self._get_session_memory(session_id)
             
         try:
             key = self._get_session_key(session_id)
@@ -95,7 +109,10 @@ class SessionManager:
                 return session
                 
         except Exception as e:
-            logger.error(f"Session retrieval failed: {e}")
+            logger.error(f"Redis session retrieval failed: {e}")
+            # Enable fallback and try memory
+            self._enable_fallback_mode()
+            return self._get_session_memory(session_id)
             
         return None
     
@@ -117,11 +134,14 @@ class SessionManager:
         return self._store_session(session_id, session)
     
     def delete_session(self, session_id: str) -> bool:
-        """Delete session (logout)"""
-        if not self.redis_enabled or not self.redis_client:
-            # Return True to indicate operation "succeeded" when Redis is disabled
-            logger.debug(f"Session deletion skipped for {session_id} (Redis disabled)")
-            return True
+        """Delete session (logout) with fallback support"""
+        if not self.redis_enabled:
+            # Use memory fallback when Redis is disabled
+            return self._delete_session_memory(session_id)
+        
+        if self._fallback_mode:
+            # Already in fallback mode, use memory
+            return self._delete_session_memory(session_id)
             
         try:
             key = self._get_session_key(session_id)
@@ -129,8 +149,10 @@ class SessionManager:
             return result > 0
             
         except Exception as e:
-            logger.error(f"Session deletion failed: {e}")
-            return False
+            logger.error(f"Redis session deletion failed: {e}")
+            # Enable fallback and try memory
+            self._enable_fallback_mode()
+            return self._delete_session_memory(session_id)
     
     async def validate_session(self, session_id: str) -> bool:
         """Check if session is valid and active"""
@@ -281,4 +303,56 @@ class SessionManager:
             self.redis_client.ping()
             return True
         except Exception:
+            return False
+    
+    def _enable_fallback_mode(self):
+        """Enable in-memory fallback when Redis fails"""
+        if not self._fallback_mode:
+            self._fallback_mode = True
+            logger.warning("Redis connection failed, enabling in-memory session fallback")
+    
+    def _store_session_memory(self, session_id: str, session_data: Dict) -> bool:
+        """Store session in memory as fallback"""
+        try:
+            self._memory_sessions[session_id] = {
+                **session_data,
+                "_expires_at": datetime.utcnow() + timedelta(hours=self.session_ttl)
+            }
+            logger.debug(f"Session {session_id} stored in memory fallback")
+            return True
+        except Exception as e:
+            logger.error(f"Memory session storage failed: {e}")
+            return False
+    
+    def _get_session_memory(self, session_id: str) -> Optional[Dict]:
+        """Retrieve session from memory fallback"""
+        try:
+            session = self._memory_sessions.get(session_id)
+            if not session:
+                return None
+            
+            # Check expiration
+            if datetime.utcnow() > session.get("_expires_at", datetime.utcnow()):
+                del self._memory_sessions[session_id]
+                return None
+            
+            # Update last activity
+            session["last_activity"] = datetime.utcnow().isoformat()
+            session["_expires_at"] = datetime.utcnow() + timedelta(hours=self.session_ttl)
+            
+            # Return session without internal fields
+            return {k: v for k, v in session.items() if not k.startswith("_")}
+        except Exception as e:
+            logger.error(f"Memory session retrieval failed: {e}")
+            return None
+    
+    def _delete_session_memory(self, session_id: str) -> bool:
+        """Delete session from memory fallback"""
+        try:
+            if session_id in self._memory_sessions:
+                del self._memory_sessions[session_id]
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Memory session deletion failed: {e}")
             return False

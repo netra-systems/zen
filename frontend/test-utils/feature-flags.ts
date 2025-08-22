@@ -24,6 +24,7 @@ const loadFeatureFlags = (): Record<string, FeatureConfig> => {
     'auth_integration': { status: 'enabled', description: 'Authentication integration' },
     'websocket_streaming': { status: 'enabled', description: 'WebSocket streaming' },
     'github_integration': { status: 'in_development', description: 'GitHub integration' },
+    'chat_sidebar_edge_cases': { status: 'enabled', description: 'ChatSidebar edge case testing' },
   };
 };
 

@@ -15,7 +15,7 @@ using real PostgreSQL containers (L3 realism) to catch production-level issues.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -37,8 +37,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 # Add project root to path
-from netra_backend.app.db.base import Base
-from netra_backend.app.db.postgres_core import Database
+from app.db.base import Base
+from app.db.postgres_core import Database
 
 # Add project root to path
 

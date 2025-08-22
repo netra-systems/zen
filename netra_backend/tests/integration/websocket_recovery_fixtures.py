@@ -14,12 +14,12 @@ All functions ≤8 lines per CLAUDE.md requirements.
 """
 
 from datetime import datetime, timezone
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.schemas.websocket_models import WebSocketValidationError
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.app.websocket.reconnection_manager import (
+from app.logging_config import central_logger
+from app.schemas.registry import WebSocketMessage
+from app.schemas.websocket_models import WebSocketValidationError
+from app.websocket.connection import ConnectionInfo
+from app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from app.websocket.reconnection_manager import (
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
@@ -32,7 +32,7 @@ import uuid
     WebSocketReconnectionManager,
 
 )
-from netra_backend.app.websocket.reconnection_types import (
+from app.websocket.reconnection_types import (
 
     DisconnectReason,
 
@@ -41,7 +41,7 @@ from netra_backend.app.websocket.reconnection_types import (
     ReconnectionState,
 
 )
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from app.websocket.unified.manager import UnifiedWebSocketManager
 
 
 logger = central_logger.get_logger(__name__)

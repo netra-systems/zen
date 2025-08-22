@@ -25,12 +25,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.exceptions_file import DataParsingError, FileError
-from netra_backend.app.core.exceptions_file import (
+from app.core.exceptions_base import NetraException
+from app.core.exceptions_file import DataParsingError, FileError
+from app.core.exceptions_file import (
     FileNotFoundError as NetraFileNotFoundError,
 )
-from netra_backend.app.schemas.startup_types import (
+from app.schemas.startup_types import (
     CrashEntry,
     Environment,
     HealthCheckHistory,
@@ -43,7 +43,7 @@ from netra_backend.app.schemas.startup_types import (
 )
 
 # Add project root to path
-from netra_backend.app.startup.status_manager import StartupStatusManager
+from app.startup.status_manager import StartupStatusManager
 
 
 @pytest.fixture

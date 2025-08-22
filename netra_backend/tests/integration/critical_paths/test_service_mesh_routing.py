@@ -15,7 +15,7 @@ L4 Realism: Tests against staging service mesh infrastructure with real microser
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -32,7 +32,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Add project root to path
-from netra_backend.tests.integration.service_mesh_fixtures import (
+from tests.integration.service_mesh_fixtures import (
     calculate_backoff_accuracy,
     service_mesh_l4,
 )

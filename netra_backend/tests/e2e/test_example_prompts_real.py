@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -19,7 +19,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.tests.example_prompts_core import (
+from tests.example_prompts_core import (
     # Add project root to path
     EXAMPLE_PROMPTS,
     create_ep_001_state,
@@ -34,7 +34,7 @@ from netra_backend.tests.example_prompts_core import (
     execute_full_prompt_workflow,
     real_llm_prompt_setup,
 )
-from netra_backend.tests.example_prompts_validators import (
+from tests.example_prompts_validators import (
     validate_capacity_planning_result,
     validate_cost_optimization_result,
     validate_function_optimization_result,

@@ -18,7 +18,7 @@ Target Coverage:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -36,10 +36,10 @@ from fastapi import HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.datastructures import URL, Headers
 
-from netra_backend.app.core.exceptions_auth import NetraSecurityException
+from app.core.exceptions_auth import NetraSecurityException
 
 # Add project root to path
-from netra_backend.app.middleware.security_middleware import (
+from app.middleware.security_middleware import (
     InputValidator,
     RateLimitTracker,
     SecurityConfig,

@@ -12,7 +12,7 @@ BVJ (Business Value Justification):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,7 +31,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.integration.first_time_user_fixtures import (
+from tests.integration.first_time_user_fixtures import (
     get_mock_optimization_request,
     # Add project root to path
     get_mock_provider_configs,

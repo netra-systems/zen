@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -87,8 +87,8 @@ class TestQualityRoute:
     
     async def test_quality_alerts(self):
         """Test quality threshold alerts."""
-        from netra_backend.app.routes.quality_handlers import handle_alerts_request
-        from netra_backend.app.schemas.quality_types import (
+        from app.routes.quality_handlers import handle_alerts_request
+        from app.schemas.quality_types import (
             AlertSeverity,
             MetricType,
             QualityAlert,
@@ -231,7 +231,7 @@ class TestQualityRoute:
     
     async def test_quality_real_time_monitoring(self):
         """Test real-time quality monitoring."""
-        from netra_backend.app.routes.quality import start_monitoring, stop_monitoring
+        from app.routes.quality import start_monitoring, stop_monitoring
         
         monitoring_config = {
             "interval_seconds": 30,
@@ -266,7 +266,7 @@ class TestQualityRoute:
         """Test quality report generation."""
         
         with patch('app.routes.quality_handlers.handle_report_generation') as mock_report:
-            from netra_backend.app.schemas.quality_types import (
+            from app.schemas.quality_types import (
                 QualityReport,
                 QualityReportType,
             )

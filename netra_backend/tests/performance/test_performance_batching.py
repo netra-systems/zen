@@ -24,8 +24,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.app.core.performance_optimization_manager import BatchProcessor
-from netra_backend.app.websocket.batch_message_handler import (
+from app.core.performance_optimization_manager import BatchProcessor
+from app.websocket.batch_message_handler import (
     BatchConfig,
     BatchingStrategy,
     LoadMonitor,

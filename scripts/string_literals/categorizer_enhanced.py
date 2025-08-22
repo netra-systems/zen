@@ -50,7 +50,7 @@ class EnhancedStringLiteralCategorizer:
         self.patterns = {
             'configuration': {
                 'env_var': [
-                    (r'^[A-Z][A-Z_]+[A-Z]$', 0.9),  # ALL_CAPS environment variables
+                    (r'^[A-Z][A-Z_]+[A-Z]$', 0.7),  # ALL_CAPS environment variables (lower confidence)
                     (r'^(NETRA|APP|DB|REDIS|LOG|ENV)_', 0.95),  # Known prefixes
                 ],
                 'config_key': [
@@ -138,7 +138,7 @@ class EnhancedStringLiteralCategorizer:
                     (r'_(handler|listener)$', 0.85),
                 ],
                 'type': [
-                    (r'_(created|updated|deleted|connected|disconnected|started|stopped)$', 0.9),
+                    (r'_(created|updated|deleted|connected|disconnected|started|stopped)$', 0.95),
                     (r'^websocket_', 0.85),
                     (r'^(thread|message|user|agent)_', 0.8),
                 ],

@@ -8,7 +8,7 @@ File is ≤300 lines (MANDATORY COMPLIANCE)
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -31,7 +31,7 @@ class TestConfigValidator:
     
     @pytest.fixture
     def validator(self):
-        from netra_backend.app.core.config_validator import ConfigValidator
+        from app.core.config_validator import ConfigValidator
         return ConfigValidator()
     
     @pytest.fixture
@@ -49,7 +49,7 @@ class TestConfigValidator:
     
     def _assert_validation_fails(self, validator, config):
         """Assert validation fails - helper function ≤8 lines."""
-        from netra_backend.app.core.config_validator import ConfigurationValidationError
+        from app.core.config_validator import ConfigurationValidationError
         with pytest.raises(ConfigurationValidationError):
             validator.validate_config(config)
 
@@ -59,7 +59,7 @@ class TestErrorContext:
     
     @pytest.fixture
     def error_context(self):
-        from netra_backend.app.core.error_context import ErrorContext
+        from app.core.error_context import ErrorContext
         return ErrorContext()
     
     def test_trace_id_generation(self, error_context):
@@ -84,13 +84,13 @@ class TestCustomExceptions:
     
     def test_netra_exception_structure(self):
         """Test NetraException structure."""
-        from netra_backend.app.core.exceptions_base import NetraException
+        from app.core.exceptions_base import NetraException
         exc = NetraException("Test error")
         self._assert_exception_valid(exc)
     
     def test_error_code_enum_exists(self):
         """Test error code enum."""
-        from netra_backend.app.core.error_codes import ErrorCode
+        from app.core.error_codes import ErrorCode
         self._assert_error_codes_exist(ErrorCode)
     
     def _assert_exception_valid(self, exc):
@@ -109,7 +109,7 @@ class TestUnifiedLogging:
     
     @pytest.fixture
     def logger(self):
-        from netra_backend.app.core.unified_logging import UnifiedLogger
+        from app.core.unified_logging import UnifiedLogger
         return UnifiedLogger()
     
     def test_logger_instantiation(self, logger):

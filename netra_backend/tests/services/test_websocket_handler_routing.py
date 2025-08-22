@@ -7,7 +7,7 @@ Tests for WebSocket message handler registration, routing, and middleware proces
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from tests.test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -21,10 +21,10 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.app.core.exceptions_base import NetraException
+from app.core.exceptions_base import NetraException
 
 # Add project root to path
-from netra_backend.app.services.websocket.message_handler import MessageRouter
+from app.services.websocket.message_handler import MessageRouter
 from .websocket_test_utilities import MockMessageHandler
 
 # Add project root to path
