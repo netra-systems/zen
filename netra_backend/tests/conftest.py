@@ -13,8 +13,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Now import after path is set up
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.app.core.network_constants import (
+from app.websocket.connection import ConnectionManager as WebSocketManager
+from app.core.network_constants import (
     DatabaseConstants,
     HostConstants,
     ServicePorts,
@@ -233,7 +233,7 @@ except Exception as e:
 def ensure_db_initialized():
 
     """Ensure database is initialized for tests that need it."""
-    from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
+    from app.db.postgres import async_session_factory, initialize_postgres
     
 
     if async_session_factory is None:

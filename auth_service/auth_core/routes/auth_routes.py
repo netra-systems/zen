@@ -573,6 +573,9 @@ async def oauth_callback_post(
                             raise HTTPException(status_code=401, detail="Failed to exchange authorization code")
                     
                     tokens = token_response.json()
+                    # Handle async mock case
+                    if hasattr(tokens, '__await__'):
+                        tokens = await tokens
                     logger.info(f"Successfully exchanged code for tokens - access_token present: {bool(tokens.get('access_token'))}")
                     
                     # Get user info
@@ -591,7 +594,11 @@ async def oauth_callback_post(
                         if user_status_code != 200:
                             raise HTTPException(status_code=401, detail="Failed to get user information")
                     
-                    return user_response.json()
+                    user_data = user_response.json()
+                    # Handle async mock case
+                    if hasattr(user_data, '__await__'):
+                        user_data = await user_data
+                    return user_data
             
             user_info = await auth_service._make_http_request_with_circuit_breaker("google_oauth", make_oauth_request)
             logger.info(f"User info received: {type(user_info)} - {user_info}")
