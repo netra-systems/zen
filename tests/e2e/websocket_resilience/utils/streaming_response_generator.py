@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, AsyncGenerator, Dict, Optional
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
     ResponseType,
 )
 

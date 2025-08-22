@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.e2e.infrastructure import (
+from tests.e2e.infrastructure import (
     LLMTestConfig,
     # Add project root to path
     LLMTestManager,

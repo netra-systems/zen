@@ -42,18 +42,18 @@ def check_test_naming() -> bool:
         violations.append(file.relative_to(root_dir))
     
     if violations:
-        print("❌ Test file naming violations found:")
+        print("VIOLATION: Test file naming violations found:")
         print("   Files ending with '_test.py' should be renamed to 'test_*.py':")
         for file in violations:
             suggested = file.parent / f"test_{file.stem[:-5]}.py"
-            print(f"   - {file} → {suggested}")
+            print(f"   - {file} -> {suggested}")
         return False
     
     return True
 
 def main():
     """Main test organization checker."""
-    print("\n🔍 Checking test organization compliance...")
+    print("\nChecking test organization compliance...")
     
     all_passed = True
     
@@ -66,10 +66,10 @@ def main():
         all_passed = False
     
     if all_passed:
-        print("✅ Test organization checks passed!")
+        print("SUCCESS: Test organization checks passed!")
         return 0
     else:
-        print("\n❌ Test organization violations detected!")
+        print("\nVIOLATION: Test organization violations detected!")
         print("   Please fix the violations before committing.")
         return 1
 

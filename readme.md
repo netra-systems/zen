@@ -342,7 +342,7 @@ netra-core-generation-1/
 │   └── *.xml                 # Specification files
 │
 ├── test_framework/            # Unified Testing Infrastructure
-│   ├── test_runner.py        # Main test orchestrator
+│   ├── runner.py             # Main test orchestrator
 │   ├── bad_test_detector.py  # Flaky test detection
 │   └── coverage_analyzer.py  # Coverage reporting
 │

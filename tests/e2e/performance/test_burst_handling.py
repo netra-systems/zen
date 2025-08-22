@@ -16,7 +16,7 @@ import time
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.performance_base import (
+from tests.e2e.test_helpers.performance_base import (
     HighVolumeThroughputClient,
     LoadTestResults,
     ThroughputAnalyzer,

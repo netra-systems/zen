@@ -19,7 +19,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from netra_backend.tests.e2e.latency_optimization_helpers import (
+from tests.e2e.latency_optimization_helpers import (
     create_3x_latency_state,
     create_already_optimized_state,
     create_caching_optimization_state,

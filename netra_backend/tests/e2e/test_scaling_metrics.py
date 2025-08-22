@@ -22,7 +22,7 @@ from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
 # Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.tests.e2e.scaling_test_helpers import (
+from tests.e2e.scaling_test_helpers import (
     create_50_percent_increase_state,
     create_cost_projection_state,
     # Add project root to path

@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable generators
 
 Usage:
-    from netra_backend.tests.e2e.data.seeded_data_generator import (
+    from tests.e2e.data.seeded_data_generator import (
         ProductionMirrorGenerator,
         StressTestGenerator,
         DomainSpecificGenerator

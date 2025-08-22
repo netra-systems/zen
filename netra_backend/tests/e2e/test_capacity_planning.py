@@ -28,7 +28,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.e2e.scaling_test_helpers import (
+from tests.e2e.scaling_test_helpers import (
     create_gradual_scaling_state,
     # Add project root to path
     create_scaling_setup,

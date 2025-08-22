@@ -67,7 +67,7 @@ def main():
     script_dir = Path(__file__).parent
     root_dir = script_dir.parent
     
-    print("🔍 Checking for conftest.py violations...")
+    print("Checking for conftest.py violations...")
     print(f"   Project root: {root_dir}")
     print()
     
@@ -75,18 +75,18 @@ def main():
     
     # Report allowed files
     if allowed:
-        print("✅ Allowed conftest.py files (service-level):")
+        print("ALLOWED conftest.py files (service-level):")
         for file_path in allowed:
             print(f"   - {file_path}")
         print()
     
     # Report violations
     if violations:
-        print("❌ VIOLATION: conftest.py files found in non-service-level directories:")
+        print("VIOLATION: conftest.py files found in non-service-level directories:")
         for file_path in violations:
             print(f"   - {file_path}")
         print()
-        print("⚠️  Action Required:")
+        print("Action Required:")
         print("   1. Move fixtures to appropriate service-level conftest.py")
         print("   2. Delete the violating conftest.py files")
         print("   3. Update test imports if necessary")
@@ -97,7 +97,7 @@ def main():
         
         sys.exit(1)
     else:
-        print("✅ No violations found! All conftest.py files are at service-level.")
+        print("SUCCESS: No violations found! All conftest.py files are at service-level.")
         print()
         print(f"Total conftest.py files: {len(allowed)}")
         
@@ -105,7 +105,7 @@ def main():
         for location in ALLOWED_CONFTEST_LOCATIONS:
             location_path = root_dir / location
             if not location_path.exists():
-                print(f"   ℹ️  Note: {location} does not exist (OK if service has no tests)")
+                print(f"   Note: {location} does not exist (OK if service has no tests)")
     
     return 0
 

@@ -22,7 +22,7 @@ import pytest
 from schemas import SubAgentLifecycle
 
 # Add project root to path
-from netra_backend.tests.e2e.multi_constraint_test_helpers import (
+from tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
     # Add project root to path
     create_agent_instances,

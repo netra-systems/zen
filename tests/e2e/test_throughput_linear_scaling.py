@@ -19,7 +19,7 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
+from tests.e2e.test_helpers.throughput_helpers import (
     E2E_TEST_CONFIG,
     LoadTestResults,
     ThroughputMetrics,

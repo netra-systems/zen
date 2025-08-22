@@ -32,7 +32,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.e2e.infrastructure.llm_test_manager import (
+from tests.e2e.infrastructure.llm_test_manager import (
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,

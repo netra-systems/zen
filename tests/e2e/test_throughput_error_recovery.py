@@ -19,8 +19,8 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
-from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from tests.e2e.test_helpers.websocket_helpers import (
     websocket_test_context,
 )
 
@@ -259,7 +259,7 @@ class TestErrorRecoveryAndResilience:
     
     async def _resource_pressure_simulation(self, duration: int):
         """Simulate resource pressure"""
-        from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
+        from tests.e2e.test_helpers.resource_monitoring import (
             stress_system_resources,
         )
         

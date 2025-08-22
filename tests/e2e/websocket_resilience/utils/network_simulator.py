@@ -14,7 +14,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
     NetworkCondition,
 )
 

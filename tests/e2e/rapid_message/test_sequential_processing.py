@@ -14,13 +14,13 @@ from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import (
+from tests.e2e.fixtures.rapid_message_fixtures import (
     MessageSequenceEntry,
     message_validator,
     test_config,
     user_token,
 )
-from netra_backend.tests.e2e.utils.rapid_message_sender import RapidMessageSender
+from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 
 @pytest.mark.asyncio

@@ -24,24 +24,24 @@ from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.tests.e2e.fixtures.concurrency_scenarios import (
+from tests.e2e.fixtures.concurrency_scenarios import (
     ConcurrencyScenarioRunner,
     get_load_levels_for_scaling,
 )
-from netra_backend.tests.e2e.test_helpers.concurrency_base import (
+from tests.e2e.test_helpers.concurrency_base import (
     ConcurrencyTestBase,
     ConcurrencyTestConfig,
     PerformanceAnalyzer,
     StressTestGenerator,
 )
-from netra_backend.tests.e2e.test_helpers.performance_testing import (
+from tests.e2e.test_helpers.performance_testing import (
     PerformanceTestOrchestrator,
     ResourceMonitoringHelper,
     StressTestOrchestrator,
     TestResultValidator,
     create_session_result_converter,
 )
-from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
 
 logger = logging.getLogger(__name__)
 

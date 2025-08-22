@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
     ConnectionState,
     ResponseType,
     StreamBuffer,
@@ -23,10 +23,10 @@ from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixt
     stream_buffer,
     test_user_id,
 )
-from netra_backend.tests.e2e.websocket_resilience.utils.network_simulator import (
+from tests.e2e.websocket_resilience.utils.network_simulator import (
     NetworkSimulator,
 )
-from netra_backend.tests.e2e.websocket_resilience.utils.streaming_response_generator import (
+from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
     StreamingResponseGenerator,
 )
 

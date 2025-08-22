@@ -134,7 +134,7 @@ class TestResultValidator:
 
 def create_session_result_converter():
     """Factory function for session result converter"""
-    from netra_backend.tests.e2e.test_helpers.concurrency_base import UserSessionResult
+    from tests.e2e.test_helpers.concurrency_base import UserSessionResult
     
     def convert_dict_to_session_result(result_dict: Dict[str, Any]) -> UserSessionResult:
         """Convert dictionary to UserSessionResult object"""

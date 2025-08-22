@@ -18,9 +18,9 @@ from typing import Dict, List
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
-from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from tests.e2e.test_helpers.websocket_helpers import (
     stress_test_connections,
 )
 
@@ -140,7 +140,7 @@ class TestConcurrentConnectionScalability:
     
     async def _single_connection_test(self, connection_id: int) -> Dict[str, any]:
         """Single connection test for burst testing"""
-        from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+        from tests.e2e.test_helpers.websocket_helpers import (
             websocket_test_context,
         )
         

@@ -14,7 +14,7 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     UserIntent,
 )
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
-from netra_backend.tests.e2e.validators import (
+from tests.e2e.validators import (
     DataIntegrityValidator,
     PerformanceValidator,
     StageValidator,

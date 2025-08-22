@@ -19,12 +19,12 @@ from typing import Any, Dict, List, Set
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
+from tests.e2e.test_helpers.throughput_helpers import (
     E2E_TEST_CONFIG,
     LoadTestResults,
     create_test_message,
 )
-from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+from tests.e2e.test_helpers.websocket_helpers import (
     websocket_test_context,
 )
 

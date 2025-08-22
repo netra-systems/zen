@@ -193,7 +193,29 @@ Use precise naming to ensure clear component identification.
 *   **References:** `SPEC/system_boundaries.xml` (Defined boundaries), `SPEC/growth_control.xml` (Good growth patterns), `SPEC/conventions.xml`.
 *   **Maintenance:** Clean, reorganize, or archive legacy files proactively.
 
-### 5.4. AI Factory Productivity
+### 5.4. Directory Organization and File Placement
+CRITICAL: Always respect established directory organization patterns. Files MUST be placed in their designated locations to maintain system coherence.
+
+**Test Organization Rules:**
+*   **Service-Specific Tests:** Each service maintains its own test directory at the service root
+    *   `/netra_backend/tests/` - Main backend tests ONLY
+    *   `/auth_service/tests/` - Auth service tests ONLY  
+    *   `/frontend/` test files alongside components or in dedicated test directories
+*   **E2E Tests:** End-to-end tests that span services belong in `/tests/e2e/`
+*   **Test Framework:** Shared test utilities in `/test_framework/`
+*   **Never Mix:** NEVER place auth_service tests in netra_backend/tests or vice versa
+
+**General Directory Conventions:**
+*   **Documentation:** `/docs/` for user-facing documentation; `/SPEC/` for specifications
+*   **Scripts:** `/scripts/` for utility and automation scripts
+*   **Configuration:** Root-level for main configs; service-specific in service directories
+*   **Shared Resources:** `/shared/` for cross-service schemas and types
+*   **Deployment:** `/organized_root/` for deployment configurations
+*   **Infrastructure:** `/terraform-dev-postgres/` for infrastructure as code
+
+See [`SPEC/folder_structure_rules.md`](SPEC/folder_structure_rules.md) for comprehensive directory organization guidelines.
+
+### 5.5. AI Factory Productivity
 See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for detailed patterns, complex coding processes, multi-agent collaboration strategies, and debugging strategies.
 
 ## 6. Project Overview and Tooling

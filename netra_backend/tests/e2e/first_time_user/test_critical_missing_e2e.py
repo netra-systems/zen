@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.e2e.conftest import *
+from tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 # Add project root to path

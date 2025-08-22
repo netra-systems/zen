@@ -4,16 +4,11 @@
     <name>NetraPlatform.CodingConventions</name>
     <type>InstructionSet</type>
     <version>3.0</version>
-    <last_updated>2025-08-19</last_updated>
+    <last_updated>2025-08-22</last_updated>
     <description>
             MANDATORY instruction set for all AI agents contributing code to the Netra AI platform.
         </description>
-    <last_edited>2025-08-21T08:47:28.401907</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.401907">
-      <reasons>
-        <reason>Content contains: DO NOT USE</reason>
-      </reasons>
-    </legacy_status>
+    <last_edited>2025-08-22T00:00:00.000000</last_edited>
   </metadata>
   <section title="Architectural Constraints (The 450/25 Rule)">
     <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>
@@ -39,6 +34,25 @@
       <title>Test Code Segregation</title>
       <instruction>Do not introduce test stubs or mocks into production service code.</instruction>
       <reference>SPEC/no_test_stubs.xml</reference>
+    </constraint>
+    <constraint id="ARC-005" priority="CRITICAL">
+      <title>Test Organization Standards</title>
+      <instruction>Test files and configurations must follow strict organizational standards to maintain service boundaries and prevent complexity.</instruction>
+      <conftest_rules>
+        <rule>conftest.py files MUST only exist at service-level directories</rule>
+        <allowed_locations>auth_service/tests/conftest.py, netra_backend/tests/conftest.py, tests/conftest.py</allowed_locations>
+        <prohibited>ANY subdirectory conftest.py files (e.g., netra_backend/tests/*/conftest.py)</prohibited>
+      </conftest_rules>
+      <naming_standards>
+        <rule>ALL test files MUST use test_*.py naming pattern</rule>
+        <prohibited>*_test.py, test*.py (without underscore)</prohibited>
+        <examples>✅ test_user_service.py, ❌ user_service_test.py</examples>
+      </naming_standards>
+      <enforcement>
+        <script>scripts/check_conftest_violations.py</script>
+        <pre_commit_hook>.githooks/check-test-organization.py</pre_commit_hook>
+      </enforcement>
+      <reference>SPEC/testing.xml#test_organization_standards</reference>
     </constraint>
   </section>
   <section title="Frontend Specific Conventions">

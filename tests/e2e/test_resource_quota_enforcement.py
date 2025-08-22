@@ -17,7 +17,7 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
+from tests.e2e.test_helpers.resource_monitoring import (
     ResourceMonitor,
     check_resource_limits,
     stress_system_resources,

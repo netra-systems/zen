@@ -12,15 +12,15 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from netra_backend.tests.e2e.infrastructure.llm_test_manager import (
+from tests.e2e.infrastructure.llm_test_manager import (
     LLMTestConfig,
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,
     LLMTestResponse,
 )
-from netra_backend.tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
-from netra_backend.tests.e2e.infrastructure.llm_response_cache import (
+from tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
+from tests.e2e.infrastructure.llm_response_cache import (
     CacheEntry,
     CacheStatistics,
     LLMResponseCache,

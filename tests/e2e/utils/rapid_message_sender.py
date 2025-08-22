@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Tuple
 
 import websockets
 
-from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import (
+from tests.e2e.fixtures.rapid_message_fixtures import (
     MessageBurstResult,
     MessageSequenceEntry,
 )

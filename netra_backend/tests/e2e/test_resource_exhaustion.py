@@ -22,7 +22,7 @@ import aiohttp
 import pytest
 
 # Add project root to path
-from netra_backend.tests.e2e.concurrent_load_helpers import (
+from tests.e2e.concurrent_load_helpers import (
     ConcurrentUserLoadTest,
     analyze_pool_exhaustion_results,
 )

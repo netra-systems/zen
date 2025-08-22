@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
+from tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
 
 # Add project root to path
 

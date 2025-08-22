@@ -18,12 +18,12 @@ from typing import Any, Dict
 
 import pytest
 
-from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
+from tests.e2e.test_helpers.resource_monitoring import (
     MemoryLeakDetector,
     ResourceMonitor,
     resource_monitoring_context,
 )
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
 
 logger = logging.getLogger(__name__)
 

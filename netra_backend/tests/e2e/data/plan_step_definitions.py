@@ -14,7 +14,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Individual step creators
 
 Usage:
-    from netra_backend.tests.e2e.data.plan_step_definitions import (
+    from tests.e2e.data.plan_step_definitions import (
         create_all_cost_steps,
         create_all_performance_steps,
         create_all_capacity_steps
@@ -23,13 +23,13 @@ Usage:
 
 from typing import List
 
-from netra_backend.tests.e2e.data.default_plans import (
+from tests.e2e.data.default_plans import (
     PlanPriority,
     PlanStep,
     PlanStepType,
     ValidationCriteria,
 )
-from netra_backend.tests.e2e.data.plan_step_placeholders import (
+from tests.e2e.data.plan_step_placeholders import (
     _create_cap_step_4,
     _create_cap_step_5,
     _create_cap_step_6,

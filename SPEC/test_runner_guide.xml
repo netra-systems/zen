@@ -33,7 +33,34 @@
       - Logical superset relationships between test levels
       - No confusing or redundant options
       - Service-agnostic interface with service-specific implementations
+      - Enforces test organization standards and compliance checking
     </overview>
+    <test_organization_compliance>
+      <description>
+        The unified test runner enforces test organization standards during discovery and execution.
+      </description>
+      <validation_checks>
+        <check name="conftest_placement">
+          <description>Validates conftest.py files exist only at service-level directories</description>
+          <enforcement>scripts/check_conftest_violations.py</enforcement>
+          <allowed_locations>auth_service/tests/, netra_backend/tests/, tests/</allowed_locations>
+        </check>
+        <check name="test_naming">
+          <description>Ensures all test files follow test_*.py naming convention</description>
+          <pattern>test_*.py</pattern>
+          <violations>*_test.py files are flagged for renaming</violations>
+        </check>
+        <check name="directory_structure">
+          <description>Validates test directories follow microservice boundaries</description>
+          <service_boundaries>Each service maintains independent test directory</service_boundaries>
+        </check>
+      </validation_checks>
+      <compliance_commands>
+        <command purpose="Check conftest compliance">python scripts/check_conftest_violations.py</command>
+        <command purpose="Pre-commit organization check">.githooks/check-test-organization.py</command>
+        <command purpose="Discover test structure">python unified_test_runner.py --discover</command>
+      </compliance_commands>
+    </test_organization_compliance>
     <test_levels>
       <level name="smoke" time="&lt;30s" order="1">
         <purpose>Pre-commit validation</purpose>

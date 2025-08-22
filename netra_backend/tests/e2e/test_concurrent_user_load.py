@@ -20,10 +20,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.e2e.test_concurrent_load_core import TestConcurrentLoadCore
-from netra_backend.tests.e2e.test_fair_queuing import TestFairQueuing
-from netra_backend.tests.e2e.test_resource_exhaustion import TestResourceExhaustion
-from netra_backend.tests.e2e.test_websocket_limits import TestWebSocketLimits
+from tests.e2e.test_concurrent_load_core import TestConcurrentLoadCore
+from tests.e2e.test_fair_queuing import TestFairQueuing
+from tests.e2e.test_resource_exhaustion import TestResourceExhaustion
+from tests.e2e.test_websocket_limits import TestWebSocketLimits
 
 # Add project root to path
 
