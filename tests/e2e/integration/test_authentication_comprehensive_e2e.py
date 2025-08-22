@@ -29,7 +29,7 @@ import pytest
 import pytest_asyncio
 
 from tests.database_sync_fixtures import create_test_user_data
-from tests.harness_complete import (
+from tests.e2e.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper

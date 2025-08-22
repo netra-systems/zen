@@ -36,7 +36,7 @@ except ImportError:
         pass
 
 try:
-    from tests.real_websocket_client import RealWebSocketClient
+    from tests.e2e.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Use clients factory if available
     from tests.clients.websocket_client import (

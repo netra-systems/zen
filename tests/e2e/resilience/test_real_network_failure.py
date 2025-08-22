@@ -24,9 +24,9 @@ from typing import Any, Dict, List
 import pytest
 
 from tests.e2e.config import TEST_USERS
-from tests.e2e.integration.websocket_resilience_core import WebSocketResilienceTestCore
-from tests.network_failure_simulator import NetworkFailureSimulator
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.e2e.network_failure_simulator import NetworkFailureSimulator
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 class NetworkFailureMessageQueue:

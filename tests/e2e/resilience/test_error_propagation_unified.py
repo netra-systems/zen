@@ -40,9 +40,9 @@ sys.path.insert(0, str(project_root))
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.real_client_types import ClientConfig, ConnectionState
-from tests.real_http_client import RealHTTPClient
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig, ConnectionState
+from tests.e2e.real_http_client import RealHTTPClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

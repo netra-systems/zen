@@ -20,7 +20,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
-from tests.e2e.integration.token_lifecycle_helpers import (
+from tests.e2e.token_lifecycle_helpers import (
     TokenLifecycleManager, WebSocketSessionManager, TokenValidationHelper, PerformanceBenchmark,
     TokenLifecycleManager, WebSocketSessionManager,
     TokenValidationHelper, PerformanceBenchmark

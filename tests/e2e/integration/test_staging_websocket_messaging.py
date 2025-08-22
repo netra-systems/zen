@@ -21,8 +21,8 @@ from tests.e2e.integration.unified_e2e_harness import (
     create_e2e_harness,
 )
 from tests.e2e.integration.user_journey_executor import TestUser
-from tests.real_client_types import ClientConfig, ConnectionState
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig, ConnectionState
+from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.test_environment_config import TestEnvironmentType
 
 

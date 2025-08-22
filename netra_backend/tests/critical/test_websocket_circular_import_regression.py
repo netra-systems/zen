@@ -250,7 +250,7 @@ class TestConnectionModuleCircularImportPrevention:
             ('app.websocket.connection_info', ['ConnectionInfo']),
             ('app.websocket.connection_reliability', ['ConnectionReliabilityManager']),
             ('app.websocket.connection_executor', ['ConnectionExecutor']),
-            ('app.websocket.connection_manager', ['ModernConnectionManager', 'get_connection_manager']),
+            ('app.websocket.connection_manager', ['ConnectionManager', 'get_connection_manager']),
             ('app.websocket.connection', ['ConnectionManager', 'get_connection_manager_instance'])
         ]
         
@@ -299,7 +299,7 @@ class TestConnectionModuleCircularImportPrevention:
             'ConnectionReliabilityManager',
             'ConnectionCloseReliability',
             'ConnectionEstablishmentReliability',
-            'ModernConnectionManager'
+            'ConnectionManager'
         ]
         
         for export in required_exports:

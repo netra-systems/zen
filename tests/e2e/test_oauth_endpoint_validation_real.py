@@ -47,12 +47,12 @@ from tests.e2e.oauth_test_providers import (
     OAuthUserFactory,
     get_enterprise_config,
 )
-from tests.real_client_types import (
+from tests.e2e.real_client_types import (
     create_auth_config,
     create_backend_config,
 )
-from tests.real_http_client import RealHTTPClient
-from tests.real_services_manager import (
+from tests.e2e.real_http_client import RealHTTPClient
+from tests.e2e.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

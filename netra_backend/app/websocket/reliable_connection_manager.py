@@ -30,9 +30,7 @@ from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.websocket.connection_lifecycle_manager import (
     ConnectionLifecycleManager,
 )
-from netra_backend.app.websocket.connection_manager import (
-    ModernConnectionManager as ConnectionManager,
-)
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 from netra_backend.app.websocket.connection_message_handler import (
     ConnectionMessageHandler,
 )

@@ -39,11 +39,11 @@ import websockets
 from websockets.exceptions import ConnectionClosedError
 
 from tests.jwt_token_helpers import JWTTestHelper
-from tests.real_client_types import ClientConfig, ConnectionState
-from tests.real_services_manager import (
+from tests.e2e.real_client_types import ClientConfig, ConnectionState
+from tests.e2e.real_services_manager import (
     create_real_services_manager,
 )
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 class ConnectionCleanupTester:

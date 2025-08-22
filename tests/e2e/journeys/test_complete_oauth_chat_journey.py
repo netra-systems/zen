@@ -70,7 +70,7 @@ from tests.e2e.helpers.auth.oauth_journey_helpers import (
 )
 
 from netra_backend.app.logging_config import central_logger
-from tests.real_services_manager import (
+from tests.e2e.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

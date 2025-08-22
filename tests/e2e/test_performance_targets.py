@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from tests.e2e.config import TestUser, UnifiedTestConfig
-from tests.service_manager import ServiceManager
+from tests.e2e.service_manager import ServiceManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 import asyncio

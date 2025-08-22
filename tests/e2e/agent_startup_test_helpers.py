@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 from tests.e2e.config import TestTier, get_test_user
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class AgentStartupE2EManager:

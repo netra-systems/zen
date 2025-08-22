@@ -25,7 +25,7 @@ import pytest
 
 # Import test configuration and network simulator
 from tests.e2e.config import TEST_CONFIG, TestDataFactory
-from tests.network_failure_simulator import NetworkFailureSimulator
+from tests.e2e.network_failure_simulator import NetworkFailureSimulator
 
 
 @pytest.fixture

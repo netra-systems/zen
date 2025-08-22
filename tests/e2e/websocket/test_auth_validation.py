@@ -35,8 +35,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 # Import from unified test config to avoid config issues
-from tests.config import setup_test_environment
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.config import setup_test_environment
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 # Set up test environment first
 test_config = setup_test_environment()

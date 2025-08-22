@@ -18,8 +18,8 @@ from typing import Any, Dict, List, Optional
 
 from tests.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.real_services_manager import RealServicesManager
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

@@ -27,12 +27,12 @@ import pytest
 import redis.asyncio as redis
 import websockets
 
-from tests.e2e.integration.rate_limiting_core import (
+from tests.e2e.rate_limiting_core import (
     MessageSender,
     RedisManager,
     UserManager,
 )
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class ComprehensiveRateLimitTester:

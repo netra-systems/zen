@@ -52,7 +52,7 @@ from tests.e2e.helpers.core.unified_flow_helpers import (
 )
 
 from tests.database_test_connections import DatabaseConnectionManager
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class RealUnifiedFlowTester:

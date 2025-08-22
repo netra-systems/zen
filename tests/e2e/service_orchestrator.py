@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.real_services_manager import RealServicesManager
-from tests.e2e.config import TestEnvironmentConfig
+from tests.e2e.test_environment_config import TestEnvironmentConfig
 
 logger = logging.getLogger(__name__)
 

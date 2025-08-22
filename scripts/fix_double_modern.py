@@ -15,7 +15,7 @@ def fix_file(file_path: Path) -> bool:
     original_content = content
     
     # Fix double Modern prefix
-    content = content.replace('ModernConnectionManager', 'ModernConnectionManager')
+    content = content.replace('ConnectionManager', 'ConnectionManager')
     
     if content != original_content:
         try:

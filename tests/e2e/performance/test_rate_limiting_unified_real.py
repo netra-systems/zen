@@ -40,14 +40,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.e2e.integration.rate_limiting_core import (
+from tests.e2e.rate_limiting_core import (
     MessageSender,
     RateLimitFlowValidator,
     RedisManager,
     UserManager,
 )
-from tests.service_manager import ServiceManager
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.service_manager import ServiceManager
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class UnifiedRateLimitTester:

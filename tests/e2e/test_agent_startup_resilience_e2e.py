@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from tests.test_data_factory import create_test_message_data, create_test_user_data
+from tests.e2e.data_factory import create_test_message_data, create_test_user_data
 
 
 class AgentRateLimitTester:

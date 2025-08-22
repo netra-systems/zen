@@ -38,12 +38,12 @@ import pytest
 try:
     # Try relative imports first (for pytest execution)
     from tests.jwt_token_helpers import JWTTestHelper
-    from tests.real_client_types import (
+    from tests.e2e.real_client_types import (
         ClientConfig,
         ConnectionState,
     )
-    from tests.real_services_manager import RealServicesManager
-    from tests.real_websocket_client import RealWebSocketClient
+    from tests.e2e.real_services_manager import RealServicesManager
+    from tests.e2e.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Fallback for standalone execution
     import os

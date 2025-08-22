@@ -22,8 +22,8 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
-from tests.e2e.integration.permission_enforcement_helpers import PermissionEnforcementTester
+from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.permission_enforcement_helpers import PermissionEnforcementTester
 
 
 @pytest.mark.asyncio

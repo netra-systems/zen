@@ -26,7 +26,7 @@ import pytest
 import time
 from typing import Dict, Any, Optional
 
-from tests.e2e.integration.session_persistence_manager import (
+from tests.e2e.session_persistence_manager import (
     SessionPersistenceManager, SessionPersistenceTestValidator, ServiceRestartSimulator, ChatContinuityValidator, PerformanceTracker,
     SessionPersistenceManager, SessionPersistenceTestValidator,
     ServiceRestartSimulator, ChatContinuityValidator, PerformanceTracker

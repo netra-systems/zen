@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
 from tests.e2e.config import TestDataFactory, TestUser
-from tests.message_flow_validators import (
+from tests.e2e.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,
     StreamInterruptionHandler,

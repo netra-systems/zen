@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.reconnection_test_helpers import create_test_token
 
 

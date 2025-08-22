@@ -15,7 +15,7 @@ Architecture: 450-line compliance through focused failure scenario testing
 
 import pytest
 
-from tests.agent_orchestration_fixtures import (
+from tests.e2e.agent_orchestration_fixtures import (
     failure_recovery_data,
     mock_supervisor_agent,
 )

@@ -12,7 +12,7 @@ Refactored for <300 lines using helpers.
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.config import TEST_USERS
 from tests.e2e.integration.helpers.thread_management_helpers import (
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 from typing import Dict, List, Any
 import asyncio
 import pytest

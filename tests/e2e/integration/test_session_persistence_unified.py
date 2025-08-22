@@ -28,11 +28,11 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from tests.e2e.integration.session_persistence_core import SessionPersistenceManager
+from tests.e2e.session_persistence_core import SessionPersistenceManager
 from tests.e2e.integration.session_persistence_validators import SessionPersistenceValidator
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 from tests.real_client_factory import RealClientFactory
-from tests.real_client_types import ClientConfig
+from tests.e2e.real_client_types import ClientConfig
 
 
 @pytest.mark.critical

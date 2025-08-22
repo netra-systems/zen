@@ -38,7 +38,7 @@ import websockets
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
-    from tests.harness_complete import (
+    from tests.e2e.harness_complete import (
         TestClient,
         TestHarnessContext,
     )

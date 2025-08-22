@@ -21,13 +21,13 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
-from tests.config import (
+from tests.e2e.config import (
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,
 )
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 logger = central_logger.get_logger(__name__)
 

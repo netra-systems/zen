@@ -27,7 +27,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
-from tests.e2e.integration.data_crud_helpers import (
+from tests.e2e.data_crud_helpers import (
     DataCRUDManager, GDPRComplianceValidator, CrossServiceDataValidator, create_test_user_data, create_user_preferences_data,
     DataCRUDManager,
     GDPRComplianceValidator,

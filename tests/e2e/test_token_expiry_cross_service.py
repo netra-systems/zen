@@ -16,7 +16,7 @@ import pytest
 import websockets
 
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 @pytest.fixture

@@ -21,7 +21,7 @@ from typing import Dict, List, Optional
 import pytest
 import websockets
 
-from tests.harness_complete import (
+from tests.e2e.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper

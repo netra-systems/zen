@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.real_client_types import ClientConfig
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

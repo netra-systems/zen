@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
 
-from tests.agent_startup_validators import AgentStartupValidatorSuite
+from tests.e2e.agent_startup_validators import AgentStartupValidatorSuite
 
 # Test infrastructure
 from tests.e2e.config import TEST_CONFIG, TestTier

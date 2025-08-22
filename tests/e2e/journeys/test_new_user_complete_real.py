@@ -48,7 +48,7 @@ from tests.e2e.helpers.journey.new_user_journey_helpers import (
     validate_signup_completion,
 )
 
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 from tests.database_test_connections import DatabaseTestConnections
 
 

@@ -40,8 +40,8 @@ from tests.e2e.config import (
 )
 from tests.e2e.agent_conversation_helpers import AgentConversationTestCore
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
-from tests.real_services_manager import RealServicesManager
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

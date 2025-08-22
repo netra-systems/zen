@@ -39,7 +39,7 @@ import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
 from tests.e2e.config import TEST_CONFIG, TestTier, get_test_user
-from tests.harness_complete import (
+from tests.e2e.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,
     get_auth_service_url,
@@ -51,7 +51,7 @@ from tests.load_test_utilities import (
     SystemResourceMonitor,
 )
 from tests.real_client_factory import create_real_client_factory
-from tests.real_services_manager import RealServicesManager
+from tests.e2e.real_services_manager import RealServicesManager
 
 
 class CorruptedStateTestManager:

@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from tests.clients.factory import TestClientFactory
-from tests.e2e.integration.cache_coherence_helpers import CacheCoherenceValidator
+from tests.e2e.cache_coherence_helpers import CacheCoherenceValidator
 from tests.websocket.state_helpers import StateDiffTracker, StateValidator
 
 # Enable real services for this test module

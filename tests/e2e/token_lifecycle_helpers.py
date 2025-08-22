@@ -11,8 +11,8 @@ from typing import Any, Dict, Optional
 import httpx
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.real_client_types import ClientConfig
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 class TokenLifecycleManager:

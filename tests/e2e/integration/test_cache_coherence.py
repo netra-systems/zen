@@ -18,7 +18,7 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from tests.e2e.integration.cache_coherence_helpers import (
+from tests.e2e.cache_coherence_helpers import (
     CacheCoherenceEvent,
     CacheCoherenceMetrics,
     CacheCoherenceValidator,

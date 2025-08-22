@@ -21,13 +21,13 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.agent_startup_helpers import (
+from tests.e2e.agent_startup_helpers import (
     AgentInitializationValidator,
     ContextTestManager,
     MultiAgentTestManager,
 )
 from tests.e2e.config import TestTier, get_test_user
-from tests.harness_complete import TestHarnessContext
+from tests.e2e.harness_complete import TestHarnessContext
 
 
 @pytest.mark.asyncio

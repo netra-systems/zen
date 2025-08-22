@@ -26,7 +26,7 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.e2e.integration.enterprise_sso_helpers import EnterpriseSSOTestHarness
+from tests.e2e.enterprise_sso_helpers import EnterpriseSSOTestHarness
 
 
 @pytest.mark.asyncio

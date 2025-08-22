@@ -39,7 +39,7 @@ from netra_backend.app.tests.test_utilities.websocket_mocks import (
     WebSocketBuilder,
 )
 from tests.e2e.config import TEST_USERS, TestDataFactory
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

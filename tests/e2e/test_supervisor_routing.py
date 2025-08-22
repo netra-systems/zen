@@ -15,7 +15,7 @@ Architecture: 450-line compliance through focused testing scope
 
 import pytest
 
-from tests.agent_orchestration_fixtures import (
+from tests.e2e.agent_orchestration_fixtures import (
     mock_supervisor_agent,
     routing_test_data,
 )

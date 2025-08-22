@@ -28,8 +28,8 @@ from tests.e2e.config import (
     TestUser,
     UnifiedTestConfig,
 )
-from tests.harness_complete import TestHarnessContext
-from tests.message_flow_helpers import (
+from tests.e2e.harness_complete import TestHarnessContext
+from tests.e2e.message_flow_helpers import (
     create_concurrent_messages,
     send_concurrent_message,
     test_cache_persistence,
@@ -41,7 +41,7 @@ from tests.message_flow_helpers import (
     test_response_streaming,
     validate_complete_flow,
 )
-from tests.message_flow_validators import (
+from tests.e2e.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,
     StreamInterruptionHandler,

@@ -10,7 +10,7 @@ import time
 from typing import Any, Dict, Optional
 
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

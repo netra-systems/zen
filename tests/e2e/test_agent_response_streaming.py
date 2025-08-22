@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from tests.agent_orchestration_fixtures import (
+from tests.e2e.agent_orchestration_fixtures import (
     streaming_test_data,
     websocket_mock,
 )

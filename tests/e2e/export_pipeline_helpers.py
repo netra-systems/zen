@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class LargeDatasetGenerator:

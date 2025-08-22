@@ -15,7 +15,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.sync_types import StateCheckpoint, SyncState
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.websocket.connection_manager import (
-    ModernConnectionManager as ConnectionManager,
+    ConnectionManager as ConnectionManager,
 )
 
 logger = central_logger.get_logger(__name__)

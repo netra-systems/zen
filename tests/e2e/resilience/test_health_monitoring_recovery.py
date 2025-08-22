@@ -28,7 +28,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.integration.health_monitoring_helpers import (
+from tests.e2e.health_monitoring_helpers import (
     HealthMonitor, ServiceFailureSimulator, AutoRecoveryEngine, AlertNotificationValidator, RecoveryTimeTracker,
     HealthMonitor,
     ServiceFailureSimulator,

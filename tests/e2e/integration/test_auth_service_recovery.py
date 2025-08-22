@@ -42,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.e2e.integration.service_failure_recovery_helpers import (
+from tests.e2e.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
     create_degradation_tester,
     create_recovery_time_validator,
@@ -52,7 +52,7 @@ from tests.e2e.integration.service_orchestrator import (
     create_service_orchestrator,
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)

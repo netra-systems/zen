@@ -23,9 +23,9 @@ import websockets
 from websockets.exceptions import ConnectionClosedError
 
 from tests.e2e.config import TEST_ENDPOINTS, TestDataFactory
-from tests.network_failure_simulator import NetworkFailureSimulator
-from tests.real_client_types import ClientConfig, ConnectionState
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.network_failure_simulator import NetworkFailureSimulator
+from tests.e2e.real_client_types import ClientConfig, ConnectionState
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 class WebSocketResilienceTestCore:

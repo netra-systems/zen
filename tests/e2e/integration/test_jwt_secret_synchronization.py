@@ -19,7 +19,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.e2e.integration.token_lifecycle_helpers import (
+from tests.e2e.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,
@@ -29,10 +29,10 @@ from tests.e2e.jwt_token_helpers import (
     JWTTestFixtures,
     JWTTestHelper,
 )
-from tests.test_data_factory import (
+from tests.e2e.data_factory import (
     create_test_service_credentials,
 )
-from tests.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedTestHarness
 
 
 class JWTSecretSynchronizationValidator:

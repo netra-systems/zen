@@ -19,14 +19,14 @@ Architecture:
 
 from typing import Any, Dict, Optional
 
-from tests.real_client_types import (
+from tests.e2e.real_client_types import (
     ClientConfig,
     create_auth_config,
     create_backend_config,
     create_test_config,
 )
-from tests.real_http_client import RealHTTPClient
-from tests.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_http_client import RealHTTPClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 
 class RealClientFactory:

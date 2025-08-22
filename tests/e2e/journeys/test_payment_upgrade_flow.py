@@ -24,7 +24,7 @@ import time
 import pytest
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.integration.payment_upgrade_flow_tester import PaymentUpgradeFlowTester
 
 

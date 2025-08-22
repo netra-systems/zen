@@ -25,8 +25,8 @@ from tests.e2e.config import (
     TestDataFactory,
     UnifiedTestConfig,
 )
-from tests.harness_complete import TestHarnessContext
-from tests.message_flow_validators import MessageFlowValidator
+from tests.e2e.harness_complete import TestHarnessContext
+from tests.e2e.message_flow_validators import MessageFlowValidator
 
 logger = central_logger.get_logger(__name__)
 

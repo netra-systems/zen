@@ -20,7 +20,7 @@ from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 from netra_backend.app.logging_config import central_logger
 
 # Import required classes from core module
-from tests.e2e.websocket_resilience.test_5_backend_service_restart_core import (
+from tests.e2e.websocket_resilience.backend_service_restart import (
     ReconnectionStrategy,
 )
 

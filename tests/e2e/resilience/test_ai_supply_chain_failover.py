@@ -17,7 +17,7 @@ import asyncio
 import time
 from typing import Dict, Any
 
-from tests.e2e.integration.ai_supply_chain_helpers import (
+from tests.e2e.ai_supply_chain_helpers import (
     ProviderSimulator, ProviderStatus, FailoverMetrics, SLAValidator, CostOptimizer, QualityMonitor,
     ProviderSimulator, ProviderStatus, FailoverMetrics,
     SLAValidator, CostOptimizer, QualityMonitor

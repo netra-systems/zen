@@ -34,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.e2e.integration.token_lifecycle_helpers import (
+from tests.e2e.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,
@@ -43,8 +43,8 @@ from tests.e2e.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestHelper,
 )
-from tests.real_services_manager import RealServicesManager
-from tests.test_data_factory import (
+from tests.e2e.real_services_manager import RealServicesManager
+from tests.e2e.data_factory import (
     create_test_service_credentials,
     create_test_user,
 )

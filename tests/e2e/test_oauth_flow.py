@@ -31,7 +31,7 @@ from tests.e2e.oauth_test_providers import (
     OAuthErrorProvider,
     get_enterprise_config
 )
-from tests.oauth_flow_manager import (
+from tests.e2e.oauth_flow_manager import (
     create_oauth_flow_manager, create_oauth_validator, create_oauth_session_manager,
     create_oauth_flow_manager,
     create_oauth_validator,

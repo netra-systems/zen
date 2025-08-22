@@ -27,7 +27,7 @@ import pytest
 import redis.asyncio as redis
 
 from netra_backend.app.logging_config import central_logger
-from tests.e2e.conftest import E2E_CONFIG, E2EEnvironmentValidator
+from conftest import E2E_CONFIG, E2EEnvironmentValidator
 
 
 class ConcurrencyTestMetrics:

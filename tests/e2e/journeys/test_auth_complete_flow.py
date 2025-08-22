@@ -18,7 +18,7 @@ import time
 
 import pytest
 
-from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
+from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.integration.new_user_flow_tester import CompleteNewUserFlowTester
 from tests.e2e.integration.session_security_tester import SessionSecurityLogoutTester
 
