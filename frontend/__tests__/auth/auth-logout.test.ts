@@ -76,7 +76,7 @@ describe('Auth Logout Flow', () => {
 
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(hrefSpy).toHaveBeenCalledWith('/');
     });
 
     it('should handle logout without token', async () => {
@@ -87,7 +87,7 @@ describe('Auth Logout Flow', () => {
 
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-      expect(window.location.href).toBe('/');
+      expect(hrefSpy).toHaveBeenCalledWith('/');
     });
 
     it('should handle logout failure and still clear token', async () => {

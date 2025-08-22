@@ -450,17 +450,19 @@ describe('ThreadList Navigation Tests', () => {
 
       const threadItem = screen.getByTestId('thread-item-thread-1');
       
+      // Focus initially
       await act(async () => {
         threadItem.focus();
       });
+      expect(threadItem).toHaveClass('hovered');
       
       // Blur the element
       await act(async () => {
-        fireEvent.blur(threadItem);
+        threadItem.blur();
       });
       expect(threadItem).not.toHaveClass('hovered');
       
-      // Focus again
+      // Focus again should restore hover state
       await act(async () => {
         threadItem.focus();
       });
