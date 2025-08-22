@@ -13,7 +13,7 @@ import redis.asyncio as redis
 
 # Import test environment config for environment-aware configuration
 try:
-    from tests.unified.test_environment_config import TestEnvironmentConfig
+    from tests.test_environment_config import TestEnvironmentConfig
 except ImportError:
     TestEnvironmentConfig = None
 

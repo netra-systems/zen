@@ -45,8 +45,8 @@ import redis.asyncio as redis
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from tests.unified.clients.factory import TestClientFactory
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.clients.factory import TestClientFactory
+from tests.jwt_token_helpers import JWTTestHelper
 
 
 class SessionPersistenceTestManager:

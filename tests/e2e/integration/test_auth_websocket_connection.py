@@ -22,7 +22,7 @@ import time
 import pytest
 from typing import Dict, Any
 
-from tests.unified.e2e.auth_test_fixtures import (
+from tests.e2e.auth_test_fixtures import (
     WebSocketAuthTester,
     TokenExpiryTester,
     AuthTestConfig,

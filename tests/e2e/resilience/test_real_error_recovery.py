@@ -43,11 +43,11 @@ import pytest_asyncio
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.config import TEST_USERS
+from tests.config import TEST_USERS
 from tests.e2e.integration.error_cascade_core import ServiceFailureSimulator
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_client_types import ClientConfig
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.real_client_types import ClientConfig
+from tests.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

@@ -24,12 +24,12 @@ from datetime import datetime
 
 import pytest
 
-from tests.unified.database_sync_fixtures import (
+from tests.database_sync_fixtures import (
     DatabaseSyncValidator,
     create_eventual_consistency_user,
     create_test_user_data,
 )
-from tests.unified.database_sync_helpers import (
+from tests.database_sync_helpers import (
     create_migration_users,
     create_sync_task,
     execute_migration,

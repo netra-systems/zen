@@ -20,7 +20,7 @@ import asyncio
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from tests.unified.agent_startup_user_manager import TestUser
+from tests.agent_startup_user_manager import TestUser
 
 logger = logging.getLogger(__name__)
 

@@ -17,7 +17,7 @@ from netra_backend.app.core.websocket_recovery_types import (
     ConnectionState,
     MessageState,
 )
-from tests.unified.config import TEST_USERS
+from tests.config import TEST_USERS
 
 
 class WebSocketStateManager:

@@ -26,7 +26,7 @@ import httpx
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from tests.unified.health_check_core import (
+from tests.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,
     HealthCheckResult,
@@ -35,7 +35,7 @@ from tests.unified.health_check_core import (
     create_service_error_result,
     get_critical_services,
 )
-from tests.unified.health_service_checker import ServiceHealthChecker
+from tests.health_service_checker import ServiceHealthChecker
 
 logger = central_logger.get_logger(__name__)
 

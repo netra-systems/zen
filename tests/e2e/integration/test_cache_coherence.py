@@ -23,7 +23,7 @@ from tests.e2e.integration.cache_coherence_helpers import (
     CacheCoherenceMetrics,
     CacheCoherenceValidator,
 )
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 logger = central_logger.get_logger(__name__)
 

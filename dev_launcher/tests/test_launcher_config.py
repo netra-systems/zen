@@ -164,39 +164,7 @@ class TestServiceDiscovery(unittest.TestCase):
         self.assertEqual(info['port'], 8001)
 
 
-class TestServicesConfiguration(unittest.TestCase):
-    """Test services configuration management."""
-    
-    def test_development_configuration(self):
-        """Test development mode configuration."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _assert_development_config(self, config):
-        """Assert development configuration values."""
-        pass
-    
-    def test_production_configuration(self):
-        """Test production mode configuration."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _assert_production_config(self, config):
-        """Assert production configuration values."""
-        pass
-    
-    def test_configuration_switching(self):
-        """Test switching between configurations."""
-        # Skip until ServicesConfiguration module exists
-        self.skipTest("ServicesConfiguration module not available")
-    
-    def _create_dev_config(self):
-        """Create development configuration."""
-        pass
-    
-    def _create_prod_config(self):
-        """Create production configuration."""
-        pass
+# Legacy TestServicesConfiguration class removed - module no longer exists
     
     def _assert_configs_different(self, dev, prod):
         """Assert configurations are different."""

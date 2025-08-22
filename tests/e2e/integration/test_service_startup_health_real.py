@@ -44,13 +44,13 @@ sys.path.insert(0, str(project_root))
 
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.startup_optimizer import PhaseStep, StartupPhase
-from tests.unified.health_check_core import (
+from tests.health_check_core import (
     SERVICE_ENDPOINTS,
     HealthCheckResult,
     create_healthy_result,
     create_service_error_result,
 )
-from tests.unified.health_service_checker import ServiceHealthChecker
+from tests.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

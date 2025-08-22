@@ -31,9 +31,9 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.unified.config import TEST_USERS, TestDataFactory
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.config import TEST_USERS, TestDataFactory
+from tests.real_services_manager import RealServicesManager
+from tests.real_websocket_client import RealWebSocketClient
 
 
 @pytest.mark.asyncio

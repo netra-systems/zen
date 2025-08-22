@@ -28,13 +28,13 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-from tests.unified.database_sync_fixtures import (
+from tests.database_sync_fixtures import (
     DatabaseSyncValidator,
     create_eventual_consistency_user,
     create_performance_user_data,
     create_test_user_data,
 )
-from tests.unified.database_sync_helpers import (
+from tests.database_sync_helpers import (
     create_sync_task,
     measure_performance_duration,
     sync_user_to_backend,
@@ -42,7 +42,7 @@ from tests.unified.database_sync_helpers import (
     verify_backend_user_exists,
     verify_sync_consistency,
 )
-from tests.unified.database_test_connections import (
+from tests.database_test_connections import (
     DatabaseTestConnections,
 )
 

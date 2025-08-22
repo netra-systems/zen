@@ -32,8 +32,8 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 
-from tests.unified.clients import TestClientFactory
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.clients import TestClientFactory
+from tests.jwt_token_helpers import JWTTestHelper
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(

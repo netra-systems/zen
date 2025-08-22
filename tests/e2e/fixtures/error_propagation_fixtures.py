@@ -25,14 +25,14 @@ import pytest
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.config import TEST_ENDPOINTS, TEST_USERS
-from tests.unified.e2e.real_client_types import (
+from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
+from tests.e2e.real_client_types import (
     ClientConfig,
     ConnectionState,
 )
-from tests.unified.e2e.real_http_client import RealHTTPClient
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.real_http_client import RealHTTPClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
+from tests.e2e.service_orchestrator import E2EServiceOrchestrator
 
 logger = logging.getLogger(__name__)
 

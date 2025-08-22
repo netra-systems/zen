@@ -12,7 +12,7 @@ import asyncio
 
 import pytest
 
-from tests.unified.e2e.helpers.service_independence import (
+from tests.e2e.helpers.service_independence import (
     TEST_TIMEOUT,
     ServiceIndependenceValidator,
 )

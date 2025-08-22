@@ -21,7 +21,7 @@ from contextlib import asynccontextmanager
 import pytest
 
 from tests.e2e.integration.onboarding_flow_executor import OnboardingFlowExecutor
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.test_harness import UnifiedTestHarness
 
 
 class OnboardingTestManager:

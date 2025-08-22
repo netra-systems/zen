@@ -20,13 +20,13 @@ from netra_backend.app.tests.test_utilities.websocket_mocks import (
     MockWebSocket,
     WebSocketBuilder,
 )
-from tests.unified.config import (
+from tests.config import (
     TEST_CONFIG,
     TestDataFactory,
     UnifiedTestConfig,
 )
-from tests.unified.harness_complete import TestHarnessContext
-from tests.unified.message_flow_validators import MessageFlowValidator
+from tests.harness_complete import TestHarnessContext
+from tests.message_flow_validators import MessageFlowValidator
 
 logger = central_logger.get_logger(__name__)
 

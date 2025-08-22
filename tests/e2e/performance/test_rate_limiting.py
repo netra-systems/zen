@@ -25,8 +25,8 @@ import websockets
 
 from netra_backend.app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.unified.service_manager import ServiceManager
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.service_manager import ServiceManager
+from tests.test_harness import UnifiedTestHarness
 
 
 class RateLimitFlowTester:

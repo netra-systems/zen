@@ -39,12 +39,12 @@ from tests.e2e.integration.token_lifecycle_helpers import (
     TokenLifecycleManager,
     WebSocketSessionManager,
 )
-from tests.unified.jwt_token_helpers import (
+from tests.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestHelper,
 )
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.test_data_factory import (
+from tests.real_services_manager import RealServicesManager
+from tests.test_data_factory import (
     create_test_service_credentials,
     create_test_user,
 )

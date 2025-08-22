@@ -32,7 +32,7 @@ from tests.e2e.integration.rate_limiting_core import (
     RedisManager,
     UserManager,
 )
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.test_harness import UnifiedTestHarness
 
 
 class ComprehensiveRateLimitTester:

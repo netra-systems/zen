@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from tests.unified.config import TEST_CONFIG, TestDataFactory
+from tests.config import TEST_CONFIG, TestDataFactory
 
 
 class MockLLMProvider:

@@ -10,8 +10,8 @@ import asyncio
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
-from tests.unified.config import TestDataFactory, TestUser
-from tests.unified.message_flow_validators import (
+from tests.config import TestDataFactory, TestUser
+from tests.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,
     StreamInterruptionHandler,

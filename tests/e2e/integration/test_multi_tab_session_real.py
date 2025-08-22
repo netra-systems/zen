@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 
 class MockWebSocketConnection:

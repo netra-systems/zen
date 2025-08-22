@@ -18,7 +18,7 @@ from typing import Any, Dict, Optional, Union
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from tests.unified.real_client_types import (
+from tests.real_client_types import (
     ClientConfig,
     ConnectionMetrics,
     ConnectionState,

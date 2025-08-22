@@ -29,8 +29,8 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from tests.unified.config import UnifiedTestConfig
-from tests.unified.load_test_utilities import (
+from tests.config import UnifiedTestConfig
+from tests.load_test_utilities import (
     LoadTestSimulator, LoadPatternGenerator, SystemResourceMonitor, calculate_p95_response_time, calculate_success_rate, analyze_memory_usage, detect_degraded_features,
     LoadTestSimulator, LoadPatternGenerator, SystemResourceMonitor,
     calculate_p95_response_time, calculate_success_rate, analyze_memory_usage,

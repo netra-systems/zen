@@ -37,14 +37,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from tests.unified.config import TEST_ENDPOINTS, TEST_USERS
+from tests.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.integration.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,
     WebSocketSessionManager,
 )
-from tests.unified.real_client_types import ClientConfig
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.real_client_types import ClientConfig
+from tests.real_websocket_client import RealWebSocketClient
 
 
 class TokenExpiryReconnectionTester:

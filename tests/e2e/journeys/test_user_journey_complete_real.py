@@ -41,7 +41,7 @@ from helpers.real_service_journey_helpers import (
 )
 
 from dev_launcher.discovery import ServiceDiscovery
-from tests.unified.clients.factory import TestClientFactory
+from tests.clients.factory import TestClientFactory
 
 
 class CompleteUserJourneyRealTester:

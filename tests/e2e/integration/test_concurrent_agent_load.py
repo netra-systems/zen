@@ -13,11 +13,11 @@ from typing import Any, Dict, List, Optional
 import psutil
 import pytest
 
-from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.database_test_connections import DatabaseConnectionManager
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_client_types import ClientConfig
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.real_client_types import ClientConfig
+from tests.real_http_client import RealHTTPClient
+from tests.real_websocket_client import RealWebSocketClient
 
 
 class ConcurrentUserSession:

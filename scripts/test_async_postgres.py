@@ -16,7 +16,8 @@ sys.path.insert(0, str(project_root))
 
 # Set up environment for testing
 os.environ["ENVIRONMENT"] = "development"
-os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:password@localhost:5432/netra"
+# Check for existing PostgreSQL on port 5433 (dev container)
+os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:DTprdt5KoQXlEG4Gh9lF@localhost:5433/netra_dev"
 os.environ["SQL_ECHO"] = "false"
 
 
@@ -34,30 +35,30 @@ async def test_backend_connection():
         # Test connection
         is_connected = await unified_db.test_connection()
         if is_connected:
-            print("✓ Backend database connection successful")
+            print("[OK] Backend database connection successful")
         else:
-            print("✗ Backend database connection failed")
+            print("[ERROR] Backend database connection failed")
             return False
         
         # Get status
         status = unified_db.get_status()
-        print(f"✓ Backend database status: {status}")
+        print(f"[OK] Backend database status: {status}")
         
         # Test session
         async with unified_db.get_session() as session:
             from sqlalchemy import text
             result = await session.execute(text("SELECT version()"))
             version = result.scalar_one()
-            print(f"✓ PostgreSQL version: {version[:50]}...")
+            print(f"[OK] PostgreSQL version: {version[:50]}...")
         
         # Close connection
         await unified_db.close()
-        print("✓ Backend database connection closed")
+        print("[OK] Backend database connection closed")
         
         return True
         
     except Exception as e:
-        print(f"✗ Backend database test failed: {e}")
+        print(f"[ERROR] Backend database test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -72,35 +73,35 @@ async def test_auth_connection():
         
         # Initialize database
         await auth_db.initialize()
-        print("✓ Auth database initialized")
+        print("[OK] Auth database initialized")
         
         # Test connection
         is_connected = await auth_db.test_connection()
         if is_connected:
-            print("✓ Auth database connection successful")
+            print("[OK] Auth database connection successful")
         else:
-            print("✗ Auth database connection failed")
+            print("[ERROR] Auth database connection failed")
             return False
         
         # Get status
         status = auth_db.get_status()
-        print(f"✓ Auth database status: {status}")
+        print(f"[OK] Auth database status: {status}")
         
         # Test session
         async with auth_db.get_session() as session:
             from sqlalchemy import text
             result = await session.execute(text("SELECT current_database()"))
             db_name = result.scalar_one()
-            print(f"✓ Connected to database: {db_name}")
+            print(f"[OK] Connected to database: {db_name}")
         
         # Close connection
         await auth_db.close()
-        print("✓ Auth database connection closed")
+        print("[OK] Auth database connection closed")
         
         return True
         
     except Exception as e:
-        print(f"✗ Auth database test failed: {e}")
+        print(f"[ERROR] Auth database test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -112,10 +113,10 @@ async def test_cloud_sql_imports():
     
     try:
         from google.cloud.sql.connector import Connector
-        print("✓ Cloud SQL connector is available")
+        print("[OK] Cloud SQL connector is available")
         return True
     except ImportError as e:
-        print(f"ℹ Cloud SQL connector not installed (optional for local dev): {e}")
+        print(f"[INFO] Cloud SQL connector not installed (optional for local dev): {e}")
         print("  Install with: pip install cloud-sql-python-connector[asyncpg]")
         return False
 
@@ -130,16 +131,30 @@ async def main():
     print("\n=== Checking PostgreSQL Availability ===")
     try:
         import asyncpg
-        # Try to connect directly
-        conn = await asyncpg.connect(
-            host='localhost',
-            port=5432,
-            user='postgres',
-            password='password',
-            database='postgres'
-        )
-        await conn.close()
-        print("[OK] PostgreSQL is running on localhost:5432")
+        # Try to connect directly (check both common ports)
+        ports_to_try = [(5433, 'DTprdt5KoQXlEG4Gh9lF'), (5432, 'password')]
+        connected = False
+        for port, password in ports_to_try:
+            try:
+                conn = await asyncpg.connect(
+                    host='localhost',
+                    port=port,
+                    user='postgres',
+                    password=password,
+                    database='postgres'
+                )
+                await conn.close()
+                print(f"[OK] PostgreSQL is running on localhost:{port}")
+                # Update DATABASE_URL with working configuration
+                db_name = 'netra_dev' if port == 5433 else 'netra'
+                os.environ["DATABASE_URL"] = f"postgresql+asyncpg://postgres:{password}@localhost:{port}/{db_name}"
+                connected = True
+                break
+            except:
+                continue
+        
+        if not connected:
+            raise Exception("Could not connect to PostgreSQL on ports 5432 or 5433")
     except Exception as e:
         print(f"[ERROR] PostgreSQL not available: {e}")
         print("\nPlease start PostgreSQL with:")
@@ -167,15 +182,15 @@ async def main():
     print("=" * 60)
     
     for name, result in results:
-        status = "✓ PASSED" if result else "✗ FAILED" if result is False else "ℹ SKIPPED"
+        status = "[PASSED]" if result else "[FAILED]" if result is False else "[SKIPPED]"
         print(f"{name:.<40} {status}")
     
     all_passed = all(r for _, r in results if r is not False)
     
     if all_passed:
-        print("\n✅ All tests passed! Async PostgreSQL configuration is working.")
+        print("\n[SUCCESS] All tests passed! Async PostgreSQL configuration is working.")
     else:
-        print("\n❌ Some tests failed. Please check the errors above.")
+        print("\n[FAILURE] Some tests failed. Please check the errors above.")
         sys.exit(1)
 
 

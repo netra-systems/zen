@@ -38,12 +38,12 @@ import httpx
 import pytest
 import websockets
 
-from tests.unified.oauth_test_providers import (
+from tests.oauth_test_providers import (
     GoogleOAuthProvider,
     get_enterprise_config,
 )
-from tests.unified.service_manager import ServiceManager
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.service_manager import ServiceManager
+from tests.test_harness import UnifiedTestHarness
 
 
 class RealOAuthFlowTester:

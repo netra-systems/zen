@@ -21,7 +21,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from tests.unified.load_test_utilities import SystemResourceMonitor
+from tests.load_test_utilities import SystemResourceMonitor
 
 
 @dataclass

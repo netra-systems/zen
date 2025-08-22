@@ -28,7 +28,7 @@ from netra_backend.tests.integration.test_unified_message_flow import MessageFlo
 from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
 
 # Add project root to path
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 

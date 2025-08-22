@@ -17,12 +17,12 @@ from typing import Any, Dict, List
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.helpers.error_propagation.error_generators import (
+from tests.e2e.helpers.error_propagation.error_generators import (
     ErrorCorrelationContext,
     RealErrorPropagationTester,
 )
-from tests.unified.e2e.real_client_types import ClientConfig
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

@@ -28,10 +28,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
 
-from tests.unified.agent_startup_validators import AgentStartupValidatorSuite
+from tests.agent_startup_validators import AgentStartupValidatorSuite
 
 # Test infrastructure
-from tests.unified.config import TEST_CONFIG, TestTier
+from tests.config import TEST_CONFIG, TestTier
 
 
 class CoverageLevel(str, Enum):

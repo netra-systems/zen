@@ -28,7 +28,7 @@ from netra_backend.app.schemas.shared_types import (
     ErrorContext,
     ProcessingResult,
 )
-from tests.unified.config import TestTier, UnifiedTestConfig
+from tests.config import TestTier, UnifiedTestConfig
 
 
 class ResponseValidationType(str, Enum):

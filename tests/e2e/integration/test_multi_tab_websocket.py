@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 from tests.e2e.integration.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.integration.real_websocket_client import RealWebSocketClient
 

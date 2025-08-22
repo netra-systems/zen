@@ -40,8 +40,8 @@ from tests.e2e.integration.disaster_recovery_helpers import (
     create_rto_validator
 )
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import ClientConfig
+from tests.real_websocket_client import RealWebSocketClient
+from tests.real_client_types import ClientConfig
 
 
 @pytest_asyncio.fixture

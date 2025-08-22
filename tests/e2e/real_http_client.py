@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from tests.unified.real_client_types import ClientConfig, ConnectionMetrics
+from tests.real_client_types import ClientConfig, ConnectionMetrics
 
 
 class RealHTTPClient:

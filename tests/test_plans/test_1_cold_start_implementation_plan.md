@@ -71,7 +71,7 @@
 import pytest
 import asyncio
 import time
-from tests.unified.harness import UnifiedTestHarness
+from tests.harness import UnifiedTestHarness
 
 class TestColdStartZeroToResponse:
     """

@@ -9,8 +9,8 @@ from datetime import datetime, timedelta, timezone
 import pytest
 import websockets
 
-from tests.unified.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
+from tests.test_harness import UnifiedTestHarness
 
 
 class TestTokenExpiryUnified:

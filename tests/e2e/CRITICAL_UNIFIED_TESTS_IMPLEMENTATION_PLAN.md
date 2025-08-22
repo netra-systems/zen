@@ -359,7 +359,7 @@ Performance: [Requirements]
 """
 
 import pytest
-from tests.unified.harness import UnifiedTestHarness
+from tests.harness import UnifiedTestHarness
 
 @pytest.mark.asyncio
 @pytest.mark.integration

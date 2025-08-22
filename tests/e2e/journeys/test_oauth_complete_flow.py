@@ -26,9 +26,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_services_manager import create_real_services_manager
+from tests.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
+from tests.real_http_client import RealHTTPClient
+from tests.real_services_manager import create_real_services_manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -29,8 +29,8 @@ import psutil
 import pytest
 
 # Test infrastructure
-from tests.unified.config import TEST_CONFIG, TestTier, get_test_user
-from tests.unified.harness_complete import (
+from tests.config import TEST_CONFIG, TestTier, get_test_user
+from tests.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,
 )

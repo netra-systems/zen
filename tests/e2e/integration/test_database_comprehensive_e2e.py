@@ -27,9 +27,9 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-from tests.unified.database_sync_fixtures import create_test_user_data
-from tests.unified.database_test_operations import DatabaseOperations
-from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from tests.database_sync_fixtures import create_test_user_data
+from tests.database_test_operations import DatabaseOperations
+from tests.harness_complete import UnifiedTestHarnessComplete as TestHarness
 
 
 class DatabaseE2ETester:

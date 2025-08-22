@@ -72,8 +72,8 @@
 ```python
 import pytest
 import time
-from tests.unified.harness import UnifiedTestHarness
-from tests.unified.jwt_helper import JWTTestHelper
+from tests.harness import UnifiedTestHarness
+from tests.jwt_helper import JWTTestHelper
 
 class TestJWTCrossServiceValidation:
     """

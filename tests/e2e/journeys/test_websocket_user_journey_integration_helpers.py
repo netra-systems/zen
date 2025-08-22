@@ -30,13 +30,13 @@ import websockets
 from websockets.exceptions import ConnectionClosedError
 
 from test_framework.mock_utils import mock_justified
-from tests.unified.config import TEST_ENDPOINTS, TEST_SECRETS, TestTier, TestUser
+from tests.config import TEST_ENDPOINTS, TEST_SECRETS, TestTier, TestUser
 from tests.e2e.integration.auth_flow_manager import AuthCompleteFlowManager
 from tests.e2e.integration.websocket_dev_utilities import (
     ConnectionState,
     WebSocketClientSimulator,
 )
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketUserJourneyTester:

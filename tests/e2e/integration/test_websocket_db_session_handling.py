@@ -33,8 +33,8 @@ import pytest
 
 # Note: Config imports are for full test framework - not needed for simplified validation
 try:
-    from tests.unified.config import TEST_USERS
-    from tests.unified.real_services_manager import RealServicesManager
+    from tests.config import TEST_USERS
+    from tests.real_services_manager import RealServicesManager
 except ImportError:
     # Fallback for standalone execution
     TEST_USERS = {}

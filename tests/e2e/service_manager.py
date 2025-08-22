@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import httpx
 
 # Import from part 1
-from tests.unified.test_harness import (
+from tests.test_harness import (
     DatabaseManager,
     ServiceConfig,
     UnifiedTestHarness,

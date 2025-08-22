@@ -13,7 +13,7 @@ import pytest
 
 from netra_backend.app.schemas.registry import User, UserCreate
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 # Helper function for backward compatibility
 jwt_helper = JWTTestHelper()

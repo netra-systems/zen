@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.unified.test_environment_config import (
+from tests.test_environment_config import (
     TestEnvironmentConfig,
     TestEnvironmentType,
     get_test_environment_config,

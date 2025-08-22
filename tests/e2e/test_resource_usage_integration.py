@@ -22,7 +22,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from tests.unified.test_resource_usage import (
+from tests.test_resource_usage import (
     ResourceLimits,
     ResourceMetrics,
     ResourceMonitor,

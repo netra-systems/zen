@@ -31,7 +31,7 @@ import httpx
 
 # Import test environment config for environment-aware configuration
 try:
-    from tests.unified.test_environment_config import TestEnvironmentConfig
+    from tests.test_environment_config import TestEnvironmentConfig
 except ImportError:
     TestEnvironmentConfig = None
 
@@ -366,7 +366,7 @@ def create_real_services_manager(project_root: Optional[Path] = None) -> RealSer
     """
     # Try to use the new dev_launcher integration if available
     try:
-        from tests.unified.dev_launcher_real_system import create_dev_launcher_system
+        from tests.dev_launcher_real_system import create_dev_launcher_system
         logger.info("Using dev_launcher_real_system for service management")
         return create_dev_launcher_system(skip_frontend=True)
     except ImportError:

@@ -21,9 +21,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
-from tests.unified.config import TEST_ENDPOINTS, TEST_SECRETS, TEST_USERS
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.config import TEST_ENDPOINTS, TEST_SECRETS, TEST_USERS
+from tests.jwt_token_helpers import JWTTestHelper
+from tests.reconnection_test_helpers import ReconnectionTestHelpers
 
 
 class ReconnectionPhase(Enum):

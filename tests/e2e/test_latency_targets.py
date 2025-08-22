@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from tests.unified.config import TestUser, UnifiedTestConfig
+from tests.config import TestUser, UnifiedTestConfig
 
 # Import MockWebSocket from the actual location
 try:
@@ -50,7 +50,7 @@ except ImportError:
         def build(self):
             return MockWebSocket()
 from netra_backend.app.logging_config import central_logger
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.jwt_token_helpers import JWTTestHelper
 
 logger = central_logger.get_logger(__name__)
 

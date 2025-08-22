@@ -26,21 +26,21 @@ from typing import Dict, List, Any, Optional, Set, Tuple
 from dataclasses import dataclass
 
 # Import all validators
-from tests.unified.e2e.helpers.import_validators import ImportIndependenceValidator, ServiceConfig
-from tests.unified.e2e.helpers.api_isolation_helpers import (
+from tests.e2e.helpers.import_validators import ImportIndependenceValidator, ServiceConfig
+from tests.e2e.helpers.api_isolation_helpers import (
     ApiIsolationValidator, BackendServiceFailureSimulator, AuthServiceFailureSimulator, NetworkIsolationTester,
     ApiIsolationValidator,
     BackendServiceFailureSimulator,
     AuthServiceFailureSimulator,
     NetworkIsolationTester
 )
-from tests.unified.e2e.helpers.startup_isolation_helpers import (
+from tests.e2e.helpers.startup_isolation_helpers import (
     StartupIsolationValidator, ConfigurationIsolationTester, DeploymentIsolationTester,
     StartupIsolationValidator,
     ConfigurationIsolationTester,
     DeploymentIsolationTester
 )
-from tests.unified.e2e.helpers.dependency_validators import (
+from tests.e2e.helpers.dependency_validators import (
     DependencyIsolationValidator, DatabaseIsolationValidator, ServiceIsolationCoordinator, PatternScanner,
     DependencyIsolationValidator,
     DatabaseIsolationValidator,

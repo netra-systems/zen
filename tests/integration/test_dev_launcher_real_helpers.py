@@ -22,6 +22,10 @@ from dev_launcher.cache_manager import CacheManager
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager
 
+# Set up project root and logger
+project_root = Path(__file__).parent.parent.parent
+logger = logging.getLogger(__name__)
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
@@ -151,7 +155,3 @@ class TestSyntaxFix:
                                 subprocess.run(f"taskkill /F /PID {pid}", shell=True)
             except Exception:
                 pass
-
-            def capture_error(msg, *args, **kwargs):
-                self.console_errors.append(str(msg))
-                return original_log(msg, *args, **kwargs)

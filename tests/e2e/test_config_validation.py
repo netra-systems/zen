@@ -8,7 +8,7 @@ import os
 
 import pytest
 
-from tests.unified.config import (
+from tests.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_SECRETS,

@@ -48,7 +48,7 @@ from netra_backend.app.services.cache.cache_manager import (
 
 # SessionCache = AsyncMock  # Class may not exist, commented out
 # from netra_backend.app.services.database.user_repository import UserRepository  # Class may not exist, commented out
-# from tests.unified.config import TEST_CONFIG  # Comment out since config structure may vary
+# from tests.config import TEST_CONFIG  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 
 logger = logging.getLogger(__name__)

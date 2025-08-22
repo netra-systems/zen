@@ -29,8 +29,8 @@ import httpx
 import pytest
 import websockets
 
-from tests.unified.service_manager import ServiceManager
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.service_manager import ServiceManager
+from tests.test_harness import UnifiedTestHarness
 
 
 class ChatHistoryCreator:

@@ -19,8 +19,8 @@ import time
 from typing import Dict, Any, List
 import pytest_asyncio
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.config import TEST_USERS, TEST_ENDPOINTS
+from tests.real_websocket_client import RealWebSocketClient
 from tests.e2e.integration.helpers.agent_failure_recovery_helpers import (
     AgentFailureSimulator, WebSocketErrorEventValidator, CircuitBreakerTester, FailureType, RecoveryAction, create_error_test_scenarios, validate_recovery_timing, create_mock_websocket_error,
     AgentFailureSimulator,

@@ -37,8 +37,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from tests.unified.config import TestUser, UnifiedTestConfig
-from tests.unified.service_manager import ServiceManager
+from tests.config import TestUser, UnifiedTestConfig
+from tests.service_manager import ServiceManager
 
 # Conditional imports to avoid configuration issues in testing
 try:

@@ -82,11 +82,11 @@ class E2EImportFixer:
             r'^import tests\.': 'import netra_backend.tests.',
             
             # Unified test imports
-            r'^from unified\.': 'from tests.unified.',
+            r'^from unified\.': 'from tests.',
             r'^import unified\.': 'import tests.unified.',
             
             # E2E specific
-            r'^from e2e\.': 'from tests.unified.e2e.',
+            r'^from e2e\.': 'from tests.e2e.',
             r'^import e2e\.': 'import tests.unified.e2e.',
             
             # Integration test imports

@@ -34,8 +34,8 @@ from unittest.mock import AsyncMock, patch
 import psutil
 import pytest
 
-from tests.unified.config import TestUser, UnifiedTestConfig
-from tests.unified.service_manager import ServiceManager
+from tests.config import TestUser, UnifiedTestConfig
+from tests.service_manager import ServiceManager
 
 
 @dataclass

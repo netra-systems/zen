@@ -36,8 +36,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
-from tests.unified.clients import TestClientFactory
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.clients import TestClientFactory
+from tests.jwt_token_helpers import JWTTestHelper
 
 logger = logging.getLogger(__name__)
 

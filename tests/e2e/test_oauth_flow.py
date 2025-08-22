@@ -23,7 +23,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
 from unittest.mock import patch
 
-from tests.unified.oauth_test_providers import (
+from tests.oauth_test_providers import (
     GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory, OAuthErrorProvider, get_enterprise_config,
     GoogleOAuthProvider,
     GitHubOAuthProvider,
@@ -31,7 +31,7 @@ from tests.unified.oauth_test_providers import (
     OAuthErrorProvider,
     get_enterprise_config
 )
-from tests.unified.oauth_flow_manager import (
+from tests.oauth_flow_manager import (
     create_oauth_flow_manager, create_oauth_validator, create_oauth_session_manager,
     create_oauth_flow_manager,
     create_oauth_validator,

@@ -8,9 +8,9 @@ to:
   from tests.e2e.*
 
 and from:
-  from tests.unified.*
+  from tests.*
 to:
-  from tests.unified.*
+  from tests.*
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Development velocity
@@ -55,7 +55,7 @@ def fix_imports_in_file(file_path: Path) -> Tuple[bool, List[str]]:
     
     # Pattern to match netra_backend.tests.unified imports
     pattern2 = r'from netra_backend\.tests\.unified\.(.*)'
-    replacement2 = r'from tests.unified.\1'
+    replacement2 = r'from tests.\1'
     
     # Find all matches before replacing
     matches1 = re.findall(pattern1, content)
@@ -69,7 +69,7 @@ def fix_imports_in_file(file_path: Path) -> Tuple[bool, List[str]]:
     for match in matches1:
         changes.append(f"  from tests.e2e.{match} -> from tests.e2e.{match}")
     for match in matches2:
-        changes.append(f"  from tests.unified.{match} -> from tests.unified.{match}")
+        changes.append(f"  from tests.{match} -> from tests.{match}")
     
     # Write back if changed
     if content != original_content:

@@ -21,15 +21,15 @@ from typing import Dict, Any, Optional, List
 import httpx
 import websockets
 
-from tests.unified.config import (
+from tests.config import (
     TestTier, get_test_user,
     get_auth_service_url, get_backend_service_url
 )
-from tests.unified.database_test_operations import (
+from tests.database_test_operations import (
     UserDataOperations, ChatMessageOperations,
     UserDataOperations, ChatMessageOperations
 )
-from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.database_test_connections import DatabaseConnectionManager
 
 
 class ContextTestManager:

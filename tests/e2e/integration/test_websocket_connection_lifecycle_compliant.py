@@ -20,9 +20,9 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from tests.unified.clients.backend_client import BackendTestClient
-from tests.unified.clients.websocket_client import WebSocketTestClient
-from tests.unified.config import UnifiedTestConfig
+from tests.clients.backend_client import BackendTestClient
+from tests.clients.websocket_client import WebSocketTestClient
+from tests.config import UnifiedTestConfig
 
 
 class TestWebSocketConnectionLifecycleCompliant:

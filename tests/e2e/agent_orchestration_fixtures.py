@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.unified.config import TestTier
+from tests.config import TestTier
 
 
 @pytest.fixture

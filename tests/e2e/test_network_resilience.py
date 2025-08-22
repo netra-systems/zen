@@ -24,8 +24,8 @@ from typing import Any, Dict
 import pytest
 
 # Import test configuration and network simulator
-from tests.unified.config import TEST_CONFIG, TestDataFactory
-from tests.unified.network_failure_simulator import NetworkFailureSimulator
+from tests.config import TEST_CONFIG, TestDataFactory
+from tests.network_failure_simulator import NetworkFailureSimulator
 
 
 @pytest.fixture

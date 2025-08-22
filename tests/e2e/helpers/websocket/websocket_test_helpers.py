@@ -16,13 +16,13 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
-from tests.unified.e2e.config import (
+from tests.e2e.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,
 )
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

@@ -28,7 +28,7 @@ import pytest
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.monitoring.models import MetricsCollector
 from netra_backend.app.services.redis_service import RedisService
-from tests.unified.e2e.staging_test_helpers import (
+from tests.e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite,
 )

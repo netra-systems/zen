@@ -12,14 +12,14 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from tests.unified.clients.factory import TestClientFactory
-from tests.unified.e2e.error_cascade_core import (
+from tests.clients.factory import TestClientFactory
+from tests.e2e.error_cascade_core import (
     AutoRecoveryVerifier,
     GracefulDegradationValidator,
     ServiceFailureSimulator,
 )
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

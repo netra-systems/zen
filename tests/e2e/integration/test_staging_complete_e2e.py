@@ -23,8 +23,8 @@ import aiohttp
 import pytest
 
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.test_environment_config import TestEnvironmentType
+from tests.real_services_manager import RealServicesManager
+from tests.test_environment_config import TestEnvironmentType
 
 logger = logging.getLogger(__name__)
 

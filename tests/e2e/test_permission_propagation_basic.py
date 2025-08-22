@@ -11,10 +11,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.unified.clients.auth_client import AuthTestClient
-from tests.unified.clients.backend_client import BackendTestClient
-from tests.unified.clients.websocket_client import WebSocketTestClient
-from tests.unified.config import UnifiedTestConfig
+from tests.clients.auth_client import AuthTestClient
+from tests.clients.backend_client import BackendTestClient
+from tests.clients.websocket_client import WebSocketTestClient
+from tests.config import UnifiedTestConfig
 
 
 class PermissionPropagationTester:

@@ -102,8 +102,8 @@ from netra_backend.tests.conftest import TestClient
 # Always use absolute imports with full service namespace
 
 # E2E test helpers - CORRECT pattern (root-level tests directory):
-from tests.unified.harness_complete import UnifiedTestHarnessComplete
-from tests.unified.e2e.helpers.database_sync_helpers import DatabaseSyncHelper
+from tests.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.helpers.database_sync_helpers import DatabaseSyncHelper
 
                 </after>
       </code-example>

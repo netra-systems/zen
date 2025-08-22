@@ -142,18 +142,26 @@ class AsyncPostgresManager:
     
     def get_pool_status(self) -> dict:
         """Get connection pool status for monitoring"""
-        if not self.engine or not hasattr(self.engine.pool, 'size'):
+        if not self.engine:
             return {"status": "not_initialized"}
         
         pool = self.engine.pool
-        return {
+        status = {
             "status": "active",
-            "size": pool.size(),
-            "checked_in": pool.checkedin(),
-            "checked_out": pool.checkedout(),
-            "overflow": pool.overflow(),
-            "total": pool.total(),
+            "pool_class": pool.__class__.__name__,
         }
+        
+        # Add available pool attributes
+        if hasattr(pool, 'size'):
+            status["size"] = pool.size()
+        if hasattr(pool, 'checkedin'):
+            status["checked_in"] = pool.checkedin()
+        if hasattr(pool, 'checkedout'):
+            status["checked_out"] = pool.checkedout()
+        if hasattr(pool, 'overflow'):
+            status["overflow"] = pool.overflow()
+        
+        return status
 
 
 # Global instance for local development

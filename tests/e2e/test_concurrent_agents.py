@@ -21,12 +21,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.unified.agent_orchestration_fixtures import (
+from tests.agent_orchestration_fixtures import (
     mock_sub_agents,
     mock_supervisor_agent,
     websocket_mock,
 )
-from tests.unified.config import (
+from tests.config import (
     TEST_USERS,
     TestTier,
     create_unified_config,

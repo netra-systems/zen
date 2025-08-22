@@ -25,7 +25,7 @@ Test Modules:
 
 # Import all modular agent orchestration tests
 # Import shared fixtures
-from tests.unified.agent_orchestration_fixtures import (
+from tests.agent_orchestration_fixtures import (
     coordination_test_data,
     failure_recovery_data,
     health_monitoring_data,
@@ -37,24 +37,24 @@ from tests.unified.agent_orchestration_fixtures import (
     streaming_test_data,
     websocket_mock,
 )
-from tests.unified.test_agent_failure_recovery import (
+from tests.test_agent_failure_recovery import (
     TestAgentFailureRecovery,
     TestFailureDetection,
     TestFailureRecoveryStrategies,
     TestRecoveryValidation,
 )
-from tests.unified.test_agent_response_streaming import (
+from tests.test_agent_response_streaming import (
     TestAgentResponseStreaming,
     TestStreamingIntegration,
     TestStreamingPerformance,
     TestStreamingReliability,
 )
-from tests.unified.test_multi_agent_coordination import (
+from tests.test_multi_agent_coordination import (
     TestAgentSynchronization,
     TestDataFlowOrchestration,
     TestMultiAgentCoordination,
 )
-from tests.unified.test_supervisor_routing import (
+from tests.test_supervisor_routing import (
     TestRoutingPerformance,
     TestRoutingValidation,
     TestSupervisorRouting,

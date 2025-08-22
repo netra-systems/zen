@@ -16,8 +16,8 @@ import time
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from tests.unified.config import TestTier, get_test_user
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.config import TestTier, get_test_user
+from tests.test_harness import UnifiedTestHarness
 
 
 class AgentStartupE2EManager:

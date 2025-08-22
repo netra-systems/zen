@@ -22,7 +22,7 @@ import pytest
 import asyncio
 import uuid
 from typing import Dict, Optional
-from tests.unified.transaction_test_fixtures import (
+from tests.transaction_test_fixtures import (
     TransactionConsistencyTester, TransactionTestDataFactory, DatabaseType, TransactionState,
     TransactionConsistencyTester,
     TransactionTestDataFactory,

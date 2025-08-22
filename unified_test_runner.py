@@ -235,8 +235,9 @@ class UnifiedTestRunner:
         # Dev launcher test patterns - tests that validate dev_launcher functionality
         dev_launcher_patterns = [
             "tests/test_system_startup.py",
-            "tests/unified/test_dev_launcher_real_startup.py", 
+            "tests/e2e/test_dev_launcher_real_startup.py", 
             "tests/e2e/integration/test_dev_launcher_startup_complete.py",
+            "tests/integration/test_dev_launcher_utilities_validation.py",
             "-k", "dev_launcher"
         ]
         
@@ -251,7 +252,8 @@ class UnifiedTestRunner:
         elif args.level == "integration":
             # For integration tests, include service interaction tests
             cmd_parts.extend([
-                "tests/unified/test_dev_launcher_real_startup.py",
+                "tests/e2e/test_dev_launcher_real_startup.py",
+                "tests/integration/test_dev_launcher_utilities_validation.py",
                 "tests/test_system_startup.py",
                 "--timeout=300"  # 5 minute timeout for integration tests
             ])
@@ -262,7 +264,7 @@ class UnifiedTestRunner:
         elif args.level == "performance":
             # For performance tests, focus on startup performance
             cmd_parts.extend([
-                "tests/unified/test_dev_launcher_real_startup.py::TestDevLauncherRealStartup::test_service_startup_order_validation",
+                "tests/e2e/test_dev_launcher_real_startup.py::TestDevLauncherRealStartup::test_service_startup_order_validation",
                 "--timeout=300"
             ])
         elif args.level == "comprehensive":

@@ -24,8 +24,8 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.config import setup_test_environment
-from tests.unified.health_check_core import SERVICE_ENDPOINTS
+from tests.config import setup_test_environment
+from tests.health_check_core import SERVICE_ENDPOINTS
 
 logger = logging.getLogger(__name__)
 

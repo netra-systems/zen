@@ -18,10 +18,10 @@ from auth_service.auth_core.services.auth_service import AuthService
 
 # App imports
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from tests.unified.jwt_token_helpers import JWTTokenTestHelper
+from tests.jwt_token_helpers import JWTTokenTestHelper
 
 # Test framework imports
-from tests.unified.test_data_factory import (
+from tests.test_data_factory import (
     create_test_service_credentials,
 )
 

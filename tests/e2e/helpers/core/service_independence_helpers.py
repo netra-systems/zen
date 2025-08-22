@@ -29,8 +29,8 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import everything from the new modular structure
-from tests.unified.e2e.helpers.service_independence import *
-from tests.unified.e2e.helpers.service_independence.pytest_interface import (
+from tests.e2e.helpers.service_independence import *
+from tests.e2e.helpers.service_independence.pytest_interface import (
     test_service_independence, test_zero_,
     test_service_independence,
     test_zero_import_violations,

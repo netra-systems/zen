@@ -15,7 +15,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.test_harness import UnifiedTestHarness
 
 
 class TestTokenValidationFlow:

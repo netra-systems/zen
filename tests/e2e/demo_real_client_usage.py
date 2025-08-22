@@ -13,9 +13,9 @@ Business Value Justification (BVJ):
 import asyncio
 import json
 
-from tests.unified.config import TEST_ENDPOINTS, get_test_user
-from tests.unified.real_client_factory import create_real_client_factory
-from tests.unified.real_client_types import create_test_config
+from tests.config import TEST_ENDPOINTS, get_test_user
+from tests.real_client_factory import create_real_client_factory
+from tests.real_client_types import create_test_config
 
 
 async def demo_http_client():

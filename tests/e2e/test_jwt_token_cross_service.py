@@ -14,12 +14,12 @@ import jwt
 import pytest
 import websockets
 
-from tests.unified.jwt_token_helpers import (
+from tests.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestFixtures,
     JWTTestHelper,
 )
-from tests.unified.test_harness import UnifiedTestHarness
+from tests.test_harness import UnifiedTestHarness
 
 
 class TestRealTokenGeneration(JWTTestFixtures):

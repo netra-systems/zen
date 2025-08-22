@@ -22,7 +22,7 @@ import httpx
 from typing import Dict, Any
 
 from netra_backend.app.logging_config import central_logger
-from tests.unified.health_check_core import (
+from tests.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, create_service_error_result, create_timeout_result, create_healthy_result, validate_service_response,
     HealthCheckResult, SERVICE_ENDPOINTS,
     create_service_error_result, create_timeout_result,

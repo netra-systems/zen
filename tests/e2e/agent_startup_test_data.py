@@ -28,7 +28,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.shared_types import TestTier
-from tests.unified.config import TestUser, get_test_user
+from tests.config import TestUser, get_test_user
 
 
 class DataCorruptionType(Enum):

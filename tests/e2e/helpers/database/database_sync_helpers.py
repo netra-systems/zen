@@ -37,17 +37,17 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
-from tests.unified.database_test_connections import (
+from tests.database_test_connections import (
     DatabaseTestConnections,
 )
-from tests.unified.database_test_operations import (
+from tests.database_test_operations import (
     ChatMessageOperations,
     SessionCacheOperations,
     UserDataOperations,
 )
 
 # Test infrastructure imports
-from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.e2e.unified_e2e_harness import create_e2e_harness
 
 logger = logging.getLogger(__name__)
 

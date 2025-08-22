@@ -30,9 +30,9 @@ import pytest
 
 from tests.e2e.integration.session_persistence_core import SessionPersistenceManager
 from tests.e2e.integration.session_persistence_validators import SessionPersistenceValidator
-from tests.unified.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
-from tests.unified.real_client_factory import RealClientFactory
-from tests.unified.real_client_types import ClientConfig
+from tests.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
+from tests.real_client_factory import RealClientFactory
+from tests.real_client_types import ClientConfig
 
 
 @pytest.mark.critical

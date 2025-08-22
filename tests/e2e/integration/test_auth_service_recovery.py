@@ -51,9 +51,9 @@ from tests.e2e.integration.service_failure_recovery_helpers import (
 from tests.e2e.integration.service_orchestrator import (
     create_service_orchestrator,
 )
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.test_websocket_real_connection import WebSocketRealConnectionTester
+from tests.jwt_token_helpers import JWTTestHelper
+from tests.real_websocket_client import RealWebSocketClient
+from tests.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)
 

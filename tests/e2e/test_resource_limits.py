@@ -28,7 +28,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import psutil
 import pytest
 
-from tests.unified.config import TEST_CONFIG, TestDatabaseManager
+from tests.config import TEST_CONFIG, TestDatabaseManager
 
 
 @dataclass
