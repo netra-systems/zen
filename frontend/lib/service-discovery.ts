@@ -108,19 +108,19 @@ class ServiceDiscoveryClient {
     if (environment === 'development') {
       return {
         apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-        wsUrl: process.env.NEXT_PUBLIC_WEBSOCKET_URL || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/secure',
+        wsUrl: process.env.NEXT_PUBLIC_WEBSOCKET_URL || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws',
         authUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081',
       };
     } else if (environment === 'production') {
       return {
         apiUrl: 'https://api.netrasystems.ai',
-        wsUrl: 'wss://api.netrasystems.ai/ws/secure',
+        wsUrl: 'wss://api.netrasystems.ai/ws',
         authUrl: 'https://auth.netrasystems.ai',
       };
     } else {
       return {
         apiUrl: 'https://api.staging.netrasystems.ai',
-        wsUrl: 'wss://api.staging.netrasystems.ai/ws/secure',
+        wsUrl: 'wss://api.staging.netrasystems.ai/ws',
         authUrl: 'https://auth.staging.netrasystems.ai',
       };
     }

@@ -57,8 +57,20 @@ class AuthServiceClient:
         return None
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
-        """Try to get token from cache."""
-        return self.token_cache.get_cached_token(token)
+        """Try to get token from cache, checking for invalidation."""
+        cached_result = self.token_cache.get_cached_token(token)
+        if cached_result:
+            # If we have a cached result, still check if token was blacklisted
+            # This provides additional security in case of race conditions
+            try:
+                blacklist_check = await self._check_token_blacklist(token)
+                if blacklist_check and blacklist_check.get("blacklisted", False):
+                    # Token is blacklisted, mark as invalid and remove from cache
+                    self.token_cache.invalidate_cached_token(token)
+                    return None
+            except Exception as e:
+                logger.warning(f"Blacklist check failed, proceeding with cached result: {e}")
+        return cached_result
     
     async def _validate_with_circuit_breaker(self, token: str) -> Optional[Dict]:
         """Validate token using circuit breaker."""
@@ -196,6 +208,33 @@ class AuthServiceClient:
         """Process logout result and invalidate cache."""
         self.token_cache.invalidate_cached_token(token)
         return result
+    
+    async def _check_token_blacklist(self, token: str) -> Optional[Dict]:
+        """Check if token is blacklisted in auth service."""
+        if not self.settings.enabled:
+            return {"blacklisted": False}
+        
+        try:
+            client = await self._get_client()
+            request_data = {"token": token}
+            
+            # Add tracing headers for cross-service communication
+            trace_headers = self.tracing_manager.inject_trace_headers()
+            
+            response = await client.post(
+                "/auth/check-blacklist",
+                json=request_data,
+                headers=trace_headers
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+            return {"blacklisted": False}
+        except Exception as e:
+            logger.error(f"Blacklist check failed: {e}")
+            # In case of error, assume token is not blacklisted to avoid false positives
+            # The main validation will still happen at the auth service
+            return {"blacklisted": False}
     
     async def _attempt_logout(self, token: str, session_id: Optional[str]) -> bool:
         """Attempt logout with error handling."""

@@ -52,6 +52,9 @@ class AuthService:
         self._last_failure_times = {}
         self._circuit_breaker_redis_prefix = "circuit_breaker:"
         
+        # Simple in-memory user store for testing
+        self._test_users = {}
+        
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
         """Process user login"""
@@ -121,10 +124,13 @@ class AuthService:
     
     async def logout(self, token: str, 
                     session_id: Optional[str] = None) -> bool:
-        """Process user logout"""
+        """Process user logout with token blacklisting"""
         try:
             # Extract user from token
             user_id = self.jwt_handler.extract_user_id(token)
+            
+            # Blacklist the specific token to invalidate it immediately
+            self.jwt_handler.blacklist_token(token)
             
             # Delete session if provided
             if session_id:
@@ -145,6 +151,25 @@ class AuthService:
         except Exception as e:
             logger.error(f"Logout failed: {e}")
             return False
+    
+    def register_test_user(self, email: str, password: str) -> Dict:
+        """Register a test user in memory"""
+        import uuid
+        user_id = str(uuid.uuid4())
+        
+        self._test_users[email] = {
+            "id": user_id,
+            "email": email,
+            "password": password,
+            "name": "Test User",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        return {
+            "user_id": user_id,
+            "email": email,
+            "message": "User registered successfully"
+        }
     
     async def validate_token(self, token: str) -> TokenResponse:
         """Validate access token"""
@@ -285,6 +310,17 @@ class AuthService:
                                   password: str) -> Optional[Dict]:
         """Validate local username/password"""
         if not self.db_session:
+            # Check test users store first
+            if email in self._test_users:
+                stored_user = self._test_users[email]
+                if stored_user["password"] == password:
+                    return {
+                        "id": stored_user["id"],
+                        "email": email,
+                        "name": stored_user.get("name", "Test User"),
+                        "permissions": ["read", "write"]
+                    }
+            
             # Fallback for testing
             hashed = hashlib.sha256(password.encode()).hexdigest()
             if email == "test@example.com":

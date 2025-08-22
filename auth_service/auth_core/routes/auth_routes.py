@@ -153,6 +153,29 @@ async def initiate_oauth_login(
         logger.error(f"OAuth initiation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/register", status_code=201)
+async def register_user(
+    request: dict
+):
+    """Register a new user"""
+    email = request.get("email")
+    password = request.get("password")
+    confirm_password = request.get("confirm_password")
+    
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+    
+    if password != confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    
+    # Register user using auth service
+    try:
+        result = auth_service.register_test_user(email, password)
+        return result
+    except Exception as e:
+        logger.error(f"Registration failed: {e}")
+        raise HTTPException(status_code=500, detail="Registration failed")
+
 @router.post("/login", response_model=LoginResponse)
 async def login(
     request: LoginRequest,
@@ -197,6 +220,27 @@ async def validate_token(request: TokenRequest):
         raise HTTPException(status_code=401, detail="Invalid token")
     
     return response
+
+@router.post("/check-blacklist")
+async def check_token_blacklist(request: TokenRequest):
+    """Check if token is blacklisted"""
+    try:
+        blacklisted = auth_service.jwt_handler.is_token_blacklisted(request.token)
+        
+        # Also check if user is blacklisted
+        user_id = auth_service.jwt_handler.extract_user_id(request.token)
+        user_blacklisted = False
+        if user_id:
+            user_blacklisted = auth_service.jwt_handler.is_user_blacklisted(user_id)
+        
+        return {
+            "blacklisted": blacklisted or user_blacklisted,
+            "token_blacklisted": blacklisted,
+            "user_blacklisted": user_blacklisted
+        }
+    except Exception as e:
+        logger.error(f"Blacklist check failed: {e}")
+        return {"blacklisted": False, "token_blacklisted": False, "user_blacklisted": False}
 
 @router.post("/refresh")
 async def refresh_tokens(request: RefreshRequest):

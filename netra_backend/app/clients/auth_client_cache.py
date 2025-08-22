@@ -51,6 +51,10 @@ class AuthTokenCache:
         """Validate cached token and return if valid."""
         cached = self._token_cache[token]
         if cached.is_valid():
+            # Check if token was marked as invalidated
+            if cached.data.get("invalidated", False):
+                self._remove_expired_token(token)
+                return None
             return cached.data
         
         self._remove_expired_token(token)
@@ -68,6 +72,12 @@ class AuthTokenCache:
     def clear_cache(self) -> None:
         """Clear all cached tokens."""
         self._token_cache.clear()
+    
+    def mark_token_invalidated(self, token: str) -> None:
+        """Mark cached token as invalidated without removing from cache."""
+        if token in self._token_cache:
+            cached = self._token_cache[token]
+            cached.data["invalidated"] = True
 
 
 class AuthCircuitBreakerManager:

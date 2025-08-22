@@ -323,16 +323,24 @@ class WebSocketValidator:
                 is_mcp_endpoint = "/api/mcp/ws" in endpoint.path
                 
                 if is_mcp_endpoint:
-                    # Send JSON-RPC format message for MCP endpoints
+                    # Send JSON-RPC wrapped in unified format for MCP endpoints
                     test_message = {
-                        "jsonrpc": "2.0",
-                        "method": "ping",
-                        "params": {"timestamp": time.time()},
-                        "id": 1
+                        "type": "jsonrpc",
+                        "payload": {
+                            "jsonrpc": "2.0",
+                            "method": "ping",
+                            "params": {"timestamp": time.time()},
+                            "id": 1
+                        },
+                        "timestamp": time.time()
                     }
                 else:
-                    # Send regular JSON for main WebSocket endpoints (/ws)
-                    test_message = {"type": "ping", "timestamp": time.time()}
+                    # Send unified format for main WebSocket endpoints (/ws)
+                    test_message = {
+                        "type": "ping",
+                        "payload": {},
+                        "timestamp": time.time()
+                    }
                 
                 await websocket.send(json.dumps(test_message))
                 
@@ -344,26 +352,24 @@ class WebSocketValidator:
                         try:
                             parsed_response = json.loads(response)
                             
-                            if is_mcp_endpoint:
-                                # For MCP endpoints, check JSON-RPC response format
-                                if not isinstance(parsed_response, dict):
-                                    endpoint.last_error = "Invalid JSON-RPC response structure"
-                                    return False
-                                # Check for either result or error (both are valid JSON-RPC responses)
-                                if "jsonrpc" not in parsed_response:
-                                    endpoint.last_error = "Missing jsonrpc field in response"
-                                    return False
-                                # If there's an error, it's still a valid connection
-                                # MCP might return method not found, which is OK for validation
-                            else:
-                                # For regular endpoints, check basic message structure
-                                if not isinstance(parsed_response, dict) or "type" not in parsed_response:
-                                    endpoint.last_error = "Invalid JSON message structure in response"
-                                    return False
-                                # Check for expected pong response
-                                if parsed_response.get("type") not in ["pong", "connection_established", "error"]:
+                            # All endpoints now use unified message format
+                            if not isinstance(parsed_response, dict):
+                                endpoint.last_error = "Invalid response structure"
+                                return False
+                            
+                            # Check for unified format or legacy format (backward compatibility)
+                            if "type" in parsed_response:
+                                # Unified format response
+                                valid_types = ["pong", "connection_established", "error", "jsonrpc_response"]
+                                if parsed_response.get("type") not in valid_types:
                                     endpoint.last_error = f"Unexpected response type: {parsed_response.get('type')}"
                                     return False
+                            elif "jsonrpc" in parsed_response:
+                                # Legacy JSON-RPC response (for backward compatibility)
+                                pass  # Accept legacy format during transition
+                            else:
+                                endpoint.last_error = "Response missing required 'type' field"
+                                return False
                         except json.JSONDecodeError:
                             endpoint.last_error = "Non-JSON response received"
                             return False

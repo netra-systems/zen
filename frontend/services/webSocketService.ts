@@ -1286,13 +1286,10 @@ class WebSocketService {
     urlObj.searchParams.delete('auth');
     urlObj.searchParams.delete('jwt');
     
-    // Use secure WebSocket endpoint (only if not already secure)
-    // Check if URL already has /secure or if it's a versioned endpoint like /ws/v1
-    const needsSecurePath = urlObj.pathname === '/ws' || urlObj.pathname === '/ws/';
-    const alreadySecure = urlObj.pathname.includes('/secure') || urlObj.pathname.includes('/v1');
-    
-    if (needsSecurePath && !alreadySecure) {
-      urlObj.pathname = '/ws/secure';
+    // Use unified WebSocket endpoint 
+    // All WebSocket connections now use the single unified '/ws' endpoint
+    if (urlObj.pathname !== '/ws') {
+      urlObj.pathname = '/ws';
     }
     
     return urlObj.toString();

@@ -32,6 +32,15 @@ from pydantic import BaseModel, EmailStr, Field, field_validator, model_validato
 from netra_backend.app.core.exceptions_auth import AuthenticationError
 
 
+# Rate limiting exception
+class RateLimitError(Exception):
+    """Rate limit exceeded error"""
+    
+    def __init__(self, message: str = "Rate limit exceeded", retry_after: Optional[int] = None):
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
 class TokenType(str, Enum):
     """Token type enumeration - single source of truth."""
     ACCESS = "access"

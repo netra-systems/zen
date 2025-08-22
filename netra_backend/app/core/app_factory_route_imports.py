@@ -103,21 +103,18 @@ def _import_extended_router_modules() -> tuple:
         router as health_extended_router,
     )
     from netra_backend.app.routes.monitoring import router as monitoring_router
-    from netra_backend.app.routes.websocket import (
-        router as websocket_router,
+    from netra_backend.app.routes.websocket_unified import (
+        router as websocket_unified_router,
     )
-    from netra_backend.app.routes.websocket_secure import (
-        router as websocket_secure_router,
-    )
-    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_secure_router
+    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_unified_router
 
 
 def _create_extended_router_dict(router_imports: tuple) -> dict:
     """Create extended router dictionary from imports."""
-    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_router, websocket_secure_router = router_imports
+    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_unified_router = router_imports
     return {"health_extended_router": health_extended_router,
         "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router,
-        "websocket_router": websocket_router, "websocket_secure_router": websocket_secure_router}
+        "websocket_unified_router": websocket_unified_router}
 
 
 def import_factory_routers() -> dict:

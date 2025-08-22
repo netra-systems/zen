@@ -127,10 +127,56 @@ def run_database_migrations(logger: logging.Logger) -> None:
     fast_startup = config.fast_startup_mode.lower() == "true"
     skip_migrations = config.skip_migrations.lower() == "true"
     
+    # Check if database is in mock mode by examining DATABASE_URL or service config
+    database_url = config.database_url or ""
+    is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
+    
+    if is_mock_database:
+        logger.info("Skipping database migrations (PostgreSQL in mock mode)")
+        return
+    
     if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
     elif fast_startup or skip_migrations:
         logger.info("Skipping database migrations (fast startup mode)")
+
+
+def _is_mock_database_url(database_url: str) -> bool:
+    """Check if database URL indicates mock mode."""
+    if not database_url:
+        return False
+    
+    # Check for common mock database URL patterns
+    mock_patterns = [
+        "postgresql://mock:mock@",
+        "postgresql+asyncpg://mock:mock@",
+        "/mock?",  # database name is "mock"
+        "/mock$",  # database name is "mock" at end
+        "@localhost:5432/mock"  # specific mock pattern used by dev launcher
+    ]
+    
+    return any(pattern in database_url for pattern in mock_patterns)
+
+
+def _is_postgres_service_mock_mode() -> bool:
+    """Check if PostgreSQL service is configured in mock mode via dev launcher config."""
+    import json
+    import os
+    from pathlib import Path
+    
+    try:
+        # Check dev launcher service config
+        config_path = Path.cwd() / ".dev_services.json"
+        if config_path.exists():
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                postgres_config = config.get("postgres", {})
+                return postgres_config.get("mode") == "mock"
+    except Exception:
+        pass  # Ignore errors in config reading
+    
+    # Also check environment variable
+    return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
 
 
 def _execute_migrations(logger: logging.Logger) -> None:
@@ -180,6 +226,17 @@ def setup_database_connections(app: FastAPI) -> None:
     logger.info("Setting up database connections...")
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
+    # Check if database is in mock mode by examining DATABASE_URL or service config
+    database_url = config.database_url or ""
+    is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
+    
+    if is_mock_database:
+        logger.info("PostgreSQL in mock mode - using mock session factory")
+        app.state.db_session_factory = None  # Signal to use mock/fallback
+        app.state.database_available = False
+        app.state.database_mock_mode = True
+        return
     
     try:
         logger.debug("Calling initialize_postgres()...")

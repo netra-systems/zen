@@ -43,6 +43,11 @@ class MigrationRunner:
         if self._should_skip_migrations(env):
             self._print("⏭️", "MIGRATIONS", "Skipping migrations (explicitly disabled)")
             return True
+        
+        # Check if PostgreSQL is in mock mode from service configuration
+        if self._is_postgres_mock_mode():
+            self._print("🎭", "MIGRATIONS", "PostgreSQL in mock mode, skipping migrations")
+            return True
             
         # Check if database is configured
         database_url = self._get_database_url(env)
@@ -89,6 +94,24 @@ class MigrationRunner:
         ]
         
         return any(skip_flags)
+    
+    def _is_postgres_mock_mode(self) -> bool:
+        """Check if PostgreSQL service is configured in mock mode."""
+        import json
+        
+        try:
+            # Check dev launcher service config
+            config_path = self.project_root / ".dev_services.json"
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    postgres_config = config.get("postgres", {})
+                    return postgres_config.get("mode") == "mock"
+        except Exception:
+            pass  # Ignore errors in config reading
+        
+        # Also check environment variable
+        return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
     
     def _get_database_url(self, env: Optional[Dict] = None) -> Optional[str]:
         """Get database URL from environment."""

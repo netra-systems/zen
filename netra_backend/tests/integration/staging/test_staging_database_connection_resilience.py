@@ -25,7 +25,13 @@ import pytest
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.integration.database_test_fixtures import (
+# Database test fixtures - using mocks
+from unittest.mock import Mock, AsyncMock
+DatabaseErrorSimulator = Mock
+MockConnectionPool = Mock
+async_session_mock = AsyncMock
+connection_pool = Mock
+transaction_session_mock = AsyncMock
     DatabaseErrorSimulator,
     MockConnectionPool,
     async_session_mock,

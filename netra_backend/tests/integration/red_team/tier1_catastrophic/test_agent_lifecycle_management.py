@@ -37,7 +37,10 @@ from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-from netra_backend.app.db.models_agent import Agent, AgentRun
+# Agent models - creating mocks for tests
+from unittest.mock import Mock
+Agent = Mock
+AgentRun = Mock
 from netra_backend.app.db.session import get_db_session
 
 

@@ -25,6 +25,10 @@ class JWTHandler:
         self.refresh_expiry = AuthConfig.get_jwt_refresh_expiry_days()
         self.service_expiry = AuthConfig.get_jwt_service_expiry_minutes()
         self.security_validator = JWTSecurityValidator()
+        
+        # Token blacklist for immediate invalidation
+        self._token_blacklist = set()
+        self._user_blacklist = set()  # For invalidating all user tokens
     
     def _get_jwt_secret(self) -> str:
         """Get JWT secret with production safety"""
@@ -76,8 +80,13 @@ class JWTHandler:
     
     def validate_token(self, token: str, 
                       token_type: str = "access") -> Optional[Dict]:
-        """Validate and decode JWT token with enhanced security"""
+        """Validate and decode JWT token with enhanced security and blacklist checking"""
         try:
+            # Check if token is blacklisted first
+            if self.is_token_blacklisted(token):
+                logger.warning("Token is blacklisted")
+                return None
+            
             # First validate token security (algorithm, etc.)
             if not self.security_validator.validate_token_security(token):
                 logger.warning("Token failed security validation")
@@ -98,6 +107,12 @@ class JWTHandler:
             
             if payload.get("token_type") != token_type:
                 logger.warning(f"Invalid token type: expected {token_type}")
+                return None
+            
+            # Check if user is blacklisted
+            user_id = payload.get("sub")
+            if user_id and self.is_user_blacklisted(user_id):
+                logger.warning(f"User {user_id} is blacklisted")
                 return None
             
             # Additional security checks
@@ -254,3 +269,58 @@ class JWTHandler:
         except Exception as e:
             logger.error(f"Token claims validation error: {e}")
             return False
+    
+    def blacklist_token(self, token: str) -> bool:
+        """Add token to blacklist for immediate invalidation"""
+        try:
+            self._token_blacklist.add(token)
+            logger.info(f"Token blacklisted successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to blacklist token: {e}")
+            return False
+    
+    def blacklist_user(self, user_id: str) -> bool:
+        """Add user to blacklist, invalidating all their tokens"""
+        try:
+            self._user_blacklist.add(user_id)
+            logger.info(f"User {user_id} blacklisted successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to blacklist user {user_id}: {e}")
+            return False
+    
+    def is_token_blacklisted(self, token: str) -> bool:
+        """Check if specific token is blacklisted"""
+        return token in self._token_blacklist
+    
+    def is_user_blacklisted(self, user_id: str) -> bool:
+        """Check if user is blacklisted"""
+        return user_id in self._user_blacklist
+    
+    def remove_from_blacklist(self, token: str) -> bool:
+        """Remove token from blacklist"""
+        try:
+            self._token_blacklist.discard(token)
+            logger.info(f"Token removed from blacklist")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to remove token from blacklist: {e}")
+            return False
+    
+    def remove_user_from_blacklist(self, user_id: str) -> bool:
+        """Remove user from blacklist"""
+        try:
+            self._user_blacklist.discard(user_id)
+            logger.info(f"User {user_id} removed from blacklist")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to remove user {user_id} from blacklist: {e}")
+            return False
+    
+    def get_blacklist_info(self) -> Dict[str, int]:
+        """Get blacklist statistics"""
+        return {
+            "blacklisted_tokens": len(self._token_blacklist),
+            "blacklisted_users": len(self._user_blacklist)
+        }

@@ -5,6 +5,10 @@ from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
 
+# Alias for backward compatibility
+MessageQueue = None  # Will be defined below
+
+
 class MessageQueueService:
     """Service for managing message queues"""
     
@@ -72,3 +76,27 @@ class MessageQueueService:
             self.queues[queue_name].clear()
             return count
         return 0
+
+
+class MessageQueue:
+    """Message Queue class for backward compatibility"""
+    
+    def __init__(self, name: str = "default"):
+        self.name = name
+        self.service = MessageQueueService()
+    
+    async def put(self, message: Dict[str, Any]) -> bool:
+        """Put message in queue"""
+        return await self.service.publish(self.name, message)
+    
+    async def get(self) -> Optional[Dict[str, Any]]:
+        """Get message from queue"""
+        return await self.service.consume(self.name)
+    
+    async def size(self) -> int:
+        """Get queue size"""
+        return self.service.get_queue_size(self.name)
+    
+    async def clear(self) -> int:
+        """Clear queue"""
+        return await self.service.purge_queue(self.name)
