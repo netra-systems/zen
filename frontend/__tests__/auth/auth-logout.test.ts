@@ -45,20 +45,29 @@ describe('Auth Logout Flow', () => {
     originalLocation = window.location;
     mockLocationAssign = jest.fn();
     
-    // Create a simple mock that captures href assignments without triggering JSDOM navigation
+    // Create a mock that captures href assignments
+    const mockLocation: any = {
+      href: '',
+      protocol: 'http:',
+      host: 'localhost:3000',
+      hostname: 'localhost',
+      port: '3000',
+      pathname: '/',
+      search: '',
+      hash: '',
+      origin: 'http://localhost:3000',
+      assign: mockLocationAssign
+    };
+    
+    // Override the href setter to capture assignments
+    Object.defineProperty(mockLocation, 'href', {
+      get: () => mockLocation._href || '',
+      set: (value) => { mockLocation._href = value; },
+      configurable: true
+    });
+    
     Object.defineProperty(window, 'location', {
-      value: {
-        href: '',
-        protocol: 'http:',
-        host: 'localhost:3000',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/',
-        search: '',
-        hash: '',
-        origin: 'http://localhost:3000',
-        assign: mockLocationAssign
-      },
+      value: mockLocation,
       writable: true,
       configurable: true
     });

@@ -66,10 +66,10 @@ const ThreadItem: React.FC<ThreadItemProps> = ({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      onMouseEnter={() => act(() => setIsHovered(true))}
-      onMouseLeave={() => act(() => setIsHovered(false))}
-      onFocus={() => act(() => setIsHovered(true))}
-      onBlur={() => act(() => setIsHovered(false))}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
       aria-current={isActive ? 'page' : undefined}
       aria-label={`Thread: ${title}${hasUnread ? ' (unread)' : ''}`}
     >
