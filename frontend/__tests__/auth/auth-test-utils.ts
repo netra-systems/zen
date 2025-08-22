@@ -87,7 +87,7 @@ export function createMockDevConfig() {
 }
 
 export function createMockToken() {
-  return 'mock-jwt-token-123';
+  return 'mock-token'; // Align with existing mock setup
 }
 
 export function createMockDevLoginResponse() {

@@ -74,3 +74,15 @@ class QualityGateException(NetraException):
             message=message, code=ErrorCode.VALIDATION_ERROR, severity=ErrorSeverity.HIGH,
             details=details, user_message=user_message, trace_id=trace_id, context=context
         )
+
+
+class StateRecoveryException(NetraException):
+    """Exception raised when state recovery operations fail."""
+    
+    def __init__(self, message: str = "State recovery failed", details: Optional[Dict[str, Any]] = None,
+                 user_message: Optional[str] = None, trace_id: Optional[str] = None,
+                 context: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message, code=ErrorCode.INTERNAL_ERROR, severity=ErrorSeverity.HIGH,
+            details=details, user_message=user_message, trace_id=trace_id, context=context
+        )
