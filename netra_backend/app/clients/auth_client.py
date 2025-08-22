@@ -32,9 +32,13 @@ from netra_backend.app.clients.auth_client_config import (
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client
 
+# Alias for backward compatibility
+AuthClient = AuthServiceClient
+
 # Re-export for backward compatibility
 __all__ = [
     'AuthServiceClient',
+    'AuthClient',
     'auth_client',
     'Environment', 
     'OAuthConfig',

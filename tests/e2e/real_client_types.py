@@ -183,3 +183,35 @@ class ConnectionState:
         self.session_id = None
         self.user_id = None
         self.last_heartbeat = None
+
+
+# Configuration factory functions
+def create_auth_config() -> ClientConfig:
+    """Create configuration for auth service client."""
+    return ClientConfig(
+        base_url="http://localhost:8001",
+        auth_url="http://localhost:8001",
+        timeout=30.0,
+        max_retries=3
+    )
+
+
+def create_backend_config() -> ClientConfig:
+    """Create configuration for backend service client."""
+    return ClientConfig(
+        base_url="http://localhost:8000",
+        auth_url="http://localhost:8001",
+        timeout=30.0,
+        max_retries=3
+    )
+
+
+def create_test_config() -> ClientConfig:
+    """Create configuration for test clients."""
+    return ClientConfig(
+        base_url="http://localhost:8000",
+        websocket_url="ws://localhost:8000/websocket",
+        auth_url="http://localhost:8001",
+        timeout=30.0,
+        max_retries=3
+    )

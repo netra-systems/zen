@@ -21,7 +21,7 @@ from typing import Dict, List, Optional
 import pytest
 import websockets
 
-from tests.database_sync_fixtures import create_test_user_data
+from tests.e2e.database_sync_fixtures import create_test_user_data
 from tests.e2e.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )

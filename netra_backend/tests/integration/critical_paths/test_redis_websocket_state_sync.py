@@ -117,7 +117,7 @@ class TestRedisWebSocketStateSyncL3:
         
         # Patch the global redis_manager instance
 
-        with patch('app.redis_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 

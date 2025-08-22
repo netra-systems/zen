@@ -10,16 +10,16 @@ from typing import Any, Callable, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
-from netra_backend.tests.performance_analyzer import (
+from netra_backend.tests.e2e.validators.performance_analyzer import (
     BenchmarkComparator,
     RegressionDetector,
 )
-from netra_backend.tests.performance_measurer import (
+from netra_backend.tests.e2e.validators.performance_measurer import (
     LatencyMeasurer,
     ResourceMonitor,
     ThroughputTracker,
 )
-from netra_backend.tests.performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     BenchmarkComparison,
     LatencyMetrics,
     PerformanceRegression,

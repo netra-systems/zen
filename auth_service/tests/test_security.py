@@ -74,6 +74,8 @@ def security_test_payloads():
 class TestSQLInjectionPrevention:
     """Test SQL injection prevention across all endpoints"""
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_login_sql_injection_prevention(self, client, 
                                                   security_test_payloads,
                                                   mock_auth_service):
@@ -109,6 +111,7 @@ class TestSQLInjectionPrevention:
                 assert payload not in str(call_args.email)
                 assert payload not in str(call_args.password)
 
+    @pytest.mark.asyncio
     async def test_token_validation_sql_injection(self, client,
                                                  security_test_payloads,
                                                  mock_auth_service):
@@ -129,6 +132,7 @@ class TestSQLInjectionPrevention:
                 assert "DROP TABLE" not in call_args
                 assert "DELETE FROM" not in call_args
 
+    @pytest.mark.asyncio
     async def test_service_token_sql_injection(self, client,
                                               security_test_payloads, 
                                               mock_auth_service):
@@ -150,6 +154,7 @@ class TestSQLInjectionPrevention:
 class TestXSSPrevention:
     """Test XSS prevention in user data handling"""
     
+    @pytest.mark.asyncio
     async def test_login_xss_prevention(self, client,
                                        security_test_payloads,
                                        mock_auth_service):
@@ -177,6 +182,7 @@ class TestXSSPrevention:
                 assert "javascript:" not in json.dumps(response_data) 
                 assert "onerror=" not in json.dumps(response_data)
 
+    @pytest.mark.asyncio
     async def test_user_agent_xss_prevention(self, client,
                                             security_test_payloads,
                                             mock_auth_service):
@@ -210,6 +216,7 @@ class TestXSSPrevention:
                     assert "<script>" not in user_agent
                     assert "javascript:" not in user_agent
 
+    @pytest.mark.asyncio
     async def test_oauth_callback_xss_prevention(self, client,
                                                 security_test_payloads):
         """Test XSS prevention in OAuth callback parameters"""
@@ -228,6 +235,7 @@ class TestXSSPrevention:
 class TestCSRFProtection:
     """Test CSRF protection and security headers"""
     
+    @pytest.mark.asyncio
     async def test_security_headers_present(self, client):
         """Test security headers are set properly"""
         response = client.get("/auth/health")
@@ -242,6 +250,7 @@ class TestCSRFProtection:
         assert "password" not in str(headers).lower()
         assert "secret" not in str(headers).lower()
 
+    @pytest.mark.asyncio
     async def test_csrf_token_validation(self, client, mock_auth_service):
         """Test CSRF protection for state-changing operations"""
         mock_auth_service.login = AsyncMock()
@@ -265,6 +274,7 @@ class TestCSRFProtection:
         # but should log the suspicious activity
         assert response.status_code in [200, 400, 401, 422]
 
+    @pytest.mark.asyncio
     async def test_method_override_prevention(self, client):
         """Test prevention of HTTP method override attacks"""
         # Try to override GET to POST using headers
@@ -282,6 +292,7 @@ class TestCSRFProtection:
 class TestInputValidation:
     """Test comprehensive input validation"""
     
+    @pytest.mark.asyncio
     async def test_email_validation(self, client):
         """Test email format validation"""
         invalid_emails = [
@@ -305,6 +316,7 @@ class TestInputValidation:
             # Should reject invalid email formats
             assert response.status_code == 422
 
+    @pytest.mark.asyncio
     async def test_password_length_limits(self, client, mock_auth_service):
         """Test password length validation"""
         mock_auth_service.login = AsyncMock()
@@ -323,6 +335,7 @@ class TestInputValidation:
         # Should handle gracefully (limit or reject)
         assert response.status_code != 500
 
+    @pytest.mark.asyncio
     async def test_json_payload_size_limit(self, client):
         """Test protection against large payload attacks"""
         # Create oversized payload
@@ -342,6 +355,7 @@ class TestInputValidation:
 class TestSecurityLogging:
     """Test security event logging and audit trail"""
     
+    @pytest.mark.asyncio
     async def test_failed_login_logging(self, client, mock_auth_service):
         """Test failed login attempts are logged"""
         mock_auth_service.login = AsyncMock(side_effect=Exception("Invalid credentials"))
@@ -362,6 +376,7 @@ class TestSecurityLogging:
             logged_calls = str(mock_logger.error.call_args_list)
             assert "wrongpass" not in logged_calls
 
+    @pytest.mark.asyncio
     async def test_sql_injection_attempt_logging(self, client, 
                                                 mock_auth_service,
                                                 security_test_payloads):
@@ -383,6 +398,7 @@ class TestSecurityLogging:
                 # Validation error should be logged
                 assert mock_logger.error.called or mock_logger.warning.called
 
+    @pytest.mark.asyncio
     async def test_audit_trail_completeness(self, client, mock_auth_service):
         """Test comprehensive audit logging"""
         # Mock successful operations to test audit trail
@@ -421,6 +437,7 @@ class TestSecurityLogging:
 class TestTokenSecurity:
     """Test JWT token security measures"""
     
+    @pytest.mark.asyncio
     async def test_token_format_validation(self, client, mock_auth_service):
         """Test JWT token format validation"""
         invalid_tokens = [
@@ -440,6 +457,7 @@ class TestTokenSecurity:
             # Should reject invalid token formats
             assert response.status_code in [400, 401, 422]
 
+    @pytest.mark.asyncio
     async def test_token_injection_prevention(self, client,
                                              security_test_payloads,
                                              mock_auth_service):
@@ -459,6 +477,7 @@ class TestTokenSecurity:
 class TestRateLimiting:
     """Test rate limiting and abuse prevention"""
     
+    @pytest.mark.asyncio
     async def test_login_rate_limiting(self, client, mock_auth_service):
         """Test rate limiting on login attempts"""
         mock_auth_service.login = AsyncMock(side_effect=Exception("Invalid credentials"))
@@ -480,6 +499,7 @@ class TestRateLimiting:
         # At minimum, should not crash the service
         assert all(code != 500 for code in responses)
 
+    @pytest.mark.asyncio
     async def test_token_validation_rate_limiting(self, client, mock_auth_service):
         """Test rate limiting on token validation"""
         mock_auth_service.validate_token = AsyncMock(return_value=MagicMock(valid=False))
@@ -492,7 +512,7 @@ class TestRateLimiting:
             assert response.status_code != 500
 
 
-@pytest.mark.asyncio 
+@pytest.mark.asyncio
 async def test_comprehensive_security_scenario(client, mock_auth_service,
                                               security_test_payloads):
     """Test comprehensive attack scenario"""

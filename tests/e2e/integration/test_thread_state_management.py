@@ -322,7 +322,7 @@ async def test_thread_state_preservation_across_operations(stateful_thread_setup
            "Preserved state must remain intact across operations"
 
 @pytest.mark.asyncio
-async def test_thread_state_restoration_after_interruption(stateful_thread_setup,:
+async def test_thread_state_restoration_after_interruption(stateful_thread_setup:
                                                             thread_state_manager, ws_thread_fixtures):
     """Test thread state can be restored after connection interruption."""
     user = stateful_thread_setup["user"]
@@ -368,7 +368,7 @@ async def test_thread_state_restoration_after_interruption(stateful_thread_setup
            "Restored state must match original preserved state"
 
 @pytest.mark.asyncio
-async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_state_manager,:
+async def test_multiple_thread_state_isolation(ws_thread_fixtures, thread_state_manager:
                                                 thread_context_manager):
     """Test state isolation across multiple threads for same user."""
     user = TEST_USERS["enterprise"]

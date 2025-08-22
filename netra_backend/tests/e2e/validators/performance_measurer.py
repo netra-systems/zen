@@ -10,7 +10,7 @@ from typing import List, Tuple
 
 import psutil
 
-from netra_backend.tests.e2e.performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     LatencyMetrics,
     ResourceMetrics,
     ThroughputMetrics,

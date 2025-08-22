@@ -148,7 +148,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         assert "websocket" in invalid_job_id.lower() or "mock" in invalid_job_id.lower()
         
-        with patch('app.ws_manager.logger') as mock_logger:
+        with patch('netra_backend.app.ws_manager.logger') as mock_logger:
 
             conn_info2 = await manager.connect_to_job(mock_websocket, invalid_job_id)
             # Should log warning about invalid job_id
@@ -184,7 +184,7 @@ class TestWebSocketConnectionParadoxPrevention:
         
         # connect_to_job should handle this gracefully
 
-        with patch('app.ws_manager.logger') as mock_logger:
+        with patch('netra_backend.app.ws_manager.logger') as mock_logger:
             # This should trigger the validation logic
 
             if not isinstance(job_id, str):

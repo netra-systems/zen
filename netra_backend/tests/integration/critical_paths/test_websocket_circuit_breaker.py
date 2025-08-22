@@ -728,7 +728,7 @@ class TestWebSocketCircuitBreaker:
 
         """Create WebSocket manager with mocked external services."""
 
-        with patch('app.ws_manager.redis_manager') as mock_redis:
+        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
 

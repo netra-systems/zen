@@ -681,9 +681,30 @@ export const TestChatSidebar: React.FC = () => {
                       </p>
                       
                       <div className="flex items-center space-x-3 mt-1">
-                        <span className="text-xs text-gray-500">
-                          {thread.message_count || 0} message{thread.message_count !== 1 ? 's' : ''}
+                        <span className="text-xs text-gray-500 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {(() => {
+                            // Import and use the real formatThreadTime function
+                            const { formatDistanceToNow } = require('date-fns');
+                            const timestamp = thread.updated_at || thread.created_at;
+                            if (!timestamp) return 'Unknown';
+                            try {
+                              const date = new Date(typeof timestamp === 'number' ? timestamp * 1000 : timestamp);
+                              if (isNaN(date.getTime())) return 'Unknown';
+                              const result = formatDistanceToNow(date, { addSuffix: true });
+                              return result && result !== 'Invalid Date' ? result : 'Recently';
+                            } catch (error) {
+                              return 'Unknown';
+                            }
+                          })()}
                         </span>
+                        {(thread.message_count && thread.message_count > 0) && (
+                          <span className="text-xs text-gray-500">
+                            {thread.message_count} message{thread.message_count !== 1 ? 's' : ''}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -5,6 +5,7 @@ FastAPI endpoints for authentication operations
 import logging
 import os
 import secrets
+from datetime import datetime
 from typing import Optional
 import redis
 
@@ -218,27 +219,50 @@ async def create_service_token(request: ServiceTokenRequest):
 
 @router.post("/verify")
 async def verify_token_endpoint(authorization: Optional[str] = Header(None)):
-    """Enhanced token verification endpoint with security validation"""
+    """Enhanced token verification endpoint with security validation and backend propagation support"""
     if not authorization:
-        raise HTTPException(status_code=401, detail="No token provided")
+        logger.warning("Token verification failed: No authorization header provided")
+        raise HTTPException(status_code=401, detail="Authorization header is required for token verification")
     
     # Extract token from Bearer header
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization format")
+        logger.warning("Token verification failed: Invalid authorization format")
+        raise HTTPException(
+            status_code=401, 
+            detail="Authorization header must be in 'Bearer <token>' format"
+        )
     
     token = authorization.replace("Bearer ", "")
     
-    # Enhanced token validation with security checks
-    response = await auth_service.validate_token(token)
-    
-    if not response.valid:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    return {
-        "valid": True,
-        "user_id": response.user_id,
-        "email": response.email
-    }
+    try:
+        # Enhanced token validation with security checks
+        response = await auth_service.validate_token(token)
+        
+        if not response.valid:
+            logger.warning(f"Token validation failed for token: {token[:20]}...")
+            raise HTTPException(
+                status_code=401, 
+                detail="JWT token is invalid, expired, or malformed. Please obtain a new token."
+            )
+        
+        logger.info(f"Token verification successful for user: {response.user_id}")
+        return {
+            "valid": True,
+            "user_id": response.user_id,
+            "email": response.email,
+            "permissions": response.permissions if hasattr(response, 'permissions') else [],
+            "verified_at": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"Token verification error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Token verification service encountered an error. Please try again later."
+        )
 
 @router.get("/verify")
 async def verify_auth(authorization: Optional[str] = Header(None)):
@@ -480,6 +504,12 @@ async def oauth_callback(
             tokens = token_response.json()
             logger.info(f"Successfully exchanged code for tokens - access_token present: {bool(tokens.get('access_token'))}")
             
+            # Validate token expiry
+            expires_in = tokens.get("expires_in")
+            if expires_in is not None and expires_in <= 0:
+                logger.error(f"Token already expired: expires_in={expires_in}")
+                raise HTTPException(status_code=401, detail="Token has already expired")
+            
             # Get user info
             user_response = await client.get(
                 "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -554,7 +584,9 @@ async def oauth_callback_post(
     request: OAuthCallbackRequest,
     client_info: dict = Depends(get_client_info),
     authorization: Optional[str] = Header(None),
-    origin: Optional[str] = Header(None)
+    origin: Optional[str] = Header(None),
+    traceparent: Optional[str] = Header(None),
+    tracestate: Optional[str] = Header(None)
 ):
     """Handle OAuth callback POST request from Google - with enhanced security"""
     import base64
@@ -639,7 +671,11 @@ async def oauth_callback_post(
         try:
             # Check circuit breaker first
             if auth_service._is_circuit_breaker_open("google_oauth"):
-                raise HTTPException(status_code=503, detail="OAuth service is temporarily unavailable")
+                logger.error("Circuit breaker is open for Google OAuth service")
+                raise HTTPException(
+                    status_code=503, 
+                    detail="OAuth provider service is temporarily unavailable due to repeated failures. Please try again later."
+                )
             
             async def make_oauth_request():
                 async with httpx.AsyncClient(timeout=30.0) as client:
@@ -672,6 +708,27 @@ async def oauth_callback_post(
                     if hasattr(tokens, '__await__'):
                         tokens = await tokens
                     logger.info(f"Successfully exchanged code for tokens - access_token present: {bool(tokens.get('access_token'))}")
+                    
+                    # Validate token expiry
+                    expires_in = tokens.get("expires_in")
+                    if expires_in is not None and expires_in <= 0:
+                        logger.error(f"Token already expired: expires_in={expires_in}")
+                        raise HTTPException(status_code=401, detail="Token has already expired")
+                    
+                    # Validate ID token if present
+                    id_token = tokens.get("id_token")
+                    if id_token:
+                        id_payload = auth_service.jwt_handler.validate_id_token(
+                            id_token, 
+                            expected_issuer="https://accounts.google.com"
+                        )
+                        if not id_payload:
+                            logger.error("ID token validation failed")
+                            raise HTTPException(
+                                status_code=401, 
+                                detail="ID token validation failed - token may be expired or malformed"
+                            )
+                        logger.info("ID token validated successfully")
                     
                     # Get user info
                     user_response = await client.get(
@@ -768,32 +825,43 @@ async def oauth_callback_post(
             user_name = html.escape(user_name)
             user_name = user_name.replace("<script>", "").replace("</script>", "")
         
-        # Create or update user in database with error handling
+        # Create or update user in database with enhanced error handling and retries
         try:
-            async with auth_db.get_session() as session:
-                repo = AuthUserRepository(session)
-                
-                # Prepare user data with consistent ID
-                user_data = {
-                    "id": user_info.get("id", str(uuid.uuid4())),
-                    "email": user_info["email"],
-                    "name": user_name,
-                    "provider": "google",
-                    **user_info
-                }
-                
-                # Create or update OAuth user in auth database
-                auth_user = await repo.create_oauth_user(user_data)
-                
-                # Also sync to main app database
-                await _sync_user_to_main_db(auth_user)
-                
-                # Use the database user ID for tokens
-                user_id = auth_user.id
+            # Use auth service's retry mechanism for database operations
+            async def db_operation():
+                async with auth_db.get_session() as session:
+                    repo = AuthUserRepository(session)
+                    
+                    # Prepare user data with consistent ID
+                    user_data = {
+                        "id": user_info.get("id", str(uuid.uuid4())),
+                        "email": user_info["email"],
+                        "name": user_name,
+                        "provider": "google",
+                        **user_info
+                    }
+                    
+                    # Create or update OAuth user in auth database
+                    auth_user = await repo.create_oauth_user(user_data)
+                    
+                    # Also sync to main app database
+                    await _sync_user_to_main_db(auth_user)
+                    
+                    return auth_user.id
+            
+            # Execute with retry logic
+            user_id = await auth_service._retry_with_exponential_backoff(
+                db_operation, 
+                max_retries=3, 
+                base_delay=0.5
+            )
                 
         except Exception as db_error:
-            logger.error(f"Database connection failed: {db_error}")
-            raise HTTPException(status_code=503, detail="Database connection failed")
+            logger.error(f"Database connection failed after retries: {db_error}", exc_info=True)
+            raise HTTPException(
+                status_code=503, 
+                detail="Database service is temporarily unavailable. Please try again later."
+            )
         
         # Create session and tokens with session error handling
         try:
@@ -812,10 +880,22 @@ async def oauth_callback_post(
                 }
             )
         except Exception as session_error:
-            logger.error(f"Session storage failed: {session_error}")
+            logger.error(f"Session storage failed: {session_error}", exc_info=True)
+            
             # For Redis failures, we can still continue with just JWT tokens
             # The session manager should handle Redis failures gracefully
             session_id = str(uuid.uuid4())  # Generate a fallback session ID
+            
+            # Check if this is a critical session storage failure that should fail the request
+            if "redis" in str(session_error).lower() or "connection" in str(session_error).lower():
+                logger.warning("Session storage service unavailable, continuing with stateless authentication")
+            else:
+                # For other session errors, we might want to fail
+                logger.error("Critical session management error occurred")
+                raise HTTPException(
+                    status_code=503,
+                    detail="Session management service is temporarily unavailable. Please try again later."
+                )
         
         # Create JWT tokens
         access_token = auth_service.jwt_handler.create_access_token(
@@ -843,13 +923,36 @@ async def oauth_callback_post(
             }
         )
         
+        # Create JSONResponse to add tracing headers
+        from fastapi.responses import JSONResponse
+        
+        json_response = JSONResponse(
+            content=response.dict(),
+            status_code=200
+        )
+        
+        # Propagate tracing context in response headers
+        if traceparent:
+            json_response.headers["traceparent"] = traceparent
+            logger.info(f"Propagating trace context: {traceparent}")
+        if tracestate:
+            json_response.headers["tracestate"] = tracestate
+        
         # SECURITY CHECK 9: Ensure new session ID was generated
         if old_session_id and session_id == old_session_id:
             logger.warning("Session fixation attack detected - session ID not regenerated")
             # Force a new session ID
             response.user["session_id"] = oauth_security.generate_secure_session_id()
+            json_response = JSONResponse(
+                content=response.dict(),
+                status_code=200
+            )
+            if traceparent:
+                json_response.headers["traceparent"] = traceparent
+            if tracestate:
+                json_response.headers["tracestate"] = tracestate
         
-        return response
+        return json_response
         
     except HTTPException:
         # Re-raise HTTP exceptions as-is
@@ -892,3 +995,106 @@ async def confirm_password_reset(request: PasswordResetConfirm):
     except Exception as e:
         logger.error(f"Password reset confirmation error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/websocket/auth")
+async def websocket_auth_handshake(request: Request):
+    """WebSocket authentication handshake endpoint"""
+    try:
+        # Get token from various sources
+        token = None
+        
+        # Try Authorization header first
+        auth_header = request.headers.get("authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.replace("Bearer ", "")
+        
+        # Try query parameter
+        if not token:
+            token = request.query_params.get("token")
+        
+        # Try request body if POST
+        if not token:
+            try:
+                body = await request.json()
+                token = body.get("token")
+            except:
+                pass
+        
+        if not token:
+            logger.warning("WebSocket auth failed: No token provided")
+            raise HTTPException(
+                status_code=401,
+                detail="Token is required for WebSocket authentication. Provide via Authorization header, query param, or request body."
+            )
+        
+        # Validate the token
+        response = await auth_service.validate_token(token)
+        
+        if not response.valid:
+            logger.warning(f"WebSocket auth failed: Invalid token for token: {token[:20]}...")
+            raise HTTPException(
+                status_code=401,
+                detail="WebSocket authentication failed - token is invalid, expired, or malformed"
+            )
+        
+        # Get user session info
+        session_data = None
+        if hasattr(auth_service, 'session_manager'):
+            try:
+                session_data = await auth_service.session_manager.get_user_session(response.user_id)
+            except Exception as e:
+                logger.warning(f"Could not retrieve session data for WebSocket auth: {e}")
+        
+        logger.info(f"WebSocket authentication successful for user: {response.user_id}")
+        
+        return {
+            "status": "authenticated",
+            "user": {
+                "id": response.user_id,
+                "email": response.email,
+                "permissions": response.permissions if hasattr(response, 'permissions') else []
+            },
+            "session": {
+                "active": session_data is not None,
+                "created_at": session_data.get("created_at") if session_data else None,
+                "last_activity": session_data.get("last_activity") if session_data else None
+            },
+            "authenticated_at": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"WebSocket authentication error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="WebSocket authentication service encountered an error. Please try again later."
+        )
+
+@router.get("/websocket/validate")
+async def websocket_validate_token(token: str):
+    """Quick WebSocket token validation endpoint"""
+    try:
+        response = await auth_service.validate_token(token)
+        
+        if not response.valid:
+            logger.warning(f"WebSocket token validation failed for token: {token[:20]}...")
+            return {
+                "valid": False,
+                "error": "Token is invalid, expired, or malformed"
+            }
+        
+        return {
+            "valid": True,
+            "user_id": response.user_id,
+            "email": response.email,
+            "expires_at": response.expires_at.isoformat() if hasattr(response, 'expires_at') and response.expires_at else None
+        }
+        
+    except Exception as e:
+        logger.error(f"WebSocket token validation error: {e}")
+        return {
+            "valid": False,
+            "error": "Token validation service error"
+        }

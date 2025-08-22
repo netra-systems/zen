@@ -17,10 +17,20 @@ class AgentError(NetraException):
     and agent lifecycle problems.
     """
     
-    def __init__(self, message: str = None, agent_name: str = None, severity: ErrorSeverity = None, **kwargs):
+    def __init__(self, message: str = None, agent_name: str = None, severity: ErrorSeverity = None, 
+                 category=None, original_error=None, context=None, metadata=None, **kwargs):
+        from netra_backend.app.schemas.core_enums import ErrorCategory
+        
         message = self._handle_message_fallback(message, agent_name)
         agent_msg = self._build_agent_message(agent_name, message)
-        final_severity = severity or ErrorSeverity.HIGH
+        final_severity = severity or ErrorSeverity.MEDIUM
+        
+        # Store additional properties
+        self._category = category or ErrorCategory.UNKNOWN
+        self._original_error = original_error
+        self._context = context or {}
+        self._metadata = metadata or {}
+        
         init_params = self._build_init_params(agent_msg, final_severity, agent_name, kwargs)
         super().__init__(**init_params)
     
@@ -32,9 +42,12 @@ class AgentError(NetraException):
     
     def _build_init_params(self, agent_msg: str, final_severity: ErrorSeverity, agent_name: str, kwargs: dict) -> dict:
         """Build initialization parameters for AgentError."""
+        # Filter out custom kwargs that NetraException doesn't accept
+        filtered_kwargs = {k: v for k, v in kwargs.items() 
+                          if k in ['details', 'user_message', 'trace_id', 'context']}
         return {
             "message": agent_msg, "code": ErrorCode.AGENT_EXECUTION_FAILED, 
-            "severity": final_severity, "details": {"agent": agent_name}, **kwargs
+            "severity": final_severity, "details": {"agent": agent_name}, **filtered_kwargs
         }
     
     @property
@@ -60,15 +73,44 @@ class AgentError(NetraException):
         return None
     
     @property
+    def message(self):
+        """Get error message."""
+        return self.error_details.message
+    
+    @property
     def category(self):
-        """Get error category - default to PROCESSING for agent errors."""
-        from netra_backend.app.schemas.core_enums import ErrorCategory
-        return getattr(self, '_category', ErrorCategory.PROCESSING)
+        """Get error category."""
+        return self._category
     
     @category.setter
     def category(self, value):
         """Set error category."""
         self._category = value
+    
+    @property
+    def original_error(self):
+        """Get original error."""
+        return self._original_error
+    
+    @property
+    def context(self):
+        """Get error context."""
+        return self._context
+    
+    @property
+    def metadata(self):
+        """Get error metadata."""
+        return self._metadata
+    
+    def to_dict(self) -> dict:
+        """Convert exception to dictionary for serialization."""
+        base_dict = super().to_dict()
+        base_dict['category'] = self.category.value if hasattr(self.category, 'value') else str(self.category)
+        return base_dict
+    
+    def __str__(self) -> str:
+        """String representation of the exception."""
+        return f"{self.category.value.upper()}: {self.message}"
     
     def _build_agent_message(self, agent_name: str, message: str) -> str:
         """Build error message with agent name if provided."""

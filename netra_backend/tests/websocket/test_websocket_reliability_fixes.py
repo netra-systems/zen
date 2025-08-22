@@ -29,7 +29,7 @@ import pytest
 
 from netra_backend.app.core.websocket_cors import SECURITY_CONFIG, WebSocketCORSHandler
 
-from netra_backend.app.routes.websocket_enhanced import (
+from netra_backend.app.routes.websocket import (
 
     DatabaseConnectionPool,
 
@@ -66,7 +66,7 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=3)
         
-        with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
+        with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_session = AsyncMock()
 
@@ -88,7 +88,7 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=2)
         
-        with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
+        with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_factory.return_value = AsyncMock()
             
@@ -252,7 +252,7 @@ class TestJWTTokenRefresh:
         
         session_info = {"current_token": "old_token"}
         
-        with patch('app.routes.websocket_enhanced.auth_client') as mock_auth:
+        with patch('netra_backend.app.routes.websocket_enhanced.auth_client') as mock_auth:
 
             mock_auth.refresh_token.return_value = {
 
@@ -783,7 +783,7 @@ class TestIntegrationScenarios:
         
         session_info = {"current_token": "expiring_token"}
         
-        with patch('app.routes.websocket_enhanced.auth_client') as mock_auth:
+        with patch('netra_backend.app.routes.websocket_enhanced.auth_client') as mock_auth:
             # Simulate network failure during refresh
 
             mock_auth.refresh_token.side_effect = Exception("Network timeout")
@@ -805,7 +805,7 @@ class TestIntegrationScenarios:
 
         pool = DatabaseConnectionPool(max_pool_size=1)
         
-        with patch('app.routes.websocket_enhanced.async_session_factory') as mock_factory:
+        with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
             mock_factory.return_value = AsyncMock()
             

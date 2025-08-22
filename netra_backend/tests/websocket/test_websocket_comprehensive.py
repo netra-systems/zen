@@ -42,13 +42,14 @@ from netra_backend.app.core.websocket_cors import (
 from netra_backend.app.db.postgres import get_async_db
 
 from netra_backend.app.main import app
-from netra_backend.app.routes.websocket_enhanced import (
-    authenticate_websocket_with_database,
-    connection_manager,
-    enhanced_websocket_endpoint,
-    get_websocket_service_discovery,
-    validate_websocket_token_enhanced,
+from netra_backend.app.routes.websocket import (
+    websocket_endpoint,
 )
+from netra_backend.app.routes.utils.websocket_helpers import (
+    authenticate_websocket_user,
+    accept_websocket_connection,
+)
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.tests.conftest import create_test_user, get_test_token
 
 class WebSocketTestClient:
@@ -175,7 +176,7 @@ class TestWebSocketAuthentication:
         with pytest.raises(Exception):
             await validate_websocket_token_enhanced(mock_websocket)
             
-    @patch('app.routes.websocket_enhanced.get_async_db')
+    @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
     async def test_manual_database_session_handling(self, mock_db):
         """Test manual database session handling (not using Depends())."""
         # Mock database session
@@ -190,7 +191,7 @@ class TestWebSocketAuthentication:
         }
         
         # This should work with manual session handling
-        with patch('app.services.security_service.SecurityService') as mock_security:
+        with patch('netra_backend.app.services.security_service.SecurityService') as mock_security:
             mock_security_instance = AsyncMock()
             mock_security_instance.get_user_by_id.return_value = Mock(is_active=True)
             mock_security.return_value = mock_security_instance

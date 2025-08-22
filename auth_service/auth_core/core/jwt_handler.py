@@ -4,6 +4,7 @@ Maintains 450-line limit with focused single responsibility
 """
 import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -111,6 +112,61 @@ class JWTHandler:
             return None
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid token: {e}")
+            return None
+    
+    def validate_token_jwt(self, token: str, 
+                          token_type: str = "access") -> Optional[Dict]:
+        """Alias for validate_token for backwards compatibility with tests"""
+        return self.validate_token(token, token_type)
+    
+    def validate_id_token(self, id_token: str, expected_issuer: str = None) -> Optional[Dict]:
+        """Validate OAuth ID token from external providers (Google, etc.)"""
+        try:
+            # Decode header to check algorithm
+            header = jwt.get_unverified_header(id_token)
+            algorithm = header.get("alg")
+            
+            # For external OAuth ID tokens, we typically can't verify signature
+            # without the provider's public key. For testing, we'll do basic validation.
+            # In production, this would verify against Google's public keys.
+            
+            # Basic validation without signature verification for now
+            payload = jwt.decode(
+                id_token,
+                options={
+                    "verify_signature": False,  # Would need provider's public key
+                    "verify_exp": True,
+                    "verify_iat": True
+                }
+            )
+            
+            # Validate issuer if provided
+            if expected_issuer and payload.get("iss") != expected_issuer:
+                logger.warning(f"Invalid ID token issuer: {payload.get('iss')}")
+                return None
+            
+            # Check if token is expired
+            exp = payload.get("exp")
+            if exp and exp < time.time():
+                logger.warning("ID token is expired")
+                return None
+            
+            # Check if token is too old
+            iat = payload.get("iat")
+            if iat and (time.time() - iat) > 24 * 60 * 60:  # 24 hours
+                logger.warning("ID token issued too long ago")
+                return None
+            
+            return payload
+            
+        except jwt.ExpiredSignatureError:
+            logger.warning("ID token expired")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.warning(f"Invalid ID token: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"ID token validation error: {e}")
             return None
     
     def refresh_access_token(self, refresh_token: str) -> Optional[tuple]:

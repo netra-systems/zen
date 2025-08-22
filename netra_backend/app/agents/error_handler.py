@@ -8,6 +8,7 @@ in app.core.error_handlers. This file now provides backward compatibility.
 # Import from existing modular components for backward compatibility
 from netra_backend.app.agents.agent_error_types import (
     AgentValidationError,
+    DatabaseError,
     NetworkError,
 )
 from netra_backend.app.agents.error_decorators import handle_agent_error
@@ -29,7 +30,6 @@ global_error_handler = None
 from netra_backend.app.core.exceptions_agent import AgentError
 
 # Import external dependencies that were referenced
-from netra_backend.app.core.exceptions_database import DatabaseError
 from netra_backend.app.core.exceptions_websocket import WebSocketError
 from netra_backend.app.schemas.core_enums import ErrorCategory
 from netra_backend.app.schemas.shared_types import ErrorContext

@@ -212,7 +212,7 @@ def mock_db_session():
     return session
 
 @pytest.mark.asyncio
-async def test_agent_state_persistence_across_reconnect(persistence_tester, context_validator,:
+async def test_agent_state_persistence_across_reconnect(persistence_tester, context_validator:
                                                        reconnection_manager, mock_db_session):
     """Test agent remembers context across WebSocket reconnection."""
     # BVJ: State persistence essential for premium user experience continuity
@@ -269,7 +269,7 @@ async def test_agent_state_persistence_across_reconnect(persistence_tester, cont
     assert len(message_history) == len(unique_messages), "No duplicate message processing"
 
 @pytest.mark.asyncio
-async def test_conversation_history_continuity(persistence_tester, context_validator,:
+async def test_conversation_history_continuity(persistence_tester, context_validator:
                                               mock_db_session):
     """Test conversation history remains accessible after reconnection."""
     # BVJ: History continuity critical for seamless user experience
@@ -338,7 +338,7 @@ async def test_user_preferences_persistence(persistence_tester, mock_db_session)
         assert restored_context["analysis_frequency"] == "daily", "Updated preferences must be saved"
 
 @pytest.mark.asyncio  
-async def test_agent_decision_consistency(persistence_tester, reconnection_manager,:
+async def test_agent_decision_consistency(persistence_tester, reconnection_manager:
                                          mock_db_session):
     """Test agent decisions remain consistent after reconnection."""  
     # BVJ: Decision consistency prevents user confusion and builds trust

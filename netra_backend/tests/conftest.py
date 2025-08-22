@@ -1033,6 +1033,29 @@ def cleanup_performance_files():
             os.remove(filepath)
 
 # =============================================================================
+# AUTH TOKEN FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def test_auth_token():
+    """Generate a test authentication token for E2E tests."""
+    import jwt
+    import time
+    
+    payload = {
+        "user_id": "test_user_123",
+        "email": "test@example.com",
+        "exp": int(time.time()) + 3600,  # 1 hour expiry
+        "iat": int(time.time())
+    }
+    
+    # Use a test secret key
+    secret_key = "test_secret_key_for_e2e_testing"
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+    
+    return token
+
+# =============================================================================
 # WEBSOCKET MANAGER TESTING FIXTURES
 # Consolidated from netra_backend/tests/ws_manager/conftest.py
 # =============================================================================

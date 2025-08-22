@@ -1,227 +1,129 @@
 #!/usr/bin/env python3
 """
-Simple WebSocket Test Script for Netra Platform
+Simple WebSocket connection test to identify 403 issue
 """
-
 import asyncio
 import json
-import sys
-from datetime import datetime
-from typing import Dict, Optional, Any
-
-import httpx
 import websockets
-from websockets.exceptions import ConnectionClosed, InvalidStatusCode
+from websockets.exceptions import WebSocketException
+import requests
 
-# Service URLs from running services
-BACKEND_URL = "http://localhost:8000"
-AUTH_SERVICE_URL = "http://localhost:8083"
-WEBSOCKET_URL = "ws://localhost:8000/ws"
 
-async def get_auth_token():
-    """Get authentication token."""
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        try:
-            response = await client.post(
-                f"{AUTH_SERVICE_URL}/auth/dev/login",
-                json={}
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data.get("access_token")
-        except Exception:
-            pass
-        return None
-
-async def test_websocket_connection():
-    """Test WebSocket connection."""
-    results = {
-        "timestamp": datetime.now().isoformat(),
-        "tests_passed": 0,
-        "tests_failed": 0,
-        "websocket_connections": [],
-        "messages_sent": [],
-        "messages_received": [],
-        "errors": []
-    }
+async def test_simple_websocket():
+    """Simple WebSocket test."""
     
-    print("Starting WebSocket Tests")
-    
-    # Get authentication token
-    auth_token = await get_auth_token()
-    if auth_token:
-        print(f"PASS: Got auth token: {auth_token[:20]}...")
-        results["tests_passed"] += 1
-    else:
-        print("FAIL: Could not get auth token")
-        results["tests_failed"] += 1
-        return results
-    
-    # Test WebSocket Info Endpoint
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        try:
-            response = await client.get(f"{BACKEND_URL}/ws")
-            if response.status_code == 200:
-                print("PASS: WebSocket Info Endpoint")
-                results["tests_passed"] += 1
-            else:
-                print(f"FAIL: WebSocket Info Endpoint - Status {response.status_code}")
-                results["tests_failed"] += 1
-        except Exception as e:
-            print(f"FAIL: WebSocket Info Endpoint - {str(e)}")
-            results["tests_failed"] += 1
-    
-    # Test WebSocket Connection (multiple methods)
-    websocket_endpoints = [
-        (WEBSOCKET_URL, "Standard WebSocket"),
-        ("ws://localhost:8000/ws/secure", "Secure WebSocket"),
+    # Test endpoints with different methods
+    test_cases = [
+        {
+            "url": "ws://localhost:8000/ws",
+            "description": "Standard WebSocket endpoint",
+            "headers": {},
+            "subprotocols": None
+        },
+        {
+            "url": "ws://localhost:8000/ws", 
+            "description": "WebSocket with fake auth header",
+            "headers": {"Authorization": "Bearer fake_token_123"},
+            "subprotocols": None
+        },
+        {
+            "url": "ws://localhost:8000/ws/secure",
+            "description": "Secure WebSocket endpoint",
+            "headers": {},
+            "subprotocols": None
+        },
+        {
+            "url": "ws://localhost:8000/ws/secure",
+            "description": "Secure WebSocket with auth header",
+            "headers": {"Authorization": "Bearer fake_token_123"},
+            "subprotocols": None
+        }
     ]
     
-    for ws_url, test_name in websocket_endpoints:
-        print(f"\nTesting {test_name} at {ws_url}")
+    for case in test_cases:
+        print(f"\n{'=' * 60}")
+        print(f"Testing: {case['description']}")
+        print(f"URL: {case['url']}")
+        print(f"Headers: {case['headers']}")
+        print(f"{'=' * 60}")
         
-        websocket = None
-        connection_method = "unknown"
-        
-        # Method 1: With Authorization header and subprotocols
-        if auth_token:
+        try:
+            # Create connection arguments
+            connect_args = {
+                "origin": "http://localhost:3000"  # Add origin for CORS
+            }
+            
+            if case['headers']:
+                connect_args["extra_headers"] = case['headers']
+                
+            if case['subprotocols']:
+                connect_args["subprotocols"] = case['subprotocols']
+            
+            # Attempt WebSocket connection with timeout
+            websocket = await asyncio.wait_for(
+                websockets.connect(case['url'], **connect_args),
+                timeout=5
+            )
+            
             try:
-                headers = {"Authorization": f"Bearer {auth_token}"}
-                subprotocols = ["jwt-auth", f"Bearer.{auth_token}"]
+                print("SUCCESS: WebSocket connection established!")
                 
-                websocket = await websockets.connect(
-                    ws_url,
-                    extra_headers=headers,
-                    subprotocols=subprotocols,
-                    timeout=10
-                )
-                connection_method = "headers_and_subprotocols"
-                print(f"PASS: {test_name} Connection - Connected via {connection_method}")
-                results["tests_passed"] += 1
+                # Try to send a ping message
+                ping_msg = json.dumps({"type": "ping", "timestamp": asyncio.get_event_loop().time()})
+                await websocket.send(ping_msg)
+                print("SUCCESS: Ping message sent")
                 
-            except Exception as e:
-                print(f"FAIL: {test_name} Connection (Method 1) - {str(e)}")
-                results["tests_failed"] += 1
-                
-                # Method 2: Headers only
+                # Wait for response
                 try:
-                    websocket = await websockets.connect(
-                        ws_url,
-                        extra_headers=headers,
-                        timeout=10
-                    )
-                    connection_method = "headers_only"
-                    print(f"PASS: {test_name} Connection - Connected via {connection_method}")
-                    results["tests_passed"] += 1
-                    
-                except Exception as e2:
-                    print(f"FAIL: {test_name} Connection (Method 2) - {str(e2)}")
-                    results["tests_failed"] += 1
-                    
-                    # Method 3: No auth (fallback)
-                    try:
-                        websocket = await websockets.connect(ws_url, timeout=10)
-                        connection_method = "no_auth"
-                        print(f"PASS: {test_name} Connection - Connected via {connection_method}")
-                        results["tests_passed"] += 1
-                        
-                    except Exception as e3:
-                        print(f"FAIL: {test_name} Connection (All Methods) - Last error: {str(e3)}")
-                        results["tests_failed"] += 1
-        
-        if websocket:
-            try:
-                results["websocket_connections"].append({
-                    "url": ws_url,
-                    "method": connection_method,
-                    "timestamp": datetime.now().isoformat()
-                })
-                
-                # Test Ping/Pong
-                try:
-                    pong_waiter = await websocket.ping()
-                    await asyncio.wait_for(pong_waiter, timeout=5.0)
-                    print(f"PASS: {test_name} Ping/Pong")
-                    results["tests_passed"] += 1
+                    response = await asyncio.wait_for(websocket.recv(), timeout=3)
+                    print(f"SUCCESS: Got response: {response[:200]}...")
                 except asyncio.TimeoutError:
-                    print(f"FAIL: {test_name} Ping/Pong - Timeout")
-                    results["tests_failed"] += 1
-                except Exception as e:
-                    print(f"FAIL: {test_name} Ping/Pong - {str(e)}")
-                    results["tests_failed"] += 1
-                
-                # Test Message Exchange
-                try:
-                    test_message = {
-                        "type": "message",
-                        "data": {
-                            "message": "Hello WebSocket! This is a test.",
-                            "timestamp": datetime.now().isoformat()
-                        },
-                        "id": "test-message-001"
-                    }
+                    print("WARNING: No response received within timeout")
                     
-                    await websocket.send(json.dumps(test_message))
-                    results["messages_sent"].append({
-                        "message": test_message,
-                        "timestamp": datetime.now().isoformat()
-                    })
-                    print(f"PASS: {test_name} Message Send")
-                    results["tests_passed"] += 1
-                    
-                    # Try to receive response
-                    try:
-                        response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
-                        if response:
-                            try:
-                                response_data = json.loads(response)
-                                results["messages_received"].append({
-                                    "message": response_data,
-                                    "timestamp": datetime.now().isoformat()
-                                })
-                                print(f"PASS: {test_name} Message Receive - Got response")
-                                results["tests_passed"] += 1
-                            except json.JSONDecodeError:
-                                print(f"PASS: {test_name} Message Receive - Got raw response: {response[:100]}...")
-                                results["tests_passed"] += 1
-                        else:
-                            print(f"FAIL: {test_name} Message Receive - Empty response")
-                            results["tests_failed"] += 1
-                    except asyncio.TimeoutError:
-                        print(f"FAIL: {test_name} Message Receive - Timeout (this may be expected)")
-                        results["tests_failed"] += 1
-                        
-                except Exception as e:
-                    print(f"FAIL: {test_name} Message Exchange - {str(e)}")
-                    results["tests_failed"] += 1
-                
             finally:
                 await websocket.close()
+                
+        except WebSocketException as e:
+            error_str = str(e)
+            if "403" in error_str or "Forbidden" in error_str:
+                print(f"ERROR: 403 FORBIDDEN - {error_str}")
+            elif "401" in error_str or "Unauthorized" in error_str:
+                print(f"ERROR: 401 UNAUTHORIZED - {error_str}")
+            elif "404" in error_str:
+                print(f"ERROR: 404 NOT FOUND - {error_str}")
+            else:
+                print(f"ERROR: WebSocket error - {error_str}")
+                
+        except Exception as e:
+            print(f"ERROR: Connection failed - {e}")
+            
+    # Test backend health to confirm it's working
+    print(f"\n{'=' * 60}")
+    print("Testing Backend Health")
+    print(f"{'=' * 60}")
     
-    return results
+    try:
+        health_response = requests.get("http://localhost:8000/health", timeout=5)
+        print(f"Backend health status: {health_response.status_code}")
+        if health_response.status_code == 200:
+            health_data = health_response.json()
+            print(f"Backend health: {health_data.get('status', 'unknown')}")
+    except Exception as e:
+        print(f"Backend health check failed: {e}")
+        
+    # Test WebSocket configuration endpoint
+    try:
+        config_response = requests.get("http://localhost:8000/ws/config", timeout=5)
+        print(f"WebSocket config status: {config_response.status_code}")
+        if config_response.status_code == 200:
+            config_data = config_response.json()
+            ws_config = config_data.get('websocket_config', {})
+            print(f"Authentication required: {ws_config.get('authentication_required', 'unknown')}")
+            print(f"Available endpoints: {ws_config.get('available_endpoints', [])}")
+            print(f"Environment: {ws_config.get('environment', 'unknown')}")
+    except Exception as e:
+        print(f"WebSocket config check failed: {e}")
 
-async def main():
-    """Main test execution."""
-    results = await test_websocket_connection()
-    
-    print(f"\nWebSocket Test Results:")
-    print(f"   Passed: {results['tests_passed']}")
-    print(f"   Failed: {results['tests_failed']}")
-    print(f"   WebSocket Connections: {len(results['websocket_connections'])}")
-    print(f"   Messages Sent: {len(results['messages_sent'])}")
-    print(f"   Messages Received: {len(results['messages_received'])}")
-    
-    # Save results to file
-    with open("websocket_test_results.json", "w") as f:
-        json.dump(results, f, indent=2)
-    
-    print(f"\nResults saved to websocket_test_results.json")
-    
-    # Return success if all tests passed
-    success = results["tests_failed"] == 0 and results["tests_passed"] > 0
-    return 0 if success else 1
 
 if __name__ == "__main__":
-    exit_code = asyncio.run(main())
-    sys.exit(exit_code)
+    asyncio.run(test_simple_websocket())

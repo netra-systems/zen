@@ -9,7 +9,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import * from '@/__tests__/helpers/websocket-test-manager';
+import * as WebSocketTestManager from '@/__tests__/helpers/websocket-test-manager';
 
 // Reconnection manager with React synchronization
 class ReconnectionManager {

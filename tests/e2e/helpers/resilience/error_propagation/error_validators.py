@@ -48,7 +48,21 @@ class AuthServiceFailurePropagationValidator:
         api_result = await self._test_http_auth_rejection(invalid_token, context)
         
         # Test 2: WebSocket with invalid token
-        return {"validation": "placeholder"}
+        ws_result = await self._test_websocket_auth_rejection(invalid_token, context)
+        
+        # Test 3: Verify error correlation
+        correlation_result = self._validate_error_correlation(context)
+        
+        return {
+            "test_type": "invalid_token_propagation",
+            "request_id": context.request_id,
+            "http_api_result": api_result,
+            "websocket_result": ws_result,
+            "correlation_result": correlation_result,
+            "propagation_successful": self._assess_propagation_success(
+                api_result, ws_result, correlation_result
+            )
+        }
 
 
 # Validation functions for export
@@ -66,21 +80,6 @@ def validate_error_isolation(error_context: Dict[str, Any]) -> bool:
 def validate_recovery_behavior(recovery_context: Dict[str, Any]) -> bool:
     """Validate that service recovery behavior is appropriate."""
     return recovery_context.get("recovered", False) and recovery_context.get("recovery_time", 0) < 30
-        ws_result = await self._test_websocket_auth_rejection(invalid_token, context)
-        
-        # Test 3: Verify error correlation
-        correlation_result = self._validate_error_correlation(context)
-        
-        return {
-            "test_type": "invalid_token_propagation",
-            "request_id": context.request_id,
-            "http_api_result": api_result,
-            "websocket_result": ws_result,
-            "correlation_result": correlation_result,
-            "propagation_successful": self._assess_propagation_success(
-                api_result, ws_result, correlation_result
-            )
-        }
     
     async def _test_http_auth_rejection(self, token: str, context: ErrorCorrelationContext) -> Dict[str, Any]:
         """Test HTTP API auth rejection with error context."""

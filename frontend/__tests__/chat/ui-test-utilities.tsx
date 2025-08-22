@@ -26,7 +26,7 @@ export { screen, fireEvent, waitFor, userEvent };
 /**
  * Create auth store mock
  */
-export function createAuthStoreMock() {
+export function createAuthStoreMock(overrides: any = {}) {
   return {
     user: { id: 'test-user', email: 'test@example.com', name: 'Test User' },
     token: 'test-token',
@@ -38,14 +38,15 @@ export function createAuthStoreMock() {
     logout: jest.fn(),
     checkAuth: jest.fn(),
     login: jest.fn(),
-    refreshToken: jest.fn()
+    refreshToken: jest.fn(),
+    ...overrides
   };
 }
 
 /**
  * Create chat store mock
  */
-export function createChatStoreMock() {
+export function createChatStoreMock(overrides: any = {}) {
   return {
     messages: [],
     isLoading: false,
@@ -55,25 +56,28 @@ export function createChatStoreMock() {
     clearMessages: jest.fn(),
     addMessage: jest.fn(),
     updateMessage: jest.fn(),
-    setMessages: jest.fn()
+    setMessages: jest.fn(),
+    ...overrides
   };
 }
 
 /**
  * Create unified chat store mock
  */
-export function createUnifiedChatStoreMock() {
+export function createUnifiedChatStoreMock(overrides: any = {}) {
   return {
     messages: [],
     threads: [],
     currentThreadId: null,
     isLoading: false,
+    isProcessing: false,
     error: null,
     sendMessage: jest.fn(),
     loadMessages: jest.fn(),
     createThread: jest.fn(),
     setCurrentThread: jest.fn(),
-    deleteThread: jest.fn()
+    deleteThread: jest.fn(),
+    ...overrides
   };
 }
 

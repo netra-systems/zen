@@ -186,7 +186,7 @@ class TestAgentResourceInitialization:
         return agent
     
     @pytest.mark.asyncio
-    async def test_agent_resource_initialization(self, test_agent: AsyncMock,:
+    async def test_agent_resource_initialization(self, test_agent: AsyncMock:
                                                resource_monitor: AgentResourceMonitor,
                                                token_tracker: TokenUsageTracker,
                                                db_pool: DatabaseConnectionPool):

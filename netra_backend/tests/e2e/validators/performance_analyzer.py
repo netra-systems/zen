@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 from typing import Dict, List, Optional, Tuple
 
-from netra_backend.tests.e2e.performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     BenchmarkComparison,
     LatencyMetrics,
     PerformanceRegression,

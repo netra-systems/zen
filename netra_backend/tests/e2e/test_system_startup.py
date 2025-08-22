@@ -36,7 +36,7 @@ import httpx
 import psutil
 import pytest
 
-# from scripts.dev_launcher_config import  # Should be mocked in tests LauncherConfig
+from dev_launcher.config import LauncherConfig
 # from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
 # from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
 # from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
@@ -132,11 +132,11 @@ class TestSystemStartup:
         """Test database connections are properly established."""
         from netra_backend.app.db.client import (
             get_clickhouse_client,
-            get_postgres_client,
+            get_db_client,
         )
         
         # Test PostgreSQL connection
-        postgres_client = await get_postgres_client()
+        postgres_client = await get_db_client()
         assert postgres_client is not None
         
         # Test ClickHouse connection  

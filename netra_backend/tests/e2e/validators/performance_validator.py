@@ -8,16 +8,16 @@ components from the modular performance validation system.
 """
 
 # Import all components for backward compatibility
-from netra_backend.tests.e2e.performance_analyzer import (
+from netra_backend.tests.e2e.validators.performance_analyzer import (
     BenchmarkComparator,
     RegressionDetector,
 )
-from netra_backend.tests.e2e.performance_measurer import (
+from netra_backend.tests.e2e.validators.performance_measurer import (
     LatencyMeasurer,
     ResourceMonitor,
     ThroughputTracker,
 )
-from netra_backend.tests.e2e.performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     BenchmarkComparison,
     LatencyMetrics,
     PerformanceRegression,
@@ -26,7 +26,7 @@ from netra_backend.tests.e2e.performance_metrics import (
     ResourceMetrics,
     ThroughputMetrics,
 )
-from netra_backend.tests.e2e.performance_validator_core import PerformanceValidator
+from netra_backend.tests.e2e.validators.performance_validator_core import PerformanceValidator
 
 # Export all classes for external use
 __all__ = [

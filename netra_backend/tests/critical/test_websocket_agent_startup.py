@@ -76,7 +76,7 @@ class TestAgentStartupWithoutContext:
             # Note: No thread_id field
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -100,7 +100,7 @@ class TestAgentStartupWithoutContext:
             "references": []
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -124,8 +124,8 @@ class TestAgentStartupWithoutContext:
         mock_thread_service.get_or_create_thread = AsyncMock(return_value=None)
         message_handler.thread_service = mock_thread_service
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -146,7 +146,7 @@ class TestAgentStartupWithoutContext:
             "references": []
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -196,7 +196,7 @@ class TestAgentStartupWithoutContext:
         existing_thread.metadata_ = {"user_id": "test_user"}
         mock_thread_service.get_thread = AsyncMock(return_value=existing_thread)
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -227,8 +227,8 @@ class TestAgentStartupWithoutContext:
         other_thread.metadata_ = {"user_id": "different_user"}  # Different user
         mock_thread_service.get_thread = AsyncMock(return_value=other_thread)
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -252,8 +252,8 @@ class TestAgentStartupWithoutContext:
         # Make supervisor throw exception
         mock_supervisor.run = AsyncMock(side_effect=Exception("Supervisor failed"))
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -270,7 +270,7 @@ class TestAgentStartupWithoutContext:
         payload1 = {"content": "First message", "references": []}
         payload2 = {"content": "Second message", "references": []}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -297,7 +297,7 @@ class TestAgentStartupWithoutContext:
             "references": ["file1.csv", "report.pdf", "metrics.json"]
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()

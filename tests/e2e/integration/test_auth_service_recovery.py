@@ -50,7 +50,7 @@ from tests.e2e.integration.service_orchestrator import (
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.test_websocket_real_connection import WebSocketRealConnectionTester
+from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)
 

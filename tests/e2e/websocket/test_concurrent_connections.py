@@ -288,7 +288,7 @@ class TestConcurrentConnections:
         """Initialize connection limit manager."""
         return ConnectionLimitManager(limit=5)
     
-    async def test_concurrent_connections_core_functionality(self, connection_manager,:
+    async def test_concurrent_connections_core_functionality(self, connection_manager:
                                                            message_broadcaster, connection_validator):
         """Test core concurrent connection functionality."""
         start_time = time.time()

@@ -34,8 +34,8 @@ from netra_backend.app.main import app
 
 from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import clickhouse_client
-from netra_backend.app.db.postgres import engine as pg_engine
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.postgres import async_engine as pg_engine
 
 class TestBasicSystemColdStartup:
     """Test basic system cold startup sequence."""
@@ -189,6 +189,9 @@ class TestBasicSystemColdStartup:
     @pytest.mark.L3
     async def test_configuration_loading_on_startup(self):
         """Test 6: Configuration should be properly loaded on startup."""
+        # Get settings instance
+        settings = get_config()
+        
         # Verify essential settings are loaded
         assert settings.PROJECT_NAME
         assert settings.VERSION

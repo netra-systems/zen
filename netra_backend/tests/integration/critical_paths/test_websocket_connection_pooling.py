@@ -86,7 +86,7 @@ class TestWebSocketConnectionPoolingL3:
 
         _, redis_url = redis_container
         
-        with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 

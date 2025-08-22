@@ -73,11 +73,19 @@ async def _run_index_optimization_background(logger: logging.Logger) -> None:
     try:
         # Delay optimization to avoid startup bottleneck
         await asyncio.sleep(30)  # Wait 30 seconds after startup
-        logger.debug("Starting background database index optimization...")
-        optimization_results = await index_manager.optimize_all_databases()
-        logger.debug(f"Background database optimization completed: {optimization_results}")
+        logger.info("Starting background database index optimization...")
+        
+        # Add timeout to prevent hanging indefinitely
+        optimization_results = await asyncio.wait_for(
+            index_manager.optimize_all_databases(), 
+            timeout=120.0  # 2 minute timeout
+        )
+        logger.info(f"Background database optimization completed successfully: {optimization_results}")
+    except asyncio.TimeoutError:
+        logger.error("Background index optimization timed out after 2 minutes - continuing without optimization")
     except Exception as e:
         logger.error(f"Background index optimization failed: {e}")
+        # Continue running - don't let this crash the application
 
 
 def initialize_logging() -> Tuple[float, logging.Logger]:

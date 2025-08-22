@@ -59,7 +59,7 @@ class AuthService:
             # Validate credentials based on provider
             user = await self._validate_credentials(request)
             if not user:
-                raise AuthError(
+                raise AuthException(
                     error="invalid_credentials",
                     error_code="AUTH001",
                     message="Invalid credentials provided"
@@ -67,7 +67,7 @@ class AuthService:
             
             # Check account status
             if not await self._check_account_status(user["id"]):
-                raise AuthError(
+                raise AuthException(
                     error="account_locked",
                     error_code="AUTH002",
                     message="Account is locked or disabled"

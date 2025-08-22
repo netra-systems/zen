@@ -58,7 +58,7 @@ class TestAuthWebSocketRecovery:
         """Initialize message preservation tester."""
         return MessagePreservationTester(auth_tester)
     
-    async def test_reconnection_after_expiry_with_message_preservation(:
+    async def test_reconnection_after_expiry_with_message_preservation(
         self, auth_tester, expiry_tester, message_tester
     ):
         """Test reconnection after token expiry with message preservation."""

@@ -5,13 +5,11 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+    ActionsToMeetGoalsSubAgent,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Dict, List
 import uuid
-
-    ActionsToMeetGoalsSubAgent,
-
-)
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import (
 

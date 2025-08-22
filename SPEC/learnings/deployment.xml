@@ -1,0 +1,384 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>Deployment Learnings</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <last_updated>2025-08-22</last_updated>
+    <description>Comprehensive deployment learnings including staging environment setup</description>
+    <critical>true</critical>
+    <business_impact>Mission Critical - Deployment Success Required for Customer Access</business_impact>
+  </metadata>
+  
+  <staging_deployment_learnings>
+    <learning>
+      <id>staging-gunicorn-uvicorn-workers</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>critical</severity>
+      <title>Use Gunicorn with Uvicorn Workers for Cloud Run</title>
+      <problem>
+        <description>Default uvicorn server doesn't handle Cloud Run requirements properly</description>
+        <symptoms>
+          <symptom>Service startup failures in Cloud Run</symptom>
+          <symptom>Request handling issues under load</symptom>
+          <symptom>Poor performance in production environment</symptom>
+        </symptoms>
+        <root_cause>Single-process uvicorn not optimal for Cloud Run container lifecycle</root_cause>
+      </problem>
+      <solution>
+        <description>Use gunicorn with uvicorn workers for Cloud Run deployments</description>
+        <implementation>
+          <configuration>gunicorn --worker-class uvicorn.workers.UvicornWorker</configuration>
+          <benefits>
+            <benefit>Better process management</benefit>
+            <benefit>Improved request handling</benefit>
+            <benefit>Cloud Run compatibility</benefit>
+          </benefits>
+        </implementation>
+        <verification>
+          <step>Deploy to staging with gunicorn configuration</step>
+          <step>Verify service starts correctly</step>
+          <step>Test request handling under load</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always use gunicorn with uvicorn workers for production deployments</guideline>
+        <guideline>Test deployment configuration in staging before production</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-database-ssl-requirements</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>critical</severity>
+      <title>DATABASE_URL Must Include sslmode=require for Cloud SQL</title>
+      <problem>
+        <description>Database connections fail without proper SSL configuration</description>
+        <symptoms>
+          <symptom>Database connection errors in staging/production</symptom>
+          <symptom>SSL-related connection failures</symptom>
+          <symptom>Health checks failing with database errors</symptom>
+        </symptoms>
+        <root_cause>Cloud SQL requires SSL connections but URL doesn't specify sslmode</root_cause>
+      </problem>
+      <solution>
+        <description>Include sslmode=require parameter in DATABASE_URL for staging/production</description>
+        <implementation>
+          <example>postgresql://user:pass@host:5432/db?sslmode=require</example>
+          <note>Required for all Cloud SQL connections</note>
+        </implementation>
+        <verification>
+          <step>Test database connection with SSL parameter</step>
+          <step>Verify health checks pass in staging</step>
+          <step>Check connection works in production</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always include sslmode=require for Cloud SQL connections</guideline>
+        <guideline>Validate database URLs in deployment scripts</guideline>
+        <guideline>Test database connectivity before deploying</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-frontend-api-url-configuration</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>high</severity>
+      <title>Frontend API URL Must Point to Backend for Proxy Rewrites</title>
+      <problem>
+        <description>Frontend cannot connect to backend API in staging</description>
+        <symptoms>
+          <symptom>API requests from frontend failing</symptom>
+          <symptom>CORS errors in staging environment</symptom>
+          <symptom>Proxy rewrites not working correctly</symptom>
+        </symptoms>
+        <root_cause>NEXT_PUBLIC_API_URL not pointing to correct backend URL</root_cause>
+      </problem>
+      <solution>
+        <description>Configure NEXT_PUBLIC_API_URL to point to backend API URL</description>
+        <implementation>
+          <example>NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai</example>
+          <note>Required for proxy rewrites to work correctly</note>
+        </implementation>
+        <verification>
+          <step>Test frontend API calls work in staging</step>
+          <step>Verify proxy rewrites function correctly</step>
+          <step>Check CORS configuration allows requests</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always configure frontend API URL for each environment</guideline>
+        <guideline>Test frontend-backend connectivity in staging</guideline>
+        <guideline>Document API URL requirements for each environment</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-health-check-503-errors</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>high</severity>
+      <title>Health Check 503 Errors Due to Database Connectivity</title>
+      <problem>
+        <description>Health check endpoints returning 503 in staging</description>
+        <symptoms>
+          <symptom>/health/ready endpoint fails with 503</symptom>
+          <symptom>Database connectivity issues in health checks</symptom>
+          <symptom>Service marked as unhealthy in Cloud Run</symptom>
+        </symptoms>
+        <root_cause>Database connectivity not properly configured for health checks</root_cause>
+      </problem>
+      <solution>
+        <description>Fix database connectivity and SSL settings for health checks</description>
+        <implementation>
+          <check>Verify DATABASE_URL includes SSL settings</check>
+          <check>Ensure database credentials are correct</check>
+          <check>Test database connection from health check code</check>
+        </implementation>
+        <verification>
+          <step>Test /health/ready endpoint returns 200</step>
+          <step>Verify database connection works in health check</step>
+          <step>Check Cloud Run service shows as healthy</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always test health checks before deploying</guideline>
+        <guideline>Validate database connectivity in staging</guideline>
+        <guideline>Monitor health check endpoints post-deployment</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-oauth-separate-domain</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>high</severity>
+      <title>OAuth Flow Requires Auth Service at Separate Domain</title>
+      <problem>
+        <description>OAuth authentication flow fails in staging</description>
+        <symptoms>
+          <symptom>OAuth redirects not working</symptom>
+          <symptom>CORS issues with auth service</symptom>
+          <symptom>Callback URL configuration problems</symptom>
+        </symptoms>
+        <root_cause>Auth service needs separate domain for proper OAuth flow</root_cause>
+      </problem>
+      <solution>
+        <description>Deploy auth service at separate domain with proper CORS and callback configuration</description>
+        <implementation>
+          <example>auth.staging.netrasystems.ai</example>
+          <requirements>
+            <requirement>Separate domain for auth service</requirement>
+            <requirement>Proper CORS configuration</requirement>
+            <requirement>Correct callback URL setup</requirement>
+          </requirements>
+        </implementation>
+        <verification>
+          <step>Test OAuth flow works end-to-end</step>
+          <step>Verify callback URLs are correctly configured</step>
+          <step>Check CORS allows cross-domain requests</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always use separate domain for auth service</guideline>
+        <guideline>Test OAuth flow in staging before production</guideline>
+        <guideline>Document OAuth domain requirements</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-oauth-proxy-configuration</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>critical</severity>
+      <title>USE_OAUTH_PROXY Must Be "true" for Token Validation</title>
+      <problem>
+        <description>Backend cannot validate tokens through auth service</description>
+        <symptoms>
+          <symptom>Token validation failures between services</symptom>
+          <symptom>Cross-service authentication not working</symptom>
+          <symptom>Users cannot access protected endpoints</symptom>
+        </symptoms>
+        <root_cause>USE_OAUTH_PROXY not set to "true" even when OAUTH_PROXY_URL is configured</root_cause>
+      </problem>
+      <solution>
+        <description>Set USE_OAUTH_PROXY="true" for backend to validate tokens through auth service</description>
+        <implementation>
+          <requirement>USE_OAUTH_PROXY=true</requirement>
+          <requirement>OAUTH_PROXY_URL=https://auth.staging.netrasystems.ai</requirement>
+          <note>Both settings required for proper token validation</note>
+        </implementation>
+        <verification>
+          <step>Test token validation works between services</step>
+          <step>Verify protected endpoints are accessible with valid tokens</step>
+          <step>Check cross-service authentication flows</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always set USE_OAUTH_PROXY=true when using auth service proxy</guideline>
+        <guideline>Validate token validation configuration in staging</guideline>
+        <guideline>Test cross-service authentication before deployment</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-deployment-command</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>info</severity>
+      <title>Recommended Staging Deployment Command</title>
+      <description>Established best practice command for staging deployments</description>
+      <command>python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks</command>
+      <benefits>
+        <benefit>Local builds are 5-10x faster than Cloud Build</benefit>
+        <benefit>Pre-deployment checks catch issues early</benefit>
+        <benefit>Reliable deployment process</benefit>
+      </benefits>
+      <verification>
+        <step>All services deploy successfully</step>
+        <step>Health checks pass post-deployment</step>
+        <step>Services are accessible at staging URLs</step>
+      </verification>
+    </learning>
+    
+    <learning>
+      <id>staging-missing-secrets</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>medium</severity>
+      <title>Missing GCP Secrets for Full Staging Functionality</title>
+      <problem>
+        <description>Some features not working due to missing secrets</description>
+        <symptoms>
+          <symptom>LLM agent functionality limited</symptom>
+          <symptom>Encryption features not available</symptom>
+          <symptom>Some integrations failing</symptom>
+        </symptoms>
+        <missing_secrets>
+          <secret>OPENAI_API_KEY</secret>
+          <secret>FERNET_KEY</secret>
+          <secret>Additional LLM API keys</secret>
+        </missing_secrets>
+      </problem>
+      <solution>
+        <description>Add missing secrets to GCP Secret Manager for full functionality</description>
+        <implementation>
+          <step>Identify all required secrets for staging</step>
+          <step>Add secrets to GCP Secret Manager</step>
+          <step>Update deployment configuration to use secrets</step>
+          <step>Test full functionality with all secrets available</step>
+        </implementation>
+        <verification>
+          <step>All LLM agent features work in staging</step>
+          <step>Encryption functionality operational</step>
+          <step>All integrations working correctly</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Audit required secrets before staging deployment</guideline>
+        <guideline>Maintain secret inventory for each environment</guideline>
+        <guideline>Test functionality requiring secrets in staging</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>staging-service-discovery-needed</id>
+      <category>deployment</category>
+      <date>2025-08-22</date>
+      <severity>medium</severity>
+      <title>Service URL Discovery Needed for Dynamic Configuration</title>
+      <problem>
+        <description>Services need to discover each other's URLs dynamically</description>
+        <symptoms>
+          <symptom>Hard-coded service URLs in configuration</symptom>
+          <symptom>Manual URL updates required for deployments</symptom>
+          <symptom>Configuration drift between environments</symptom>
+        </symptoms>
+        <root_cause>No automated service discovery mechanism</root_cause>
+      </problem>
+      <solution>
+        <description>Implement service discovery for dynamic URL configuration</description>
+        <implementation>
+          <approach>Use GCP service discovery APIs</approach>
+          <approach>Environment-based service URL configuration</approach>
+          <approach>Automatic service registration and discovery</approach>
+        </implementation>
+        <verification>
+          <step>Services automatically discover each other</step>
+          <step>Configuration updates automatically</step>
+          <step>No manual URL configuration required</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Implement service discovery from the start</guideline>
+        <guideline>Avoid hard-coded service URLs</guideline>
+        <guideline>Use environment-based configuration</guideline>
+      </prevention>
+    </learning>
+  </staging_deployment_learnings>
+  
+  <deployment_best_practices>
+    <practice priority="critical">
+      <title>Pre-Deployment Validation</title>
+      <steps>
+        <step>Run all tests locally before deployment</step>
+        <step>Validate configuration for target environment</step>
+        <step>Check all required secrets are available</step>
+        <step>Verify database connectivity settings</step>
+        <step>Test OAuth configuration for environment</step>
+      </steps>
+    </practice>
+    
+    <practice priority="high">
+      <title>Deployment Process</title>
+      <steps>
+        <step>Use --build-local for faster builds</step>
+        <step>Always use --run-checks for validation</step>
+        <step>Monitor deployment logs for errors</step>
+        <step>Verify all services start successfully</step>
+        <step>Test critical user flows post-deployment</step>
+      </steps>
+    </practice>
+    
+    <practice priority="medium">
+      <title>Post-Deployment Verification</title>
+      <steps>
+        <step>Test all health check endpoints</step>
+        <step>Verify frontend-backend connectivity</step>
+        <step>Test authentication flows</step>
+        <step>Check WebSocket connections</step>
+        <step>Validate LLM agent functionality</step>
+      </steps>
+    </practice>
+  </deployment_best_practices>
+  
+  <troubleshooting>
+    <issue symptom="503 health check errors">
+      <cause>Database connectivity issues</cause>
+      <solution>Check DATABASE_URL includes sslmode=require</solution>
+    </issue>
+    
+    <issue symptom="OAuth flow failures">
+      <cause>Callback URL or domain configuration</cause>
+      <solution>Verify auth service domain and OAuth settings</solution>
+    </issue>
+    
+    <issue symptom="Frontend API failures">
+      <cause>NEXT_PUBLIC_API_URL misconfiguration</cause>
+      <solution>Point frontend to correct backend API URL</solution>
+    </issue>
+    
+    <issue symptom="Token validation failures">
+      <cause>USE_OAUTH_PROXY not set correctly</cause>
+      <solution>Set USE_OAUTH_PROXY=true for auth service proxy</solution>
+    </issue>
+    
+    <issue symptom="Service startup failures">
+      <cause>Wrong server configuration for Cloud Run</cause>
+      <solution>Use gunicorn with uvicorn workers</solution>
+    </issue>
+  </troubleshooting>
+</specification>

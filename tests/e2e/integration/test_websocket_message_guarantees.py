@@ -52,7 +52,7 @@ class TestConcurrentMessageDeliveryGuarantees:
         """Initialize message ordering validator."""
         return OrderingValidator()
     
-    async def test_concurrent_100_messages_zero_loss(self, delivery_core,:
+    async def test_concurrent_100_messages_zero_loss(self, delivery_core:
                                                    concurrent_sender, ordering_validator):
         """Test 100 concurrent messages with 0% loss guarantee."""
         user_id = TEST_USERS["enterprise"].id
@@ -121,7 +121,7 @@ class TestNetworkInterruptionResilience:
         """Initialize message loss detector."""
         return MessageLossDetector()
     
-    async def test_message_delivery_during_network_interruption(self, delivery_core,:
+    async def test_message_delivery_during_network_interruption(self, delivery_core:
                                                               interruption_simulator, loss_detector):
         """Test message delivery guarantee during network interruptions."""
         user_id = TEST_USERS["enterprise"].id
@@ -153,7 +153,7 @@ class TestNetworkInterruptionResilience:
                 pytest.skip("WebSocket server not available for E2E test")
             raise
     
-    async def test_recovery_and_message_queue_integrity(self, delivery_core,:
+    async def test_recovery_and_message_queue_integrity(self, delivery_core:
                                                       interruption_simulator):
         """Test message queue integrity after network recovery."""
         user_id = TEST_USERS["enterprise"].id

@@ -50,7 +50,7 @@ class AgentOrchestrationTester:
         self.active_agents[name] = sub_agent
         return sub_agent
     
-    async def test_agent_coordination(self, supervisor: SupervisorAgent,:
+    async def test_agent_coordination(self, supervisor: SupervisorAgent,
                                     sub_agents: List[BaseSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
         start_time = time.time()
@@ -81,7 +81,7 @@ class AgentOrchestrationTester:
             return False
         return all(all(key in r for key in ["agent_name", "response_data"]) for r in responses)
     
-    async def test_agent_error_propagation(self, supervisor: SupervisorAgent,:
+    async def test_agent_error_propagation(self, supervisor: SupervisorAgent:
                                          failing_agent: str) -> Dict[str, Any]:
         """Test error propagation through agent hierarchy."""
         error_test_result = {

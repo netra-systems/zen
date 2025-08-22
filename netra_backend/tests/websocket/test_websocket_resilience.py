@@ -290,7 +290,7 @@ class TestWebSocketErrorRecovery:
         user_id = "db_error_user"
         mock_websocket = AsyncMock()
         
-        with patch('app.routes.websocket_enhanced.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.websocket_enhanced.get_async_db') as mock_db:
             # Mock database failure
             mock_db.side_effect = Exception("Database connection failed")
             

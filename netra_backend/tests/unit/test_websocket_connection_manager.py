@@ -92,7 +92,7 @@ class TestWebSocketConnectionManager:
     
     def test_is_connection_alive(self, manager, connection_info):
         """Test checking if connection is alive."""
-        with patch('app.websocket.connection_manager.ConnectionValidator') as mock_validator:
+        with patch('netra_backend.app.websocket.connection_manager.ConnectionValidator') as mock_validator:
             mock_validator.is_websocket_connected.return_value = True
             
             is_alive = manager.is_connection_alive(connection_info)

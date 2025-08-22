@@ -23,7 +23,7 @@ import pytest
 
 
 from tests.e2e.config import setup_test_environment
-from tests.health_check_core import SERVICE_ENDPOINTS
+from tests.e2e.health_check_core import SERVICE_ENDPOINTS
 
 logger = logging.getLogger(__name__)
 

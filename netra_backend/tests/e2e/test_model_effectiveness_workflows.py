@@ -47,16 +47,14 @@ def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_di
     return _build_model_setup(agents, real_llm_manager, real_websocket_manager)
 
 def _create_agent_dictionary(llm_manager, tool_dispatcher):
-
     """Create dictionary of agents"""
-
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
         ActionsToMeetGoalsSubAgent,
-
     )
-
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
         OptimizationsCoreSubAgent,
-
     )
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     return {
 

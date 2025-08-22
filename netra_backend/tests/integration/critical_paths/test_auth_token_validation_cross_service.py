@@ -38,10 +38,9 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 from netra_backend.app.main import app
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-from netra_backend.app.utils.jwt_utils import JWTUtils
 
 class TestAuthTokenValidationCrossService:
 
@@ -70,8 +69,8 @@ class TestAuthTokenValidationCrossService:
         }
         
         # Use test secret key
-
-        secret_key = settings.SECRET_KEY if hasattr(settings, 'SECRET_KEY') else "test_secret_key"
+        settings = get_settings()
+        secret_key = getattr(settings, 'jwt_secret_key', "test_secret_key")
 
         token = jwt.encode(payload, secret_key, algorithm="HS256")
 
@@ -97,7 +96,8 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-        secret_key = settings.SECRET_KEY if hasattr(settings, 'SECRET_KEY') else "test_secret_key"
+        settings = get_settings()
+        secret_key = getattr(settings, 'jwt_secret_key', "test_secret_key")
 
         token = jwt.encode(payload, secret_key, algorithm="HS256")
 
@@ -317,7 +317,8 @@ class TestAuthTokenValidationCrossService:
 
         }
         
-        secret_key = settings.SECRET_KEY if hasattr(settings, 'SECRET_KEY') else "test_secret_key"
+        settings = get_settings()
+        secret_key = getattr(settings, 'jwt_secret_key', "test_secret_key")
 
         limited_token = jwt.encode(payload, secret_key, algorithm="HS256")
         

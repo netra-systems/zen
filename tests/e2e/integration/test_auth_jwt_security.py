@@ -27,10 +27,9 @@ import logging
 import pytest
 import time
 
+from test_framework.auth_jwt_test_manager import (
     JWTGenerationTestManager,
-
     TokenSet,
-
 )
 
 
@@ -584,7 +583,6 @@ class TestJWTSecurity:
         # Validate security - all services should reject expired tokens
 
         assert expiry_results["all_services_reject_expired"], \
-
             "All services should reject expired tokens"
         
 
@@ -612,7 +610,6 @@ class TestJWTSecurity:
         
 
         assert tampering_results["tampering_tests_performed"] >= 3, \
-
             "Should test multiple tampering attack vectors"
         
         # Validate each tampering attack is detected
@@ -620,7 +617,6 @@ class TestJWTSecurity:
         for attack_type, attack_results in tampering_results["tampering_results"].items():
 
             assert attack_results["all_services_reject"], \
-
                 f"All services should reject {attack_type} tokens"
             
             # Log attack detection results
@@ -701,7 +697,6 @@ class TestJWTSecurity:
         service_token_results = security_tests["service_token_user_endpoint"]
 
         assert not service_token_results["backend_service"], \
-
             "Backend service should reject service tokens for user endpoints"
         
         # Test 2: Refresh tokens should not work for API endpoints
@@ -709,7 +704,6 @@ class TestJWTSecurity:
         refresh_token_results = security_tests["refresh_token_api_endpoint"]
 
         assert not refresh_token_results["backend_service"], \
-
             "Backend service should reject refresh tokens for API endpoints"
         
         # Test 3: Wrong issuer tokens should be rejected
@@ -719,7 +713,6 @@ class TestJWTSecurity:
         for service, accepts_wrong_issuer in wrong_issuer_results.items():
 
             assert not accepts_wrong_issuer, \
-
                 f"{service} should reject tokens with wrong issuer"
         
 
@@ -813,7 +806,6 @@ class TestJWTSecurity:
         # Security compliance should be 100%
 
         assert compliance_rate >= 0.9, \
-
             f"Security compliance rate {compliance_rate:.1%} below 90% threshold"
         
 

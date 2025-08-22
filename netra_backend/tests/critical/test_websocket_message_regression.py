@@ -67,7 +67,7 @@ class TestWebSocketMessageRegression:
             "payload": {"data": "some data"}
         }
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
             await agent_service.handle_websocket_message(
                 user_id, 
                 json.dumps(unknown_message), 
@@ -88,7 +88,7 @@ class TestWebSocketMessageRegression:
             "thread_id": "test_thread"
         }
         
-        with patch('app.logging_config.central_logger.get_logger') as mock_logger:
+        with patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_logger:
             logger = Mock()
             mock_logger.return_value = logger
             
@@ -105,7 +105,7 @@ class TestWebSocketMessageRegression:
         user_id = "test_user"
         invalid_json = "{'invalid': json, missing quotes}"
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
             await agent_service.handle_websocket_message(
                 user_id,
                 invalid_json,
@@ -131,7 +131,7 @@ class TestWebSocketMessageRegression:
         assert thread_id is None
         
         # Should not throw exception
-        with patch('app.ws_manager.manager.send_error'):
+        with patch('netra_backend.app.ws_manager.manager.send_error'):
             # This should complete without error
             pass
     
@@ -160,7 +160,7 @@ class TestWebSocketMessageRegression:
             "payload": {"content": "Test message"}
         }
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
             await agent_service.handle_websocket_message(
                 user_id,
                 json.dumps(typeless_message),
@@ -256,7 +256,7 @@ class TestWebSocketErrorPropagation:
         handler = MessageHandlerService(supervisor=None, thread_service=None)
         
         with patch('app.db.postgres.get_async_db', side_effect=Exception("DB Connection failed")):
-            with patch('app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
                 await handler.handle_user_message(
                     "test_user",
                     {"content": "Test"},
@@ -277,7 +277,7 @@ class TestWebSocketErrorPropagation:
         
         handler = MessageHandlerService(supervisor=supervisor, thread_service=Mock())
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
             # This should handle the timeout gracefully
             try:
                 await handler._execute_supervisor(
@@ -299,7 +299,7 @@ class TestWebSocketErrorPropagation:
         # Frontend accidentally sends array instead of object
         wrong_structure = ["user_message", {"content": "Test"}]
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
             await agent_service.handle_websocket_message(
                 "test_user",
                 json.dumps(wrong_structure),
@@ -320,7 +320,7 @@ class TestWebSocketErrorPropagation:
             "references": "not_an_array"  # References should be array
         }
         
-        with patch('app.services.message_handlers.logger') as mock_logger:
+        with patch('netra_backend.app.services.message_handlers.logger') as mock_logger:
             text, refs, thread_id = handler._extract_message_data(invalid_payload)
             
             # Should log validation issues for debugging
@@ -521,7 +521,7 @@ class TestWebSocketCoroutineAuthRegression:
         )
         mock_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_db_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_db_session
             
@@ -544,7 +544,7 @@ class TestWebSocketCoroutineAuthRegression:
         mock_websocket = Mock()
         error = RuntimeError("'coroutine' object has no attribute 'get'")
         
-        with patch('app.routes.websockets.logger') as mock_logger:
+        with patch('netra_backend.app.routes.websockets.logger') as mock_logger:
             await _handle_general_exception(error, "user123", mock_websocket)
             
             # Verify error was logged

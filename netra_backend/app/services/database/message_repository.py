@@ -148,4 +148,76 @@ class MessageRepository(BaseRepository[Message]):
                            thread_id: str,
                            limit: int = 50) -> List[Message]:
         """Get messages by thread - alias for find_by_thread for consistency"""
-        return await self.get_thread_messages(db, thread_id, limit)
+        return await self.get_thread_messages(db, thread_id, limit)    
+    async def get_messages_paginated(self,
+                                   db: AsyncSession,
+                                   thread_id: str,
+                                   limit: int = 20,
+                                   offset: int = 0) -> List[Message]:
+        """Get paginated messages for a thread"""
+        try:
+            query = select(Message).where(Message.thread_id == thread_id)
+            query = query.order_by(Message.created_at).limit(limit).offset(offset)
+            result = await db.execute(query)
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error(f"Error getting paginated messages for thread {thread_id}: {e}")
+            return []
+    
+    async def search_messages(self,
+                            db: AsyncSession,
+                            query: str,
+                            thread_id: Optional[str] = None) -> List[Message]:
+        """Search messages by content"""
+        try:
+            # Extract text content from JSON structure for search
+            stmt = select(Message)
+            
+            if thread_id:
+                stmt = stmt.where(Message.thread_id == thread_id)
+            
+            # For now, return all messages since content is in JSON format
+            # In a real implementation, we'd use JSON operators to search content
+            result = await db.execute(stmt.order_by(Message.created_at))
+            messages = list(result.scalars().all())
+            
+            # Simple text search in content
+            filtered = []
+            for msg in messages:
+                if msg.content and isinstance(msg.content, list):
+                    for content_item in msg.content:
+                        if isinstance(content_item, dict) and 'text' in content_item:
+                            text_content = content_item.get('text', {}).get('value', '')
+                            if query.lower() in text_content.lower():
+                                filtered.append(msg)
+                                break
+            
+            return filtered
+        except Exception as e:
+            logger.error(f"Error searching messages with query '{query}': {e}")
+            return []
+    
+    async def get_messages_by_date_range(self,
+                                       db: AsyncSession,
+                                       thread_id: str,
+                                       start_date,
+                                       end_date) -> List[Message]:
+        """Get messages by date range"""
+        try:
+            # Convert datetime to timestamp if needed
+            start_ts = int(start_date.timestamp()) if hasattr(start_date, 'timestamp') else start_date
+            end_ts = int(end_date.timestamp()) if hasattr(end_date, 'timestamp') else end_date
+            
+            query = select(Message).where(
+                and_(
+                    Message.thread_id == thread_id,
+                    Message.created_at >= start_ts,
+                    Message.created_at <= end_ts
+                )
+            ).order_by(Message.created_at)
+            
+            result = await db.execute(query)
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error(f"Error getting messages by date range for thread {thread_id}: {e}")
+            return []

@@ -293,9 +293,7 @@ class TestAgentMessageFlow:
 
     """Test complete agent message flow end-to-end."""
     
-    async def test_complete_user_message_to_agent_response_flow(:
-
-        self, 
+    async def test_complete_user_message_to_agent_response_flow(self, 
 
         real_agent_service: AgentService,
 
@@ -398,7 +396,7 @@ class TestAgentMessageFlow:
 
         assert len(errors) == 0, f"Unexpected errors: {errors}"
     
-    async def test_agent_message_ordering_guarantees(:
+    async def test_agent_message_ordering_guarantees(
 
         self,
 
@@ -503,7 +501,7 @@ class TestAgentMessageFlow:
         assert len(processed_order) == len(test_messages), \
             "Not all messages completed processing"
     
-    async def test_streaming_response_handling(:
+    async def test_streaming_response_handling(
 
         self,
 
@@ -605,7 +603,7 @@ class TestAgentMessageFlow:
             assert chunk_indices == sorted(chunk_indices), \
                 "Streaming chunks were not sent in order"
     
-    async def test_agent_error_handling_and_recovery(:
+    async def test_agent_error_handling_and_recovery(
 
         self,
 
@@ -664,7 +662,7 @@ class TestAgentMessageFlow:
         assert "Unknown message type" in error_message or "invalid" in error_message.lower(), \
             f"Error message not descriptive: {error_message}"
     
-    async def test_concurrent_user_message_isolation(:
+    async def test_concurrent_user_message_isolation(
 
         self,
 
@@ -745,7 +743,7 @@ class TestAgentMessageFlow:
             assert user_id in response_content or f"thread_{user_id}" in response_content, \
                 f"Response for {user_id} doesn't contain user-specific content"
     
-    async def test_agent_websocket_connection_recovery(:
+    async def test_agent_websocket_connection_recovery(
 
         self,
 
@@ -841,7 +839,7 @@ class TestAgentMessageFlowPerformance:
 
     """Performance tests for agent message flow."""
     
-    async def test_message_processing_latency(:
+    async def test_message_processing_latency(
 
         self,
 
@@ -908,7 +906,7 @@ class TestAgentMessageFlowPerformance:
         
         logger.info(f"Message processing latency: {processing_time:.3f}s")
     
-    async def test_concurrent_message_throughput(:
+    async def test_concurrent_message_throughput(
 
         self,
 

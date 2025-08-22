@@ -21,7 +21,7 @@ global.URL.revokeObjectURL = jest.fn();
 let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  wsManager = createWebSocketManager();
+  wsManager = WebSocketTestManager.createWebSocketManager();
   wsManager.setup();
 });
 

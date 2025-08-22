@@ -102,7 +102,7 @@ class AgentContextAccumulationTester:
         context_building_result["conversation_time"] = time.time() - conversation_start
         return context_building_result
 
-    async def test_context_window_management(self, supervisor: SupervisorAgent,:
+    async def test_context_window_management(self, supervisor: SupervisorAgent,
                                            max_context_size: int = 4000) -> Dict[str, Any]:
         """Test context window management and truncation."""
         window_test_start = time.time()
@@ -154,7 +154,7 @@ class AgentContextAccumulationTester:
         window_management_result["management_time"] = time.time() - window_test_start
         return window_management_result
 
-    async def test_context_retrieval_accuracy(self, supervisor: SupervisorAgent,:
+    async def test_context_retrieval_accuracy(self, supervisor: SupervisorAgent,
                                             historical_context: Dict[str, Any]) -> Dict[str, Any]:
         """Test context retrieval accuracy and relevance."""
         retrieval_start = time.time()

@@ -35,7 +35,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.clients.auth_client import AuthClient
 from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.postgres import AsyncSessionLocal
+from netra_backend.app.db.postgres import async_session_factory
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 
 @dataclass

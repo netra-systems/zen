@@ -172,7 +172,7 @@ class TestRealNetworkFailureWithMessageQueue:
         """Initialize auto-reconnection validator."""
         return AutoReconnectionValidator()
     
-    async def test_real_network_failure_complete_flow(self, test_core, message_queue,:
+    async def test_real_network_failure_complete_flow(self, test_core, message_queue:
                                                      network_simulator, reconnection_validator):
         """Test complete real network failure and recovery flow."""
         start_time = time.time()

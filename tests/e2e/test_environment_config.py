@@ -125,3 +125,8 @@ class TestEnvironmentConfig:
 def get_test_config(env_name: str = "test") -> TestEnvironmentConfig:
     """Get test configuration for specified environment."""
     return TestEnvironmentConfig.from_env(env_name)
+
+
+def get_test_environment_config(env_name: str = "test") -> TestEnvironmentConfig:
+    """Get test environment configuration for specified environment."""
+    return TestEnvironmentConfig.from_env(env_name)

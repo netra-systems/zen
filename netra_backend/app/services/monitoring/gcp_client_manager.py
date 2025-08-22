@@ -14,9 +14,41 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 
 from typing import Optional
 
-from google.auth import default
-from google.cloud import error_reporting
-from google.oauth2 import service_account
+try:
+    from google.auth import default
+    from google.cloud import error_reporting
+    from google.oauth2 import service_account
+    GCP_AVAILABLE = True
+except ImportError:
+    # Create stub classes for when GCP libraries are not available
+    GCP_AVAILABLE = False
+    
+    class StubCredentials:
+        pass
+    
+    class StubClient:
+        def __init__(self, *args, **kwargs):
+            self.project = "test-project"
+    
+    # Create namespace-like objects for the missing imports
+    class DefaultAuth:
+        @staticmethod
+        def default():
+            return StubCredentials(), "test-project"
+    
+    class ServiceAccount:
+        @staticmethod
+        def from_service_account_file(path):
+            return StubCredentials()
+        
+        Credentials = StubCredentials
+    
+    class ErrorReporting:
+        Client = StubClient
+    
+    default = DefaultAuth.default
+    service_account = ServiceAccount()
+    error_reporting = ErrorReporting()
 
 from netra_backend.app.core.error_codes import ErrorCode
 from netra_backend.app.core.exceptions_base import NetraException

@@ -246,7 +246,7 @@ async def test_thread_creation_isolation_across_users(ws_thread_fixtures, thread
            "Users must not have access to each other's threads"
 
 @pytest.mark.asyncio
-async def test_thread_creation_context_initialization(ws_thread_fixtures, thread_creator,:
+async def test_thread_creation_context_initialization(ws_thread_fixtures, thread_creator:
                                                        thread_context_manager):
     """Test thread creation properly initializes context for agent operations."""
     user = TEST_USERS["enterprise"]

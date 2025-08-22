@@ -83,7 +83,7 @@ class RealCircuitBreakerTester:
         self.failure_counts[service_name] = 0
         return circuit
     
-    async def test_circuit_activation(self, service_name: str,:
+    async def test_circuit_activation(self, service_name: str:
                                     failing_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker activation with real failing operations."""
         circuit = self.circuit_breakers.get(service_name)
@@ -122,7 +122,7 @@ class RealCircuitBreakerTester:
             "circuit_state": circuit.state.value
         }
     
-    async def test_circuit_recovery(self, service_name: str,:
+    async def test_circuit_recovery(self, service_name: str:
                                   working_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker recovery with working operation."""
         circuit = self.circuit_breakers.get(service_name)
@@ -353,7 +353,7 @@ class TestCompleteErrorRecovery:
         """Initialize data integrity tracker."""
         return DataIntegrityTracker()
     
-    async def test_error_recovery(self, orchestrator, circuit_breaker_tester,:
+    async def test_error_recovery(self, orchestrator, circuit_breaker_tester:
                                 isolation_validator, data_tracker):
         """Main test: Complete error recovery with circuit breaker activation."""
         # Skip if services not available

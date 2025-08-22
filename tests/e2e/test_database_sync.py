@@ -24,29 +24,29 @@ from datetime import datetime
 
 import pytest
 
-from tests.database_sync_fixtures import (
+from tests.e2e.database_sync_fixtures import (
     DatabaseSyncValidator,
     create_eventual_consistency_user,
     create_test_user_data,
 )
-from tests.database_sync_helpers import (
+from tests.e2e.database_sync_helpers import (
     create_migration_users,
     create_sync_task,
-    execute_migration,
     insert_user_creation_event,
     measure_performance_duration,
     setup_cache_test,
     sync_user_to_backend,
-    update_user_and_invalidate_cache,
+    test_update_user_and_invalidate_cache,
+    test_execute_migration,
     validate_performance_results,
     verify_auth_backend_consistency,
-    verify_backend_user_exists,
+    test_verify_backend_user_exists,
     verify_cache_invalidation,
     verify_clickhouse_metrics,
     verify_event_types,
     verify_initial_cache,
     verify_metrics_consistency,
-    verify_migration_integrity,
+    test_verify_migration_integrity,
     verify_sync_consistency,
 )
 
@@ -71,7 +71,7 @@ class TestDatabaseSync:
         auth_user = await sync_validator.auth_service.get_user(user_id)
         await sync_validator.backend_service.sync_user_from_auth(auth_user)
         await verify_auth_backend_consistency(sync_validator, user_id)
-        await verify_backend_user_exists(sync_validator, user_id, test_user_data)
+        await test_verify_backend_user_exists(sync_validator, user_id, test_user_data)
     
     @pytest.mark.asyncio
     async def test_clickhouse_metrics_sync(self, sync_validator, test_user_data):
@@ -95,16 +95,16 @@ class TestDatabaseSync:
         user_id = await sync_validator.auth_service.create_user(test_user_data)
         cache_key, user_json = await setup_cache_test(sync_validator, user_id, test_user_data)
         await verify_initial_cache(sync_validator, cache_key, user_json)
-        await update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key)
+        await test_update_user_and_invalidate_cache(sync_validator, user_id, test_user_data, cache_key)
         await verify_cache_invalidation(sync_validator, cache_key)
     
     @pytest.mark.asyncio
     async def test_database_migration_integrity(self, sync_validator):
         """Test 4: Migration safety and rollback."""
         test_users = await create_migration_users(sync_validator)
-        migration_success = await execute_migration(sync_validator, test_users)
+        migration_success = await test_execute_migration(sync_validator, test_users)
         assert migration_success, "Migration failed"
-        await verify_migration_integrity(sync_validator, test_users)
+        await test_verify_migration_integrity(sync_validator, test_users)
 
 
 class TestDatabaseSyncPerformance:

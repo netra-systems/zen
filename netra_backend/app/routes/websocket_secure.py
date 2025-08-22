@@ -157,7 +157,24 @@ class SecureWebSocketManager:
                         continue
                     break
         
+        # Development mode: Allow connections without authentication
         if not token:
+            from netra_backend.app.core.configuration import unified_config_manager
+            config = unified_config_manager.get_config()
+            environment = getattr(config, 'environment', 'production').lower()
+            
+            if environment in ['development', 'test']:
+                logger.warning("WebSocket development mode: Allowing connection without authentication")
+                # Create a fake development session
+                return {
+                    "user_id": "dev_user",
+                    "email": "dev@netra.ai",
+                    "permissions": ["dev"],
+                    "auth_method": "development_bypass",
+                    "token_expires": None,
+                    "authenticated_at": datetime.now(timezone.utc)
+                }
+            
             self._stats["security_violations"] += 1
             logger.error("WebSocket connection denied: No secure JWT token provided")
             raise HTTPException(

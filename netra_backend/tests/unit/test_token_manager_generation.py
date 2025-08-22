@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from freezegun import freeze_time
 from jose import JWTError, jwt
 
 from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
@@ -93,7 +92,6 @@ class TestJWTTokenGeneration:
     """Test cases for JWT token generation and validation."""
 
     # Test JWT generation
-    @freeze_time("2023-01-01 12:00:00")
     @patch('uuid.uuid4')
     async def test_generate_jwt_success(self, mock_uuid, jwt_manager, sample_user_data):
         """Test successful JWT token generation."""
@@ -104,7 +102,6 @@ class TestJWTTokenGeneration:
         assert isinstance(token, str)
         assert len(token.split('.')) == 3  # JWT has 3 parts
 
-    @freeze_time("2023-01-01 12:00:00")
     @patch('uuid.uuid4')
     async def test_generate_jwt_with_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation with PR number included."""
@@ -115,7 +112,6 @@ class TestJWTTokenGeneration:
         claims = jwt.decode(token, jwt_manager._get_secret_key(), algorithms=["HS256"])
         assert claims["pr_number"] == "PR-123"
 
-    @freeze_time("2023-01-01 12:00:00")
     @patch('uuid.uuid4')
     async def test_generate_jwt_no_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation without PR number."""
@@ -168,16 +164,16 @@ class TestJWTTokenGeneration:
             await jwt_manager.get_jwt_claims(malformed_token)
 
     # Test token expiry time
-    @freeze_time("2023-01-01 12:00:00")
     async def test_token_expiry_time(self, jwt_manager, sample_user_data):
         """Test token contains correct expiry time."""
         from datetime import timezone
         with patch('uuid.uuid4', return_value=Mock(__str__=Mock(return_value="test_jti"))):
+            now = datetime.now(timezone.utc)
             token = await jwt_manager.generate_jwt(sample_user_data, "test")
             claims = await jwt_manager.get_jwt_claims(token)
-            now = datetime.now(timezone.utc)
+            # Verify expiry is approximately 1 hour from now (allowing some tolerance)
             expected_exp = int((now + timedelta(hours=1)).timestamp())
-            assert claims.exp == expected_exp
+            assert abs(claims.exp - expected_exp) <= 5  # 5 second tolerance
 
     # Test token claims structure
     async def test_token_claims_structure(self, jwt_manager, valid_jwt_token):

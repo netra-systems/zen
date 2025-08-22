@@ -268,8 +268,8 @@ afterAll(() => {
 // ============================================================================
 
 describe('Data Fetching - Optimistic Updates', () => {
-  it('handles basic state updates', () => {
-    // Simple synchronous test 
+  it('handles basic state updates', async () => {
+    // Simple test 
     const TestComponent = () => {
       const [count, setCount] = useState(0);
       
@@ -287,12 +287,12 @@ describe('Data Fetching - Optimistic Updates', () => {
     
     expect(screen.getByTestId('count')).toHaveTextContent('0');
     
-    userEvent.click(screen.getByTestId('increment'));
+    await userEvent.click(screen.getByTestId('increment'));
     
     expect(screen.getByTestId('count')).toHaveTextContent('1');
   });
 
-  it('validates optimistic update concept', () => {
+  it('validates optimistic update concept', async () => {
     // Test optimistic update pattern
     const TestComponent = () => {
       const [items, setItems] = useState(['Item 1']);
@@ -328,7 +328,7 @@ describe('Data Fetching - Optimistic Updates', () => {
     expect(screen.getByTestId('item-count')).toHaveTextContent('1');
     expect(screen.getByTestId('item-0')).toHaveTextContent('Item 1');
     
-    userEvent.click(screen.getByTestId('add-item'));
+    await userEvent.click(screen.getByTestId('add-item'));
     
     // Should immediately show optimistic update
     expect(screen.getByTestId('item-count')).toHaveTextContent('2');
@@ -336,7 +336,7 @@ describe('Data Fetching - Optimistic Updates', () => {
     expect(screen.getByTestId('loading-state')).toHaveTextContent('loading');
   });
 
-  it('demonstrates error rollback pattern', () => {
+  it('demonstrates error rollback pattern', async () => {
     const TestComponent = () => {
       const [title, setTitle] = useState('Original Title');
       const [hasError, setHasError] = useState(false);
@@ -366,7 +366,7 @@ describe('Data Fetching - Optimistic Updates', () => {
     expect(screen.getByTestId('title')).toHaveTextContent('Original Title');
     expect(screen.getByTestId('error-state')).toHaveTextContent('ok');
     
-    userEvent.click(screen.getByTestId('update'));
+    await userEvent.click(screen.getByTestId('update'));
     
     // Should immediately show optimistic update
     expect(screen.getByTestId('title')).toHaveTextContent('Updated Title');

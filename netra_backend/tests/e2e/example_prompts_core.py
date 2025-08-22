@@ -7,15 +7,13 @@ Maximum 300 lines, functions ≤8 lines.
 from datetime import datetime, timezone
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest
 import uuid
-
-    SupervisorAgent as Supervisor,
-
-)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.quality_gate_service import (

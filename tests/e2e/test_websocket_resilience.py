@@ -50,7 +50,7 @@ class TestWebSocketReconnectionWithStateRecovery:
         """Initialize message continuity validator."""
         return MessageContinuityValidator()
     
-    async def test_real_connection_drop_and_recovery(self, test_core, state_manager,:
+    async def test_real_connection_drop_and_recovery(self, test_core, state_manager:
                                                    continuity_validator):
         """Test real connection drop with automatic reconnection and state recovery."""
         user_id = TEST_USERS["enterprise"].id

@@ -25,8 +25,7 @@ from tests.e2e.config import (
     TestTier, get_test_user,
     get_auth_service_url, get_backend_service_url
 )
-from tests.database_test_operations import (
-    UserDataOperations, ChatMessageOperations,
+from tests.e2e.database_test_operations import (
     UserDataOperations, ChatMessageOperations
 )
 from tests.e2e.database_test_connections import DatabaseConnectionManager

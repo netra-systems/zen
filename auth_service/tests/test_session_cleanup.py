@@ -81,7 +81,7 @@ class SessionCleanupService:
         # Delete oldest sessions
         sessions_to_delete = sessions[max_sessions:]
         for session in sessions_to_delete:
-            await db_session.delete(session)
+            db_session.delete(session)
         
         await db_session.commit()
         return len(sessions_to_delete)
@@ -146,10 +146,11 @@ class TestSessionCleanupJob:
     async def test_enforce_session_limits(self, cleanup_service, test_db_session):
         """Test enforcement of maximum sessions per user"""
         # Create 7 sessions for same user
+        import uuid
         sessions = []
         for i in range(7):
             session = AuthSession(
-                id=f"session{i}",
+                id=f"limit-test-{uuid.uuid4()}",
                 user_id="user123",
                 last_activity=datetime.now(timezone.utc) - timedelta(minutes=i),
                 expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
@@ -169,10 +170,11 @@ class TestSessionCleanupJob:
     async def test_cleanup_preserves_recent_sessions(self, cleanup_service, test_db_session):
         """Test cleanup preserves most recent sessions"""
         # Create sessions with different activity times
+        import uuid
         sessions = []
         for i in range(3):
             session = AuthSession(
-                id=f"recent{i}",
+                id=f"recent-test-{uuid.uuid4()}",
                 user_id="user123",
                 last_activity=datetime.now(timezone.utc) - timedelta(minutes=i),
                 expires_at=datetime.now(timezone.utc) + timedelta(hours=1)

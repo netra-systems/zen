@@ -414,7 +414,7 @@ async def test_thread_deletion_error_handling(ws_thread_fixtures, deletion_handl
     assert len(non_existent_deletion_events) == 1, "Deletion event must be captured for audit"
 
 @pytest.mark.asyncio
-async def test_thread_deletion_with_active_agent_context(ws_thread_fixtures, deletion_handler,:
+async def test_thread_deletion_with_active_agent_context(ws_thread_fixtures, deletion_handler:
                                                          thread_context_manager):
     """Test thread deletion properly cleans up active agent contexts."""
     user = TEST_USERS["enterprise"]

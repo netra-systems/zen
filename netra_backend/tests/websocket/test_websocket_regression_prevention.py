@@ -122,7 +122,7 @@ class TestAgentRegistration:
 
         llm_manager, tool_dispatcher, websocket_manager = real_components
         
-        with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
 
             supervisor = SupervisorAgent(
 
@@ -180,7 +180,7 @@ class TestWebSocketMessageFlow:
         
         # Mock WebSocket manager to avoid actual sending
 
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
 
             await agent_service.handle_websocket_message(
 
@@ -231,7 +231,7 @@ class TestWebSocketMessageFlow:
         
         # Test process_agent_message
 
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
 
             mock_db.return_value.__aenter__ = AsyncMock(return_value=Mock())
 

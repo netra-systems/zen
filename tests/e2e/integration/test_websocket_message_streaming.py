@@ -133,7 +133,7 @@ class WebSocketStreamingTester:
         
         return streaming_result
 
-    async def test_websocket_connection_stability(self, ws_manager: WebSocketManager,:
+    async def test_websocket_connection_stability(self, ws_manager: WebSocketManager:
 
                                                 user_id: str) -> Dict[str, Any]:
 
@@ -251,7 +251,7 @@ class WebSocketStreamingTester:
         
         return backpressure_result
 
-    async def test_reconnection_handling(self, ws_manager: WebSocketManager,:
+    async def test_reconnection_handling(self, ws_manager: WebSocketManager:
 
                                        user_id: str) -> Dict[str, Any]:
 

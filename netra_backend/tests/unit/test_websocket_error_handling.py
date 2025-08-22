@@ -115,14 +115,14 @@ async def test_websocket_state_transitions():
     # Test CONNECTING state
     ws.client_state = WebSocketState.CONNECTING
     ws.application_state = WebSocketState.CONNECTING
-    with patch('app.routes.websockets.manager') as mock_manager:
+    with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
         await _handle_websocket_error(Exception("Early error"), "user", ws)
         mock_manager.disconnect_user.assert_not_called()
     
     # Test CONNECTED state
     ws.client_state = WebSocketState.CONNECTED
     ws.application_state = WebSocketState.CONNECTED
-    with patch('app.routes.websockets.manager') as mock_manager:
+    with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
         mock_manager.disconnect_user = AsyncMock()
         await _handle_websocket_error(Exception("Connected error"), "user", ws)
         mock_manager.disconnect_user.assert_called_once()
@@ -130,7 +130,7 @@ async def test_websocket_state_transitions():
     # Test DISCONNECTED state
     ws.client_state = WebSocketState.DISCONNECTED
     ws.application_state = WebSocketState.DISCONNECTED
-    with patch('app.routes.websockets.manager') as mock_manager:
+    with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
         mock_manager.disconnect_user = AsyncMock()
         await _handle_websocket_error(Exception("Post-disconnect error"), "user", ws)
         # Should not try to disconnect already disconnected WebSocket

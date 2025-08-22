@@ -25,10 +25,9 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.tests.e2e.helpers.thread_test_helpers import (
-    create_mock_thread,
-    setup_thread_repo_mock,
-    setup_ws_manager_mock,
+from netra_backend.tests.e2e.thread_test_fixtures import (
+    ThreadTestDataFactory,
+    ThreadTestMocks,
 )
 
 class TestThreadCreation:

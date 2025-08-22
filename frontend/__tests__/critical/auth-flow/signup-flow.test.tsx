@@ -64,6 +64,9 @@ describe('Signup Flow - Business Critical Tests', () => {
     
     jest.clearAllTimers();
     jest.useFakeTimers();
+    
+    // Clear all mock calls
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -88,6 +91,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('validates email format and uniqueness', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('invalid-email', 'password123', 'password123', 'Test User');
       });
@@ -98,6 +106,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('enforces password strength requirements', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('user@test.com', 'weak', 'weak', 'Test User');
       });
@@ -107,6 +120,11 @@ describe('Signup Flow - Business Critical Tests', () => {
 
     it('validates password confirmation match', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
       
       await act(async () => {
         await performSignup('user@test.com', 'validpassword123', 'different123', 'Test User');
@@ -119,6 +137,11 @@ describe('Signup Flow - Business Critical Tests', () => {
   describe('Successful Signup Flow', () => {
     it('completes signup with valid data and auto-login', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
       
       await act(async () => {
         await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
@@ -138,6 +161,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('stores signup token and updates auth state', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
       });
@@ -150,6 +178,11 @@ describe('Signup Flow - Business Critical Tests', () => {
       const mockPush = jest.fn();
       renderSignupForm(mockPush);
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
       });
@@ -161,6 +194,11 @@ describe('Signup Flow - Business Critical Tests', () => {
 
     it('tracks conversion analytics on successful signup', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
       
       await act(async () => {
         await performSignup('newuser@company.com', 'validpassword123', 'validpassword123', 'New Customer');
@@ -177,6 +215,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('initiates Google signup flow', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await user.click(screen.getByTestId('google-signup-button'));
       });
@@ -189,6 +232,11 @@ describe('Signup Flow - Business Critical Tests', () => {
       
       renderSignupForm();
       
+      // Wait for form to render and effect to run
+      await waitFor(() => {
+        expect(screen.getByTestId('signup-form')).toBeInTheDocument();
+      });
+      
       await waitFor(() => {
         expect(mockAuthService.handleOAuthSignup).toHaveBeenCalledWith('signup_code', 'signup_state');
       });
@@ -196,6 +244,12 @@ describe('Signup Flow - Business Critical Tests', () => {
 
     it('shows terms acceptance for social signup', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
+        expect(screen.getByTestId('google-signup-button')).toBeInTheDocument();
+      });
       
       await act(async () => {
         await user.click(screen.getByTestId('google-signup-button'));
@@ -215,6 +269,11 @@ describe('Signup Flow - Business Critical Tests', () => {
       
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('existing@company.com', 'password123', 'password123', 'Existing User');
       });
@@ -230,6 +289,11 @@ describe('Signup Flow - Business Critical Tests', () => {
       
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignup('user@test.com', 'password123', 'password123', 'Test User');
       });
@@ -242,6 +306,11 @@ describe('Signup Flow - Business Critical Tests', () => {
 
     it('prevents double submission during processing', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('signup-button')).toBeInTheDocument();
+      });
       
       const signupButton = screen.getByTestId('signup-button');
       await act(async () => {
@@ -256,6 +325,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('handles weak password with strength meter', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('password-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await user.type(screen.getByTestId('password-input'), 'weak');
       });
@@ -269,6 +343,11 @@ describe('Signup Flow - Business Critical Tests', () => {
     it('requires terms acceptance before signup', async () => {
       renderSignupForm();
       
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('email-input')).toBeInTheDocument();
+      });
+      
       await act(async () => {
         await performSignupWithoutTerms('user@test.com', 'password123', 'password123', 'Test User');
       });
@@ -279,6 +358,11 @@ describe('Signup Flow - Business Critical Tests', () => {
 
     it('tracks privacy consent for compliance', async () => {
       renderSignupForm();
+      
+      // Wait for form to render
+      await waitFor(() => {
+        expect(screen.getByTestId('terms-checkbox')).toBeInTheDocument();
+      });
       
       await act(async () => {
         await user.click(screen.getByTestId('terms-checkbox'));
@@ -308,7 +392,9 @@ describe('Signup Flow - Business Critical Tests', () => {
   }
 
   function renderSignupForm(mockPush?: jest.Mock) {
-    return render(<SignupForm onRedirect={mockPush} />);
+    const result = render(<SignupForm onRedirect={mockPush} />);
+    // Add a small delay to ensure component is fully rendered
+    return result;
   }
 
   async function performSignup(email: string, password: string, confirmPassword: string, fullName: string) {

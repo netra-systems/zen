@@ -471,7 +471,7 @@ async def test_concurrent_user_performance(ws_thread_fixtures, thread_performanc
            f"Should complete at least 80% of operations, got {actual_operations}/{expected_total_operations}"
 
 @pytest.mark.asyncio
-async def test_comprehensive_thread_operations_performance_target(ws_thread_fixtures,:
+async def test_comprehensive_thread_operations_performance_target(ws_thread_fixtures:
                                                                    thread_performance_tester,
                                                                    thread_context_manager):
     """Test all thread operations complete within comprehensive performance targets."""

@@ -98,7 +98,7 @@ class CircuitBreakerTester:
         self.circuit_open = False
         self.recovery_attempts = 0
     
-    async def test_circuit_breaker_activation(self, client: RealWebSocketClient,:
+    async def test_circuit_breaker_activation(self, client: RealWebSocketClient:
                                             failure_threshold: int = 3) -> Dict[str, Any]:
         """Test circuit breaker opens after threshold failures."""
         attempts = []
@@ -320,7 +320,7 @@ class TestRealErrorRecovery:
         """Initialize recovery coordinator."""
         return ServiceRecoveryCoordinator(orchestrator)
     
-    async def test_backend_service_failure_recovery(self, orchestrator, failure_simulator,:
+    async def test_backend_service_failure_recovery(self, orchestrator, failure_simulator:
                                                   recovery_coordinator, data_validator):
         """Test complete backend service failure and recovery cycle."""
         # Establish connection and capture initial state
@@ -361,7 +361,7 @@ class TestRealErrorRecovery:
         finally:
             await ws_client.close()
     
-    async def test_network_failure_with_timeouts(self, orchestrator, network_simulator,:
+    async def test_network_failure_with_timeouts(self, orchestrator, network_simulator:
                                                 circuit_breaker_tester):
         """Test network failure handling with timeout and retry logic."""
         ws_client = await self._setup_test_connection(orchestrator)
@@ -449,7 +449,7 @@ class TestRealErrorRecovery:
             error_str = str(e)
             assert len(error_str) > 0, "Error message should not be empty"
     
-    async def test_complete_error_recovery_flow(self, network_simulator, circuit_breaker_tester,:
+    async def test_complete_error_recovery_flow(self, network_simulator, circuit_breaker_tester:
                                               data_validator):
         """Test complete error recovery flow logic validation."""
         start_time = time.time()

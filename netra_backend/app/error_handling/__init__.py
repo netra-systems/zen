@@ -4,7 +4,7 @@ Provides comprehensive error handling with recovery strategies,
 user-friendly error messages, and business continuity measures.
 """
 
-from netra_backend.app.example_message_errors import (
+from netra_backend.app.error_handling.example_message_errors import (
     ErrorCategory,
     ErrorContext,
     ErrorSeverity,

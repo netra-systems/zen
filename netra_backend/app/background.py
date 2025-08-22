@@ -12,9 +12,17 @@ class BackgroundTaskManager:
 
     def add_task(self, coro: Coroutine):
         """Adds a coroutine to be run as a background task."""
-        task = asyncio.create_task(coro)
+        task = asyncio.create_task(self._wrap_task_with_error_handling(coro))
         self.tasks.append(task)
         logger.info(f"Task {task.get_name()} added to background manager.")
+
+    async def _wrap_task_with_error_handling(self, coro: Coroutine):
+        """Wrap task with error handling to prevent crashes."""
+        try:
+            return await coro
+        except Exception as e:
+            logger.error(f"Background task failed with error: {e}")
+            # Don't re-raise - let the task fail gracefully without crashing the app
 
     async def shutdown(self):
         """Cancels all running background tasks."""

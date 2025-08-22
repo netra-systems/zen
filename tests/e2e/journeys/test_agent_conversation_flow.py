@@ -57,7 +57,7 @@ class TestAgentConversationFlow:
         return ConversationFlowValidator()
     
     @pytest.mark.asyncio
-    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator,:
+    async def test_complete_optimization_conversation_flow(self, test_core, flow_simulator:
                                                          flow_validator):
         """Test complete optimization conversation with context preservation."""
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)

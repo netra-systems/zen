@@ -39,7 +39,7 @@ class TestWebSocketAgentIntegration:
         websocket_manager = Mock()
         
         # Create supervisor with mocked components
-        with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
             supervisor = SupervisorAgent(
                 llm_manager=llm_manager,
                 tool_dispatcher=tool_dispatcher,
@@ -89,8 +89,8 @@ class TestWebSocketAgentIntegration:
         app.state.tool_dispatcher = Mock()
         
         # Mock WebSocket manager
-        with patch('app.startup_module.manager') as mock_manager:
-            with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.startup_module.manager') as mock_manager:
+            with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
                 _create_agent_supervisor(app)
         
         # Verify supervisor was created and stored
@@ -130,7 +130,7 @@ class TestWebSocketAgentIntegration:
         mock_db = Mock()
         
         # Execute
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             await handler.handle_user_message(
                 user_id="test_user",
                 payload=payload,
@@ -204,7 +204,7 @@ class TestWebSocketAgentIntegration:
         ]
         
         # Execute concurrently
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             tasks = [
                 agent_service.handle_websocket_message(
                     user_id=f"user_{i}",

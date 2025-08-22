@@ -95,7 +95,7 @@ class AgentResponseTester:
         
         return response
     
-    async def test_multi_turn_conversation(self, agent_type: str,:
+    async def test_multi_turn_conversation(self, agent_type: str:
                                          messages: List[str]) -> List[Dict[str, Any]]:
         """Test multi-turn conversation with an agent."""
         responses = []
@@ -129,7 +129,7 @@ class AgentResponseTester:
             "fallback_available": True
         }
     
-    async def test_agent_tool_execution(self, agent_type: str,:
+    async def test_agent_tool_execution(self, agent_type: str:
                                       tool_name: str) -> Dict[str, Any]:
         """Test agent tool execution."""
         start_time = time.time()

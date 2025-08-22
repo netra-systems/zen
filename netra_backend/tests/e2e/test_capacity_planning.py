@@ -21,13 +21,13 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 )
 # from scaling_test_helpers - using fixtures instead (
-    create_gradual_scaling_state,
-    create_scaling_setup,
-    create_traffic_spike_state,
-    execute_scaling_workflow,
-    validate_gradual_scaling_plan,
-    validate_spike_handling_strategy,
-)
+#     create_gradual_scaling_state,
+#     create_scaling_setup,
+#     create_traffic_spike_state,
+#     execute_scaling_workflow,
+#     validate_gradual_scaling_plan,
+#     validate_spike_handling_strategy,
+# )
 
 @pytest.fixture
 def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):

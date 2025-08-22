@@ -121,7 +121,7 @@ class ResponseQualityTester:
         
         return threshold_results
     
-    async def test_content_type_validation(self, responses: List[Dict[str, Any]],:
+    async def test_content_type_validation(self, responses: List[Dict[str, Any]]:
                                          content_types: List[ContentType]) -> Dict[str, Any]:
         """Test content type specific validation."""
         type_results = {}

@@ -3,7 +3,7 @@ E2E Validation Framework Package
 Comprehensive validation for agent workflows with stage-by-stage checkpoints.
 """
 
-from netra_backend.tests.e2e.data_integrity_validator import (
+from netra_backend.tests.e2e.validators.data_integrity_validator import (
     AuditTrailResult,
     AuditTrailValidator,
     DataFlowResult,
@@ -17,7 +17,7 @@ from netra_backend.tests.e2e.data_integrity_validator import (
     TypeSafetyResult,
     TypeSafetyValidator,
 )
-from netra_backend.tests.e2e.performance_validator import (
+from netra_backend.tests.e2e.validators.performance_validator import (
     BenchmarkComparator,
     BenchmarkComparison,
     LatencyMeasurer,
@@ -32,7 +32,7 @@ from netra_backend.tests.e2e.performance_validator import (
     ThroughputMetrics,
     ThroughputTracker,
 )
-from netra_backend.tests.e2e.stage_validator import (
+from netra_backend.tests.e2e.validators.stage_validator import (
     InputValidationResult,
     InputValidator,
     OutputValidationResult,

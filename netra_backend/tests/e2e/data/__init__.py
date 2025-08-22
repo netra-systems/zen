@@ -23,7 +23,7 @@ Usage:
     )
 """
 
-from netra_backend.tests.default_plans import (
+from netra_backend.tests.e2e.data.default_plans import (
     OptimizationPlan,
     PlanStep,
     ValidationCriteria,
@@ -31,19 +31,20 @@ from netra_backend.tests.default_plans import (
     get_cost_optimization_plan,
     get_performance_tuning_plan,
 )
-from netra_backend.tests.edge_cases_temporal import (
-    EdgeCase,
-    EdgeCaseCategory,
-    EdgeCaseGenerator,
-    ErrorConditionSimulator,
-)
-from netra_backend.tests.seeded_data_generator import (
+# NOTE: edge_cases_temporal module not found - commenting out for now
+# from netra_backend.tests.edge_cases_temporal import (
+#     EdgeCase,
+#     EdgeCaseCategory,
+#     EdgeCaseGenerator,
+#     ErrorConditionSimulator,
+# )
+from netra_backend.tests.e2e.data.seeded_data_generator import (
     DatasetConfig,
     DomainSpecificGenerator,
     ProductionMirrorGenerator,
     StressTestGenerator,
 )
-from netra_backend.tests.temporal_patterns import (
+from netra_backend.tests.e2e.data.temporal_patterns import (
     BurstPatternGenerator,
     GrowthPatternGenerator,
     SeasonalPatternGenerator,
@@ -67,11 +68,11 @@ __all__ = [
     "PlanStep",
     "ValidationCriteria",
     
-    # Edge cases
-    "EdgeCaseGenerator",
-    "ErrorConditionSimulator",
-    "EdgeCase",
-    "EdgeCaseCategory",
+    # Edge cases - commented out due to missing module
+    # "EdgeCaseGenerator",
+    # "ErrorConditionSimulator",
+    # "EdgeCase",
+    # "EdgeCaseCategory",
     
     # Temporal patterns
     "TemporalPatternGenerator",

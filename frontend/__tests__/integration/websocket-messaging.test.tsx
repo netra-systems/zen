@@ -7,16 +7,16 @@
 
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import * from '@/__tests__/helpers/websocket-test-manager';
+import * as WebSocketTestManager from '@/__tests__/helpers/websocket-test-manager';
 import { MessageBuffer } from '../setup/websocket-test-utils';
 
 describe('WebSocket Message Processing Tests', () => {
-  let wsManager: WebSocketTestManager;
+  let wsManager: any;
   let messageBuffer: MessageBuffer;
 
   beforeEach(() => {
     // Use real WebSocket simulation instead of mocks
-    wsManager = createWebSocketManager(undefined, true);
+    wsManager = WebSocketTestManager.WebSocketTestManager.createWebSocketManager(undefined, true);
     messageBuffer = wsManager.getMessageBuffer();
     wsManager.setup();
   });

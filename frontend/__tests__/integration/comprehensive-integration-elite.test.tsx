@@ -70,7 +70,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import * from '@/__tests__/helpers/test-setup-helpers';
+import * as TestSetupHelpers from '@/__tests__/helpers/test-setup-helpers';
 import {
   createMockDocument,
   createMockSearchResults,

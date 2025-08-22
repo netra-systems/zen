@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+import aiohttp
 import pytest
 
 # Add project root to path
@@ -170,8 +171,6 @@ class HealthMonitor:
     
     async def _monitor_loop(self, services: Dict[str, int], interval: float) -> None:
         """Main monitoring loop."""
-        import aiohttp
-        
         async with aiohttp.ClientSession() as session:
             while self.monitoring_active:
                 timestamp = time.time()

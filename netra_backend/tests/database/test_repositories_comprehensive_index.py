@@ -22,7 +22,7 @@ from netra_backend.tests.database.test_repository_auth import (
     TestOptimizationRepositoryStorage,
     TestUserRepositoryAuth,
 )
-from netra_backend.tests.services.test_thread_repository import TestThreadRepository as TestThreadRepositoryOperations
+from netra_backend.tests.database.test_thread_repository import TestThreadRepositoryOperations
 
 # Re-export for backward compatibility
 __all__ = [

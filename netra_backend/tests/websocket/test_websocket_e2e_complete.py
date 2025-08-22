@@ -33,7 +33,7 @@ from netra_backend.app.core.network_constants import (
     ServicePorts,
     URLConstants,
 )
-from netra_backend.app.routes.websocket_enhanced import connection_manager
+from netra_backend.app.routes.websocket import connection_manager
 from netra_backend.app.schemas.websocket_models import (
     AgentUpdatePayload,
     UserMessagePayload,
@@ -271,7 +271,7 @@ class TestServiceDiscovery:
     
     async def test_websocket_config_discovery(self):
         """Test backend provides WebSocket configuration."""
-        from netra_backend.app.routes.websocket_enhanced import (
+        from netra_backend.app.routes.websocket import (
             get_websocket_service_discovery,
         )
         
@@ -289,7 +289,7 @@ class TestErrorHandlingAndLogging:
     
     async def test_connection_rejection_logged_clearly(self):
         """Test rejected connections are logged clearly."""
-        with patch('app.logging_config.central_logger') as mock_logger:
+        with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             mock_log = Mock()
             mock_logger.get_logger.return_value = mock_log
             
@@ -388,7 +388,7 @@ class TestManualDatabaseSessions:
     
     async def test_websocket_manual_db_sessions(self, ws_client):
         """Test WebSocket endpoints use manual DB sessions."""
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session
             
@@ -398,19 +398,19 @@ class TestManualDatabaseSessions:
             # Should have called manual session creation
             assert mock_db.called
             
-    @patch('app.routes.websocket_enhanced.get_async_db')
+    @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
     async def test_auth_validation_manual_session(self, mock_db):
         """Test auth validation uses manual database session."""
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
-        from netra_backend.app.routes.websocket_enhanced import (
+        from netra_backend.app.routes.websocket import (
             authenticate_websocket_with_database,
         )
         
         session_info = {"user_id": "test_user", "email": "test@example.com"}
         
-        with patch('app.services.security_service.SecurityService') as mock_security:
+        with patch('netra_backend.app.services.security_service.SecurityService') as mock_security:
             mock_security_instance = AsyncMock()
             mock_security_instance.get_user_by_id.return_value = Mock(is_active=True)
             mock_security.return_value = mock_security_instance

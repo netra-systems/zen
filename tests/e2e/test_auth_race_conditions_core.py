@@ -356,7 +356,7 @@ class TestConcurrentTokenRefreshRaceConditions:
     """Test Case 1: Concurrent Token Refresh Race Conditions"""
     
     @pytest.mark.asyncio
-    async def test_concurrent_token_refresh_race(self, isolated_auth_environment,:
+    async def test_concurrent_token_refresh_race(self, isolated_auth_environment:
                                                concurrent_executor, race_detector):
         """
         Scenario: Multiple clients refresh tokens simultaneously
@@ -421,7 +421,7 @@ class TestMultiDeviceLoginCollision:
     """Test Case 2: Multi-Device Login Collision"""
     
     @pytest.mark.asyncio
-    async def test_multi_device_login_collision(self, isolated_auth_environment,:
+    async def test_multi_device_login_collision(self, isolated_auth_environment:
                                               concurrent_executor, race_detector):
         """
         Scenario: User logs in from 5 devices simultaneously
@@ -511,7 +511,7 @@ class TestConcurrentSessionInvalidation:
     """Test Case 3: Session Invalidation Race Conditions"""
     
     @pytest.mark.asyncio
-    async def test_concurrent_session_invalidation(self, isolated_auth_environment,:
+    async def test_concurrent_session_invalidation(self, isolated_auth_environment:
                                                  concurrent_executor, race_detector):
         """
         Scenario: Multiple logout requests and session invalidations happen simultaneously
@@ -618,7 +618,7 @@ class TestJWTTokenCollisionDetection:
     """Test Case 4: JWT Token Collision Detection"""
     
     @pytest.mark.asyncio
-    async def test_jwt_token_collision_detection(self, isolated_auth_environment,:
+    async def test_jwt_token_collision_detection(self, isolated_auth_environment:
                                                 race_detector):
         """
         Scenario: Generate thousands of tokens simultaneously
@@ -743,7 +743,7 @@ class TestRaceConditionLoadStress:
     
     @pytest.mark.asyncio
     @pytest.mark.slow  # Mark as slow test for optional execution
-    async def test_comprehensive_race_condition_stress(self, isolated_auth_environment,:
+    async def test_comprehensive_race_condition_stress(self, isolated_auth_environment:
                                                      race_detector):
         """
         Comprehensive stress test combining all race condition scenarios

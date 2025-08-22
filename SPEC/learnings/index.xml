@@ -98,6 +98,16 @@
             <critical-takeaway>Maintain backwards compatibility during migrations with wrapper scripts and deprecation warnings.</critical-takeaway>
         </category>
         
+        <category name="Test Infrastructure Repair" path="SPEC/learnings/test_infrastructure_repair.xml" keywords="Integration Tests, Import Errors, Async Tests, Test Collection, pytest.mark.asyncio">
+            <critical-takeaway>CRITICAL: All async test functions MUST have @pytest.mark.asyncio decorator or tests will hang/timeout.</critical-takeaway>
+            <critical-takeaway>All imports MUST be absolute starting from package root - NO relative imports in tests.</critical-takeaway>
+            <critical-takeaway>Missing module exports cause most import errors - ensure __all__ exports in modules.</critical-takeaway>
+            <critical-takeaway>Create stub implementations for missing modules rather than removing test coverage.</critical-takeaway>
+            <critical-takeaway>Auth service is UserAuthService not AuthService - import as: from netra_backend.app.services.user_auth_service import UserAuthService as AuthService.</critical-takeaway>
+            <critical-takeaway>Metrics collector is at netra_backend.app.monitoring.metrics_collector not core.monitoring.</critical-takeaway>
+            <critical-takeaway>Test config is at netra_backend.tests.integration.config not tests.config.</critical-takeaway>
+        </category>
+        
         <category name="Test Imports" path="SPEC/learnings/test_import_fixes.xml" keywords="Imports, ModuleNotFoundError, PYTHONPATH, Test Setup">
             <critical-takeaway>All imports MUST use absolute imports with netra_backend namespace (e.g., from netra_backend.app.db import models).</critical-takeaway>
             <critical-takeaway>Auth service endpoints use /auth prefix, NOT /api/v1/auth.</critical-takeaway>
@@ -304,6 +314,36 @@
             <critical-takeaway>When refactoring module structure, grep for ALL imports globally and update systematically.</critical-takeaway>
             <critical-takeaway>Avoid similar class names in different modules (SystemChecker vs StartupChecker confusion).</critical-takeaway>
             <critical-takeaway>Create comprehensive import tests that validate module locations and catch import errors early.</critical-takeaway>
+        </category>
+        
+        <category name="Cold Start Comprehensive" path="SPEC/learnings/cold_start_comprehensive.xml" keywords="Cold Start, Startup, Deployment, End-to-End, Mission Critical">
+            <critical-takeaway>100% startup success rate achieved through comprehensive cold start audit and fixes.</critical-takeaway>
+            <critical-takeaway>Database table creation required for first-time setup - automated via create_postgres_tables.py.</critical-takeaway>
+            <critical-takeaway>JWT secret synchronization critical between services - both JWT_SECRET_KEY and JWT_SECRET required.</critical-takeaway>
+            <critical-takeaway>Dynamic port allocation prevents conflicts - use service discovery for health checks.</critical-takeaway>
+            <critical-takeaway>WebSocket route registration mandatory for real-time functionality.</critical-takeaway>
+            <critical-takeaway>CORS configuration must support dynamic development ports with service discovery.</critical-takeaway>
+            <critical-takeaway>Frontend environment configuration must align with backend service discovery.</critical-takeaway>
+            <critical-takeaway>Staging deployment requires sslmode=require for DATABASE_URL and gunicorn with uvicorn workers.</critical-takeaway>
+        </category>
+        
+        <category name="Deployment Staging" path="SPEC/learnings/deployment.xml" keywords="Staging, GCP, Cloud Run, SSL, OAuth, Health Checks">
+            <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run deployments for optimal performance.</critical-takeaway>
+            <critical-takeaway>DATABASE_URL MUST include sslmode=require parameter for Cloud SQL connections in staging/production.</critical-takeaway>
+            <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL for proxy rewrites to work.</critical-takeaway>
+            <critical-takeaway>Health check /health/ready endpoint failures in staging usually indicate database connectivity issues.</critical-takeaway>
+            <critical-takeaway>OAuth flow requires auth service at separate domain with proper CORS and callback URL configuration.</critical-takeaway>
+            <critical-takeaway>USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service.</critical-takeaway>
+        </category>
+        
+        <category name="AI Processing Flow" path="SPEC/learnings/ai_processing_flow.xml" keywords="AI, LLM, Agent, Processing, Streaming, Real-time">
+            <critical-takeaway>AI agent system initialization critical for end-to-end processing validation.</critical-takeaway>
+            <critical-takeaway>LLM API configuration supports multiple modes: development (mock), testing (real), production (full).</critical-takeaway>
+            <critical-takeaway>Message thread creation and management essential for AI conversation flow.</critical-takeaway>
+            <critical-takeaway>Real-time AI response streaming requires WebSocket connection and progressive UI updates.</critical-takeaway>
+            <critical-takeaway>Agent message routing must handle classification, selection, context preservation, and response formatting.</critical-takeaway>
+            <critical-takeaway>Comprehensive error handling required for LLM API failures, timeouts, and network issues.</critical-takeaway>
+            <critical-takeaway>Conversation state persistence across sessions and system restarts critical for user experience.</critical-takeaway>
         </category>
     </categories>
 </specification>

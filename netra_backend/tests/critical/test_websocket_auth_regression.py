@@ -63,7 +63,7 @@ class TestAuthenticationErrorPropagation:
         security_service = Mock()
         security_service.decode_token = Mock(return_value={"sub": "test-user"})
         
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_db.side_effect = ConnectionError("Database unavailable")
             
             with pytest.raises(ConnectionError) as exc_info:
@@ -84,7 +84,7 @@ class TestUserLookupFailures:
         security_service.decode_token = Mock(return_value={"sub": "nonexistent-user-123"})
         security_service.get_user_by_id = AsyncMock(return_value=None)
         
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session
             
@@ -108,7 +108,7 @@ class TestUserLookupFailures:
         mock_user.id = "inactive-user"
         security_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session
             
@@ -134,7 +134,7 @@ class TestUserLookupFailures:
             ]
         )
         
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_session.rollback = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session

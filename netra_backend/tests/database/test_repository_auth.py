@@ -47,6 +47,13 @@ class OptimizationRepository:
         return Optimization(id="opt124", parent_id=opt_id, version=2, **data)
     
     async def get_version_history(self, session, opt_id):
+        # Return test data for opt1
+        if opt_id == "opt1":
+            return [
+                Optimization(id="opt1", version=1, created_at=datetime.now(timezone.utc) - timedelta(days=2)),
+                Optimization(id="opt2", version=2, created_at=datetime.now(timezone.utc) - timedelta(days=1)),
+                Optimization(id="opt3", version=3, created_at=datetime.now(timezone.utc))
+            ]
         return []
 
 class MetricRepository:
@@ -57,7 +64,14 @@ class MetricRepository:
         return 70.0
     
     async def get_time_series(self, session, metric_name, interval, time_range):
-        return []
+        # Return test time series data
+        now = datetime.now(timezone.utc)
+        return [
+            (now - timedelta(minutes=30), 50.0),
+            (now - timedelta(minutes=20), 55.0),
+            (now - timedelta(minutes=10), 60.0),
+            (now, 65.0)
+        ]
 
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""

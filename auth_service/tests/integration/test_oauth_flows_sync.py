@@ -178,7 +178,7 @@ def test_oauth_token_exchange_mocked(mock_client):
     mock_async_client.get.return_value = user_response
     
     # Test callback with mocked responses
-    response = client.get("/auth/callback?code=test_code&state=test_state")
+    response = client.get("/auth/callback?code=test_code&state=test_state", follow_redirects=False)
     
     # Should handle the mocked OAuth flow
     assert response.status_code in [302, 500]  # Redirect or server error

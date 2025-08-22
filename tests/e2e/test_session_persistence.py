@@ -146,7 +146,7 @@ def token_refresh_manager(session_manager):
 # ============================================================================
 
 @pytest.mark.asyncio
-async def test_session_persists_across_disconnect_reconnect(session_manager,:
+async def test_session_persists_across_disconnect_reconnect(session_manager:
                                                            connection_manager):
     """Test session persistence across disconnect/reconnect."""
     user = TEST_USERS["enterprise"]
@@ -210,7 +210,7 @@ def _validate_graceful_disconnect(session_manager, connection_manager, token):
     assert len(disconnect_events) == 1, "Graceful disconnect must be recorded"
 
 @pytest.mark.asyncio  
-async def test_token_refresh_during_active_session(session_manager, token_refresh_manager,:
+async def test_token_refresh_during_active_session(session_manager, token_refresh_manager:
                                                    connection_manager):
     """Test token refresh without session interruption."""
     user = TEST_USERS["enterprise"]

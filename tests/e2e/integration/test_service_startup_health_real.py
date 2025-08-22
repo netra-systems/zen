@@ -42,7 +42,7 @@ import pytest
 
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.startup_optimizer import PhaseStep, StartupPhase
-from tests.health_check_core import (
+from tests.e2e.health_check_core import (
     SERVICE_ENDPOINTS,
     HealthCheckResult,
     create_healthy_result,

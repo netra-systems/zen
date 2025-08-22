@@ -116,9 +116,16 @@ class ConnectionHealthChecker:
         from netra_backend.app.db.postgres_core import async_engine
         if async_engine:
             try:
+                # Add timeout to prevent hanging
                 async with async_engine.connect() as conn:
-                    result = await conn.execute(text("SELECT 1"))
+                    result = await asyncio.wait_for(
+                        conn.execute(text("SELECT 1")), 
+                        timeout=10.0
+                    )
                     result.fetchone()
+            except asyncio.TimeoutError:
+                logger.error("Database health check query timed out after 10 seconds")
+                raise
             except Exception as e:
                 if "sslmode" in str(e):
                     logger.error(f"CRITICAL: Health checker detected sslmode error - this indicates URL conversion was bypassed: {e}")

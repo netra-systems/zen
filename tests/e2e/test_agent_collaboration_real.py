@@ -54,7 +54,7 @@ class TestRealAgentCollaboration:
         return CollaborationFlowValidator()
     
     @pytest.mark.asyncio
-    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator,:
+    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator,
                                                             flow_validator):
         """Test complex cost optimization requiring multiple agents with real LLM calls."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)

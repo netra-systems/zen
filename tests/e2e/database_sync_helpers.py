@@ -39,7 +39,7 @@ async def verify_metrics_consistency(validator, user_id, expected_count):
 
 async def create_sync_task(validator, index):
     """Create individual sync task."""
-    from tests.database_sync_fixtures import (
+    from tests.e2e.database_sync_fixtures import (
         create_performance_user_data,
     )
     user_data = create_performance_user_data(index)
@@ -51,7 +51,7 @@ async def create_sync_task(validator, index):
 
 async def create_migration_users(sync_validator):
     """Create migration test users."""
-    from tests.database_sync_fixtures import (
+    from tests.e2e.database_sync_fixtures import (
         create_migration_user_data,
     )
     test_users = []

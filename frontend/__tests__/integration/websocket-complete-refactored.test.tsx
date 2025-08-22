@@ -21,7 +21,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import * from '@/__tests__/helpers/websocket-test-manager';
+import * as WebSocketTestManager from '@/__tests__/helpers/websocket-test-manager';
 import {
   ConnectionStateManager,
   MessageBuffer,
@@ -46,7 +46,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
   let advancedTester: AdvancedWebSocketTester;
 
   beforeEach(() => {
-    wsManager = createWebSocketManager(undefined, true);
+    wsManager = WebSocketTestManager.createWebSocketManager(undefined, true);
     stateManager = wsManager.getStateManager();
     messageBuffer = wsManager.getMessageBuffer();
     advancedTester = new AdvancedWebSocketTester();

@@ -615,7 +615,7 @@ class SpikeLoadGenerator:
 class TestThunderingHerdLoginSpike:
     """Test Case 1: Thundering Herd Login Spike"""
     
-    async def test_thundering_herd_login_spike(self, load_generator: SpikeLoadGenerator,:
+    async def test_thundering_herd_login_spike(self, load_generator: SpikeLoadGenerator:
                                              spike_metrics: SpikeLoadMetrics,
                                              system_health_validator):
         """
@@ -663,7 +663,7 @@ class TestThunderingHerdLoginSpike:
 class TestAutoScalingResponseValidation:
     """Test Case 3: Auto-scaling Response Validation"""
     
-    async def test_auto_scaling_response_validation(self, load_generator: SpikeLoadGenerator,:
+    async def test_auto_scaling_response_validation(self, load_generator: SpikeLoadGenerator:
                                                   spike_metrics: SpikeLoadMetrics,
                                                   system_health_validator):
         """
@@ -696,7 +696,7 @@ class TestAutoScalingResponseValidation:
 class TestCircuitBreakerActivationRecovery:
     """Test Case 4: Circuit Breaker Activation and Recovery"""
     
-    async def test_circuit_breaker_activation_recovery(self, load_generator: SpikeLoadGenerator,:
+    async def test_circuit_breaker_activation_recovery(self, load_generator: SpikeLoadGenerator:
                                                      spike_metrics: SpikeLoadMetrics,
                                                      system_health_validator):
         """
@@ -730,7 +730,7 @@ class TestCircuitBreakerActivationRecovery:
 class TestCacheCoherenceUnderLoadSpikes:
     """Test Case 6: Cache Coherence Under Load Spikes"""
     
-    async def test_cache_coherence_under_load_spikes(self, load_generator: SpikeLoadGenerator,:
+    async def test_cache_coherence_under_load_spikes(self, load_generator: SpikeLoadGenerator:
                                                    spike_metrics: SpikeLoadMetrics,
                                                    system_health_validator):
         """
@@ -834,7 +834,7 @@ class TestCacheCoherenceUnderLoadSpikes:
 class TestComprehensiveSpikeStress:
     """Comprehensive spike stress test combining all scenarios"""
     
-    async def test_comprehensive_spike_stress(self, load_generator: SpikeLoadGenerator,:
+    async def test_comprehensive_spike_stress(self, load_generator: SpikeLoadGenerator:
                                             spike_metrics: SpikeLoadMetrics,
                                             system_health_validator):
         """

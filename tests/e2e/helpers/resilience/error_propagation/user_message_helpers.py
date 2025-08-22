@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.e2e.helpers.error_propagation.error_generators import (
+from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     ErrorCorrelationContext,
     ErrorInjectionHelper,
     RealErrorPropagationTester,

@@ -180,7 +180,7 @@ class TestCircularImportRegression:
         }
         
         # Process message
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             await service.handle_websocket_message(
                 user_id="test_user",
                 message=message,

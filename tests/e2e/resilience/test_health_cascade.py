@@ -31,7 +31,7 @@ import pytest
 
 
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from tests.health_check_core import (
+from tests.e2e.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,
     HealthCheckResult,

@@ -124,11 +124,11 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
-        with patch('app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
-             patch('app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
-             patch('app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
-             patch('app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
-             patch('app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
+        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
             
             agent = DataSubAgent(
                 llm_manager=mock_llm_manager,
@@ -464,7 +464,7 @@ class TestClickHouseClient:
     async def test_connection_establishment(self, clickhouse_client):
         """Test ClickHouse connection establishment."""
         # Test connection with mock
-        with patch('app.agents.data_sub_agent.clickhouse_client.get_client', None):
+        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_client', None):
             result = await clickhouse_client.connect()
             assert result is True  # Should succeed in mock mode
     

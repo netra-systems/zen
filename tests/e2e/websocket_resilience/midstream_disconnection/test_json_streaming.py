@@ -35,7 +35,7 @@ from tests.e2e.websocket_resilience.utils.streaming_response_generator import (
 class TestJSONStreamingDisconnection:
     """Test JSON streaming disconnection and recovery."""
     
-    async def test_json_stream_interruption(self, network_condition, stream_buffer,:
+    async def test_json_stream_interruption(self, network_condition, stream_buffer:
                                           test_user_id, response_configs):
         """Test JSON streaming interruption and recovery."""
         config = response_configs["json_response"]
@@ -71,7 +71,7 @@ class TestJSONStreamingDisconnection:
         assert stream_buffer.chunks_received > 0
         assert valid_json_chunks > 0
         
-    async def test_json_structure_preservation(self, network_condition, stream_buffer,:
+    async def test_json_structure_preservation(self, network_condition, stream_buffer:
                                              test_user_id, response_configs):
         """Test JSON structure is preserved across disconnections."""
         config = response_configs["json_response"]
@@ -110,7 +110,7 @@ class TestJSONStreamingDisconnection:
             assert "timestamp" in obj
             assert "data" in obj
             
-    async def test_large_json_streaming(self, network_condition, stream_buffer,:
+    async def test_large_json_streaming(self, network_condition, stream_buffer:
                                       test_user_id, response_configs):
         """Test large JSON streaming with disconnections."""
         # Create larger JSON response
@@ -145,7 +145,7 @@ class TestJSONStreamingDisconnection:
         assert disconnections > 0
         assert stream_buffer.total_size > 1000  # Significant data received
         
-    async def test_malformed_json_during_disconnection(self, network_condition, stream_buffer,:
+    async def test_malformed_json_during_disconnection(self, network_condition, stream_buffer:
                                                      test_user_id, response_configs):
         """Test handling of malformed JSON during disconnection."""
         config = response_configs["json_response"]
@@ -178,7 +178,7 @@ class TestJSONStreamingDisconnection:
         assert stream_buffer.chunks_received > 0
         # Some JSON errors are expected due to partial chunks
         
-    async def test_json_array_streaming(self, network_condition, stream_buffer,:
+    async def test_json_array_streaming(self, network_condition, stream_buffer:
                                       test_user_id, response_configs):
         """Test JSON array streaming with disconnections."""
         # Simulate JSON array streaming
