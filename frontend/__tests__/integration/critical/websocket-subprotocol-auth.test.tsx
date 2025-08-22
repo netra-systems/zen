@@ -12,7 +12,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import WS from 'jest-websocket-mock';
 
 import { AuthContext } from '@/auth/context';
 import { webSocketService } from '@/services/webSocketService';
