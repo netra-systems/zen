@@ -7,7 +7,7 @@
 
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import * as WebSocketTestManager from '@/__tests__/helpers/websocket-test-manager';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 import { MessageBuffer } from '../setup/websocket-test-utils';
 
 describe('WebSocket Message Processing Tests', () => {

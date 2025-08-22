@@ -30,16 +30,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException, PaymentException
-from netra_backend.app.core.logging_config import get_logger
-from netra_backend.app.db.models_postgres import Subscription, UsageRecord, User
+from netra_backend.app.core.unified_logging import get_central_logger
+# from netra_backend.app.db.models_postgres import Subscription, UsageRecord, User  # FIXME: Missing models
 from netra_backend.app.schemas.UserPlan import PlanDefinition, PlanTier, UserPlan
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
-from netra_backend.app.services.billing.subscription_manager import SubscriptionManager
+# from netra_backend.app.services.billing.subscription_manager import SubscriptionManager  # FIXME: Missing service
 
 from netra_backend.app.services.billing.usage_metering import UsageMeteringService
 
-logger = get_logger(__name__)
+logger = get_central_logger().get_logger(__name__)
 
 class BusinessCriticalFlowsTester:
     """L2 tester for business critical flow scenarios."""

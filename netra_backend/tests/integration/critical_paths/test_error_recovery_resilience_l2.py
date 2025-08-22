@@ -34,7 +34,7 @@ from netra_backend.app.core.exceptions_base import (
     NetraException,
     ServiceUnavailableException,
 )
-from netra_backend.app.core.logging_config import get_logger
+from netra_backend.app.core.unified_logging import get_central_logger
 from netra_backend.app.services.observability.error_tracker import ErrorTracker
 
 from netra_backend.app.services.resilience.circuit_breaker import (
@@ -49,7 +49,7 @@ from netra_backend.app.services.resilience.retry_manager import (
 )
 from netra_backend.app.services.resilience.timeout_manager import TimeoutManager
 
-logger = get_logger(__name__)
+logger = get_central_logger().get_logger(__name__)
 
 class ErrorRecoveryResilienceTester:
     """L2 tester for error recovery and resilience scenarios."""

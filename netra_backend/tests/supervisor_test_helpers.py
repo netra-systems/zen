@@ -259,9 +259,20 @@ def _create_triage_result(return_data: Dict[str, Any]):
 
 def _build_triage_result_from_dict(result_class, triage_dict: Dict[str, Any]):
     """Build TriageResult from dictionary."""
+    # Import here to avoid circular imports
+    from netra_backend.app.agents.triage_sub_agent.models import SuggestedWorkflow
+    
+    # Determine next agent based on requirements
+    next_agent = "DataSubAgent" if triage_dict.get('requires_data', False) else "OptimizationAgent"
+    required_data_sources = ["metrics", "logs"] if triage_dict.get('requires_data', False) else []
+    
     return result_class(
         category=triage_dict.get('message_type', 'query'),
-        confidence_score=triage_dict.get('confidence', 0.8)
+        confidence_score=triage_dict.get('confidence', 0.8),
+        suggested_workflow=SuggestedWorkflow(
+            next_agent=next_agent,
+            required_data_sources=required_data_sources
+        )
     )
 
 def _create_triage_execute_func(triage_result):

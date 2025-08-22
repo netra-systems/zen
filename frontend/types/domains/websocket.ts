@@ -7,7 +7,7 @@
  * CRITICAL: Maximum 300 lines, 8 lines per function
  */
 
-import { WebSocketMessageType, AgentStatus } from '../shared/enums';
+import { WebSocketMessageType, AgentStatus, isValidWebSocketMessageType } from '../shared/enums';
 import { AgentResult, WebSocketError } from '../backend-sync/payloads';
 
 // ============================================================================
@@ -265,4 +265,4 @@ export function createWebSocketMessage<T extends WebSocketMessage['payload']>(
 // ============================================================================
 
 export type MessageTypeLiteral = keyof typeof WebSocketMessageType;
-export type WebSocketPayload = WebSocketMessage['payload'];
+export type WebSocketPayload = WebSocketMessage['payload'];export { isValidWebSocketMessageType };

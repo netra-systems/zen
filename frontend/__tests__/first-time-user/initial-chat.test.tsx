@@ -165,13 +165,45 @@ describe('First-Time User Initial Chat', () => {
       isSending: false,
       handleSend: mockHandleSend
     });
+    
+    // Setup remaining hooks that the working test has
+    mockUseWebSocket.mockReturnValue({
+      messages: []
+    });
+    
+    mockUseEventProcessor.mockReturnValue({
+      processedCount: 0,
+      queueSize: 0
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: null,
+      isNavigating: false
+    });
+    
+    // Default loading state for first-time user
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: true,
+      shouldShowExamplePrompts: true,
+      loadingMessage: ''
+    });
   });
 
   it('allows first-time user to type in message input', () => {
+    // Override the beforeEach mock to ensure fresh setup
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true
+    });
+    
     render(<MessageInput />);
     
     const textarea = screen.getByRole('textbox');
     expect(textarea).toBeInTheDocument();
+    
+    // Debug: check what the placeholder says
+    console.log('Placeholder text:', textarea.getAttribute('placeholder'));
+    
     expect(textarea).not.toBeDisabled();
     
     fireEvent.change(textarea, { target: { value: 'Hello Netra!' } });
@@ -219,6 +251,11 @@ describe('First-Time User Initial Chat', () => {
       loadingMessage: ''
     });
     
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread-1',
+      isNavigating: false
+    });
+    
     render(<MainChat />);
     
     await waitFor(() => {
@@ -248,4 +285,22 @@ describe('First-Time User Initial Chat', () => {
     expect(screen.queryByText('Welcome to Netra AI')).not.toBeInTheDocument();
   });
 
-  it('shows message input is always available for interaction'
+  it('shows message input is always available for interaction', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+    });
+  });
+
+  it('disables input when user is not authenticated', () => {
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: false
+    });
+    
+    render(<MessageInput />);
+    
+    const textarea = screen.getByRole('textbox');
+    expect(textarea).toBeDisabled();
+  });
+});

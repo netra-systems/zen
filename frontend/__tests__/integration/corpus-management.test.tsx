@@ -6,7 +6,7 @@ import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import * as WebSocketTestManager from '@/__tests__/helpers/websocket-test-manager';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
 import { AgentProvider } from '@/providers/AgentProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';

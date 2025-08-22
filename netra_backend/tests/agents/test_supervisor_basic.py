@@ -178,7 +178,7 @@ class TestSupervisorOrchestration:
         assert triage_result.success
         
         # Branch 1: If requires_data, run data agent
-        if triage_result.state.triage_result.get("requires_data"):
+        if triage_result.state.triage_result.suggested_workflow.next_agent == "DataSubAgent":
             data_result = await supervisor._route_to_agent(triage_result.state, context, "data")
             assert data_result.success
             current_state = data_result.state
@@ -186,7 +186,7 @@ class TestSupervisorOrchestration:
             current_state = triage_result.state
         
         # Branch 2: If requires specialized optimization, use specialized path
-        if triage_result.state.triage_result.get("requires_specialized_optimization"):
+        if len(triage_result.state.triage_result.suggested_workflow.required_data_sources) > 0:
             opt_result = await supervisor._route_to_agent(current_state, context, "optimization")
             assert opt_result.success
             assert opt_result.state.optimizations_result["optimization_type"] == "specialized"
@@ -201,20 +201,18 @@ class TestSupervisorOrchestration:
         # Each agent adds to the state
         triage_agent = supervisor.agents["triage"]
         triage_agent.execute = AsyncMock()
-        triage_agent.execute.return_value = create_agent_state("State test",
-                                                             triage_result={"step": 1, "agent": "triage"})
+        # Create state with triage_result manually to avoid type conversion
+        triage_state = create_agent_state("State test")
+        triage_state.triage_result = {"step": 1, "agent": "triage"}
+        triage_agent.execute.return_value = triage_state
         
         data_agent = supervisor.agents["data"]
         data_agent.execute = AsyncMock()
         
         def mock_data_execute(state, run_id, stream_updates=True):
-            # Preserve existing state and add new data
-            result_state = DeepAgentState(
-                user_request=state.user_request,
-                triage_result=state.triage_result,  # Preserve from triage
-                data_result={"step": 2, "agent": "data", "previous_steps": [1]}
-            )
-            return result_state
+            # Modify state in place to avoid type conversion
+            state.data_result = {"step": 2, "agent": "data", "previous_steps": [1]}
+            return state
         
         data_agent.execute.side_effect = mock_data_execute
         
@@ -222,18 +220,14 @@ class TestSupervisorOrchestration:
         opt_agent.execute = AsyncMock()
         
         def mock_opt_execute(state, run_id, stream_updates=True):
-            result_state = DeepAgentState(
-                user_request=state.user_request,
-                triage_result=state.triage_result,  # Preserve
-                data_result=state.data_result,  # Preserve
-                optimizations_result={
-                    "optimization_type": "accumulated",
-                    "step": 3,
-                    "agent": "optimization",
-                    "previous_steps": [1, 2]
-                }
-            )
-            return result_state
+            # Modify state in place to avoid type conversion
+            state.optimizations_result = {
+                "optimization_type": "accumulated",
+                "step": 3,
+                "agent": "optimization",
+                "previous_steps": [1, 2]
+            }
+            return state
         
         opt_agent.execute.side_effect = mock_opt_execute
         

@@ -38,7 +38,7 @@ from netra_backend.app.websocket.state_synchronization_manager import (
     StateUpdate,
 
 )
-from netra_backend.tests.integration.critical_paths.integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     MockWebSocketForRedis,
 

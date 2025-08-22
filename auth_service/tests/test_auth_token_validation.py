@@ -247,21 +247,32 @@ class TestJWTTokenValidation(unittest.TestCase):
     
     def test_validate_token_edge_case_timing(self):
         """Test validation edge cases around timing"""
-        # Test token that expires very soon
+        # Create a token that expires very soon by directly encoding with JWT
+        import jwt
         near_expiry_time = datetime.now(timezone.utc) + timedelta(seconds=1)
         
-        with patch.object(self.jwt_handler, '_get_token_expiry') as mock_expiry:
-            mock_expiry.return_value = near_expiry_time
-            token = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)
+        # Create payload manually with short expiry
+        payload = {
+            "sub": self.test_user_id,
+            "email": self.test_email,
+            "token_type": "access",
+            "iat": datetime.now(timezone.utc),
+            "exp": near_expiry_time,
+            "jti": f"access_{int(time.time())}"
+        }
+        
+        # Encode token with short expiry
+        secret = self.jwt_handler.secret
+        token = jwt.encode(payload, secret, algorithm=self.jwt_handler.algorithm)
         
         # Should be valid immediately
-        payload = self.jwt_handler.validate_token(token, "access")
-        assert payload is not None
+        validation_payload = self.jwt_handler.validate_token(token, "access")
+        assert validation_payload is not None
         
         # Wait for expiry and test again
         time.sleep(2)
-        payload = self.jwt_handler.validate_token(token, "access")
-        assert payload is None
+        validation_payload = self.jwt_handler.validate_token(token, "access")
+        assert validation_payload is None
     
     def test_validate_token_concurrent_validation(self):
         """Test concurrent token validation for race conditions"""

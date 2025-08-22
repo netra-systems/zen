@@ -152,10 +152,12 @@ describe('First-Time User Tutorial Help System', () => {
     render(<MainChat />);
     
     await waitFor(() => {
-      // Look for the lightning bolt SVG icon
-      const svgIcon = screen.getByTestId('chat-header').closest('div')?.querySelector('svg');
-      // Since we mock the components, we check the general structure exists
+      // Check that the welcome screen has the icon structure in the welcome section
       expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
+      
+      // Look for the lightning bolt SVG icon in the welcome content
+      const welcomeIcon = document.querySelector('svg');
+      expect(welcomeIcon).toBeInTheDocument();
     });
   });
 

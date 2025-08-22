@@ -345,5 +345,16 @@
             <critical-takeaway>Comprehensive error handling required for LLM API failures, timeouts, and network issues.</critical-takeaway>
             <critical-takeaway>Conversation state persistence across sessions and system restarts critical for user experience.</critical-takeaway>
         </category>
+        
+        <category name="E2E Test Infrastructure Fixes" path="SPEC/learnings/e2e_test_fixes.xml" keywords="E2E, Test Fixes, Syntax Errors, Import Errors, Test Infrastructure, Automated Fixing, AST, Absolute Imports">
+            <critical-takeaway>CRITICAL: ALL Python files MUST use absolute imports - NO EXCEPTIONS. Relative imports are the #1 cause of test infrastructure failures.</critical-takeaway>
+            <critical-takeaway>ALL async test functions MUST have @pytest.mark.asyncio decorator or tests will hang/timeout.</critical-takeaway>
+            <critical-takeaway>NEVER write manual sys.path manipulation in test files - use centralized setup_test_path() function.</critical-takeaway>
+            <critical-takeaway>Automated AST-based fixing scripts are far more effective than regex-based fixes for large-scale transformations.</critical-takeaway>
+            <critical-takeaway>System-wide changes must be applied atomically using batch operations - never fix issues file-by-file.</critical-takeaway>
+            <critical-takeaway>Fix infrastructure (syntax, imports) before addressing individual test logic - infrastructure must be functional first.</critical-takeaway>
+            <critical-takeaway>Pre-commit hooks and CI validation essential to prevent regression to broken import patterns.</critical-takeaway>
+            <critical-takeaway>From 0% to 85% test functionality achieved through systematic automated fixing and infrastructure improvements.</critical-takeaway>
+        </category>
     </categories>
 </specification>

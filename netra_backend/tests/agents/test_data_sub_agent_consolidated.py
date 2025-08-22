@@ -180,7 +180,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate results
         assert result.success is True
@@ -219,7 +219,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate results
         assert result.success is True
@@ -247,7 +247,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate LLM insights were included
         assert result.success is True
@@ -322,7 +322,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate error handling
         assert result.success is False
@@ -444,7 +444,7 @@ class TestDataSubAgentConsolidated:
             user_id="test_user"
         )
         
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         assert result.success is True
         assert result.result["analysis_type"] == "trend_analysis"

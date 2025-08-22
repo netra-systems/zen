@@ -247,20 +247,15 @@ const server = setupServer(...createOptimisticHandlers());
 
 beforeAll(() => {
   server.listen();
-  jest.useFakeTimers();
 });
 
 afterEach(() => {
   server.resetHandlers();
   jest.clearAllMocks();
-  act(() => {
-    jest.runAllTimers();
-  });
 });
 
 afterAll(() => {
   server.close();
-  jest.useRealTimers();
 });
 
 // ============================================================================
@@ -298,15 +293,14 @@ describe('Data Fetching - Optimistic Updates', () => {
       const [items, setItems] = useState(['Item 1']);
       const [isLoading, setIsLoading] = useState(false);
       
-      const addItem = () => {
+      const addItem = async () => {
         // Optimistic update
         setItems(prev => [...prev, 'New Item']);
         setIsLoading(true);
         
         // Simulate async operation
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 100);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setIsLoading(false);
       };
       
       return (
@@ -334,6 +328,11 @@ describe('Data Fetching - Optimistic Updates', () => {
     expect(screen.getByTestId('item-count')).toHaveTextContent('2');
     expect(screen.getByTestId('item-1')).toHaveTextContent('New Item');
     expect(screen.getByTestId('loading-state')).toHaveTextContent('loading');
+    
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+    });
   });
 
   it('demonstrates error rollback pattern', async () => {
@@ -341,15 +340,14 @@ describe('Data Fetching - Optimistic Updates', () => {
       const [title, setTitle] = useState('Original Title');
       const [hasError, setHasError] = useState(false);
       
-      const updateTitle = () => {
+      const updateTitle = async () => {
         const originalTitle = title;
         setTitle('Updated Title'); // Optimistic update
         
         // Simulate error and rollback
-        setTimeout(() => {
-          setHasError(true);
-          setTitle(originalTitle); // Rollback
-        }, 100);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setHasError(true);
+        setTitle(originalTitle); // Rollback
       };
       
       return (
@@ -371,7 +369,13 @@ describe('Data Fetching - Optimistic Updates', () => {
     // Should immediately show optimistic update
     expect(screen.getByTestId('title')).toHaveTextContent('Updated Title');
     
-    // After error simulation, should rollback (in real scenario)
-    // This test validates the pattern, not the actual async behavior
+    // Wait for error and rollback to occur
+    await waitFor(() => {
+      expect(screen.getByTestId('error-state')).toHaveTextContent('error');
+    });
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('title')).toHaveTextContent('Original Title');
+    });
   });
 });

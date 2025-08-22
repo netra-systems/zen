@@ -75,10 +75,15 @@ export const ExamplePrompts: React.FC = () => {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full px-6 py-6" style={{
-      background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
-      backdropFilter: 'blur(8px)'
-    }}>
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className="w-full px-6 py-6" 
+      data-testid="example-prompts"
+      style={{
+        background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
+        backdropFilter: 'blur(8px)'
+      }}>
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

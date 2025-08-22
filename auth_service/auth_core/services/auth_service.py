@@ -778,3 +778,40 @@ class AuthService:
         except Exception as e:
             logger.warning(f"Failed to read last failure time from Redis: {e}")
         return self._last_failure_times.get(service, 0)
+    
+    def reset_circuit_breaker(self, service: str = None):
+        """Reset circuit breaker state for a specific service or all services"""
+        if service:
+            # Reset specific service
+            self._circuit_breaker_state.pop(service, None)
+            self._failure_counts.pop(service, None)
+            self._last_failure_times.pop(service, None)
+            
+            # Clear from Redis too
+            try:
+                if self.session_manager.redis_client:
+                    redis_keys = [
+                        f"{self._circuit_breaker_redis_prefix}{service}_state",
+                        f"{self._circuit_breaker_redis_prefix}{service}_failures",
+                        f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                    ]
+                    for key in redis_keys:
+                        self.session_manager.redis_client.delete(key)
+            except Exception as e:
+                logger.warning(f"Failed to clear circuit breaker state from Redis for {service}: {e}")
+        else:
+            # Reset all services
+            self._circuit_breaker_state.clear()
+            self._failure_counts.clear()
+            self._last_failure_times.clear()
+            
+            # Clear from Redis too
+            try:
+                if self.session_manager.redis_client:
+                    # Get all circuit breaker keys and delete them
+                    pattern = f"{self._circuit_breaker_redis_prefix}*"
+                    keys = self.session_manager.redis_client.keys(pattern)
+                    if keys:
+                        self.session_manager.redis_client.delete(*keys)
+            except Exception as e:
+                logger.warning(f"Failed to clear circuit breaker state from Redis: {e}")

@@ -25,8 +25,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.services.cache.cache_manager import CacheManager
-from netra_backend.app.services.notification_service import NotificationService
+from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+# from netra_backend.app.services.notification_service import NotificationService  # FIXME: Missing service
 
 from netra_backend.app.services.redis_service import RedisService
 
@@ -39,7 +39,7 @@ class CacheInvalidationManager:
         self.redis_service = None
         self.cache_manager = None
         self.db_manager = None
-        self.notification_service = None
+        # self.notification_service = None  # FIXME: Missing service
         self.cache_operations = []
         self.invalidation_events = []
         
@@ -48,13 +48,13 @@ class CacheInvalidationManager:
         self.redis_service = RedisService()
         await self.redis_service.connect()
         
-        self.cache_manager = CacheManager()
+        self.cache_manager = LLMCacheManager()
         await self.cache_manager.initialize()
         
         self.db_manager = DatabaseConnectionManager()
         await self.db_manager.initialize()
         
-        self.notification_service = NotificationService()
+        # self.notification_service = NotificationService()  # FIXME: Missing service
         await self.notification_service.initialize()
     
     async def create_cache_entry(self, key: str, data: Dict[str, Any], 

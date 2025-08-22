@@ -60,9 +60,12 @@ const mockLocation = {
   search: '',
   hash: ''
 };
+// Mock window.location with configurable property
+delete (window as any).location;
 Object.defineProperty(window, 'location', {
   value: mockLocation,
   writable: true,
+  configurable: true,
 });
 
 // Test components
