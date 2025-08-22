@@ -143,13 +143,13 @@ describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
       
       // Wait for connection attempt
       await waitFor(() => {
-        expect(webSocketConstructorSpy).toHaveBeenCalled();
+        expect(capturedConnections.length).toBeGreaterThan(0);
       });
 
       // SECURITY VERIFICATION: Check that WebSocket was created with proper authentication
-      const websocketCall = webSocketConstructorSpy.mock.calls[0];
-      const url = websocketCall[0];
-      const protocols = websocketCall[1];
+      const connection = capturedConnections[0];
+      const url = connection.url;
+      const protocols = connection.protocols;
 
       // Security check: Token should NOT be in URL (security vulnerability)
       expect(url).not.toContain('token=');

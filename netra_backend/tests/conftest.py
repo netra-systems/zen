@@ -13,8 +13,8 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Now import after path is set up
-from app.websocket.connection import ConnectionManager as WebSocketManager
-from app.core.network_constants import (
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.core.network_constants import (
     DatabaseConstants,
     HostConstants,
     ServicePorts,
@@ -112,19 +112,19 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import get_config
-from app.db.base import Base
-from app.db.models_agent_state import *  # Import all agent state models
-from app.db.models_content import *  # Import all content models
-from app.db.models_postgres import *  # Import all postgres models
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_content import *  # Import all content models
+from netra_backend.app.db.models_postgres import *  # Import all postgres models
 
 # Import all models to ensure they are registered with Base before creating tables
-from app.db.models_user import Secret, ToolUsageLog, User
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Initialize database on import to ensure async_session_factory is available
-from app.db.postgres import initialize_postgres
-from app.db.session import get_db_session
-from app.main import app
-from tests.conftest_helpers import (
+from netra_backend.app.db.postgres import initialize_postgres
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.main import app
+from netra_backend.tests.conftest_helpers import (
 
     _create_mock_tool_dispatcher,
 
