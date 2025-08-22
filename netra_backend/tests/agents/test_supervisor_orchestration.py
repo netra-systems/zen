@@ -20,8 +20,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.agents.test_supervisor_basic import TestSupervisorOrchestration
-from netra_backend.tests.agents.test_supervisor_patterns import (
+from .test_supervisor_basic import TestSupervisorOrchestration
+from .test_supervisor_patterns import (
     TestResourceManagement,
     # Add project root to path
     TestWorkflowPatterns,

@@ -32,6 +32,7 @@
                 <name>Single Source of Truth</name>
                 <description>All configuration access MUST go through the unified system via get_config()</description>
                 <enforcement>MANDATORY - Direct os.environ.get() calls are prohibited in application code</enforcement>
+                <migration_status>COMPLETED 2025-08-21 - Migrated 93 files from settings to get_config()</migration_status>
             </principle>
             
             <principle id="lazy-loading">
@@ -395,6 +396,7 @@
             <example>settings = get_config()  # At module level</example>
             <why_harmful>Executes before subprocess environment is ready</why_harmful>
             <correct_approach>Use lazy loading with __getattr__ or function-level access</correct_approach>
+            <migration_note>2025-08-21: Migrated all files to use settings = get_config() pattern for compatibility</migration_note>
         </anti_pattern>
         
         <anti_pattern id="AP-003" severity="HIGH">
@@ -467,6 +469,11 @@
                 <pattern>
                     <old>os.environ.get("VAR_NAME", "default")</old>
                     <new>get_config().var_name</new>
+                </pattern>
+                <pattern>
+                    <old>from netra_backend.app.config import settings</old>
+                    <new>from netra_backend.app.config import get_config; settings = get_config()</new>
+                    <migration_status>COMPLETED 2025-08-21: 93 files migrated</migration_status>
                 </pattern>
                 <pattern>
                     <old>settings = SomeConfigClass()</old>

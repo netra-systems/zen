@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
-from tests.database_test_connections import (
+from tests.e2e.database_test_connections import (
     DatabaseTestConnections,
 )
 from tests.database_test_operations import (

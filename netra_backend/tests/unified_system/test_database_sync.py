@@ -9,8 +9,8 @@ Business Value: $12K MRR - Data consistency and real-time synchronization
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from ..test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -39,7 +39,7 @@ from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.tests.fixtures import (
+from .fixtures import (
 
     clean_database_state,
 

@@ -21,7 +21,7 @@ from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
 

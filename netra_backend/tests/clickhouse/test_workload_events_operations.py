@@ -20,7 +20,7 @@ from logging_config import central_logger as logger
 
 # Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.tests.clickhouse_test_fixtures import (
+from .clickhouse_test_fixtures import (
     build_workload_insert_query,
     check_table_insert_permission,
     generate_test_workload_events,

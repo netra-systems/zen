@@ -5,7 +5,7 @@ ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
 from datetime import datetime, timezone
-from tests.database_test_connections import DatabaseConnectionManager
+from tests.e2e.database_test_connections import DatabaseConnectionManager
 from typing import Any, Dict, List, Optional
 import json
 

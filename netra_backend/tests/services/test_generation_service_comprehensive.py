@@ -26,7 +26,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
 import pytest
-from schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
+from netra_backend.app.schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
 
 from netra_backend.app.core.exceptions_base import NetraException
 

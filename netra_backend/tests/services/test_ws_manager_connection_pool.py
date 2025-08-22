@@ -9,7 +9,7 @@ Modular test suite split into focused test modules for maintainability
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -23,12 +23,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_ws_connection_basic import (
+from .test_ws_connection_basic import (
 
     TestWebSocketManagerConnectionPooling,
 
 )
-from netra_backend.tests.test_ws_connection_mocks import (
+from .test_ws_connection_mocks import (
 
     MockConnectionPool,
     # Add project root to path
@@ -38,7 +38,7 @@ from netra_backend.tests.test_ws_connection_mocks import (
     WebSocketTestHelpers,
 
 )
-from netra_backend.tests.test_ws_connection_performance import (
+from .test_ws_connection_performance import (
 
     TestWebSocketManagerPerformanceAndScaling,
 

@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.alert_types import (
+from .alert_types import (
     AlertLevel,
     AlertRule,
     NotificationChannel,

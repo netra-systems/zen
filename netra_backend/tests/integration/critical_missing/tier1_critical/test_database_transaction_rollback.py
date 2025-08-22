@@ -34,7 +34,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.db.models_agent import Message, Run, Thread
 from netra_backend.app.db.models_user import ToolUsageLog, User
 
-# Add project root to path
+# Import from shared infrastructure
 from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import (
     ServiceOrchestrator,
 )

@@ -46,7 +46,7 @@ import pytest
 import websockets
 
 # Add project root to path
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+from .integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
 )
 

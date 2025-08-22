@@ -24,13 +24,13 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.test_fixtures import (
+from ..test_fixtures import (
     mock_llm_manager,
     mock_tool_dispatcher,
     mock_websocket_manager,
     supervisor_agent,
 )
-from netra_backend.tests.test_helpers import setup_mock_llm_with_retry
+from ..test_helpers import setup_mock_llm_with_retry
 
 # Add project root to path
 

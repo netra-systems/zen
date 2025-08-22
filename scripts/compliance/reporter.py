@@ -69,7 +69,12 @@ class ComplianceReporter:
         displayed = min(limit, len(violations))
         for violation in violations[:displayed]:
             severity_marker = self.utils.get_severity_marker(violation.severity)
-            print(f"  {severity_marker} {violation.actual_value:4d} {suffix}: {violation.file_path}")
+            try:
+                print(f"  {severity_marker} {violation.actual_value:4d} {suffix}: {violation.file_path}")
+            except UnicodeEncodeError:
+                # Fallback to text markers if emoji can't be displayed
+                text_marker = {'high': '[H]', 'medium': '[M]', 'low': '[L]'}.get(violation.severity, '[ ]')
+                print(f"  {text_marker} {violation.actual_value:4d} {suffix}: {violation.file_path}")
         self._print_truncation_message(violations, displayed)
     
     def _print_truncation_message(self, violations: List[Violation], limit: int) -> None:

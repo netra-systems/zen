@@ -31,7 +31,7 @@ from netra_backend.app.core.async_resource_manager import (
     AsyncTaskPool,
 )
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, with_retry
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
 

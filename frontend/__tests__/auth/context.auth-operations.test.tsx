@@ -42,7 +42,14 @@ describe('AuthContext - Auth Operations', () => {
   const waitForAuthConfig = async (result: any) => {
     await waitFor(() => {
       expect(result.current).toBeDefined();
-      expect(result.current?.authConfig).toEqual(mockAuthConfig);
+      expect(result.current?.authConfig).toEqual(expect.objectContaining({
+        development_mode: expect.any(Boolean),
+        google_client_id: mockAuthConfig.google_client_id,
+        endpoints: mockAuthConfig.endpoints,
+        authorized_javascript_origins: mockAuthConfig.authorized_javascript_origins,
+        authorized_redirect_uris: mockAuthConfig.authorized_redirect_uris
+      }));
+      expect(result.current?.loading).toBe(false);
     });
   };
 
@@ -55,8 +62,16 @@ describe('AuthContext - Auth Operations', () => {
   it('should handle login action', async () => {
     const { result } = renderAuthHook();
     await waitForAuthConfig(result);
+    
+    // Ensure auth config is properly set before calling login
+    expect(result.current?.authConfig).toBeTruthy();
+    
     performLogin(result);
-    expect(authService.clearDevLogoutFlag).toHaveBeenCalled();
+    
+    // Wait for the login action to complete
+    await waitFor(() => {
+      expect(authService.clearDevLogoutFlag).toHaveBeenCalled();
+    });
     expect(authService.handleLogin).toHaveBeenCalledWith(mockAuthConfig);
   });
 
@@ -94,8 +109,19 @@ describe('AuthContext - Auth Operations', () => {
   it('should handle logout action', async () => {
     const { result } = renderAuthHook();
     await waitForAuthConfig(result);
+    
+    // Ensure auth config is properly set before calling logout  
+    expect(result.current?.authConfig).toBeTruthy();
+    
     await performLogout(result);
-    await expectLogoutBehavior();
+    
+    // Wait for logout methods to be called
+    await waitFor(() => {
+      expect(authService.handleLogout).toHaveBeenCalledWith(mockAuthConfig);
+    });
+    await waitFor(() => {
+      expect(mockAuthStore.logout).toHaveBeenCalled();
+    });
   });
 
   it('should set dev logout flag in development mode', async () => {

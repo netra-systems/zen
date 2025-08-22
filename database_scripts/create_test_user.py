@@ -17,7 +17,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
@@ -25,11 +25,12 @@ from netra_backend.app.services.security_service import SecurityService
 
 async def create_test_user():
     # Create async engine
-    engine = create_async_engine(settings.database_url, echo=True)
+    config = get_config()
+    engine = create_async_engine(config.database_url, echo=True)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     # Initialize security service for password hashing
-    key_manager = KeyManager.load_from_settings(settings)
+    key_manager = KeyManager.load_from_settings(config)
     security_service = SecurityService(key_manager)
     
     async with async_session() as session:

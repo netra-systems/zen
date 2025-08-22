@@ -23,8 +23,8 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
-from netra_backend.tests.helpers.llm_manager_helpers import (
+from .enhanced_llm_manager import EnhancedLLMManager
+from .llm_manager_helpers import (
     assert_failure_count,
     assert_health_status,
     count_provider_usage,

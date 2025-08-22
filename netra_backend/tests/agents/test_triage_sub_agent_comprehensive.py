@@ -23,10 +23,10 @@ from pathlib import Path
 
 import pytest
 
-from netra_backend.tests.agents.test_triage_caching_async import *
-from netra_backend.tests.agents.test_triage_edge_performance import *
-from netra_backend.tests.agents.test_triage_entity_intent import *
-from netra_backend.tests.agents.test_triage_init_validation import *
+from .test_triage_caching_async import *
+from .test_triage_edge_performance import *
+from .test_triage_entity_intent import *
+from .test_triage_init_validation import *
 
 
 def test_architectural_compliance():

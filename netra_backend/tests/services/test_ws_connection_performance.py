@@ -5,7 +5,7 @@ Tests high volume connections, memory usage, recovery, and broadcast performance
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -40,7 +40,7 @@ from netra_backend.app.services.websocket.ws_manager import (
     WebSocketManager,
 
 )
-from netra_backend.tests.test_ws_connection_mocks import (
+from .test_ws_connection_mocks import (
 
     MockConnectionPool,
     # Add project root to path

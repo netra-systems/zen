@@ -44,7 +44,7 @@ from netra_backend.app.services.quota.quota_manager import QuotaManager
 
 # Add project root to path
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
-from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+from .integration.staging_config.base import StagingConfigTestBase
 
 # Add project root to path
 

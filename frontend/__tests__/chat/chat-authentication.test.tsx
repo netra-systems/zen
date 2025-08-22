@@ -12,7 +12,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MainChat from '../../components/chat/MainChat';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 import {
   createAuthStoreMock,
   createChatStoreMock,

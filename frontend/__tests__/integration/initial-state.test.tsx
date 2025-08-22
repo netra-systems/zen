@@ -18,8 +18,8 @@ import {
   InitialStateTestComponent,
   WebSocketConnectionComponent
 } from '../helpers/initial-state-helpers';
-import { setupStorageTestMocks, setupCookieTestMocks } from '../helpers/initial-state-storage-helpers';
-import { setupInitialStateMockComponents } from '../helpers/initial-state-mock-components';
+import.*from '@/__tests__/helpers/initial-state-storage-helpers';
+import.*from '@/__tests__/helpers/initial-state-mock-components';
 
 // Setup all mocks
 setupInitialStateMockComponents();

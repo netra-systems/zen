@@ -31,7 +31,7 @@ from netra_backend.app.services.permission_service import (
     ROLE_PERMISSIONS,
     PermissionService,
 )
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
 

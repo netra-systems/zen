@@ -99,8 +99,9 @@ class EnhancedSecurityService(SecurityService):
             if expires_delta:
                 expire = current_time + expires_delta
             else:
-                from netra_backend.app.config import settings
-                expire = current_time + timedelta(minutes=settings.access_token_expire_minutes)
+                from netra_backend.app.config import get_config
+                config = get_config()
+                expire = current_time + timedelta(minutes=config.access_token_expire_minutes)
             to_encode['exp'] = expire
         
         # Map email to sub for JWT standard compliance

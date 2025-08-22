@@ -18,11 +18,11 @@ setup_test_path()
 import pytest
 from logging_config import central_logger as logger
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
-from netra_backend.tests.clickhouse_test_fixtures import get_clickhouse_config
+from .clickhouse_test_fixtures import get_clickhouse_config
 
 # Add project root to path
 

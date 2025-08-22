@@ -9,7 +9,8 @@ from netra_backend.app.auth_integration.auth import (
     DeveloperDep,
     require_permission,
 )
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.services.permission_service import PermissionService
 

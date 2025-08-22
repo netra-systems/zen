@@ -13,7 +13,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
 
-import { TestProviders } from '../../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({

@@ -8,7 +8,7 @@ import asyncio
 import random
 from typing import Any, Dict, Optional
 
-from tests.e2e.infrastructure.llm_test_manager import LLMTestModel
+from ..e2e.infrastructure.llm_test_manager import LLMTestModel
 
 
 class LLMTestMockClient:

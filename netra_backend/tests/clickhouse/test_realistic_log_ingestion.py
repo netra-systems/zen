@@ -21,7 +21,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
-from netra_backend.tests.realistic_test_fixtures import (
+from .realistic_test_fixtures import (
     # Add project root to path
     generate_realistic_logs_fixture,
     mock_clickhouse_client,

@@ -19,13 +19,13 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import Corpus, CorpusCreate, CorpusUpdate
+from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
 
 from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
 

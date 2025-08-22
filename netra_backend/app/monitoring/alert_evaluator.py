@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.alert_models import Alert, AlertLevel, AlertRule
+from .alert_models import Alert, AlertLevel, AlertRule
 from netra_backend.app.services.metrics.agent_metrics import (
     AgentMetrics,
     AgentMetricsCollector,

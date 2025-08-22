@@ -1,0 +1,334 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>GCP Staging Deployment Infrastructure</name>
+    <type>deployment</type>
+    <version>3.0</version>
+    <last_updated>2025-08-22</last_updated>
+    <description>Comprehensive GCP staging deployment specification with local-first builds and mandatory checks</description>
+  </metadata>
+  
+  <critical_principles>
+    <principle id="use-existing-infra">
+      <rule>ALWAYS use scripts/deploy_to_gcp.py - NEVER create new deployment scripts</rule>
+      <reason>Maintains consistency, prevents duplication, leverages tested infrastructure</reason>
+    </principle>
+    <principle id="local-build-default">
+      <rule>DEFAULT to local Docker builds (faster, more control)</rule>
+      <reason>Cloud Build is slow and expensive; local builds provide immediate feedback</reason>
+      <command>python scripts/deploy_to_gcp.py --project PROJECT_ID --build-local</command>
+    </principle>
+    <principle id="mandatory-checks">
+      <rule>MUST run all checks before deployment</rule>
+      <checks>
+        - Type safety compliance
+        - Tests pass (integration level minimum)
+        - Architecture compliance verified
+        - String literals validated
+      </checks>
+    </principle>
+  </critical_principles>
+
+  <existing_infrastructure>
+    <primary_script>
+      <path>scripts/deploy_to_gcp.py</path>
+      <purpose>Official GCP deployment orchestrator</purpose>
+      <capabilities>
+        - Multi-service deployment (backend, auth, frontend)
+        - Local and cloud builds
+        - Health checks
+        - Secret management
+        - Service URL extraction
+        - Cleanup functionality
+      </capabilities>
+      <usage>
+        <!-- Primary deployment command (local build, fast) -->
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local
+        
+        <!-- With pre-deployment checks (recommended) -->
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+        
+        <!-- Cloud build (slower, when needed) -->
+        python scripts/deploy_to_gcp.py --project netra-staging
+        
+        <!-- Skip build (use existing images) -->
+        python scripts/deploy_to_gcp.py --project netra-staging --skip-build
+        
+        <!-- Cleanup -->
+        python scripts/deploy_to_gcp.py --project netra-staging --cleanup
+      </usage>
+    </primary_script>
+    
+    <supporting_scripts>
+      <script>
+        <path>scripts/check_architecture_compliance.py</path>
+        <purpose>Verify code meets architectural standards</purpose>
+        <when>BEFORE every deployment</when>
+      </script>
+      <script>
+        <path>unified_test_runner.py</path>
+        <purpose>Run tests with staging validation</purpose>
+        <when>BEFORE deployment</when>
+        <command>python unified_test_runner.py --level integration --env staging</command>
+      </script>
+      <script>
+        <path>scripts/query_string_literals.py</path>
+        <purpose>Validate configuration strings</purpose>
+        <when>When adding new config values</when>
+      </script>
+    </supporting_scripts>
+  </existing_infrastructure>
+
+  <deployment_workflow>
+    <phase id="pre-deployment">
+      <step order="1">
+        <name>Check Architecture Compliance</name>
+        <command>python scripts/check_architecture_compliance.py</command>
+        <required>true</required>
+        <on_failure>STOP - Fix violations before proceeding</on_failure>
+      </step>
+      <step order="2">
+        <name>Validate String Literals</name>
+        <command>python scripts/scan_string_literals.py</command>
+        <required>true</required>
+        <purpose>Update string literals index</purpose>
+      </step>
+      <step order="3">
+        <name>Run Tests</name>
+        <command>python unified_test_runner.py --level integration --no-coverage --fast-fail</command>
+        <required>true</required>
+        <on_failure>STOP - Fix test failures</on_failure>
+      </step>
+      <step order="4">
+        <name>Staging Environment Tests</name>
+        <command>python unified_test_runner.py --level integration --env staging --real-llm</command>
+        <required>false</required>
+        <when>For production-like validation</when>
+      </step>
+    </phase>
+
+    <phase id="build">
+      <default_mode>local</default_mode>
+      <local_build>
+        <advantages>
+          - 5-10x faster than Cloud Build
+          - Immediate feedback on errors
+          - No cloud costs
+          - Better caching
+          - Easier debugging
+        </advantages>
+        <requirements>
+          - Docker Desktop installed
+          - Sufficient local resources (8GB RAM minimum)
+        </requirements>
+        <command>--build-local flag in deploy_to_gcp.py</command>
+      </local_build>
+      <cloud_build>
+        <when_to_use>
+          - CI/CD pipelines
+          - Large images that exceed local resources
+          - Team deployments requiring shared artifacts
+        </when_to_use>
+        <command>Default behavior (no --build-local flag)</command>
+      </cloud_build>
+    </phase>
+
+    <phase id="deployment">
+      <step order="1">
+        <name>Deploy with Existing Script</name>
+        <command>python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks</command>
+        <outputs>
+          - Service URLs
+          - Health check results
+          - Deployment summary
+        </outputs>
+      </step>
+      <step order="2">
+        <name>Verify Deployment</name>
+        <checks>
+          - Health endpoints responding
+          - Authentication flow working
+          - WebSocket connections established
+          - Database connectivity confirmed
+        </checks>
+      </step>
+    </phase>
+
+    <phase id="post-deployment">
+      <step order="1">
+        <name>Update Documentation</name>
+        <action>Record deployment URLs and configuration</action>
+      </step>
+      <step order="2">
+        <name>Monitor Initial Performance</name>
+        <duration>15 minutes</duration>
+        <metrics>
+          - Error rates
+          - Response times
+          - Resource utilization
+        </metrics>
+      </step>
+    </phase>
+  </deployment_workflow>
+
+  <configuration>
+    <project_structure>
+      <service name="backend">
+        <directory>netra_backend</directory>
+        <port>8888</port>
+        <cloud_run_name>netra-backend</cloud_run_name>
+        <resources>
+          <memory>1Gi</memory>
+          <cpu>2</cpu>
+          <min_instances>1</min_instances>
+          <max_instances>20</max_instances>
+        </resources>
+      </service>
+      <service name="auth">
+        <directory>auth_service</directory>
+        <port>8001</port>
+        <cloud_run_name>netra-auth</cloud_run_name>
+        <resources>
+          <memory>512Mi</memory>
+          <cpu>1</cpu>
+          <min_instances>1</min_instances>
+          <max_instances>10</max_instances>
+        </resources>
+      </service>
+      <service name="frontend">
+        <directory>frontend</directory>
+        <port>3000</port>
+        <cloud_run_name>netra-frontend</cloud_run_name>
+        <resources>
+          <memory>512Mi</memory>
+          <cpu>1</cpu>
+          <min_instances>0</min_instances>
+          <max_instances>10</max_instances>
+        </resources>
+      </service>
+    </project_structure>
+
+    <secrets_management>
+      <secret name="database-url">
+        <pattern>postgresql://user:password@/netra?host=/cloudsql/PROJECT:REGION:INSTANCE</pattern>
+      </secret>
+      <secret name="redis-url">
+        <pattern>redis://REDIS_IP:6379</pattern>
+      </secret>
+      <secret name="jwt-secret">
+        <pattern>Generated secure random string</pattern>
+      </secret>
+    </secrets_management>
+  </configuration>
+
+  <enhancements_needed>
+    <enhancement priority="high">
+      <description>Add --run-checks flag to deploy_to_gcp.py</description>
+      <implementation>
+        Run pre-deployment checks automatically:
+        - Architecture compliance
+        - Test suite
+        - String literal validation
+      </implementation>
+    </enhancement>
+    <enhancement priority="high">
+      <description>Add --build-local flag to deploy_to_gcp.py</description>
+      <implementation>
+        Build Docker images locally instead of Cloud Build:
+        - Use docker build directly
+        - Push to GCR after successful build
+        - Much faster iteration
+      </implementation>
+    </enhancement>
+    <enhancement priority="medium">
+      <description>Improve error messages</description>
+      <implementation>
+        When deployment fails, provide:
+        - Clear next steps
+        - Link to this spec
+        - Common troubleshooting tips
+      </implementation>
+    </enhancement>
+  </enhancements_needed>
+
+  <common_issues>
+    <issue id="slow-cloud-builds">
+      <problem>Cloud Build takes 20-30 minutes</problem>
+      <solution>Use --build-local flag for 5x faster builds</solution>
+    </issue>
+    <issue id="failed-health-checks">
+      <problem>Services deploy but health checks fail</problem>
+      <solution>
+        1. Check Secret Manager values
+        2. Verify Cloud SQL proxy is running
+        3. Check service logs in Cloud Console
+      </solution>
+    </issue>
+    <issue id="permission-errors">
+      <problem>Deployment fails with permission denied</problem>
+      <solution>
+        1. Run: gcloud auth application-default login
+        2. Ensure project has required APIs enabled
+        3. Check IAM roles for service account
+      </solution>
+    </issue>
+  </common_issues>
+
+  <anti_patterns>
+    <anti_pattern>
+      <name>Creating new deployment scripts</name>
+      <why_bad>
+        - Duplicates existing functionality
+        - Loses battle-tested error handling
+        - Creates maintenance burden
+        - Confuses team members
+      </why_bad>
+      <correct_approach>Use and enhance scripts/deploy_to_gcp.py</correct_approach>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Skipping pre-deployment checks</name>
+      <why_bad>
+        - Deploys broken code
+        - Wastes cloud resources
+        - Harder to debug in staging
+      </why_bad>
+      <correct_approach>Always run checks locally first</correct_approach>
+    </anti_pattern>
+    <anti_pattern>
+      <name>Using Cloud Build by default</name>
+      <why_bad>
+        - 20-30 minute wait times
+        - Costs money
+        - Harder to debug build failures
+      </why_bad>
+      <correct_approach>Use local builds (--build-local) by default</correct_approach>
+    </anti_pattern>
+  </anti_patterns>
+
+  <quick_reference>
+    <command_cheatsheet>
+      <!-- Standard deployment with all best practices -->
+      python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+      
+      <!-- Quick deployment (skip checks - use carefully) -->
+      python scripts/deploy_to_gcp.py --project netra-staging --build-local
+      
+      <!-- Redeploy with existing images -->
+      python scripts/deploy_to_gcp.py --project netra-staging --skip-build
+      
+      <!-- Clean up resources -->
+      python scripts/deploy_to_gcp.py --project netra-staging --cleanup
+      
+      <!-- View current deployment status -->
+      gcloud run services list --platform managed --region us-central1
+    </command_cheatsheet>
+  </quick_reference>
+
+  <references>
+    <script>scripts/deploy_to_gcp.py</script>
+    <spec>staging_workflow.xml</spec>
+    <spec>staging_environment.xml</spec>
+    <spec>github_actions.xml</spec>
+    <spec>learnings/index.xml</spec>
+  </references>
+</specification>

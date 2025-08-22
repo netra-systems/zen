@@ -13,7 +13,7 @@ import { act } from '@testing-library/react';
 
 // Import component and utilities
 import { ThreadList } from '@/components/chat/ChatSidebarThreadList';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 const mockThreadData = {
   basic: {

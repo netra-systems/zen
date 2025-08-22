@@ -16,6 +16,9 @@ from main import app
 
 from auth_service.auth_core.models.auth_models import AuthProvider
 
+# Test client
+client = TestClient(app)
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

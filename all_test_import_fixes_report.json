@@ -1,0 +1,846 @@
+{
+  "total_files_checked": 1407,
+  "total_files_modified": 131,
+  "files_modified": [
+    {
+      "file": "netra_backend\\tests\\test_database_manager_helpers.py",
+      "changes": [
+        "Line 52: from netra_backend.tests.fixtures.database_test_fixtures import ( -> from .database_test_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\test_websocket_production_realistic.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.websocket.test_compression_auth import ( -> from .test_compression_auth import (",
+        "Line 37: from netra_backend.tests.websocket.test_concurrent_connections import ( -> from .test_concurrent_connections import (",
+        "Line 42: from netra_backend.tests.websocket.test_memory_monitoring import ( -> from .test_memory_monitoring import (",
+        "Line 45: from netra_backend.tests.websocket.test_message_ordering import ( -> from .test_message_ordering import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\test_websocket_type_safety.py",
+      "changes": [
+        "Line 21: from netra_backend.tests.websocket.test_websocket_bidirectional_types import ( -> from .test_websocket_bidirectional_types import (",
+        "Line 26: from netra_backend.tests.websocket.test_websocket_client_to_server_types import ( -> from .test_websocket_client_to_server_types import (",
+        "Line 30: from netra_backend.tests.websocket.test_websocket_server_to_client_types import ( -> from .test_websocket_server_to_client_types import (",
+        "Line 37: from netra_backend.tests.websocket.test_websocket_type_safety_factory import ( -> from .test_websocket_type_safety_factory import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_data_sub_agent_core.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_data_sub_agent_integration.py",
+      "changes": [
+        "Line 27: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_data_sub_agent_reliability.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_error_handler_enums.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_llm_agent_basic_operations.py",
+      "changes": [
+        "Line 36: from netra_backend.tests.fixtures.llm_agent_fixtures import ( -> from .llm_agent_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_llm_agent_e2e_performance.py",
+      "changes": [
+        "Line 55: from netra_backend.tests.helpers.performance_test_helpers import ( -> from .performance_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_llm_agent_state_persistence.py",
+      "changes": [
+        "Line 35: from netra_backend.tests.fixtures.llm_agent_fixtures import ( -> from .llm_agent_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_llm_agent_tool_integration.py",
+      "changes": [
+        "Line 35: from netra_backend.tests.fixtures.llm_agent_fixtures import ( -> from .llm_agent_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_production_tool.py",
+      "changes": [
+        "Line 21: from netra_backend.tests.helpers.tool_dispatcher_assertions import ( -> from .tool_dispatcher_assertions import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_production_tool_operations.py",
+      "changes": [
+        "Line 21: from netra_backend.tests.helpers.tool_dispatcher_assertions import ( -> from .tool_dispatcher_assertions import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_basic.py",
+      "changes": [
+        "Line 37: from netra_backend.tests.helpers.supervisor_extensions import ( -> from .supervisor_extensions import (",
+        "Line 40: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_corpus_data.py",
+      "changes": [
+        "Line 46: from netra_backend.tests.helpers.supervisor_test_classes import ( -> from .supervisor_test_classes import (",
+        "Line 51: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_error_handling.py",
+      "changes": [
+        "Line 36: from netra_backend.tests.helpers.supervisor_extensions import ( -> from .supervisor_extensions import (",
+        "Line 39: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_patterns.py",
+      "changes": [
+        "Line 37: from netra_backend.tests.helpers.supervisor_extensions import ( -> from .supervisor_extensions import (",
+        "Line 40: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_quality_admin.py",
+      "changes": [
+        "Line 46: from netra_backend.tests.helpers.supervisor_test_classes import ( -> from .supervisor_test_classes import (",
+        "Line 51: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_supervisor_routing.py",
+      "changes": [
+        "Line 46: from netra_backend.tests.helpers.supervisor_extensions import ( -> from .supervisor_extensions import (",
+        "Line 49: from netra_backend.tests.helpers.supervisor_test_helpers import ( -> from .supervisor_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_tool_dispatcher_advanced_operations.py",
+      "changes": [
+        "Line 21: from netra_backend.tests.helpers.tool_dispatcher_assertions import ( -> from .tool_dispatcher_assertions import (",
+        "Line 24: from netra_backend.tests.helpers.tool_dispatcher_helpers import ( -> from .tool_dispatcher_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_tool_dispatcher_core_operations.py",
+      "changes": [
+        "Line 20: from netra_backend.tests.helpers.tool_dispatcher_helpers import ( -> from .tool_dispatcher_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_tool_dispatcher_edge_cases.py",
+      "changes": [
+        "Line 20: from netra_backend.tests.helpers.tool_dispatcher_helpers import ( -> from .tool_dispatcher_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_tool_dispatcher_initialization.py",
+      "changes": [
+        "Line 19: from netra_backend.tests.helpers.tool_dispatcher_helpers import ( -> from .tool_dispatcher_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_triage_caching_async.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.triage_test_helpers import ( -> from .triage_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_triage_edge_performance.py",
+      "changes": [
+        "Line 35: from netra_backend.tests.helpers.triage_test_helpers import ( -> from .triage_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_triage_entity_intent.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.triage_test_helpers import ( -> from .triage_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\agents\\test_triage_init_validation.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.triage_test_helpers import ( -> from .triage_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\clickhouse\\test_query_correctness.py",
+      "changes": [
+        "Line 43: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_batch_processor.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_connection_pool.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_integration_scenarios.py",
+      "changes": [
+        "Line 34: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_lock_circuit_breaker.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_rate_limiter.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_resource_manager.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_task_pool.py",
+      "changes": [
+        "Line 27: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_async_timeout_retry.py",
+      "changes": [
+        "Line 30: from netra_backend.tests.helpers.async_utils_helpers import ( -> from .async_utils_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\core\\test_missing_tests_final.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.core_test_helpers import create_mock_config -> from .core_test_helpers import create_mock_config"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\e2e\\test_thread_management.py",
+      "changes": [
+        "Line 36: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\examples\\agent_fixtures_usage_examples.py",
+      "changes": [
+        "Line 12: from netra_backend.tests.test_utilities.agent_fixtures import ( -> from .agent_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\examples\\test_database_fixtures_examples.py",
+      "changes": [
+        "Line 27: from netra_backend.tests.fixtures.database_test_fixtures import ( -> from .database_test_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\examples\\test_pattern_examples.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\fixtures\\realistic_test_fixtures.py",
+      "changes": [
+        "Line 18: from netra_backend.tests.fixtures.fixtures_core import ( -> from .fixtures_core import (",
+        "Line 25: from netra_backend.tests.fixtures.fixtures_metrics import ( -> from .fixtures_metrics import (",
+        "Line 32: from netra_backend.tests.fixtures.fixtures_workloads import ( -> from .fixtures_workloads import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\fixtures\\seed_test_data.py",
+      "changes": [
+        "Line 14: from netra_backend.tests.fixtures.small_datasets import get_all_small_datasets -> from .small_datasets import get_all_small_datasets"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\helpers\\llm_mocks.py",
+      "changes": [
+        "Line 10: from netra_backend.tests.utils.mock_helpers import create_mock_structured_response -> from .mock_helpers import create_mock_structured_response"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\helpers\\quality_gate_fixtures.py",
+      "changes": [
+        "Line 17: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\helpers\\__init__.py",
+      "changes": [
+        "Line 3: from netra_backend.tests.helpers.quality_gate_content import * -> from .quality_gate_content import *",
+        "Line 4: from netra_backend.tests.helpers.quality_gate_fixtures import * -> from .quality_gate_fixtures import *",
+        "Line 5: from netra_backend.tests.helpers.quality_gate_helpers import * -> from .quality_gate_helpers import *",
+        "Line 6: from netra_backend.tests.helpers.startup_check_helpers import * -> from .startup_check_helpers import *"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_advanced_analytics_export.py",
+      "changes": [
+        "Line 44: from netra_backend.tests.helpers.analytics_export_helpers import ( -> from .analytics_export_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_auth_core.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket -> from .test_ws_connection_mocks import MockWebSocket",
+        "Line 31: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_auth_helpers.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket -> from .test_ws_connection_mocks import MockWebSocket",
+        "Line 31: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_errors_core.py",
+      "changes": [
+        "Line 33: from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket -> from .websocket_mocks import MockWebSocket"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_errors_helpers.py",
+      "changes": [
+        "Line 33: from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket -> from .websocket_mocks import MockWebSocket"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_routing_core.py",
+      "changes": [
+        "Line 33: from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket -> from .websocket_mocks import MockWebSocket"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_message_flow_routing_helpers.py",
+      "changes": [
+        "Line 33: from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket -> from .websocket_mocks import MockWebSocket"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_sso_saml_error_scenarios.py",
+      "changes": [
+        "Line 35: from netra_backend.tests.helpers.sso_saml_components import ( -> from .sso_saml_components import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_sso_saml_integration.py",
+      "changes": [
+        "Line 58: from netra_backend.tests.helpers.sso_saml_components import ( -> from .sso_saml_components import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_unified_message_flow_core.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket -> from .test_ws_connection_mocks import MockWebSocket",
+        "Line 34: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_unified_message_flow_fixtures.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket -> from .test_ws_connection_mocks import MockWebSocket",
+        "Line 34: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\test_unified_message_flow_helpers.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket -> from .test_ws_connection_mocks import MockWebSocket",
+        "Line 34: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\llm\\test_structured_generation.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM -> from .llm_mocks import MockLLM, MockStructuredLLM"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_base_repository.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_corpus_service_comprehensive.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_llm_load_balancing.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager -> from .enhanced_llm_manager import EnhancedLLMManager",
+        "Line 28: from netra_backend.tests.helpers.llm_manager_helpers import ( -> from .llm_manager_helpers import (",
+        "Line 35: from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient -> from .llm_mock_clients import MockLLMClient"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_llm_provider_switching.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager -> from .enhanced_llm_manager import EnhancedLLMManager",
+        "Line 27: from netra_backend.tests.helpers.llm_manager_helpers import ( -> from .llm_manager_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_llm_structured_output.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager -> from .enhanced_llm_manager import EnhancedLLMManager",
+        "Line 28: from netra_backend.tests.helpers.llm_manager_helpers import ( -> from .llm_manager_helpers import (",
+        "Line 32: from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient -> from .llm_mock_clients import MockLLMClient"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_message_repository.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_permission_service_integration.py",
+      "changes": [
+        "Line 34: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_advanced.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.quality_gate_content import ( -> from .quality_gate_content import (",
+        "Line 30: from netra_backend.tests.helpers.quality_gate_fixtures import ( -> from .quality_gate_fixtures import (",
+        "Line 45: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_basic.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.quality_gate_content import ( -> from .quality_gate_content import (",
+        "Line 31: from netra_backend.tests.helpers.quality_gate_fixtures import ( -> from .quality_gate_fixtures import (",
+        "Line 37: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_clarity_redundancy.py",
+      "changes": [
+        "Line 19: from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import ( -> from .quality_gate_comprehensive_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_completeness_novelty.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import ( -> from .quality_gate_comprehensive_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_content.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.quality_gate_content import ( -> from .quality_gate_content import (",
+        "Line 33: from netra_backend.tests.helpers.quality_gate_fixtures import ( -> from .quality_gate_fixtures import (",
+        "Line 37: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_dataclasses.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.quality_gate_fixtures import ( -> from .quality_gate_fixtures import (",
+        "Line 30: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_hallucination_scoring.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import ( -> from .quality_gate_comprehensive_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_integration_core_1.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_integration_core_2.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_integration_fixtures.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_integration_utilities_1.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_integration_utilities_2.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_metrics.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.quality_gate_content import ( -> from .quality_gate_content import (",
+        "Line 42: from netra_backend.tests.helpers.quality_gate_fixtures import ( -> from .quality_gate_fixtures import (",
+        "Line 48: from netra_backend.tests.helpers.quality_gate_helpers import ( -> from .quality_gate_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_quantification_relevance.py",
+      "changes": [
+        "Line 19: from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import ( -> from .quality_gate_comprehensive_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_specificity_actionability.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import ( -> from .quality_gate_comprehensive_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_gate_validation.py",
+      "changes": [
+        "Line 38: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_monitoring_alerts.py",
+      "changes": [
+        "Line 30: from netra_backend.tests.helpers.quality_monitoring_fixtures import ( -> from .quality_monitoring_fixtures import (",
+        "Line 36: from netra_backend.tests.helpers.quality_monitoring_helpers import ( -> from .quality_monitoring_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_monitoring_basic.py",
+      "changes": [
+        "Line 30: from netra_backend.tests.helpers.quality_monitoring_fixtures import ( -> from .quality_monitoring_fixtures import (",
+        "Line 36: from netra_backend.tests.helpers.quality_monitoring_helpers import ( -> from .quality_monitoring_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_monitoring_integration.py",
+      "changes": [
+        "Line 34: from netra_backend.tests.helpers.quality_monitoring_fixtures import ( -> from .quality_monitoring_fixtures import (",
+        "Line 38: from netra_backend.tests.helpers.quality_monitoring_helpers import ( -> from .quality_monitoring_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_quality_monitoring_metrics.py",
+      "changes": [
+        "Line 30: from netra_backend.tests.helpers.quality_monitoring_fixtures import ( -> from .quality_monitoring_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_redis_manager_basic_operations.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.redis_test_fixtures import ( -> from .redis_test_fixtures import (",
+        "Line 29: from netra_backend.tests.helpers.redis_test_helpers import ( -> from .redis_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_redis_manager_performance.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.redis_test_fixtures import ( -> from .redis_test_fixtures import (",
+        "Line 29: from netra_backend.tests.helpers.redis_test_helpers import ( -> from .redis_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_redis_manager_pooling.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.redis_test_fixtures import ( -> from .redis_test_fixtures import (",
+        "Line 29: from netra_backend.tests.helpers.redis_test_helpers import ( -> from .redis_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_redis_manager_retry.py",
+      "changes": [
+        "Line 24: from netra_backend.tests.helpers.redis_test_fixtures import ( -> from .redis_test_fixtures import (",
+        "Line 28: from netra_backend.tests.helpers.redis_test_helpers import ( -> from .redis_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_reference_repository.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_run_repository.py",
+      "changes": [
+        "Line 23: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_supply_research_service_error_handling.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_synthetic_data_service_integration.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_thread_repository.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_availability.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_business_requirements.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_checking.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_integration.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.helpers.shared_test_types import ( -> from .shared_test_types import (",
+        "Line 34: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_rate_limiting.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_service_initialization.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_tool_permission_user_plans.py",
+      "changes": [
+        "Line 29: from netra_backend.tests.helpers.tool_permission_helpers import ( -> from .tool_permission_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\services\\test_unit_of_work.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.database_repository_helpers import ( -> from .database_repository_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unified_system\\test_dev_launcher_startup.py",
+      "changes": [
+        "Line 62: from netra_backend.tests.helpers.startup_check_helpers import ( -> from .startup_check_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unified_system\\test_health_coordination.py",
+      "changes": [
+        "Line 49: from tests.unified_system.mock_services import ( -> from .mock_services import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unified_system\\test_service_recovery.py",
+      "changes": [
+        "Line 80: from netra_backend.tests.helpers.startup_check_helpers import ( -> from .startup_check_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_create.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_delete.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_get.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_list.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_messages.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_rename.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\unit\\test_threads_route_update.py",
+      "changes": [
+        "Line 22: from netra_backend.tests.helpers.thread_test_helpers import ( -> from .thread_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\utils\\test_datetime_string_json_utils.py",
+      "changes": [
+        "Line 28: from netra_backend.tests.helpers.datetime_string_test_helpers import ( -> from .datetime_string_test_helpers import (",
+        "Line 33: from netra_backend.tests.helpers.json_file_crypto_test_helpers import JsonTestHelpers -> from .json_file_crypto_test_helpers import JsonTestHelpers"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\utils\\test_file_crypto_validation_utils.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.json_file_crypto_test_helpers import ( -> from .json_file_crypto_test_helpers import (",
+        "Line 31: from netra_backend.tests.helpers.validation_formatting_test_helpers import ( -> from .validation_formatting_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\utils\\test_formatting_math_network_utils.py",
+      "changes": [
+        "Line 26: from netra_backend.tests.helpers.network_pagination_test_helpers import ( -> from .network_pagination_test_helpers import (",
+        "Line 31: from netra_backend.tests.helpers.validation_formatting_test_helpers import ( -> from .validation_formatting_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\utils\\test_monitoring_debug_migration_utils.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.debug_migration_test_helpers import ( -> from .debug_migration_test_helpers import (",
+        "Line 32: from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import ( -> from .rate_retry_monitoring_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\utils\\test_pagination_rate_retry_utils.py",
+      "changes": [
+        "Line 25: from netra_backend.tests.helpers.network_pagination_test_helpers import ( -> from .network_pagination_test_helpers import (",
+        "Line 28: from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import ( -> from .rate_retry_monitoring_test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\websocket\\test_websocket_e2e_complete.py",
+      "changes": [
+        "Line 50: from tests.jwt_token_helpers import JWTTestHelper -> from ..jwt_token_helpers import JWTTestHelper"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\e2e\\first_time_user\\test_real_critical_user_journey_e2e.py",
+      "changes": [
+        "Line 31: from netra_backend.tests.agents.test_helpers import ( -> from .test_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\critical_paths\\test_api_rate_limiting_first_requests.py",
+      "changes": [
+        "Line 44: from tests.config import TestTier -> from ..config import TestTier"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\critical_paths\\test_billing_accuracy_l4.py",
+      "changes": [
+        "Line 51: from tests.config import TEST_CONFIG, TestTier  # Comment out since config structure may vary -> from ..config import TEST_CONFIG, TestTier  # Comment out since config structure may vary"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\critical_paths\\test_cache_coherence_l4.py",
+      "changes": [
+        "Line 51: from tests.config import TEST_CONFIG  # Comment out since config structure may vary -> from ..config import TEST_CONFIG  # Comment out since config structure may vary"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\critical_paths\\test_message_pipeline_l4.py",
+      "changes": [
+        "Line 60: from tests.config import TEST_CONFIG -> from ..config import TEST_CONFIG"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\critical_paths\\test_multi_service_auth_token_propagation.py",
+      "changes": [
+        "Line 41: from netra_backend.tests.helpers.multi_service_auth_helpers import ( -> from .multi_service_auth_helpers import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\staging\\test_staging_database_connection_resilience.py",
+      "changes": [
+        "Line 35: from netra_backend.tests.fixtures.database_test_fixtures import ( -> from .database_test_fixtures import ("
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\user_flows\\test_conversion_paths.py",
+      "changes": [
+        "Line 42: from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase -> from .user_flow_base import UserFlowTestBase",
+        "Line 43: from netra_backend.tests.fixtures.user_journey_data import UserTestData -> from .user_journey_data import UserTestData"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\user_flows\\test_early_tier_flows.py",
+      "changes": [
+        "Line 40: from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase -> from .user_flow_base import UserFlowTestBase",
+        "Line 41: from netra_backend.tests.fixtures.user_journey_data import BillingTestData -> from .user_journey_data import BillingTestData"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\user_flows\\test_enterprise_flows.py",
+      "changes": [
+        "Line 37: from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase -> from .user_flow_base import UserFlowTestBase"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\user_flows\\test_free_tier_onboarding.py",
+      "changes": [
+        "Line 56: from netra_backend.tests.test_helpers.user_flow_base import ( -> from .user_flow_base import (",
+        "Line 63: from netra_backend.tests.fixtures.user_journey_data import UserTestData, UserJourneyScenarios -> from .user_journey_data import UserTestData, UserJourneyScenarios"
+      ]
+    },
+    {
+      "file": "netra_backend\\tests\\integration\\user_flows\\test_mid_tier_flows.py",
+      "changes": [
+        "Line 40: from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase -> from .user_flow_base import UserFlowTestBase",
+        "Line 41: from netra_backend.tests.fixtures.user_journey_data import BillingTestData -> from .user_journey_data import BillingTestData"
+      ]
+    }
+  ]
+}

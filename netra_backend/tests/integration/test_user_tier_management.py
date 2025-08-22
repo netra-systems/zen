@@ -31,7 +31,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.integration.helpers.user_flow_helpers import (
+from .integration.helpers.user_flow_helpers import (
     MockUsageService,
     # Add project root to path
     generate_test_user_data,

@@ -24,7 +24,7 @@ import pytest
 
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.e2e.service_manager import RealServicesManager
-from tests.test_environment_config import TestEnvironmentType
+from tests.e2e.test_environment_config import TestEnvironmentType
 
 logger = logging.getLogger(__name__)
 

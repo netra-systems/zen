@@ -16,7 +16,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.routes.threads_route import (
-    ThreadCreate,
+    Thread,
     ThreadResponse,
     ThreadUpdate,
     router,
@@ -45,12 +45,12 @@ class TestPydanticModels:
     """Test Pydantic model configurations"""
     
     def test_thread_create_model(self):
-        """Test ThreadCreate model"""
-        thread = ThreadCreate(title="Test", metadata={"key": "value"})
+        """Test Thread model"""
+        thread = Thread(title="Test", metadata={"key": "value"})
         assert thread.title == "Test"
         assert thread.metadata == {"key": "value"}
         
-        thread = ThreadCreate()
+        thread = Thread()
         assert thread.title == None
         assert thread.metadata == None
     

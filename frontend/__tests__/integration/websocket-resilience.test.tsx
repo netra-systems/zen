@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../setup/test-providers';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
+import.*from '@/__tests__/helpers/websocket-test-manager';
 import { webSocketService } from '@/services/webSocketService';
 
 // Mock dependencies

@@ -35,7 +35,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.postgres import async_engine, get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager

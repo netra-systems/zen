@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.tests.real_critical_auth_helpers import CriticalUserJourneyHelpers
+from .real_critical_auth_helpers import CriticalUserJourneyHelpers
 
 
 # Core Environment Fixtures

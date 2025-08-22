@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.database_repository_helpers import (
+from .database_repository_helpers import (
     assert_pagination_result,
     assert_thread_created_correctly,
     # Add project root to path

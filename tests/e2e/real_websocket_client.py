@@ -18,11 +18,8 @@ from typing import Any, Dict, Optional, Union
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from tests.e2e.real_client_types import (
-    ClientConfig,
-    ConnectionMetrics,
-    ConnectionState,
-)
+from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.websocket_dev_utilities import ConnectionMetrics, ConnectionState
 
 
 class RealWebSocketClient:

@@ -37,8 +37,8 @@ from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer
-from netra_backend.tests.helpers.multi_service_auth_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
+from netra_backend.tests.integration.helpers.multi_service_auth_helpers import (
 
 # Add project root to path
     PostgreSQLContainer, AuthServiceSimulator, 

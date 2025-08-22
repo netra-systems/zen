@@ -6,7 +6,7 @@ Critical: Seamless token refresh without disrupting active conversations
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import jwt
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 # Add project root to path
 from netra_backend.app.services.auth_service import AuthService
@@ -68,7 +68,7 @@ class TestWebSocketAuthTokenRefresh:
 
         """Create test user."""
 
-        return UserInDB(
+        return User(
 
             id="refresh_user_001",
 
@@ -209,7 +209,7 @@ class TestWebSocketAuthTokenRefresh:
 
         for i in range(5):
 
-            user = UserInDB(
+            user = User(
 
                 id=f"concurrent_user_{i}",
 

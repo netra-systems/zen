@@ -6,7 +6,8 @@ tests and code that depends on the legacy API.
 
 from typing import Any, AsyncGenerator, Dict, Optional
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_factory import get_agent_service
 

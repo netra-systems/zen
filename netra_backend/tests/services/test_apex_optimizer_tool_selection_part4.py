@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import AppConfig, RequestModel
+from netra_backend.app.schemas import AppConfig, RequestModel
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.services.apex_optimizer_agent.models import AgentState
@@ -42,12 +42,12 @@ from netra_backend.app.services.context import ToolContext
 
 # Add project root to path
 # Import helper classes from other parts
-from netra_backend.tests.test_apex_optimizer_tool_selection_part1 import (
+from .test_apex_optimizer_tool_selection_part1 import (
     MockLLMConnector,
     MockOptimizationTool,
     OptimizationCategory,
 )
-from netra_backend.tests.test_apex_optimizer_tool_selection_part3 import ToolChain
+from .test_apex_optimizer_tool_selection_part3 import ToolChain
 
 
 class TestApexOptimizerPerformanceAndScaling:

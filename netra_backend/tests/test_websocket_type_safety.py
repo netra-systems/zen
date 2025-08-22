@@ -8,7 +8,7 @@ Imports and orchestrates tests from focused modules.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -18,23 +18,23 @@ setup_test_path()
 
 import pytest
 
-from netra_backend.tests.websocket.test_websocket_bidirectional_types import (
+from .test_websocket_bidirectional_types import (
     TestBidirectionalTypeConsistency,
     TestWebSocketMessageValidation,
     TestWebSocketSendToThread,
 )
-from netra_backend.tests.websocket.test_websocket_client_to_server_types import (
+from .test_websocket_client_to_server_types import (
     TestClientMessageBatchValidation,
     TestClientToServerMessageTypes,
 )
-from netra_backend.tests.websocket.test_websocket_server_to_client_types import (
+from .test_websocket_server_to_client_types import (
     TestServerMessageBatchValidation,
     TestServerToClientMessageTypes,
 )
 
 # Add project root to path
 # Import from the focused modules
-from netra_backend.tests.websocket.test_websocket_type_safety_factory import (
+from .test_websocket_type_safety_factory import (
     WebSocketMessageFactory,
     WebSocketTestDataFactory,
 )

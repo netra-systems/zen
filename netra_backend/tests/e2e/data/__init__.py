@@ -23,7 +23,7 @@ Usage:
     )
 """
 
-from netra_backend.tests.default_plans import (
+from .default_plans import (
     OptimizationPlan,
     PlanStep,
     ValidationCriteria,
@@ -31,19 +31,19 @@ from netra_backend.tests.default_plans import (
     get_cost_optimization_plan,
     get_performance_tuning_plan,
 )
-from netra_backend.tests.edge_cases_temporal import (
+from .edge_cases_temporal import (
     EdgeCase,
     EdgeCaseCategory,
     EdgeCaseGenerator,
     ErrorConditionSimulator,
 )
-from netra_backend.tests.seeded_data_generator import (
+from .seeded_data_generator import (
     DatasetConfig,
     DomainSpecificGenerator,
     ProductionMirrorGenerator,
     StressTestGenerator,
 )
-from netra_backend.tests.temporal_patterns import (
+from .temporal_patterns import (
     BurstPatternGenerator,
     GrowthPatternGenerator,
     SeasonalPatternGenerator,

@@ -25,13 +25,13 @@ import pytest
 # Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.test_fixtures import (
+from .test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_tool_dispatcher,
     mock_websocket_manager,
 )
-from netra_backend.tests.test_helpers import (
+from .test_helpers import (
     create_concurrent_tasks,
     create_llm_response_with_tools,
     # Add project root to path

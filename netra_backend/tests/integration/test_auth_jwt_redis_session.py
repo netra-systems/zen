@@ -37,7 +37,7 @@ from logging_config import central_logger
 # Add project root to path
 from netra_backend.app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.tests.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )

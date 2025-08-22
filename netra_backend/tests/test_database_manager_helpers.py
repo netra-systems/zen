@@ -21,7 +21,7 @@ Each function ≤8 lines, file ≤300 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -49,7 +49,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Add project root to path
 from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
 from netra_backend.app.core.exceptions_config import DatabaseError
-from netra_backend.tests.fixtures.database_test_fixtures import (
+from .database_test_fixtures import (
     create_mock_message,
     create_mock_thread,
     create_mock_user,

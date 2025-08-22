@@ -8,7 +8,7 @@ import asyncio
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import aioredis
+import redis.asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_service.auth_core.database.models import AuthSession, AuthUser

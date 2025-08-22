@@ -48,7 +48,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
-from netra_backend.tests.l4_staging_critical_base import (
+from .l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

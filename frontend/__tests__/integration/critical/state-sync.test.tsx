@@ -12,7 +12,7 @@ import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
 
 // Import test utilities
-import { TestProviders } from '../../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('State Synchronization', () => {
   beforeEach(async () => {

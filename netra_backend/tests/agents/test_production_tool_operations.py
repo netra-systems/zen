@@ -18,7 +18,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.agents.production_tool import ProductionTool
-from netra_backend.tests.helpers.tool_dispatcher_assertions import (
+from .tool_dispatcher_assertions import (
     assert_batch_execution_success,
     assert_corpus_creation_success,
     assert_corpus_search_success,

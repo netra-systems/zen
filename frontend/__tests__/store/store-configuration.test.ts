@@ -23,6 +23,22 @@ describe('Store Configuration - Infrastructure Tests', () => {
   beforeEach(() => {
     const env = GlobalTestUtils.setupStoreTestEnvironment();
     mockStorage = env.mockStorage;
+    
+    // Reset all stores to default state
+    const { result: appResult } = renderHook(() => useAppStore());
+    const { result: authResult } = renderHook(() => useAuthStore());
+    const { result: chatResult } = renderHook(() => useChatStore());
+    
+    act(() => {
+      // Reset auth store
+      authResult.current.reset();
+      // Reset chat store
+      chatResult.current.reset();
+      // Reset app store by setting to default
+      if (appResult.current.isSidebarCollapsed) {
+        appResult.current.toggleSidebar();
+      }
+    });
   });
 
   afterEach(() => {

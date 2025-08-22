@@ -25,12 +25,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.datetime_string_test_helpers import (
+from .datetime_string_test_helpers import (
     # Add project root to path
     DatetimeTestHelpers,
     StringTestHelpers,
 )
-from netra_backend.tests.helpers.json_file_crypto_test_helpers import JsonTestHelpers
+from .json_file_crypto_test_helpers import JsonTestHelpers
 
 
 # Test 86: Datetime utils timezone

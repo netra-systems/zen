@@ -23,12 +23,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.json_file_crypto_test_helpers import (
+from .json_file_crypto_test_helpers import (
     CryptoTestHelpers,
     # Add project root to path
     FileTestHelpers,
 )
-from netra_backend.tests.helpers.validation_formatting_test_helpers import (
+from .validation_formatting_test_helpers import (
     ValidationTestHelpers,
 )
 

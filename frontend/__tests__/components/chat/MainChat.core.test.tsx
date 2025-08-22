@@ -27,11 +27,15 @@ jest.mock('@/store/unified-chat', () => ({
     currentRunId: null,
     activeThreadId: null,
     isThreadLoading: false,
+    threads: [],
+    currentThreadId: null,
     handleWebSocketEvent: jest.fn(),
     addMessage: jest.fn(),
     setProcessing: jest.fn(),
     clearMessages: jest.fn(),
     updateLayerData: jest.fn(),
+    setActiveThread: jest.fn(),
+    resetLayers: jest.fn()
   })
 }));
 

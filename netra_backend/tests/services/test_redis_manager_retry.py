@@ -21,11 +21,11 @@ import pytest
 import redis.asyncio as redis
 
 # Add project root to path
-from netra_backend.tests.helpers.redis_test_fixtures import (
+from .redis_test_fixtures import (
     MockRedisClient,
     enhanced_redis_manager_with_retry,
 )
-from netra_backend.tests.helpers.redis_test_helpers import (
+from .redis_test_helpers import (
     create_fallback_operations,
     setup_fallback_cache,
     setup_persistent_failure_mock,

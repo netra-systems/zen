@@ -13,7 +13,7 @@ Performance Requirements: p99 < 500ms, 99.9% delivery success, message ordering 
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -57,8 +57,8 @@ from netra_backend.app.services.websocket_manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage
-from tests.config import TEST_CONFIG
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from ..config import TEST_CONFIG
+from ..e2e.real_websocket_client import RealWebSocketClient
 
 
 logger = logging.getLogger(__name__)

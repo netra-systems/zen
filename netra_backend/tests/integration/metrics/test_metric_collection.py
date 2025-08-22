@@ -34,7 +34,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.metrics.shared_fixtures import (
     # Add project root to path
     MetricEvent,
     MockMetricsCollector,

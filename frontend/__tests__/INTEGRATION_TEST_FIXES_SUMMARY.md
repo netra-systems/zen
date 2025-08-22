@@ -82,7 +82,7 @@ Comprehensive fix for 268+ frontend integration test failures focused on timing,
 
 ### Basic React act() Utilities
 ```tsx
-import { ActUtils } from '../test-utils/react-act-utils';
+import { ActUtils } from '@/__tests__/test-utils/react-act-utils';
 
 // Wrap async operations
 await ActUtils.async(async () => {
@@ -102,7 +102,7 @@ ActUtils.stateUpdate(() => {
 
 ### State Timing Management
 ```tsx
-import { StateTimingUtils } from '../test-utils/state-timing-utils';
+import { StateTimingUtils } from '@/__tests__/test-utils/state-timing-utils';
 
 const manager = StateTimingUtils.createManager({ count: 0 });
 
@@ -116,7 +116,7 @@ await StateTimingUtils.async.sequentialUpdate([
 
 ### Heartbeat Management
 ```tsx
-import { HeartbeatUtils } from '../test-utils/heartbeat-timing-fix';
+import { HeartbeatUtils } from '@/__tests__/test-utils/heartbeat-timing-fix';
 
 // Create test-safe heartbeat
 const heartbeat = HeartbeatUtils.create({ interval: 1000 });
@@ -131,7 +131,7 @@ heartbeat.cleanup();
 
 ### Comprehensive Cleanup
 ```tsx
-import { TestCleanup } from '../test-utils/test-cleanup-utils';
+import { TestCleanup } from '@/__tests__/test-utils/test-cleanup-utils';
 
 describe('My Tests', () => {
   beforeEach(async () => {

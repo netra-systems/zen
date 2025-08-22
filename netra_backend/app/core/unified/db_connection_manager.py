@@ -29,7 +29,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool, QueuePool
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

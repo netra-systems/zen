@@ -7,7 +7,8 @@ from clickhouse_driver import Client
 # For using remote() copy between clickhouse the driver is better then connect it seems.
 from sqlmodel import Session
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.db.models_clickhouse import SUPPLY_TABLE_NAME
 from netra_backend.app.db.models_postgres import SupplyOption
 

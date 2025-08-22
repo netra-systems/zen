@@ -13,11 +13,11 @@ if str(PROJECT_ROOT) not in sys.path:
 setup_test_path()
 
 import pytest
-from schemas import ToolResult
+from netra_backend.app.schemas import ToolResult
 
 # Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.tests.helpers.tool_dispatcher_helpers import (
+from .tool_dispatcher_helpers import (
     # Add project root to path
     create_mock_tool,
     create_test_state,

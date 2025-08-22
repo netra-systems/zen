@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 
-import { TestProviders } from '../test-utils/providers';// Using Jest, not vitest
+import { TestProviders } from '@/__tests__/test-utils/providers'; // Using Jest, not vitest
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 

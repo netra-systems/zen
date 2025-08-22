@@ -50,7 +50,7 @@ import { render, fireEvent, waitFor, screen, act } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { jwtDecode } from 'jwt-decode';
 import { AuthProvider, AuthContext } from '@/auth/context';
-import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '../test-utils/integration-test-setup';
+import { setupTestEnvironment, resetTestState, mockUser, mockAuthToken } from '@/__tests__/test-utils/integration-test-setup';
 
 // Test data for different user tiers
 const testUsers = {

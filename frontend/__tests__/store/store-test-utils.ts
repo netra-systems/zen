@@ -7,25 +7,36 @@ import { jest } from '@jest/globals';
 
 export class GlobalTestUtils {
   static setupStoreTestEnvironment() {
-    // Mock localStorage
+    // Create a real storage implementation for better Zustand compatibility
+    let store: Record<string, string> = {};
+    
     const mockStorage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
-      key: jest.fn(),
-      length: 0
+      getItem: jest.fn((key: string) => store[key] || null),
+      setItem: jest.fn((key: string, value: string) => {
+        store[key] = value;
+      }),
+      removeItem: jest.fn((key: string) => {
+        delete store[key];
+      }),
+      clear: jest.fn(() => {
+        store = {};
+      }),
+      key: jest.fn((index: number) => Object.keys(store)[index] || null),
+      get length() { return Object.keys(store).length; }
     };
     
+    // Set up proper window.localStorage replacement
     Object.defineProperty(window, 'localStorage', {
       value: mockStorage,
-      writable: true
+      writable: true,
+      configurable: true
     });
     
-    // Mock sessionStorage
+    // Also set up sessionStorage
     Object.defineProperty(window, 'sessionStorage', {
       value: mockStorage,
-      writable: true
+      writable: true,
+      configurable: true
     });
     
     return {
@@ -35,8 +46,12 @@ export class GlobalTestUtils {
   
   static cleanupStoreTestEnvironment() {
     jest.clearAllMocks();
-    localStorage.clear();
-    sessionStorage.clear();
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear();
+    }
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.clear();
+    }
   }
   
   static createMockStore(initialState = {}) {

@@ -23,13 +23,13 @@ Usage:
 
 from typing import List
 
-from tests.e2e.data.default_plans import (
+from ..e2e.data.default_plans import (
     PlanPriority,
     PlanStep,
     PlanStepType,
     ValidationCriteria,
 )
-from tests.e2e.data.plan_step_placeholders import (
+from ..e2e.data.plan_step_placeholders import (
     _create_cap_step_4,
     _create_cap_step_5,
     _create_cap_step_6,

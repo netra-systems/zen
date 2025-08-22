@@ -28,10 +28,10 @@ from netra_backend.app.services.corpus_service import CorpusService
 # Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )
-from netra_backend.tests.test_synthetic_data_service_basic import (
+from .test_synthetic_data_service_basic import (
     ClickHouseService,
     GenerationConfig,
 )

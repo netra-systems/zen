@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.auth_failover_service import AuthFailoverService
 
 # Add project root to path

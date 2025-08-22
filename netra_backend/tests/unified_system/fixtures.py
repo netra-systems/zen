@@ -14,15 +14,15 @@ import websockets
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.db.base import Base
-from netra_backend.tests.mock_services import (
+from .mock_services import (
     MockLLMService,
     MockOAuthProvider,
     MockWebSocketServer,
     ServiceRegistry,
 )
-from netra_backend.tests.test_harness import UnifiedTestHarness
+from .test_harness import UnifiedTestHarness
 
 
 @dataclass
@@ -87,7 +87,8 @@ def test_user() -> TestUser:
 @pytest.fixture(scope="function")
 async def test_database() -> AsyncGenerator[AsyncSession, None]:
     """Provide isolated test database session."""
-    engine = create_async_engine(settings.database_url, echo=False)
+    config = get_config()
+    engine = create_async_engine(config.database_url, echo=False)
     session = None
     
     try:
@@ -308,7 +309,7 @@ def test_environment_config() -> Dict[str, str]:
         "TESTING": "1",
         "ENVIRONMENT": "testing", 
         "LOG_LEVEL": "ERROR",
-        "DATABASE_URL": settings.database_url,
+        "DATABASE_URL": config.database_url,
         "ENABLE_REAL_LLM_TESTING": "false",
         "DISABLE_RATE_LIMITING": "true",
         "TEST_MODE_FAST_STARTUP": "true"

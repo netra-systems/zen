@@ -36,7 +36,7 @@ import pytest
 from logging_config import central_logger
 
 # Add project root to path
-from tests.integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     MonitoringTestHelpers,
 )
 

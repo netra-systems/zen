@@ -39,7 +39,7 @@ from netra_backend.app.core.alert_manager import HealthAlertManager
 
 # Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
-from netra_backend.tests.integration.metrics.shared_fixtures import MetricEvent
+from .integration.metrics.shared_fixtures import MetricEvent
 
 # Add project root to path
 

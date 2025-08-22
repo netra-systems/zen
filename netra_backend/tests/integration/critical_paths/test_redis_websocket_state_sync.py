@@ -13,7 +13,7 @@ session store → state sync pipeline with actual serialization/deserialization.
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 import redis.asyncio as redis
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
@@ -50,7 +50,7 @@ from netra_backend.app.websocket.state_synchronization_manager import (
     StateUpdate,
 
 )
-from netra_backend.tests.integration.helpers.redis_l3_helpers import (
+from .integration.helpers.redis_l3_helpers import (
 
     MockWebSocketForRedis,
     # Add project root to path
@@ -166,7 +166,7 @@ class TestRedisWebSocketStateSyncL3:
 
         """Create test user for session state testing."""
 
-        return UserInDB(
+        return User(
 
             id="state_sync_user_123",
 

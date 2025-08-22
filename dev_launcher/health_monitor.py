@@ -184,7 +184,7 @@ class HealthMonitor:
     def set_database_connector(self, database_connector):
         """Set database connector for database health monitoring."""
         self.database_connector = database_connector
-        logger.info("Database connector registered with health monitor")
+        logger.info("Database connector linked to health monitor for cross-service health checks")
     
     def unregister_service(self, name: str):
         """Remove a service from monitoring."""

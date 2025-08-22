@@ -46,7 +46,7 @@ import pytest
 import redis.asyncio as redis
 
 # Add project root to path
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+from .integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     # Add project root to path
     L4StagingCriticalPathTestBase,

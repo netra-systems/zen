@@ -23,11 +23,11 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )
-from netra_backend.tests.helpers.quality_gate_fixtures import (
+from .quality_gate_fixtures import (
     quality_service,
     redis_mock,
 )
-from netra_backend.tests.helpers.quality_gate_helpers import (
+from .quality_gate_helpers import (
     assert_validation_passed,
     create_test_metrics,
 )

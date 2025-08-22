@@ -41,7 +41,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.tests.services.test_agent_service_fixtures import (
+from .test_agent_service_fixtures import (
     agent_service,
     create_concurrent_request_models,
     create_mock_request_model,

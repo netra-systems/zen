@@ -19,7 +19,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.tests.helpers.quality_gate_content import (
+from .quality_gate_content import (
     get_complete_action_plan_content,
     # Add project root to path
     get_data_analysis_content,
@@ -30,11 +30,11 @@ from netra_backend.tests.helpers.quality_gate_content import (
     get_redundant_report_content,
     get_triage_content,
 )
-from netra_backend.tests.helpers.quality_gate_fixtures import (
+from .quality_gate_fixtures import (
     quality_service,
     redis_mock,
 )
-from netra_backend.tests.helpers.quality_gate_helpers import (
+from .quality_gate_helpers import (
     assert_action_plan_completeness,
     assert_domain_terms_recognition,
     assert_error_message_clarity,

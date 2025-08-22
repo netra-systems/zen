@@ -37,7 +37,7 @@ import pytest
 
 try:
     # Try relative imports first (for pytest execution)
-    from tests.jwt_token_helpers import JWTTestHelper
+    from tests.e2e.jwt_token_helpers import JWTTestHelper
     from tests.e2e.real_client_types import (
         ClientConfig,
         ConnectionState,
@@ -51,6 +51,7 @@ except ImportError:
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     sys.path.insert(0, project_root)
 
+from tests.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_models import (

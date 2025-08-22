@@ -5,7 +5,8 @@ Creates required tables on application startup.
 
 from typing import List, Tuple
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
+settings = get_config()
 from netra_backend.app.core.configuration.base import config_manager
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import (

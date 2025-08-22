@@ -525,21 +525,38 @@ class DatabaseConnector:
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
         """Test Redis connection."""
         try:
-            import aioredis
-            
-            redis = aioredis.from_url(
-                connection.url,
-                socket_timeout=self.retry_config.timeout
-            )
-            
-            # Test with ping
-            await redis.ping()
-            await redis.close()
-            return True
+            # Try modern redis library first (4.3+) which works with Python 3.12
+            try:
+                import redis.asyncio as redis_async
+                
+                redis = redis_async.from_url(
+                    connection.url,
+                    socket_connect_timeout=self.retry_config.timeout,
+                    socket_timeout=self.retry_config.timeout
+                )
+                
+                # Test with ping
+                await redis.ping()
+                await redis.aclose()
+                return True
+                
+            except ImportError:
+                # Fall back to aioredis for older setups
+                import aioredis
+                
+                redis = aioredis.from_url(
+                    connection.url,
+                    socket_timeout=self.retry_config.timeout
+                )
+                
+                # Test with ping
+                await redis.ping()
+                await redis.aclose()
+                return True
             
         except ImportError:
-            # aioredis not available, skip validation
-            logger.warning("aioredis not available for Redis validation")
+            # No Redis libraries available, skip validation
+            logger.warning("No Redis client libraries available (redis or aioredis)")
             return True
         except Exception as e:
             connection.last_error = f"Redis connection failed: {str(e)}"

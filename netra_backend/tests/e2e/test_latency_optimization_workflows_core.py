@@ -27,7 +27,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from tests.e2e.latency_optimization_helpers import (
+from netra_backend.tests.latency_optimization_helpers import (
     create_3x_latency_state,
     create_bottleneck_analysis_state,
     create_caching_optimization_state,

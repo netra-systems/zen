@@ -18,8 +18,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
-# Import from part 1
-from tests.e2e.unified_e2e_harness import (
+# Import from test_harness where these are actually defined
+from tests.e2e.test_harness import (
     DatabaseManager,
     ServiceConfig,
     UnifiedTestHarness,

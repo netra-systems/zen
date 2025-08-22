@@ -34,7 +34,7 @@ from netra_backend.app.services.api_gateway_service import APIGatewayService
 from netra_backend.app.services.auth_service import AuthService
 
 WebSocketService = AsyncMock
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.backend_service import BackendService
 
 

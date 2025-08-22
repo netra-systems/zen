@@ -22,7 +22,7 @@ import pytest
 from cryptography.fernet import Fernet
 
 # Add project root to path
-from netra_backend.tests.security_service_test_mocks import (
+from .security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
 )

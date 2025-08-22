@@ -20,7 +20,7 @@ Usage:
 
 from typing import List
 
-from tests.e2e.data.default_plans import (
+from ..e2e.data.default_plans import (
     PlanPriority,
     PlanStep,
     PlanStepType,

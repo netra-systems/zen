@@ -18,7 +18,7 @@
 import React, { Profiler, ProfilerOnRenderCallback } from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 // Import mock components for performance testing
 import {

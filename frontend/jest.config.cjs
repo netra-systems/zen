@@ -22,6 +22,9 @@ const commonConfig = {
     '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
     'react-syntax-highlighter/dist/esm/styles/prism': '<rootDir>/__mocks__/prismStyleMock.js',
     'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
+    'remark-gfm': '<rootDir>/__mocks__/remark-gfm.js',
+    'remark-math': '<rootDir>/__mocks__/remark-math.js',
+    'rehype-katex': '<rootDir>/__mocks__/rehype-katex.js',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
@@ -101,6 +104,8 @@ module.exports = async () => {
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,
       },
+      isolatedModules: true,
+      useESM: false
     }],
     '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
   };

@@ -20,20 +20,20 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_triage_agent_caching import (
+from .test_triage_agent_caching import (
     TestCaching,
     TestExecuteMethod,
     TestRequestHashing,
 )
-from netra_backend.tests.test_triage_agent_core import (
+from .test_triage_agent_core import (
     TestEntityExtraction,
     TestIntentDetermination,
     TestRequestValidation,
     # Add project root to path
     TestTriageSubAgentInitialization,
 )
-from netra_backend.tests.test_triage_agent_models import TestCleanup, TestPydanticModels
-from netra_backend.tests.test_triage_agent_validation import (
+from .test_triage_agent_models import TestCleanup, TestPydanticModels
+from .test_triage_agent_validation import (
     TestEntryConditions,
     TestFallbackCategorization,
     TestJSONExtraction,

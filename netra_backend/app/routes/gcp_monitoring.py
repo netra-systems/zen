@@ -38,7 +38,8 @@ router = APIRouter(prefix="/monitoring", tags=["gcp-error-monitoring"])
 
 async def _get_gcp_error_service():
     """Get GCP Error Service instance with dependency injection."""
-    from netra_backend.app.config import settings
+    from netra_backend.app.config import get_config
+    settings = get_config()
     from netra_backend.app.schemas.monitoring_schemas import (
         GCPCredentialsConfig,
         GCPErrorServiceConfig,

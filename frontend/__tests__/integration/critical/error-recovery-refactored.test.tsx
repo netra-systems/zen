@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import { useAuthStore } from '@/store/authStore';
 
 // Import test utilities
-import { TestProviders } from '../../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 import { setupTestEnvironment, cleanupTestEnvironment, resetTestStores, clearTestStorage } from '../../helpers/test-setup-helpers';
 import { createExpiredToken, setupRetryFetchMock } from '../../helpers/test-mock-helpers';
 import { retryWithBackoff } from '../../helpers/test-async-helpers';

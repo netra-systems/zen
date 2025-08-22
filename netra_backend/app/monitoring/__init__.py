@@ -11,34 +11,34 @@ Architecture:
 """
 
 # Core monitoring components
-from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
+from .alert_evaluator import AlertEvaluator
 
 # Alert management system
-from netra_backend.app.monitoring.alert_manager_compact import (
+from .alert_manager_compact import (
     CompactAlertManager,
     alert_manager,
 )
-from netra_backend.app.monitoring.alert_models import (
+from .alert_models import (
     Alert,
     AlertLevel,
     AlertRule,
     NotificationChannel,
 )
-from netra_backend.app.monitoring.alert_notifications import NotificationDeliveryManager
-from netra_backend.app.monitoring.dashboard import (
+from .alert_notifications import NotificationDeliveryManager
+from .dashboard import (
     OperationMeasurement,
     PerformanceDashboard,
     SystemOverview,
 )
-from netra_backend.app.monitoring.health_calculator import HealthScoreCalculator
-from netra_backend.app.monitoring.metrics_collector import (
+from .health_calculator import HealthScoreCalculator
+from .metrics_collector import (
     PerformanceMetric,
     SystemResourceMetrics,
     WebSocketMetrics,
 )
 
 # Monitoring models
-from netra_backend.app.monitoring.models import (
+from .models import (
     HealthCheck,
     Metric,
     MetricDataPoint,
@@ -48,8 +48,9 @@ from netra_backend.app.monitoring.models import (
     MetricUnit,
     MonitoringDashboard,
 )
-from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
-from netra_backend.app.monitoring.system_monitor import (
+from .performance_alerting import PerformanceAlertManager
+from .performance_monitor import PerformanceMonitor
+from .system_monitor import (
     MonitoringManager,
     SystemPerformanceMonitor,
     monitoring_manager,
@@ -63,6 +64,7 @@ __all__ = [
     "SystemResourceMetrics",
     "WebSocketMetrics",
     "PerformanceAlertManager",
+    "PerformanceMonitor",
     "PerformanceDashboard",
     "OperationMeasurement", 
     "SystemOverview",

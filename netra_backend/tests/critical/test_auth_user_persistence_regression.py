@@ -137,13 +137,13 @@ class TestAuthUserPersistenceRegression:
         """Test that JWT token user_id matches the database user.id."""
         from sqlalchemy import select
 
-        from netra_backend.app.config import settings
+        from netra_backend.app.config import get_config
         from netra_backend.app.db.postgres import get_async_db
         from netra_backend.app.services.key_manager import KeyManager
         from netra_backend.app.services.security_service import SecurityService
         
         # Setup security service
-        key_manager = KeyManager.load_from_settings(settings)
+        key_manager = KeyManager.load_from_settings(get_config())
         security_service = SecurityService(key_manager)
         
         async with get_async_db() as db:
@@ -356,11 +356,11 @@ class TestAuthServiceIntegration:
             assert app_user.email == auth_user["email"]
             
             # Verify WebSocket auth would find this user
-            from netra_backend.app.config import settings
+            from netra_backend.app.config import get_config
             from netra_backend.app.services.key_manager import KeyManager
             from netra_backend.app.services.security_service import SecurityService
             
-            key_manager = KeyManager.load_from_settings(settings)
+            key_manager = KeyManager.load_from_settings(get_config())
             security_service = SecurityService(key_manager)
             
             found_user = await security_service.get_user_by_id(db, auth_user["id"])

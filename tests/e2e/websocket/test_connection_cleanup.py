@@ -38,7 +38,7 @@ import pytest_asyncio
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.service_manager import (
     create_real_services_manager,

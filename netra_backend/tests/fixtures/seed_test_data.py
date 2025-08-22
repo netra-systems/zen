@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions import NetraException
-from netra_backend.tests.fixtures.small_datasets import get_all_small_datasets
+from .small_datasets import get_all_small_datasets
 
 
 class TestDataSeeder:

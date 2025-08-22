@@ -26,12 +26,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.key_manager import KeyManager
 
 # Add project root to path
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.tests.routes.test_route_fixtures import (
+from .test_route_fixtures import (
     TEST_DOCUMENT_DATA,
     # Add project root to path
     CommonResponseValidators,
@@ -59,7 +59,8 @@ class TestCorpusRoute:
             
         # Set up security service to prevent AttributeError
         if not hasattr(app.state, 'security_service'):
-            key_manager = KeyManager.load_from_settings(settings)
+            config = get_config()
+            key_manager = KeyManager.load_from_settings(config)
             app.state.security_service = SecurityService(key_manager)
         
         return TestClient(app)

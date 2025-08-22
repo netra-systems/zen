@@ -42,7 +42,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 from logging_config import central_logger
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.agent_pipeline_mocks import AgentPipelineMocks
+from .agent_pipeline_mocks import AgentPipelineMocks
 
 logger = central_logger.get_logger(__name__)
 

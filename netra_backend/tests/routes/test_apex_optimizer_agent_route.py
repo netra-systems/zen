@@ -15,9 +15,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from schemas import DataSource, RequestModel, TimeRange, Workload
+from netra_backend.app.schemas import DataSource, RequestModel, TimeRange, Workload
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.main import app
 

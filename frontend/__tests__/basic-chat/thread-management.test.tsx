@@ -20,9 +20,9 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 // Test utilities and helpers
-import { ThreadSidebar } from '../../components/chat/ThreadSidebar';
-import { useThreadStore } from '../../store/threadStore';
-import { useAuthStore } from '../../store/authStore';
+import { ThreadSidebar } from '@/components/chat/ThreadSidebar';
+import { useThreadStore } from '@/store/threadStore';
+import { useAuthStore } from '@/store/authStore';
 
 // Mock stores and hooks
 const mockThreadStore = {

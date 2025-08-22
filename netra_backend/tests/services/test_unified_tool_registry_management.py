@@ -21,7 +21,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.tool_registry_management_core import (
+from .tool_registry_management_core import (
     ToolHealthMonitor,
     ToolLifecycleManager,
     ToolMetricsCollector,
@@ -29,7 +29,7 @@ from netra_backend.tests.tool_registry_management_core import (
     # Add project root to path
     UnifiedToolRegistry,
 )
-from netra_backend.tests.tool_registry_test_mocks import (
+from .tool_registry_test_mocks import (
     MockAdvancedTool,
     ToolStatus,
     assert_tool_status,

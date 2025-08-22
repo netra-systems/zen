@@ -21,7 +21,7 @@ import httpx
 import websockets
 
 from tests.e2e.service_manager import HealthMonitor, ServiceManager, TestDataSeeder
-from tests.e2e.unified_e2e_harness import ServiceConfig, UnifiedTestHarness
+from tests.e2e.test_harness import ServiceConfig, UnifiedTestHarness
 
 logger = logging.getLogger(__name__)
 

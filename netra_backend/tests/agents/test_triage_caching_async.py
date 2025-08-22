@@ -26,7 +26,7 @@ from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.tests.helpers.triage_test_helpers import (
+from .triage_test_helpers import (
     AssertionHelpers,
     AsyncTestHelpers,
     PerformanceHelpers,

@@ -47,14 +47,14 @@ import pytest
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Add project root to path
-from netra_backend.tests.integration.critical_paths.test_base import (
+from .integration.critical_paths.test_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-from tests.e2e.clickhouse_billing_helper import (
+from ..e2e.clickhouse_billing_helper import (
     ClickHouseBillingHelper,
 )
-from tests.e2e.payment_flow_manager import (
+from ..e2e.payment_flow_manager import (
     MockPaymentProvider,
     PaymentFlowManager,
 )

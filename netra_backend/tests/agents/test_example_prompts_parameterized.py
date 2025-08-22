@@ -24,14 +24,14 @@ import pytest_asyncio
 from netra_backend.app.services.quality_gate_service import ContentType
 
 # Add project root to path
-from netra_backend.tests.agents.test_example_prompts_base import (
+from .test_example_prompts_base import (
     # Add project root to path
     EXAMPLE_PROMPTS,
     ExamplePromptsTestBase,
     setup_real_infrastructure,
 )
-from netra_backend.tests.agents.test_example_prompts_contexts import ContextGenerator
-from netra_backend.tests.agents.test_example_prompts_runner import TestRunner
+from .test_example_prompts_contexts import ContextGenerator
+from .test_example_prompts_runner import TestRunner
 
 
 @pytest_asyncio.fixture

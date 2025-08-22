@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.deployment_config_fixtures import (
+from netra_backend.tests.integration.deployment_config_fixtures import (
     assert_enterprise_success,
     create_enterprise_customer_config,
     create_service_startup_config,

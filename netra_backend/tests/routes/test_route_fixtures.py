@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.services.key_manager import KeyManager
 
 # Add project root to path
@@ -182,7 +182,8 @@ class MockAppStateManager:
         
         # Set up security service
         if not hasattr(app.state, 'security_service'):
-            key_manager = KeyManager.load_from_settings(settings)
+            config = get_config()
+            key_manager = KeyManager.load_from_settings(config)
             app.state.security_service = SecurityService(key_manager)
         
         # Set up LLM manager for dependency injection

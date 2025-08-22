@@ -14,7 +14,7 @@ import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import dynamic from 'next/dynamic';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 // Mock dynamic import for testing
 const MockDynamicComponent = dynamic(() => 

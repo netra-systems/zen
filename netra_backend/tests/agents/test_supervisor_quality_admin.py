@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import (
+from netra_backend.app.schemas import (
     AgentCompleted,
     AgentStarted,
     SubAgentLifecycle,
@@ -43,12 +43,12 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.helpers.supervisor_test_classes import (
+from .supervisor_test_classes import (
     MockAdminToolDispatcher,
     PermissionError,
     QualitySupervisor,
 )
-from netra_backend.tests.helpers.supervisor_test_helpers import (
+from .supervisor_test_helpers import (
     create_admin_dispatcher_mocks,
     create_admin_operation,
     create_quality_response_data,

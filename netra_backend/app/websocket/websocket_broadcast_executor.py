@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,
+)
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import (
     ExecutionErrorHandler,
 )
 from netra_backend.app.agents.base.interface import (

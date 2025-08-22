@@ -236,11 +236,19 @@ python unified_test_runner.py
 *   **BEFORE RELEASES (Includes Staging Validation):** `python unified_test_runner.py --level integration --real-llm --env staging`
 
 ### 6.3. Deployment (GCP Staging)
-→ See [`SPEC/learnings/deployment_staging.xml`](SPEC/learnings/deployment_staging.xml).
+→ See [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) for comprehensive guidelines.
 
-*   **Quick Deploy**: `python organized_root/deployment_configs/deploy_staging.py`
-*   **Auth Issues**: `python organized_root/deployment_configs/setup_staging_auth.py --force-new-key`
+**CRITICAL: Use ONLY the official deployment script - Do NOT create new deployment scripts**
 
+*   **RECOMMENDED (Fast + Safe)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks`
+*   **Quick Deploy (Local Build)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
+*   **Cloud Build (Slower)**: `python scripts/deploy_to_gcp.py --project netra-staging`
+*   **Cleanup**: `python scripts/deploy_to_gcp.py --project netra-staging --cleanup`
+
+**Key Points:**
+- **DEFAULT to local builds** (--build-local) - 5-10x faster than Cloud Build
+- **ALWAYS run checks** (--run-checks) before production deployments
+- **NEVER create new deployment scripts** - enhance the existing one
 ## 7. Critical Specifications Reference
 
 Ensure adherence to these core specifications throughout the development process by all agents.

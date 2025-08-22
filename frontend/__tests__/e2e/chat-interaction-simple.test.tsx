@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
 // ============================================
 // Simple Test Components (8 lines each)

@@ -19,7 +19,7 @@ from fastapi import HTTPException
 
 # Add project root to path
 from netra_backend.app.routes.threads_route import ThreadUpdate, update_thread
-from netra_backend.tests.helpers.thread_test_helpers import (
+from .thread_test_helpers import (
     assert_http_exception,
     create_access_denied_thread,
     # Add project root to path

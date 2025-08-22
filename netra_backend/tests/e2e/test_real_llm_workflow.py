@@ -23,7 +23,7 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
 import pytest
-from schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 # Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
@@ -32,7 +32,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from tests.e2e.infrastructure.llm_test_manager import (
+from ..infrastructure.llm_test_manager import (
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,

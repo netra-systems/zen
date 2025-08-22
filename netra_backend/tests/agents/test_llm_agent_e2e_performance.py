@@ -39,7 +39,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.tests.agents.test_fixtures import (
+from .test_fixtures import (
     create_mock_infrastructure,
     create_supervisor_with_mocks,
     mock_db_session,
@@ -52,7 +52,7 @@ from netra_backend.tests.agents.test_fixtures import (
     setup_websocket_manager,
     supervisor_agent,
 )
-from netra_backend.tests.helpers.performance_test_helpers import (
+from .performance_test_helpers import (
     create_benchmark_supervisor,
     create_e2e_persistence_mock,
     create_flow_persistence_mock,

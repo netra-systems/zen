@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents broken deployments
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 
 setup_test_path()
 

@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import jwt
 import pytest
 
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 from netra_backend.app.core.exceptions import (
     # Add project root to path
     InvalidTokenError,

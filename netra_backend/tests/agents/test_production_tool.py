@@ -18,7 +18,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.agents.production_tool import ProductionTool, ToolExecuteResponse
-from netra_backend.tests.helpers.tool_dispatcher_assertions import (
+from .tool_dispatcher_assertions import (
     assert_execution_error_response,
     assert_not_implemented_error,
     # Add project root to path

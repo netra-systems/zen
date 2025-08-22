@@ -7,7 +7,7 @@ Critical: Users can't interact without successful auth→WS flow
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -29,10 +29,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import jwt
 import pytest
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 
 # Add project root to path
-from netra_backend.app.config import settings
+from netra_backend.app.config import get_config
 
 # Add project root to path
 
@@ -69,7 +69,7 @@ class TestAuthToWebSocketFlow:
 
         """Create mock user for testing."""
 
-        return UserInDB(
+        return User(
 
             id="test_user_123",
 

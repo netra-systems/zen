@@ -31,7 +31,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     get_mock_optimization_request,
     # Add project root to path
     get_mock_provider_configs,

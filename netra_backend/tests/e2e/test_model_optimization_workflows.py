@@ -20,7 +20,7 @@ import asyncio
 from typing import Dict, List
 
 import pytest
-from schemas import SubAgentLifecycle
+from netra_backend.app.schemas import SubAgentLifecycle
 
 # Add project root to path
 from netra_backend.app.agents.state import DeepAgentState

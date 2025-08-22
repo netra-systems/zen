@@ -26,7 +26,7 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.base import StagingConfigTestBase
+from .base import StagingConfigTestBase
 
 # Add project root to path
 

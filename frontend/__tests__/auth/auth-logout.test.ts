@@ -32,12 +32,28 @@ describe('Auth Logout Flow', () => {
   let testEnv: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthConfig: ReturnType<typeof createMockAuthConfig>;
   let mockToken: string;
+  let originalLocation: Location;
 
   beforeEach(() => {
     testEnv = setupAuthTestEnvironment();
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
     resetAuthTestMocks(testEnv);
+    
+    // Mock window.location.href
+    originalLocation = window.location;
+    delete (window as any).location;
+    window.location = {
+      href: '',
+      protocol: 'http:',
+      host: 'localhost',
+      hostname: 'localhost',
+      port: '3000',
+      pathname: '/',
+      search: '',
+      hash: '',
+      origin: 'http://localhost:3000'
+    } as Location;
     
     // Reset mocks
     Object.values(mockAuthServiceClient).forEach(mock => {
@@ -52,6 +68,10 @@ describe('Auth Logout Flow', () => {
     });
   });
 
+  afterEach(() => {
+    window.location = originalLocation;
+  });
+
   afterAll(() => {
     jest.restoreAllMocks();
   });
@@ -61,10 +81,14 @@ describe('Auth Logout Flow', () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
       mockAuthServiceClient.logout.mockResolvedValue({});
 
+      console.log('Debug: mockAuthServiceClient.logout type:', typeof mockAuthServiceClient.logout);
+      console.log('Debug: is mockAuthServiceClient.logout a jest mock?', jest.isMockFunction(mockAuthServiceClient.logout));
+      
       await authService.handleLogout(mockAuthConfig);
 
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
-      validateSecureLogout(testEnv.localStorageMock);
+      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+      expect(window.location.href).toBe('/');
     });
 
     it('should handle logout without token', async () => {
@@ -74,7 +98,8 @@ describe('Auth Logout Flow', () => {
       await authService.handleLogout(mockAuthConfig);
 
       expect(mockAuthServiceClient.logout).toHaveBeenCalled();
-      validateSecureLogout(testEnv.localStorageMock);
+      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+      expect(window.location.href).toBe('/');
     });
 
     it('should handle logout failure and still clear token', async () => {
@@ -85,7 +110,8 @@ describe('Auth Logout Flow', () => {
 
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
-      validateSecureLogout(testEnv.localStorageMock);
+      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+      expect(window.location.href).toBe('/');
     });
 
     it('should handle logout network error and still clear token', async () => {
@@ -96,7 +122,8 @@ describe('Auth Logout Flow', () => {
 
       expect(mockLogger.error).toHaveBeenCalled();
       expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
-      validateSecureLogout(testEnv.localStorageMock);
+      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+      expect(window.location.href).toBe('/');
     });
 
     it('should handle concurrent logout operations', async () => {
@@ -145,9 +172,7 @@ describe('Auth Logout Flow', () => {
       it('should set dev logout flag', () => {
         authService.setDevLogoutFlag();
 
-        validateTokenOperation(
-          testEnv.localStorageMock,
-          'set',
+        expect(testEnv.localStorageMock.setItem).toHaveBeenCalledWith(
           'dev_logout_flag',
           'true'
         );
@@ -163,9 +188,7 @@ describe('Auth Logout Flow', () => {
       it('should clear dev logout flag', () => {
         authService.clearDevLogoutFlag();
 
-        validateTokenOperation(
-          testEnv.localStorageMock,
-          'remove',
+        expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith(
           'dev_logout_flag'
         );
       });
@@ -227,7 +250,7 @@ describe('Auth Logout Flow', () => {
   }
 
   function verifyConcurrentLogoutResults() {
-    expect(testEnv.localStorageMock.removeItem).toHaveBeenCalled();
+    expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     expect(mockAuthServiceClient.logout).toHaveBeenCalled();
   }
 
@@ -236,9 +259,7 @@ describe('Auth Logout Flow', () => {
   }
 
   function validateFlagGet() {
-    validateTokenOperation(
-      testEnv.localStorageMock,
-      'get',
+    expect(testEnv.localStorageMock.getItem).toHaveBeenCalledWith(
       'dev_logout_flag'
     );
   }
@@ -291,15 +312,16 @@ describe('Auth Logout Flow', () => {
 
   function setupLogoutWithDevFlag() {
     testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-    testEnv.fetchMock.mockResolvedValue(createSuccessResponse({}));
+    mockAuthServiceClient.logout.mockResolvedValue({});
   }
 
   function verifyLogoutWithDevFlag() {
-    validateSecureLogout(testEnv.localStorageMock);
+    expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     expect(testEnv.localStorageMock.setItem).toHaveBeenCalledWith(
       'dev_logout_flag',
       'true'
     );
+    expect(window.location.href).toBe('/');
   }
 
   function setupFailedLogoutWithDevFlag() {
@@ -308,7 +330,8 @@ describe('Auth Logout Flow', () => {
   }
 
   function verifyFailedLogoutCleanup() {
-    validateSecureLogout(testEnv.localStorageMock);
+    expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     expect(mockLogger.error).toHaveBeenCalled();
+    expect(window.location.href).toBe('/');
   }
 });

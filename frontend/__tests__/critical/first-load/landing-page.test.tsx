@@ -17,8 +17,8 @@ import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import HomePage from '@/app/page';
 import { authService } from '@/auth';
-import { TestProviders } from '../../setup/test-providers';
-import { renderWithProviders, waitForElement, safeAsync } from '../../shared/unified-test-utilities';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { renderWithProviders, waitForElement, safeAsync } from '@/__tests__/shared/unified-test-utilities';
 
 // Mock router for navigation testing
 const mockPush = jest.fn();

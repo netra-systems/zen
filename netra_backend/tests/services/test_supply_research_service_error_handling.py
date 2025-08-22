@@ -26,7 +26,7 @@ from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
 # Add project root to path
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
 

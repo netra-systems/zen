@@ -20,7 +20,7 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from schemas import ContentGenParams
+from netra_backend.app.schemas import ContentGenParams
 
 from netra_backend.app.services.corpus_service import CorpusService
 

@@ -20,16 +20,16 @@ from typing import Any, Dict, List
 
 import pytest
 from pydantic import BaseModel
-from schemas import AppConfig
+from netra_backend.app.schemas import AppConfig
 
-from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
+from .enhanced_llm_manager import EnhancedLLMManager
 
 # Add project root to path
-from netra_backend.tests.helpers.llm_manager_helpers import (
+from .llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
 )
-from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
+from .llm_mock_clients import MockLLMClient
 
 # Add project root to path
 

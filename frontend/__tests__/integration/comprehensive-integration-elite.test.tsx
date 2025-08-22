@@ -69,8 +69,8 @@ import { useAgent } from '@/hooks/useAgent';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
-import { TestProviders } from '../test-utils/providers';
-import { setupTestEnvironment, cleanupTestEnvironment, resetTestStores, clearTestStorage, setupMockFetch } from '../helpers/test-setup-helpers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import.*from '@/__tests__/helpers/test-setup-helpers';
 import {
   createMockDocument,
   createMockSearchResults,

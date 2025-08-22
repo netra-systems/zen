@@ -20,19 +20,19 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_corpus_content_ops import (
+from .test_corpus_content_ops import (
     TestBatchProcessing,
     TestContentGeneration,
 )
-from netra_backend.tests.test_corpus_lifecycle import (
+from .test_corpus_lifecycle import (
     TestCorpusLifecycle,
     TestWorkloadTypesCoverage,
 )
-from netra_backend.tests.test_corpus_metadata import (
+from .test_corpus_metadata import (
     TestErrorRecovery,
     TestMetadataTracking,
 )
-from netra_backend.tests.test_corpus_validation import (
+from .test_corpus_validation import (
     TestCorpusCloning,
     TestValidationAndSafety,
 )

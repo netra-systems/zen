@@ -16,10 +16,10 @@ if str(PROJECT_ROOT) not in sys.path:
 setup_test_path()
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.core.unified_logging import central_logger as logger
 
 # Add project root to path
-from netra_backend.tests.test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_system_metrics_permission,
     # Add project root to path
     real_clickhouse_client,

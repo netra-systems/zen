@@ -34,6 +34,21 @@ import jwt
 import pytest
 
 
+class JWTConstants:
+    """JWT-related constants."""
+    SUBJECT = "sub"
+    EMAIL = "email"
+    PERMISSIONS = "permissions"
+    ISSUED_AT = "iat"
+    EXPIRES_AT = "exp"
+    TOKEN_TYPE = "type"
+    ACCESS_TOKEN_TYPE = "access"
+    REFRESH_TOKEN_TYPE = "refresh"
+    ISSUER = "iss"
+    NETRA_AUTH_SERVICE = "netra-auth-service"
+    HS256_ALGORITHM = "HS256"
+
+
 class JWTTestHelper:
     """Helper class for JWT token operations in tests."""
     

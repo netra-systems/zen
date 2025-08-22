@@ -14,7 +14,25 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useChatStore } from '@/store/chat';
 import { useCorpusStore } from '@/store/corpusStore';
-import { GlobalTestUtils, ChatStoreTestUtils, CorpusStoreTestUtils } from './store-test-utils';
+import { GlobalTestUtils } from './store-test-utils';
+
+// Simple helper functions
+const createMockMessage = (id: string, type: 'user' | 'ai' = 'user', content: string = 'Test message') => ({
+  id,
+  type: type as const,
+  content,
+  role: type === 'user' ? 'user' : 'assistant',
+  created_at: new Date().toISOString(),
+  displayed_to_user: true
+});
+
+const createMockCorpus = (id: string, name: string = 'Test Corpus') => ({
+  id,
+  name,
+  description: 'Mock corpus for testing',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+});
 
 describe('Cache Management Tests', () => {
   beforeEach(() => {
@@ -29,21 +47,24 @@ describe('Cache Management Tests', () => {
 
   describe('Memory Cache Management', () => {
     it('should cache message data in memory', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const message = ChatStoreTestUtils.createMockMessage('cached-msg-1');
+      const { result } = renderHook(() => useChatStore());
+      const message = createMockMessage('cached-msg-1');
 
-      ChatStoreTestUtils.addMessageAndVerify(result, message);
+      act(() => {
+        result.current.reset();
+        result.current.addMessage(message);
+      });
 
       // Message should be cached in store state
       expect(result.current.messages).toContainEqual(message);
     });
 
     it('should limit memory cache size for large datasets', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       
       // Add many messages to test memory limits
       const messages = Array.from({ length: 1000 }, (_, i) => 
-        ChatStoreTestUtils.createMockMessage(`msg-${i}`, 'user', `Message ${i}`)
+        createMockMessage(`msg-${i}`, 'user', `Message ${i}`)
       );
 
       act(() => {
@@ -58,11 +79,11 @@ describe('Cache Management Tests', () => {
     });
 
     it('should implement LRU cache eviction for old data', () => {
-      const result = CorpusStoreTestUtils.initializeStore();
+      const result = renderHook(() => useCorpusStore());
       
       // Add many corpora to trigger cache eviction
       const corpora = Array.from({ length: 100 }, (_, i) => 
-        CorpusStoreTestUtils.createMockCorpus(`corpus-${i}`, `Corpus ${i}`)
+        createMockCorpus(`corpus-${i}`, `Corpus ${i}`)
       );
 
       act(() => {
@@ -73,9 +94,9 @@ describe('Cache Management Tests', () => {
     });
 
     it('should cache computed values for performance', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       const messages = Array.from({ length: 10 }, (_, i) => 
-        ChatStoreTestUtils.createMockMessage(`msg-${i}`)
+        createMockMessage(`msg-${i}`)
       );
 
       act(() => {
@@ -93,8 +114,8 @@ describe('Cache Management Tests', () => {
 
   describe('Cache Invalidation Strategies', () => {
     it('should invalidate cache on data updates', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const message = ChatStoreTestUtils.createMockMessage('update-msg');
+      const result = renderHook(() => useChatStore());
+      const message = createMockMessage('update-msg');
 
       ChatStoreTestUtils.addMessageAndVerify(result, message);
 
@@ -109,7 +130,7 @@ describe('Cache Management Tests', () => {
     });
 
     it('should invalidate dependent caches on state changes', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
 
       // Set up initial state
       act(() => {
@@ -129,8 +150,8 @@ describe('Cache Management Tests', () => {
     });
 
     it('should implement time-based cache expiration', async () => {
-      const result = CorpusStoreTestUtils.initializeStore();
-      const corpus = CorpusStoreTestUtils.createMockCorpus('time-corpus');
+      const result = renderHook(() => useCorpusStore());
+      const corpus = createMockCorpus('time-corpus');
 
       CorpusStoreTestUtils.addCorpusAndVerify(result, corpus);
 
@@ -141,8 +162,8 @@ describe('Cache Management Tests', () => {
     });
 
     it('should invalidate cache on manual refresh', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const message = ChatStoreTestUtils.createMockMessage('refresh-msg');
+      const result = renderHook(() => useChatStore());
+      const message = createMockMessage('refresh-msg');
 
       ChatStoreTestUtils.addMessageAndVerify(result, message);
 
@@ -154,9 +175,9 @@ describe('Cache Management Tests', () => {
     });
 
     it('should selectively invalidate cache sections', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const userMsg = ChatStoreTestUtils.createMockMessage('user-msg', 'user');
-      const aiMsg = ChatStoreTestUtils.createMockMessage('ai-msg', 'assistant');
+      const result = renderHook(() => useChatStore());
+      const userMsg = createMockMessage('user-msg', 'user');
+      const aiMsg = createMockMessage('ai-msg', 'assistant');
 
       act(() => {
         result.current.addMessage(userMsg);
@@ -177,11 +198,11 @@ describe('Cache Management Tests', () => {
 
   describe('Cache Synchronization', () => {
     it('should sync cache with external updates', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       
       const externalMessages = [
-        ChatStoreTestUtils.createMockMessage('ext-1', 'user', 'External 1'),
-        ChatStoreTestUtils.createMockMessage('ext-2', 'assistant', 'External 2')
+        createMockMessage('ext-1', 'user', 'External 1'),
+        createMockMessage('ext-2', 'assistant', 'External 2')
       ];
 
       act(() => {
@@ -193,9 +214,9 @@ describe('Cache Management Tests', () => {
     });
 
     it('should handle cache conflicts gracefully', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const message1 = ChatStoreTestUtils.createMockMessage('conflict-msg', 'user', 'Version 1');
-      const message2 = ChatStoreTestUtils.createMockMessage('conflict-msg', 'user', 'Version 2');
+      const result = renderHook(() => useChatStore());
+      const message1 = createMockMessage('conflict-msg', 'user', 'Version 1');
+      const message2 = createMockMessage('conflict-msg', 'user', 'Version 2');
 
       // Add first version
       ChatStoreTestUtils.addMessageAndVerify(result, message1);
@@ -210,8 +231,8 @@ describe('Cache Management Tests', () => {
     });
 
     it('should merge cache updates intelligently', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const baseMessage = ChatStoreTestUtils.createMockMessage('merge-msg', 'assistant', 'Base');
+      const result = renderHook(() => useChatStore());
+      const baseMessage = createMockMessage('merge-msg', 'assistant', 'Base');
 
       ChatStoreTestUtils.addMessageAndVerify(result, baseMessage);
 
@@ -228,10 +249,10 @@ describe('Cache Management Tests', () => {
     });
 
     it('should handle concurrent cache operations', () => {
-      const result1 = ChatStoreTestUtils.initializeStore();
-      const result2 = ChatStoreTestUtils.initializeStore();
+      const result1 = renderHook(() => useChatStore());
+      const result2 = renderHook(() => useChatStore());
 
-      const message = ChatStoreTestUtils.createMockMessage('concurrent-msg');
+      const message = createMockMessage('concurrent-msg');
 
       act(() => {
         result1.current.addMessage(message);
@@ -246,9 +267,9 @@ describe('Cache Management Tests', () => {
 
   describe('Cache Performance Optimization', () => {
     it('should batch cache updates for performance', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       const messages = Array.from({ length: 50 }, (_, i) => 
-        ChatStoreTestUtils.createMockMessage(`batch-${i}`)
+        createMockMessage(`batch-${i}`)
       );
 
       const startTime = performance.now();
@@ -265,10 +286,10 @@ describe('Cache Management Tests', () => {
     });
 
     it('should implement cache compression for large datasets', () => {
-      const result = CorpusStoreTestUtils.initializeStore();
+      const result = renderHook(() => useCorpusStore());
       
       // Create large corpus data
-      const largeCorpus = CorpusStoreTestUtils.createMockCorpus(
+      const largeCorpus = createMockCorpus(
         'large-corpus',
         'Large Corpus '.repeat(1000) // Large description
       );
@@ -279,7 +300,7 @@ describe('Cache Management Tests', () => {
     });
 
     it('should lazy-load cached data when needed', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       
       // Simulate lazy loading scenario
       act(() => {
@@ -291,8 +312,8 @@ describe('Cache Management Tests', () => {
     });
 
     it('should prefetch commonly accessed data', async () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const commonMessage = ChatStoreTestUtils.createMockMessage('common-msg');
+      const result = renderHook(() => useChatStore());
+      const commonMessage = createMockMessage('common-msg');
 
       ChatStoreTestUtils.addMessageAndVerify(result, commonMessage);
 
@@ -307,8 +328,8 @@ describe('Cache Management Tests', () => {
 
   describe('Cache Cleanup and Garbage Collection', () => {
     it('should clean up unused cache entries', () => {
-      const result = ChatStoreTestUtils.initializeStore();
-      const message = ChatStoreTestUtils.createMockMessage('cleanup-msg');
+      const result = renderHook(() => useChatStore());
+      const message = createMockMessage('cleanup-msg');
 
       ChatStoreTestUtils.addMessageAndVerify(result, message);
       expect(result.current.messages).toHaveLength(1);
@@ -321,11 +342,11 @@ describe('Cache Management Tests', () => {
     });
 
     it('should handle memory pressure by clearing old cache', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       
       // Simulate memory pressure with many messages
       const messages = Array.from({ length: 2000 }, (_, i) => 
-        ChatStoreTestUtils.createMockMessage(`memory-${i}`)
+        createMockMessage(`memory-${i}`)
       );
 
       act(() => {
@@ -339,11 +360,11 @@ describe('Cache Management Tests', () => {
     });
 
     it('should implement cache size limits', () => {
-      const result = CorpusStoreTestUtils.initializeStore();
+      const result = renderHook(() => useCorpusStore());
       
       // Try to exceed reasonable cache limits
       const manyCorpora = Array.from({ length: 10000 }, (_, i) => 
-        CorpusStoreTestUtils.createMockCorpus(`limit-${i}`)
+        createMockCorpus(`limit-${i}`)
       );
 
       act(() => {
@@ -355,10 +376,10 @@ describe('Cache Management Tests', () => {
     });
 
     it('should provide cache statistics for monitoring', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const result = renderHook(() => useChatStore());
       
       Array.from({ length: 10 }, (_, i) => {
-        const msg = ChatStoreTestUtils.createMockMessage(`stats-${i}`);
+        const msg = createMockMessage(`stats-${i}`);
         ChatStoreTestUtils.addMessageAndVerify(result, msg);
       });
 

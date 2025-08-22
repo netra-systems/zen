@@ -14,7 +14,7 @@ Coverage: 100+ concurrent connections, network fault injection, message delivery
 
 # Add project root to path
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -39,7 +39,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 # Add project root to path
-from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest

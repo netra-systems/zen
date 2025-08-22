@@ -18,7 +18,7 @@
 import React, { useState, useEffect } from 'react';
 import { render, cleanup, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 // Import mock components for memory testing
 import {

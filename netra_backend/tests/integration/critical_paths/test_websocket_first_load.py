@@ -12,7 +12,7 @@ Performance target: WebSocket connection establishment < 2 seconds with 50+ conc
 """
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -40,13 +40,13 @@ import httpx
 
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
-from schemas import UserInDB
+from netra_backend.app.schemas import User
 from clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
 
-from netra_backend.tests.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
 # Add project root to path
 
@@ -378,7 +378,7 @@ class TestWebSocketFirstLoadL3:
 
         return [
 
-            UserInDB(
+            User(
 
                 id=f"first_load_user_{i}",
 
@@ -422,7 +422,7 @@ class TestWebSocketFirstLoadL3:
 
         """Test WebSocket upgrade from HTTP successful."""
 
-        user = UserInDB(
+        user = User(
 
             id="upgrade_test_user",
 
@@ -468,7 +468,7 @@ class TestWebSocketFirstLoadL3:
 
         """Test authentication token validation before connection."""
 
-        user = UserInDB(
+        user = User(
 
             id="auth_test_user",
 
@@ -525,7 +525,7 @@ class TestWebSocketFirstLoadL3:
             }
             
 
-            invalid_user = UserInDB(
+            invalid_user = User(
 
                 id="invalid_auth_user",
 
@@ -610,7 +610,7 @@ class TestWebSocketFirstLoadL3:
 
         """Test heartbeat/ping-pong mechanism."""
 
-        user = UserInDB(
+        user = User(
 
             id="heartbeat_test_user",
 
@@ -671,7 +671,7 @@ class TestWebSocketFirstLoadL3:
 
         """Test message delivery confirmation."""
 
-        user = UserInDB(
+        user = User(
 
             id="message_test_user",
 
@@ -729,7 +729,7 @@ class TestWebSocketFirstLoadL3:
 
         """Test reconnection after disconnect."""
 
-        user = UserInDB(
+        user = User(
 
             id="reconnect_test_user",
 

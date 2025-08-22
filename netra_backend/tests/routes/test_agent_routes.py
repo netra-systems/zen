@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.routes.test_route_fixtures import (
+from .test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
     # Add project root to path

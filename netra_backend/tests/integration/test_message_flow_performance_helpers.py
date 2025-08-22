@@ -24,7 +24,7 @@ import pytest
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
+from .test_unified_message_flow import MessageFlowTracker
 
 # Add project root to path
 

@@ -5,7 +5,7 @@
 
 import path from 'path';
 
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/test-utils/providers';
 
 describe('Internal Frontend Module Import Tests', () => {
   // @smoke-test

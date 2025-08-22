@@ -24,11 +24,11 @@ import pytest
 from logging_config import central_logger
 from app.routes.utils.websocket_helpers import validate_websocket_token
 
-from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
+from .test_unified_message_flow import MessageFlowTracker
+from .test_ws_connection_mocks import MockWebSocket
 
 # Add project root to path
-from tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 

@@ -23,7 +23,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
+from .test_synthetic_data_service_basic import GenerationConfig
 
 # Add project root to path
 

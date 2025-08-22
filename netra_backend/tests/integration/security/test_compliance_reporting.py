@@ -33,7 +33,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.security.shared_fixtures import (
     ComplianceReportingHelper,
     compliance_helper,
     # Add project root to path

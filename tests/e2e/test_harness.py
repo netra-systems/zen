@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.e2e.test_environment_config import (
+from tests.e2e.config import (
     TestEnvironmentConfig,
     TestEnvironmentType,
     get_test_environment_config,
@@ -106,12 +106,12 @@ class UnifiedTestHarness:
         self.test_data = {}
         
         # Setup environment configuration
-        self.env_config = get_test_environment_config(environment=environment)
+        self.env_config = get_test_environment_config(env_type=environment or TestEnvironmentType.LOCAL)
         self.state = TestState(self.env_config)
         self.state.databases.harness = self
         self.project_root = Path.cwd()
         
-        logger.info(f"Test Harness initialized for {self.env_config.environment.value} environment")
+        logger.info(f"Test Harness initialized for {self.env_config.environment_type.value} environment")
     
     # Authentication Testing Support
     def create_test_user(self, user_id: str = None) -> Dict[str, str]:

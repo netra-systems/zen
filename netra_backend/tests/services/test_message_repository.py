@@ -22,7 +22,7 @@ import asyncio
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.database_repository_helpers import (
+from .database_repository_helpers import (
     assert_pagination_result,
     create_test_message,
     create_test_messages,

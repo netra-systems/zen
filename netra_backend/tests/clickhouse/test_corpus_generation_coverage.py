@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from schemas import ContentGenParams, CorpusCreate, CorpusUpdate
+from netra_backend.app.schemas import ContentGenParams, CorpusCreate, CorpusUpdate
 
 # Add project root to path
 from netra_backend.app.services.corpus_service import (

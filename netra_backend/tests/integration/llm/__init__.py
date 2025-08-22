@@ -15,7 +15,7 @@ This package contains focused integration tests for:
 All tests maintain ≤8 lines per test function and ≤300 lines per module.
 """
 
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.llm.shared_fixtures import (
     MockLLMManagerWithIntegration,
     MockLLMProvider,
     llm_test_agent,

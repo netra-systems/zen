@@ -6,11 +6,11 @@ import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import { createWebSocketManager, WebSocketTestManager } from '../helpers/websocket-test-manager';
+import.*from '@/__tests__/helpers/websocket-test-manager';
 
 import { AgentProvider } from '@/providers/AgentProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock stores
 const createMockStore = (initialState: any) => {

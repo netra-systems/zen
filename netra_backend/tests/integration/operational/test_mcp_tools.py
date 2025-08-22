@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 import pytest
 
 # Add project root to path
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.operational.shared_fixtures import (
     MCPToolsTestHelper,
     mcp_test_helper,
     # Add project root to path

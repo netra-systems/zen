@@ -21,7 +21,7 @@ from unittest.mock import Mock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.core_test_helpers import create_mock_config
+from .core_test_helpers import create_mock_config
 
 # Add project root to path
 

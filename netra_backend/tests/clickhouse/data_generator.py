@@ -6,11 +6,11 @@ Unified interface for generating production-like test data
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from netra_backend.tests.corpus_generator import CorpusGenerator
-from netra_backend.tests.data_models import LLMEvent, LogEntry, WorkloadMetric
-from netra_backend.tests.llm_event_generator import LLMEventGenerator
-from netra_backend.tests.log_entry_generator import LogEntryGenerator
-from netra_backend.tests.workload_metric_generator import WorkloadMetricGenerator
+from .corpus_generator import CorpusGenerator
+from .data_models import LLMEvent, LogEntry, WorkloadMetric
+from .llm_event_generator import LLMEventGenerator
+from .log_entry_generator import LogEntryGenerator
+from .workload_metric_generator import WorkloadMetricGenerator
 
 
 class RealisticDataGenerator:

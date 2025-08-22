@@ -18,7 +18,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from netra_backend.tests.services.external_api_client_utils import (
+from .external_api_client_utils import (
     # Add project root to path
     create_mock_session,
     verify_new_session_creation,

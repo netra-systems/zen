@@ -6,7 +6,7 @@ Tests for structured generation functionality in LLM Manager.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -20,12 +20,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from pydantic import BaseModel, Field
-from schemas import AppConfig, LLMConfig
+from netra_backend.app.schemas import AppConfig, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
-from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
+from .llm_mocks import MockLLM, MockStructuredLLM
 
 # Add project root to path
 

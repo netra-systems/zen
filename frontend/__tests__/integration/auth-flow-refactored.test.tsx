@@ -57,7 +57,7 @@ import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { useAuthStore } from '@/store/authStore';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 import {
   setupTestEnvironment,
   createWebSocketServer,
@@ -68,7 +68,7 @@ import {
   expectUnauthenticatedState,
   performFullCleanup,
   mockNextRouter
-} from '../test-utils/integration-test-setup';
+} from '@/__tests__/test-utils/integration-test-setup';
 import {
   createLoginComponent,
   createLogoutComponent,

@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
-import { TestProviders } from '../test-utils/providers';
+import.*from '@/__tests__/helpers/websocket-test-manager';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock router for navigation testing
 const mockPush = jest.fn();

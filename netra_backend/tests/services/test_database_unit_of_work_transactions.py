@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from netra_backend.tests.database_transaction_test_helpers import (
+from .database_transaction_test_helpers import (
     create_mock_session_factory,
 )
 

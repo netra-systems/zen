@@ -32,7 +32,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.integration.helpers.user_flow_helpers import MockAuthService
+from .integration.helpers.user_flow_helpers import MockAuthService
 
 # Add project root to path
 

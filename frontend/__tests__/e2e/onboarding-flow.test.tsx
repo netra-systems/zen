@@ -15,8 +15,8 @@ import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
 
 // Test utilities
-import { TestProviders } from '../setup/test-providers';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
 // Simple setup functions
 const setupTestEnvironment = () => {
