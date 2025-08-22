@@ -39,7 +39,7 @@ from netra_backend.app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
-from netra_backend.tests.integration.critical_paths.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 PermissionsService = AsyncMock
 from netra_backend.app.core.security import SecurityContext

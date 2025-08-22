@@ -30,7 +30,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.core.cache.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
 logger = logging.getLogger(__name__)

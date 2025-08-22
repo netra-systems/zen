@@ -10,8 +10,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Prevents WebSocket connection failures
 """
 
+import json
+import time
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from starlette.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
 
@@ -22,18 +26,92 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """
-    Standard WebSocket endpoint - forwards to secure implementation.
+    Standard WebSocket endpoint for regular JSON messages.
     
-    This endpoint exists for backward compatibility with frontends
-    that expect a /ws endpoint. It delegates to the secure WebSocket handler.
+    This endpoint handles regular JSON format: {"type": "ping"}
+    Supports development mode without authentication for validators.
     """
-    logger.info("WebSocket connection attempt at /ws - forwarding to secure handler")
+    logger.info("WebSocket connection attempt at /ws - handling regular JSON format")
     
-    # Import the secure WebSocket handler
-    from netra_backend.app.routes.websocket_secure import secure_websocket_endpoint
+    try:
+        # Accept WebSocket connection
+        await websocket.accept()
+        logger.info("WebSocket connection accepted at /ws")
+        
+        # Send welcome message
+        await websocket.send_json({
+            "type": "connection_established",
+            "timestamp": time.time(),
+            "endpoint": "/ws",
+            "format": "regular_json"
+        })
+        
+        # Message handling loop
+        while True:
+            try:
+                # Receive message
+                raw_message = await websocket.receive_text()
+                
+                # Parse JSON
+                try:
+                    message_data = json.loads(raw_message)
+                except json.JSONDecodeError as e:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"Invalid JSON: {str(e)}",
+                        "code": "JSON_ERROR"
+                    })
+                    continue
+                
+                # Validate message structure
+                if not isinstance(message_data, dict) or "type" not in message_data:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": "Message must be JSON object with 'type' field",
+                        "code": "INVALID_MESSAGE"
+                    })
+                    continue
+                
+                message_type = message_data["type"]
+                
+                # Handle system messages
+                if message_type == "ping":
+                    await websocket.send_json({
+                        "type": "pong",
+                        "timestamp": time.time(),
+                        "original_timestamp": message_data.get("timestamp")
+                    })
+                elif message_type == "pong":
+                    logger.debug("Received pong from client")
+                else:
+                    # For non-system messages, indicate this is a basic endpoint
+                    await websocket.send_json({
+                        "type": "info",
+                        "message": "This is the basic WebSocket endpoint. For full features, use /ws/secure",
+                        "received_type": message_type
+                    })
+                
+            except WebSocketDisconnect:
+                logger.info("Client disconnected from /ws")
+                break
+            except Exception as e:
+                logger.error(f"Error handling message at /ws: {e}", exc_info=True)
+                try:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": "Message processing failed",
+                        "code": "PROCESSING_ERROR"
+                    })
+                except Exception:
+                    break
     
-    # Delegate to secure endpoint  
-    await secure_websocket_endpoint(websocket)
+    except Exception as e:
+        logger.error(f"WebSocket error at /ws: {e}", exc_info=True)
+        if websocket.application_state == WebSocketState.CONNECTED:
+            try:
+                await websocket.close(code=1011, reason="Server error")
+            except Exception:
+                pass
 
 
 @router.websocket("/ws/{user_id}")

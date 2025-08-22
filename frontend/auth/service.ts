@@ -1,6 +1,6 @@
-import { AuthConfigResponse } from '@/auth';
+import { AuthConfigResponse } from './types';
 import { useContext } from 'react';
-import { AuthContext, AuthContextType } from '@/auth';
+import { AuthContext, AuthContextType } from './context';
 import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { logger } from '@/lib/logger';
 import { jwtDecode } from 'jwt-decode';
@@ -206,4 +206,11 @@ class AuthService {
   };
 }
 
-export const authService = new AuthService();export { AuthService };
+// Create instance
+const authServiceInstance = new AuthService();
+
+// Export both the instance and the class
+export { authServiceInstance as authService, AuthService };
+
+// Also provide as default export for compatibility
+export default AuthService;

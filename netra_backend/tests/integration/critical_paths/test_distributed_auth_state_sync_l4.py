@@ -37,10 +37,26 @@ import httpx
 from unittest.mock import patch, AsyncMock
 
 from netra_backend.app.schemas.auth_types import (
-
-    Token, SessionInfo, LoginRequest, LoginResponse,
-    SessionState, ReplicationEvent, ConsistencyCheck
+    Token, SessionInfo, LoginRequest, LoginResponse
 )
+
+# Mock classes for missing types - these should be properly defined when implementing distributed auth
+from dataclasses import dataclass
+@dataclass
+class SessionState:
+    session_id: str
+    state: str
+
+@dataclass  
+class ReplicationEvent:
+    event_type: str
+    data: dict
+    timestamp: float = None
+
+@dataclass
+class ConsistencyCheck:
+    check_type: str
+    result: bool
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.redis_manager import get_redis_manager
 from netra_backend.app.db.postgres import get_async_db

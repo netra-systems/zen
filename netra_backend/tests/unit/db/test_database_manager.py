@@ -59,8 +59,8 @@ class TestDatabaseManagerURLConversion:
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
                 result = DatabaseManager.get_base_database_url()
-                # The unified config system provides its own default with password "postgres"
-                assert result == "postgresql://postgres:postgres@localhost:5432/netra"
+                # In test environment, we expect the test database URL
+                assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     @pytest.mark.parametrize("base_url,expected_migration_url", [
         # Standard sync URL conversion
@@ -348,8 +348,8 @@ class TestDatabaseManagerErrorHandling:
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
                 result = DatabaseManager.get_base_database_url()
-                # The unified config system provides its own default with password "postgres"
-                assert result == "postgresql://postgres:postgres@localhost:5432/netra"
+                # In test environment, we expect the test database URL
+                assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_missing_database_url_handling(self):
         """Test handling when DATABASE_URL is not set."""
@@ -357,8 +357,8 @@ class TestDatabaseManagerErrorHandling:
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"
                 result = DatabaseManager.get_base_database_url()
-                # The unified config system provides its own default, ignoring the testing environment
-                assert result == "postgresql://postgres:postgres@localhost:5432/netra"
+                # In test environment, we expect the test database URL
+                assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_driver_mismatch_validation(self):
         """Test validation catches driver mismatches."""

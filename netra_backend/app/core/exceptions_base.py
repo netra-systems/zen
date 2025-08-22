@@ -100,6 +100,18 @@ class AuthorizationException(NetraException):
         )
 
 
+class ServiceUnavailableException(NetraException):
+    """Exception raised when a service is unavailable."""
+    
+    def __init__(self, message: str = "Service unavailable", details: Optional[Dict[str, Any]] = None,
+                 user_message: Optional[str] = None, trace_id: Optional[str] = None,
+                 context: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message, code=ErrorCode.SERVICE_UNAVAILABLE, severity=ErrorSeverity.HIGH,
+            details=details, user_message=user_message, trace_id=trace_id, context=context
+        )
+
+
 class PaymentException(NetraException):
     """Exception raised when payment processing fails."""
     

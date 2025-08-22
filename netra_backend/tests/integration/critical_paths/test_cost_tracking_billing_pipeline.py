@@ -33,7 +33,7 @@ from netra_backend.app.services.billing.cost_calculator import CostCalculator
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
-from netra_backend.tests.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

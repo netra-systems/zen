@@ -39,14 +39,14 @@ import pytest
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 
-from netra_backend.tests.integration.critical_paths.integration.critical_paths.test_base import (
+from netra_backend.tests.integration.critical_paths.test_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-from netra_backend.tests.integration.critical_paths.e2e.clickhouse_billing_helper import (
+from netra_backend.tests.integration.e2e.clickhouse_billing_helper import (
     ClickHouseBillingHelper,
 )
-from netra_backend.tests.integration.critical_paths.e2e.payment_flow_manager import (
+from netra_backend.tests.integration.e2e.payment_flow_manager import (
     MockPaymentProvider,
     PaymentFlowManager,
 )

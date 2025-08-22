@@ -40,7 +40,7 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.redis_service import RedisService
 
-from netra_backend.tests.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

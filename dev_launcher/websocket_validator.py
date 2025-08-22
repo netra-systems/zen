@@ -44,6 +44,7 @@ class WebSocketEndpoint:
     last_check: Optional[datetime] = None
     failure_count: int = 0
     last_error: Optional[str] = None
+    required: bool = True  # Whether this endpoint is required for successful validation
 
 
 class WebSocketValidator:
@@ -66,33 +67,38 @@ class WebSocketValidator:
     
     def _discover_websocket_endpoints(self) -> None:
         """Discover WebSocket endpoints from environment variables."""
-        # Backend WebSocket endpoint
+        # Backend WebSocket endpoint (regular JSON format) - always required
         backend_port = int(os.environ.get("BACKEND_PORT", "8000"))
-        self._add_endpoint("backend_ws", "localhost", backend_port, "/ws")
+        self._add_endpoint("main_ws", "localhost", backend_port, "/ws", required=True)
+        
+        # MCP WebSocket endpoint (JSON-RPC format) - optional, may not be available in all configurations
+        self._add_endpoint("mcp_ws", "localhost", backend_port, "/api/mcp/ws", required=False)
         
         # Additional WebSocket endpoints can be discovered here
         websocket_port = int(os.environ.get("WEBSOCKET_PORT", backend_port))
         if websocket_port != backend_port:
-            self._add_endpoint("dedicated_ws", "localhost", websocket_port, "/ws")
+            self._add_endpoint("dedicated_ws", "localhost", websocket_port, "/ws", required=True)
         
         logger.info(f"Discovered {len(self.endpoints)} WebSocket endpoints")
     
-    def _add_endpoint(self, name: str, host: str, port: int, path: str = "/ws") -> None:
+    def _add_endpoint(self, name: str, host: str, port: int, path: str = "/ws", required: bool = True) -> None:
         """Add WebSocket endpoint for validation."""
         url = f"ws://{host}:{port}{path}"
         endpoint = WebSocketEndpoint(
             name=name,
             url=url,
             port=port,
-            path=path
+            path=path,
+            required=required
         )
         self.endpoints[name] = endpoint
-        self._print_endpoint_discovered(name, url)
+        self._print_endpoint_discovered(name, url, required)
     
-    def _print_endpoint_discovered(self, name: str, url: str) -> None:
+    def _print_endpoint_discovered(self, name: str, url: str, required: bool = True) -> None:
         """Print endpoint discovery message."""
-        emoji = "[DISCOVER]" if not self.use_emoji else "🔍"
-        print(f"{emoji} WEBSOCKET | Discovered endpoint: {name} -> {url}")
+        emoji = "[DISCOVER]" if not self.use_emoji else "[DISCOVER]"
+        required_text = " (required)" if required else " (optional)"
+        print(f"{emoji} WEBSOCKET | Discovered endpoint: {name} -> {url}{required_text}")
     
     async def validate_all_endpoints(self) -> bool:
         """
@@ -115,37 +121,53 @@ class WebSocketValidator:
         
         results = await asyncio.gather(*validation_tasks, return_exceptions=True)
         
-        # Check results
-        all_healthy = True
+        # Check results - only required endpoints determine overall success
+        all_required_healthy = True
+        optional_failures = []
+        
         for i, result in enumerate(results):
             endpoint = list(self.endpoints.values())[i]
             if isinstance(result, Exception):
                 self._handle_validation_exception(endpoint, result)
-                all_healthy = False
+                if endpoint.required:
+                    all_required_healthy = False
+                else:
+                    optional_failures.append(endpoint.name)
             elif not result:
-                all_healthy = False
+                if endpoint.required:
+                    all_required_healthy = False
+                else:
+                    optional_failures.append(endpoint.name)
         
-        self._print_validation_summary(all_healthy)
-        return all_healthy
+        self._print_validation_summary(all_required_healthy, optional_failures)
+        return all_required_healthy
     
     def _print_no_endpoints(self) -> None:
         """Print message when no endpoints are configured."""
-        emoji = "[INFO]" if not self.use_emoji else "ℹ️"
+        emoji = "[INFO]" if not self.use_emoji else "[INFO]"
         print(f"{emoji} WEBSOCKET | No WebSocket endpoints configured")
     
     def _print_validation_start(self) -> None:
         """Print validation start message."""
-        emoji = "[VALIDATE]" if not self.use_emoji else "🔄"
+        emoji = "[VALIDATE]" if not self.use_emoji else "[VALIDATE]"
         print(f"{emoji} WEBSOCKET | Validating {len(self.endpoints)} WebSocket endpoints...")
     
-    def _print_validation_summary(self, all_healthy: bool) -> None:
+    def _print_validation_summary(self, all_required_healthy: bool, optional_failures: List[str] = None) -> None:
         """Print validation summary."""
-        if all_healthy:
-            emoji = "[OK]" if not self.use_emoji else "✅"
-            print(f"{emoji} WEBSOCKET | All WebSocket endpoints validated successfully")
+        if optional_failures is None:
+            optional_failures = []
+            
+        if all_required_healthy:
+            emoji = "[OK]" if not self.use_emoji else "[OK]"
+            if optional_failures:
+                print(f"{emoji} WEBSOCKET | All required WebSocket endpoints validated successfully")
+                emoji_warn = "[WARN]" if not self.use_emoji else "[WARN]"
+                print(f"{emoji_warn} WEBSOCKET | Optional endpoints failed: {', '.join(optional_failures)}")
+            else:
+                print(f"{emoji} WEBSOCKET | All WebSocket endpoints validated successfully")
         else:
-            emoji = "[FAIL]" if not self.use_emoji else "❌"
-            print(f"{emoji} WEBSOCKET | WebSocket validation failed - check logs for details")
+            emoji = "[FAIL]" if not self.use_emoji else "[FAIL]"
+            print(f"{emoji} WEBSOCKET | Required WebSocket endpoints failed validation - check logs for details")
     
     async def _validate_endpoint_with_retry(self, endpoint: WebSocketEndpoint) -> bool:
         """
@@ -193,19 +215,24 @@ class WebSocketValidator:
     
     def _print_connection_attempt(self, endpoint: WebSocketEndpoint, attempt: int) -> None:
         """Print connection attempt message."""
-        emoji = "[CONNECT]" if not self.use_emoji else "🔄"
+        emoji = "[CONNECT]" if not self.use_emoji else "[CONNECT]"
         print(f"{emoji} WS_CONNECT | {endpoint.name}: Attempt {attempt}/{self.max_retries}")
     
     def _print_connection_success(self, endpoint: WebSocketEndpoint) -> None:
         """Print connection success message."""
-        emoji = "[OK]" if not self.use_emoji else "✅"
+        emoji = "[OK]" if not self.use_emoji else "[OK]"
         print(f"{emoji} WS_CONNECT | {endpoint.name}: WebSocket endpoint ready")
     
     def _print_connection_failed(self, endpoint: WebSocketEndpoint) -> None:
         """Print connection failure message."""
-        emoji = "[FAIL]" if not self.use_emoji else "❌"
+        if endpoint.required:
+            emoji = "[FAIL]" if not self.use_emoji else "[FAIL]"
+        else:
+            emoji = "[WARN]" if not self.use_emoji else "[WARN]"
+        
         error_msg = endpoint.last_error or "Connection failed"
-        print(f"{emoji} WS_CONNECT | {endpoint.name}: Failed after {self.max_retries} attempts - {error_msg}")
+        endpoint_type = "required" if endpoint.required else "optional"
+        print(f"{emoji} WS_CONNECT | {endpoint.name} ({endpoint_type}): Failed after {self.max_retries} attempts - {error_msg}")
     
     def _handle_connection_failure(self, endpoint: WebSocketEndpoint, attempt: int) -> None:
         """Handle connection failure during validation."""
@@ -219,14 +246,14 @@ class WebSocketValidator:
         endpoint.last_error = str(exception)
         
         if attempt == self.max_retries - 1:
-            emoji = "[WARN]" if not self.use_emoji else "⚠️"
+            emoji = "[WARN]" if not self.use_emoji else "[WARN]"
             print(f"{emoji} WS_ERROR | {endpoint.name}: {str(exception)}")
     
     def _handle_validation_exception(self, endpoint: WebSocketEndpoint, exception: Exception) -> None:
         """Handle validation exception during startup."""
         endpoint.status = WebSocketStatus.FAILED
         endpoint.last_error = str(exception)
-        emoji = "[FAIL]" if not self.use_emoji else "❌"
+        emoji = "[FAIL]" if not self.use_emoji else "[FAIL]"
         print(f"{emoji} WS_ERROR | {endpoint.name}: Validation failed - {str(exception)}")
     
     async def _test_websocket_connection(self, endpoint: WebSocketEndpoint) -> bool:
@@ -280,18 +307,20 @@ class WebSocketValidator:
             return False
     
     async def _test_websocket_upgrade(self, endpoint: WebSocketEndpoint) -> bool:
-        """Test WebSocket upgrade capability with JSON-RPC format for MCP compatibility."""
+        """Test WebSocket upgrade capability with appropriate format for each endpoint type."""
         try:
             import websockets
             
-            # Test WebSocket connection
-            async with websockets.connect(
+            # Test WebSocket connection with proper timeout handling
+            # Use asyncio.wait_for for timeout instead of websockets timeout parameter
+            connection_task = websockets.connect(
                 endpoint.url,
-                timeout=self.timeout,
                 ping_interval=None  # Disable ping during validation
-            ) as websocket:
-                # Check if this is an MCP endpoint (path is /ws)
-                is_mcp_endpoint = endpoint.path == "/ws"
+            )
+            
+            async with await asyncio.wait_for(connection_task, timeout=self.timeout) as websocket:
+                # Determine endpoint type by path
+                is_mcp_endpoint = "/api/mcp/ws" in endpoint.path
                 
                 if is_mcp_endpoint:
                     # Send JSON-RPC format message for MCP endpoints
@@ -302,14 +331,14 @@ class WebSocketValidator:
                         "id": 1
                     }
                 else:
-                    # Send regular JSON for other endpoints (like /ws/secure)
+                    # Send regular JSON for main WebSocket endpoints (/ws)
                     test_message = {"type": "ping", "timestamp": time.time()}
                 
                 await websocket.send(json.dumps(test_message))
                 
                 # Wait for response with JSON validation
                 try:
-                    response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                    response = await asyncio.wait_for(websocket.recv(), timeout=5.0)  # Increased timeout
                     # Validate response is valid JSON
                     if response:
                         try:
@@ -331,6 +360,10 @@ class WebSocketValidator:
                                 if not isinstance(parsed_response, dict) or "type" not in parsed_response:
                                     endpoint.last_error = "Invalid JSON message structure in response"
                                     return False
+                                # Check for expected pong response
+                                if parsed_response.get("type") not in ["pong", "connection_established", "error"]:
+                                    endpoint.last_error = f"Unexpected response type: {parsed_response.get('type')}"
+                                    return False
                         except json.JSONDecodeError:
                             endpoint.last_error = "Non-JSON response received"
                             return False
@@ -339,8 +372,9 @@ class WebSocketValidator:
                     # For MCP endpoints, timeout might mean the method isn't recognized
                     # But the connection itself was established, so it's OK
                     if is_mcp_endpoint:
+                        endpoint.last_error = "MCP endpoint connected but no response (acceptable)"
                         return True
-                    # For other endpoints, timeout is a failure
+                    # For main endpoints, timeout is a failure
                     endpoint.last_error = "No response received within timeout"
                     return False
                     
@@ -349,7 +383,11 @@ class WebSocketValidator:
             logger.warning("websockets library not available for WebSocket validation")
             return True
         except Exception as e:
-            endpoint.last_error = f"WebSocket upgrade failed: {str(e)}"
+            # Provide more helpful error messages for specific endpoint types
+            if "/api/mcp/ws" in endpoint.path and "refused" in str(e).lower():
+                endpoint.last_error = "MCP WebSocket endpoint not available (may not be enabled in this configuration)"
+            else:
+                endpoint.last_error = f"WebSocket upgrade failed: {str(e)}"
             return False
     
     def get_endpoint_status(self) -> Dict[str, Dict[str, str]]:
@@ -368,20 +406,21 @@ class WebSocketValidator:
         return status
     
     def is_all_healthy(self) -> bool:
-        """Check if all WebSocket endpoints are healthy."""
+        """Check if all required WebSocket endpoints are healthy."""
         if not self.endpoints:
             return True
         
         return all(
             endpoint.status == WebSocketStatus.CONNECTED
             for endpoint in self.endpoints.values()
+            if endpoint.required
         )
     
-    def get_failed_endpoints(self) -> List[str]:
+    def get_failed_endpoints(self, required_only: bool = False) -> List[str]:
         """Get list of failed endpoint names."""
         return [
             name for name, endpoint in self.endpoints.items()
-            if endpoint.status == WebSocketStatus.FAILED
+            if endpoint.status == WebSocketStatus.FAILED and (not required_only or endpoint.required)
         ]
     
     def get_health_summary(self) -> str:
@@ -390,14 +429,24 @@ class WebSocketValidator:
             return "No WebSocket endpoints configured"
         
         total = len(self.endpoints)
+        required_total = sum(1 for endpoint in self.endpoints.values() if endpoint.required)
+        optional_total = total - required_total
+        
         healthy = sum(1 for endpoint in self.endpoints.values() 
                      if endpoint.status == WebSocketStatus.CONNECTED)
+        required_healthy = sum(1 for endpoint in self.endpoints.values() 
+                              if endpoint.status == WebSocketStatus.CONNECTED and endpoint.required)
+        optional_healthy = healthy - required_healthy
+        
         failed = sum(1 for endpoint in self.endpoints.values() 
                     if endpoint.status == WebSocketStatus.FAILED)
         
-        if healthy == total:
-            return f"All {total} WebSocket endpoints healthy"
-        elif failed > 0:
-            return f"{healthy}/{total} WebSocket endpoints healthy ({failed} failed)"
+        if required_healthy == required_total:
+            if optional_total == 0:
+                return f"All {total} WebSocket endpoints healthy"
+            elif optional_healthy == optional_total:
+                return f"All {total} WebSocket endpoints healthy ({required_total} required, {optional_total} optional)"
+            else:
+                return f"All required WebSocket endpoints healthy ({required_healthy}/{required_total}), optional endpoints: {optional_healthy}/{optional_total}"
         else:
-            return f"{healthy}/{total} WebSocket endpoints healthy"
+            return f"Required WebSocket endpoints failed: {required_healthy}/{required_total} healthy"

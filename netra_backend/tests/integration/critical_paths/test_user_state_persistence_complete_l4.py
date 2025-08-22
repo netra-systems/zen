@@ -20,7 +20,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.models.user import User, UserPreferences, UserState
-from netra_backend.app.services.database_service import DatabaseService
+from netra_backend.app.services.database_operations_service import DatabaseOperationsService as DatabaseService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.session_service import SessionService
 

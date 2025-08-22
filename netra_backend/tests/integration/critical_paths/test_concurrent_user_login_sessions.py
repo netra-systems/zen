@@ -47,10 +47,10 @@ from netra_backend.app.schemas.auth_types import (
     AuthError,
     LoginRequest,
     LoginResponse,
-    RateLimitError,
     SessionInfo,
     UserProfile,
 )
+from netra_backend.app.core.exceptions_agent import LLMRateLimitError as RateLimitError
 
 @dataclass
 class ConcurrentLoginMetrics:

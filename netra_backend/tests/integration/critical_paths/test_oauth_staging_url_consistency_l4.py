@@ -34,7 +34,7 @@ import pytest
 
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
 )
 

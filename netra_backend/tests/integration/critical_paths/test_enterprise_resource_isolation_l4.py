@@ -38,7 +38,7 @@ import psutil
 import pytest
 import redis.asyncio as redis
 
-from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

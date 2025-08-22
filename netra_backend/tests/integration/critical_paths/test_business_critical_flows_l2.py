@@ -37,7 +37,7 @@ from netra_backend.app.services.billing.payment_processor import PaymentProcesso
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 # from netra_backend.app.services.billing.subscription_manager import SubscriptionManager  # FIXME: Missing service
 
-from netra_backend.app.services.billing.usage_metering import UsageMeteringService
+from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
 logger = get_central_logger().get_logger(__name__)
 
@@ -139,20 +139,20 @@ class BusinessCriticalFlowsTester:
                     "ai_operations": Decimal('0.0'),
                     "data_storage": Decimal('0.0')
                 },
-                PlanTier.EARLY: {
+                PlanTier.PRO: {
                     "api_calls": Decimal('0.001'),  # $0.001 per call
                     "ai_operations": Decimal('0.01'),  # $0.01 per operation
                     "data_storage": Decimal('0.1')  # $0.1 per GB
                 },
-                PlanTier.MID: {
-                    "api_calls": Decimal('0.0008'),
-                    "ai_operations": Decimal('0.008'),
-                    "data_storage": Decimal('0.08')
-                },
                 PlanTier.ENTERPRISE: {
-                    "api_calls": Decimal('0.0005'),
+                    "api_calls": Decimal('0.0005'),  # Lower rates for enterprise
                     "ai_operations": Decimal('0.005'),
                     "data_storage": Decimal('0.05')
+                },
+                PlanTier.DEVELOPER: {
+                    "api_calls": Decimal('0.0'),  # Internal use
+                    "ai_operations": Decimal('0.0'),
+                    "data_storage": Decimal('0.0')
                 }
             }
             
@@ -250,9 +250,9 @@ class BusinessCriticalFlowsTester:
             # Plan pricing
             monthly_prices = {
                 PlanTier.FREE: Decimal('0'),
-                PlanTier.EARLY: Decimal('29'),
-                PlanTier.MID: Decimal('99'),
-                PlanTier.ENTERPRISE: Decimal('299')
+                PlanTier.PRO: Decimal('29'),
+                PlanTier.ENTERPRISE: Decimal('299'),
+                PlanTier.DEVELOPER: Decimal('0')
             }
             
             subscription = {
@@ -356,23 +356,23 @@ class BusinessCriticalFlowsTester:
                 "data_storage_gb": 1,
                 "support": "community"
             },
-            PlanTier.EARLY: {
+            PlanTier.PRO: {
                 "api_calls_limit": 10000,
                 "ai_operations_limit": 1000,
                 "data_storage_gb": 10,
                 "support": "email"
-            },
-            PlanTier.MID: {
-                "api_calls_limit": 100000,
-                "ai_operations_limit": 10000,
-                "data_storage_gb": 100,
-                "support": "priority"
             },
             PlanTier.ENTERPRISE: {
                 "api_calls_limit": "unlimited",
                 "ai_operations_limit": "unlimited",
                 "data_storage_gb": 1000,
                 "support": "dedicated"
+            },
+            PlanTier.DEVELOPER: {
+                "api_calls_limit": "unlimited",
+                "ai_operations_limit": "unlimited",
+                "data_storage_gb": 1000,
+                "support": "internal"
             }
         }
         return features.get(plan_tier, features[PlanTier.FREE])
@@ -419,7 +419,7 @@ class BusinessCriticalFlowsTester:
             
             # Test cost calculation for different plan tiers
             cost_calculations = {}
-            for plan_tier in [PlanTier.FREE, PlanTier.EARLY, PlanTier.MID, PlanTier.ENTERPRISE]:
+            for plan_tier in [PlanTier.FREE, PlanTier.PRO, PlanTier.ENTERPRISE, PlanTier.DEVELOPER]:
                 cost_calc = await self.usage_metering.calculate_usage_cost(
                     user_id, usage_summary["usage_by_type"], plan_tier
                 )
@@ -451,7 +451,7 @@ class BusinessCriticalFlowsTester:
                 "free_tier_zero_cost": cost_calculations["free"]["total_cost"] == Decimal('0'),
                 "enterprise_lowest_unit_cost": (
                     cost_calculations["enterprise"]["total_cost"] <= 
-                    cost_calculations["early"]["total_cost"]
+                    cost_calculations["pro"]["total_cost"]
                 ),
                 "usage_period_correct": (
                     usage_summary["period"]["start"] == billing_start and
@@ -684,7 +684,7 @@ class BusinessCriticalFlowsTester:
             
             # Step 1: Create subscription
             subscription = await self.subscription_manager.create_subscription(
-                user_id, PlanTier.EARLY, "monthly"
+                user_id, PlanTier.PRO, "monthly"
             )
             lifecycle_events.append({
                 "event": "subscription_created",
@@ -699,16 +699,16 @@ class BusinessCriticalFlowsTester:
             upgraded_subscription = await self.subscription_manager.update_subscription(
                 subscription["subscription_id"],
                 {
-                    "plan_tier": PlanTier.MID.value,
-                    "monthly_price": Decimal('99')
+                    "plan_tier": PlanTier.ENTERPRISE.value,
+                    "monthly_price": Decimal('299')
                 }
             )
             lifecycle_events.append({
                 "event": "subscription_upgraded",
                 "timestamp": datetime.now(timezone.utc),
                 "subscription_id": subscription["subscription_id"],
-                "old_plan": PlanTier.EARLY.value,
-                "new_plan": PlanTier.MID.value
+                "old_plan": PlanTier.PRO.value,
+                "new_plan": PlanTier.ENTERPRISE.value
             })
             
             # Step 3: Update billing cycle
@@ -731,16 +731,16 @@ class BusinessCriticalFlowsTester:
             downgraded_subscription = await self.subscription_manager.update_subscription(
                 subscription["subscription_id"],
                 {
-                    "plan_tier": PlanTier.EARLY.value,
-                    "monthly_price": Decimal('348')  # Annual early pricing
+                    "plan_tier": PlanTier.PRO.value,
+                    "monthly_price": Decimal('348')  # Annual pro pricing
                 }
             )
             lifecycle_events.append({
                 "event": "subscription_downgraded",
                 "timestamp": datetime.now(timezone.utc),
                 "subscription_id": subscription["subscription_id"],
-                "old_plan": PlanTier.MID.value,
-                "new_plan": PlanTier.EARLY.value
+                "old_plan": PlanTier.ENTERPRISE.value,
+                "new_plan": PlanTier.PRO.value
             })
             
             # Step 5: Cancel subscription
@@ -792,7 +792,7 @@ class BusinessCriticalFlowsTester:
                 "final_state_correct": (
                     final_subscription and 
                     final_subscription["status"] == "cancelled" and
-                    final_subscription["plan_tier"] == PlanTier.EARLY.value
+                    final_subscription["plan_tier"] == PlanTier.PRO.value
                 ),
                 "subscription_retrievable": final_subscription is not None
             }
@@ -840,10 +840,10 @@ class BusinessCriticalFlowsTester:
             # Create multiple subscriptions across different tiers
             subscription_data = [
                 {"user_id": f"user_free_{test_id[:4]}", "plan": PlanTier.FREE, "price": Decimal('0')},
-                {"user_id": f"user_early_{test_id[:4]}", "plan": PlanTier.EARLY, "price": Decimal('29')},
-                {"user_id": f"user_mid_{test_id[:4]}", "plan": PlanTier.MID, "price": Decimal('99')},
+                {"user_id": f"user_pro_{test_id[:4]}", "plan": PlanTier.PRO, "price": Decimal('29')},
                 {"user_id": f"user_ent_{test_id[:4]}", "plan": PlanTier.ENTERPRISE, "price": Decimal('299')},
-                {"user_id": f"user_early2_{test_id[:4]}", "plan": PlanTier.EARLY, "price": Decimal('29')},
+                {"user_id": f"user_dev_{test_id[:4]}", "plan": PlanTier.DEVELOPER, "price": Decimal('0')},
+                {"user_id": f"user_pro2_{test_id[:4]}", "plan": PlanTier.PRO, "price": Decimal('29')},
             ]
             
             for sub_data in subscription_data:
@@ -862,8 +862,8 @@ class BusinessCriticalFlowsTester:
             cancelled_subscription = {
                 "subscription_id": str(uuid.uuid4()),
                 "user_id": f"user_cancelled_{test_id[:4]}",
-                "plan_tier": PlanTier.MID.value,
-                "monthly_price": Decimal('99'),
+                "plan_tier": PlanTier.ENTERPRISE.value,
+                "monthly_price": Decimal('299'),
                 "status": "cancelled",
                 "billing_cycle": "monthly",
                 "created_at": datetime.now(timezone.utc) - timedelta(days=15),
@@ -964,7 +964,7 @@ class BusinessCriticalFlowsTester:
                 ]),
                 "cancelled_subscriptions_excluded": all(
                     s["monthly_price"] > 0 for s in test_subscriptions 
-                    if s["status"] == "active" and s["plan_tier"] != "free"
+                    if s["status"] == "active" and s["plan_tier"] not in ["free", "developer"]
                 ),
                 "usage_users_match": usage_revenue["total_users"] == len(set(
                     record["user_id"] for record in test_usage_records

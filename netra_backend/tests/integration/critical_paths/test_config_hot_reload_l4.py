@@ -31,15 +31,15 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from netra_backend.app.core.config import Settings
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.services.health_check_service import HealthCheckService
-from netra_backend.app.services.secret_manager import SecretManager
-from netra_backend.tests.integration.critical_paths.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.app.core.secret_manager import SecretManager
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
 

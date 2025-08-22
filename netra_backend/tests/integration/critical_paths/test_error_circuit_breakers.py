@@ -25,14 +25,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.services.circuit_breaker.circuit_breaker_service import (
-    CircuitBreakerService,
+from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import (
+    CircuitBreakerManager as CircuitBreakerService,
 )
-from netra_backend.app.services.circuit_breaker.circuit_state import (
-    CircuitBreaker,
-    CircuitState,
-)
-from netra_backend.app.services.fallback_service import FallbackService
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitState
+from netra_backend.app.services.api_gateway.fallback_service import ApiFallbackService as FallbackService
 from netra_backend.app.services.health_check_service import HealthCheckService
 
 logger = logging.getLogger(__name__)

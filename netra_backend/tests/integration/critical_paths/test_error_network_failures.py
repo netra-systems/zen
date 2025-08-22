@@ -16,7 +16,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.api_client import APIClient
+from netra_backend.app.services.external_api_client import ResilientHTTPClient as APIClient
 
 class TestErrorNetworkFailuresL3:
     """Test network error handling scenarios"""

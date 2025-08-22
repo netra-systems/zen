@@ -164,6 +164,11 @@ class BackendStarter:
     def _create_backend_env(self, port: int) -> dict:
         """Create backend environment variables."""
         service_env_vars = self.services_config.get_all_env_vars()
+        
+        # Debug logging for mock mode
+        if hasattr(self.services_config, 'postgres') and self.services_config.postgres.mode.value == "mock":
+            logger.info(f"Backend starting in mock mode - DATABASE_URL: {service_env_vars.get('DATABASE_URL', 'NOT_SET')}")
+        
         return create_process_env(
             BACKEND_PORT=str(port),
             PYTHONPATH=str(self.config.project_root),

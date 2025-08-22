@@ -100,7 +100,34 @@ export {
   sortThreadsByDate
 } from './domains/threads';
 
-// WebSocket domain - Only verified working functions
+// WebSocket domain - Type-only exports for interfaces, runtime exports for functions
+export type {
+  // Payload interface types
+  AgentCompletedPayload,
+  AgentStartedPayload,
+  AgentUpdatePayload,
+  AuthMessage,
+  CreateThreadPayload,
+  DeleteThreadPayload,
+  SwitchThreadPayload,
+  StopAgentPayload,
+  UserMessagePayload,
+  StartAgentPayload,
+  SubAgentUpdatePayload,
+  ToolCallPayload,
+  ToolResultPayload,
+  StreamChunkPayload,
+  StreamCompletePayload,
+  ErrorPayload,
+  WebSocketMessage,
+  WebSocketError,
+  PingMessage,
+  PongMessage,
+  // Base types
+  BaseWebSocketPayload
+} from './domains/websocket';
+
+// WebSocket runtime functions
 export {
   createWebSocketError,
   createWebSocketMessage,
@@ -111,7 +138,8 @@ export {
   isSubAgentUpdateMessage,
   isToolCallMessage,
   isUserMessagePayload,
-  isWebSocketMessage
+  isWebSocketMessage,
+  isValidWebSocketMessageType
 } from './domains/websocket';
 
 // Agent domain - Only verified working functions
@@ -166,6 +194,12 @@ export type {
   OperationStatus,
   ConnectionStatus
 } from './shared/base';
+
+// Additional WebSocket types that need to be available as types
+export type {
+  AgentResult,
+  WebSocketMessage
+} from './domains/websocket';
 
 // ============================================================================
 // COMPATIBILITY ALIASES - Maintain exact backward compatibility

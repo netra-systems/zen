@@ -28,7 +28,7 @@ import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-from netra_backend.app.core.config import Settings
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService

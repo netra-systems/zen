@@ -435,6 +435,19 @@ class DevLauncher:
     async def _validate_databases(self) -> bool:
         """Validate database connections before service startup."""
         try:
+            # Check if all database services are in mock mode
+            if hasattr(self.config, 'services_config') and self.config.services_config:
+                services_config = self.config.services_config
+                all_mock = all([
+                    services_config.redis.mode.value == "mock",
+                    services_config.clickhouse.mode.value == "mock", 
+                    services_config.postgres.mode.value == "mock"
+                ])
+                
+                if all_mock:
+                    self._print("✅", "DATABASE", "All databases in mock mode - skipping validation")
+                    return True
+            
             return await self.database_connector.validate_all_connections()
         except Exception as e:
             logger.error(f"Database validation failed: {e}")

@@ -877,7 +877,6 @@ class DashboardPerformanceValidator:
         ]) if cache_results_data["execution_details"] else 0
         
         cache_hit_rate = sum(1 for ex in cache_results_data["execution_details"] if ex.cache_hit) / \
-
                         max(1, len(cache_results_data["execution_details"])) * 100
         
         if no_cache_avg_time > 0:

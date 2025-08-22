@@ -16,7 +16,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.database_service import DatabaseService
+from netra_backend.app.services.database_operations_service import DatabaseOperationsService as DatabaseService
 
 class TestErrorDatabaseFailuresL3:
     """Test database error handling scenarios"""

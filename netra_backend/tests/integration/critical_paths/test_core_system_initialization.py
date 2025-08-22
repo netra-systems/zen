@@ -26,12 +26,8 @@ import aiohttp
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.config import Settings
-from netra_backend.app.services.database.connection_manager import (
-
-    DatabaseConnectionManager,
-
-)
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService

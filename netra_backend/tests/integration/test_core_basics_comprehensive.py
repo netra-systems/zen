@@ -50,52 +50,68 @@ class MockAuthService:
 
         self.tokens = {}
         
+        # Add race condition prevention
+        self.login_locks = {}  # Track ongoing login attempts per user
+        
     async def login(self, email: str, password: str, client_ip: str = None) -> Optional[Dict]:
 
-        """Mock login implementation with timing attack prevention"""
+        """Mock login implementation with timing attack prevention and race condition handling"""
         # Always take consistent time regardless of input validity
         base_delay = 0.02  # Consistent base delay for all login attempts
         
-        if email in self.locked_accounts:
-            await asyncio.sleep(base_delay)  # Consistent timing even for locked accounts
-            raise Exception("Account locked")
-        
-        # Simulate password hashing/validation time consistently
-        await asyncio.sleep(base_delay)
-        
-        # Check if user exists
-        user_exists = email in ["valid_user@test.com", "test@example.com", "user@test.com"]
-        
-        # Check if password is correct
-        password_correct = password in ["password123", "password"]
-        
-        if not user_exists or not password_correct:
-            # Track failed attempts only for existing users
-            if user_exists:
-                self.failed_attempts[email] = self.failed_attempts.get(email, 0) + 1
-
-                if self.failed_attempts[email] >= 5:
-                    self.locked_accounts.add(email)
-
-            return None
+        # Race condition prevention: Check if user is already logging in
+        if email in self.login_locks:
+            await asyncio.sleep(base_delay)  # Consistent timing
+            return None  # Reject concurrent login attempts
             
-        # Successful login - reset failed attempts
-        if email in self.failed_attempts:
-            del self.failed_attempts[email]
+        # Lock this user for login processing
+        self.login_locks[email] = True
+        
+        try:
+            if email in self.locked_accounts:
+                await asyncio.sleep(base_delay)  # Consistent timing even for locked accounts
+                raise Exception("Account locked")
+            
+            # Simulate password hashing/validation time consistently
+            await asyncio.sleep(base_delay)
+            
+            # Check if user exists
+            user_exists = email in ["valid_user@test.com", "test@example.com", "user@test.com"]
+            
+            # Check if password is correct
+            password_correct = password in ["password123", "password"]
+            
+            if not user_exists or not password_correct:
+                # Track failed attempts only for existing users
+                if user_exists:
+                    self.failed_attempts[email] = self.failed_attempts.get(email, 0) + 1
 
-        token = f"token_{uuid.uuid4()}"
+                    if self.failed_attempts[email] >= 5:
+                        self.locked_accounts.add(email)
 
-        self.tokens[token] = {"user": email, "created": time.time()}
+                return None
+                
+            # Successful login - reset failed attempts
+            if email in self.failed_attempts:
+                del self.failed_attempts[email]
 
-        return {
+            token = f"token_{uuid.uuid4()}"
 
-            "access_token": token,
+            self.tokens[token] = {"user": email, "created": time.time()}
 
-            "refresh_token": f"refresh_{token}",
+            return {
 
-            "user": email
+                "access_token": token,
 
-        }
+                "refresh_token": f"refresh_{token}",
+
+                "user": email
+
+            }
+        finally:
+            # Always release the lock
+            if email in self.login_locks:
+                del self.login_locks[email]
     
     async def refresh_token(self, refresh_token: str) -> Dict:
 
@@ -980,6 +996,23 @@ class MockWebSocketManager:
 
             await self.disconnect(ws_id)
 
+class MockPostgresConnection:
+    """Mock connection that supports async context manager protocol"""
+    
+    def __init__(self, manager):
+        self.manager = manager
+        
+    async def __aenter__(self):
+        # Create a mock connection with async execute method
+        mock_conn = MagicMock()
+        mock_conn.execute = AsyncMock(return_value=True)
+        self.manager.connections.append(mock_conn)
+        return mock_conn
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        # Clean up connection on exit
+        pass
+
 class MockPostgresManager:
 
     """Mock Postgres Manager for testing"""
@@ -994,15 +1027,11 @@ class MockPostgresManager:
 
         self.transactions = []
     
-    async def get_connection(self):
+    def get_connection(self):
 
-        """Get database connection"""
+        """Get database connection - returns async context manager"""
 
-        conn = MagicMock()
-
-        self.connections.append(conn)
-
-        return conn
+        return MockPostgresConnection(self)
     
     def get_pool_stats(self) -> Dict:
 

@@ -17,7 +17,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.postgres_service import PostgresService
+from netra_backend.app.services.database.postgres_service import PostgresService
 
 class TestDataPersistencePostgresL3:
     """Test PostgreSQL data persistence scenarios"""

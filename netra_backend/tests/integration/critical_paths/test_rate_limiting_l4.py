@@ -36,7 +36,7 @@ from netra_backend.app.services.backpressure.backpressure_service import (
 from netra_backend.app.services.quota.quota_manager import QuotaManager
 
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
-from netra_backend.tests.integration.critical_paths.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
 

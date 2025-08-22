@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.core.cache.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 

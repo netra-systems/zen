@@ -19,7 +19,7 @@ import uuid
 
 import pytest
 
-from netra_backend.tests.integration.critical_paths.integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     PermissionType,
     TeamCollaborationManager,
     TeamRole,

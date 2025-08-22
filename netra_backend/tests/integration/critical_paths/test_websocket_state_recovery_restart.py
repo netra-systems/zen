@@ -31,7 +31,7 @@ import websockets
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-from netra_backend.tests.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 
     CriticalPathMetrics,
 

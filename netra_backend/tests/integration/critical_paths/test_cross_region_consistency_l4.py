@@ -42,7 +42,7 @@ from netra_backend.app.db.postgres_core import async_engine, async_session_facto
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.redis_service import RedisService
 
-from netra_backend.tests.integration.critical_paths.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

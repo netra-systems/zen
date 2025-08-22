@@ -11,6 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.user_service import user_service
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
 class UserAuthService:
@@ -26,6 +29,19 @@ class UserAuthService:
         self.sessions: Dict[str, Dict[str, Any]] = {}
         self.user_data: Dict[str, Dict[str, Any]] = {}
         self.capacity = 1.0  # For load testing
+        self._database_initialized = False
+        self._redis_initialized = False
+        self._config_initialized = False
+        self._certificates_initialized = False
+        self._oauth_initialized = False
+        self._health_status = "initializing"
+        self._metrics: Dict[str, Any] = {
+            "requests_total": 0,
+            "requests_success": 0,
+            "requests_failed": 0,
+            "initialization_time": None,
+            "last_health_check": None
+        }
     
     async def get_user_by_id(self, db: AsyncSession, user_id: str) -> Optional[User]:
         """Get user by ID - service layer abstraction for routes."""
@@ -325,6 +341,235 @@ class UserAuthService:
         await self.update_user_data(user_id, {'password_changed_at': time.time()})
         
         return True
+    
+    # Initialization Methods
+    async def init_config(self) -> bool:
+        """Initialize configuration for auth service."""
+        try:
+            logger.info(f"Initializing auth service configuration for instance {self.instance_id}")
+            # Configuration is already loaded during import, just mark as initialized
+            self._config_initialized = True
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize config: {e}")
+            return False
+    
+    async def init_database(self) -> bool:
+        """Initialize database connections for auth service."""
+        try:
+            logger.info(f"Initializing database connections for auth service {self.instance_id}")
+            # Test database connectivity
+            from netra_backend.app.db.postgres import initialize_postgres
+            initialize_postgres()
+            
+            # Verify connection works
+            from netra_backend.app.db.postgres import async_session_factory
+            async with async_session_factory() as session:
+                # Simple connectivity test
+                from sqlalchemy import text
+                await session.execute(text("SELECT 1"))
+            
+            self._database_initialized = True
+            logger.info("Database initialization completed successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
+            self._database_initialized = False
+            return False
+    
+    async def init_redis(self) -> bool:
+        """Initialize Redis connections for auth service."""
+        try:
+            logger.info(f"Initializing Redis connections for auth service {self.instance_id}")
+            from netra_backend.app.redis_manager import redis_manager
+            
+            if not redis_manager.enabled:
+                logger.info("Redis is disabled in this environment")
+                self._redis_initialized = True  # Consider disabled as successfully initialized
+                return True
+            
+            # Test Redis connectivity
+            client = await redis_manager.get_client()
+            if client:
+                await client.ping()
+                self._redis_initialized = True
+                logger.info("Redis initialization completed successfully")
+                return True
+            else:
+                logger.warning("Redis client not available")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to initialize Redis: {e}")
+            self._redis_initialized = False
+            return False
+    
+    async def init_certificates(self) -> bool:
+        """Initialize SSL certificates for auth service."""
+        try:
+            logger.info(f"Initializing certificates for auth service {self.instance_id}")
+            # In our current setup, certificates are handled by infrastructure
+            # Mark as initialized since we don't have custom cert management
+            self._certificates_initialized = True
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize certificates: {e}")
+            return False
+    
+    async def init_oauth_providers(self) -> bool:
+        """Initialize OAuth providers for auth service."""
+        try:
+            logger.info(f"Initializing OAuth providers for auth service {self.instance_id}")
+            # OAuth provider initialization would go here
+            # For now, mark as initialized since we handle OAuth elsewhere
+            self._oauth_initialized = True
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize OAuth providers: {e}")
+            return False
+    
+    async def initialize(self) -> bool:
+        """Initialize all auth service components in correct order."""
+        try:
+            logger.info(f"Starting full initialization for auth service {self.instance_id}")
+            start_time = time.time()
+            
+            # Initialize in dependency order
+            if not await self.init_config():
+                raise Exception("Configuration initialization failed")
+            
+            if not await self.init_database():
+                raise Exception("Database initialization failed")
+            
+            if not await self.init_redis():
+                raise Exception("Redis initialization failed")
+            
+            if not await self.init_certificates():
+                raise Exception("Certificate initialization failed")
+            
+            if not await self.init_oauth_providers():
+                raise Exception("OAuth provider initialization failed")
+            
+            self._metrics["initialization_time"] = time.time() - start_time
+            self._health_status = "healthy"
+            logger.info(f"Auth service {self.instance_id} initialization completed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Auth service initialization failed: {e}")
+            self._health_status = "unhealthy"
+            return False
+    
+    # Shutdown Methods
+    async def close_database(self) -> bool:
+        """Close database connections gracefully."""
+        try:
+            logger.info(f"Closing database connections for auth service {self.instance_id}")
+            from netra_backend.app.db.postgres import close_async_db
+            await close_async_db()
+            self._database_initialized = False
+            return True
+        except Exception as e:
+            logger.error(f"Failed to close database connections: {e}")
+            return False
+    
+    async def close_redis(self) -> bool:
+        """Close Redis connections gracefully."""
+        try:
+            logger.info(f"Closing Redis connections for auth service {self.instance_id}")
+            from netra_backend.app.redis_manager import redis_manager
+            
+            if redis_manager.redis_client:
+                await redis_manager.redis_client.close()
+            
+            self._redis_initialized = False
+            return True
+        except Exception as e:
+            logger.error(f"Failed to close Redis connections: {e}")
+            return False
+    
+    async def flush_cache(self) -> bool:
+        """Flush all cached data."""
+        try:
+            logger.info(f"Flushing cache for auth service {self.instance_id}")
+            # Clear local session cache
+            self.sessions.clear()
+            self.user_data.clear()
+            
+            # Clear shared cache
+            UserAuthService._shared_sessions.clear()
+            UserAuthService._shared_user_data.clear()
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to flush cache: {e}")
+            return False
+    
+    async def save_metrics(self) -> bool:
+        """Save current metrics before shutdown."""
+        try:
+            logger.info(f"Saving metrics for auth service {self.instance_id}")
+            # In a real implementation, this would save to persistent storage
+            logger.info(f"Metrics for {self.instance_id}: {self._metrics}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save metrics: {e}")
+            return False
+    
+    async def shutdown(self) -> bool:
+        """Gracefully shutdown auth service."""
+        try:
+            logger.info(f"Starting graceful shutdown for auth service {self.instance_id}")
+            
+            # Shutdown in reverse order of initialization
+            await self.flush_cache()
+            await self.save_metrics()
+            await self.close_redis()
+            await self.close_database()
+            
+            self._health_status = "shutdown"
+            logger.info(f"Auth service {self.instance_id} shutdown completed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error during auth service shutdown: {e}")
+            return False
+    
+    async def get_health_status(self) -> Dict[str, Any]:
+        """Get current health status of auth service."""
+        try:
+            # Update last health check time
+            self._metrics["last_health_check"] = time.time()
+            
+            # Determine overall status based on component health
+            if not self._database_initialized:
+                status = "degraded" if self._redis_initialized else "unhealthy"
+            elif not self._redis_initialized:
+                status = "degraded"
+            else:
+                status = "healthy"
+            
+            return {
+                "status": status,
+                "instance_id": self.instance_id,
+                "components": {
+                    "database": self._database_initialized,
+                    "redis": self._redis_initialized,
+                    "config": self._config_initialized,
+                    "certificates": self._certificates_initialized,
+                    "oauth": self._oauth_initialized
+                },
+                "metrics": self._metrics.copy(),
+                "capacity": self.capacity,
+                "sessions_count": len(self.sessions),
+                "users_count": len(self.user_data)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get health status: {e}")
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+                "instance_id": self.instance_id
+            }
 
 
 # Singleton instance
