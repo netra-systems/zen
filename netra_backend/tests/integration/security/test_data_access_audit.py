@@ -34,7 +34,7 @@ import pytest
 from netra_backend.app.schemas.registry import CorpusAuditAction, CorpusAuditStatus
 
 # Add project root to path
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.security.shared_fixtures import (
     DataAccessAuditHelper,
     data_access_helper,
     # Add project root to path

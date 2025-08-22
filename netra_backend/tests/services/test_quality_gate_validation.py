@@ -35,7 +35,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
 

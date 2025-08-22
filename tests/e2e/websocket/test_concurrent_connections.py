@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional, Set
 import httpx
 import pytest
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.real_websocket_client import RealWebSocketClient
 

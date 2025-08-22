@@ -139,9 +139,11 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 - **Test Runner**: `/test_framework/test_runner.py` - Test execution entry (run with `python unified_test_runner.py`)
 
 ### Deployment Entry Points
-- **Enhanced Deploy**: `/organized_root/deployment_configs/deploy_staging_enhanced.py` - Modular deployment orchestrator
-- **Standard Deploy**: `/organized_root/deployment_configs/deploy_staging.py` - Standard deployment script
-- **Setup Auth**: `/organized_root/deployment_configs/setup_staging_auth.py` - GCP authentication setup
+**🔴 CRITICAL: Use ONLY the official deployment script - scripts/deploy_to_gcp.py**
+- **Official Deploy Script**: `/scripts/deploy_to_gcp.py` - THE ONLY deployment script to use
+  - Recommended: `python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks`
+  - See `SPEC/gcp_deployment.xml` for comprehensive guidelines
+- **DEPRECATED**: Do NOT use scripts in `/organized_root/deployment_configs/` - enhance the official script instead
 
 ### Frontend Entry Points
 - **Next.js App**: `/frontend/app/page.tsx` - Main page component
@@ -258,7 +260,8 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 | **Testing** | `testing.xml`, `e2e_testing.xml`, `bad_test_detection.xml` | TDD workflows, real vs mock |
 | **Database** | `database_asyncio.xml`, `database_*.xml` | Async patterns, connections |
 | **Frontend** | `frontend.xml`, `react-content-handling.xml` | Zustand patterns, React |
-| **Deployment** | `deployment_staging.xml` | Cloud Run, staging |
+| **Deployment** | `gcp_deployment.xml` | GCP deployment (USE THIS), local builds, checks |
+| **Staging** | `staging_workflow.xml` | Staging environment workflow |
 | **Startup** | `startup.xml`, `startup_optimization.xml` | Initialization order |
 | **Compliance** | `architectural_compliance.xml`, `compliance_improvements.xml` | 300/8 enforcement |
 
@@ -279,7 +282,7 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 | **Authentication** | `auth_*.xml`, `shared_auth_integration.xml`, `PRODUCTION_SECRETS_ISOLATION.xml` | Auth & secrets |
 | **Testing** | `testing.xml`, `enhanced_testing.xml`, `coverage_requirements.xml` | Test standards |
 | **CI/CD** | `github_actions.xml`, `cicd_testing.xml` | Pipeline configuration |
-| **Deployment** | `deployment.xml`, `staging_*.xml`, `terraform_gcp.xml` | Deployment configs |
+| **Deployment** | `gcp_deployment.xml` (PRIMARY), `staging_*.xml`, `terraform_gcp.xml` | Use gcp_deployment.xml |
 
 ### 🤖 Agent System Specifications
 | Spec | Purpose | Components |
@@ -354,7 +357,8 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 ### 🚀 Deployment & Infrastructure
 | Spec | Purpose | Environment |
 |------|---------|-------------|
-| **`deployment.xml`** | Deployment patterns | All environments |
+| **`gcp_deployment.xml`** | GCP deployment guide | **PRIMARY - Use this for all deployments** |
+| **`deployment.xml`** | General deployment patterns | Reference only |
 | **`staging_environment.xml`** | Staging setup | Staging env |
 | **`staging_workflow.xml`** | Staging processes | Staging workflow |
 | **`terraform_gcp.xml`** | Terraform configs | GCP infrastructure |

@@ -31,7 +31,7 @@ import asyncpg
 import pytest
 
 # Add project root to path
-from netra_backend.tests.database_migration_validators import (
+from .database_migration_validators import (
     ContainerizedDatabaseManager,
     MigrationValidator,
 )

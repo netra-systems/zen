@@ -20,13 +20,13 @@ import asyncio
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.redis_test_fixtures import (
+from .redis_test_fixtures import (
     MockRedisClient,
     connection_pool,
     # Add project root to path
     enhanced_redis_manager,
 )
-from netra_backend.tests.helpers.redis_test_helpers import (
+from .redis_test_helpers import (
     create_concurrent_tasks,
     verify_concurrent_results,
     verify_connection_pool_state,

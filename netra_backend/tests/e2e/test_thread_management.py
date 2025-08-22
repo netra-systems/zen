@@ -33,7 +33,7 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 
 # Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.tests.helpers.thread_test_helpers import (
+from .thread_test_helpers import (
     # Add project root to path
     create_mock_thread,
     setup_thread_repo_mock,

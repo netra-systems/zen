@@ -12,11 +12,11 @@ import WS from 'jest-websocket-mock';
 import { useAuthStore } from '@/store/authStore';
 
 // Import unified test utilities
-import { renderWithProviders, waitForElement, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
-import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
-import { TestProviders, mockWebSocketContextValue } from '../../setup/test-providers';
-import { createTestUser, createMockToken, setAuthenticatedState, setupMockFetchForConfig } from '../../helpers/test-setup-helpers';
-import { WebSocketStatusComponent, AuthenticatedWebSocketComponent, AuthStatusComponent } from '../../helpers/test-component-helpers';
+import { renderWithProviders, waitForElement, safeAsync, resetAllMocks } from '@/__tests__/shared/unified-test-utilities';
+import { safeAct, waitForCondition, flushPromises } from '@/__tests__/helpers/test-timing-utilities';
+import { TestProviders, mockWebSocketContextValue } from '@/__tests__/setup/test-providers';
+import { createTestUser, createMockToken, setAuthenticatedState, setupMockFetchForConfig } from '@/__tests__/helpers/test-setup-helpers';
+import { WebSocketStatusComponent, AuthenticatedWebSocketComponent, AuthStatusComponent } from '@/__tests__/helpers/test-component-helpers';
 
 // Mock environment
 const mockEnv = {
@@ -86,3 +86,52 @@ describe('WebSocket and Authentication Integration', () => {
     });
   });
 });
+
+// Helper functions
+function createMockOAuthResponse() {
+  return {
+    access_token: 'oauth-token',
+    refresh_token: 'refresh-token',
+    token_type: 'Bearer',
+    expires_in: 3600,
+    user: createTestUser(),
+  };
+}
+
+async function simulateOAuthCallback(code: string) {
+  const mockResponse = createMockOAuthResponse();
+  
+  (global.fetch as jest.Mock) = jest.fn(() =>
+    Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    })
+  );
+
+  return mockResponse;
+}
+
+function assertUserIsAuthenticated() {
+  expect(localStorage.getItem('auth_token')).toBeTruthy();
+  expect(localStorage.getItem('user')).toBeTruthy();
+}
+
+function setupPersistedAuthState(user: any, token: string) {
+  localStorage.setItem('auth_token', token);
+  localStorage.setItem('user', JSON.stringify(user));
+}
+
+function resetTestStores() {
+  localStorage.clear();
+  jest.clearAllMocks();
+}
+
+function simulateSessionRestore() {
+  const token = localStorage.getItem('auth_token');
+  const user = localStorage.getItem('user');
+  
+  return {
+    token,
+    user: user ? JSON.parse(user) : null,
+  };
+}

@@ -16,13 +16,13 @@ from sqlalchemy.orm import sessionmaker
 
 from netra_backend.app.config import get_config
 from netra_backend.app.db.base import Base
-from netra_backend.tests.mock_services import (
+from .mock_services import (
     MockLLMService,
     MockOAuthProvider,
     MockWebSocketServer,
     ServiceRegistry,
 )
-from netra_backend.tests.test_harness import UnifiedTestHarness
+from .test_harness import UnifiedTestHarness
 
 
 @dataclass

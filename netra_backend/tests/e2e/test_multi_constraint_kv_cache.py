@@ -23,7 +23,7 @@ import pytest
 import pytest_asyncio
 
 # Add project root to path
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
     create_agent_instances,
     create_comprehensive_cache_state,

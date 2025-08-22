@@ -23,7 +23,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from netra_backend.tests.helpers.database_repository_helpers import (
+from .database_repository_helpers import (
     assert_thread_created_correctly,
     create_test_message,
     # Add project root to path

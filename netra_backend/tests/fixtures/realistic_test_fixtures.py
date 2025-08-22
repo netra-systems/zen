@@ -15,21 +15,21 @@ from netra_backend.app.services.realistic_test_data_service import (
 
 # Import all fixture modules
 # Import all fixture functions
-from netra_backend.tests.fixtures.fixtures_core import (
+from .fixtures_core import (
     CoreTestFixtures,
     core_fixtures,
     large_core_data,
     medium_core_data,
     small_core_data,
 )
-from netra_backend.tests.fixtures.fixtures_metrics import (
+from .fixtures_metrics import (
     MetricsFixtures,
     error_cascade_logs,
     memory_leak_logs,
     metrics_fixtures,
     performance_metrics,
 )
-from netra_backend.tests.fixtures.fixtures_workloads import (
+from .fixtures_workloads import (
     WorkloadFixtures,
     batch_jobs,
     inference_endpoints,

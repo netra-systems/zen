@@ -62,7 +62,7 @@ from netra_backend.app.services.audit_service import (
 )
 
 # Add project root to path
-from netra_backend.tests.l4_staging_critical_base import (
+from .l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

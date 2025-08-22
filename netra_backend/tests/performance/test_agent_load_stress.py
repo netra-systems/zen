@@ -9,7 +9,7 @@ Tests concurrent agent requests, resource isolation, and performance degradation
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 from pathlib import Path
 import sys
 

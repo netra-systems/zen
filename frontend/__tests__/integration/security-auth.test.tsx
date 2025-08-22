@@ -6,7 +6,7 @@ import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import apiClient from '@/services/apiClient';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock API
 jest.mock('@/services/apiClient');

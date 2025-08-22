@@ -32,7 +32,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     assert_billing_metrics,
     track_usage_and_verify,
     # Add project root to path

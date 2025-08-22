@@ -19,8 +19,8 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
-from netra_backend.tests.clickhouse_query_fixtures import get_all_test_queries
-from netra_backend.tests.clickhouse_test_helpers import (
+from .clickhouse_query_fixtures import get_all_test_queries
+from .clickhouse_test_helpers import (
     # Add project root to path
     assert_array_syntax_fixed,
     assert_complex_query_fixes,

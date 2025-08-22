@@ -31,7 +31,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     # Add project root to path
     assert_api_key_properties,
     assert_export_response,

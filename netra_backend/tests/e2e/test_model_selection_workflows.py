@@ -18,15 +18,15 @@ setup_test_path()
 
 import pytest
 
-from netra_backend.tests.chat_optimization_tests import TestRealTimeChatOptimization
-from netra_backend.tests.example_prompts_tests import TestExamplePromptsModelSelection
-from netra_backend.tests.gpt5_migration_tests import TestGPT5MigrationWorkflows
-from netra_backend.tests.model_effectiveness_tests import TestModelEffectivenessAnalysis
+from .chat_optimization_tests import TestRealTimeChatOptimization
+from .example_prompts_tests import TestExamplePromptsModelSelection
+from .gpt5_migration_tests import TestGPT5MigrationWorkflows
+from .model_effectiveness_tests import TestModelEffectivenessAnalysis
 
 # Add project root to path
 # Import all test classes and fixtures from focused modules
-from netra_backend.tests.model_setup_helpers import model_selection_setup
-from netra_backend.tests.workflow_integrity_tests import (
+from .model_setup_helpers import model_selection_setup
+from .workflow_integrity_tests import (
     TestModelSelectionDataFlow,
     TestModelSelectionEdgeCases,
     TestWorkflowIntegrity,

@@ -29,7 +29,7 @@ from tests.database_test_operations import (
     UserDataOperations, ChatMessageOperations,
     UserDataOperations, ChatMessageOperations
 )
-from tests.database_test_connections import DatabaseConnectionManager
+from tests.e2e.database_test_connections import DatabaseConnectionManager
 
 
 class ContextTestManager:

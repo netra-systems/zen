@@ -24,7 +24,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.database_transaction_test_mocks import MockRepository
+from .database_transaction_test_mocks import MockRepository
 
 # Add project root to path
 

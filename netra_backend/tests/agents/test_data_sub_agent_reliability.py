@@ -23,7 +23,7 @@ import pytest
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
 # Add project root to path
-from netra_backend.tests.helpers.shared_test_types import (
+from ..helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
 

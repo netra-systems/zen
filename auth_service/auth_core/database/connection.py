@@ -37,8 +37,12 @@ class AuthDatabase:
             return
         
         # Determine database URL and configuration based on environment
-        if self.is_test_mode or self.environment == "test":
-            # Use in-memory SQLite for testing
+        # Check if we're in a pytest environment
+        import sys
+        is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
+        
+        if self.is_test_mode or self.environment == "test" or is_pytest:
+            # Use in-memory SQLite for testing - always use NullPool for tests
             logger.info("Using in-memory SQLite for test mode")
             database_url = "sqlite+aiosqlite:///:memory:"
             pool_class = NullPool
@@ -74,6 +78,9 @@ class AuthDatabase:
                     "pool_pre_ping": True,
                     "pool_reset_on_return": "rollback",
                 })
+            elif pool_class == NullPool:
+                # Ensure no pool-related arguments for NullPool
+                pass
             
             self.engine = create_async_engine(database_url, **engine_kwargs)
             
@@ -86,9 +93,8 @@ class AuthDatabase:
                 autoflush=False,
             )
             
-            # Create tables if needed
-            if not (self.is_test_mode and "memory" in database_url):
-                await self.create_tables()
+            # Create tables always - needed for both production and test
+            await self.create_tables()
             
             self._initialized = True
             logger.info(f"Auth database initialized successfully for {self.environment}")

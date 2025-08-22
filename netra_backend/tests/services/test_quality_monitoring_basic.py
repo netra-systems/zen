@@ -27,13 +27,13 @@ sys.modules['app.db.clickhouse'].ClickHouseManager = MagicMock
 from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
-from netra_backend.tests.helpers.quality_monitoring_fixtures import (
+from .quality_monitoring_fixtures import (
     mock_clickhouse_manager,
     mock_db_session,
     mock_redis_manager,
     quality_monitoring_service,
 )
-from netra_backend.tests.helpers.quality_monitoring_helpers import (
+from .quality_monitoring_helpers import (
     assert_service_collections_initialized,
     assert_service_initialization,
     assert_service_monitoring_state,

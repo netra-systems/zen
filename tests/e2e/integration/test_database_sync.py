@@ -42,7 +42,7 @@ from tests.database_sync_helpers import (
     verify_backend_user_exists,
     verify_sync_consistency,
 )
-from tests.database_test_connections import (
+from tests.e2e.database_test_connections import (
     DatabaseTestConnections,
 )
 

@@ -56,14 +56,14 @@ from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from tests.e2e.real_client_types import (
+from ...e2e.real_client_types import (
 
     ClientConfig,
 
     ConnectionState,
 
 )
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from ...e2e.real_websocket_client import RealWebSocketClient
 
 # Add project root to path
 

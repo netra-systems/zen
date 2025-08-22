@@ -47,7 +47,7 @@ from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.websocket.rate_limiter import RateLimiter
 
 # Add project root to path
-from netra_backend.tests.l4_staging_critical_base import (
+from .l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

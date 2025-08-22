@@ -6,9 +6,9 @@ import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
+import.*from '@/__tests__/helpers/websocket-test-manager';
 
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Mock stores
 const createMockStore = (initialState: any) => {

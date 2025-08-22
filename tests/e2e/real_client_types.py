@@ -130,6 +130,7 @@ class ClientConfig:
     websocket_url: str = "ws://localhost:8000/websocket"
     auth_url: str = "http://localhost:8001"
     timeout: float = 30.0
+    max_retries: int = 3
     headers: Dict[str, str] = field(default_factory=dict)
     cookies: Dict[str, str] = field(default_factory=dict)
     use_ssl: bool = False
@@ -150,6 +151,19 @@ class ClientConfig:
             url=self.websocket_url,
             headers=self.headers
         )
+    
+    def get_retry_delay(self, attempt: int) -> float:
+        """Calculate retry delay with exponential backoff."""
+        return min(2 ** attempt, 30.0)
+    
+    def create_ssl_context(self):
+        """Create SSL context for secure connections."""
+        import ssl
+        context = ssl.create_default_context()
+        if not self.verify_ssl:
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        return context
 
 
 class ConnectionState:

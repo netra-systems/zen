@@ -34,7 +34,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 
-from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase
+from .user_flow_base import UserFlowTestBase
 
 # Add project root to path
 

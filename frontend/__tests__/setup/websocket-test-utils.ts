@@ -101,3 +101,43 @@ export class MessageBuffer {
     this.messages = [];
   }
 }
+
+/**
+ * Measure connection timing
+ */
+export function measureConnectionTime(): Promise<number> {
+  return new Promise((resolve) => {
+    const start = performance.now();
+    setTimeout(() => {
+      const end = performance.now();
+      resolve(end - start);
+    }, 10);
+  });
+}
+
+/**
+ * Create WebSocket mock for testing
+ */
+export function createWebSocketMock() {
+  return {
+    send: jest.fn(),
+    close: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    readyState: WebSocket.OPEN,
+    url: 'ws://localhost:8000/ws',
+    protocol: '',
+    extensions: '',
+    bufferedAmount: 0,
+    binaryType: 'blob',
+    onopen: null,
+    onclose: null,
+    onerror: null,
+    onmessage: null,
+    dispatchEvent: jest.fn(),
+    CONNECTING: WebSocket.CONNECTING,
+    OPEN: WebSocket.OPEN,
+    CLOSING: WebSocket.CLOSING,
+    CLOSED: WebSocket.CLOSED,
+  } as any;
+}

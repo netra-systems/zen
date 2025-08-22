@@ -32,7 +32,7 @@ from typing import Dict
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.sso_saml_components import (
+from .sso_saml_components import (
     EnterpriseTokenManager,
     MockIdPErrorGenerator,
     # Add project root to path

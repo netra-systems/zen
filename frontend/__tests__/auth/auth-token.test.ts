@@ -9,17 +9,25 @@
 
 // Import test setup with mocks FIRST
 import './auth-test-setup';
+
+// Set up localStorage mock before importing authService
+import { createLocalStorageMock } from './auth-test-utils';
+const testLocalStorageMock = createLocalStorageMock();
+global.localStorage = testLocalStorageMock;
+
 import { authService } from '@/auth';
 import {
   setupAuthTestEnvironment,
   resetAuthTestMocks,
   createMockToken,
   createMockAuthContext,
-  mockUseContext,
   validateTokenOperation,
   expectAuthHeaders,
   expectEmptyHeaders
 } from './auth-test-utils';
+
+// Import mockUseContext directly from setup
+import { mockUseContext } from './auth-test-setup';
 import { AuthContext } from '@/auth';
 
 describe('Auth Token Management', () => {
@@ -29,6 +37,13 @@ describe('Auth Token Management', () => {
   beforeEach(() => {
     testEnv = setupAuthTestEnvironment();
     mockToken = createMockToken();
+    
+    // Use the test-wide localStorage mock and clear it
+    testLocalStorageMock.clear();
+    
+    // Also set up the testEnv to use our global mock
+    testEnv.localStorageMock = testLocalStorageMock;
+    
     resetAuthTestMocks(testEnv);
   });
 
@@ -38,16 +53,19 @@ describe('Auth Token Management', () => {
 
   describe('getToken', () => {
     it('should retrieve token from localStorage', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
+      // Clear any existing token first
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(mockToken);
 
       const result = authService.getToken();
 
-      validateTokenOperation(testEnv.localStorageMock, 'get');
+      expect(testLocalStorageMock.getItem).toHaveBeenCalledWith('jwt_token');
       expect(result).toBe(mockToken);
     });
 
     it('should return null when no token exists', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(null);
 
       const result = authService.getToken();
 
@@ -55,7 +73,8 @@ describe('Auth Token Management', () => {
     });
 
     it('should return empty string as null', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue('');
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue('');
 
       const result = authService.getToken();
 
@@ -63,7 +82,7 @@ describe('Auth Token Management', () => {
     });
 
     it('should handle localStorage errors gracefully', () => {
-      testEnv.localStorageMock.getItem.mockImplementation(() => {
+      testLocalStorageMock.getItem.mockImplementation(() => {
         throw new Error('localStorage error');
       });
 
@@ -73,7 +92,8 @@ describe('Auth Token Management', () => {
 
   describe('getAuthHeaders', () => {
     it('should return auth headers with token', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(mockToken);
 
       const headers = authService.getAuthHeaders();
 
@@ -81,7 +101,8 @@ describe('Auth Token Management', () => {
     });
 
     it('should return empty object when no token', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(null);
 
       const headers = authService.getAuthHeaders();
 
@@ -89,7 +110,8 @@ describe('Auth Token Management', () => {
     });
 
     it('should return empty object for empty token', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue('');
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue('');
 
       const headers = authService.getAuthHeaders();
 
@@ -98,7 +120,8 @@ describe('Auth Token Management', () => {
 
     it('should handle long tokens', () => {
       const longToken = 'a'.repeat(1000);
-      testEnv.localStorageMock.getItem.mockReturnValue(longToken);
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(longToken);
 
       const headers = authService.getAuthHeaders();
 
@@ -107,7 +130,8 @@ describe('Auth Token Management', () => {
 
     it('should handle special characters in token', () => {
       const specialToken = 'token.with-special_chars123!@#';
-      testEnv.localStorageMock.getItem.mockReturnValue(specialToken);
+      testLocalStorageMock.clear();
+      testLocalStorageMock.getItem.mockReturnValue(specialToken);
 
       const headers = authService.getAuthHeaders();
 
@@ -119,19 +143,19 @@ describe('Auth Token Management', () => {
     it('should remove token from localStorage', () => {
       authService.removeToken();
 
-      validateTokenOperation(testEnv.localStorageMock, 'remove');
+      expect(testLocalStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     });
 
     it('should handle removing non-existent token', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
+      testLocalStorageMock.getItem.mockReturnValue(null);
       
       authService.removeToken();
 
-      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
+      expect(testLocalStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
     });
 
     it('should handle localStorage errors on removal', () => {
-      testEnv.localStorageMock.removeItem.mockImplementation(() => {
+      testLocalStorageMock.removeItem.mockImplementation(() => {
         throw new Error('localStorage error');
       });
 
@@ -240,8 +264,10 @@ describe('Auth Token Management', () => {
 
   describe('useAuth Hook', () => {
     beforeEach(() => {
-      // Reset the mock before each test
-      mockUseContext.mockReset();
+      // Reset the mock before each test if it exists
+      if (mockUseContext && jest.isMockFunction(mockUseContext)) {
+        mockUseContext.mockReset();
+      }
     });
 
     it('should return auth context when used within provider', () => {

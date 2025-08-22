@@ -29,7 +29,7 @@ from netra_backend.app.core.auth_constants import (
     OAuthConstants,
 )
 from tests.e2e.integration.unified_e2e_harness import create_e2e_harness
-from tests.test_environment_config import TestEnvironmentType
+from tests.e2e.test_environment_config import TestEnvironmentType
 
 
 class StagingOAuthTestHelper:

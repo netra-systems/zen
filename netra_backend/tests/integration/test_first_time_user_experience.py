@@ -29,7 +29,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.db.models_user import User
-from netra_backend.tests.first_time_user_fixtures import FirstTimeUserFixtures
+from netra_backend.tests.integration.first_time_user_fixtures import FirstTimeUserFixtures
 from test_framework.decorators import tdd_test
 
 # Add project root to path

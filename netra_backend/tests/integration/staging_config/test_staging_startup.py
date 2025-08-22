@@ -17,7 +17,7 @@ import time
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
-from netra_backend.tests.base import StagingConfigTestBase
+from .base import StagingConfigTestBase
 
 # Add app to path for imports
 

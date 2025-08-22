@@ -16,18 +16,12 @@ from main import app
 
 from auth_service.auth_core.models.auth_models import AuthProvider
 
+# Test client
+client = TestClient(app)
+
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
-
-    def test_state_parameter_generation(self):
-        """Test secure state parameter generation"""
-        state1 = secrets.token_urlsafe(32)
-        state2 = secrets.token_urlsafe(32)
-        
-        assert len(state1) >= 32
-        assert len(state2) >= 32
-        assert state1 != state2
 
     def test_state_parameter_generation(self):
         """Test secure state parameter generation"""

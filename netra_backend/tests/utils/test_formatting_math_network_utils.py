@@ -23,12 +23,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.tests.helpers.network_pagination_test_helpers import (
+from .network_pagination_test_helpers import (
     NetworkTestHelpers,
 )
 
 # Add project root to path
-from netra_backend.tests.helpers.validation_formatting_test_helpers import (
+from .validation_formatting_test_helpers import (
     FormattingTestHelpers,
 )
 

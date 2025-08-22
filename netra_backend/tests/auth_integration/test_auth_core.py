@@ -34,7 +34,7 @@ setup_test_path()
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from auth_integration.auth import (
+from netra_backend.app.auth_integration.auth import (
     # Add project root to path
     get_current_user,
     get_current_user_optional,

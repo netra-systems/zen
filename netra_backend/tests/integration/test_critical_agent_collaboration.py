@@ -25,7 +25,7 @@ import pytest
 # Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.tests.test_fixtures_common import mock_infrastructure, test_database
+from .test_fixtures_common import mock_infrastructure, test_database
 
 # Add project root to path
 

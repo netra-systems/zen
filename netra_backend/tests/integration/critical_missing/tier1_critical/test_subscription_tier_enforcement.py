@@ -39,7 +39,7 @@ from netra_backend.app.services.tool_permissions.tool_permission_service_main im
 )
 
 # Add project root to path
-from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import (
+from .integration.critical_missing.shared_infrastructure.containerized_services import (
     ServiceOrchestrator,
 )
 

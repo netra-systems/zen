@@ -39,8 +39,8 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.conversion_event import ConversionEvent
 from netra_backend.app.services.user_service import UserService as UsageService
 
-from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase
-from netra_backend.tests.fixtures.user_journey_data import UserTestData
+from .user_flow_base import UserFlowTestBase
+from .user_journey_data import UserTestData
 
 # Add project root to path
 

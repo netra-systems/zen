@@ -10,10 +10,12 @@ from unittest.mock import patch
 import pytest
 
 # Set auth-specific environment variables (common ones handled by root conftest)
+os.environ["ENVIRONMENT"] = "development"  # Use development so database gets initialized
+os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
 os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
 os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
 os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["REDIS_URL"] = "redis://localhost:6379/1"
 
 @pytest.fixture(scope="session")
@@ -31,6 +33,36 @@ async def auth_db():
     await auth_db.initialize()
     yield auth_db
     await auth_db.close()
+
+@pytest.fixture(scope="function")
+def initialized_test_db():
+    """Synchronous fixture that ensures database is initialized for integration tests"""
+    import asyncio
+    from auth_service.auth_core.database.connection import auth_db
+    
+    # Get or create event loop
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    # Initialize database synchronously
+    if not loop.is_running():
+        loop.run_until_complete(auth_db.initialize())
+    else:
+        # If loop is already running, create task
+        task = asyncio.create_task(auth_db.initialize())
+        # This fixture will be called before the test, ensuring DB is ready
+    
+    yield auth_db
+    
+    # Cleanup
+    try:
+        if not loop.is_running():
+            loop.run_until_complete(auth_db.close())
+    except:
+        pass
 
 @pytest.fixture
 def mock_auth_redis():

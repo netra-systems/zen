@@ -28,7 +28,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 # Add project root to path
-from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
+from .integration.test_helpers.team_collaboration_base import (
     PermissionType,
     # Add project root to path
     TeamCollaborationManager,

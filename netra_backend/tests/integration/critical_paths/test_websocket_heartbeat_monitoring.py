@@ -43,7 +43,7 @@ from test_framework.mock_utils import mock_justified
 
 # Add project root to path
 
-from netra_backend.tests.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
 # Add project root to path
 

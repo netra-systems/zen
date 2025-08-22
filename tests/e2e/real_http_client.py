@@ -15,7 +15,8 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from tests.e2e.real_client_types import ClientConfig, ConnectionMetrics
+from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.websocket_dev_utilities import ConnectionMetrics
 
 
 class RealHTTPClient:

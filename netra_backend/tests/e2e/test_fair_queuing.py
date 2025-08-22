@@ -23,7 +23,7 @@ import aiohttp
 import pytest
 
 # Add project root to path
-from tests.e2e.concurrent_load_helpers import (
+from netra_backend.tests.concurrent_load_helpers import (
     # Add project root to path
     ConcurrentUserLoadTest,
     create_priority_user_request,

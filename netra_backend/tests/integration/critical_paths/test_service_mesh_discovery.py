@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Add project root to path
-from netra_backend.tests.service_mesh_fixtures import service_mesh_l4
+from netra_backend.tests.integration.service_mesh_fixtures import service_mesh_l4
 
 # Add project root to path
 

@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from netra_backend.tests.test_utilities.agent_fixtures import (
+from .agent_fixtures import (
     AgentBuilder,
     AgentOrchestrator,
     create_agent_state,

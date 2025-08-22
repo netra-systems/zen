@@ -20,19 +20,19 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.test_database_connections import (
+from .test_database_connections import (
     # Add project root to path
     TestClickHouseConnectionPool,
     TestDatabaseHealthChecks,
     TestMigrationRunnerSafety,
 )
-from netra_backend.tests.test_message_repository import TestMessageRepositoryQueries
-from netra_backend.tests.test_repository_auth import (
+from .test_message_repository import TestMessageRepositoryQueries
+from .test_repository_auth import (
     TestMetricRepositoryAggregation,
     TestOptimizationRepositoryStorage,
     TestUserRepositoryAuth,
 )
-from netra_backend.tests.test_thread_repository import TestThreadRepositoryOperations
+from .test_thread_repository import TestThreadRepositoryOperations
 
 # Re-export for backward compatibility
 __all__ = [

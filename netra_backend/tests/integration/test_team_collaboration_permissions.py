@@ -41,21 +41,21 @@ setup_test_path()
 
 import pytest
 
-from netra_backend.tests.integration.critical_paths.test_concurrent_editing_performance import (
+from .integration.critical_paths.test_concurrent_editing_performance import (
     TestConcurrentEditingPerformance,
 )
 
 # Add project root to path
-from netra_backend.tests.integration.critical_paths.test_team_creation_permissions import (
+from .integration.critical_paths.test_team_creation_permissions import (
     TestTeamCreationPermissions,
 )
-from netra_backend.tests.integration.critical_paths.test_team_isolation_security import (
+from .integration.critical_paths.test_team_isolation_security import (
     TestTeamIsolationSecurity,
 )
-from netra_backend.tests.integration.critical_paths.test_user_invitation_flow import (
+from .integration.critical_paths.test_user_invitation_flow import (
     TestUserInvitationFlow,
 )
-from netra_backend.tests.integration.critical_paths.test_workspace_resource_sharing import (
+from .integration.critical_paths.test_workspace_resource_sharing import (
     TestWorkspaceResourceSharing,
 )
 

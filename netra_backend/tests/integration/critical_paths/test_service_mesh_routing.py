@@ -32,7 +32,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 # Add project root to path
-from netra_backend.tests.service_mesh_fixtures import (
+from netra_backend.tests.integration.service_mesh_fixtures import (
     calculate_backoff_accuracy,
     service_mesh_l4,
 )

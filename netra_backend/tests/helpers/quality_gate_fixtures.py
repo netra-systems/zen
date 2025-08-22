@@ -14,7 +14,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )
-from netra_backend.tests.helpers.quality_gate_helpers import (
+from .quality_gate_helpers import (
     create_quality_service,
     create_redis_mock,
 )

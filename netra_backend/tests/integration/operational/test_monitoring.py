@@ -34,7 +34,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.shared_fixtures import (
+from netra_backend.tests.integration.operational.shared_fixtures import (
     QualityMonitoringTestHelper,
     # Add project root to path
     operational_infrastructure,

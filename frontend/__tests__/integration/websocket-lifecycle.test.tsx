@@ -8,16 +8,16 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import { TestProviders } from '../setup/test-providers';
-import { WebSocketTestManager, createWebSocketManager } from '../helpers/websocket-test-manager';
+import { TestProviders } from '@/__tests__/setup/test-providers';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
 import {
   WebSocketConnectionLifecycle,
   measurePerformance
-} from '../helpers/websocket-test-utilities';
+} from '@/__tests__/helpers/websocket-test-utilities';
 import {
   ConnectionStateManager,
   measureConnectionTime
-} from '../setup/websocket-test-utils';
+} from '@/__tests__/setup/websocket-test-utils';
 import { WebSocketLifecycleTest } from './utils/websocket-test-components';
 
 describe('WebSocket Connection Lifecycle Tests', () => {

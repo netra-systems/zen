@@ -38,7 +38,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from netra_backend.tests.websocket_recovery_fixtures import (
+from netra_backend.tests.integration.websocket_recovery_fixtures import (
     # Add project root to path
 
     MockWebSocket,

@@ -24,7 +24,7 @@ from unittest.mock import Mock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.fixtures.database_test_fixtures import (
+from .database_test_fixtures import (
     # Add project root to path
     async_session_mock,
     clickhouse_mocker,

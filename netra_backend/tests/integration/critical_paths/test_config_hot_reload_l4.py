@@ -53,7 +53,7 @@ from netra_backend.app.services.websocket_manager import WebSocketManager
 SupervisorAgent = AsyncMock
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.secret_manager import SecretManager
-from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+from .integration.staging_config.base import StagingConfigTestBase
 
 
 logger = logging.getLogger(__name__)

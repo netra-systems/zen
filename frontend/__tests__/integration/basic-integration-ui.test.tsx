@@ -7,7 +7,7 @@ import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 import { setupTestEnvironment, clearStorages, resetStores, cleanupWebSocket } from './helpers/test-setup';
 import { assertTextContent } from './helpers/test-assertions';
 

@@ -42,7 +42,7 @@ from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.postgres_service import PostgresService
-from netra_backend.app.services.resource_monitor import ResourceMonitor
+from netra_backend.app.services.metrics.resource_monitor import ResourceMonitor
 from netra_backend.app.services.resource_pool import AgentResourcePool
 from test_framework.testcontainers_utils import TestcontainerHelper
 

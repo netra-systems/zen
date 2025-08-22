@@ -7,8 +7,8 @@ import random
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from netra_backend.tests.data_models import WorkloadMetric
-from netra_backend.tests.generator_base import DataGeneratorBase
+from .data_models import WorkloadMetric
+from .generator_base import DataGeneratorBase
 
 
 class WorkloadMetricGenerator(DataGeneratorBase):

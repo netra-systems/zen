@@ -25,7 +25,7 @@ from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.services.shared.transaction_test_helpers import (
+from .services.shared.transaction_test_helpers import (
     # Add project root to path
     MockDatabaseModel,
     MockRepository,

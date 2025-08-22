@@ -43,12 +43,12 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.helpers.supervisor_test_classes import (
+from .supervisor_test_classes import (
     CorpusAdminSubAgent,
     DemoService,
     SupplyResearcherSubAgent,
 )
-from netra_backend.tests.helpers.supervisor_test_helpers import (
+from .supervisor_test_helpers import (
     create_corpus_admin_mocks,
     create_demo_data,
     create_demo_service_mocks,

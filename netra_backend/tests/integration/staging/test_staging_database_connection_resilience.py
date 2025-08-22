@@ -32,7 +32,7 @@ import pytest
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.fixtures.database_test_fixtures import (
+from netra_backend.tests.integration.database_test_fixtures import (
     DatabaseErrorSimulator,
     MockConnectionPool,
     async_session_mock,

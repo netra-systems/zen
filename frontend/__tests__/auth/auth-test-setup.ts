@@ -12,38 +12,58 @@ jest.mock('react', () => ({
   useContext: mockUseContext
 }));
 
+// Default mock auth config data
+const defaultMockAuthConfig = {
+  development_mode: process.env.NODE_ENV === 'development',
+  google_client_id: 'mock-google-client-id',
+  endpoints: {
+    login: 'http://localhost:8081/auth/login',
+    logout: 'http://localhost:8081/auth/logout',
+    callback: 'http://localhost:8081/auth/callback',
+    token: 'http://localhost:8081/auth/token',
+    user: 'http://localhost:8081/auth/me',
+    dev_login: 'http://localhost:8081/auth/dev/login'
+  },
+  authorized_javascript_origins: ['http://localhost:3000'],
+  authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+};
+
 // Mock auth service client to prevent real navigation
 const mockAuthServiceClient = {
-  getConfig: jest.fn(),
+  getConfig: jest.fn().mockResolvedValue(defaultMockAuthConfig),
   initiateLogin: jest.fn(),
-  logout: jest.fn(),
+  logout: jest.fn().mockResolvedValue({ success: true }),
   getSession: jest.fn(),
   getCurrentUser: jest.fn(),
   validateToken: jest.fn(),
   refreshToken: jest.fn()
 };
 
+// Mock getAuthServiceConfig function
+const mockGetAuthServiceConfig = jest.fn(() => ({
+  baseUrl: 'http://localhost:8081',
+  endpoints: {
+    login: 'http://localhost:8081/auth/login',
+    logout: 'http://localhost:8081/auth/logout',
+    callback: 'http://localhost:8081/auth/callback',
+    token: 'http://localhost:8081/auth/token',
+    refresh: 'http://localhost:8081/auth/refresh',
+    validate_token: 'http://localhost:8081/auth/validate',
+    config: 'http://localhost:8081/auth/config',
+    session: 'http://localhost:8081/auth/session',
+    me: 'http://localhost:8081/auth/me'
+  },
+  oauth: {
+    googleClientId: 'mock-google-client-id',
+    redirectUri: 'http://localhost:3000/auth/callback',
+    javascriptOrigins: ['http://localhost:3000']
+  }
+}));
+
 jest.mock('@/lib/auth-service-config', () => ({
   authService: mockAuthServiceClient,
-  getAuthServiceConfig: jest.fn(() => ({
-    baseUrl: 'http://localhost:8081',
-    endpoints: {
-      login: 'http://localhost:8081/auth/login',
-      logout: 'http://localhost:8081/auth/logout',
-      callback: 'http://localhost:8081/auth/callback',
-      token: 'http://localhost:8081/auth/token',
-      refresh: 'http://localhost:8081/auth/refresh',
-      validate_token: 'http://localhost:8081/auth/validate',
-      config: 'http://localhost:8081/auth/config',
-      session: 'http://localhost:8081/auth/session',
-      me: 'http://localhost:8081/auth/me'
-    },
-    oauth: {
-      googleClientId: 'mock-google-client-id',
-      redirectUri: 'http://localhost:3000/auth/callback',
-      javascriptOrigins: ['http://localhost:3000']
-    }
-  }))
+  AuthServiceClient: jest.fn().mockImplementation(() => mockAuthServiceClient),
+  getAuthServiceConfig: mockGetAuthServiceConfig
 }));
 
 // Mock logger
@@ -58,6 +78,11 @@ jest.mock('@/lib/logger', () => ({
   logger: mockLogger
 }));
 
+// Mock debug logger used in auth-service-config
+jest.mock('@/utils/debug-logger', () => ({
+  logger: mockLogger
+}));
+
 // Mock configuration
 jest.mock('@/config', () => ({
   config: {
@@ -65,5 +90,8 @@ jest.mock('@/config', () => ({
   }
 }));
 
+// Note: We DON'T mock @/auth/service here because we want to test the real auth service
+// which will use our mocked authServiceClient from @/lib/auth-service-config
+
 // Export mocks for test access
-export { mockUseContext, mockAuthServiceClient, mockLogger };
+export { mockUseContext, mockAuthServiceClient, mockLogger, defaultMockAuthConfig, mockGetAuthServiceConfig };

@@ -23,7 +23,7 @@ ARCHITECTURE COMPLIANCE:
 # Add project root to path
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+from ..test_utils import setup_test_path
 from pathlib import Path
 import sys
 
@@ -77,7 +77,7 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.recovery_manager import RecoveryManager
 
 # Test utilities
-from netra_backend.tests.helpers.startup_check_helpers import (
+from .startup_check_helpers import (
 
     RealServiceTestValidator,
 

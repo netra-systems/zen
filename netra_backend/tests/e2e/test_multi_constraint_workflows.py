@@ -22,7 +22,7 @@ from typing import Dict
 import pytest
 
 # Add project root to path
-from tests.e2e.multi_constraint_test_helpers import (
+from netra_backend.tests.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
     # Add project root to path
     create_agent_instances,

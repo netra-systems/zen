@@ -25,7 +25,7 @@ from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
 from netra_backend.app.services.websocket.message_handler import MessageRouter
-from netra_backend.tests.websocket_test_utilities import MockMessageHandler
+from .websocket_test_utilities import MockMessageHandler
 
 # Add project root to path
 

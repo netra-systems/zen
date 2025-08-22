@@ -22,7 +22,7 @@ from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 
 # Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.tests.helpers.tool_permission_helpers import (
+from .tool_permission_helpers import (
     # Add project root to path
     MockRedisClient,
     assert_permission_definition_properties,

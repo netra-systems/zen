@@ -23,7 +23,7 @@ from langchain_core.tools import BaseTool
 
 # Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.test_tool_registry_registration_core import MockTool
+from .test_tool_registry_registration_core import MockTool
 
 # Add project root to path
 

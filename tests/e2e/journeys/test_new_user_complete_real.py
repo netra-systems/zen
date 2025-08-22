@@ -49,7 +49,7 @@ from tests.e2e.helpers.journey.new_user_journey_helpers import (
 )
 
 from tests.e2e.harness_complete import UnifiedTestHarness
-from tests.database_test_connections import DatabaseTestConnections
+from tests.e2e.database_test_connections import DatabaseTestConnections
 
 
 class CompleteNewUserJourneyTester:

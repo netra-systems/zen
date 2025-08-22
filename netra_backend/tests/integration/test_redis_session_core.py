@@ -46,7 +46,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from logging_config import central_logger
 
-from netra_backend.tests.redis_session_mocks import (
+from .redis_session_mocks import (
 
     MockRedisConnection,
 

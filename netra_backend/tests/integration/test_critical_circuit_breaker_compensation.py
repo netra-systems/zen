@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_fixtures_common import (
+from .test_fixtures_common import (
     mock_infrastructure,
     setup_circuit_breakers_for_chain,
     test_database,

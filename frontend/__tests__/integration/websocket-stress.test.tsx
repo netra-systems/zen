@@ -7,7 +7,7 @@
 
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import { WebSocketTestManager, createWebSocketManager } from '../helpers/websocket-test-manager';
+import.*from '@/__tests__/helpers/websocket-test-manager';
 
 describe('WebSocket Stress Testing', () => {
   let wsManager: WebSocketTestManager;

@@ -280,7 +280,7 @@ class WebSocketValidator:
             return False
     
     async def _test_websocket_upgrade(self, endpoint: WebSocketEndpoint) -> bool:
-        """Test WebSocket upgrade capability with JSON-first validation."""
+        """Test WebSocket upgrade capability with JSON-RPC format for MCP compatibility."""
         try:
             import websockets
             
@@ -290,8 +290,21 @@ class WebSocketValidator:
                 timeout=self.timeout,
                 ping_interval=None  # Disable ping during validation
             ) as websocket:
-                # Test JSON-first message validation
-                test_message = {"type": "ping", "timestamp": time.time()}
+                # Check if this is an MCP endpoint (path is /ws)
+                is_mcp_endpoint = endpoint.path == "/ws"
+                
+                if is_mcp_endpoint:
+                    # Send JSON-RPC format message for MCP endpoints
+                    test_message = {
+                        "jsonrpc": "2.0",
+                        "method": "ping",
+                        "params": {"timestamp": time.time()},
+                        "id": 1
+                    }
+                else:
+                    # Send regular JSON for other endpoints (like /ws/secure)
+                    test_message = {"type": "ping", "timestamp": time.time()}
+                
                 await websocket.send(json.dumps(test_message))
                 
                 # Wait for response with JSON validation
@@ -301,17 +314,35 @@ class WebSocketValidator:
                     if response:
                         try:
                             parsed_response = json.loads(response)
-                            # Validate basic message structure
-                            if not isinstance(parsed_response, dict) or "type" not in parsed_response:
-                                endpoint.last_error = "Invalid JSON message structure in response"
-                                return False
+                            
+                            if is_mcp_endpoint:
+                                # For MCP endpoints, check JSON-RPC response format
+                                if not isinstance(parsed_response, dict):
+                                    endpoint.last_error = "Invalid JSON-RPC response structure"
+                                    return False
+                                # Check for either result or error (both are valid JSON-RPC responses)
+                                if "jsonrpc" not in parsed_response:
+                                    endpoint.last_error = "Missing jsonrpc field in response"
+                                    return False
+                                # If there's an error, it's still a valid connection
+                                # MCP might return method not found, which is OK for validation
+                            else:
+                                # For regular endpoints, check basic message structure
+                                if not isinstance(parsed_response, dict) or "type" not in parsed_response:
+                                    endpoint.last_error = "Invalid JSON message structure in response"
+                                    return False
                         except json.JSONDecodeError:
                             endpoint.last_error = "Non-JSON response received"
                             return False
                     return True
                 except asyncio.TimeoutError:
-                    # No response is OK for ping, connection was established
-                    return True
+                    # For MCP endpoints, timeout might mean the method isn't recognized
+                    # But the connection itself was established, so it's OK
+                    if is_mcp_endpoint:
+                        return True
+                    # For other endpoints, timeout is a failure
+                    endpoint.last_error = "No response received within timeout"
+                    return False
                     
         except ImportError:
             # websockets library not available, skip WebSocket test

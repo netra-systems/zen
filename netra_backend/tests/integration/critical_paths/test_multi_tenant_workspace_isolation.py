@@ -48,7 +48,7 @@ from netra_backend.app.services.database.connection_manager import (
 )
 
 # Add project root to path
-from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+from .integration.staging_config.base import StagingConfigTestBase
 
 PermissionsService = AsyncMock
 from netra_backend.app.core.security import SecurityContext

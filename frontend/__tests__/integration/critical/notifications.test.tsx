@@ -8,7 +8,7 @@ import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import test utilities
-import { TestProviders } from '../../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Notification System Integration', () => {
   beforeEach(() => {

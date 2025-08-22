@@ -41,7 +41,7 @@ from netra_backend.app.services.billing.invoice_generator import InvoiceGenerato
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
 # Add project root to path
-from netra_backend.tests.l4_staging_critical_base import (
+from .l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )

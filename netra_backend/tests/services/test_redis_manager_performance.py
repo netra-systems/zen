@@ -22,11 +22,11 @@ import tracemalloc
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.redis_test_fixtures import (
+from .redis_test_fixtures import (
     RedisConnectionPool,
     performance_redis_manager,
 )
-from netra_backend.tests.helpers.redis_test_helpers import (
+from .redis_test_helpers import (
     calculate_hit_rate,
     measure_operation_latency,
     setup_batch_operations,

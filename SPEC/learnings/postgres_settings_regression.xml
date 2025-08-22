@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>PostgresSettingsRegression.Learnings</name>
+        <type>CriticalBugResolution</type>
+        <version>1.0</version>
+        <date>2025-08-21</date>
+        <description>Critical regression where postgres_events module had undefined settings variable causing startup failures.</description>
+        <business-value>Prevents 100% platform unavailability from database initialization failures</business-value>
+    </metadata>
+    
+    <problem-statement>
+        <title>Undefined Settings Variable in postgres_events.py</title>
+        <description>
+            The postgres_events.py module referenced a 'settings' variable in 4 locations 
+            without ever initializing it, causing NameError during database connection events.
+        </description>
+        <error-message>
+            NameError: name 'settings' is not defined
+            Location: netra_backend.app.db.postgres_session:get_async_db:157
+        </error-message>
+        <impact>
+            - Complete system startup failure
+            - All database operations fail
+            - Development environment unusable
+            - Production deployment would be catastrophic
+        </impact>
+    </problem-statement>
+    
+    <root-cause>
+        <title>Missing Module-Level Settings Initialization</title>
+        <analysis>
+            The module defined a get_settings() function to avoid circular imports,
+            but never called it to initialize the module-level settings variable.
+            This appears to be a historical bug that existed even before recent
+            import standardization changes.
+        </analysis>
+        <code-locations>
+            <location file="postgres_events.py" line="68">
+                if settings.log_async_checkout:  # settings undefined
+            </location>
+            <location file="postgres_events.py" line="98">
+                if settings.log_async_checkout:  # settings undefined
+            </location>
+            <location file="postgres_events.py" line="122">
+                if settings.log_async_checkout:  # settings undefined
+            </location>
+            <location file="postgres_events.py" line="134">
+                if settings.log_async_checkout:  # settings undefined
+            </location>
+        </code-locations>
+    </root-cause>
+    
+    <resolution>
+        <title>Initialize Settings at Module Level</title>
+        <fix>
+            Added single line after get_settings() function definition:
+            settings = get_settings()
+        </fix>
+        <code>
+            # Import settings lazily to avoid circular dependency
+            def get_settings():
+                """Get settings lazily to avoid circular import."""
+                from netra_backend.app.config import get_config
+                return get_config()
+            
+            # Initialize settings at module level (THE FIX)
+            settings = get_settings()
+        </code>
+    </resolution>
+    
+    <testing-gaps>
+        <title>Why Tests Failed to Catch This</title>
+        
+        <gap id="1" name="Over-Mocking">
+            <description>
+                Tests mocked AsyncEngine and database connections, preventing
+                real SQLAlchemy event handler execution where the error occurs.
+            </description>
+        </gap>
+        
+        <gap id="2" name="Import vs Runtime">
+            <description>
+                The error only manifests when database connections are actually
+                established, not during module import or event handler registration.
+            </description>
+        </gap>
+        
+        <gap id="3" name="No Direct Function Testing">
+            <description>
+                No tests directly called the event handler helper functions
+                that reference settings.
+            </description>
+        </gap>
+        
+        <gap id="4" name="Static Analysis Missing">
+            <description>
+                No AST-based analysis to detect undefined variable references
+                at the code level.
+            </description>
+        </gap>
+    </testing-gaps>
+    
+    <prevention-strategy>
+        <title>Preventing Similar Regressions</title>
+        
+        <action id="1" name="Add Direct Function Tests">
+            <description>
+                Test all event handler functions directly, not just through
+                mocked engine setup.
+            </description>
+            <example>
+                def test_postgres_events_functions_have_settings():
+                    from netra_backend.app.db import postgres_events
+                    # Verify settings is accessible
+                    assert hasattr(postgres_events, 'settings')
+                    # Test functions don't raise NameError
+                    mock_record = Mock(spec=ConnectionPoolEntry)
+                    postgres_events._log_async_connection_established(mock_record)
+            </example>
+        </action>
+        
+        <action id="2" name="Integration Tests with Real Engines">
+            <description>
+                Use real SQLAlchemy engines (even in-memory SQLite) to trigger
+                actual event handlers during tests.
+            </description>
+        </action>
+        
+        <action id="3" name="Static Analysis">
+            <description>
+                Implement AST-based analysis to detect undefined variable
+                references before runtime.
+            </description>
+        </action>
+        
+        <action id="4" name="Startup Integration Tests">
+            <description>
+                Test complete startup paths including dev_launcher to ensure
+                all initialization sequences work.
+            </description>
+        </action>
+    </prevention-strategy>
+    
+    <patterns-to-watch>
+        <pattern id="1" name="Lazy Import Functions">
+            <description>
+                When using get_X() functions to avoid circular imports,
+                ALWAYS ensure the result is assigned to a module-level variable
+                if it will be referenced elsewhere in the module.
+            </description>
+        </pattern>
+        
+        <pattern id="2" name="Event Handler Testing">
+            <description>
+                SQLAlchemy event handlers require special testing attention
+                as they're only triggered during actual database operations.
+            </description>
+        </pattern>
+        
+        <pattern id="3" name="Settings Access Pattern">
+            <description>
+                Prefer explicit settings parameter passing over module-level
+                globals when possible to avoid this class of errors.
+            </description>
+        </pattern>
+    </patterns-to-watch>
+    
+    <related-files>
+        <file>netra_backend/app/db/postgres_events.py</file>
+        <file>netra_backend/app/db/postgres_session.py</file>
+        <file>netra_backend/app/db/postgres_core.py</file>
+        <file>netra_backend/tests/critical/test_postgres_settings_regression.py</file>
+    </related-files>
+</specification>

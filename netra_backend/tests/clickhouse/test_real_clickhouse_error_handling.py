@@ -22,7 +22,7 @@ from netra_backend.app.config import get_config
 
 # Add project root to path
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
-from netra_backend.tests.clickhouse_test_fixtures import get_clickhouse_config
+from .clickhouse_test_fixtures import get_clickhouse_config
 
 # Add project root to path
 

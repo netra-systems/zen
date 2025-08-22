@@ -29,8 +29,8 @@ from netra_backend.app.schemas.websocket_models import (
 )
 
 # Add project root to path
-from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket
+from .test_unified_message_flow import MessageFlowTracker
+from .websocket_mocks import MockWebSocket
 
 # Add project root to path
 

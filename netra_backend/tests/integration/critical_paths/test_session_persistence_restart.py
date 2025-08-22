@@ -53,7 +53,7 @@ from ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.database.models import User, Session
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 
 logger = central_logger.get_logger(__name__)

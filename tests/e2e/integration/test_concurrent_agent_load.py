@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 import psutil
 import pytest
 
-from tests.database_test_connections import DatabaseConnectionManager
+from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.real_client_types import ClientConfig
 from tests.e2e.real_http_client import RealHTTPClient

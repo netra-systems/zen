@@ -27,7 +27,7 @@ import uuid
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas import SubAgentLifecycle
-from tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
+from netra_backend.tests.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 # Add project root to path
 

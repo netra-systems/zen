@@ -20,7 +20,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityMetrics,
 )
-from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
+from .quality_gate_comprehensive_helpers import (
     create_all_penalties_metrics,
     create_claims_with_evidence_content,
     create_context_with_data_source,

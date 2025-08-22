@@ -33,7 +33,7 @@ import pytest
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.cache_invalidation_fixtures import (
+from netra_backend.tests.integration.cache_invalidation_fixtures import (
     CACHE_TEST_CONFIG,
     # Add project root to path
     CacheInvalidationMetrics,

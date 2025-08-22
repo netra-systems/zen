@@ -27,7 +27,7 @@ from netra_backend.app.services.quality_monitoring_service import (
 )
 
 # Add project root to path
-from netra_backend.tests.helpers.quality_monitoring_fixtures import (
+from .quality_monitoring_fixtures import (
     actual_metrics,
     # Add project root to path
     sample_quality_metrics,

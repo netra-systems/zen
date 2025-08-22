@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.database_repository_helpers import (
+from .database_repository_helpers import (
     # Add project root to path
     create_test_thread,
     create_test_threads,

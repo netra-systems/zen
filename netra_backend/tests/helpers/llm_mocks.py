@@ -7,7 +7,7 @@ from typing import Any, AsyncIterator, Type, TypeVar
 
 from pydantic import BaseModel
 
-from netra_backend.tests.utils.mock_helpers import create_mock_structured_response
+from .mock_helpers import create_mock_structured_response
 
 T = TypeVar('T', bound=BaseModel)
 

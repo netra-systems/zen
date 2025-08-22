@@ -20,7 +20,7 @@ import {
   checkPageInteractive,
   FirstLoadTestComponent 
 } from '../helpers/first-load-helpers';
-import { setupFirstLoadMockComponents, mockPush, mockReplace } from '../helpers/first-load-mock-setup';
+import.*from '@/__tests__/helpers/first-load-mock-setup';
 
 setupFirstLoadMockComponents();
 

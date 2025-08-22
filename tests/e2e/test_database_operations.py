@@ -30,7 +30,7 @@ import redis.asyncio as redis
 from netra_backend.app.logging_config import central_logger
 
 # Import test infrastructure
-from tests.database_test_connections import DatabaseTestConnections
+from tests.e2e.database_test_connections import DatabaseTestConnections
 from tests.database_test_operations import (
     ChatMessageOperations,
     SessionCacheOperations,

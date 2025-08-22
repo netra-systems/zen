@@ -27,6 +27,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import * as ThreadServiceModule from '@/services/threadService';
 import { TestProviders } from '../../test-utils/providers';
+import { FilterType } from '@/components/chat/ChatSidebarTypes';
 
 // Mock WebSocket hook
 jest.mock('@/hooks/useWebSocket', () => ({
@@ -126,6 +127,8 @@ export const mockChatStore = {
   resetLayers: jest.fn(),
   threads: [] as any[],
   currentThreadId: null as string | null,
+  loadMessages: jest.fn(),
+  setThreadLoading: jest.fn()
 };
 
 export const mockAuthStore = {
@@ -203,7 +206,14 @@ export const mockThreadService = {
   }),
   getThread: jest.fn(),
   deleteThread: jest.fn(),
-  updateThread: jest.fn()
+  updateThread: jest.fn(),
+  getThreadMessages: jest.fn().mockResolvedValue({
+    messages: [],
+    thread_id: 'test-thread',
+    total: 0,
+    limit: 50,
+    offset: 0
+  })
 };
 
 // Sample thread data matching Thread interface from threadService
@@ -273,8 +283,10 @@ export class ChatSidebarTestSetup {
     (useAuthState as jest.Mock).mockReturnValue(mockAuthState);
     jest.mocked(useAuthStore).mockReturnValue(mockAuthStore);
     
-    // Configure other store mocks
+    // Configure other store mocks - CRITICAL: Mock both hook and getState()
     jest.mocked(useUnifiedChatStore).mockReturnValue(mockChatStore);
+    // CRITICAL: Mock getState() method for handlers that use useUnifiedChatStore.getState()
+    (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(mockChatStore);
     
     // CRITICAL: Reset ChatSidebar hooks to default empty state
     // This ensures clean state before each test - use mockReset then mockReturnValue
@@ -328,6 +340,8 @@ export class ChatSidebarTestSetup {
   configureStore(overrides: Partial<typeof mockChatStore>) {
     const storeConfig = { ...mockChatStore, ...overrides };
     jest.mocked(useUnifiedChatStore).mockReturnValue(storeConfig);
+    // CRITICAL: Also update getState() mock for handlers
+    (useUnifiedChatStore as any).getState = jest.fn().mockReturnValue(storeConfig);
     return storeConfig;
   }
 
@@ -559,7 +573,7 @@ export const TestChatSidebar: React.FC = () => {
     currentPage
   );
   
-  const handleFilterChange = (type: any) => {
+  const handleFilterChange = (type: FilterType) => {
     setFilterType(type);
     setCurrentPage(1);
   };

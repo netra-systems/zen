@@ -22,7 +22,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
-from netra_backend.tests.supply_researcher_fixtures import (
+from .supply_researcher_fixtures import (
     # Add project root to path
     agent,
     mock_supply_service,

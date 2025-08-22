@@ -22,14 +22,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.tests.helpers.debug_migration_test_helpers import (
+from .debug_migration_test_helpers import (
     # Add project root to path
     DebugTestHelpers,
     MigrationTestHelpers,
 )
 
 # Add project root to path
-from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
+from .rate_retry_monitoring_test_helpers import (
     MonitoringTestHelpers,
 )
 

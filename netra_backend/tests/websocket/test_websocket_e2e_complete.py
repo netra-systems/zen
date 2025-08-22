@@ -47,7 +47,7 @@ from netra_backend.app.schemas.websocket_models import (
 )
 
 # Add project root to path
-from tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 

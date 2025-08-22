@@ -32,7 +32,7 @@ import time
 import pytest
 
 # Add project root to path
-from netra_backend.tests.shared_fixtures import mock_llm_manager, mock_llm_provider
+from netra_backend.tests.integration.llm.shared_fixtures import mock_llm_manager, mock_llm_provider
 
 # Add project root to path
 

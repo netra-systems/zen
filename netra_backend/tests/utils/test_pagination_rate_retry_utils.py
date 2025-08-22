@@ -22,10 +22,10 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.helpers.network_pagination_test_helpers import (
+from .network_pagination_test_helpers import (
     PaginationTestHelpers,
 )
-from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
+from .rate_retry_monitoring_test_helpers import (
     # Add project root to path
     RateLimiterTestHelpers,
     RetryTestHelpers,

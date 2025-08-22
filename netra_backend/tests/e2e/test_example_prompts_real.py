@@ -19,7 +19,7 @@ setup_test_path()
 import pytest
 
 # Add project root to path
-from tests.e2e.example_prompts_core import (
+from netra_backend.tests.example_prompts_core import (
     # Add project root to path
     EXAMPLE_PROMPTS,
     create_ep_001_state,
@@ -34,7 +34,7 @@ from tests.e2e.example_prompts_core import (
     execute_full_prompt_workflow,
     real_llm_prompt_setup,
 )
-from tests.e2e.example_prompts_validators import (
+from netra_backend.tests.example_prompts_validators import (
     validate_capacity_planning_result,
     validate_cost_optimization_result,
     validate_function_optimization_result,

@@ -33,7 +33,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.tests.fixtures.llm_agent_fixtures import (
+from .llm_agent_fixtures import (
     mock_db_session,
     # Add project root to path
     mock_llm_manager,

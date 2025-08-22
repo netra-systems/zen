@@ -23,7 +23,7 @@ import pytest
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.tests.test_fixtures_common import (
+from .test_fixtures_common import (
     create_test_user_with_oauth,
     mock_infrastructure,
     test_database,

@@ -20,12 +20,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from tests.e2e.test_capacity_planning import TestCapacityPlanningWorkflows
-from tests.e2e.test_rate_limit_analysis import TestRateLimitImpactAnalysis
-from tests.e2e.test_scaling_edge_cases import TestScalingEdgeCases
-from tests.e2e.test_scaling_integrity import TestScalingWorkflowIntegrity
-from tests.e2e.test_scaling_metrics import TestScalingMetricsValidation
-from tests.e2e.test_usage_increase_analysis import (
+from netra_backend.tests.test_capacity_planning import TestCapacityPlanningWorkflows
+from netra_backend.tests.test_rate_limit_analysis import TestRateLimitImpactAnalysis
+from netra_backend.tests.test_scaling_edge_cases import TestScalingEdgeCases
+from netra_backend.tests.test_scaling_integrity import TestScalingWorkflowIntegrity
+from netra_backend.tests.test_scaling_metrics import TestScalingMetricsValidation
+from netra_backend.tests.test_usage_increase_analysis import (
     TestUsageIncreaseAnalysis,
 )
 

@@ -16,7 +16,7 @@ import pytest
 
 # Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.tests.helpers.tool_dispatcher_helpers import (
+from .tool_dispatcher_helpers import (
     assert_corpus_tools_registered,
     assert_synthetic_tools_registered,
     # Add project root to path

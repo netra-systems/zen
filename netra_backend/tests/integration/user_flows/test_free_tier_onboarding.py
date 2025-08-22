@@ -53,14 +53,14 @@ from netra_backend.app.services.user_service import UserService as UsageService
 from netra_backend.app.services.websocket_service import WebSocketService as WebSocketManager
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
-from netra_backend.tests.test_helpers.user_flow_base import (
+from .user_flow_base import (
 
 # Add project root to path
 
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance
 
 )
-from netra_backend.tests.fixtures.user_journey_data import UserTestData, UserJourneyScenarios
+from .user_journey_data import UserTestData, UserJourneyScenarios
 
 
 @pytest.mark.integration

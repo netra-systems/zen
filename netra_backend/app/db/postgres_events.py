@@ -19,6 +19,9 @@ def get_settings():
     from netra_backend.app.config import get_config
     return get_config()
 
+# Initialize settings at module level
+settings = get_settings()
+
 logger = central_logger.get_logger(__name__)
 
 

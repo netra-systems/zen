@@ -70,7 +70,7 @@ RedisSessionManager = AsyncMock
 
 
 WebSocketManager = AsyncMock
-from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 
 StagingTestSuite = AsyncMock
 

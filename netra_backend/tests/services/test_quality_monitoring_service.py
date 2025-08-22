@@ -20,9 +20,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 setup_test_path()
 
-from netra_backend.tests.services.test_quality_monitoring_alerts import *
-from netra_backend.tests.services.test_quality_monitoring_basic import *
-from netra_backend.tests.services.test_quality_monitoring_integration import *
-from netra_backend.tests.services.test_quality_monitoring_metrics import *
+from .test_quality_monitoring_alerts import *
+from .test_quality_monitoring_basic import *
+from .test_quality_monitoring_integration import *
+from .test_quality_monitoring_metrics import *
 
 # Add project root to path

@@ -31,7 +31,7 @@ import httpx
 
 # Import test environment config for environment-aware configuration
 try:
-    from tests.test_environment_config import TestEnvironmentConfig
+    from tests.e2e.test_environment_config import TestEnvironmentConfig
 except ImportError:
     TestEnvironmentConfig = None
 

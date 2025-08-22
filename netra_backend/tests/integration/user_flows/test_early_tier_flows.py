@@ -37,8 +37,8 @@ from redis.asyncio import Redis
 
 from netra_backend.app.services.user_service import UserService as UsageService
 
-from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase
-from netra_backend.tests.fixtures.user_journey_data import BillingTestData
+from .user_flow_base import UserFlowTestBase
+from .user_journey_data import BillingTestData
 
 # Add project root to path
 

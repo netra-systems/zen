@@ -41,7 +41,7 @@ import pytest
 
 from netra_backend.app.db.clickhouse import ClickHouseService
 from netra_backend.app.services.thread_analytics import get_analytics_dashboard
-from netra_backend.tests.helpers.analytics_export_helpers import (
+from netra_backend.tests.integration.helpers.analytics_export_helpers import (
     AdvancedAnalyticsExportInfrastructure,
     AnalyticsDataGenerator,
     ExportConfigFactory,

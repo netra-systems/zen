@@ -37,7 +37,7 @@ from enum import Enum
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer
+from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
 
 # Add project root to path
 

@@ -12,15 +12,15 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from tests.e2e.infrastructure.llm_test_manager import (
+from ..e2e.infrastructure.llm_test_manager import (
     LLMTestConfig,
     LLMTestManager,
     LLMTestModel,
     LLMTestRequest,
     LLMTestResponse,
 )
-from tests.e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
-from tests.e2e.infrastructure.llm_response_cache import (
+from ..e2e.infrastructure.llm_mock_client import LLMTestMockClient, MockClientFactory
+from ..e2e.infrastructure.llm_response_cache import (
     CacheEntry,
     CacheStatistics,
     LLMResponseCache,

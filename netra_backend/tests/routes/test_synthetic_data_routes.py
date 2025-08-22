@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utilities import base_client
+from .test_utilities import base_client
 
 # Add project root to path
 

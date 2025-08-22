@@ -116,3 +116,6 @@ export const getTestProviderWrapper = () => {
     </div>
   );
 };
+
+// Additional export aliases to match import expectations
+export const WebSocketConnectionLifecycle = WebSocketLifecycleTest;

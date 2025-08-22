@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 import { useChatStore } from '@/store/chatStore';
 
 // Import test utilities
-import { TestProviders } from '../../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 
 describe('Real-time Message Streaming', () => {
   beforeEach(() => {

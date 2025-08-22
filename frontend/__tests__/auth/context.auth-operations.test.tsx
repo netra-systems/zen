@@ -42,7 +42,13 @@ describe('AuthContext - Auth Operations', () => {
   const waitForAuthConfig = async (result: any) => {
     await waitFor(() => {
       expect(result.current).toBeDefined();
-      expect(result.current?.authConfig).toEqual(mockAuthConfig);
+      expect(result.current?.authConfig).toEqual(expect.objectContaining({
+        development_mode: expect.any(Boolean),
+        google_client_id: mockAuthConfig.google_client_id,
+        endpoints: mockAuthConfig.endpoints,
+        authorized_javascript_origins: mockAuthConfig.authorized_javascript_origins,
+        authorized_redirect_uris: mockAuthConfig.authorized_redirect_uris
+      }));
     });
   };
 

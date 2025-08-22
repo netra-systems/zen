@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import httpx

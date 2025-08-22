@@ -35,7 +35,7 @@ from netra_backend.app.models.message import Message
 
 # Add project root to path
 from netra_backend.app.models.thread import Thread
-from netra_backend.tests.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     agent_dispatcher,
     assert_websocket_message_flow,
     verify_user_in_database,

@@ -21,7 +21,7 @@ from netra_backend.app.services.external_api_client import (
     HTTPError,
     ResilientHTTPClient,
 )
-from netra_backend.tests.services.external_api_client_utils import (
+from .external_api_client_utils import (
     configure_request_flow_mocks,
     create_async_context_manager,
     # Add project root to path

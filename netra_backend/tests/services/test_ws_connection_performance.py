@@ -40,7 +40,7 @@ from netra_backend.app.services.websocket.ws_manager import (
     WebSocketManager,
 
 )
-from netra_backend.tests.test_ws_connection_mocks import (
+from .test_ws_connection_mocks import (
 
     MockConnectionPool,
     # Add project root to path

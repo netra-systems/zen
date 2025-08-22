@@ -15,7 +15,7 @@ import { mockAuthServiceResponses } from '@/__tests__/mocks/auth-service-mock';
 
 // Mock data - uses independent auth service endpoints
 export const mockAuthConfig = {
-  development_mode: false,
+  development_mode: process.env.NODE_ENV === 'development',
   google_client_id: 'mock-google-client-id',
   endpoints: {
     login: 'http://localhost:8081/auth/login',

@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
 from netra_backend.app.models.user import User
-from netra_backend.tests.first_time_user_fixtures import (
+from netra_backend.tests.integration.first_time_user_fixtures import (
     assert_user_registration_success,
     auth_service,
     get_mock_provider_configs,

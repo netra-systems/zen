@@ -36,7 +36,7 @@ from netra_backend.app.schemas.Request import RequestModel
 from netra_backend.app.services.agent_service_core import AgentService
 
 # Add project root to path
-from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import (
+from .integration.critical_missing.shared_infrastructure.containerized_services import (
     ServiceOrchestrator,
 )
 

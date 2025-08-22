@@ -24,7 +24,7 @@ from typing import Dict, Optional
 import httpx
 
 # Add project root to path
-from netra_backend.tests.base import StagingConfigTestBase
+from .base import StagingConfigTestBase
 
 # Add project root to path
 

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { TestProviders } from '../test-utils/providers';
+import { TestProviders } from '@/__tests__/setup/test-providers';
 import { 
   initInfrastructureTest,
   setupFetchMock,

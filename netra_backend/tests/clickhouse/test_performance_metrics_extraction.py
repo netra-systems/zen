@@ -30,7 +30,7 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     validate_clickhouse_query,
 
 )
-from netra_backend.tests.realistic_test_fixtures import validate_array_query_syntax
+from .realistic_test_fixtures import validate_array_query_syntax
 
 
 class TestPerformanceMetricsWithClickHouse:

@@ -22,7 +22,7 @@ from logging_config import central_logger as logger
 
 # Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.tests.clickhouse_test_fixtures import (
+from .clickhouse_test_fixtures import (
     build_corpus_create_query,
     # Add project root to path
     check_table_create_permission,
