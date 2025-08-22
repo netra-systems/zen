@@ -31,7 +31,7 @@ import pytest
 from tests.agent_startup_validators import AgentStartupValidatorSuite
 
 # Test infrastructure
-from tests.config import TEST_CONFIG, TestTier
+from tests.e2e.config import TEST_CONFIG, TestTier
 
 
 class CoverageLevel(str, Enum):

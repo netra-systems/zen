@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.user_journey_executor import TestUser, UserJourneyExecutor
-from tests.test_environment_config import (
+from tests.e2e.config import (
     TestEnvironmentConfig,
     TestEnvironmentType,
     get_test_environment_config,

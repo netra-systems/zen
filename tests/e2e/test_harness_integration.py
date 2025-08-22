@@ -15,7 +15,7 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.config import setup_test_environment
+from tests.e2e.config import setup_test_environment
 from tests.harness_complete import (
     TestHarnessContext,
     UnifiedTestHarnessComplete,

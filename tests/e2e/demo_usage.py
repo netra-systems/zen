@@ -5,7 +5,7 @@ This demonstrates how to use the unified test configuration
 system for consistent testing across all customer tiers.
 """
 
-from tests.config import (
+from tests.e2e.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_SECRETS,
@@ -147,4 +147,4 @@ if __name__ == "__main__":
     
     print("Demo completed successfully!")
     print("\nTo use in your tests:")
-    print("from tests.config import TEST_USERS, get_test_user, TestDataFactory")
+    print("from tests.e2e.config import TEST_USERS, get_test_user, TestDataFactory")

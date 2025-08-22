@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from tests.oauth_test_providers import (
+from tests.e2e.oauth_test_providers import (
     GitHubOAuthProvider,
     GoogleOAuthProvider,
     OAuthUserFactory,

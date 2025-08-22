@@ -40,7 +40,7 @@ import pytest
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from helpers.unified_flow_helpers import (
+from tests.e2e.helpers.core.unified_flow_helpers import (
     ChatFlowSimulationHelper,
     ConcurrentJourneyHelper,
     ControlledLoginHelper,

@@ -33,7 +33,7 @@ from tests.e2e.test_auth_oauth_flows import (
     OAuthFlowTestRunner,
     OAuthIntegrationTestValidator,
 )
-from tests.oauth_test_providers import OAuthUserFactory
+from tests.e2e.oauth_test_providers import OAuthUserFactory
 
 logger = central_logger.get_logger(__name__)
 

@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 logger = logging.getLogger(__name__)
 

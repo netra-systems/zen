@@ -31,7 +31,7 @@ from netra_backend.app.tests.test_utilities.websocket_mocks import (
     MockWebSocket,
     WebSocketBuilder,
 )
-from tests.config import (
+from tests.e2e.config import (
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,

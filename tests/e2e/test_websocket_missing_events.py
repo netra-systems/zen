@@ -22,7 +22,7 @@ import pytest
 
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.websocket_client import WebSocketTestClient
-from tests.config import UnifiedTestConfig
+from tests.e2e.config import UnifiedTestConfig
 
 
 class TestWebSocketMissingEvents:

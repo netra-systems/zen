@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from tests.database_sync_fixtures import DatabaseSyncValidator
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.real_websocket_client import RealWebSocketClient
 
 

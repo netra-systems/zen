@@ -26,7 +26,7 @@ from tests.agent_orchestration_fixtures import (
     mock_supervisor_agent,
     websocket_mock,
 )
-from tests.config import (
+from tests.e2e.config import (
     TEST_USERS,
     TestTier,
     create_unified_config,

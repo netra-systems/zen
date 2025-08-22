@@ -24,7 +24,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 # Import MockWebSocket from the actual location
 try:

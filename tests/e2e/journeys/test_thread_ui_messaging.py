@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from tests.e2e.integration.thread_test_fixtures_core import (
+from tests.e2e.fixtures.core.thread_test_fixtures_core import (
     ThreadTestDataFactory,
     test_users,
     unified_harness,

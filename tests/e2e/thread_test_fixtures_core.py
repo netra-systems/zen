@@ -21,7 +21,7 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
-from tests.config import (
+from tests.e2e.config import (
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,

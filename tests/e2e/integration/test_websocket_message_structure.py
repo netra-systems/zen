@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 import pytest
 
-from tests.config import TEST_ENDPOINTS, TEST_USERS
+from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.real_websocket_client import RealWebSocketClient
 
 
@@ -379,7 +379,7 @@ class TestWebSocketMessageStructure:
 
     async def _establish_connection(self, user_id: str) -> RealWebSocketClient:
         """Establish WebSocket connection for testing."""
-        from tests.config import TestDataFactory
+        from tests.e2e.config import TestDataFactory
         
         client = RealWebSocketClient(TEST_ENDPOINTS.ws_url)
         headers = TestDataFactory.create_websocket_auth(f"test-token-{user_id}")

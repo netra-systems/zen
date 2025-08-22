@@ -1,129 +1,234 @@
 #!/usr/bin/env python3
 """
-Fix E2E test helper imports to use root-level tests directory imports.
+E2E Test Import Fixer
 
-This script corrects imports from:
-  from tests.e2e.* 
-to:
-  from tests.e2e.*
-
-and from:
-  from tests.*
-to:
-  from tests.*
+Automatically fixes imports in all moved test files after the test directory reorganization.
+Updates imports to reflect the new test structure under tests/e2e/.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Development velocity
-- Business Goal: Ensure consistent import patterns for test helpers
-- Value Impact: Reduces confusion and prevents import errors
-- Strategic Impact: Maintains clean test architecture
+- Segment: Platform/Internal (Development velocity protection)
+- Business Goal: Restore broken imports after test reorganization
+- Value Impact: Enables test execution after directory restructuring
+- Strategic Impact: Prevents development velocity loss due to import failures
+
+This script:
+1. Scans test files in tests/e2e/ subdirectories
+2. Updates imports that reference old paths
+3. Fixes helper imports to use new organized structure
+4. Reports all changes made
 """
 
 import os
 import re
+import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Set, Tuple
 
 
-def find_python_files(root_dir: Path) -> List[Path]:
-    """Find all Python files in the project."""
-    python_files = []
-    for file_path in root_dir.rglob("*.py"):
-        # Skip __pycache__ directories
-        if "__pycache__" in str(file_path):
-            continue
-        python_files.append(file_path)
-    return python_files
-
-
-def fix_imports_in_file(file_path: Path) -> Tuple[bool, List[str]]:
-    """Fix imports in a single file."""
-    changes = []
+class ImportFixer:
+    """Fixes imports in moved test files."""
     
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
-        return False, []
+    def __init__(self, project_root: Path):
+        self.project_root = project_root
+        self.changes_made = []
+        self.files_processed = 0
+        
+        # Define import mappings
+        self.import_mappings = {
+            # Old unified paths to new paths
+            r'from tests\.unified\.e2e\.helpers': 'from tests.e2e.helpers',
+            r'from tests\.unified\.e2e\.fixtures': 'from tests.e2e.fixtures',
+            
+            # Old backend paths to new paths
+            r'from netra_backend\.tests\.e2e\.helpers': 'from tests.e2e.helpers',
+            r'from netra_backend\.tests\.e2e\.fixtures': 'from tests.e2e.fixtures',
+            r'from netra_backend\.tests\.e2e\.data': 'from tests.e2e.data',
+            r'from netra_backend\.tests\.e2e\.validators': 'from tests.e2e.validators',
+            r'from netra_backend\.tests\.e2e\.infrastructure': 'from tests.e2e.infrastructure',
+            
+            # Legacy test_utils path
+            r'from netra_backend\.tests\.test_utils': 'from tests.test_utils',
+            
+            # Fix missing module imports - map them to their new locations
+            r'from tests\.jwt_token_helpers': 'from tests.e2e.jwt_token_helpers',
+            r'from tests\.oauth_test_providers': 'from tests.e2e.oauth_test_providers', 
+            r'from tests\.config': 'from tests.e2e.config',
+            r'from tests\.e2e\.auth_flow_testers': 'from tests.e2e.auth_flow_testers',
+            
+            # Fix imports referencing old integration paths for moved files
+            r'from tests\.e2e\.integration\.account_deletion_flow_manager': 'from tests.e2e.account_deletion_flow_manager',
+            r'from tests\.e2e\.integration\.agent_conversation_helpers': 'from tests.e2e.agent_conversation_helpers',
+            r'from tests\.e2e\.integration\.auth_flow_manager': 'from tests.e2e.integration.auth_flow_manager',
+            r'from tests\.e2e\.integration\.onboarding_flow_executor': 'from tests.e2e.onboarding_flow_executor',
+            
+            # Fix thread_test_fixtures_core to point to fixtures/core
+            r'from tests\.e2e\.integration\.thread_test_fixtures_core': 'from tests.e2e.fixtures.core.thread_test_fixtures_core',
+            r'from tests\.e2e\.thread_test_fixtures_core': 'from tests.e2e.fixtures.core.thread_test_fixtures_core',
+            
+            # Fix high_volume_data import to point to fixtures
+            r'from tests\.e2e\.high_volume_data': 'from tests.e2e.fixtures.high_volume_data',
+            
+            # Fix performance_base import to point to test_helpers
+            r'from tests\.e2e\.performance_base': 'from tests.e2e.test_helpers.performance_base',
+            
+            # Fix relative helper imports that should be absolute
+            r'^from helpers\.': 'from tests.e2e.helpers.',
+            
+            # Fix patch statements with old paths
+            r'tests\.unified\.e2e\.': 'tests.e2e.',
+            r'netra_backend\.tests\.e2e\.': 'tests.e2e.',
+        }
+        
+        # Import statement patterns for common import styles
+        self.import_statement_mappings = {
+            # Standard import statements
+            r'import tests\.jwt_token_helpers': 'import tests.e2e.jwt_token_helpers',
+            r'import tests\.oauth_test_providers': 'import tests.e2e.oauth_test_providers',
+            r'import tests\.config': 'import tests.e2e.config',
+            r'import tests\.e2e\.auth_flow_testers': 'import tests.e2e.auth_flow_testers',
+            
+            # From import with specific items
+            r'from tests\.jwt_token_helpers import': 'from tests.e2e.jwt_token_helpers import',
+            r'from tests\.oauth_test_providers import': 'from tests.e2e.oauth_test_providers import',
+            r'from tests\.config import': 'from tests.e2e.config import',
+        }
+        
+        # Specific helper module mappings based on new organization
+        self.helper_mappings = {
+            'from tests.e2e.helpers.user_journey_helpers': 'from tests.e2e.helpers.journey.user_journey_helpers',
+            'from tests.e2e.helpers.new_user_journey_helpers': 'from tests.e2e.helpers.journey.new_user_journey_helpers',
+            'from tests.e2e.helpers.real_service_journey_helpers': 'from tests.e2e.helpers.journey.real_service_journey_helpers',
+            'from tests.e2e.helpers.journey_validation_helpers': 'from tests.e2e.helpers.journey.journey_validation_helpers',
+            'from tests.e2e.helpers.oauth_journey_helpers': 'from tests.e2e.helpers.auth.oauth_journey_helpers',
+            'from tests.e2e.helpers.chat_helpers': 'from tests.e2e.helpers.core.chat_helpers',
+            'from tests.e2e.helpers.unified_flow_helpers': 'from tests.e2e.helpers.core.unified_flow_helpers',
+            'from tests.e2e.helpers.websocket_test_helpers': 'from tests.e2e.helpers.websocket.websocket_test_helpers',
+            'from tests.e2e.helpers.database_sync_helpers': 'from tests.e2e.helpers.database.database_sync_helpers',
+        }
     
-    original_content = content
+    def scan_test_directories(self) -> List[Path]:
+        """Scan for Python test files in the reorganized directories."""
+        test_dirs = [
+            self.project_root / "tests" / "e2e" / "journeys",
+            self.project_root / "tests" / "e2e" / "integration", 
+            self.project_root / "tests" / "e2e" / "performance",
+            self.project_root / "tests" / "e2e" / "resilience",
+            # Also include the root e2e directory for any remaining files
+            self.project_root / "tests" / "e2e",
+        ]
+        
+        python_files = []
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                if test_dir.name == "e2e":
+                    # For the root e2e directory, only get direct .py files
+                    python_files.extend(test_dir.glob("*.py"))
+                else:
+                    # For subdirectories, get all .py files recursively
+                    python_files.extend(test_dir.glob("**/*.py"))
+        
+        return python_files
     
-    # Pattern to match netra_backend.tests.e2e imports
-    pattern1 = r'from netra_backend\.tests\.e2e\.(.*)'
-    replacement1 = r'from tests.e2e.\1'
-    
-    # Pattern to match netra_backend.tests.unified imports
-    pattern2 = r'from netra_backend\.tests\.unified\.(.*)'
-    replacement2 = r'from tests.\1'
-    
-    # Find all matches before replacing
-    matches1 = re.findall(pattern1, content)
-    matches2 = re.findall(pattern2, content)
-    
-    # Apply replacements
-    content = re.sub(pattern1, replacement1, content)
-    content = re.sub(pattern2, replacement2, content)
-    
-    # Record changes
-    for match in matches1:
-        changes.append(f"  from tests.e2e.{match} -> from tests.e2e.{match}")
-    for match in matches2:
-        changes.append(f"  from tests.{match} -> from tests.{match}")
-    
-    # Write back if changed
-    if content != original_content:
+    def fix_imports_in_file(self, file_path: Path) -> bool:
+        """Fix imports in a single file. Returns True if changes were made."""
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-            return True, changes
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            original_content = content
+            lines = content.split('\n')
+            modified_lines = []
+            changes_in_file = []
+            
+            for line_num, line in enumerate(lines, 1):
+                original_line = line
+                modified_line = line
+                
+                # Apply general import mappings
+                for old_pattern, new_replacement in self.import_mappings.items():
+                    if re.search(old_pattern, modified_line):
+                        new_line = re.sub(old_pattern, new_replacement, modified_line)
+                        if new_line != modified_line:
+                            changes_in_file.append(f"  Line {line_num}: {modified_line.strip()} -> {new_line.strip()}")
+                            modified_line = new_line
+                
+                # Apply import statement mappings
+                for old_pattern, new_replacement in self.import_statement_mappings.items():
+                    if re.search(old_pattern, modified_line):
+                        new_line = re.sub(old_pattern, new_replacement, modified_line)
+                        if new_line != modified_line:
+                            changes_in_file.append(f"  Line {line_num}: {modified_line.strip()} -> {new_line.strip()}")
+                            modified_line = new_line
+                
+                # Apply specific helper mappings
+                for old_import, new_import in self.helper_mappings.items():
+                    if modified_line.strip().startswith(old_import):
+                        # Replace the specific import
+                        new_line = modified_line.replace(old_import, new_import)
+                        if new_line != modified_line:
+                            changes_in_file.append(f"  Line {line_num}: {modified_line.strip()} -> {new_line.strip()}")
+                            modified_line = new_line
+                
+                modified_lines.append(modified_line)
+            
+            # Write back if changes were made
+            if changes_in_file:
+                new_content = '\n'.join(modified_lines)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+                
+                self.changes_made.append(f"\n{file_path}:")
+                self.changes_made.extend(changes_in_file)
+                return True
+            
+            return False
+            
         except Exception as e:
-            print(f"Error writing {file_path}: {e}")
-            return False, []
+            print(f"Error processing {file_path}: {e}")
+            return False
     
-    return False, []
+    def run(self) -> None:
+        """Run the import fixing process."""
+        print("Starting E2E test import fixing...")
+        
+        # Find all Python test files
+        test_files = self.scan_test_directories()
+        print(f"Found {len(test_files)} Python files to process")
+        
+        # Process each file
+        files_changed = 0
+        for file_path in test_files:
+            self.files_processed += 1
+            if self.fix_imports_in_file(file_path):
+                files_changed += 1
+        
+        # Report results
+        print(f"\nProcessing complete!")
+        print(f"Files processed: {self.files_processed}")
+        print(f"Files modified: {files_changed}")
+        
+        if self.changes_made:
+            print(f"\nChanges made:")
+            for change in self.changes_made:
+                print(change)
+        else:
+            print("\nNo import changes were needed.")
 
 
 def main():
-    """Main function to fix all imports."""
-    # Get project root
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
+    """Main entry point."""
+    # Find project root
+    current_dir = Path(__file__).parent
+    project_root = current_dir.parent
     
-    print("Fixing E2E test helper imports...")
-    print(f"Project root: {project_root}")
-    print("-" * 60)
+    # Verify we're in the right place
+    if not (project_root / "tests" / "e2e").exists():
+        print("Error: Could not find tests/e2e directory. Make sure script is run from project root.")
+        sys.exit(1)
     
-    # Find all Python files
-    python_files = find_python_files(project_root)
-    
-    # Track statistics
-    files_modified = 0
-    total_changes = 0
-    
-    # Process each file
-    for file_path in python_files:
-        modified, changes = fix_imports_in_file(file_path)
-        
-        if modified:
-            files_modified += 1
-            total_changes += len(changes)
-            rel_path = file_path.relative_to(project_root)
-            print(f"\nFixed {rel_path}:")
-            for change in changes:
-                print(change)
-    
-    # Print summary
-    print("\n" + "=" * 60)
-    print(f"Summary:")
-    print(f"  Files scanned: {len(python_files)}")
-    print(f"  Files modified: {files_modified}")
-    print(f"  Total import fixes: {total_changes}")
-    
-    if files_modified == 0:
-        print("\nNo files needed fixing - all imports are already correct!")
-    else:
-        print(f"\nSuccessfully fixed {total_changes} imports in {files_modified} files.")
+    # Run the fixer
+    fixer = ImportFixer(project_root)
+    fixer.run()
 
 
 if __name__ == "__main__":

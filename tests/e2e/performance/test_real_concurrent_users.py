@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 import pytest_asyncio
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.real_client_types import ClientConfig, ConnectionState
 from tests.real_services_manager import (
     create_real_services_manager,

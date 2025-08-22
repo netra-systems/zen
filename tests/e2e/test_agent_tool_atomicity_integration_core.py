@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import pytest
 
 from netra_backend.app.schemas.shared_types import ProcessingResult
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 class ToolAtomicityLevel(Enum):

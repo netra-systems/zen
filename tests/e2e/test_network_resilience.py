@@ -24,7 +24,7 @@ from typing import Any, Dict
 import pytest
 
 # Import test configuration and network simulator
-from tests.config import TEST_CONFIG, TestDataFactory
+from tests.e2e.config import TEST_CONFIG, TestDataFactory
 from tests.network_failure_simulator import NetworkFailureSimulator
 
 

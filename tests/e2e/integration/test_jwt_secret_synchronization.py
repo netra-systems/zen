@@ -24,7 +24,7 @@ from tests.e2e.integration.token_lifecycle_helpers import (
     TokenLifecycleManager,
     WebSocketSessionManager,
 )
-from tests.jwt_token_helpers import (
+from tests.e2e.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestFixtures,
     JWTTestHelper,

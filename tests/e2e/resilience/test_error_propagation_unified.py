@@ -38,7 +38,7 @@ import pytest
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.config import TEST_ENDPOINTS, TEST_USERS
+from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.real_client_types import ClientConfig, ConnectionState
 from tests.real_http_client import RealHTTPClient

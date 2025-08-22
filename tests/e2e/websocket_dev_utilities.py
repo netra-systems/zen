@@ -24,7 +24,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import websockets
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 class ConnectionState(Enum):

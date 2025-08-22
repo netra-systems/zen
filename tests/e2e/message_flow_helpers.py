@@ -10,7 +10,7 @@ import asyncio
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, patch
 
-from tests.config import TestDataFactory, TestUser
+from tests.e2e.config import TestDataFactory, TestUser
 from tests.message_flow_validators import (
     MessageFlowValidator,
     MessagePersistenceValidator,

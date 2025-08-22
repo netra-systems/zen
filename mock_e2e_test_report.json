@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-08-21T17:51:16.040759",
+  "environment": "mock",
+  "total_tests": 7,
+  "passed": 7,
+  "failed": 0,
+  "success_rate": "100.0%",
+  "test_results": [
+    {
+      "name": "Backend Health",
+      "passed": true
+    },
+    {
+      "name": "Auth Health",
+      "passed": true
+    },
+    {
+      "name": "Database Operations",
+      "passed": true
+    },
+    {
+      "name": "User Login",
+      "passed": true
+    },
+    {
+      "name": "WebSocket Flow",
+      "passed": true
+    },
+    {
+      "name": "Thread Creation",
+      "passed": true
+    },
+    {
+      "name": "Agent Interaction",
+      "passed": true
+    }
+  ]
+}

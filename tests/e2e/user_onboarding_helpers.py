@@ -18,7 +18,7 @@ import uuid
 from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 class OnboardingFlowManager:

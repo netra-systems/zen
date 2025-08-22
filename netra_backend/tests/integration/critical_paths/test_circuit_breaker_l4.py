@@ -34,7 +34,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
-# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import httpx

@@ -38,7 +38,7 @@ from tests.e2e.integration.error_cascade_core import (
 )
 from tests.real_websocket_client import RealWebSocketClient
 from tests.real_client_types import ClientConfig
-from tests.config import TEST_USERS
+from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 

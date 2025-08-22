@@ -19,7 +19,7 @@ import time
 import uuid
 from typing import Any, Dict
 
-from tests.config import TestDataFactory
+from tests.e2e.config import TestDataFactory
 from tests.real_websocket_client import RealWebSocketClient
 
 

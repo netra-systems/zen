@@ -117,9 +117,9 @@ class ComprehensiveE2EImportFixer:
                 'from netra_backend.app.core.websocket.manager import WebSocketManager'
             )
             
-            # Fix ConnectionManager import
+            # Fix ModernConnectionManager import
             content = content.replace(
-                'from netra_backend.app.websocket.connection_manager import ConnectionManager',
+                'from netra_backend.app.websocket.connection_manager import ModernConnectionManager',
                 'from netra_backend.app.core.websocket.manager import ConnectionManager'
             )
             

@@ -29,7 +29,7 @@ import pytest
 os.environ["TESTING"] = "1"
 os.environ["USE_REAL_SERVICES"] = "true"
 
-from helpers.real_service_journey_helpers import (
+from tests.e2e.helpers.journey.real_service_journey_helpers import (
     RealChatHelper,
     RealLoginHelper,
     RealSignupHelper,

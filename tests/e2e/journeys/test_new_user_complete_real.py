@@ -34,7 +34,7 @@ os.environ["TESTING"] = "1"
 os.environ["AUTH_FAST_TEST_MODE"] = "true"
 
 import aiosqlite
-from helpers.new_user_journey_helpers import (
+from tests.e2e.helpers.journey.new_user_journey_helpers import (
     ChatFlowHelper,
     DatabaseSetupHelper,
     DatabaseValidationHelper,

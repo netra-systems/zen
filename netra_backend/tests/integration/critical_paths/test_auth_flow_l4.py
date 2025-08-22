@@ -61,7 +61,7 @@ JWTService = AsyncMock
 SessionManager = AsyncMock
 # Redis session manager replaced with mock
 RedisSessionManager = AsyncMock
-# # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from tests.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 

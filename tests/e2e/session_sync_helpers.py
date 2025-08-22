@@ -19,7 +19,7 @@ import httpx
 import redis.asyncio as redis
 import websockets
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 @dataclass

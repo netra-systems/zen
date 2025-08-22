@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-from tests.config import (
+from tests.e2e.config import (
     TEST_CONFIG,
     TestDataFactory,
     TestUser,

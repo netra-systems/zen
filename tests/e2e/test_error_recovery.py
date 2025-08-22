@@ -31,7 +31,7 @@ from netra_backend.app.core.resilience.circuit_breaker import (
     UnifiedCircuitBreaker,
 )
 from netra_backend.app.logging_config import central_logger
-from tests.config import TEST_CONFIG, TestUser
+from tests.e2e.config import TEST_CONFIG, TestUser
 from tests.network_failure_simulator import (
     NetworkFailureSimulator,
 )

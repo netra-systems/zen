@@ -17,8 +17,8 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
-from tests.config import TEST_USERS
-from tests.e2e.integration.thread_test_fixtures_core import (
+from tests.e2e.config import TEST_USERS
+from tests.e2e.fixtures.core.thread_test_fixtures_core import (
     ThreadContextManager,
     ThreadTestDataFactory,
     ThreadWebSocketFixtures,

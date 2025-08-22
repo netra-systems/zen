@@ -37,8 +37,8 @@ from netra_backend.app.websocket.reconnection_handler import get_reconnection_ha
 logger = central_logger.get_logger(__name__)
 
 
-class ModernConnectionManager:
-    """Modern WebSocket connection manager with reliability patterns."""
+class ConnectionManager:
+    """WebSocket connection manager with reliability patterns."""
     
     def __init__(self):
         self.max_connections_per_user = 5
@@ -381,11 +381,11 @@ class ModernConnectionManager:
 
 
 # Global instance for backward compatibility - lazy initialization
-connection_manager: Optional[ModernConnectionManager] = None
+connection_manager: Optional[ConnectionManager] = None
 
-def get_connection_manager() -> ModernConnectionManager:
+def get_connection_manager() -> ConnectionManager:
     """Get global connection manager instance with lazy initialization."""
     global connection_manager
     if connection_manager is None:
-        connection_manager = ModernConnectionManager()
+        connection_manager = ConnectionManager()
     return connection_manager

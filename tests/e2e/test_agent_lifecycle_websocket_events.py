@@ -32,7 +32,7 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 from netra_backend.app.logging_config import central_logger
-from tests.config import (
+from tests.e2e.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_USERS,

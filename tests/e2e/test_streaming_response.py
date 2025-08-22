@@ -27,7 +27,7 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from tests.config import setup_test_environment
+from tests.e2e.config import setup_test_environment
 from tests.test_harness import (
     UnifiedTestHarness,
     WebSocketTestHelper,

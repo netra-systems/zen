@@ -14,7 +14,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.jwt_token_helpers import (
+from tests.e2e.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestFixtures,
     JWTTestHelper,

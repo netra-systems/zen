@@ -16,7 +16,7 @@ import time
 import pytest
 from typing import Dict, Any
 
-from tests.config import TEST_USERS
+from tests.e2e.config import TEST_USERS
 from tests.e2e.websocket_guarantees_helpers import (
     MessageOrderingCore, AtLeastOnceDeliveryCore, DuplicateDetectionCore, ReconnectionRecoveryCore, ConcurrentMessageCore,
     MessageOrderingCore,

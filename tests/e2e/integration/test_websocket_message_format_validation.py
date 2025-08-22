@@ -37,7 +37,7 @@ import time
 from typing import Dict, Any, List, Optional, Union
 import pytest
 
-from tests.config import TEST_USERS, TEST_ENDPOINTS
+from tests.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from tests.e2e.integration.websocket_message_format_validators import (
     MessageFormatValidator, FieldConsistencyChecker, CoroutineErrorDetector, MessageStructureValidator,
     MessageFormatValidator,

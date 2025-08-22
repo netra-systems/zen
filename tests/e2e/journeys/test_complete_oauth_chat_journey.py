@@ -48,12 +48,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from helpers.chat_helpers import (
+from tests.e2e.helpers.core.chat_helpers import (
     ChatInteractionHelper,
     ConversationPersistenceHelper,
     WebSocketConnectionHelper,
 )
-from helpers.journey_validation_helpers import (
+from tests.e2e.helpers.journey.journey_validation_helpers import (
     validate_auth_callback,
     validate_chat_interaction,
     validate_conversation_persistence,
@@ -62,7 +62,7 @@ from helpers.journey_validation_helpers import (
     validate_user_sync,
     validate_websocket_connection,
 )
-from helpers.oauth_journey_helpers import (
+from tests.e2e.helpers.auth.oauth_journey_helpers import (
     OAuthAuthenticationHelper,
     OAuthCallbackHelper,
     OAuthReturningUserHelper,

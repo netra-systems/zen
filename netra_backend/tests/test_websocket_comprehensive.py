@@ -45,7 +45,7 @@ from fastapi import WebSocket
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 # Add project root to path
-from netra_backend.app.websocket.connection_manager import ModernConnectionManager
+from netra_backend.app.websocket.connection_manager import ModernModernConnectionManager
 
 # Add project root to path
 

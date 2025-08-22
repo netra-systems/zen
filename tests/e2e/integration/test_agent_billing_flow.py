@@ -155,7 +155,7 @@ class TestAgentBillingFlow:
             request = request_simulator.create_triage_request(session["user_data"]["id"])
             
             # Test with simulated billing failure
-            with patch('tests.unified.e2e.clickhouse_billing_helper.MockClickHouseBillingClient.insert_billing_record') as mock_billing:
+            with patch('tests.e2e.clickhouse_billing_helper.MockClickHouseBillingClient.insert_billing_record') as mock_billing:
                 mock_billing.side_effect = Exception("Billing service unavailable")
                 
                 # Should handle billing errors gracefully

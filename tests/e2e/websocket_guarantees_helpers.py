@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-from tests.config import TEST_ENDPOINTS, TestDataFactory
+from tests.e2e.config import TEST_ENDPOINTS, TestDataFactory
 from tests.real_client_types import ClientConfig
 from tests.real_websocket_client import RealWebSocketClient
 

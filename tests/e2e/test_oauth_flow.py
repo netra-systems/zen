@@ -23,7 +23,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
 from unittest.mock import patch
 
-from tests.oauth_test_providers import (
+from tests.e2e.oauth_test_providers import (
     GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory, OAuthErrorProvider, get_enterprise_config,
     GoogleOAuthProvider,
     GitHubOAuthProvider,

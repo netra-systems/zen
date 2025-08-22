@@ -21,7 +21,7 @@ from typing import Dict, Any, Optional, List
 import httpx
 import websockets
 
-from tests.config import (
+from tests.e2e.config import (
     TestTier, get_test_user,
     get_auth_service_url, get_backend_service_url
 )

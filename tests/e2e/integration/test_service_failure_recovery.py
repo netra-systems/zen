@@ -40,7 +40,7 @@ from tests.e2e.integration.service_failure_recovery_helpers import (
 )
 from tests.real_websocket_client import RealWebSocketClient
 from tests.real_client_types import ClientConfig
-from tests.config import TEST_USERS
+from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 

@@ -23,7 +23,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from tests.config import TEST_USERS
+from tests.e2e.config import TEST_USERS
 from tests.e2e.integration.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.network_failure_simulator import NetworkFailureSimulator
 from tests.real_websocket_client import RealWebSocketClient

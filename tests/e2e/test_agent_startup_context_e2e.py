@@ -26,7 +26,7 @@ from tests.agent_startup_helpers import (
     ContextTestManager,
     MultiAgentTestManager,
 )
-from tests.config import TestTier, get_test_user
+from tests.e2e.config import TestTier, get_test_user
 from tests.harness_complete import TestHarnessContext
 
 

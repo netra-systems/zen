@@ -38,7 +38,7 @@ from netra_backend.app.tests.test_utilities.websocket_mocks import (
     MockWebSocket,
     WebSocketBuilder,
 )
-from tests.config import TEST_USERS, TestDataFactory
+from tests.e2e.config import TEST_USERS, TestDataFactory
 from tests.test_harness import UnifiedTestHarness
 from test_framework.mock_utils import mock_justified
 

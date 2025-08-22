@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from tests.config import TEST_ENDPOINTS, TEST_USERS
+from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.integration.token_lifecycle_helpers import (
     PerformanceBenchmark,
     TokenLifecycleManager,

@@ -26,7 +26,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.e2e.integration.agent_conversation_helpers import (
+from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
     AgentConversationTestUtils,
     ConversationFlowSimulator,

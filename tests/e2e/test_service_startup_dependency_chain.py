@@ -33,7 +33,7 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.config import setup_test_environment
+from tests.e2e.config import setup_test_environment
 from tests.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,

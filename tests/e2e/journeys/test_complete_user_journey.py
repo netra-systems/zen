@@ -31,7 +31,7 @@ os.environ["TESTING"] = "1"
 os.environ["CORS_ORIGINS"] = "*"
 os.environ["ENVIRONMENT"] = "development"
 
-from helpers.user_journey_helpers import (
+from tests.e2e.helpers.journey.user_journey_helpers import (
     ErrorRecoveryHelper,
     LoginFlowHelper,
     MessageFlowHelper,

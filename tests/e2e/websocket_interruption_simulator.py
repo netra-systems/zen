@@ -19,7 +19,7 @@ import asyncio
 import time
 from typing import Any, Dict, List
 
-from tests.config import TestDataFactory
+from tests.e2e.config import TestDataFactory
 from tests.real_client_types import ConnectionState
 from tests.real_websocket_client import RealWebSocketClient
 

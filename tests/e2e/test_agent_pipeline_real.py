@@ -1,16 +1,27 @@
-"""CRITICAL Agent Pipeline Test - Real Message Processing and Response Streaming
+"""
+Real Agent Pipeline Execution Flow Test - E2E Critical Test
 
-BUSINESS VALUE JUSTIFICATION (BVJ):
-1. Segment: Mid/Enterprise customers ($30K+ MRR)
-2. Business Goal: Ensure core AI value delivery mechanism functions reliably
-3. Value Impact: Validates message flow → supervisor → agents → streaming responses
-4. Revenue Impact: Protects $30K+ MRR from agent pipeline failures, ensures customer AI operations
+CRITICAL E2E Test: Real Agent Pipeline from WebSocket Message to Agent Response
+Tests the complete agent pipeline flow from message routing through supervisor to agent execution.
 
-CRITICAL TEST: Core AI value delivery mechanism with real agent pipeline execution.
-Message Flow: User Message → WebSocket → Supervisor → Agent → Streaming Response
+Business Value Justification (BVJ):
+Segment: ALL (Free, Early, Mid, Enterprise) | Goal: Core Agent Value Delivery | Revenue Impact: $120K+ MRR
+- Agent failures = no value delivery = immediate churn
+- Validates supervisor routing, agent selection, and execution patterns
+- Tests real LLM integration with agent processing pipeline  
+- Ensures quality gates and response generation work end-to-end
+- Performance requirements critical for user retention
+
+Performance Requirements:
+- Message routing: <100ms
+- Agent selection: <200ms
+- Agent execution: <5s total pipeline
+- Response generation: <1s
+- Quality gates: <500ms
+- End-to-end: <5s for user retention
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <300 lines (modular design with focused test cases)
+- File size: <500 lines (modular design with focused test cases)
 - Function size: <25 lines each (single responsibility principle)
 - Real agent execution with minimal mocks (REAL > Mock principle)
 - Streaming response validation and performance requirements
@@ -19,7 +30,10 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import json
+import os
 import time
+import uuid
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
@@ -31,9 +45,17 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.config import TEST_USERS, TestDataFactory
+from tests.clients import TestClientFactory
+from tests.e2e.config import TEST_USERS, TestDataFactory
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.real_services_manager import RealServicesManager
 from tests.real_websocket_client import RealWebSocketClient
+
+# Enable real services for this test module
+pytestmark = pytest.mark.skipif(
+    os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
+    reason="Real services disabled (set USE_REAL_SERVICES=true)"
+)
 
 
 @pytest.mark.asyncio

@@ -15,7 +15,7 @@ REQUIREMENTS:
 from typing import Dict
 from unittest.mock import AsyncMock, MagicMock
 
-from tests.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 
 
 class AuthFlowE2ETester:

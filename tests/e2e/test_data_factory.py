@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.schemas.registry import MessageType
-from tests.config import UnifiedTestConfig
+from tests.e2e.config import UnifiedTestConfig
 
 
 @dataclass

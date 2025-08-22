@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from tests.config import TestTier
+from tests.e2e.config import TestTier
 
 
 @pytest.fixture

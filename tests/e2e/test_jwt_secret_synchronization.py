@@ -16,7 +16,7 @@ from typing import Any, Dict
 import pytest
 import websockets
 
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.test_harness import UnifiedTestHarness
 
 

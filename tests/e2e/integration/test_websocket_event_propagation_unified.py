@@ -21,7 +21,7 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 try:
-    from tests.config import (
+    from tests.e2e.config import (
         TEST_CONFIG,
         TEST_ENDPOINTS,
         TEST_USERS,

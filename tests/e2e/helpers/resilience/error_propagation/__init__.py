@@ -16,7 +16,7 @@ Re-exports all public interfaces for backward compatibility.
 # Import all public classes and functions from the refactored modules
 
 # Error Generation and Testing Infrastructure
-from tests.e2e.helpers.error_generators import (
+from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation,
     ErrorCorrelationContext,
     ErrorPropagationMetrics,
@@ -27,7 +27,7 @@ from tests.e2e.helpers.error_generators import (
 )
 
 # Error Validation Components  
-from tests.e2e.helpers.error_validators import (
+from tests.e2e.helpers.resilience.error_propagation.error_validators import (
     AuthServiceFailurePropagationValidator, AuthTokenValidator,
     AuthServiceFailurePropagationValidator,
     AuthTokenValidator

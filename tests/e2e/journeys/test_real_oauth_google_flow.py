@@ -38,7 +38,7 @@ import httpx
 import pytest
 import websockets
 
-from tests.oauth_test_providers import (
+from tests.e2e.oauth_test_providers import (
     GoogleOAuthProvider,
     get_enterprise_config,
 )

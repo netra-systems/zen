@@ -24,7 +24,7 @@ import websockets
 from tests.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketConnectionTester:

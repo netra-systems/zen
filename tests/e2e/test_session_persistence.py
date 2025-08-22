@@ -20,7 +20,7 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
-from tests.config import TEST_USERS
+from tests.e2e.config import TEST_USERS
 
 logger = central_logger.get_logger(__name__)
 

@@ -8,7 +8,7 @@ import os
 
 import pytest
 
-from tests.config import (
+from tests.e2e.config import (
     TEST_CONFIG,
     TEST_ENDPOINTS,
     TEST_SECRETS,

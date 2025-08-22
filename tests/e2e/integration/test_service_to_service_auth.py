@@ -18,7 +18,7 @@ from auth_service.auth_core.services.auth_service import AuthService
 
 # App imports
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from tests.jwt_token_helpers import JWTTokenTestHelper
+from tests.e2e.jwt_token_helpers import JWTTokenTestHelper
 
 # Test framework imports
 from tests.test_data_factory import (

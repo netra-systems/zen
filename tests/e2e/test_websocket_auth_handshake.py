@@ -29,7 +29,7 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket
-from tests.jwt_token_helpers import JWTTestHelper
+from tests.e2e.jwt_token_helpers import JWTTestHelper
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

@@ -309,7 +309,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     async def _setup_test_environment(self) -> None:
         """Setup test environment variables and configuration."""
-        from tests.config import setup_test_environment
+        from tests.e2e.config import setup_test_environment
         setup_test_environment()
         self.logger.info("Test environment configured")
     

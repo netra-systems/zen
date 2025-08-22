@@ -31,7 +31,7 @@ import pytest
 import pytest_asyncio
 
 try:
-    from tests.oauth_test_providers import (
+    from tests.e2e.oauth_test_providers import (
         GoogleOAuthProvider,
         OAuthUserFactory,
         get_enterprise_config,

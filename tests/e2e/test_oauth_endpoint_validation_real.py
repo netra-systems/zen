@@ -42,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from netra_backend.app.logging_config import central_logger
-from tests.oauth_test_providers import (
+from tests.e2e.oauth_test_providers import (
     GoogleOAuthProvider,
     OAuthUserFactory,
     get_enterprise_config,
