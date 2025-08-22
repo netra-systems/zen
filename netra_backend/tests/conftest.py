@@ -308,8 +308,8 @@ def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
 
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from app.config import get_config
-        from app.llm.llm_manager import LLMManager
+        from netra_backend.app.config import get_config
+        from netra_backend.app.llm.llm_manager import LLMManager
 
         config = get_config()
         return LLMManager(config)

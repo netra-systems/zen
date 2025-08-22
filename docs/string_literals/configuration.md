@@ -2,7 +2,7 @@
 
 System configuration keys, environment variables, and settings
 
-*Generated on 2025-08-21 22:03:25*
+*Generated on 2025-08-21 22:09:25*
 
 ## 📊 Category Statistics
 
@@ -529,7 +529,7 @@ class CostOptimizer:
 | `netra\_backend` | fix_schema_imports.py:35 | SchemaImportFixer.move_sche... | `workflows`, `act` |
 | `netra\_backend` | fix_supervisor_imports.py:66 | find_files_with_bad_imports | `workflows`, `act` |
 | `netra\_backend` | remove_duplicate_test_setup.py:38 | main | `workflows`, `act` |
-| `netra\_backend` | scan_string_literals.py:296 | main | `workflows`, `act` |
+| `netra\_backend` | scan_string_literals.py:302 | main | `workflows`, `act` |
 | `netra\_backend` | scan_string_literals_enhanced.py:302 | EnhancedStringLiteralIndexe... | `workflows`, `act` |
 | `netra\_backend` | standardize_l3_test_names.py:59 | find_references_to_file | `workflows`, `act` |
 | `netra\_backend` | test_backend.py:189 | _add_config_file_args | `workflows`, `act` |
@@ -3479,7 +3479,7 @@ class CostOptimizer:
 | `frontend` | installer_types.py:58 | create_installer_config | `workflows`, `act` |
 | `Frontend` | monitor_oauth_flow.py:27 | OAuthMonitor.check_services | `workflows`, `act` |
 | `frontend` | remove_test_stubs.py:74 | TestStubDetector.__init__ | `workflows`, `act` |
-| `frontend` | scan_string_literals.py:296 | main | `workflows`, `act` |
+| `frontend` | scan_string_literals.py:302 | main | `workflows`, `act` |
 | `frontend` | scan_string_literals_enhanced.py:302 | EnhancedStringLiteralIndexe... | `workflows`, `act` |
 | `frontend` | service_discovery.py:77 | ServiceDiscovery.get_all_se... | `workflows`, `act` |
 | `frontend` | service_discovery.py:90 | ServiceDiscovery.is_service... | `workflows`, `act` |
@@ -6770,7 +6770,7 @@ class CostOptimizer:
 | `scripts` | import_management.py:40 | ImportManagementSystem.__in... | `workflows`, `act` |
 | `scripts` | script_generator.py:20 | ScriptGeneratorBase._get_sc... | `workflows`, `act` |
 | `scripts` | status_manager.py:24 | StatusManager._setup_paths | `workflows`, `act` |
-| `scripts` | scan_string_literals.py:296 | main | `workflows`, `act` |
+| `scripts` | scan_string_literals.py:302 | main | `workflows`, `act` |
 | `scripts` | scan_string_literals_enhanced.py:302 | EnhancedStringLiteralIndexe... | `workflows`, `act` |
 | `scripts` | service_discovery.py:17 | ServiceDiscovery.__init__ | `workflows`, `act` |
 | `scripts` | setup_import_hooks.py:69 | verify_tools | `workflows`, `act` |
@@ -7010,7 +7010,7 @@ class CostOptimizer:
 | `shards` | validate_workflow_config.py:198 | _print_config_details | `workflows`, `act` |
 | `shards` | validate_workflow_config.py:199 | _print_config_details | `workflows`, `act` |
 | `share` | generate_test_audit.py:28 | module | `workflows`, `act` |
-| `shared` | scan_string_literals.py:296 | main | `workflows`, `act` |
+| `shared` | scan_string_literals.py:302 | main | `workflows`, `act` |
 | `shared` | scan_string_literals_enhanced.py:302 | EnhancedStringLiteralIndexe... | `workflows`, `act` |
 | `shared\_utilities` | test_refactor_helper.py:334 | TestRefactorHelper._analyze... | `workflows`, `act` |
 | `shared\_utilities` | test_refactor_helper.py:357 | TestRefactorHelper._analyze... | `workflows`, `act` |
@@ -8228,7 +8228,7 @@ class CostOptimizer:
 | `tests` | remove_duplicate_test_setup.py:38 | main | `workflows`, `act` |
 | `tests` | remove_duplicate_test_setup.py:39 | main | `workflows`, `act` |
 | `tests` | remove_test_stubs.py:78 | TestStubDetector.__init__ | `workflows`, `act` |
-| `tests` | scan_string_literals.py:298 | main | `workflows`, `act` |
+| `tests` | scan_string_literals.py:304 | main | `workflows`, `act` |
 | `tests` | scan_string_literals_enhanced.py:84 | EnhancedStringLiteralIndexe... | `workflows`, `act` |
 | `tests` | standardize_l3_test_names.py:59 | find_references_to_file | `workflows`, `act` |
 | `tests` | startup_reporter.py:51 | ReportData.to_dict | `workflows`, `act` |

@@ -2,7 +2,7 @@
 
 Status values, boolean states, and lifecycle states
 
-*Generated on 2025-08-21 22:03:51*
+*Generated on 2025-08-21 22:09:53*
 
 ## 📊 Category Statistics
 

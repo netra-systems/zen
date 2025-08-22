@@ -2,21 +2,21 @@
 
 Command line arguments and CLI-related strings
 
-*Generated on 2025-08-21 22:03:48*
+*Generated on 2025-08-21 22:09:50*
 
 ## 📊 Category Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total Literals | 522 |
+| Total Literals | 523 |
 | Subcategories | 1 |
 | Average Confidence | 0.800 |
 
 ## Subcategory: argument {subcategory-argument}
 
-**Count**: 522 literals
+**Count**: 523 literals
 
-### 🟢 High (≥0.8) (522 literals)
+### 🟢 High (≥0.8) (523 literals)
 
 | Literal | Files | Context | Related |
 |---------|-------|---------|---------|
@@ -198,6 +198,7 @@ Command line arguments and CLI-related strings
 | `\-\-depth=0` | dependency_scanner.py:133 | get_installed_node_packages | `--version`, `-W` |
 | `\-\-diagnose` | startup_diagnostics.py:211 | main | `--version`, `-W` |
 | `\-\-dirs` | enhanced_string_literals_docs.py:81 | main | `--version`, `-W` |
+| `\-\-dirs` | scan_string_literals.py:280 | main | `--version`, `-W` |
 | `\-\-dirs` | scan_string_literals_enhanced.py:374 | main | `--version`, `-W` |
 | `\-\-disable` | manage_workflows.py:183 | _setup_feature_parser | `--version`, `-W` |
 | `\-\-dry\-run` | agent_tracking_helper.py:379 | _add_optional_arguments | `--version`, `-W` |

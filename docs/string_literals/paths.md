@@ -2,7 +2,7 @@
 
 API endpoints, file paths, directories, and URLs
 
-*Generated on 2025-08-21 22:03:46*
+*Generated on 2025-08-21 22:09:48*
 
 ## 📊 Category Statistics
 
@@ -1341,7 +1341,7 @@ Test Categorization Script \- Analyz...` | categorize_tests.py:2 | module | `.ac
 | `   python scripts/import\_management\...` | setup_import_hooks.py:164 | main | `.act.env`, `*.yml` |
 | `   python scripts/import\_management\...` | setup_import_hooks.py:162 | main | `.act.env`, `*.yml` |
 | `   python scripts/import\_management\...` | setup_import_hooks.py:160 | main | `.act.env`, `*.yml` |
-| `   python scripts/scan\_string\_liter...` | scan_string_literals.py:313 | main | `.act.env`, `*.yml` |
+| `   python scripts/scan\_string\_liter...` | scan_string_literals.py:319 | main | `.act.env`, `*.yml` |
 | `   Run 'python scripts/fix\_netra\_ba...` | check_netra_backend_imports.py:347 | main | `.act.env`, `*.yml` |
 | `   URL: http://localhost:` | dev_launcher_monitoring.py:128 | print_service_summary | `.act.env`, `*.yml` |
 | `   URL: http://localhost:` | dev_launcher_service.py:240 | ServiceManager._finalize_fr... | `.act.env`, `*.yml` |
@@ -1369,7 +1369,7 @@ Test Categorization Script \- Analyz...` | categorize_tests.py:2 | module | `.ac
 | `\.github/workflows/local\-ACT\-workflows` | cleanup_workflow_runs.py:133 | clean_local_directories | `.act.env`, `*.yml` |
 | `\.github/workflows/pending` | cleanup_workflow_runs.py:134 | clean_local_directories | `.act.env`, `*.yml` |
 | `\.pytest\_cache/` | decompose_functions.py:89 | _should_skip_file | `.act.env`, `*.yml` |
-| `/\.\.\.` | scan_string_literals.py:303 | main | `.act.env`, `*.yml` |
+| `/\.\.\.` | scan_string_literals.py:309 | main | `.act.env`, `*.yml` |
 | `/\.\.\.` | scan_string_literals_enhanced.py:93 | EnhancedStringLiteralIndexe... | `.act.env`, `*.yml` |
 | `/\.venv/` | prevent_numbered_files.py:72 | check_file_naming | `.act.env`, `*.yml` |
 | `/: ` | scan_string_literals_enhanced.py:99 | EnhancedStringLiteralIndexe... | `.act.env`, `*.yml` |
