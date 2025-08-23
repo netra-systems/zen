@@ -82,7 +82,7 @@ def test_ml_rate_limiter():
     
     Only runs when ENABLE_EXPERIMENTAL_TESTS=true.
     """
-    from netra_backend.app.websocket.ml_rate_limiter import MLRateLimiter
+    from netra_backend.app.websocket_core.ml_rate_limiter import MLRateLimiter
     
     limiter = MLRateLimiter()
     pattern = limiter.analyze_pattern([1, 2, 4, 8, 16])
@@ -116,7 +116,7 @@ def test_websocket_integration():
     
     Only runs during integration testing and when websocket_streaming is enabled.
     """
-    from netra_backend.app.websocket.connection import WebSocketConnection
+    from netra_backend.app.websocket_core import WebSocketManager as WebSocketConnection
     
     conn = WebSocketConnection()
     conn.connect("ws://localhost:8000/ws")
@@ -215,7 +215,7 @@ def test_authenticated_websocket_performance():
     - Is skipped in fast mode
     """
     from netra_backend.app.auth_integration.auth import create_auth_token
-    from netra_backend.app.websocket.authenticated_connection import (
+    from netra_backend.app.websocket_core.authenticated_connection import (
         AuthenticatedWebSocket,
     )
     

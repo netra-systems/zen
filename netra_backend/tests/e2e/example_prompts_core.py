@@ -9,7 +9,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest
@@ -25,7 +25,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 # The 9 example prompts from EXAMPLE_PROMPTS list
 

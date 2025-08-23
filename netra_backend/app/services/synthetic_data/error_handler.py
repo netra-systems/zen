@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 
 class ErrorHandler:
@@ -89,7 +89,7 @@ class ErrorHandler:
     async def _send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
         # Import locally to avoid circular dependency
-        from netra_backend.app.websocket.unified import get_unified_manager
+        from netra_backend.app.websocket_core import get_unified_manager
         manager = get_unified_manager()
         
         error_payload = self._build_error_payload(job_id, error)
@@ -287,7 +287,7 @@ class ErrorHandler:
     async def _broadcast_validation_error(self, payload: Dict):
         """Broadcast validation error via WebSocket"""
         # Import locally to avoid circular dependency
-        from netra_backend.app.websocket.unified import get_unified_manager
+        from netra_backend.app.websocket_core import get_unified_manager
         manager = get_unified_manager()
         
         await manager.broadcasting.broadcast_to_all({

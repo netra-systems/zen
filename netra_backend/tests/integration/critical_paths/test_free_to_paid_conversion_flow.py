@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from netra_backend.app.websocket.unified import get_unified_manager as get_manager
+from netra_backend.app.websocket_core import get_unified_manager as get_manager
 
 from netra_backend.app.schemas.UserPlan import (
     PLAN_DEFINITIONS,

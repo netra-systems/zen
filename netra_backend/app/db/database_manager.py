@@ -355,6 +355,52 @@ class DatabaseManager:
         return {"status": "Pool status unavailable"}
     
     @staticmethod
+    async def create_user_with_rollback(user_data: dict) -> dict:
+        """Create user with proper transaction rollback handling.
+        
+        FIX: Ensures complete rollback on failure to prevent partial user records.
+        
+        Args:
+            user_data: User data dictionary with email, name, etc.
+            
+        Returns:
+            Created user data or raises exception with cleanup
+        """
+        # Create async session from application engine
+        async_session = DatabaseManager.get_application_session()
+        
+        async with async_session() as session:
+            async with session.begin():
+                try:
+                    # Create user record using SQLAlchemy core
+                    from sqlalchemy import text
+                    user_result = await session.execute(
+                        text("INSERT INTO users (email, name, created_at) VALUES (:email, :name, NOW()) RETURNING id"),
+                        {"email": user_data.get("email"), "name": user_data.get("name")}
+                    )
+                    user_id = user_result.scalar()
+                    
+                    # Create associated profile if data provided
+                    if user_data.get("profile_data"):
+                        await session.execute(
+                            text("INSERT INTO user_profiles (user_id, data, created_at) VALUES (:user_id, :data, NOW())"),
+                            {"user_id": user_id, "data": user_data["profile_data"]}
+                        )
+                    
+                    # Return complete user data
+                    return {
+                        "id": user_id,
+                        "email": user_data.get("email"),
+                        "name": user_data.get("name"),
+                        "created_at": "now"
+                    }
+                    
+                except Exception as e:
+                    logger.error(f"Failed to create user: {str(e)}")
+                    # Transaction will be rolled back automatically
+                    raise
+    
+    @staticmethod
     def _get_default_database_url() -> str:
         """Get default database URL for current environment.
         

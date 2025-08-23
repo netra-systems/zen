@@ -23,6 +23,8 @@
             <cause type="module_import_timing">Health checker imported async_engine at module load time when it was None, creating stale reference</cause>
             <cause type="bypass_conversion">Some components created engines directly without URL conversion logic</cause>
             <cause type="missing_validation">No validation to catch sslmode URLs before engine creation</cause>
+            <cause type="logic_bug">DatabaseManager.get_application_url_async() had incorrect elif logic that prevented sslmode conversion for non-Cloud SQL URLs</cause>
+            <cause type="source_of_sslmode">GCP Secret Manager stores DATABASE_URL with sslmode=require (standard psycopg2 format) which gets mounted to Cloud Run containers</cause>
         </root_causes>
     </context>
     
@@ -42,18 +44,27 @@
         </layer1>
         
         <layer2 title="Centralized URL Conversion">
-            <description>Added get_converted_async_db_url() function that MUST be used by any component creating async engines</description>
+            <description>DatabaseManager handles complex URL conversion matrix for all driver/connection combinations</description>
             <files>
+                <file>netra_backend/app/db/database_manager.py</file>
                 <file>netra_backend/app/db/postgres_core.py</file>
-                <file>netra_backend/app/core/unified/db_connection_manager.py</file>
             </files>
-            <usage>
-                <code>
-                from netra_backend.app.db.postgres_core import get_converted_async_db_url
-                converted_url = get_converted_async_db_url(config.database_url)
-                engine = create_async_engine(converted_url, **engine_args)
-                </code>
-            </usage>
+            <conversion_matrix>
+                <!-- Sync Drivers (psycopg2/pg8000) -->
+                <sync_driver>
+                    <tcp_connection>Requires sslmode= parameter for SSL</tcp_connection>
+                    <unix_socket>Remove all SSL parameters (Cloud SQL proxy handles SSL)</unix_socket>
+                </sync_driver>
+                <!-- Async Driver (asyncpg) -->
+                <async_driver>
+                    <tcp_connection>Requires ssl= parameter (MUST convert sslmode= to ssl=)</tcp_connection>
+                    <unix_socket>Remove all SSL parameters (Cloud SQL proxy handles SSL)</unix_socket>
+                </async_driver>
+            </conversion_matrix>
+            <critical_fix>
+                Fixed logic bug: get_application_url_async() had "elif" that prevented conversion.
+                Now uses "else" block to ALWAYS convert sslmode to ssl for non-Cloud SQL async connections.
+            </critical_fix>
         </layer2>
         
         <layer3 title="Runtime Validation">
@@ -65,10 +76,24 @@
         </layer3>
     </solution>
     
+    <url_flow>
+        <source>GCP Secret Manager stores "database-url-staging" with postgresql://...?sslmode=require</source>
+        <mount>Cloud Run mounts secret as DATABASE_URL environment variable</mount>
+        <step1>DatabaseConfigManager._get_postgres_url() reads DATABASE_URL</step1>
+        <step2>DatabaseManager.get_base_database_url() strips driver prefixes, keeps sslmode</step2>
+        <step3>DatabaseManager.get_migration_url_sync_format() keeps sslmode for Alembic (sync)</step3>
+        <step4>DatabaseManager.get_application_url_async() converts sslmode to ssl for asyncpg</step4>
+        <result>Each driver gets the correct SSL parameter format it understands</result>
+    </url_flow>
+    
     <environment_handling>
-        <development>No SSL/sslmode required - URLs remain unchanged</development>
-        <staging_production>sslmode parameters converted to ssl for asyncpg compatibility</staging_production>
-        <cloud_sql>sslmode parameters removed entirely as SSL handled by proxy</cloud_sql>
+        <development>
+            <tcp>No SSL required - plain postgresql://localhost connections</tcp>
+        </development>
+        <staging_production>
+            <tcp>sslmode=require in secrets, converted to ssl=require for asyncpg</tcp>
+            <unix_socket>Cloud SQL via /cloudsql/ - ALL SSL parameters removed</unix_socket>
+        </staging_production>
     </environment_handling>
     
     <prevention_checklist>

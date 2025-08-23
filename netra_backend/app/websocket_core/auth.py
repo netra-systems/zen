@@ -20,7 +20,8 @@ from contextlib import asynccontextmanager
 from fastapi import HTTPException, WebSocket
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.clients.auth_client import auth_client
+# Use HTTP-based auth client for microservice independence
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.tracing import TracingManager
 from netra_backend.app.core.websocket_cors import check_websocket_cors
 from netra_backend.app.logging_config import central_logger
@@ -170,7 +171,9 @@ class WebSocketAuthenticator:
                 span.set_attribute("auth.method", auth_method)
                 span.set_attribute("websocket.auth", True)
                 
-                validation_result = await auth_client.validate_token_jwt(token)
+                # Use HTTP-based auth client for microservice independence
+                from netra_backend.app.clients.auth_client_core import auth_client
+                validation_result = await auth_client.validate_token(token)
                 
                 if not validation_result or not validation_result.get("valid"):
                     self.auth_stats["failed_auths"] += 1

@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 from sqlalchemy import text
 
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
 from auth_service.auth_core.database.connection_events import setup_auth_async_engine_events
 
 logger = logging.getLogger(__name__)

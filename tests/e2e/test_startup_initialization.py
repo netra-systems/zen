@@ -42,7 +42,6 @@ sys.path.insert(0, str(project_root))
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.db.database_manager import DatabaseManager
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 

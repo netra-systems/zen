@@ -4,7 +4,7 @@ Tests WebSocket connection resilience, automatic reconnection, and state recover
 using real WebSocket connections to verify production-grade reliability.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -32,7 +32,7 @@ try:
         ReconnectionManager,
 
     )
-    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 except ImportError:
     # Provide fallback implementations if modules don't exist

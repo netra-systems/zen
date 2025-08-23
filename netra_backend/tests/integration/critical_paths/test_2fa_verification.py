@@ -640,65 +640,19 @@ class TwoFactorAuthManager:
 class TwoFactorAuthTestManager:
     """Manages 2FA verification testing."""
     
-    def __init__(self):
+    def __init__(self, redis_client):
         self.sms_provider = MockSMSProvider()
         self.totp_generator = None
         self.sms_handler = None
         self.tfa_manager = None
-        self.redis_client = None
+        self.redis_client = redis_client
         self.jwt_handler = JWTHandler()
         self.test_users = []
 
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
-            
-            self.redis_client = AsyncMock()
-            self.redis_client.get = AsyncMock(return_value=None)
-            self.redis_client.set = AsyncMock()
-            self.redis_client.setex = AsyncMock()
-            self.redis_client.delete = AsyncMock()
-            self.redis_client.exists = AsyncMock(return_value=False)
-            self.redis_client.incr = AsyncMock(return_value=1)
-            self.redis_client.expire = AsyncMock()
-            self.redis_client.ping = AsyncMock(return_value=b'PONG')
-            self.redis_client.aclose = AsyncMock()
-            
-            # Mock Redis data storage with rate limiting support
-            self._redis_data = {}
-            
-            async def mock_get(key):
-                return self._redis_data.get(key)
-                
-            async def mock_setex(key, ttl, value):
-                self._redis_data[key] = value
-                
-            async def mock_delete(key):
-                self._redis_data.pop(key, None)
-                
-            async def mock_exists(key):
-                return 1 if key in self._redis_data else 0
-                
-            async def mock_incr(key):
-                current_value = int(self._redis_data.get(key, "0"))
-                new_value = current_value + 1
-                self._redis_data[key] = str(new_value)
-                return new_value
-                
-            async def mock_expire(key, ttl):
-                # In real Redis this would set expiry, for mock just acknowledge
-                pass
-            
-            self.redis_client.get = mock_get
-            self.redis_client.setex = mock_setex
-            self.redis_client.delete = mock_delete
-            self.redis_client.exists = mock_exists
-            self.redis_client.incr = mock_incr
-            self.redis_client.expire = mock_expire
-            
-            # Initialize real components
+            # Initialize real components with the provided Redis client
             self.totp_generator = TOTPGenerator(self.redis_client)
             self.sms_handler = SMSFallbackHandler(self.sms_provider, self.redis_client)
             self.tfa_manager = TwoFactorAuthManager(
@@ -706,7 +660,7 @@ class TwoFactorAuthTestManager:
                 self.jwt_handler, self.redis_client
             )
             
-            logger.info("2FA verification services initialized with mocked Redis")
+            logger.info("2FA verification services initialized with real Redis client")
             
         except Exception as e:
             logger.error(f"Service initialization failed: {e}")
@@ -960,20 +914,15 @@ class TwoFactorAuthTestManager:
                     await self.redis_client.delete(f"totp_rate_limit:{user_id}")
                     await self.redis_client.delete(f"sms_rate_limit:{user_id}")
                 
-                # Clean up mock data storage
-                if hasattr(self, '_redis_data'):
-                    self._redis_data.clear()
-                
-                # Mock cleanup
-                await self.redis_client.aclose()
+                logger.info(f"Cleaned up 2FA data for {len(self.test_users)} test users")
                 
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
 @pytest.fixture
-async def tfa_verification_manager():
-    """Create 2FA verification test manager."""
-    manager = TwoFactorAuthTestManager()
+async def tfa_verification_manager(isolated_redis_client):
+    """Create 2FA verification test manager with real Redis client."""
+    manager = TwoFactorAuthTestManager(isolated_redis_client)
     await manager.initialize_services()
     yield manager
     await manager.cleanup()

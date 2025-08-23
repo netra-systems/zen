@@ -15,7 +15,7 @@ These L3 integration tests validate:
 - Proper rate limiting and backpressure handling
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -38,7 +38,7 @@ from starlette.websockets import WebSocketState
 
 from netra_backend.app.redis_manager import RedisManager
 
-from netra_backend.app.websocket.enhanced_rate_limiter import (
+from netra_backend.app.websocket_core.enhanced_rate_limiter import (
 
     BackpressureManager,
 
@@ -47,7 +47,7 @@ from netra_backend.app.websocket.enhanced_rate_limiter import (
     RateLimitConfig,
 
 )
-from netra_backend.app.websocket.high_performance_broadcast import (
+from netra_backend.app.websocket_core.high_performance_broadcast import (
 
     BroadcastPerformanceConfig,
 
@@ -55,17 +55,17 @@ from netra_backend.app.websocket.high_performance_broadcast import (
 
 )
 # LoadBalancedConnectionManager has been consolidated - using WebSocketManager
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as LoadBalancedConnectionManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as LoadBalancedConnectionManager
 from enum import Enum
 
 class LoadBalancingStrategy(Enum):
     ADAPTIVE = "adaptive"
-from netra_backend.app.websocket.memory_efficient_manager import (
+from netra_backend.app.websocket_core.memory_efficient_manager import (
 
     MemoryEfficientWebSocketManager,
 
 )
-from netra_backend.app.websocket.optimized_message_processor import (
+from netra_backend.app.websocket_core.optimized_message_processor import (
 
     MessagePriority,
 

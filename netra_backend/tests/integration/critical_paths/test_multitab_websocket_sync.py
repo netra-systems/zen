@@ -24,7 +24,7 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -43,7 +43,7 @@ import redis.asyncio as aioredis
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

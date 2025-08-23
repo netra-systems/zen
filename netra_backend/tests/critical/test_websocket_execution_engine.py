@@ -19,14 +19,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core_executor import ConnectionExecutor
 
-from netra_backend.app.websocket.message_handler_core import (
+from netra_backend.app.websocket_core.message_handler_core import (
     ModernReliableMessageHandler,
 )
-from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-from netra_backend.app.websocket.websocket_broadcast_executor import (
+from netra_backend.app.websocket_core.message_router import ModernMessageTypeRouter
+from netra_backend.app.websocket_core.websocket_broadcast_executor import (
     WebSocketBroadcastExecutor,
 )
 
@@ -141,7 +141,7 @@ class TestWebSocketMessageFlow:
             mock_broadcast.return_value = Mock(successful=2, failed=0)
             
             # Create broadcast context
-            from netra_backend.app.websocket.broadcast_context import (
+            from netra_backend.app.websocket_core.broadcast_context import (
                 BroadcastContext,
                 BroadcastOperation,
             )
@@ -220,12 +220,12 @@ class TestCircularImportPrevention:
         # This test verifies the late import pattern doesn't cause issues
         
         # Import should work without circular dependency
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-        from netra_backend.app.websocket.message_handler_core import (
+        from netra_backend.app.websocket_core_executor import ConnectionExecutor
+        from netra_backend.app.websocket_core.message_handler_core import (
             ModernReliableMessageHandler,
         )
-        from netra_backend.app.websocket.message_router import ModernMessageTypeRouter
-        from netra_backend.app.websocket.websocket_broadcast_executor import (
+        from netra_backend.app.websocket_core.message_router import ModernMessageTypeRouter
+        from netra_backend.app.websocket_core.websocket_broadcast_executor import (
             WebSocketBroadcastExecutor,
         )
         
@@ -249,7 +249,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_none_connection_manager(self):
         """Test metrics collector doesn't crash with None connection manager."""
-        from netra_backend.app.monitoring.models import MetricsCollector
+        from netra_backend.app.monitoring.metrics_collector import MetricsCollector
         
         collector = MetricsCollector()
         
@@ -265,7 +265,7 @@ class TestMetricsCollectorResilience:
     @pytest.mark.asyncio
     async def test_metrics_collector_handles_connection_manager_error(self):
         """Test metrics collector handles errors from connection manager."""
-        from netra_backend.app.monitoring.models import MetricsCollector
+        from netra_backend.app.monitoring.metrics_collector import MetricsCollector
         
         collector = MetricsCollector()
         

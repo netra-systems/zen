@@ -24,9 +24,9 @@ from fastapi import WebSocket
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket_core import ConnectionInfo
 
-from netra_backend.app.websocket.unified.message_handlers import (
+from netra_backend.app.websocket_core.unified.message_handlers import (
     MessageHandler,
     MessageProcessor,
 )
@@ -245,7 +245,7 @@ class TestCriticalMessageRoutingToAgentService:
     @pytest.mark.asyncio
     async def test_10_invalid_messages_not_forwarded(self, message_processor, connection_info):
         """Test 10: Invalid messages MUST NOT reach agent service."""
-        from netra_backend.app.websocket.unified.types import WebSocketValidationError
+        from netra_backend.app.websocket_core.unified.types import WebSocketValidationError
         
         # Make validation fail
         message_processor.handler.validate_message.return_value = WebSocketValidationError(

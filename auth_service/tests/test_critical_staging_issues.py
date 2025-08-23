@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
 
 
 class TestAuthDatabaseInitialization:

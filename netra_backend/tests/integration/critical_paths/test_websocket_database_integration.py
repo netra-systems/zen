@@ -10,7 +10,7 @@ Critical Path: WebSocket connection → Database session creation → Message pe
 Coverage: Real PostgreSQL, Redis, WebSocket server with minimal mocking (L3 Realism)
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -30,7 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

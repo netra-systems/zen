@@ -43,7 +43,7 @@ import jwt as jwt_lib
 import pytest
 import redis.asyncio as aioredis
 import websockets
-from netra_backend.app.websocket.unified import get_unified_manager as get_manager
+from netra_backend.app.websocket_core import get_unified_manager as get_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
@@ -56,7 +56,7 @@ from netra_backend.app.schemas.auth_types import (
     TokenData,
 )
 from netra_backend.app.services.database.session_manager import SessionManager
-from netra_backend.app.websocket.unified import get_unified_manager
+from netra_backend.app.websocket_core import get_unified_manager
 
 logger = logging.getLogger(__name__)
 

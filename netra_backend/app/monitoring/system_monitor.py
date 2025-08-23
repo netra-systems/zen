@@ -14,7 +14,7 @@ from .dashboard import (
     PerformanceDashboard,
     SystemOverview,
 )
-from netra_backend.app.monitoring.models import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 
 logger = central_logger.get_logger(__name__)

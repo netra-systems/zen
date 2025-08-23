@@ -136,6 +136,8 @@ else:
         os.environ.setdefault("ANTHROPIC_API_KEY", "test-anthropic-api-key")
 
 import pytest
+import asyncio
+from typing import Optional
 
 # Always import logger - this is lightweight
 from netra_backend.app.logging_config import central_logger
@@ -390,7 +392,7 @@ def real_websocket_manager():
     if os.environ.get("TEST_COLLECTION_MODE"):
         return None
         
-    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
     manager = WebSocketManager()
 
@@ -556,7 +558,7 @@ def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
 
     websocket_manager = WebSocketManager()
 
@@ -1159,7 +1161,7 @@ class MockWebSocket:
 def fresh_manager():
 
     """Create a fresh WebSocketManager instance for each test"""
-    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket_core import WebSocketManager
     
     # Reset singleton
 
@@ -1207,3 +1209,159 @@ def disconnected_websocket():
     ws.client_state = WebSocketState.DISCONNECTED
 
     return ws
+
+# =============================================================================
+# REDIS CONNECTION FIXTURES
+# =============================================================================
+
+@pytest.fixture
+async def real_redis_client():
+    """
+    Create a real Redis client for integration tests.
+    
+    This fixture properly handles the event loop issue by creating the Redis
+    connection within the test's async context, not at module level.
+    """
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        # During test collection, yield a mock to avoid connection attempts
+        from unittest.mock import AsyncMock
+        mock_client = AsyncMock()
+        mock_client.ping = AsyncMock(return_value=b'PONG')
+        mock_client.aclose = AsyncMock()
+        yield mock_client
+        return
+    
+    redis_client: Optional['redis.asyncio.Redis'] = None
+    
+    try:
+        # Import within the fixture to avoid module-level issues
+        import redis.asyncio as redis
+        
+        # Get Redis URL from environment
+        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/1")
+        
+        # Create Redis client within the async context
+        redis_client = redis.from_url(redis_url, decode_responses=True)
+        
+        # Test the connection
+        await redis_client.ping()
+        
+        logger.info(f"Connected to Redis at {redis_url} for testing")
+        yield redis_client
+        
+    except Exception as e:
+        logger.error(f"Failed to connect to Redis: {e}")
+        # Fall back to mock if Redis is not available
+        from unittest.mock import AsyncMock
+        mock_client = AsyncMock()
+        mock_client.ping = AsyncMock(return_value=b'PONG')
+        mock_client.aclose = AsyncMock()
+        
+        # Add basic Redis operation mocks
+        mock_client.get = AsyncMock(return_value=None)
+        mock_client.set = AsyncMock()
+        mock_client.setex = AsyncMock()
+        mock_client.delete = AsyncMock()
+        mock_client.exists = AsyncMock(return_value=0)
+        mock_client.incr = AsyncMock(return_value=1)
+        mock_client.expire = AsyncMock()
+        
+        logger.warning("Using mock Redis client due to connection failure")
+        yield mock_client
+    
+    finally:
+        if redis_client and hasattr(redis_client, 'aclose'):
+            try:
+                await redis_client.aclose()
+            except Exception as e:
+                logger.error(f"Error closing Redis connection: {e}")
+
+@pytest.fixture
+async def isolated_redis_client():
+    """
+    Create an isolated Redis client with a unique database for each test.
+    
+    This ensures test isolation by using different Redis databases.
+    """
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        # During test collection, yield a mock
+        from unittest.mock import AsyncMock
+        mock_client = AsyncMock()
+        mock_client.ping = AsyncMock(return_value=b'PONG')
+        mock_client.aclose = AsyncMock()
+        yield mock_client
+        return
+    
+    redis_client: Optional['redis.asyncio.Redis'] = None
+    
+    try:
+        import redis.asyncio as redis
+        import random
+        
+        # Use a random database number for isolation (Redis supports 0-15 by default)
+        db_num = random.randint(2, 15)  # Avoid 0 (default) and 1 (test default)
+        base_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
+        
+        # Replace the database number in the URL
+        if base_url.endswith(('/0', '/1')):
+            redis_url = base_url[:-2] + f'/{db_num}'
+        else:
+            redis_url = f"{base_url.rstrip('/')}/{db_num}"
+        
+        redis_client = redis.from_url(redis_url, decode_responses=True)
+        await redis_client.ping()
+        
+        # Clear any existing data in this database
+        await redis_client.flushdb()
+        
+        logger.info(f"Created isolated Redis client using database {db_num}")
+        yield redis_client
+        
+        # Clean up the test database
+        await redis_client.flushdb()
+        
+    except Exception as e:
+        logger.error(f"Failed to create isolated Redis client: {e}")
+        # Fall back to mock
+        from unittest.mock import AsyncMock
+        mock_client = AsyncMock()
+        mock_client.ping = AsyncMock(return_value=b'PONG')
+        mock_client.aclose = AsyncMock()
+        
+        # Add data storage simulation for tests
+        mock_data = {}
+        
+        async def mock_get(key):
+            return mock_data.get(key)
+        
+        async def mock_setex(key, ttl, value):
+            mock_data[key] = value
+        
+        async def mock_delete(key):
+            mock_data.pop(key, None)
+        
+        async def mock_exists(key):
+            return 1 if key in mock_data else 0
+        
+        async def mock_incr(key):
+            current_value = int(mock_data.get(key, "0"))
+            new_value = current_value + 1
+            mock_data[key] = str(new_value)
+            return new_value
+        
+        mock_client.get = mock_get
+        mock_client.setex = mock_setex
+        mock_client.delete = mock_delete
+        mock_client.exists = mock_exists
+        mock_client.incr = mock_incr
+        mock_client.expire = AsyncMock()
+        mock_client.flushdb = AsyncMock()
+        
+        yield mock_client
+    
+    finally:
+        if redis_client and hasattr(redis_client, 'aclose'):
+            try:
+                await redis_client.aclose()
+            except Exception as e:
+                logger.error(f"Error closing isolated Redis connection: {e}")

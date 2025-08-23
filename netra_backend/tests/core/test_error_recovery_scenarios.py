@@ -47,7 +47,7 @@ from netra_backend.app.core.reliability_circuit_breaker import (
 )
 from netra_backend.app.core.reliability_retry import RetryConfig
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.websocket.recovery import (
+from netra_backend.app.websocket_core.recovery import (
     RecoveryStrategy,
     WebSocketError,
     WebSocketRecoveryManager,

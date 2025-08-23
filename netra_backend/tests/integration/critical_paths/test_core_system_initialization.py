@@ -10,7 +10,7 @@ Critical Path: Service discovery -> Health checks -> Database readiness -> Agent
 Coverage: Microservice startup orchestration, dependency resolution, graceful degradation
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -31,7 +31,7 @@ from netra_backend.app.core.database_connection_manager import DatabaseConnectio
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

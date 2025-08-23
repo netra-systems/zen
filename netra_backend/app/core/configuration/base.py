@@ -65,11 +65,11 @@ except ImportError:
             pass
 
 try:
-    from netra_backend.app.core.configuration.unified_secrets import (
-        UnifiedSecretManager as ActualSecretManager,
+    from netra_backend.app.core.configuration.secrets import (
+        SecretManager as ActualSecretManager,
     )
 except ImportError:
-    # Fallback placeholder if unified_secrets module not available
+    # Fallback placeholder if secrets module not available
     class ActualSecretManager:
         """Placeholder for secret manager."""
         def populate_secrets(self, config):
@@ -152,7 +152,9 @@ class UnifiedConfigManager:
         import os
         if os.environ.get("TESTING"):
             return "testing"
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        env = os.environ.get("ENVIRONMENT", "development").lower()
+        # Handle empty string case - default to development
+        return env if env else "development"
     
     def _check_hot_reload_enabled(self) -> bool:
         """Check if hot reload is enabled for this environment.

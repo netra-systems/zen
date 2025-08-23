@@ -65,7 +65,7 @@ from netra_backend.app.schemas.rate_limit_types import (
     TokenBucket,
 )
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.websocket.rate_limiter import AdaptiveRateLimiter, RateLimiter
+from netra_backend.app.websocket_core.rate_limiter import AdaptiveRateLimiter, RateLimiter
 
 class BackpressureTestHarness:
     """Test harness for rate limiting and backpressure validation."""
@@ -165,7 +165,7 @@ def test_token_bucket_reset():
 @pytest.mark.asyncio
 async def test_rate_limiter_basic_throttling():
     """Test basic rate limiting throttling functionality."""
-    from netra_backend.app.websocket.connection import ConnectionInfo
+    from netra_backend.app.websocket_core import ConnectionInfo
     rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
     mock_websocket = MagicMock()
     conn_info = ConnectionInfo(websocket=mock_websocket, user_id="test_user", connection_id="test_conn_001")
@@ -228,7 +228,7 @@ async def test_sliding_window_counter():
 @pytest.mark.asyncio
 async def test_adaptive_rate_limiter_behavior():
     """Test adaptive rate limiter with dynamic adjustment."""
-    from netra_backend.app.websocket.connection import ConnectionInfo
+    from netra_backend.app.websocket_core import ConnectionInfo
     adaptive_limiter = AdaptiveRateLimiter(base_max_requests=10, window_seconds=60)
     mock_websocket = MagicMock()
     conn_info = ConnectionInfo(websocket=mock_websocket, user_id="adaptive_user", connection_id="adaptive_test_conn")

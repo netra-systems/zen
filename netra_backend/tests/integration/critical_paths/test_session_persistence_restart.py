@@ -10,7 +10,7 @@ L3 Test: Real session persistence across service restarts with Redis/PostgreSQL.
 Tests session recovery, WebSocket reconnection, and state continuity.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -37,7 +37,7 @@ JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.models_postgres import User, ResearchSession as Session
 from netra_backend.app.logging_config import central_logger

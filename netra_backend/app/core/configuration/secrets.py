@@ -97,7 +97,12 @@ class SecretManager:
         """Get authentication secret mappings."""
         jwt_mapping = self._get_jwt_secret_mapping()
         fernet_mapping = self._get_fernet_secret_mapping()
-        return {"jwt-secret-key": jwt_mapping, "fernet-key": fernet_mapping}
+        service_mapping = self._get_service_secret_mapping()
+        return {
+            "jwt-secret-key": jwt_mapping, 
+            "fernet-key": fernet_mapping,
+            "service-secret": service_mapping
+        }
     
     def _get_jwt_secret_mapping(self) -> Dict[str, Any]:
         """Get JWT secret mapping."""
@@ -111,6 +116,14 @@ class SecretManager:
         """Get Fernet secret mapping."""
         return {
             "target_field": "fernet_key",
+            "required": True,
+            "rotation_enabled": True
+        }
+    
+    def _get_service_secret_mapping(self) -> Dict[str, Any]:
+        """Get service secret mapping for cross-service authentication."""
+        return {
+            "target_field": "service_secret",
             "required": True,
             "rotation_enabled": True
         }
@@ -253,6 +266,7 @@ class SecretManager:
             "google-client-secret": "GOOGLE_CLIENT_SECRET",
             "jwt-secret-key": "JWT_SECRET_KEY",
             "fernet-key": "FERNET_KEY",
+            "service-secret": "SERVICE_SECRET",
             "clickhouse-default-password": "CLICKHOUSE_PASSWORD",
             "redis-default": "REDIS_PASSWORD"
         }

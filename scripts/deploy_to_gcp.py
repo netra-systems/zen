@@ -7,7 +7,7 @@ IMPORTANT: This is the OFFICIAL deployment script. Do NOT create new deployment 
 Use this script with appropriate flags for all GCP staging deployments.
 
 Quick Start:
-    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 See SPEC/gcp_deployment.xml for comprehensive deployment guidelines.
 """
@@ -87,8 +87,8 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
-                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
+                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
@@ -104,7 +104,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
+                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
@@ -901,11 +901,11 @@ def main():
     Do NOT create new deployment scripts. Use this with appropriate flags.
     
     Examples:
-        # Recommended: Fast local build with checks
-        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
-        
-        # Quick deployment (local build, no checks)
+        # Default: Fast local build (no checks for testing deployment issues)
         python scripts/deploy_to_gcp.py --project netra-staging --build-local
+        
+        # With checks (for production readiness)
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
         
         # Cloud Build (slower)
         python scripts/deploy_to_gcp.py --project netra-staging
@@ -923,11 +923,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  Recommended deployment:
-    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
-    
-  Quick local build:
+  Default deployment (fast, no checks):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
+    
+  With pre-deployment checks:
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
     
   Cloud Build (slower):
     python scripts/deploy_to_gcp.py --project netra-staging
@@ -942,7 +942,7 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
     parser.add_argument("--build-local", action="store_true",
                        help="Build images locally (5-10x faster than Cloud Build)")
     parser.add_argument("--run-checks", action="store_true",
-                       help="Run pre-deployment checks (architecture, tests, etc.)")
+                       help="Run pre-deployment checks (architecture, tests, etc.) - optional for staging")
     parser.add_argument("--cleanup", action="store_true", 
                        help="Clean up deployments")
     parser.add_argument("--service-account", 
@@ -953,7 +953,7 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
     # Print warning if not using recommended flags
     if not args.cleanup and not args.build_local and not args.skip_build:
         print("\n⚠️ NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.")
-        print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local --run-checks\n".format(args.project))
+        print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local\n".format(args.project))
         time.sleep(2)
     
     deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account)

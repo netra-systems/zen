@@ -22,7 +22,7 @@ from netra_backend.app.services.corpus.base import (
     CorpusNotAvailableError,
 )
 from netra_backend.app.services.corpus.validation import ValidationManager
-from netra_backend.app.websocket.unified import get_unified_manager
+from netra_backend.app.websocket_core import get_unified_manager
 manager = get_unified_manager()
 
 

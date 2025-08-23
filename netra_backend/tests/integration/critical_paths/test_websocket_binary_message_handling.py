@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for binary message storage and WebSocket transmission.
 Binary target: 10MB file support with <5% corruption rate.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -30,7 +30,7 @@ import os
 import tempfile
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified

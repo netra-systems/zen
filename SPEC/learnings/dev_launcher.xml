@@ -1,15 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <learnings category="dev-launcher" priority="high">
   <metadata>
-    <last_edited>2025-08-23T15:30:00.000000</last_edited>
+    <last_edited>2025-08-23T16:15:00.000000</last_edited>
     <legacy_status is_legacy="false">
       <reasons>
-        <reason>Updated with latest LLM configuration fixes</reason>
+        <reason>Updated with critical dev launcher fixes: port validation, ClickHouse protocols, and BackgroundTaskManager usage</reason>
       </reasons>
     </legacy_status>
   </metadata>
   <title>Dev Launcher Comprehensive Guide</title>
-  <description>Consolidated learnings for dev launcher setup, configuration, and troubleshooting</description>
+  <description>Consolidated learnings for dev launcher setup, configuration, and troubleshooting including port management, service connections, and background task handling</description>
   <last_updated>2025-08-23</last_updated>
   <section name="Configuration">
     <learning id="secret-key-configuration">
@@ -163,9 +163,75 @@
       <keys_needed>GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY</keys_needed>
     </learning>
   </section>
+  <section name="PortManagement">
+    <learning id="port-validation-best-practices" date="2025-08-23">
+      <problem>Port binding failures due to invalid port numbers</problem>
+      <solution>
+        Always validate port numbers in range 0-65535 before attempting to bind
+        Use explicit validation in is_port_available() methods:
+        - Port 0 is special (lets OS choose available port) and should be handled separately
+        - Validate port range before socket operations
+        - Return meaningful error messages for invalid ports
+      </solution>
+      <prevention>
+        Implement port validation at service startup
+        Use helper functions to validate port ranges
+        Handle port 0 as a special case for dynamic allocation
+      </prevention>
+      <files_affected>dev_launcher/port_manager.py, service startup scripts</files_affected>
+    </learning>
+  </section>
+  <section name="ServiceConnections">
+    <learning id="clickhouse-connection-protocols" date="2025-08-23">
+      <problem>ClickHouse connection failures with localhost HTTPS</problem>
+      <solution>
+        Use connection protocol detection based on hostname:
+        - Localhost addresses (localhost, 127.0.0.1, ::1) always use HTTP
+        - Remote/production connections use HTTPS
+        - Implement hostname detection in connection setup
+        - Never force HTTPS for local development connections
+      </solution>
+      <prevention>
+        Create connection helper that detects localhost vs remote
+        Use HTTP for all local development connections
+        Reserve HTTPS for production and remote connections only
+      </prevention>
+      <files_affected>clickhouse connection utilities, service configuration</files_affected>
+    </learning>
+  </section>
+  <section name="BackgroundTasks">
+    <learning id="background-task-manager-usage" date="2025-08-23">
+      <problem>BackgroundTaskManager method errors and coroutine handling issues</problem>
+      <solution>
+        Proper BackgroundTaskManager usage patterns:
+        - Use create_task() method, not add_task() (which doesn't exist)
+        - Pass coroutine functions properly, not coroutine objects
+        - Handle both coroutine functions and coroutine objects in manager
+        - Use functools.partial to bind arguments to coroutine functions when needed
+      </solution>
+      <example>
+        # Correct usage
+        task_manager.create_task(my_coroutine_function())
+        # With arguments
+        task_manager.create_task(functools.partial(my_function, arg1, arg2))
+      </example>
+      <prevention>
+        Always use create_task() for background task creation
+        Ensure BackgroundTaskManager handles both function types
+        Test coroutine function binding with arguments
+      </prevention>
+      <files_affected>BackgroundTaskManager implementation, service startup code</files_affected>
+    </learning>
+  </section>
   <best_practices>
     <practice priority="critical">
       Always check startup logs for critical vs non-critical failures
+    </practice>
+    <practice priority="critical">
+      Validate port numbers (0-65535) before attempting socket operations
+    </practice>
+    <practice priority="critical">
+      Use HTTP for localhost ClickHouse connections, HTTPS for remote only
     </practice>
     <practice priority="high">
       Keep .env.development.local synchronized with .env
@@ -173,11 +239,20 @@
     <practice priority="high">
       Use absolute imports in Alembic migrations
     </practice>
+    <practice priority="high">
+      Use create_task() method for BackgroundTaskManager, never add_task()
+    </practice>
     <practice priority="medium">
       Read dynamic ports from service discovery files
     </practice>
     <practice priority="medium">
       Set timeouts based on worst-case startup times
+    </practice>
+    <practice priority="medium">
+      Handle port 0 as special case for OS-chosen dynamic allocation
+    </practice>
+    <practice priority="medium">
+      Use functools.partial for coroutine functions with arguments
     </practice>
     <practice priority="low">
       Monitor actual startup times to adjust timeouts
@@ -216,6 +291,21 @@
       Check service_availability_checker.py - ensure LLM stays in shared mode
       Verify backend loads .env correctly without circular dependencies
       Check display mapping in config.py (should show "On" for shared mode)
+    </issue>
+    <issue symptom="Port binding failures or invalid port errors">
+      Validate port number is in range 0-65535 before binding
+      Check if port 0 is being handled as special case for dynamic allocation
+      Review port_manager.py for proper validation logic
+    </issue>
+    <issue symptom="ClickHouse HTTPS connection failures to localhost">
+      Check if localhost detection is working properly
+      Ensure localhost addresses use HTTP, not HTTPS
+      Verify connection protocol selection in ClickHouse utilities
+    </issue>
+    <issue symptom="BackgroundTaskManager add_task AttributeError">
+      Use create_task() method instead of add_task()
+      Check that coroutine functions are passed correctly
+      Use functools.partial for functions requiring arguments
     </issue>
   </troubleshooting>
 </learnings>

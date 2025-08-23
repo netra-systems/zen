@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for broadcast performance validation.
 Performance target: 1000+ concurrent connections with <100ms broadcast latency.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -28,7 +28,7 @@ from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified

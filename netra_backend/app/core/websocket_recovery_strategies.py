@@ -7,7 +7,7 @@ This module aggregates WebSocket recovery components that have been split
 into focused modules for better maintainability and compliance.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager as WebSocketConnectionManager
 from netra_backend.app.core.websocket_recovery_manager import (
     WebSocketRecoveryManager,
     websocket_recovery_manager,

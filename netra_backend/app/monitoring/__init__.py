@@ -49,7 +49,7 @@ from .models import (
     MonitoringDashboard,
 )
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor
+# PerformanceMonitor removed - use PerformanceMetric from metrics_collector or SystemPerformanceMonitor
 from .system_monitor import (
     MonitoringManager,
     SystemPerformanceMonitor,
@@ -64,7 +64,6 @@ __all__ = [
     "SystemResourceMetrics",
     "WebSocketMetrics",
     "PerformanceAlertManager",
-    "PerformanceMonitor",
     "PerformanceDashboard",
     "OperationMeasurement", 
     "SystemOverview",

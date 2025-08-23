@@ -11,7 +11,7 @@ L3 Test: Uses real WebSocket server, Redis pub/sub, and authentication service.
 Performance target: WebSocket connection establishment < 2 seconds with 50+ concurrent connections.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from uuid import uuid4
 import httpx
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.schemas import User
 from netra_backend.app.clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified

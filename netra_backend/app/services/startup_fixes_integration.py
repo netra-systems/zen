@@ -180,17 +180,17 @@ class StartupFixesIntegration:
         }
         
         try:
-            from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager
             status["auth_database_manager_available"] = True
             
             # Check if the rollback method is available
-            if hasattr(AuthDatabaseManager, 'create_user_with_rollback'):
+            if hasattr(DatabaseManager, 'create_user_with_rollback'):
                 status["rollback_method_available"] = True
                 logger.info("Database transaction rollback fix is available")
                 self.fixes_applied.add("database_transaction_rollback")
             
         except ImportError:
-            logger.warning("Auth database manager not available")
+            logger.warning("Database manager not available")
         
         return status
     
