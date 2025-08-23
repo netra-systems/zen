@@ -49,84 +49,64 @@ class TestEnvironmentConfig:
     enable_monitoring: bool = False
     
     def __post_init__(self):
-        """Initialize services dictionary if not provided."""
+        """Post-init processing."""
         if self.services is None:
-            self.services = {
-                "backend": {
-                    "url": self.api_base_url,
-                    "port": 8000,
-                    "health_endpoint": "/health"
-                },
-                "auth": {
-                    "url": self.auth_service_url,
-                    "port": 8001,
-                    "health_endpoint": "/health"
-                },
-                "websocket": {
-                    "url": self.websocket_url,
-                    "port": 8000,
-                    "path": "/websocket"
-                }
-            }
+            self.services = {}
+
+
+class TestEnvironment:
+    """Test environment manager."""
     
-    @classmethod
-    def from_env(cls, env_name: str = "test") -> "TestEnvironmentConfig":
-        """Create config from environment variables."""
-        config = cls(name=env_name)
-        
-        # Override from environment variables
-        if api_url := os.getenv("NETRA_API_URL"):
-            config.api_base_url = api_url
-            
-        if ws_url := os.getenv("NETRA_WEBSOCKET_URL"):
-            config.websocket_url = ws_url
-            
-        if auth_url := os.getenv("NETRA_AUTH_URL"):
-            config.auth_service_url = auth_url
-            
-        if pg_url := os.getenv("DATABASE_URL"):
-            config.postgres_url = pg_url
-            
-        if ch_url := os.getenv("CLICKHOUSE_URL"):
-            config.clickhouse_url = ch_url
-            
-        if redis_url := os.getenv("REDIS_URL"):
-            config.redis_url = redis_url
-            
-        # Feature flags
-        config.use_real_llm = os.getenv("USE_REAL_LLM", "false").lower() == "true"
-        config.use_real_database = os.getenv("USE_REAL_DATABASE", "false").lower() == "true"
-        config.enable_monitoring = os.getenv("ENABLE_MONITORING", "false").lower() == "true"
-        
-        return config
+    def __init__(self, env_type: TestEnvironmentType = TestEnvironmentType.LOCAL):
+        self.env_type = env_type
+        self.config = self._create_config(env_type)
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        return {
-            "name": self.name,
-            "api_base_url": self.api_base_url,
-            "websocket_url": self.websocket_url,
-            "auth_service_url": self.auth_service_url,
-            "services": self.services,
-            "postgres_url": self.postgres_url,
-            "clickhouse_url": self.clickhouse_url,
-            "redis_url": self.redis_url,
-            "test_user_email": self.test_user_email,
-            "test_user_password": self.test_user_password,
-            "connection_timeout": self.connection_timeout,
-            "request_timeout": self.request_timeout,
-            "websocket_timeout": self.websocket_timeout,
-            "use_real_llm": self.use_real_llm,
-            "use_real_database": self.use_real_database,
-            "enable_monitoring": self.enable_monitoring,
+    def _create_config(self, env_type: TestEnvironmentType) -> TestEnvironmentConfig:
+        """Create configuration based on environment type."""
+        configs = {
+            TestEnvironmentType.LOCAL: TestEnvironmentConfig(
+                name="local",
+                api_base_url="http://localhost:8000",
+                websocket_url="ws://localhost:8000/ws",
+                auth_service_url="http://localhost:8001"
+            ),
+            TestEnvironmentType.DEV: TestEnvironmentConfig(
+                name="dev",
+                api_base_url=os.getenv("DEV_API_URL", "http://localhost:8000"),
+                websocket_url=os.getenv("DEV_WS_URL", "ws://localhost:8000/ws"),
+                auth_service_url=os.getenv("DEV_AUTH_URL", "http://localhost:8001"),
+                use_real_database=True
+            ),
+            TestEnvironmentType.STAGING: TestEnvironmentConfig(
+                name="staging", 
+                api_base_url=os.getenv("STAGING_API_URL", "https://staging.netra.ai"),
+                websocket_url=os.getenv("STAGING_WS_URL", "wss://staging.netra.ai/ws"),
+                auth_service_url=os.getenv("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
+                use_real_database=True,
+                use_real_llm=True
+            ),
+            TestEnvironmentType.PRODUCTION: TestEnvironmentConfig(
+                name="production",
+                api_base_url=os.getenv("PROD_API_URL", "https://api.netra.ai"),
+                websocket_url=os.getenv("PROD_WS_URL", "wss://api.netra.ai/ws"),
+                auth_service_url=os.getenv("PROD_AUTH_URL", "https://auth.netra.ai"),
+                use_real_database=True,
+                use_real_llm=True,
+                enable_monitoring=True
+            )
         }
+        return configs[env_type]
+    
+    def get_config(self) -> TestEnvironmentConfig:
+        """Get environment configuration."""
+        return self.config
 
 
 def get_test_config(env_name: str = "test") -> TestEnvironmentConfig:
     """Get test configuration for specified environment."""
-    return TestEnvironmentConfig.from_env(env_name)
+    return TestEnvironmentConfig(name=env_name)
 
 
 def get_test_environment_config(env_name: str = "test") -> TestEnvironmentConfig:
     """Get test environment configuration for specified environment."""
-    return TestEnvironmentConfig.from_env(env_name)
+    return TestEnvironmentConfig(name=env_name)

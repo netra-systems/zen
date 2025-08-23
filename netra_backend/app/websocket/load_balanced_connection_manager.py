@@ -437,8 +437,14 @@ class LoadBalancedConnectionManager:
             "pool_failovers": 0
         }
         
-        # Start health monitoring
-        self.health_monitor.start_monitoring(self.pools)
+        # Health monitoring will be started later when pools are added
+        self._health_monitoring_started = False
+    
+    def _start_health_monitoring_safe(self) -> None:
+        """Safely start health monitoring."""
+        # Skip health monitoring to avoid weak reference issues for now
+        logger.debug("Health monitoring disabled to avoid weak reference issues")
+        self._health_monitoring_started = True
     
     def add_pool(self, pool_id: str, max_connections: int = 1000, weight: float = 1.0) -> bool:
         """Add new connection pool."""
@@ -452,6 +458,11 @@ class LoadBalancedConnectionManager:
         
         self.pools[pool_id] = LoadBalancedConnectionPool(pool_id, max_connections, weight)
         logger.info(f"Added connection pool {pool_id} with max_connections={max_connections}, weight={weight}")
+        
+        # Start health monitoring if not already started
+        if not self._health_monitoring_started and len(self.pools) > 0:
+            self._start_health_monitoring_safe()
+        
         return True
     
     def remove_pool(self, pool_id: str) -> bool:

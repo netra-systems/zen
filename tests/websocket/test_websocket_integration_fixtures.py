@@ -21,7 +21,6 @@ import pytest
 import time
 import websockets
 
-)
 from test_framework.mock_utils import mock_justified
 
 @pytest.fixture

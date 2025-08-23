@@ -120,20 +120,22 @@ class ThreadService(IThreadService):
         extended_data = {"assistant_id": assistant_id, "status": "in_progress", "model": model, "instructions": instructions, "tools": [], "file_ids": [], "metadata_": {}}
         return run_id, {**base_data, **extended_data}
     
-    async def _send_agent_started_event(self, uow, run_id: str, thread_id: str) -> None:
+    async def _send_agent_started_event(self, uow, run_id: str, thread_id: str, agent_name: str = "DefaultAgent") -> None:
         """Send agent started WebSocket event"""
         thread = await uow.threads.get_by_id(uow.session, thread_id)
         if thread and thread.metadata_:
             user_id = thread.metadata_.get("user_id")
             if user_id:
-                await manager.send_message(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "thread_id": thread_id, "timestamp": time.time()}})
+                await manager.send_message(user_id, {"type": "agent_started", "payload": {"run_id": run_id, "agent_name": agent_name, "thread_id": thread_id, "timestamp": time.time()}})
     
     async def _create_run_with_uow(self, uow, run_data: Dict[str, Any], thread_id: str, assistant_id: str, run_id: str) -> Run:
         """Create run using unit of work"""
         run = await uow.runs.create(**run_data)
         if not run:
             raise DatabaseError(message=f"Failed to create run for thread {thread_id}", context={"thread_id": thread_id, "assistant_id": assistant_id})
-        await self._send_agent_started_event(uow, run_id, thread_id)
+        # Get agent name from assistant_id or use a default
+        agent_name = assistant_id if assistant_id else "DefaultAgent"
+        await self._send_agent_started_event(uow, run_id, thread_id, agent_name)
         return run
     
     async def create_run(self, thread_id: str, assistant_id: str, model: str = "gpt-4", instructions: Optional[str] = None, db: Optional[AsyncSession] = None) -> Run:

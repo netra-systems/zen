@@ -21,9 +21,6 @@ import pytest
 import time
 import websockets
 
-    get_unified_websocket_manager,
-
-)
 from test_framework.mock_utils import mock_justified
 
 class WebSocketTestHelpers:
