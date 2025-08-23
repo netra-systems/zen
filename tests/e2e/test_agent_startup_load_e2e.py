@@ -45,12 +45,12 @@ from tests.e2e.harness_complete import (
     get_auth_service_url,
     get_backend_service_url,
 )
-from tests.load_test_utilities import (
+from tests.e2e.load_test_utilities import (
     LoadMetrics,
     LoadTestSimulator,
     SystemResourceMonitor,
 )
-from tests.real_client_factory import create_real_client_factory
+from tests.e2e.real_client_factory import create_real_client_factory
 from tests.e2e.service_manager import RealServicesManager
 
 

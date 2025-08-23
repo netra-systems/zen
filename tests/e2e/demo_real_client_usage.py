@@ -14,7 +14,7 @@ import asyncio
 import json
 
 from tests.e2e.config import TEST_ENDPOINTS, get_test_user
-from tests.real_client_factory import create_real_client_factory
+from tests.e2e.real_client_factory import create_real_client_factory
 from tests.e2e.real_client_types import create_test_config
 
 

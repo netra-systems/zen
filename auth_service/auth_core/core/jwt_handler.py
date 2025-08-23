@@ -6,6 +6,8 @@ import logging
 import os
 import time
 import uuid
+import hmac
+import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -21,6 +23,8 @@ class JWTHandler:
     
     def __init__(self):
         self.secret = self._get_jwt_secret()
+        self.service_secret = AuthConfig.get_service_secret()
+        self.service_id = AuthConfig.get_service_id()
         self.algorithm = AuthConfig.get_jwt_algorithm()
         self.access_expiry = AuthConfig.get_jwt_access_expiry_minutes()
         self.refresh_expiry = AuthConfig.get_jwt_refresh_expiry_days()
@@ -122,10 +126,19 @@ class JWTHandler:
                 logger.warning("Token claims validation failed")
                 return None
             
+            # Enhanced JWT validation
+            if not self._validate_enhanced_jwt_claims(payload):
+                logger.warning("Enhanced JWT claims validation failed")
+                return None
+            
             # CRITICAL FIX: Cross-service validation
             if not self._validate_cross_service_token(payload, token):
                 logger.warning("Cross-service token validation failed")
                 return None
+            
+            # Generate service signature for response
+            service_signature = self._generate_service_signature(payload)
+            payload["service_signature"] = service_signature
                 
             return payload
             
@@ -210,7 +223,7 @@ class JWTHandler:
     
     def _build_payload(self, sub: str, token_type: str, 
                       exp_minutes: int, **kwargs) -> Dict:
-        """Build JWT payload with standard claims"""
+        """Build JWT payload with enhanced security claims"""
         now = datetime.now(timezone.utc)
         exp = now + timedelta(minutes=exp_minutes)
         
@@ -219,9 +232,11 @@ class JWTHandler:
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
             "token_type": token_type,
-            "iss": "netra-auth-service",  # CRITICAL FIX: Issuer claim
-            "aud": "netra-platform",      # CRITICAL FIX: Audience claim
-            "jti": str(uuid.uuid4())      # CRITICAL FIX: JWT ID for replay protection
+            "iss": "netra-auth-service",  # Issuer claim
+            "aud": self._get_audience_for_token_type(token_type),  # Enhanced audience
+            "jti": str(uuid.uuid4()),     # JWT ID for replay protection
+            "env": AuthConfig.get_environment(),  # Environment binding
+            "svc_id": self.service_id      # Service instance ID
         }
         payload.update(kwargs)
         return payload
@@ -279,6 +294,49 @@ class JWTHandler:
             logger.error(f"Token claims validation error: {e}")
             return False
     
+    def _validate_enhanced_jwt_claims(self, payload: Dict) -> bool:
+        """Validate enhanced JWT claims for security"""
+        try:
+            # Check for jti/nonce field for replay protection
+            jti = payload.get("jti")
+            if not jti:
+                logger.warning("Missing jti (JWT ID) claim for replay protection")
+                return False
+            
+            # Validate issuer is exactly "netra-auth-service"
+            if payload.get("iss") != "netra-auth-service":
+                logger.warning(f"Invalid issuer: {payload.get('iss')}")
+                return False
+            
+            # Validate audience matches expected values
+            audience = payload.get("aud")
+            valid_audiences = ["netra-platform", "netra-services", "netra-admin"]
+            if audience not in valid_audiences:
+                logger.warning(f"Invalid audience: {audience}")
+                return False
+            
+            # Validate environment binding if present
+            token_env = payload.get("env")
+            current_env = AuthConfig.get_environment()
+            if token_env and token_env != current_env:
+                logger.warning(f"Environment mismatch: token={token_env}, current={current_env}")
+                return False
+            
+            # Validate service ID if present
+            token_svc_id = payload.get("svc_id")
+            if token_svc_id and token_svc_id != self.service_id:
+                logger.warning(f"Service ID mismatch: token={token_svc_id}, current={self.service_id}")
+                return False
+            
+            # Log security event for enhanced validation
+            logger.info(f"Enhanced JWT validation passed for token {jti[:8]}... (audience: {audience})")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Enhanced JWT claims validation error: {e}")
+            return False
+    
     def _validate_cross_service_token(self, payload: Dict, token: str) -> bool:
         """CRITICAL FIX: Validate token for cross-service security"""
         try:
@@ -293,7 +351,7 @@ class JWTHandler:
             
             # For development environment, be more permissive with audiences
             env = os.getenv("ENVIRONMENT", "development").lower()
-            valid_audiences = ["netra-platform", "netra-backend", "netra-auth"]
+            valid_audiences = ["netra-platform", "netra-backend", "netra-auth", "netra-services", "netra-admin"]
             
             if env == "development":
                 # In development, allow more permissive audience validation
@@ -354,6 +412,45 @@ class JWTHandler:
         if hasattr(self, '_used_token_ids') and len(self._used_token_ids) > 5000:
             self._used_token_ids.clear()
             logger.info("Cleaned up token ID tracking cache")
+    
+    def _get_audience_for_token_type(self, token_type: str) -> str:
+        """Get appropriate audience for token type"""
+        audience_map = {
+            "access": "netra-platform",
+            "refresh": "netra-platform", 
+            "service": "netra-services",
+            "admin": "netra-admin"
+        }
+        return audience_map.get(token_type, "netra-platform")
+    
+    def _generate_service_signature(self, payload: Dict) -> str:
+        """Generate service identity signature for enhanced security"""
+        try:
+            # Extract key claims for signature
+            service_claims = {
+                "sub": payload.get("sub"),
+                "iss": payload.get("iss"),
+                "aud": payload.get("aud"),
+                "svc_id": payload.get("svc_id"),
+                "exp": payload.get("exp")
+            }
+            
+            # Create signature data with domain separation
+            domain_prefix = "NETRA_SERVICE_AUTH_V1"
+            signature_data = f"{domain_prefix}:{service_claims}"
+            
+            # Generate HMAC-SHA256 signature
+            signature = hmac.new(
+                self.service_secret.encode('utf-8'),
+                signature_data.encode('utf-8'),
+                hashlib.sha256
+            ).hexdigest()
+            
+            return signature
+            
+        except Exception as e:
+            logger.error(f"Service signature generation failed: {e}")
+            return ""
 
     def blacklist_token(self, token: str) -> bool:
         """Add token to blacklist for immediate invalidation"""

@@ -40,7 +40,7 @@ from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 class TestSyntaxFix:
 

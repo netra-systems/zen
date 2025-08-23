@@ -39,7 +39,7 @@ from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQue
 from netra_backend.app.services.messaging.message_queue import MessageQueue
 from netra_backend.app.services.messaging.queue_manager import QueueManager
 from netra_backend.app.services.websocket.message_router import MessageRouter
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage

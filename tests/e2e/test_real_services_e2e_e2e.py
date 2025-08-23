@@ -20,6 +20,19 @@ import pytest
 import redis
 import websockets
 
+# Configure logger
+logger = logging.getLogger(__name__)
+
+
+class ServiceEndpoints:
+    """Real service endpoint configuration for E2E testing."""
+    auth_service_url: str = "http://localhost:8001"
+    backend_url: str = "http://localhost:8000"
+    websocket_url: str = "ws://localhost:8000/ws"
+    redis_url: str = "redis://localhost:6379"
+    postgres_url: str = "postgresql://postgres:netra@localhost:5432/netra_test"
+    clickhouse_url: str = "clickhouse://localhost:8123/netra_test"
+
 
 class E2ETestMetrics:
     """Metrics collection for E2E test performance tracking."""

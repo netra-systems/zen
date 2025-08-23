@@ -17,7 +17,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
     message_queue,
 )
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

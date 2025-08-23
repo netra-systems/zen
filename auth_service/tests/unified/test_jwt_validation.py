@@ -9,6 +9,7 @@ Maximum 300 lines enforced - focused on core JWT validation only
 """
 import base64
 import json
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Set
 
@@ -148,14 +149,15 @@ class TestJWTClaimsValidation:
     
     def test_missing_required_claims_rejected(self, jwt_handler):
         """Test rejection when required claims are missing."""
-        # Create token with missing claims manually
+        # Test 1: Token missing jti (security claim) should be rejected
         incomplete_payload = {
             "sub": "test-user",
-            # Missing email and permissions
             "token_type": "access",
             "iat": int(datetime.now(timezone.utc).timestamp()),
             "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
-            "iss": "netra-auth-service"
+            "iss": "netra-auth-service",
+            "aud": "netra-platform"
+            # Missing jti - required for security
         }
         
         incomplete_token = jwt.encode(
@@ -164,11 +166,35 @@ class TestJWTClaimsValidation:
             algorithm=jwt_handler.algorithm
         )
         
-        # Token should validate structurally but missing business claims
+        # Token should be rejected due to missing security claims
         decoded = jwt_handler.validate_token_jwt(incomplete_token, "access")
-        assert decoded is not None  # Structurally valid
-        assert "email" not in decoded  # Missing expected claim
-        assert "permissions" not in decoded  # Missing expected claim
+        assert decoded is None  # Should be rejected for missing jti
+        
+        # Test 2: Token with all required security claims but missing business claims should validate
+        complete_security_payload = {
+            "sub": "test-user",
+            # Missing email and permissions (business claims)
+            "token_type": "access",
+            "iat": int(datetime.now(timezone.utc).timestamp()),
+            "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+            "iss": "netra-auth-service",
+            "aud": "netra-platform",
+            "jti": str(uuid.uuid4()),  # Required security claim
+            "env": "development",
+            "svc_id": jwt_handler.service_id
+        }
+        
+        complete_token = jwt.encode(
+            complete_security_payload, 
+            jwt_handler.secret, 
+            algorithm=jwt_handler.algorithm
+        )
+        
+        # Token should validate structurally with security claims present
+        decoded = jwt_handler.validate_token_jwt(complete_token, "access")
+        assert decoded is not None  # Structurally valid with security claims
+        assert "email" not in decoded  # Missing business claim
+        assert "permissions" not in decoded  # Missing business claim
     
     def test_token_type_validation(self, jwt_handler):
         """Test token type claim validation."""

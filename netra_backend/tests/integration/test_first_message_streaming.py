@@ -21,7 +21,7 @@ from netra_backend.app.schemas import LLMStreamChunk, User
 from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.streaming_service import TextStreamProcessor
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio

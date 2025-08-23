@@ -18,7 +18,7 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo
 
 class TestWebSocketConnectionParadoxPrevention:

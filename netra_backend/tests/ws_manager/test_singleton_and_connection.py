@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import (
+from netra_backend.app.ws_manager import (
 
     ConnectionInfo,
 
@@ -100,7 +100,7 @@ class TestSingletonPattern(WebSocketTestBase):
         self.reset_manager_singleton()
         
         from netra_backend.app import ws_manager as ws_module
-        from netra_backend.app.services.websocket.ws_manager import (
+        from netra_backend.app.ws_manager import (
 
             WebSocketManager as WSM1,
 

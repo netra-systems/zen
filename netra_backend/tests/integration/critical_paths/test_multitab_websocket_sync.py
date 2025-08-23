@@ -43,7 +43,7 @@ import redis.asyncio as aioredis
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

@@ -235,7 +235,7 @@ class TestWebSocketIntegration:
 
         """Test WebSocket reconnection preserves message order"""
         # Will fail - no message replay on reconnect
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         manager = WebSocketManager()
 

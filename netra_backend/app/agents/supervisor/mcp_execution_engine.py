@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
 from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
 from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (

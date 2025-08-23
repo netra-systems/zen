@@ -20,7 +20,7 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 class ThreadTestDataFactory:
     """Factory for creating thread test data."""

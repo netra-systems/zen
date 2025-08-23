@@ -327,7 +327,7 @@ class TestWebSocketBroadcasting:
     async def test_broadcast_to_user(self):
 
         """Test broadcasting message to specific user."""
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:
 

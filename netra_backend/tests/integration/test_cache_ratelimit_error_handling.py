@@ -204,7 +204,7 @@ class TestErrorPropagation:
     async def test_backend_error_to_websocket(self):
 
         """Test backend errors propagate to WebSocket."""
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
 

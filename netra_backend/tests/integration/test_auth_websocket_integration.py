@@ -70,7 +70,7 @@ class TestAuthToWebSocketFlow:
 
         """Test successful auth flow leading to WS connection."""
         from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.ws_manager import WebSocketManager
         
         # Setup mocks
 

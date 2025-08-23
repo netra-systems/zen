@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List
 if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )

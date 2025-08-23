@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, Mock
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.demo_service import DemoService
-from netra_backend.app.services.websocket.ws_manager import (
+from netra_backend.app.ws_manager import (
     get_manager as get_ws_manager,
 )
 

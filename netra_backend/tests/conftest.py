@@ -348,7 +348,7 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
 
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
     manager = WebSocketManager()
 
