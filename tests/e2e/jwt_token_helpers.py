@@ -195,7 +195,7 @@ class JWTTestHelper:
     
     async def make_auth_request(self, endpoint: str, token: str) -> Dict:
         """Make authenticated request to auth service."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             from netra_backend.app.core.auth_constants import HeaderConstants
             headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
             try:
@@ -206,7 +206,7 @@ class JWTTestHelper:
     
     async def make_backend_request(self, endpoint: str, token: str) -> Dict:
         """Make authenticated request to backend service."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
             try:
                 response = await client.get(f"{self.backend_url}{endpoint}", headers=headers)
@@ -216,7 +216,7 @@ class JWTTestHelper:
     
     async def get_real_token_from_auth(self) -> Optional[str]:
         """Get real token from auth service dev login."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             try:
                 response = await client.post(f"{self.auth_url}/auth/dev/login")
                 if response.status_code == 200:

@@ -31,7 +31,7 @@ from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher impor
 from netra_backend.app.services.context import ToolContext
 
 # Import helper classes from part 1
-from netra_backend.tests.test_apex_optimizer_tool_selection_part1 import (
+from netra_backend.tests.services.test_apex_optimizer_tool_selection_part1 import (
     MockLLMConnector,
     MockOptimizationTool,
     OptimizationCategory,
@@ -61,7 +61,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -100,7 +100,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -139,7 +139,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -178,7 +178,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -217,7 +217,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -255,7 +255,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_llm_failure(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection when LLM fails"""
         # Create sample agent state
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -292,7 +292,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_invalid_json_response(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection with invalid JSON response from LLM"""
         # Create sample agent state
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,
@@ -329,7 +329,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario
-        from netra_backend.app.schemas.unified_tools import (
+        from netra_backend.app.schemas.Request import (
             DataSource,
             TimeRange,
             Workload,

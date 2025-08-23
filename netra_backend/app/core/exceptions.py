@@ -38,6 +38,8 @@ from netra_backend.app.core.exceptions_auth import (
     NetraSecurityException,
     TokenExpiredError,
     TokenInvalidError,
+    TokenRevokedError,
+    TokenTamperError,
 )
 from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
 from netra_backend.app.core.exceptions_config import ConfigurationError, ValidationError

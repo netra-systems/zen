@@ -17,7 +17,7 @@ Architecture:
 """
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from tests.agent_startup_user_manager import TestUser
+from tests.e2e.agent_startup_user_manager import TestUser
 from typing import Any, Callable, Dict, Optional
 import asyncio
 import logging

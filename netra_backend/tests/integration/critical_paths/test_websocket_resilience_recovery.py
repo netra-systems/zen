@@ -28,9 +28,9 @@ import pytest
 
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
+from netra_backend.app.websocket.recovery import WebSocketRecoveryManager as ConnectionRecovery
 
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

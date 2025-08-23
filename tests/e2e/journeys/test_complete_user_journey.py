@@ -30,6 +30,8 @@ import pytest
 os.environ["TESTING"] = "1"
 os.environ["CORS_ORIGINS"] = "*"
 os.environ["ENVIRONMENT"] = "development"
+os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
+os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
 
 from tests.e2e.helpers.journey.user_journey_helpers import (
     ErrorRecoveryHelper,

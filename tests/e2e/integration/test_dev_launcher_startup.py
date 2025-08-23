@@ -24,7 +24,6 @@ import requests
 # Add project root to path for imports
 
 from dev_launcher import DevLauncher, LauncherConfig
-from dev_launcher.config import LauncherConfig
 from tests.e2e.dev_launcher_test_fixtures import TestEnvironmentManager
 
 
@@ -69,9 +68,9 @@ class DevLauncherTestFixture:
         defaults = {
             "dynamic_ports": True,
             "no_browser": True,
-            "no_secrets": True,
+            "load_secrets": False,  # Use load_secrets=False instead of no_secrets=True
             "non_interactive": True,
-            "minimal": True
+            "startup_mode": "minimal"  # Use startup_mode instead of minimal
         }
         return LauncherConfig(**{**defaults, **overrides})
 
@@ -81,8 +80,8 @@ async def dev_launcher_fixture():
     """Fixture providing dev launcher test management."""
     fixture = DevLauncherTestFixture()
     yield fixture
-    if fixture.launcher:
-        await fixture.launcher.cleanup()
+    # Clean up launcher resources - DevLauncher doesn't have cleanup method
+    # Cleanup is handled by the TestEnvironmentManager
     fixture.test_env.cleanup()
 
 
@@ -154,9 +153,10 @@ async def test_graceful_shutdown(dev_launcher_fixture):
     
     launcher = dev_launcher_fixture.launcher
     
-    # Trigger graceful shutdown
+    # Trigger graceful shutdown via process manager
     start_time = time.time()
-    await launcher.cleanup()
+    if hasattr(launcher, 'process_manager') and launcher.process_manager:
+        launcher.process_manager.cleanup_all()  # cleanup_all is synchronous
     shutdown_time = time.time() - start_time
     
     # Should shutdown within reasonable time

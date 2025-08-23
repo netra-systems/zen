@@ -76,7 +76,7 @@ class ResourceIsolationTestSuite:
         """Verify that required services are available."""
         try:
             # Check backend service
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"{TEST_CONFIG['backend_url']}/health",
                     timeout=10.0
@@ -87,7 +87,7 @@ class ResourceIsolationTestSuite:
             
             # Check auth service if configured
             if TEST_CONFIG['auth_service_url'] != "http://localhost:8001":
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(
                         f"{TEST_CONFIG['auth_service_url']}/health",
                         timeout=10.0

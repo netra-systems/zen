@@ -11,7 +11,7 @@ import type {
 } from '@/types/unified-chat';
 import type { WebSocketEventBuffer } from '@/lib/circular-buffer';
 import type { ConnectionState, ConnectionActions } from '@/types/store-types';
-import type { PerformanceMetrics } from '@/types/performance-metrics';
+import type { PerformanceMetrics } from '@/types/unified';
 
 // Agent execution tracking
 export interface AgentExecution {

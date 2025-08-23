@@ -19,10 +19,10 @@ import asyncio
 import pytest
 import time
 
+from netra_backend.app.websocket.message_types import (
     ThreadCreatedMessage,
-
     ThreadUpdatedMessage,
-
+)
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
@@ -38,17 +38,12 @@ class ThreadUIStateTracker:
         self.active_thread_id: Optional[str] = None
 
         self.ui_state = {
-
             "thread_list": [],
-
             "active_thread": None,
-
             "message_history": [],
-
             "pagination_state": {"page": 1, "total_pages": 1},
-
             "loading_states": {"threads": False, "messages": False}
-
+        }
         self.websocket_events: List[Dict[str, Any]] = []
     
 
@@ -57,16 +52,11 @@ class ThreadUIStateTracker:
         """Track thread creation and UI updates."""
 
         thread_info = {
-
             "thread_id": thread_data["id"],
-
             "title": thread_data.get("title", "New Thread"),
-
             "created_at": thread_data.get("created_at"),
-
             "message_count": 0
-
-        
+        }
 
         self.ui_state["thread_list"].append(thread_info)
 
@@ -88,7 +78,7 @@ class ThreadUIStateTracker:
             "thread_count": len(self.ui_state["thread_list"]),
 
             "new_thread_id": thread_info["thread_id"]
-
+        }
     
 
     async def track_thread_switch(self, thread_id: str) -> Dict[str, Any]:
@@ -106,8 +96,7 @@ class ThreadUIStateTracker:
             (t for t in self.ui_state["thread_list"] if t["thread_id"] == thread_id),
 
             None
-
-        
+        )
 
         if active_thread:
 
@@ -138,16 +127,13 @@ class ThreadUIStateTracker:
                 "current_thread": thread_id,
 
                 "ui_loading": True
-
-        
+            }
 
         return {"switch_successful": False, "error": "Thread not found"}
     
 
     async def load_message_history(self, thread_id: str, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-
-#         """Load and paginate message history for UI.""" # Possibly broken comprehension
-
+        """Load and paginate message history for UI."""
         self.ui_state["message_history"] = messages
 
         self.ui_state["loading_states"]["messages"] = False
@@ -170,8 +156,7 @@ class ThreadUIStateTracker:
             "total_messages": total_messages,
 
             "messages_per_page": messages_per_page
-
-        
+        }
 
         return {
 
@@ -180,16 +165,10 @@ class ThreadUIStateTracker:
             "pagination_ready": True,
 
             "ui_updated": True
-
-    
-
-class TestSyntaxFix:
-    """Generated test class"""
+        }
 
     def get_current_ui_state(self) -> Dict[str, Any]:
-
         """Get current UI state snapshot."""
-
         return self.ui_state.copy()
 
 class ThreadOperationExecutor:
@@ -207,10 +186,8 @@ class ThreadOperationExecutor:
     
 
     async def create_thread_with_ui_update(self, thread_title: str = None) -> Dict[str, Any]:
-
         """Create thread and update UI state."""
-#         # Mock thread for testing without database dependency # Possibly broken comprehension
-
+        # Mock thread for testing without database dependency
         thread_id = f"thread_{self.user_id}_{int(time.time())}"
 
         mock_thread = MagicMock()
@@ -229,8 +206,7 @@ class ThreadOperationExecutor:
             "created_at": mock_thread.created_at.isoformat(),
 
             "user_id": self.user_id
-
-        
+        }
         # Update UI tracker
 
         ui_result = await self.ui_tracker.track_thread_creation(thread_data)
@@ -243,10 +219,8 @@ class ThreadOperationExecutor:
             "thread_data": thread_data,
 
             "ui_result": ui_result,
-
             "operation_successful": True
-
-    
+        }
 
     async def switch_thread_with_history_load(self, thread_id: str) -> Dict[str, Any]:
 
@@ -270,19 +244,13 @@ class ThreadOperationExecutor:
         # Mock message history
 
         message_data = [
-
             {
-
                 "id": f"msg_{i}",
-
                 "content": f"Test message {i+1}",
-
                 "role": "user" if i % 2 == 0 else "assistant",
-
                 "created_at": datetime.now(timezone.utc).isoformat()
-
+            }
             for i in range(3)  # Create 3 test messages
-
         ]
         
 
@@ -300,8 +268,7 @@ class ThreadOperationExecutor:
             "message_count": len(message_data),
 
             "operation_successful": True
-
-    
+        }
 
     async def add_message_with_ui_update(self, thread_id: str, content: str, role: str = "user") -> Dict[str, Any]:
 
@@ -327,7 +294,7 @@ class ThreadOperationExecutor:
             "role": role,
 
             "created_at": mock_message.created_at.isoformat()
-
+        }
         current_messages.append(new_message_data)
         
         # Update thread message count in UI
@@ -350,6 +317,7 @@ class ThreadOperationExecutor:
             "ui_updated": True,
 
             "operation_successful": True
+        }
 
 class ConcurrentThreadManager:
 
@@ -424,8 +392,7 @@ class ConcurrentThreadManager:
             "execution_time": execution_time,
 
             "results": results
-
-    
+        }
 
     async def _create_and_switch_operation(self, executor: ThreadOperationExecutor, index: int) -> Dict[str, Any]:
 
@@ -463,9 +430,8 @@ class ConcurrentThreadManager:
                 thread_id = create_result["thread_data"]["id"]
 
                 message_result = await executor.add_message_with_ui_update(
-
-#                     thread_id, f"Test message for thread {index}" # Possibly broken comprehension
-
+                    thread_id, f"Test message for thread {index}"
+                )
                 return message_result
 
             return create_result
@@ -475,11 +441,10 @@ class ConcurrentThreadManager:
             return {"operation_successful": False, "error": str(e)}
 
 @pytest.mark.asyncio
-
 class TestThreadManagementUIUpdate:
-
-    # """Thread Management UI Update Integration Test Suite."""
+    """Thread Management UI Update Integration Test Suite."""
     
+    pass
 
     # @pytest.fixture
 

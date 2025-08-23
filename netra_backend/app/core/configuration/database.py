@@ -217,11 +217,15 @@ class DatabaseConfigManager:
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
         # Ensure HTTP port 8123 is used for development
         default_port = "8123"  # Always use HTTP port for dev launcher
+        
+        # FIX: Support both CLICKHOUSE_PASSWORD and CLICKHOUSE_DEFAULT_PASSWORD for backward compatibility
+        password = os.environ.get("CLICKHOUSE_PASSWORD") or os.environ.get("CLICKHOUSE_DEFAULT_PASSWORD", "")
+        
         config = {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
-            "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
+            "password": password,
             "database": os.environ.get("CLICKHOUSE_DB", "default")
         }
         # Cache the configuration

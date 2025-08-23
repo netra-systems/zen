@@ -33,12 +33,12 @@ from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher impor
 from netra_backend.app.services.context import ToolContext
 
 # Import helper classes from other parts
-from netra_backend.tests.test_apex_optimizer_tool_selection_part1 import (
+from netra_backend.tests.services.test_apex_optimizer_tool_selection_part1 import (
     MockLLMConnector,
     MockOptimizationTool,
     OptimizationCategory,
 )
-from netra_backend.tests.test_apex_optimizer_tool_selection_part3 import ToolChain
+from netra_backend.tests.services.test_apex_optimizer_tool_selection_part3 import ToolChain
 
 class TestApexOptimizerPerformanceAndScaling:
     """Test performance and scaling characteristics"""

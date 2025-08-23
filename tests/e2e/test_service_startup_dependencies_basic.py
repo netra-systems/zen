@@ -44,7 +44,7 @@ class ServiceStartupValidator:
     
     def __init__(self):
         """Initialize validator with real services."""
-        self.http_client = httpx.AsyncClient(timeout=10.0)
+        self.http_client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
         self.startup_start_time = time.time()
         
     async def validate_sequential_startup_order(self) -> Dict[str, Any]:

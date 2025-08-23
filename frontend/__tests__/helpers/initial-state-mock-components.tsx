@@ -19,7 +19,12 @@ export const setupInitialStateMockComponents = () => {
   }));
 
   // Mock store modules
-  jest.mock('@/store/app');
+  jest.mock('@/store/app', () => ({
+    useAppStore: jest.fn(() => ({
+      isSidebarCollapsed: false,
+      toggleSidebar: jest.fn()
+    }))
+  }));
   jest.mock('@/store/authStore', () => ({
     useAuthStore: jest.fn(() => ({
       isAuthenticated: false,

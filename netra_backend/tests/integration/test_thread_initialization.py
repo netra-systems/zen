@@ -320,7 +320,7 @@ class TestFirstMessageThreadInit:
     async def test_websocket_notification_on_thread_creation(self, thread_data):
 
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
 

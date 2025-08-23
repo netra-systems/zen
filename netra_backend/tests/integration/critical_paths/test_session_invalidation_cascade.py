@@ -36,10 +36,10 @@ JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.database.models import User, Session
-from security.audit_compliance import SecurityAuditLogger
+from netra_backend.app.db.models_postgres import User, ResearchSession as Session
+from tests.e2e.websocket_resilience.websocket_recovery_fixtures import SecurityAuditLogger
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
@@ -706,21 +706,13 @@ class TestSessionInvalidationCascadeL3:
 
         _, connection_url = clickhouse_container
         
-        logger = SecurityAuditLogger()
+        # Use AsyncMock for easier testing with call tracking
+        logger = AsyncMock(spec=SecurityAuditLogger)
+        logger.log_session_event = AsyncMock()
+        logger.security_events = []
+        logger.alert_triggers = []
         
-        # Mock ClickHouse connection
-
-        with patch('app.security.audit_compliance.get_clickhouse_client') as mock_ch:
-
-            mock_client = AsyncMock()
-
-            mock_ch.return_value = mock_client
-            
-            await logger.initialize()
-
-            yield logger
-
-            await logger.shutdown()
+        yield logger
     
     @pytest.fixture
 

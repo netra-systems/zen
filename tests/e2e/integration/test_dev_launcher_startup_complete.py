@@ -44,6 +44,9 @@ from typing import Any, Dict, List, Optional
 import httpx
 import pytest
 
+# Define project root - go up 4 levels from tests/e2e/integration/
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
 from dev_launcher.service_discovery import ServiceDiscovery
@@ -253,7 +256,7 @@ class RealDevLauncherTester:
             if service_name == "frontend":
                 health_url = f"http://localhost:{port}/"  # Frontend uses root path
             
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return response.status_code == 200
                 
@@ -279,7 +282,7 @@ class RealDevLauncherTester:
                     if service_name == "frontend":
                         health_url = f"http://localhost:{port}/"
                     
-                    async with httpx.AsyncClient(timeout=2.0) as client:
+                    async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                         response = await client.get(health_url)
                         if response.status_code == 200:
                             logger.info(f"Found {service_name} service on port {port}")
@@ -334,7 +337,7 @@ class RealDevLauncherTester:
             if service_name == "frontend":
                 health_url = f"http://localhost:{port}/"
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 response_time = (time.time() - start_check) * 1000
                 

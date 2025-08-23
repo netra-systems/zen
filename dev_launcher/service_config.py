@@ -33,8 +33,9 @@ class ResourceMode(Enum):
     """Resource mode for services."""
     LOCAL = "local"          # Run service locally (requires installation)
     SHARED = "shared"        # Use shared cloud resource
-    MOCK = "mock"           # Use mock/stub implementation
+    DOCKER = "docker"       # Use Docker containers for local services
     DISABLED = "disabled"   # Service is disabled (NOT RECOMMENDED)
+    # NOTE: MOCK mode removed - mock services are ONLY for specific test cases, not development
 
 
 @dataclass
@@ -44,16 +45,22 @@ class ServiceResource:
     mode: ResourceMode = ResourceMode.SHARED
     local_config: Dict[str, Any] = field(default_factory=dict)
     shared_config: Dict[str, Any] = field(default_factory=dict)
-    mock_config: Dict[str, Any] = field(default_factory=dict)
+    # mock_config removed - mock services are only for testing, not development
+    docker_config: Dict[str, Any] = field(default_factory=dict)
     
     def get_config(self) -> Dict[str, Any]:
         """Get the configuration based on the current mode."""
         if self.mode == ResourceMode.LOCAL:
-            return self.local_config
+            # Check if this is actually Docker-based local
+            config = self.local_config.copy()
+            if config.get('docker', False):
+                # Merge with Docker config
+                config.update(self.docker_config)
+            return config
         elif self.mode == ResourceMode.SHARED:
             return self.shared_config
-        elif self.mode == ResourceMode.MOCK:
-            return self.mock_config
+        elif self.mode == ResourceMode.DOCKER:
+            return self.docker_config
         else:
             return {}
     
@@ -93,7 +100,14 @@ class ServicesConfiguration:
             "password": "cpmdn7pVpsJSK2mb7lUTj2VaQhSC1L3S",
             "db": 0
         },
-        mock_config={"mock": True}
+        docker_config={
+            "host": "localhost",
+            "port": 6379,
+            "db": 0,
+            "docker": True,
+            "container_name": "netra-dev-redis"
+        }
+        # Mock mode not supported in development
     ))
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -109,14 +123,25 @@ class ServicesConfiguration:
             "secure": False
         },
         shared_config={
-            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "clickhouse_host_url_placeholder"),
+            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"),
             "port": 8443,
             "user": "default",
             "password": "46YQC0J~6SfZ.",
             "database": "default",
             "secure": True
         },
-        mock_config={"mock": True}
+        docker_config={
+            "host": "localhost",
+            "port": 9000,
+            "http_port": 8123,
+            "user": "default",
+            "password": "netra_dev_password",
+            "database": "netra_dev",
+            "secure": False,
+            "docker": True,
+            "container_name": "netra-dev-clickhouse"
+        }
+        # Mock mode not supported in development
     ))
     
     postgres: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -137,7 +162,16 @@ class ServicesConfiguration:
             "password": "",  # Will be loaded from secrets
             "database": "netra_dev"
         },
-        mock_config={"mock": True}
+        docker_config={
+            "host": "localhost",
+            "port": 5433,
+            "user": "postgres",
+            "password": "",
+            "database": "netra_dev",
+            "docker": True,
+            "container_name": "netra-dev-postgres"
+        }
+        # Mock mode not supported in development
     ))
     
     llm: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -153,7 +187,7 @@ class ServicesConfiguration:
             "providers": ["anthropic", "openai", "gemini"],
             "default_provider": "gemini"
         },
-        mock_config={"mock": True, "response": "Mock LLM response"}
+        # Mock mode not supported in development
     ))
     
     auth_service: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -172,7 +206,7 @@ class ServicesConfiguration:
             "health_endpoint": "/health",
             "enabled": True
         },
-        mock_config={"mock": True, "enabled": False}
+        # Mock mode not supported in development
     ))
     
     def get_all_env_vars(self) -> Dict[str, str]:
@@ -224,8 +258,7 @@ class ServicesConfiguration:
         existing_db_url = os.environ.get("DATABASE_URL")
         if existing_db_url:
             env_vars["DATABASE_URL"] = existing_db_url
-        elif self.postgres.mode == ResourceMode.MOCK:
-            env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
+        # Mock mode not supported in development - removed mock database URL
         elif self.postgres.mode == ResourceMode.LOCAL:
             self._add_local_postgres_url(env_vars)
         elif self.postgres.mode == ResourceMode.SHARED:
@@ -274,47 +307,80 @@ class ServicesConfiguration:
             if service.mode == ResourceMode.DISABLED:
                 warnings.append(f"⚠️  {service.name.upper()} is disabled - some features may not work")
         
-        # Check for local services that require installation
-        if self.redis.mode == ResourceMode.LOCAL:
+        # Check for local services that require installation (skip Docker-based)
+        if self.redis.mode == ResourceMode.LOCAL and not self.redis.get_config().get('docker', False):
             if not self._check_redis_installed():
                 warnings.append("⚠️  Redis is set to LOCAL but doesn't appear to be installed")
         
-        if self.clickhouse.mode == ResourceMode.LOCAL:
+        if self.clickhouse.mode == ResourceMode.LOCAL and not self.clickhouse.get_config().get('docker', False):
             if not self._check_clickhouse_installed():
                 warnings.append("⚠️  ClickHouse is set to LOCAL but doesn't appear to be installed")
         
-        if self.postgres.mode == ResourceMode.LOCAL:
+        if self.postgres.mode == ResourceMode.LOCAL and not self.postgres.get_config().get('docker', False):
             if not self._check_postgres_installed():
                 warnings.append("⚠️  PostgreSQL is set to LOCAL but doesn't appear to be installed")
+        
+        # Check Docker availability for Docker mode services
+        docker_services = []
+        if self.redis.get_config().get('docker', False):
+            docker_services.append('Redis')
+        if self.clickhouse.get_config().get('docker', False):
+            docker_services.append('ClickHouse')
+        if self.postgres.get_config().get('docker', False):
+            docker_services.append('PostgreSQL')
+        
+        if docker_services:
+            from dev_launcher.docker_services import check_docker_availability
+            if not check_docker_availability():
+                services_str = ', '.join(docker_services)
+                warnings.append(f"⚠️  Docker not available but required for: {services_str}")
         
         return warnings
     
     def _check_redis_installed(self) -> bool:
-        """Check if Redis is installed locally."""
+        """Check if Redis is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["redis-cli", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_redis_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["redis-cli", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def _check_clickhouse_installed(self) -> bool:
-        """Check if ClickHouse is installed locally."""
+        """Check if ClickHouse is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["clickhouse-client", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_clickhouse_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["clickhouse-client", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def _check_postgres_installed(self) -> bool:
-        """Check if PostgreSQL is installed locally."""
+        """Check if PostgreSQL is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["psql", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_postgres_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["psql", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def save_to_file(self, path: Path):
         """Save configuration to a JSON file."""
@@ -357,8 +423,7 @@ class ServicesConfiguration:
                     service.local_config.update(service_config.get("config", {}))
                 elif service.mode == ResourceMode.SHARED:
                     service.shared_config.update(service_config.get("config", {}))
-                elif service.mode == ResourceMode.MOCK:
-                    service.mock_config.update(service_config.get("config", {}))
+                # Mock mode removed - only for testing
         
         logger.info(f"Configuration loaded from {path}")
         return config
@@ -380,7 +445,7 @@ class ServiceConfigWizard:
         print("You can choose between:")
         print("  • SHARED: Use cloud-hosted development resources (recommended)")
         print("  • LOCAL:  Use locally installed services")
-        print("  • MOCK:   Use mock implementations (limited functionality)")
+        # Mock mode not shown - only for testing, not development
         print()
         
         # Quick setup option
@@ -461,11 +526,10 @@ class ServiceConfigWizard:
         print("   Options:")
         print("     1. SHARED - Use cloud-hosted service")
         print("     2. LOCAL  - Use locally installed service")
-        print("     3. MOCK   - Use mock implementation")
-        print("     4. SKIP   - Disable this service (not recommended)")
+        print("     3. SKIP   - Disable this service (not recommended)")
         
         try:
-            choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+            choice = input("   Choice [1-3, default=1]: ").strip() or "1"
         except EOFError:
             logger.info("Non-interactive mode: using default choice=1")
             choice = "1"
@@ -473,8 +537,8 @@ class ServiceConfigWizard:
         mode_map = {
             "1": ResourceMode.SHARED,
             "2": ResourceMode.LOCAL,
-            "3": ResourceMode.MOCK,
-            "4": ResourceMode.DISABLED
+            "3": ResourceMode.DISABLED
+            # Mock mode removed - only for testing
         }
         
         service.mode = mode_map.get(choice, ResourceMode.SHARED)
@@ -526,13 +590,19 @@ class ServiceConfigWizard:
 
 
 def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
-    """Load existing configuration or create a new one.
+    """Load existing configuration or create a new one with smart service detection.
     
-    Default configuration:
-    - Redis: LOCAL
-    - ClickHouse: LOCAL
-    - PostgreSQL: LOCAL
-    - LLM: SHARED (API providers)
+    This function now includes intelligent service availability checking:
+    - Automatically detects if local services are installed and available
+    - Falls back to shared services when local ones aren't available
+    - Validates API keys and provides guidance
+    - Ensures smooth cold start experience
+    
+    Default configuration with smart detection:
+    - Redis: LOCAL (if available) → SHARED (if not)
+    - ClickHouse: LOCAL (if available) → SHARED (if not)  
+    - PostgreSQL: LOCAL (if available) → SHARED (if not)
+    - LLM: SHARED (API providers - requires valid API keys)
     - Auth Service: LOCAL
     
     To override defaults:
@@ -548,10 +618,15 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
             config = ServicesConfiguration.load_from_file(config_path)
             logger.info("Loaded existing service configuration")
             
-            # Validate the loaded configuration
+            # Check service availability and auto-adjust if needed
+            config, availability_warnings = _check_and_adjust_services(config, interactive)
+            
+            # Validate the configuration
             warnings = config.validate()
+            warnings.extend(availability_warnings)
+            
             if warnings and interactive:
-                # Log warnings but don't prompt user
+                # Log warnings but don't prompt user in non-verbose mode
                 for warning in warnings:
                     logger.debug(f"Configuration notice: {warning}")
             
@@ -559,17 +634,75 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
         except Exception as e:
             logger.warning(f"Failed to load configuration: {e}")
     
-    # Create new configuration
+    # Create new configuration with smart detection
+    config = ServicesConfiguration()
+    
     if interactive:
         try:
-            wizard = ServiceConfigWizard()
-            return wizard.run()
+            # Check if user wants to run wizard or use smart defaults
+            setup_unicode_console()
+            use_smart_defaults = _ask_use_smart_defaults()
+            
+            if use_smart_defaults:
+                config, warnings = _check_and_adjust_services(config, interactive)
+                
+                if warnings:
+                    print()
+                    safe_print(f"{get_emoji('info')} Configuration adjustments made:")
+                    for warning in warnings:
+                        print(f"  • {warning}")
+                
+                # Save the smart configuration
+                config.save_to_file(config_path)
+                safe_print(f"{get_emoji('check')} Smart configuration saved to {config_path}")
+                
+                return config
+            else:
+                # Run interactive wizard
+                wizard = ServiceConfigWizard()
+                return wizard.run()
+                
         except EOFError:
-            logger.info("Non-interactive mode detected, using default configuration")
-            config = ServicesConfiguration()
+            logger.info("Non-interactive mode detected, using smart default configuration")
+            config, _ = _check_and_adjust_services(config, False)
             return config
     else:
-        # Use defaults in non-interactive mode
-        config = ServicesConfiguration()
-        logger.info("Using default service configuration (LOCAL for all except LLM)")
+        # Non-interactive mode: use smart defaults
+        config, warnings = _check_and_adjust_services(config, False)
+        logger.info("Using smart default service configuration with availability detection")
+        
+        if warnings:
+            for warning in warnings:
+                logger.info(f"Service adjustment: {warning}")
+        
         return config
+
+
+def _ask_use_smart_defaults() -> bool:
+    """Ask user if they want to use smart defaults or run wizard."""
+    print("\n" + "="*60)
+    safe_print(f"{get_emoji('rocket')} Netra Development Environment Setup")
+    print("="*60)
+    print("\nChoose setup method:")
+    print("  1. Smart Setup (Recommended) - Automatically detect and configure services")
+    print("  2. Custom Setup - Interactive wizard for manual configuration")
+    print()
+    
+    try:
+        choice = input("Choose setup method [1-2, default=1]: ").strip() or "1"
+        return choice == "1"
+    except EOFError:
+        logger.info("Non-interactive mode: using smart defaults")
+        return True
+
+
+def _check_and_adjust_services(config: ServicesConfiguration, 
+                              interactive: bool) -> tuple[ServicesConfiguration, list[str]]:
+    """Check service availability and adjust configuration accordingly."""
+    try:
+        from dev_launcher.service_availability_checker import check_and_configure_services
+        return check_and_configure_services(config, interactive=interactive)
+    except ImportError:
+        logger.warning("Service availability checker not available, using basic validation")
+        warnings = config.validate()
+        return config, warnings

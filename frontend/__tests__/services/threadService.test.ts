@@ -5,7 +5,7 @@
  */
 
 import { ThreadService } from '@/services/threadService';
-import { ThreadMetadata } from '@/types/registry';
+import { ThreadMetadata } from '@/types/unified';
 import {
   createMockThread,
   createMockThreads,

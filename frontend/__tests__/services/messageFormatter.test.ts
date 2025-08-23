@@ -14,7 +14,7 @@ import {
   type ContentTypeInfo,
   type FormattingMetadata
 } from '@/services/messageFormatter';
-import type { Message } from '@/types/registry';
+import type { Message } from '@/types/unified';
 
 describe('MessageFormatter Service', () => {
   

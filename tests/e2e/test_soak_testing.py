@@ -431,7 +431,7 @@ class AIAgentSimulator:
             
             # Simulate agent creation
 
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 # Agent initialization
 
                 await client.post(f"{self.backend_url}/agents", json={
@@ -926,7 +926,7 @@ class SoakTestOrchestrator:
                 start_time = time.time()
                 
 
-                async with httpx.AsyncClient(timeout=30.0) as client:
+                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                     # Test critical endpoints
 
                     await client.get(f"{self.config['backend_url']}/health")

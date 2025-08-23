@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ThreadService } from '@/services/threadService';
-import { Thread } from '@/types/registry';
+import { Thread } from '@/types/unified';
 import { useAuthStore } from '@/store/authStore';
 
 export function useThreads() {

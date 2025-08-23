@@ -39,7 +39,7 @@
     <title>Error Handler Class Relocation</title>
     <problem>ExecutionErrorHandler moved to specialized directory but imports not updated</problem>
     <solution>
-      <incorrect>from netra_backend.app.agents.base import ExecutionErrorHandler</incorrect>
+      <incorrect>from netra_backend.app.agents.base_agent import ExecutionErrorHandler</incorrect>
       <correct>from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler</correct>
     </solution>
     <pattern>When refactoring error handlers to specialized modules, maintain backward compatibility shims</pattern>

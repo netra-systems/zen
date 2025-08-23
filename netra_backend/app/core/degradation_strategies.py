@@ -221,7 +221,7 @@ class WebSocketDegradationStrategy(DegradationStrategy):
     
     async def _test_websocket_health(self) -> bool:
         """Test WebSocket manager health."""
-        from netra_backend.app.services.websocket.ws_manager import (
+        from netra_backend.app.ws_manager import (
             manager as ws_manager,
         )
         if ws_manager and hasattr(ws_manager, 'core'):

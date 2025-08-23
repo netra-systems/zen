@@ -35,8 +35,8 @@ import pytest_asyncio
 
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig, ConnectionState
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class WebSocketServiceDiscoveryTester:
@@ -70,7 +70,7 @@ class WebSocketServiceDiscoveryTester:
         }
         
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Try common service discovery endpoints
                 discovery_endpoints = [
                     "/api/config/websocket",
@@ -150,7 +150,7 @@ class WebSocketServiceDiscoveryTester:
         }
         
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Auth service might provide service discovery
                 auth_endpoints = [
                     "/config",
@@ -380,7 +380,7 @@ class TestBackendServiceDiscovery:
         
         accessible_endpoints = []
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             for endpoint in config_endpoints:
                 try:
                     response = await client.get(f"{service_discovery_tester.backend_url}{endpoint}")
@@ -405,7 +405,7 @@ class TestBackendServiceDiscovery:
     async def test_websocket_url_in_health_endpoint(self, service_discovery_tester):
         """Test WebSocket URL information in health endpoint"""
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{service_discovery_tester.backend_url}/health")
                 
                 if response.status_code == 200:

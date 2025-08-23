@@ -21,7 +21,7 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-from netra_backend.app.core.resource_manager import ResourceTracker as ResourceManager
+from netra_backend.app.core.resource_manager import ResourceManager
 
 from netra_backend.app.services.session_service import SessionService
 
@@ -81,7 +81,7 @@ class TestConcurrentSessionManagementL4:
         assert len(session_ids) == len(set(session_ids))  # All unique
         
         # Verify session limit enforcement
-        user_sessions = await session_infrastructure['session_service'].get_user_sessions(user_id)
+        user_sessions = await session_infrastructure['session_service']._get_user_sessions(user_id)
         assert len(user_sessions) <= settings.MAX_SESSIONS_PER_USER
     
     @pytest.mark.asyncio

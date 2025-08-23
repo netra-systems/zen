@@ -90,7 +90,7 @@ class ChatExportService:
         }
         
         try:
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                 response = await client.post(
                     f"{self.backend_url}/api/export/chat-history",
                     json=export_request,
@@ -289,7 +289,7 @@ class DataExportE2ETester:
         """Setup test user and return auth token."""
         try:
             # Use dev login to get token with fast timeout
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 response = await client.post("http://localhost:8001/auth/dev/login")
                 if response.status_code == 200:
                     return response.json()["access_token"]

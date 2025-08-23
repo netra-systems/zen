@@ -22,7 +22,8 @@ from netra_backend.app.services.streaming_service import (
     get_streaming_service,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 logger = central_logger.get_logger(__name__)
 

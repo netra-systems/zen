@@ -71,7 +71,7 @@ class RealUnifiedFlowTester:
         try:
             await self.harness.state.databases.setup_databases()
             await self.db_manager.initialize_connections()
-            self.http_client = httpx.AsyncClient(timeout=10.0)
+            self.http_client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
             await self._setup_controlled_services()
             yield self
         finally:

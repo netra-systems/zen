@@ -22,6 +22,7 @@ from netra_backend.app.core.middleware_setup import (
     setup_cors_middleware,
     setup_session_middleware,
 )
+from netra_backend.app.core.websocket_cors import configure_websocket_cors
 from netra_backend.app.core.request_context import (
     create_error_context_middleware,
     create_request_logging_middleware,
@@ -79,6 +80,10 @@ def _add_security_headers_middleware(app: FastAPI) -> None:
 def setup_request_middleware(app: FastAPI) -> None:
     """Setup CORS, error, and request logging middleware."""
     setup_cors_middleware(app)
+    # Apply WebSocket CORS middleware for WebSocket upgrade support
+    wrapped_app = configure_websocket_cors(app)
+    # Note: configure_websocket_cors returns the wrapped app, but FastAPI middleware
+    # registration doesn't need reassignment since it modifies the app in place
     app.middleware("http")(create_cors_redirect_middleware())
     app.middleware("http")(create_error_context_middleware())
     app.middleware("http")(create_request_logging_middleware())

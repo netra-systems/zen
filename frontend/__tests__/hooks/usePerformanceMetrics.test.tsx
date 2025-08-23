@@ -17,7 +17,7 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { usePerformanceMetrics, PerformanceMonitor } from '@/hooks/usePerformanceMetrics';
 import { TestProviders } from '@/__tests__/test-utils/providers';
-import { DEFAULT_PERFORMANCE_METRICS, PERFORMANCE_THRESHOLDS } from '@/types/performance-metrics';
+import { DEFAULT_PERFORMANCE_METRICS, PERFORMANCE_THRESHOLDS } from '@/types/unified';
 
 // Mock performance.now for consistent testing
 const mockPerformanceNow = jest.fn();

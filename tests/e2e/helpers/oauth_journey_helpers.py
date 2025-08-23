@@ -16,7 +16,9 @@ from urllib.parse import parse_qs, urlparse
 import httpx
 import websockets
 
-from tests.oauth_test_providers import GoogleOAuthProvider
+from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient
+from test_framework.auth_helpers import OAuthFlowTester
+from tests.e2e.oauth_test_providers import GoogleOAuthProvider
 
 
 class OAuthFlowHelper:

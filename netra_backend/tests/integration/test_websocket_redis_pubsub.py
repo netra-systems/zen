@@ -28,7 +28,7 @@ import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 

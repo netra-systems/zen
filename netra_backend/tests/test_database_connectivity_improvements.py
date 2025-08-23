@@ -38,11 +38,8 @@ from netra_backend.app.db.comprehensive_health_monitor import (
     HealthStatus,
 )
 
-from netra_backend.app.db.fast_startup_connection_manager import (
-    ConnectionHealth,
-    FastStartupConnectionManager,
-    connection_registry,
-)
+# Fast startup connection manager has been consolidated into DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.graceful_degradation_manager import (
     DatabaseStatus,
     GracefulDegradationManager,

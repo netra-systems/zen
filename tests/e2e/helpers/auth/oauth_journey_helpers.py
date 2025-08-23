@@ -14,9 +14,13 @@ from unittest.mock import AsyncMock, patch
 from urllib.parse import parse_qs, urlparse
 
 import httpx
-import websockets
+try:
+    import websockets
+except ImportError:
+    websockets = None
 
-from tests.oauth_test_providers import GoogleOAuthProvider
+# from tests.oauth_test_providers import GoogleOAuthProvider
+# Using mock data instead to avoid import issues
 
 
 class OAuthFlowHelper:
@@ -112,7 +116,12 @@ class OAuthCallbackHelper:
                 # Mock token exchange response
                 token_response = AsyncMock()
                 token_response.status_code = 200
-                token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
+                # Mock OAuth token response
+                token_response.json.return_value = {
+                    "access_token": "mock_oauth_access_token",
+                    "token_type": "Bearer",
+                    "expires_in": 3600
+                }
                 mock_instance.post.return_value = token_response
                 
                 # Mock user info response
@@ -248,7 +257,12 @@ class OAuthReturningUserHelper:
                 # Mock same user responses
                 token_response = AsyncMock()
                 token_response.status_code = 200
-                token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
+                # Mock OAuth token response
+                token_response.json.return_value = {
+                    "access_token": "mock_oauth_access_token",
+                    "token_type": "Bearer",
+                    "expires_in": 3600
+                }
                 mock_instance.post.return_value = token_response
                 
                 user_response = AsyncMock()

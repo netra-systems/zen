@@ -19,8 +19,8 @@ Architecture:
 
 from dataclasses import dataclass
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
-from tests.load_test_utilities import SystemResourceMonitor
-from tests.real_client_factory import create_real_client_factory
+from tests.e2e.load_test_utilities import SystemResourceMonitor
+from tests.e2e.real_client_factory import create_real_client_factory
 from tests.e2e.real_services_manager import create_real_services_manager
 from typing import Any, Dict
 import asyncio
@@ -181,10 +181,10 @@ def create_startup_test_suite(
         await suite["orchestrator"].stop_all_services()
 
     """
-    from tests.agent_startup_failure_simulator import FailureSimulator
-    from tests.agent_startup_performance_measurer import PerformanceMeasurer
-    from tests.agent_startup_user_manager import UserManager
-    from tests.agent_startup_websocket_manager import WebSocketManager
+    from tests.e2e.agent_startup_failure_simulator import FailureSimulator
+    from tests.e2e.agent_startup_performance_measurer import PerformanceMeasurer
+    from tests.e2e.agent_startup_user_manager import UserManager
+    from tests.e2e.agent_startup_websocket_manager import WebSocketManager
     
 
     return {

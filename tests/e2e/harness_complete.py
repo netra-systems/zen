@@ -127,11 +127,11 @@ class TestDataSeeder:
     def __init__(self, harness):
         self.harness = harness
     
-    async def test_seed_test_data(self) -> None:
+    async def seed_test_data(self) -> None:
         """Seed test data"""
         pass
     
-    async def test_cleanup_test_data(self) -> None:
+    async def cleanup_test_data(self) -> None:
         """Cleanup test data"""
         pass
     
@@ -234,7 +234,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         self.state.ready = True
         self.logger.info("All services started and verified healthy")
     
-    async def test_seed_test_data(self) -> None:
+    async def seed_test_data(self) -> None:
         """Seed test data for realistic testing scenarios."""
         await self.data_seeder.seed_test_data()
     
@@ -410,7 +410,7 @@ class TestClient:
     def _setup_http_client(self) -> None:
         """Setup HTTP client with proper configuration."""
         import httpx
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
     
     async def auth_request(self, method: str, endpoint: str, **kwargs) -> Any:
         """Make authenticated request to auth service."""

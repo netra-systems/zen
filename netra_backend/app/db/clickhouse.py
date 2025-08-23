@@ -93,20 +93,24 @@ def _get_unified_config():
     """Get unified configuration instance."""
     return get_configuration()
 
-def _extract_https_config(config):
-    """Extract appropriate configuration from unified config based on mode."""
-    # Use HTTP config for local development, HTTPS for production
-    if config.clickhouse_mode == "local":
-        return config.clickhouse_https  # This now uses HTTP port for local
-    return config.clickhouse_https
+def _extract_clickhouse_config(config):
+    """Extract appropriate ClickHouse configuration from unified config based on mode."""
+    # Use HTTP config for local development, HTTPS for production/remote
+    if config.clickhouse_mode == "local" or config.environment == "development":
+        # Use HTTP port (8123) for local development
+        return config.clickhouse_http
+    else:
+        # Use HTTPS port (8443) for production/staging
+        return config.clickhouse_https
 
 def get_clickhouse_config():
     """Get ClickHouse configuration from unified config system.
     
     Returns appropriate config for real ClickHouse connection.
+    Uses HTTP (port 8123) for local development, HTTPS (port 8443) for production.
     """
     config = _get_unified_config()
-    return _extract_https_config(config)
+    return _extract_clickhouse_config(config)
 
 
 async def _create_mock_client():

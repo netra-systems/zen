@@ -29,7 +29,7 @@ from uuid import uuid4
 import httpx
 
 import redis.asyncio as redis
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.schemas import User
 from netra_backend.app.clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified

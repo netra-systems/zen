@@ -23,9 +23,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
 # Real components for L2 testing
@@ -162,7 +162,7 @@ class AgentToolLoadingManager:
         await self.redis_service.initialize()
         
         self.circuit_breaker = CircuitBreaker("tool_loading", failure_threshold=3)
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
     async def test_dynamic_loading(self, tools: List[MockTool]) -> Dict[str, Any]:

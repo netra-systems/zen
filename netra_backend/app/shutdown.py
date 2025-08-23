@@ -9,8 +9,10 @@ from fastapi import FastAPI
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.services.websocket.ws_manager import manager as websocket_manager
+from netra_backend.app.websocket.unified import get_unified_manager
+websocket_manager = get_unified_manager()
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
+from netra_backend.app.services.background_task_manager import background_task_manager
 
 
 def shutdown_cleanup(logger: logging.Logger) -> None:
@@ -72,17 +74,24 @@ async def close_database_connections() -> None:
 
 async def cleanup_resources(app: FastAPI) -> None:
     """Shutdown all application services."""
+    logger = central_logger.get_logger(__name__)
     await asyncio.sleep(0.1)
     
     # Shutdown background task manager with timeout
     try:
-        await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
+        if hasattr(app.state, 'background_task_manager') and app.state.background_task_manager is not None:
+            await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
+        else:
+            logger.info("Background task manager not initialized, skipping shutdown")
     except (asyncio.TimeoutError, AttributeError, Exception) as e:
         logger.warning(f"Background task manager shutdown timeout/error: {e}")
     
     # Shutdown agent supervisor with timeout  
     try:
-        await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
+        if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor is not None:
+            await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
+        else:
+            logger.info("Agent supervisor not initialized, skipping shutdown")
     except (asyncio.TimeoutError, AttributeError, Exception) as e:
         logger.warning(f"Agent supervisor shutdown timeout/error: {e}")
     
@@ -104,6 +113,21 @@ async def finalize_shutdown() -> None:
 async def run_complete_shutdown(app: FastAPI, logger: logging.Logger) -> None:
     """Run complete shutdown sequence."""
     shutdown_cleanup(logger)
+    
+    # FIX: Shutdown background task manager to prevent hanging tasks
+    try:
+        if hasattr(app.state, 'background_task_manager'):
+            logger.info("Shutting down background task manager...")
+            await app.state.background_task_manager.shutdown()
+            logger.info("Background task manager shutdown complete")
+        else:
+            # Fallback to global instance
+            logger.info("Shutting down global background task manager...")
+            await background_task_manager.shutdown()
+            logger.info("Global background task manager shutdown complete")
+    except Exception as e:
+        logger.error(f"Error shutting down background task manager: {e}")
+    
     await stop_monitoring(app, logger)
     await cleanup_resources(app)
     await close_database_connections()

@@ -5,7 +5,7 @@
 
 import { ThreadService } from '@/services/threadService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 import { logger } from '@/utils/debug-logger';
 
 interface WebSocketSender {

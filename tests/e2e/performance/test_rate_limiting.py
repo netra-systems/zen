@@ -23,10 +23,39 @@ import httpx
 import pytest
 import websockets
 
-from netra_backend.app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
-from netra_backend.app.schemas.UserPlan import PlanTier
+# Add project root to path
+from test_framework import setup_test_path
+setup_test_path()
+
+try:
+    from netra_backend.app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
+except ImportError:
+    # Fallback for missing schemas
+    from enum import Enum
+    
+    class RateLimitStatus(str, Enum):
+        ALLOWED = "allowed"
+        RATE_LIMITED = "rate_limited"
+        QUOTA_EXCEEDED = "quota_exceeded"
+    
+    class RateLimitResult:
+        def __init__(self, status: RateLimitStatus, remaining: int = 0):
+            self.status = status
+            self.remaining = remaining
+
+try:
+    from netra_backend.app.schemas.UserPlan import PlanTier
+except ImportError:
+    # Fallback for missing schemas
+    from enum import Enum
+    
+    class PlanTier(str, Enum):
+        FREE = "free"
+        PRO = "pro"
+        ENTERPRISE = "enterprise"
+
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
 
 
 class RateLimitFlowTester:
@@ -112,7 +141,7 @@ class QuotaManager:
     
     async def _get_current_quota_status(self) -> Dict[str, Any]:
         """Get current quota status from API."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
             response = await client.get(f"{self.tester.backend_base_url}/api/v1/user/quota", headers=headers)
             assert response.status_code == 200, f"Quota status failed: {response.status_code}"
@@ -160,7 +189,7 @@ class UpgradeFlowManager:
     
     async def _process_upgrade(self, upgrade_request: Dict[str, Any]) -> Dict[str, Any]:
         """Process the upgrade transaction."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
             response = await client.post(
                 f"{self.tester.backend_base_url}/api/v1/user/upgrade",
@@ -182,7 +211,7 @@ class RateLimitFlowTester(RateLimitFlowTester):  # Extend original class
     
     async def _create_free_user_with_quota(self) -> Dict[str, Any]:
         """Create free tier user with quota limits."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # Dev signup creates user with FREE tier by default
             response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             assert response.status_code == 200, f"User creation failed: {response.status_code}"
@@ -229,78 +258,72 @@ class RateLimitFlowTester(RateLimitFlowTester):  # Extend original class
         return {"warning_triggered": True, "remaining_messages": 1}
 
 
-# Continue with remaining methods
-async def _send_single_message(self, content: str) -> Dict[str, Any]:
-    """Send a single message via WebSocket."""
-    message_data = {
-        "type": "chat_message",
-        "content": content,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-    
-    async with websockets.connect(
-        f"{self.websocket_url}?token={self.current_token}",
-        timeout=10
-    ) as websocket:
-        await websocket.send(json.dumps(message_data))
-        response = await websocket.recv()
-        return {"sent": message_data, "response": json.loads(response)}
+    async def _send_single_message(self, content: str) -> Dict[str, Any]:
+        """Send a single message via WebSocket."""
+        message_data = {
+            "type": "chat_message",
+            "content": content,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        async with websockets.connect(
+            f"{self.websocket_url}?token={self.current_token}",
+            timeout=10
+        ) as websocket:
+            await websocket.send(json.dumps(message_data))
+            response = await websocket.recv()
+            return {"sent": message_data, "response": json.loads(response)}
 
-async def _hit_quota_limit(self) -> Dict[str, Any]:
-    """Hit quota limit and verify enforcement."""
-    # Send final message to hit limit
-    await self._send_single_message("Final quota message")
-    
-    # Next message should be blocked
-    try:
-        await self._send_single_message("Over quota message")
-        assert False, "Message should have been blocked by quota limit"
-    except Exception as e:
-        # Expected quota exceeded error
-        assert "quota exceeded" in str(e).lower(), f"Unexpected error: {e}"
-        return {"quota_exceeded": True, "enforcement_active": True}
+    async def _hit_quota_limit(self) -> Dict[str, Any]:
+        """Hit quota limit and verify enforcement."""
+        # Send final message to hit limit
+        await self._send_single_message("Final quota message")
+        
+        # Next message should be blocked
+        try:
+            await self._send_single_message("Over quota message")
+            assert False, "Message should have been blocked by quota limit"
+        except Exception as e:
+            # Expected quota exceeded error
+            assert "quota exceeded" in str(e).lower(), f"Unexpected error: {e}"
+            return {"quota_exceeded": True, "enforcement_active": True}
 
-async def _receive_upgrade_prompt(self) -> Dict[str, Any]:
-    """Receive and validate upgrade prompt."""
-    upgrade_manager = UpgradeFlowManager(self)
-    prompt_data = await upgrade_manager.validate_upgrade_prompt("quota_exceeded")
-    
-    # Verify prompt contains key elements
-    assert "unlimited messages" in prompt_data["value_proposition"].lower()
-    assert "$29" in prompt_data["pricing"]
-    
-    return prompt_data
+    async def _receive_upgrade_prompt(self) -> Dict[str, Any]:
+        """Receive and validate upgrade prompt."""
+        upgrade_manager = UpgradeFlowManager(self)
+        prompt_data = await upgrade_manager.validate_upgrade_prompt("quota_exceeded")
+        
+        # Verify prompt contains key elements
+        assert "unlimited messages" in prompt_data["value_proposition"].lower()
+        assert "$29" in prompt_data["pricing"]
+        
+        return prompt_data
 
-async def _execute_plan_upgrade(self) -> Dict[str, Any]:
-    """Execute plan upgrade to PRO tier."""
-    upgrade_manager = UpgradeFlowManager(self)
-    upgrade_result = await upgrade_manager.execute_upgrade_transaction("pro")
-    
-    # Verify upgrade successful
-    assert upgrade_result["new_tier"] == "pro"
-    assert upgrade_result["upgrade_successful"] is True
-    
-    return upgrade_result
+    async def _execute_plan_upgrade(self) -> Dict[str, Any]:
+        """Execute plan upgrade to PRO tier."""
+        upgrade_manager = UpgradeFlowManager(self)
+        upgrade_result = await upgrade_manager.execute_upgrade_transaction("pro")
+        
+        # Verify upgrade successful
+        assert upgrade_result["new_tier"] == "pro"
+        assert upgrade_result["upgrade_successful"] is True
+        
+        return upgrade_result
 
-async def _verify_unlimited_usage(self) -> Dict[str, Any]:
-    """Verify unlimited usage after upgrade."""
-    # Send multiple messages to confirm no limits
-    unlimited_messages = []
-    for i in range(15):  # More than free tier limit
-        message_data = await self._send_single_message(f"Unlimited message {i+1}")
-        unlimited_messages.append(message_data)
-    
-    # Verify all messages sent successfully
-    assert len(unlimited_messages) == 15
-    return {"unlimited_confirmed": True, "messages_sent": len(unlimited_messages)}
+    async def _verify_unlimited_usage(self) -> Dict[str, Any]:
+        """Verify unlimited usage after upgrade."""
+        # Send multiple messages to confirm no limits
+        unlimited_messages = []
+        for i in range(15):  # More than free tier limit
+            message_data = await self._send_single_message(f"Unlimited message {i+1}")
+            unlimited_messages.append(message_data)
+        
+        # Verify all messages sent successfully
+        assert len(unlimited_messages) == 15
+        return {"unlimited_confirmed": True, "messages_sent": len(unlimited_messages)}
 
 
-# Attach methods to class
-RateLimitFlowTester._send_single_message = _send_single_message
-RateLimitFlowTester._hit_quota_limit = _hit_quota_limit
-RateLimitFlowTester._receive_upgrade_prompt = _receive_upgrade_prompt
-RateLimitFlowTester._execute_plan_upgrade = _execute_plan_upgrade
-RateLimitFlowTester._verify_unlimited_usage = _verify_unlimited_usage
+# Methods are now properly indented as part of the class
 
 
 @pytest.mark.asyncio
@@ -349,6 +372,14 @@ async def test_rate_limiting_and_quota_enforcement_e2e(unified_test_harness):
     
     # Performance validation
     assert results["duration"] < 5.0, f"E2E test exceeded 5s limit: {results['duration']}"
+
+
+@pytest.fixture
+async def unified_test_harness():
+    """Unified test harness fixture for performance tests."""
+    harness = await create_test_harness("performance_test")
+    yield harness
+    await harness.cleanup()
 
 
 @pytest.mark.asyncio

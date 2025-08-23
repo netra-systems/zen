@@ -41,6 +41,9 @@ if os.environ.get("TEST_ISOLATION") == "1":
     os.environ.setdefault("DEV_MODE_DISABLE_CLICKHOUSE", "true")
 
     os.environ.setdefault("CLICKHOUSE_ENABLED", "false")
+    
+    # Ensure SERVICE_SECRET is set for test isolation mode
+    os.environ.setdefault("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length")
 
 else:
     # Standard test environment setup
@@ -85,6 +88,8 @@ else:
 
     os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
 
+    os.environ["SERVICE_SECRET"] = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
+
     os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
 
     os.environ["ENVIRONMENT"] = "testing"
@@ -106,6 +111,16 @@ else:
         if os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
 
             os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
+        
+        # Validate that at least Gemini key is available for real LLM testing
+        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not gemini_key or gemini_key.startswith("test-"):
+            import warnings
+            warnings.warn(
+                "ENABLE_REAL_LLM_TESTING=true but no valid Gemini API key found. "
+                "Real LLM tests will fail. Set GEMINI_API_KEY or GOOGLE_API_KEY environment variable.",
+                stacklevel=2
+            )
 
     else:
         # Use mock keys for regular testing
@@ -348,7 +363,7 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
 
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
     manager = WebSocketManager()
 
@@ -506,7 +521,7 @@ def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 
     websocket_manager = WebSocketManager()
 
@@ -1110,7 +1125,7 @@ class MockWebSocket:
 def fresh_manager():
 
     """Create a fresh WebSocketManager instance for each test"""
-    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
     
     # Reset singleton
 

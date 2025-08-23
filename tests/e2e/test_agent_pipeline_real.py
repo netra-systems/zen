@@ -40,7 +40,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
@@ -49,7 +49,7 @@ from tests.clients import TestClientFactory
 from tests.e2e.config import TEST_USERS, TestDataFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.service_manager import RealServicesManager
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(

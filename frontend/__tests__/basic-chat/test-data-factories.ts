@@ -12,7 +12,7 @@
  * - Functions: ≤8 lines each (MANDATORY)
  */
 
-import { WebSocketMessage, createWebSocketMessage } from '@/types/registry';
+import { WebSocketMessage, createWebSocketMessage } from '@/types/unified';
 import { WebSocketMessageType } from '@/types/shared/enums';
 
 // User Message Factories

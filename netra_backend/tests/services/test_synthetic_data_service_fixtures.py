@@ -17,7 +17,8 @@ import pytest
 from netra_backend.app.services.corpus_service import CorpusService
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager() as ws_manager
 
 # ==================== Mock Classes ====================
 

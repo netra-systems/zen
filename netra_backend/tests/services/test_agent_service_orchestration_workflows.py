@@ -29,8 +29,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.test_agent_service_fixtures import (
-    AgentOrchestrator,
+from netra_backend.tests.test_agent_service_mock_classes import (
+    MockOrchestrator,
     AgentState,
 )
 
@@ -40,8 +40,8 @@ class TestAgentErrorRecovery:
     @pytest.fixture
     def resilient_orchestrator(self):
         """Create orchestrator with error recovery features."""
-        orchestrator = AgentOrchestrator()
-        orchestrator.error_recovery_enabled = True
+        orchestrator = MockOrchestrator()
+        orchestrator.error_threshold = 3
         orchestrator.max_retries = 3
         orchestrator.retry_delay = 0.01  # Fast retry for testing
         return orchestrator

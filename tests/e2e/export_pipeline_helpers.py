@@ -78,7 +78,7 @@ class ExportRequestManager:
     
     async def initialize_backend_connection(self) -> None:
         """Initialize backend connection for export requests."""
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
     
     async def cleanup_connections(self) -> None:
         """Cleanup HTTP connections."""

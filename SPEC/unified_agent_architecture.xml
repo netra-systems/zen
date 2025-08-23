@@ -282,7 +282,7 @@
       <title>BaseSubAgent Extension</title>
       <description>All LLM agents MUST extend BaseSubAgent class</description>
       <implementation>
-        <import>from netra_backend.app.agents.base import BaseSubAgent</import>
+        <import>from netra_backend.app.agents.base_agent import BaseSubAgent</import>
         <inheritance>class MyAgent(BaseSubAgent)</inheritance>
         <required_methods>
           <method>async def execute(self, state: DeepAgentState) -&gt; DeepAgentState</method>

@@ -330,7 +330,7 @@ class TestSessionStateSync:
     async def test_websocket_state_synchronization(self):
 
         """Test WebSocket connection state syncs across services."""
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
 

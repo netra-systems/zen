@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action
-from tests.audit_trail_factories import AuditTestDataFactory
+from tests.e2e.audit_trail_factories import AuditTestDataFactory
 
 
 class TestCompleteAuditTrail:

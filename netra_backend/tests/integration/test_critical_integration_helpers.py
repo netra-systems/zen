@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 from netra_backend.app.agents.supervisor_consolidated import (
@@ -40,7 +40,7 @@ from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 class TestSyntaxFix:
 

@@ -69,7 +69,7 @@ describe('Type Export Validation', () => {
   
   describe('Registry Re-exports', () => {
     it('should re-export WebSocket runtime functions from registry', async () => {
-      const registryModule = await import('@/types/registry');
+      const registryModule = await import('@/types/unified');
       
       // Only test runtime functions that should be available at runtime
       const requiredRuntimeReExports = [
@@ -95,7 +95,7 @@ describe('Type Export Validation', () => {
     
     it('should support type-only imports from registry', async () => {
       // Test that type-only imports work - this verifies TypeScript compilation succeeds
-      const registryModule = await import('@/types/registry');
+      const registryModule = await import('@/types/unified');
       expect(registryModule).toBeDefined();
       
       // The existence of type exports is validated at compile time
@@ -104,7 +104,7 @@ describe('Type Export Validation', () => {
     });
     
     it('should re-export all enum types', async () => {
-      const registryModule = await import('@/types/registry');
+      const registryModule = await import('@/types/unified');
       
       const requiredEnums = [
         'MessageType',
@@ -119,7 +119,7 @@ describe('Type Export Validation', () => {
     });
     
     it('should re-export all base types', async () => {
-      const registryModule = await import('@/types/registry');
+      const registryModule = await import('@/types/unified');
       
       const requiredBaseTypes = [
         'User',
@@ -164,7 +164,7 @@ describe('Type Export Validation', () => {
         '@/types/domains/websocket',
         '@/types/domains/agents',
         '@/types/domains/tools',
-        '@/types/registry'
+        '@/types/unified'
       ];
       
       for (const modulePath of modules) {
@@ -184,7 +184,7 @@ describe('Type Export Validation', () => {
   
   describe('Type Safety Validation', () => {
     it('should have proper TypeScript types for all exports', async () => {
-      const registryModule = await import('@/types/registry');
+      const registryModule = await import('@/types/unified');
       
       // Check that type guards return boolean
       const message = { type: 'AGENT_STARTED', payload: {} };
@@ -193,7 +193,7 @@ describe('Type Export Validation', () => {
     });
     
     it('should validate enum values correctly', async () => {
-      const { WebSocketMessageType, isValidWebSocketMessageType } = await import('@/types/registry');
+      const { WebSocketMessageType, isValidWebSocketMessageType } = await import('@/types/unified');
       
       // Valid enum value - use actual enum value, not key
       expect(isValidWebSocketMessageType('agent_started')).toBe(true);

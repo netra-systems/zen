@@ -45,37 +45,37 @@ class DynamicServiceConfig:
 class TestSyntaxFix:
     """Generated test class"""
 
+    @staticmethod
     def find_free_port(start_port: int = 8000) -> int:
-    """Find a free port starting from the given port."""
-    port = start_port
-    while port < start_port + 100:  # Try 100 ports
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("localhost", port))
-                return port
-            except OSError:
-                port += 1
-    raise RuntimeError(f"No free port found starting from {start_port}")
+        """Find a free port starting from the given port."""
+        port = start_port
+        while port < start_port + 100:  # Try 100 ports
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("localhost", port))
+                    return port
+                except OSError:
+                    port += 1
+        raise RuntimeError(f"No free port found starting from {start_port}")
 
-@contextmanager
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def mock_service_discovery(config: DynamicServiceConfig):
-    """Mock service discovery with dynamic port configuration."""
-    mock_discovery = MagicMock()
-    mock_discovery.read_backend_info.return_value = {
-        "port": config.backend_port,
-        "api_url": config.backend_url,
-        "ws_url": f"ws://localhost:{config.backend_port}/ws",
-    mock_discovery.read_frontend_info.return_value = {
-        "port": config.frontend_port,
-        "url": config.frontend_url,
-    mock_discovery.read_auth_info.return_value = {
-        "port": config.auth_port,
-        "url": config.auth_url,
-        "api_url": config.auth_url,
+    @staticmethod
+    def mock_service_discovery(config):
+        """Mock service discovery with dynamic port configuration."""
+        mock_discovery = MagicMock()
+        mock_discovery.read_backend_info.return_value = {
+            "port": config.backend_port,
+            "api_url": config.backend_url,
+            "ws_url": f"ws://localhost:{config.backend_port}/ws",
+        }
+        mock_discovery.read_frontend_info.return_value = {
+            "port": config.frontend_port,
+            "url": config.frontend_url,
+        }
+        mock_discovery.read_auth_info.return_value = {
+            "port": config.auth_port,
+            "url": config.auth_url,
+            "api_url": config.auth_url,
+        }
 
     with patch(
         "app.core.middleware_setup.ServiceDiscovery", return_value=mock_discovery
@@ -241,7 +241,7 @@ from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
         dynamic_port = find_free_port(4500)
         dynamic_origin = f"http://localhost:{dynamic_port}"
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Origin": dynamic_origin, "Content-Type": "application/json"}
 
             try:
@@ -383,7 +383,7 @@ class TestCORSDynamicBackendPorts:
 
         with mock_service_discovery(config):
             # Simulate a request from auth service to dynamic backend
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {
                     "Origin": "http://localhost:8081",  # Auth service origin
                     "X-Service-ID": "netra-auth",
@@ -432,7 +432,7 @@ class TestCORSDynamicAuthServicePorts:
             with mock_service_discovery(config):
                 # Test if frontend can make requests to auth service on dynamic
                 # port
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
                     headers = {
                         "Origin": config.frontend_url,
                         "Content-Type": "application/json",
@@ -514,7 +514,7 @@ class TestCORSDynamicAuthServicePorts:
             frontend_port=3001, backend_port=8000, auth_port=dynamic_auth_port
 
         with mock_service_discovery(config):
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {
                     "Origin": config.frontend_url,
                     "Content-Type": "application/json",

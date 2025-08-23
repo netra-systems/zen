@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.tests.integration.service_mesh_fixtures import (
+from netra_backend.tests.integration.critical_paths.service_mesh_fixtures import (
     calculate_backoff_accuracy,
     service_mesh_l4,
 )

@@ -17,7 +17,8 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
     message_queue,
 )
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 logger = central_logger.get_logger(__name__)
 
@@ -431,5 +432,5 @@ class MessageHandlerService:
         return await message_queue.get_queue_stats()
 
 
-# Import MessageRouter for backward compatibility with tests
-from netra_backend.app.services.websocket.message_router import MessageRouter
+# MessageRouter import removed to prevent circular import
+# Tests should import MessageRouter directly from message_router module

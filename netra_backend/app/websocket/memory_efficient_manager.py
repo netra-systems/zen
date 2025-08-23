@@ -673,7 +673,7 @@ class MemoryEfficientWebSocketManager:
         if target_users:
             connections = []
             for user_id in target_users:
-                connections.extend(self.connection_registry.get_user_connections(user_id))
+                connections.extend(await self.connection_registry.get_user_connections(user_id))
         else:
             connections = self.connection_registry.get_connections()
         

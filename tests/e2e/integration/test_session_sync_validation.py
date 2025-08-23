@@ -49,7 +49,7 @@ class SessionSyncValidator:
     async def test_backend_health(self) -> Tuple[bool, str]:
         """Test backend service health."""
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{self.backend_url}/health")
                 if response.status_code == 200:
                     return True, f"Backend healthy (HTTP {response.status_code})"

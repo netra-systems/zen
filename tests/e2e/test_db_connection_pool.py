@@ -319,7 +319,7 @@ class TestDatabaseConnectionPoolExhaustion:
         await asyncio.sleep(0.5)
         
         # Test HTTP endpoints under pool exhaustion
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             # Test health endpoint (should work)
             try:
                 health_response = await client.get("http://localhost:8000/health")

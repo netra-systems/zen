@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,

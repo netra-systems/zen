@@ -17,7 +17,8 @@ from netra_backend.app.services.database.unit_of_work import (
     get_unit_of_work,
 )
 from netra_backend.app.services.service_interfaces import IThreadService
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 logger = central_logger.get_logger(__name__)
 

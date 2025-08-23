@@ -91,7 +91,7 @@ class TestTokenRefreshCrossService:
         refresh_payload = jwt_helper.create_refresh_payload()
         refresh_token = jwt_helper.create_token(refresh_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             try:
                 response = await client.post(
                     f"{jwt_helper.auth_url}/auth/refresh",
@@ -118,7 +118,7 @@ class TestTokenRefreshCrossService:
         expired_refresh_payload["exp"] = datetime.now(timezone.utc) - timedelta(minutes=1)
         expired_refresh_token = jwt_helper.create_token(expired_refresh_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             try:
                 response = await client.post(
                     f"{jwt_helper.auth_url}/auth/refresh",
@@ -138,7 +138,7 @@ class TestTokenRefreshCrossService:
         refresh_payload = jwt_helper.create_refresh_payload()
         refresh_token = jwt_helper.create_token(refresh_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             try:
                 response = await client.post(
                     f"{jwt_helper.auth_url}/auth/refresh",

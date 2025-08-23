@@ -23,9 +23,9 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.reconnection_test_fixtures import reconnection_fixture
-from tests.reconnection_test_helpers import ReconnectionTestHelpers
-from tests.reconnection_test_methods import (
+from tests.e2e.reconnection_test_fixtures import reconnection_fixture
+from tests.e2e.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.e2e.reconnection_test_methods import (
     MessageIntegrityTestMethods,
     StabilityTestMethods,
     TokenExpiryTestMethods,

@@ -6,7 +6,7 @@ Business Value Justification (BVJ):
 3. Value Impact: Thread WebSocket reliability directly impacts customer retention 
 4. Revenue Impact: Thread UX failures cause 15-25% user churn, protecting $100K+ MRR
 
-# Refactored for <300 lines using helpers. # Possibly broken comprehension
+# Refactored for <300 lines using helpers.
 """
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
@@ -18,32 +18,22 @@ import pytest
 import pytest_asyncio
 import time
 
-    ThreadWebSocketManager, ThreadStateValidator, create_thread_test_data, create_message_test_data, measure_thread_operation_timing, validate_thread_websocket_flow,
-
+from tests.e2e.integration.thread_websocket_helpers import (
     ThreadWebSocketManager,
-
     ThreadStateValidator,
-
     create_thread_test_data,
-
     create_message_test_data,
-
     measure_thread_operation_timing,
-
-    validate_thread_websocket_flow
-
+    validate_thread_websocket_flow,
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 @pytest_asyncio.fixture
-
 async def thread_manager():
-
     """Create thread WebSocket manager fixture."""
-
     harness = UnifiedTestHarness()
-
     manager = ThreadWebSocketManager(harness)
     
 
@@ -73,8 +63,9 @@ async def thread_validator():
         validator.clear_errors()
 
 class TestThreadManagementWebSocket:
-
-    # """Test thread management via WebSocket connections."""
+    """Test thread management via WebSocket connections."""
+    
+    pass
     
 
     # async def test_thread_creation_websocket_notification(self, thread_manager):

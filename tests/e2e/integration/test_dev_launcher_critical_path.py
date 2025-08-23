@@ -199,7 +199,7 @@ class TestDevLauncherCriticalPath:
     async def _check_service_health(self, url: str) -> bool:
         """Check if a service is healthy."""
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(url, timeout=5)
                 return response.status_code in [200, 301, 302]
         except:
@@ -213,7 +213,7 @@ class TestDevLauncherCriticalPath:
         
         try:
             # Test backend health
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{BACKEND_URL}/health")
                 assert response.status_code == 200, f"Backend health check failed: {response.status_code}"
                 
@@ -225,12 +225,12 @@ class TestDevLauncherCriticalPath:
                 assert "redis" in health_data, "Redis status missing from health check"
             
             # Test auth service health
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{AUTH_URL}/health")
                 assert response.status_code == 200, f"Auth service health check failed: {response.status_code}"
             
             # Test frontend is serving
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(FRONTEND_URL)
                 assert response.status_code in [200, 301, 302], f"Frontend not serving: {response.status_code}"
         
@@ -250,7 +250,7 @@ class TestDevLauncherCriticalPath:
                 "Access-Control-Request-Headers": "Content-Type, Authorization"
             }
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Backend CORS
                 response = await client.options(f"{BACKEND_URL}/api/v1/chat", headers=headers)
                 assert response.status_code == 200, f"Backend CORS preflight failed: {response.status_code}"
@@ -305,7 +305,7 @@ class TestDevLauncherCriticalPath:
         
         try:
             # Test dev login
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Login request
                 login_data = {
                     "username": "dev@netra.ai",
@@ -345,7 +345,7 @@ class TestDevLauncherCriticalPath:
         await self._start_dev_launcher()
         
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Test backend can access databases
                 response = await client.get(f"{BACKEND_URL}/api/v1/system/database-status")
                 
@@ -413,7 +413,7 @@ class TestDevLauncherCriticalPath:
                 assert len(response_data["content"]) > 0, "AI response is empty"
                 
                 # Step 6: Verify conversation is saved
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(
                         f"{BACKEND_URL}/api/v1/threads/test-thread-123",
                         headers={"Authorization": f"Bearer {token}"}
@@ -552,7 +552,7 @@ class TestDevLauncherCriticalPath:
             
             # Services should not share state
             # Test by checking they have separate configurations
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 backend_config = await client.get(f"{BACKEND_URL}/api/v1/config")
                 auth_config = await client.get(f"{AUTH_URL}/config")
                 
@@ -611,7 +611,7 @@ class TestDevLauncherCriticalPath:
     
     async def _get_dev_auth_token(self) -> Optional[str]:
         """Get development authentication token."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             login_data = {
                 "username": "dev@netra.ai",
                 "password": "dev123"

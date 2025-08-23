@@ -10,7 +10,7 @@
 
 import { ThreadService, ThreadMessagesResponse } from './threadService';
 import { MessageFormatterService } from './messageFormatter';
-import type { ChatMessage } from '@/types/registry';
+import type { ChatMessage } from '@/types/unified';
 
 /**
  * Thread loading result interface

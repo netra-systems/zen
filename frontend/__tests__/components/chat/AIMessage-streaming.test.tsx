@@ -11,7 +11,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MessageItem } from '@/components/chat/MessageItem';
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 import { setupChatMocks, resetChatMocks, renderWithChatSetup } from './shared-test-setup';
 
 // ============================================================================

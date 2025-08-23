@@ -49,7 +49,7 @@ class ClickHousePartitionManager:
             host = self.container.get_container_host_ip()
             port = self.container.get_exposed_port(9000)
             
-            import asyncio_clickhouse
+            # import asyncio_clickhouse  # Module not available
             self.client = asyncio_clickhouse.connect(
                 host=host,
                 port=port,

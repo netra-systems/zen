@@ -138,8 +138,7 @@ export {
   isSubAgentUpdateMessage,
   isToolCallMessage,
   isUserMessagePayload,
-  isWebSocketMessage,
-  isValidWebSocketMessageType
+  isWebSocketMessage
 } from './domains/websocket';
 
 // Agent domain - Only verified working functions
@@ -197,8 +196,7 @@ export type {
 
 // Additional WebSocket types that need to be available as types
 export type {
-  AgentResult,
-  WebSocketMessage
+  AgentResult
 } from './domains/websocket';
 
 // ============================================================================

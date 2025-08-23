@@ -62,6 +62,7 @@ class StreamingAuthManager:
             "exp": int(exp_time.timestamp()),
             "iat": int(iat_time.timestamp()),
             "email": f"{user_id}@test.com"
+        }
         return jwt.encode(payload, TEST_CONFIG.secrets.jwt_secret, algorithm="HS256")
         
 
@@ -79,6 +80,7 @@ class TestSyntaxFix:
             "exp": int(exp_time.timestamp()),
             "iat": int(iat_time.timestamp()),
             "email": f"{user_id}@test.com"
+        }
         return jwt.encode(payload, TEST_CONFIG.secrets.jwt_secret, algorithm="HS256")
         
     async def validate_token_periodically(self, token: str, user_id: str) -> Dict[str, Any]:
@@ -89,6 +91,7 @@ class TestSyntaxFix:
             "last_check": time.time(),
             "checks_performed": 1,
             "validation_errors": []
+        }
         
         try:
             # In test mode, always validate successfully for valid format tokens
@@ -160,7 +163,7 @@ class TestSyntaxFix:
                 "stream_started": False, 
                 "error": "Authentication failed", 
                 "auth_result": auth_result
-            
+            }
         # Check rate limits
         if not self.check_rate_limit(user_id):
             return {"stream_started": False, "error": "Rate limit exceeded"}
@@ -177,6 +180,7 @@ class TestSyntaxFix:
             "token_last_validated": time.time(),
             "messages_sent": 0,
             "active": True
+        }
         
         self.active_streams[stream_id] = stream_info
         return {"stream_started": True, "stream_id": stream_id, "stream_info": stream_info}
@@ -202,13 +206,12 @@ class AuthenticatedWebSocketStreamer:
                 "streaming_completed": False, 
                 "error": stream_result["error"],
                 "messages_sent": 0
-            
+            }
         stream_id = stream_result["stream_id"]
         messages_sent = 0
         validation_errors = []
         
         try:
-    pass
             for i, chunk in enumerate(content_chunks):
                 # Check auth periodically during long streams
                 if i % validate_every == 0 and i > 0:
@@ -222,6 +225,7 @@ class AuthenticatedWebSocketStreamer:
                             "error": "Token expired during stream",
                             "messages_sent": messages_sent,
                             "validation_errors": validation_errors
+                        }
                 
                 # Check rate limits
                 if not self.auth_manager.check_rate_limit(user_id):
@@ -235,6 +239,7 @@ class AuthenticatedWebSocketStreamer:
                     "sequence": i,
                     "data": chunk,
                     "timestamp": time.time()
+                }
                 
                 await self._send_websocket_message(chunk_message)
                 messages_sent += 1
@@ -256,7 +261,7 @@ class AuthenticatedWebSocketStreamer:
                 "streaming_completed": False, 
                 "error": str(e),
                 "messages_sent": messages_sent
-            
+            }
         # Complete stream
         await self._send_stream_completion(stream_id, messages_sent)
         self.auth_manager.active_streams[stream_id]["active"] = False
@@ -266,6 +271,7 @@ class AuthenticatedWebSocketStreamer:
             "messages_sent": messages_sent,
             "stream_id": stream_id,
             "validation_errors": validation_errors
+        }
         
     async def _send_websocket_message(self, message: Dict) -> None:
         """Send message via WebSocket mock."""
@@ -282,6 +288,7 @@ class AuthenticatedWebSocketStreamer:
             "stream_id": stream_id,
             "reason": reason,
             "timestamp": time.time()
+        }
         await self._send_websocket_message(termination_msg)
         
     async def _send_backpressure_notification(self, stream_id: str) -> None:
@@ -290,6 +297,7 @@ class AuthenticatedWebSocketStreamer:
             "type": "backpressure_applied",
             "stream_id": stream_id,
             "timestamp": time.time()
+        }
         await self._send_websocket_message(backpressure_msg)
         
     async def _send_stream_completion(self, stream_id: str, total_messages: int) -> None:
@@ -299,25 +307,23 @@ class AuthenticatedWebSocketStreamer:
             "stream_id": stream_id,
             "total_messages": total_messages,
             "timestamp": time.time()
+        }
         await self._send_websocket_message(completion_msg)
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def auth_manager():
+def auth_manager():
     """Authentication manager fixture."""
     setup_test_environment()
     return StreamingAuthManager()
 
 @pytest.fixture 
-    def websocket_streamer(auth_manager):
+def websocket_streamer(auth_manager):
     """WebSocket streamer fixture."""
     return AuthenticatedWebSocketStreamer(auth_manager)
 
 class TestStreamingWithAuthValidation:
     # """Test real-time streaming with comprehensive auth validation."""
+    pass
     
     # @pytest.mark.asyncio
     # async def test_successful_streaming_with_valid_token(, self, auth_manager, websocket_streamer):

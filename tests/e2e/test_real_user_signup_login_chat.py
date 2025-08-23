@@ -95,7 +95,7 @@ class RealUserFlowTester:
     
     async def _real_user_signup(self) -> Dict[str, Any]:
         """Signup user via dev login endpoint (creates real database user)."""
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             
             assert response.status_code == 200, f"Dev signup failed: {response.status_code}"
@@ -111,7 +111,7 @@ class RealUserFlowTester:
     async def _real_user_login(self) -> Dict[str, Any]:
         """Login user with real credentials via dev endpoint."""
         # For E2E testing, dev endpoint provides real token
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             
             assert response.status_code == 200, f"Login failed: {response.status_code}"
@@ -129,7 +129,7 @@ class RealUserFlowTester:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Test auth service validation
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             auth_response = await client.get(f"{self.auth_base_url}/auth/verify", headers=headers)
             if auth_response.status_code != 200:
                 return False

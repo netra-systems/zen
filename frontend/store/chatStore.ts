@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 import type { SubAgentStatusData } from '@/types/chat-store';
-import { LegacyAgentStatus } from '@/types/agent-types';
+import { LegacyAgentStatus } from '@/types/unified';
 
 // Keep legacy status for store compatibility during migration
 type AgentStatus = LegacyAgentStatus;

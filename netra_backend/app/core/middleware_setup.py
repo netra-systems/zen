@@ -14,6 +14,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
 
 from netra_backend.app.core.configuration import get_configuration
+from netra_backend.app.core.websocket_cors import configure_websocket_cors
 
 logger = logging.getLogger(__name__)
 

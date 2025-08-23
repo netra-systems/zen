@@ -20,7 +20,7 @@ import uuid
 from typing import Any, Dict
 
 from tests.e2e.config import TestDataFactory
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class AcknowledmentTracker:

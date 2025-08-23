@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.tests.integration.service_mesh_fixtures import service_mesh_l4
+from netra_backend.tests.integration.critical_paths.service_mesh_fixtures import service_mesh_l4
 
 logger = logging.getLogger(__name__)
 

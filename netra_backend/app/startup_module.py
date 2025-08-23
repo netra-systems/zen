@@ -15,7 +15,10 @@ from fastapi import FastAPI
 from netra_backend.app.agents.base.monitoring import performance_monitor
 from netra_backend.app.background import BackgroundTaskManager
 from netra_backend.app.config import get_config, settings
+from netra_backend.app.services.background_task_manager import background_task_manager
+from netra_backend.app.services.startup_fixes_integration import startup_fixes
 from netra_backend.app.core.performance_optimization_manager import performance_manager
+from netra_backend.app.core.startup_manager import startup_manager
 from netra_backend.app.db.index_optimizer import index_manager
 from netra_backend.app.db.migration_utils import (
     create_alembic_config,
@@ -35,6 +38,147 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.utils.multiprocessing_cleanup import setup_multiprocessing
+
+
+async def _ensure_database_tables_exist(logger: logging.Logger, graceful_startup: bool = True) -> None:
+    """Ensure all required database tables exist, creating them if necessary."""
+    try:
+        from netra_backend.app.db.database_manager import DatabaseManager
+        from netra_backend.app.db.base import Base
+        from sqlalchemy import text
+        import asyncio
+        
+        # Import all model classes to ensure they're registered with Base.metadata
+        logger.info("Importing database models to register tables...")
+        _import_all_models()
+        
+        logger.info("Checking if database tables exist...")
+        
+        # Create async engine for table creation
+        engine = DatabaseManager.create_application_engine()
+        
+        # Test connection with retry logic to avoid pool exhaustion
+        connection_ok = await DatabaseManager.test_connection_with_retry(engine)
+        if not connection_ok:
+            error_msg = "Failed to establish database connection for table verification"
+            if graceful_startup:
+                logger.warning(f"{error_msg} - continuing without table verification")
+                return
+            else:
+                raise RuntimeError(error_msg)
+        
+        # Check if tables exist
+        async with engine.begin() as conn:
+            result = await conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                ORDER BY table_name
+            """))
+            
+            existing_tables = set(row[0] for row in result.fetchall())
+            expected_tables = set(Base.metadata.tables.keys())
+            missing_tables = expected_tables - existing_tables
+            
+            if missing_tables:
+                logger.warning(f"Missing {len(missing_tables)} database tables: {missing_tables}")
+                logger.info("Creating missing database tables automatically...")
+                
+                # Create missing tables
+                await conn.run_sync(Base.metadata.create_all)
+                
+                # Verify tables were created
+                result = await conn.execute(text("""
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    ORDER BY table_name
+                """))
+                
+                new_existing_tables = set(row[0] for row in result.fetchall())
+                still_missing = expected_tables - new_existing_tables
+                
+                if still_missing:
+                    error_msg = f"Failed to create tables: {still_missing}"
+                    if graceful_startup:
+                        logger.error(f"{error_msg} - continuing with degraded functionality")
+                    else:
+                        raise RuntimeError(error_msg)
+                else:
+                    logger.info(f"Successfully created {len(missing_tables)} missing database tables")
+            else:
+                logger.info(f"All {len(expected_tables)} database tables are present")
+        
+        # Log final pool status before disposal
+        pool_status = DatabaseManager.get_pool_status(engine)
+        logger.debug(f"Database pool status before disposal: {pool_status}")
+        
+        await engine.dispose()
+        
+    except Exception as e:
+        error_msg = f"Failed to ensure database tables exist: {e}"
+        if graceful_startup:
+            logger.warning(f"{error_msg} - continuing with potential database issues")
+        else:
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
+
+
+def _import_all_models() -> None:
+    """Import all model classes to register them with Base.metadata."""
+    # Import all models to ensure they are registered
+    try:
+        # Agent models
+        from netra_backend.app.db.models_agent import (
+            ApexOptimizerAgentRun,
+            ApexOptimizerAgentRunReport,
+            Assistant,
+            Message,
+            Run,
+            Step,
+            Thread,
+        )
+        
+        # Agent State models
+        from netra_backend.app.db.models_agent_state import (
+            AgentRecoveryLog,
+            AgentStateSnapshot,
+            AgentStateTransaction,
+        )
+        
+        # Content models
+        from netra_backend.app.db.models_content import (
+            Analysis,
+            AnalysisResult,
+            Corpus,
+            CorpusAuditLog,
+            Reference,
+        )
+        
+        # MCP Client models
+        from netra_backend.app.db.models_mcp_client import (
+            MCPExternalServer,
+            MCPResourceAccess,
+            MCPToolExecution,
+        )
+        
+        # Supply models  
+        from netra_backend.app.db.models_supply import (
+            AISupplyItem,
+            AvailabilityStatus,
+            ResearchSession,
+            ResearchSessionStatus,
+            Supply,
+            SupplyOption,
+            SupplyUpdateLog,
+        )
+        
+        # User models
+        from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
+        
+    except ImportError as e:
+        # Some models might not be available in certain environments
+        pass
 
 
 async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Logger) -> None:
@@ -220,7 +364,7 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
     logger.warning("Continuing without migrations")
 
 
-def setup_database_connections(app: FastAPI) -> None:
+async def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory (critical service)."""
     logger = central_logger.get_logger(__name__)
     logger.info("Setting up database connections...")
@@ -252,6 +396,9 @@ def setup_database_connections(app: FastAPI) -> None:
                 return
             else:
                 raise RuntimeError(error_msg)
+        
+        # Ensure database tables exist before proceeding
+        await _ensure_database_tables_exist(logger, graceful_startup)
             
         app.state.db_session_factory = async_session_factory
         app.state.database_available = True
@@ -363,9 +510,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.services.websocket.ws_manager import (
-        manager as websocket_manager,
-    )
+    from netra_backend.app.websocket.unified import get_unified_manager
+    websocket_manager = get_unified_manager()
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 
@@ -543,10 +689,32 @@ async def _run_startup_phase_one(app: FastAPI) -> Tuple[float, logging.Logger]:
 
 async def _run_startup_phase_two(app: FastAPI, logger: logging.Logger) -> None:
     """Run service initialization phase."""
-    setup_database_connections(app)  # Move database setup first
+    await setup_database_connections(app)  # Move database setup first
     key_manager = initialize_core_services(app, logger)
     setup_security_services(app, key_manager)
     await initialize_clickhouse(logger)
+    
+    # FIX: Initialize background task manager to prevent 4-minute crash
+    logger.info("Initializing background task manager with 2-minute timeout...")
+    app.state.background_task_manager = background_task_manager
+    logger.info("Background task manager initialized successfully")
+    
+    # FIX: Apply all startup fixes for critical cold start issues
+    logger.info("Applying startup fixes for critical cold start issues...")
+    try:
+        fix_results = await startup_fixes.run_comprehensive_verification()
+        applied_fixes = fix_results.get('total_fixes', 0)
+        logger.info(f"Startup fixes applied: {applied_fixes}/5 fixes")
+        
+        if applied_fixes < 5:
+            logger.warning("Some startup fixes could not be applied - check system configuration")
+            logger.info(startup_fixes.get_fix_status_summary())
+        else:
+            logger.info("All critical startup fixes successfully applied")
+            
+    except Exception as e:
+        logger.error(f"Error applying startup fixes: {e}")
+        logger.warning("Continuing startup despite fix application errors")
 
 
 async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None:
@@ -560,7 +728,46 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
 
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
-    """Run complete startup sequence."""
+    """Run complete startup sequence with improved initialization handling."""
+    # Use the global startup manager instance
+    
+    # Check if we should use the new robust startup system
+    config = get_config()
+    use_robust_startup = getattr(config, 'use_robust_startup', 'true').lower() == 'true'
+    
+    if use_robust_startup:
+        # Use the new robust startup system with dependency resolution
+        logger = central_logger.get_logger(__name__)
+        logger.info("Using robust startup manager with dependency resolution...")
+        
+        try:
+            # Initialize the startup manager and run the startup sequence
+            start_time = time.time()
+            success = await startup_manager.initialize_system(app)
+            
+            if not success:
+                logger.error("Startup manager reported initialization failure")
+                # Fall back to legacy startup if robust startup fails
+                logger.warning("Falling back to legacy startup sequence...")
+                return await _run_legacy_startup(app)
+            
+            # Store the startup manager in app state for health monitoring
+            app.state.startup_manager = startup_manager
+            
+            log_startup_complete(start_time, logger)
+            return start_time, logger
+            
+        except Exception as e:
+            logger.error(f"Error in robust startup: {e}")
+            logger.warning("Falling back to legacy startup sequence...")
+            return await _run_legacy_startup(app)
+    else:
+        # Use the legacy startup sequence
+        return await _run_legacy_startup(app)
+
+
+async def _run_legacy_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
+    """Run legacy startup sequence (fallback)."""
     start_time, logger = await _run_startup_phase_one(app)
     await _run_startup_phase_two(app, logger)
     await _run_startup_phase_three(app, logger)

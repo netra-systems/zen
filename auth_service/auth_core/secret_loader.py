@@ -62,10 +62,11 @@ class AuthSecretLoader:
             logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
             return secret
             
-        # Legacy fallback for JWT_SECRET (auth service specific)
+        # CRITICAL FIX: Also check JWT_SECRET for backward compatibility
+        # This ensures auth service works with either JWT_SECRET_KEY or JWT_SECRET
         secret = os.getenv("JWT_SECRET")
         if secret:
-            logger.warning("Using JWT_SECRET from environment (legacy - should use JWT_SECRET_KEY)")
+            logger.info("Using JWT_SECRET from environment (backward compatibility)")
             return secret
         
         # Development fallback only
@@ -74,7 +75,7 @@ class AuthSecretLoader:
             return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
         
         # No fallback in staging/production
-        raise ValueError(f"JWT secret not configured for {env} environment")
+        raise ValueError(f"JWT secret not configured for {env} environment. Set either JWT_SECRET_KEY or JWT_SECRET.")
     
     @staticmethod
     def _load_from_secret_manager(secret_name: str) -> Optional[str]:

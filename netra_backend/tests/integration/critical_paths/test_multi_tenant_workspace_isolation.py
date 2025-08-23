@@ -36,7 +36,7 @@ import pytest
 from netra_backend.app.auth_integration.auth import require_permission
 
 from netra_backend.app.services.database.connection_manager import (
-    DatabaseConnectionManager,
+    ConnectionManager,
 )
 
 from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
@@ -94,7 +94,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                 os.environ[key] = value
             
             # Initialize database manager with staging connection
-            self.db_manager = DatabaseConnectionManager()
+            self.db_manager = ConnectionManager()
             await self.db_manager.initialize(use_staging_config=True)
             
             # Initialize permissions service with staging config

@@ -19,7 +19,7 @@ import pytest_asyncio
 
 from tests.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.integration.helpers.session_test_helpers import (
+from tests.e2e.helpers.auth.session_test_helpers import (
     SessionPersistenceManager, CrossServiceSessionValidator, MultiTabSessionManager, create_test_session_data, validate_session_timeout_behavior, create_session_test_scenarios,
     SessionPersistenceManager,
     CrossServiceSessionValidator,

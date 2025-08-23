@@ -13,7 +13,7 @@
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
@@ -26,7 +26,7 @@ from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

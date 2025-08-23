@@ -88,10 +88,14 @@ class TestJWTTokenValidation(unittest.TestCase):
         expired_payload = {
             "sub": self.test_user_id,
             "email": self.test_email,
-            "type": "access",
+            "token_type": "access",  # Fixed: was "type", should be "token_type"
             "iat": int(past_time.timestamp()),
             "exp": int((past_time + timedelta(seconds=5)).timestamp()),  # Expired 5 seconds ago
-            "iss": "netra-auth-service"
+            "iss": "netra-auth-service",
+            "aud": "netra-platform",  # Required audience claim
+            "jti": f"access_{int(time.time())}_expired",  # JWT ID for replay protection
+            "env": "test",  # Test environment claim
+            "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
         # Manually create expired token using PyJWT
@@ -161,7 +165,11 @@ class TestJWTTokenValidation(unittest.TestCase):
             "token_type": "access",
             "iss": "wrong-issuer",  # Should be "netra-auth-service"
             "iat": int(datetime.now(timezone.utc).timestamp()),
-            "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp())
+            "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+            "aud": "netra-platform",  # Required audience claim
+            "jti": f"access_{int(time.time())}_wrong_issuer",  # JWT ID for replay protection
+            "env": "test",  # Test environment claim
+            "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
         # Get JWT secret for token creation
@@ -234,7 +242,11 @@ class TestJWTTokenValidation(unittest.TestCase):
             "token_type": "access",
             "iss": "netra-auth-service",
             "iat": int(future_time.timestamp()),
-            "exp": int((future_time + timedelta(minutes=15)).timestamp())
+            "exp": int((future_time + timedelta(minutes=15)).timestamp()),
+            "aud": "netra-platform",  # Required audience claim
+            "jti": f"access_{int(time.time())}_future",  # JWT ID for replay protection
+            "env": "test",  # Test environment claim
+            "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
         # Get JWT secret for token creation
@@ -251,15 +263,18 @@ class TestJWTTokenValidation(unittest.TestCase):
         import jwt
         near_expiry_time = datetime.now(timezone.utc) + timedelta(seconds=1)
         
-        # Create payload manually with short expiry
+        # Create payload manually with short expiry - include all required claims
         payload = {
             "sub": self.test_user_id,
             "email": self.test_email,
             "token_type": "access",
-            "iat": datetime.now(timezone.utc),
-            "exp": near_expiry_time,
+            "iat": int(datetime.now(timezone.utc).timestamp()),
+            "exp": int(near_expiry_time.timestamp()),
             "jti": f"access_{int(time.time())}",
-            "iss": "netra-auth-service"
+            "iss": "netra-auth-service",
+            "aud": "netra-platform",        # Required audience claim for access tokens
+            "env": "test",  # Test environment
+            "svc_id": self.jwt_handler.service_id or "netra-auth-test-instance"  # Use handler's service ID
         }
         
         # Encode token with short expiry

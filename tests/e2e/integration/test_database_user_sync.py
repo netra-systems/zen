@@ -110,7 +110,7 @@ class DatabaseUserSyncTester:
         }
         
         # Use Auth service to create user
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             # Mock OAuth flow by directly calling user creation endpoint
             response = await client.post(
                 f"{auth_url}/auth/users",

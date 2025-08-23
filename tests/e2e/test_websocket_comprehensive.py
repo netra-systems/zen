@@ -78,7 +78,7 @@ def create_test_user() -> Dict:
 async def get_auth_token(user_email: str, password: str) -> Optional[str]:
     """Get authentication token for test user."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # Try auth service endpoints
             auth_endpoints = [
                 "http://localhost:8001/login",  # Auth service
@@ -277,7 +277,7 @@ async def test_user_with_token():
 async def websocket_config():
     """Get WebSocket configuration - MIGHT FAIL if service discovery broken."""
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.get("http://localhost:8000" + WEBSOCKET_CONFIG_ENDPOINT)
             
             if response.status_code == 200:
@@ -296,7 +296,7 @@ class TestWebSocketConnectionEstablishment:
     async def test_websocket_config_discovery_service_availability(self):
         """Test WebSocket config discovery - EXPOSES SERVICE AVAILABILITY ISSUES."""
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get("http://localhost:8000" + WEBSOCKET_CONFIG_ENDPOINT, timeout=5)
                 
                 if response.status_code == 200:
@@ -361,7 +361,7 @@ class TestWebSocketConnectionEstablishment:
         
         for service_name, url in services_to_test.items():
             try:
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
                     response = await client.get(url, timeout=3)
                     service_status[service_name] = {
                         "status": "available" if response.status_code == 200 else f"error_{response.status_code}",
@@ -1166,7 +1166,7 @@ class TestWebSocketIssuesSummary:
         # 1. Service Availability Issues
         print("\n1. SERVICE AVAILABILITY ISSUES:")
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 services = {
                     "Backend": "http://localhost:8000/health",
                     "Auth Service": "http://localhost:8001/health", 

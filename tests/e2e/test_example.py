@@ -5,7 +5,7 @@ Demonstrates how to use the unified testing infrastructure
 This shows the REAL service testing approach per SPEC/unified_system_testing.xml
 """
 
-from tests.e2e.real_client_types import TestClient
+from test_framework.http_client import TestClient
 from tests.e2e.harness_complete import TestHarnessContext, UnifiedTestHarness
 from typing import Any, Dict
 import asyncio

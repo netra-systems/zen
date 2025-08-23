@@ -30,7 +30,7 @@ import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 logger = logging.getLogger(__name__)
@@ -1066,7 +1066,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Assert interval accuracy (allow ±1 interval tolerance)
 
         assert abs(actual_interval_count - expected_interval_count) <= 1, \
-
             f"Expected ~{expected_interval_count} heartbeats, got {actual_interval_count}"
     
     @pytest.mark.asyncio
@@ -1140,7 +1139,6 @@ class TestWebSocketHeartbeatZombieL3:
         for connection_id, websocket, _ in zombie_connections:
 
             assert websocket.close_called or not websocket.is_active, \
-
                 f"Zombie connection {connection_id} should be closed"
     
     @pytest.mark.asyncio
@@ -1333,7 +1331,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Response time should be reasonable
 
         assert 0.05 <= metrics.average_response_time <= 0.5, \
-
             f"Average response time {metrics.average_response_time:.3f}s seems unreasonable"
     
     @mock_justified("L3: WebSocket heartbeat and zombie detection testing with controlled connection simulation")
@@ -1482,7 +1479,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Performance assertions
 
         assert final_metrics["failed_cleanups"] <= final_metrics["connections_cleaned_up"] * 0.1, \
-
             "Failed cleanup rate should be below 10%"
         
         logger.info(f"Reliability test results: {detection_accuracy:.2f} detection accuracy, "

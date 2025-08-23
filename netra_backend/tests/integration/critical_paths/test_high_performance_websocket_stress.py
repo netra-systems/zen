@@ -54,13 +54,12 @@ from netra_backend.app.websocket.high_performance_broadcast import (
     HighPerformanceBroadcaster,
 
 )
-from netra_backend.app.websocket.load_balanced_connection_manager import (
+# LoadBalancedConnectionManager has been consolidated - using WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as LoadBalancedConnectionManager
+from enum import Enum
 
-    LoadBalancedConnectionManager,
-
-    LoadBalancingStrategy,
-
-)
+class LoadBalancingStrategy(Enum):
+    ADAPTIVE = "adaptive"
 from netra_backend.app.websocket.memory_efficient_manager import (
 
     MemoryEfficientWebSocketManager,

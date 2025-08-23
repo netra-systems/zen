@@ -47,7 +47,7 @@ class TestCORSCompleteAuthFlow:
     @pytest.mark.asyncio
     async def test_auth_config_flow_e2e(self, services, frontend_origin):
         """Test complete auth config retrieval flow with CORS."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {
                 "Origin": frontend_origin,
                 "Content-Type": "application/json"
@@ -139,7 +139,7 @@ class TestCORSCompleteAuthFlow:
     @pytest.mark.asyncio
     async def test_token_validation_across_services_cors(self, services, frontend_origin):
         """Test token validation across services with CORS."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {
                 "Origin": frontend_origin,
                 "Authorization": "Bearer test-token-123",
@@ -357,7 +357,7 @@ class TestCORSCredentialRequestsAcrossServices:
     @pytest.mark.asyncio
     async def test_cookie_based_requests_cors(self, services):
         """Test cookie-based requests with CORS."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {
                 "Origin": services.frontend_url,
                 "Cookie": "session=abc123; csrf=xyz789"
@@ -387,7 +387,7 @@ class TestCORSCredentialRequestsAcrossServices:
     @pytest.mark.asyncio
     async def test_authorization_header_requests_cors(self, services):
         """Test Authorization header requests with CORS."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {
                 "Origin": services.frontend_url,
                 "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test",
@@ -501,7 +501,7 @@ class TestCORSRegressionComprehensive:
     @pytest.mark.asyncio
     async def test_all_regression_scenarios(self, regression_scenarios):
         """Test all identified regression scenarios."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             for scenario in regression_scenarios:
                 headers = {"Origin": scenario["origin"]}
                 
@@ -541,7 +541,7 @@ class TestCORSRegressionComprehensive:
         # We can't directly test middleware ordering, but we can test that
         # CORS headers are present even when other middleware might modify requests
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # Request with headers that might trigger other middleware
             headers = {
                 "Origin": "http://localhost:3001",
@@ -582,7 +582,7 @@ class TestCORSPerformanceAndResilience:
     @pytest.mark.asyncio
     async def test_cors_preflight_caching(self):
         """Test that CORS preflight responses include proper caching headers."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {
                 "Origin": "http://localhost:3001",
                 "Access-Control-Request-Method": "POST",
@@ -607,7 +607,7 @@ class TestCORSPerformanceAndResilience:
     @pytest.mark.asyncio
     async def test_cors_multiple_rapid_requests(self):
         """Test CORS handling under rapid successive requests."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Origin": "http://localhost:3001"}
             
             # Send multiple rapid requests

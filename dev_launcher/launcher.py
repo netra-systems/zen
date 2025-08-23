@@ -364,13 +364,18 @@ class DevLauncher:
         # Check and set defaults for critical environment variables
         self._check_critical_env_vars()
         
+        # Check service availability and adjust configuration if needed
+        service_check_result = self._check_service_availability()
+        
         # Print summary if there were warnings
         if validation_result.warnings:
             self.environment_validator.print_validation_summary(validation_result)
+        elif service_check_result:
+            self._print("✅", "ENV", "Environment and services ready")
         else:
             self._print("✅", "ENV", "Environment check passed")
         
-        return result
+        return result and service_check_result
     
     def _check_critical_env_vars(self):
         """Check and set defaults for critical environment variables."""
@@ -418,6 +423,50 @@ class DevLauncher:
             value = os.environ.get(var)
             if not value:
                 critical_handler.check_env_var(var, value)
+    
+    def _check_service_availability(self) -> bool:
+        """Check service availability and auto-adjust configuration if needed."""
+        try:
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            
+            if not hasattr(self.config, 'services_config') or not self.config.services_config:
+                return True  # Skip if no services config
+            
+            checker = ServiceAvailabilityChecker(self.use_emoji)
+            results = checker.check_all_services(self.config.services_config)
+            
+            # Apply recommendations automatically (non-interactively during startup)
+            changes_made = checker.apply_recommendations(self.config.services_config, results)
+            
+            if changes_made:
+                self._print("🔧", "CONFIG", "Auto-adjusted service configuration for availability")
+                
+                # Update environment variables with new configuration
+                service_env_vars = self.config.services_config.get_all_env_vars()
+                for key, value in service_env_vars.items():
+                    os.environ[key] = value
+            
+            # Check for critical service issues
+            critical_issues = []
+            for service_name, result in results.items():
+                if not result.available and result.recommended_mode == result.service_name:
+                    # Service couldn't be configured properly
+                    critical_issues.append(f"{service_name}: {result.reason}")
+            
+            if critical_issues:
+                self._print("⚠️", "WARN", f"Service configuration issues detected:")
+                for issue in critical_issues:
+                    print(f"  • {issue}")
+                print("  Platform will continue with available services.")
+            
+            return True  # Continue startup even with service adjustments
+            
+        except ImportError:
+            logger.debug("Service availability checker not available")
+            return True
+        except Exception as e:
+            logger.error(f"Service availability check failed: {e}")
+            return True  # Don't fail startup due to availability check issues
     
     def _check_environment_step(self) -> bool:
         """Environment check step for optimizer."""
@@ -755,10 +804,43 @@ class DevLauncher:
     
     
     def _print_startup_banner(self):
-        """Print startup banner."""
+        """Print startup banner with service configuration summary."""
         print("=" * 60)
         self._print("🚀", "LAUNCH", "Netra AI Development Environment")
         print("=" * 60)
+        
+        # Show service configuration if available
+        if hasattr(self.config, 'services_config') and self.config.services_config:
+            try:
+                from dev_launcher.unicode_utils import get_emoji
+                
+                services_info = []
+                config = self.config.services_config
+                
+                # Redis
+                redis_emoji = get_emoji('cloud') if config.redis.mode.value == 'shared' else get_emoji('computer') if config.redis.mode.value == 'local' else get_emoji('test_tube')
+                services_info.append(f"{redis_emoji} Redis: {config.redis.mode.value}")
+                
+                # ClickHouse  
+                ch_emoji = get_emoji('cloud') if config.clickhouse.mode.value == 'shared' else get_emoji('computer') if config.clickhouse.mode.value == 'local' else get_emoji('test_tube')
+                services_info.append(f"{ch_emoji} ClickHouse: {config.clickhouse.mode.value}")
+                
+                # PostgreSQL
+                pg_emoji = get_emoji('cloud') if config.postgres.mode.value == 'shared' else get_emoji('computer') if config.postgres.mode.value == 'local' else get_emoji('test_tube')
+                services_info.append(f"{pg_emoji} PostgreSQL: {config.postgres.mode.value}")
+                
+                # LLM
+                llm_emoji = get_emoji('cloud') if config.llm.mode.value == 'shared' else get_emoji('computer') if config.llm.mode.value == 'local' else get_emoji('test_tube')
+                services_info.append(f"{llm_emoji} LLM: {config.llm.mode.value}")
+                
+                if services_info:
+                    print("Services Configuration:")
+                    for info in services_info:
+                        print(f"  {info}")
+                    print("=" * 60)
+                    
+            except ImportError:
+                pass  # Skip service info if utils not available
     
     def _run_pre_checks(self) -> bool:
         """Run pre-launch checks with parallel execution where possible."""

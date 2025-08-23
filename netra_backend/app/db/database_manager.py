@@ -15,6 +15,7 @@ Each function ≤15 lines, class ≤200 lines total.
 
 import os
 import re
+import asyncio
 from typing import Optional
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
@@ -22,6 +23,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.exc import OperationalError, DisconnectionError
 
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
@@ -181,6 +183,11 @@ class DatabaseManager:
             echo=sql_echo,
             pool_pre_ping=True,
             pool_recycle=3600,
+            # Smaller pool for migration engine to avoid conflicts with main app pool
+            pool_size=5,
+            max_overflow=10,
+            pool_timeout=30,
+            pool_reset_on_return='rollback',
         )
     
     @staticmethod
@@ -213,8 +220,11 @@ class DatabaseManager:
             echo=sql_echo,
             pool_pre_ping=True,
             pool_recycle=3600,
-            pool_size=10,
-            max_overflow=20,
+            # Increased pool sizes to handle concurrent startup operations and health checks
+            pool_size=20,  # Base pool size increased from 10 to 20
+            max_overflow=30,  # Max overflow increased from 20 to 30 (total max: 50 connections)
+            pool_timeout=30,  # Timeout for getting connection from pool
+            pool_reset_on_return='rollback',  # Reset connections properly
             connect_args=connect_args
         )
     
@@ -283,6 +293,54 @@ class DatabaseManager:
         """
         current_env = get_current_environment()
         return current_env in ["staging", "production"]
+    
+    @staticmethod
+    async def test_connection_with_retry(engine, max_retries: int = 3, delay: float = 1.0) -> bool:
+        """Test database connection with retry logic and connection pool awareness.
+        
+        Args:
+            engine: SQLAlchemy async engine
+            max_retries: Maximum number of retry attempts
+            delay: Delay between retries in seconds
+            
+        Returns:
+            True if connection successful, False otherwise
+        """
+        for attempt in range(max_retries):
+            try:
+                # Use a timeout to avoid hanging indefinitely
+                async with asyncio.wait_for(engine.begin(), timeout=10.0) as conn:
+                    await conn.execute("SELECT 1")
+                    logger.debug(f"Database connection test successful on attempt {attempt + 1}")
+                    return True
+            except (OperationalError, DisconnectionError, asyncio.TimeoutError) as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+                    delay *= 2  # Exponential backoff
+                else:
+                    logger.error(f"All {max_retries} connection attempts failed: {e}")
+        return False
+    
+    @staticmethod
+    def get_pool_status(engine) -> dict:
+        """Get connection pool status for monitoring.
+        
+        Args:
+            engine: SQLAlchemy engine
+            
+        Returns:
+            Dictionary with pool statistics
+        """
+        if hasattr(engine.pool, 'size'):
+            return {
+                "pool_size": engine.pool.size(),
+                "checked_in": engine.pool.checkedin(),
+                "checked_out": engine.pool.checkedout(),
+                "overflow": engine.pool.overflow(),
+                "invalid": engine.pool.invalid(),
+            }
+        return {"status": "Pool status unavailable"}
     
     @staticmethod
     def _get_default_database_url() -> str:

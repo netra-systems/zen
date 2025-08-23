@@ -1,4 +1,4 @@
-import { WebSocketMessage, AuthMessage, PingMessage, PongMessage } from '@/types/registry';
+import { WebSocketMessage, AuthMessage, PingMessage, PongMessage } from '@/types/unified';
 import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';

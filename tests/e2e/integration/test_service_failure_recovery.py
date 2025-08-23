@@ -36,8 +36,8 @@ from tests.e2e.service_failure_recovery_helpers import (
     create_state_preservation_validator,
     create_recovery_time_validator
 )
-from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.e2e.real_client_types import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.http_client import ClientConfig
 from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)

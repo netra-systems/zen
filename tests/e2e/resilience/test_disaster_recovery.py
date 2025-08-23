@@ -32,16 +32,15 @@ from typing import Dict, List, Any
 from datetime import datetime, timezone
 
 from tests.e2e.disaster_recovery_helpers import (
-    create_backup_manager, create_disaster_simulator, create_restore_manager, create_integrity_validator, create_rto_validator,
     create_backup_manager,
     create_disaster_simulator,
     create_restore_manager,
     create_integrity_validator,
     create_rto_validator
 )
-from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.e2e.real_client_types import ClientConfig
+from tests.e2e.service_orchestrator import E2EServiceOrchestrator
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.http_client import ClientConfig
 
 
 @pytest_asyncio.fixture
@@ -314,7 +313,7 @@ class TestDisasterRecovery:
         """Check individual service health."""
         try:
             import httpx
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return response.status_code == 200
         except Exception:

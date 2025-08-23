@@ -165,7 +165,7 @@ class UnifiedMessagingManager:
 
     async def _attempt_direct_send(self, user_id: str, message: Dict[str, Any]) -> bool:
         """Attempt direct message delivery to user connections."""
-        connections = self.manager.connection_manager.get_user_connections(user_id)
+        connections = await self.manager.connection_manager.get_user_connections(user_id)
         if not connections:
             return False
         return await self._send_to_all_user_connections(connections, message)

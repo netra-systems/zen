@@ -133,7 +133,7 @@ class RealOAuthFlowTester:
     
     async def _initiate_oauth_flow(self) -> Dict[str, Any]:
         """Initiate OAuth flow by calling real auth service."""
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             response = await client.get(
                 f"{self.auth_base_url}/auth/config"
             )
@@ -158,7 +158,7 @@ class RealOAuthFlowTester:
         google_user_info = GoogleOAuthProvider.get_user_info()
         
         # Call real auth service callback endpoint with mocked external responses
-        with httpx.AsyncClient(timeout=10.0) as real_client:
+        with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as real_client:
             # We'll patch the Google API calls but use real internal service calls
             import unittest.mock
             
@@ -210,7 +210,7 @@ class RealOAuthFlowTester:
         """Validate token works across auth and backend services."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             # Test auth service validation
             auth_response = await client.get(f"{self.auth_base_url}/auth/verify", headers=headers)
             if auth_response.status_code != 200:
@@ -228,7 +228,7 @@ class RealOAuthFlowTester:
         """Validate user profile is synced to backend service."""
         headers = {"Authorization": f"Bearer {callback_result['access_token']}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             # Get user from auth service
             auth_response = await client.get(f"{self.auth_base_url}/auth/me", headers=headers)
             if auth_response.status_code != 200:
@@ -249,7 +249,7 @@ class RealOAuthFlowTester:
         """Simulate dashboard load and validate user context."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             # Test user session endpoint
             session_response = await client.get(f"{self.auth_base_url}/auth/session", headers=headers)
             if session_response.status_code != 200:

@@ -4,805 +4,470 @@ CRITICAL E2E test for agent orchestration with real LLM API calls.
 Validates complete agent lifecycle, multi-agent coordination, and real-time processing.
 
 Business Value Justification (BVJ):
-    1. Segment: Enterprise and Mid-tier ($200K+ MRR protection)  
+1. Segment: Enterprise and Mid-tier ($200K+ MRR protection)  
 2. Business Goal: Ensure reliable agent orchestration with actual LLM responses
 3. Value Impact: Validates 30-50% cost savings claim through agent optimization
 4. Revenue Impact: Protects $200K+ MRR from agent failures causing enterprise churn
 
 ARCHITECTURAL COMPLIANCE:
-    - File size: <500 lines (modular design)
+- File size: <500 lines (modular design)
 - Function size: <25 lines each
 - Real LLM API calls when --real-llm flag is set
 - Performance validation: <3 seconds response time
 - Multi-agent orchestration testing
 """
 
-from netra_backend.app.schemas.UserPlan import PlanTier
-# Removed unused import: AgentRequest
-from typing import Dict, Any, List
-from typing import Dict, Any, List
-from unittest.mock import patch, AsyncMock
 import asyncio
 import os
+import time
+from typing import Dict, Any, List
+from unittest.mock import patch, AsyncMock
+
 import pytest
 import pytest_asyncio
-import time
 
-    AgentConversationTestCore, ConversationFlowSimulator, ConversationFlowValidator, AgentConversationTestUtils, RealTimeUpdateValidator,
-
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.e2e.agent_conversation_helpers import (
     AgentConversationTestCore,
-
     ConversationFlowSimulator,
-
     ConversationFlowValidator,
-
     AgentConversationTestUtils,
+    RealTimeUpdateValidator,
+)
 
-    RealTimeUpdateValidator
 
 @pytest.mark.real_llm
-
 @pytest.mark.asyncio
-
 class TestAgentOrchestrationRealLLM:
-
-    # """Test agent orchestration with real LLM integration."""
+    """Test agent orchestration with real LLM integration."""
     
-
-    # @pytest_asyncio.fixture
-
-    # async def test_core(self):
-
-    # """Initialize test core with real LLM support."""
-
-    # core = AgentConversationTestCore()
-
-    # await core.setup_test_environment()
-
-    # yield core
-
-    # await core.teardown_test_environment()
+    @pytest_asyncio.fixture
+    async def test_core(self):
+        """Initialize test core with real LLM support."""
+        core = AgentConversationTestCore()
+        await core.setup_test_environment()
+        yield core
+        await core.teardown_test_environment()
     
-
-    # @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
+    @pytest.fixture
     def use_real_llm(self):
-
         """Check if real LLM testing is enabled."""
-
         return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
     
-
     @pytest.fixture
-
     def llm_timeout(self):
-
         """Get LLM timeout configuration."""
-
         return int(os.getenv("TEST_LLM_TIMEOUT", "30"))
     
-
     @pytest.mark.asyncio
-
     async def test_single_agent_real_llm_execution(self, test_core, use_real_llm, llm_timeout):
-
         """Test single agent execution with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
-
+        
         try:
-
             request = self._create_optimization_request(session_data["user_data"].id)
-
             response = await self._execute_agent_with_llm(
-
                 session_data, request, "data", use_real_llm, llm_timeout
-
+            )
             self._validate_agent_response(response, use_real_llm)
-
         finally:
-
             await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_multi_agent_coordination_real_llm(self, test_core, use_real_llm, llm_timeout):
-
         """Test multi-agent coordination with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
-
+        
         try:
-
             agents = ["triage", "data", "optimization"]
-
             results = await self._execute_multi_agent_flow(
-
                 session_data, agents, use_real_llm, llm_timeout
-
+            )
             self._validate_multi_agent_results(results, agents, use_real_llm)
-
         finally:
-
             await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_agent_context_preservation_real_llm(self, test_core, use_real_llm, llm_timeout):
-
         """Test context preservation across agent interactions with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
-
         flow_validator = ConversationFlowValidator()
         
-
         try:
-    pass
             # Execute multi-turn conversation
-
             conversation_flow = [
-
                 "Analyze my current AI infrastructure costs",
-
                 "What specific optimizations do you recommend?",
-
                 "Implement the top 3 cost reduction strategies"
-
             ]
             
-
             context = []
-
             for i, message in enumerate(conversation_flow):
-
                 request = self._create_contextual_request(
-
                     session_data["user_data"].id, message, context
-
+                )
                 response = await self._execute_agent_with_llm(
-
                     session_data, request, "optimization", use_real_llm, llm_timeout
-
+                )
                 context.append({"message": message, "response": response})
             
             # Validate context preservation
-
             validation = await flow_validator.validate_conversation_context(session_data["session"])
-
             assert validation["context_continuity_maintained"], "Context not preserved"
             
-
         finally:
-
             await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_agent_performance_with_real_llm(self, test_core, use_real_llm, llm_timeout):
-
         """Test agent performance meets SLA with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
         
-
         try:
-    pass
-
             request = self._create_performance_test_request(session_data["user_data"].id)
             
-
             start_time = time.time()
-
             response = await self._execute_agent_with_llm(
-
                 session_data, request, "performance", use_real_llm, llm_timeout
-
+            )
             execution_time = time.time() - start_time
             
             # Validate performance SLA
-
             if use_real_llm:
-
                 assert execution_time < 5.0, f"Real LLM response too slow: {execution_time:.2f}s"
-
             else:
-
                 assert execution_time < 3.0, f"Mock response too slow: {execution_time:.2f}s"
             
-
             assert response["status"] == "success", "Agent execution failed"
             
-
         finally:
-
             await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_agent_chain_execution_real_llm(self, test_core, use_real_llm, llm_timeout):
-
         """Test agent chain execution with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.ENTERPRISE)
         
-
         try:
-    pass
             # Define agent chain
-
             chain = [
-
                 {"agent": "triage", "task": "Identify optimization opportunities"},
-
                 {"agent": "data", "task": "Analyze current usage patterns"},
-
                 {"agent": "optimization", "task": "Generate cost reduction plan"},
-
                 {"agent": "implementation", "task": "Execute optimizations"}
-
             ]
             
-
             chain_results = []
-
             previous_output = None
             
-
-#             for step in chain: # Possibly broken comprehension
-
+            for step in chain:
                 request = self._create_chain_request(
-
                     session_data["user_data"].id, 
-
                     step["task"], 
-
                     previous_output
-
+                )
                 response = await self._execute_agent_with_llm(
-
                     session_data, request, step["agent"], use_real_llm, llm_timeout
-
+                )
                 chain_results.append({
-
                     "agent": step["agent"],
-
                     "response": response,
-
                     "execution_time": response.get("execution_time", 0)
-
                 })
-
                 previous_output = response.get("content", "")
             
             # Validate chain execution
-
             self._validate_chain_results(chain_results, use_real_llm)
             
-
         finally:
-
             await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_concurrent_agent_orchestration_real_llm(self, test_core, use_real_llm):
-
         """Test concurrent agent orchestration with real LLM."""
-
         sessions = []
         
-
         try:
-    pass
             # Create multiple sessions
-
             for tier in [PlanTier.ENTERPRISE, PlanTier.PRO, PlanTier.DEVELOPER]:
-
                 session = await test_core.establish_conversation_session(tier)
-
                 sessions.append(session)
             
             # Execute concurrent agent tasks
-
             tasks = []
-
             for i, session_data in enumerate(sessions):
-
                 request = self._create_concurrent_request(
-
                     session_data["user_data"].id,
-
                     f"Concurrent optimization task {i}"
-
+                )
                 task = self._execute_agent_with_llm(
-
                     session_data, request, "optimization", use_real_llm, 30
-
+                )
                 tasks.append(task)
             
             # Wait for all tasks with timeout
-
             start_time = time.time()
-
             results = await asyncio.gather(*tasks, return_exceptions=True)
-
             total_time = time.time() - start_time
             
             # Validate concurrent execution
-
             successful = [r for r in results if not isinstance(r, Exception)]
-
             assert len(successful) >= 2, "Too many concurrent failures"
             
-
             if use_real_llm:
-
                 assert total_time < 10.0, f"Concurrent execution too slow: {total_time:.2f}s"
-
             else:
-
                 assert total_time < 5.0, f"Concurrent execution too slow: {total_time:.2f}s"
             
-
         finally:
-
-#             for session_data in sessions: # Possibly broken comprehension
-
+            for session_data in sessions:
                 await session_data["client"].close()
     
-
     @pytest.mark.asyncio
-
     async def test_agent_error_handling_real_llm(self, test_core, use_real_llm):
-
         """Test agent error handling with real LLM."""
-
         session_data = await test_core.establish_conversation_session(PlanTier.PRO)
         
-
         try:
-    pass
-#             # Test malformed request handling # Possibly broken comprehension
-
+            # Test malformed request handling
             malformed_request = {
-
                 "type": "agent_request",
-
                 "user_id": session_data["user_data"].id,
                 # Missing required fields
-
+            }
             
-
             response = await self._execute_agent_with_error_handling(
-
                 session_data, malformed_request, use_real_llm
-
+            )
             
-
             assert response["status"] in ["error", "recovered"], "Error not handled properly"
             
-
         finally:
-
             await session_data["client"].close()
     
     # Helper methods
-
-class TestSyntaxFix:
-    """Generated test class"""
-
+    
     def _create_optimization_request(self, user_id: str) -> Dict[str, Any]:
-
         """Create optimization request."""
-
         return {
-
             "type": "agent_request",
-
             "user_id": user_id,
-
             "message": "Analyze and optimize my AI infrastructure costs",
-
             "agent_type": "optimization",
-
             "context": {
-
                 "current_spend": 50000,
-
                 "target_reduction": 0.3
-
+            }
+        }
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _create_contextual_request(self, user_id: str, message: str, 
-
                                   context: List[Dict]) -> Dict[str, Any]:
-
         """Create request with context."""
-
         return {
-
             "type": "agent_request",
-
             "user_id": user_id,
-
             "message": message,
-
             "context": context,
-
             "preserve_context": True
-
+        }
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _create_performance_test_request(self, user_id: str) -> Dict[str, Any]:
-
         """Create performance test request."""
-
         return {
-
             "type": "agent_request",
-
             "user_id": user_id,
-
             "message": "Quick performance analysis",
-
             "agent_type": "performance",
-
             "sla_target": 3.0
-
+        }
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _create_chain_request(self, user_id: str, task: str, 
-
                             previous_output: str = None) -> Dict[str, Any]:
-
         """Create chain execution request."""
-
         return {
-
             "type": "agent_request",
-
             "user_id": user_id,
-
             "message": task,
-
             "chain_context": previous_output,
-
             "is_chain_step": True
-
+        }
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _create_concurrent_request(self, user_id: str, task: str) -> Dict[str, Any]:
-
         """Create concurrent execution request."""
-
         return {
-
             "type": "agent_request",
-
             "user_id": user_id,
-
             "message": task,
-
             "concurrent": True,
-
             "priority": "high"
-
+        }
     
-
     async def _execute_agent_with_llm(self, session_data: Dict[str, Any], 
-
                                      request: Dict[str, Any], agent_type: str,
-
                                      use_real_llm: bool, timeout: int) -> Dict[str, Any]:
-
         """Execute agent with real or mocked LLM."""
-
         if use_real_llm:
             # Real LLM execution
-from netra_backend.app.llm.llm_manager import LLMManager
-
+            from netra_backend.app.llm.llm_manager import LLMManager
             llm_manager = LLMManager()
             
-
             start_time = time.time()
-
             try:
-    pass
-
                 llm_response = await asyncio.wait_for(
-
                     llm_manager.call_llm(
-
                         model="gpt-4-turbo-preview",
-
                         messages=[{"role": "user", "content": request["message"]}],
-
                         temperature=0.7
-
                     ),
-
                     timeout=timeout
-
+                )
                 execution_time = time.time() - start_time
                 
-
                 return {
-
                     "status": "success",
-
                     "content": llm_response.get("content", ""),
-
                     "agent_type": agent_type,
-
                     "execution_time": execution_time,
-
                     "tokens_used": llm_response.get("tokens_used", 0),
-
                     "real_llm": True
-
+                }
             except asyncio.TimeoutError:
-
                 return {
-
                     "status": "timeout",
-
                     "agent_type": agent_type,
-
                     "execution_time": timeout,
-
                     "real_llm": True
-
+                }
         else:
             # Mocked LLM execution
-
-            with patch('app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
-
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
                 mock_llm.return_value = {
-
                     "content": f"Mock {agent_type} response for: {request['message']}",
-
                     "tokens_used": 150,
-
                     "execution_time": 0.5
-
+                }
                 
-
                 await asyncio.sleep(0.5)  # Simulate processing time
                 
-
                 return {
-
                     "status": "success",
-
                     "content": mock_llm.return_value["content"],
-
                     "agent_type": agent_type,
-
                     "execution_time": 0.5,
-
                     "tokens_used": 150,
-
                     "real_llm": False
-
+                }
     
-
     async def _execute_multi_agent_flow(self, session_data: Dict[str, Any],
-
                                        agents: List[str], use_real_llm: bool,
-
                                        timeout: int) -> Dict[str, Any]:
-
         """Execute multi-agent flow."""
-
         results = {}
         
-
-#         for agent in agents: # Possibly broken comprehension
-
+        for agent in agents:
             request = {
-
                 "type": "agent_request",
-
                 "user_id": session_data["user_data"].id,
-
                 "message": f"Execute {agent} analysis",
-
                 "agent_type": agent
-
+            }
             
-
             results[agent] = await self._execute_agent_with_llm(
-
                 session_data, request, agent, use_real_llm, timeout
-
+            )
         
-
         return results
     
-
     async def _execute_agent_with_error_handling(self, session_data: Dict[str, Any],
-
                                                 request: Dict[str, Any],
-
                                                 use_real_llm: bool) -> Dict[str, Any]:
-
         """Execute agent with error handling."""
-
         try:
-
             return await self._execute_agent_with_llm(
-
                 session_data, request, "error_test", use_real_llm, 10
-
+            )
         except Exception as e:
-
             return {
-
                 "status": "error",
-
                 "error": str(e),
-
                 "recovered": False
-
+            }
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _validate_agent_response(self, response: Dict[str, Any], use_real_llm: bool):
-
         """Validate agent response."""
-
         assert response["status"] in ["success", "timeout"], f"Invalid status: {response['status']}"
-
         assert response["agent_type"] is not None, "Agent type missing"
-
         assert response["execution_time"] > 0, "Invalid execution time"
         
-
         if use_real_llm:
-
             assert response.get("real_llm") is True, "Real LLM flag not set"
-
             assert response.get("tokens_used", 0) > 0, "No tokens used"
     
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def _validate_multi_agent_results(self, results: Dict[str, Any], 
-
                                      agents: List[str], use_real_llm: bool):
-
         """Validate multi-agent results."""
-
-#         for agent in agents: # Possibly broken comprehension
-
-#             assert agent in results, f"Missing results for {agent}" # Possibly broken comprehension
-
+        for agent in agents:
+            assert agent in results, f"Missing results for {agent}"
             self._validate_agent_response(results[agent], use_real_llm)
     
-
     def _validate_chain_results(self, chain_results: List[Dict], use_real_llm: bool):
-
         """Validate agent chain results."""
-
         assert len(chain_results) > 0, "No chain results"
         
-
-#         for result in chain_results: # Possibly broken comprehension
-
+        for result in chain_results:
             assert result["response"]["status"] == "success", f"Chain step failed: {result['agent']}"
-
             assert result["execution_time"] > 0, "Invalid execution time"
         
         # Validate chain continuity
-
         total_time = sum(r["execution_time"] for r in chain_results)
-
         if use_real_llm:
-
             assert total_time < 20.0, f"Chain execution too slow: {total_time:.2f}s"
-
         else:
-
             assert total_time < 5.0, f"Chain execution too slow: {total_time:.2f}s"
 
+
 @pytest.mark.real_llm
-
 @pytest.mark.asyncio  
-
 class TestAgentOrchestrationPerformance:
-
-    # """Performance tests for agent orchestration with real LLM."""
+    """Performance tests for agent orchestration with real LLM."""
     
-
-    # @pytest.mark.asyncio
-
-    # async def test_agent_throughput_real_llm(self):
-
-    # """Test agent throughput with real LLM."""
-
-    # use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
+    @pytest.mark.asyncio
+    async def test_agent_throughput_real_llm(self):
+        """Test agent throughput with real LLM."""
+        use_real_llm = os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"
         
-
-    # if not use_real_llm:
-
-    # pytest.skip("Real LLM testing not enabled")
+        if not use_real_llm:
+            pytest.skip("Real LLM testing not enabled")
         
-    # # Test throughput under load
-
-    # core = AgentConversationTestCore()
-
-    # await core.setup_test_environment()
+        # Test throughput under load
+        core = AgentConversationTestCore()
+        await core.setup_test_environment()
         
-
-    # try:
-    # pass
-
-    # session_data = await core.establish_conversation_session(PlanTier.ENTERPRISE)
+        try:
+            session_data = await core.establish_conversation_session(PlanTier.ENTERPRISE)
             
-    # # Execute multiple requests
-
-    # num_requests = 10
-
-    # start_time = time.time()
+            # Execute multiple requests
+            num_requests = 10
+            start_time = time.time()
             
-
-    # tasks = []
-
-    # for i in range(num_requests):
-
-    # request = {
-
-    # "type": "agent_request",
-
-    # "user_id": session_data["user_data"].id,
-
-    # "message": f"Throughput test {i}",
-
-    # "agent_type": "performance"
-
-    # }
-    # # Simplified execution for throughput test
-
-    # tasks.append(asyncio.create_task(asyncio.sleep(0.5)))
+            tasks = []
+            for i in range(num_requests):
+                request = {
+                    "type": "agent_request",
+                    "user_id": session_data["user_data"].id,
+                    "message": f"Throughput test {i}",
+                    "agent_type": "performance"
+                }
+                # Simplified execution for throughput test
+                tasks.append(asyncio.create_task(asyncio.sleep(0.5)))
             
-
-    # await asyncio.gather(*tasks)
-
-    # total_time = time.time() - start_time
+            await asyncio.gather(*tasks)
+            total_time = time.time() - start_time
             
-
-    # throughput = num_requests / total_time
-
-    # assert throughput > 1.0, f"Throughput too low: {throughput:.2f} req/s"
+            throughput = num_requests / total_time
+            assert throughput > 1.0, f"Throughput too low: {throughput:.2f} req/s"
             
-
-    # await session_data["client"].close()
+            await session_data["client"].close()
             
-
-    # finally:
-
-    # await core.teardown_test_environment()
+        finally:
+            await core.teardown_test_environment()

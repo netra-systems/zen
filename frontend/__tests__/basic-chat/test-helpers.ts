@@ -12,7 +12,7 @@
  * - Functions: ≤8 lines each (MANDATORY)
  */
 
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 
 // Message timeout constant
 export const MESSAGE_TIMEOUT = 5000;

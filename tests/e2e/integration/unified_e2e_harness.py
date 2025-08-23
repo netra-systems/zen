@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.user_journey_executor import TestUser, UserJourneyExecutor
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.integration.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.e2e.test_environment_config import (
     TestEnvironmentConfig,
     TestEnvironmentType,
@@ -71,7 +71,7 @@ class UnifiedE2ETestHarness:
         finally:
             await self.cleanup_test_environment()
     
-    async def test_start_test_environment(self) -> None:
+    async def start_test_environment(self) -> None:
         """Start complete test environment."""
         logger.info("Starting unified E2E test environment")
         
@@ -144,7 +144,7 @@ class UnifiedE2ETestHarness:
         })
         return status
     
-    async def test_cleanup_test_environment(self) -> None:
+    async def cleanup_test_environment(self) -> None:
         """Cleanup complete test environment."""
         logger.info("Cleaning up E2E test environment")
         

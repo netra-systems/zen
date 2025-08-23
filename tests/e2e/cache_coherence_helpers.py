@@ -24,7 +24,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.service_manager import RealServicesManager
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

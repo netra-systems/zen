@@ -35,7 +35,7 @@ import pytest
 from netra_backend.app.db.session import get_db_session as get_database_session
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.schemas.core_models import Thread, User
 
 # Real imports - not mocked unless external API

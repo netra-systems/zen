@@ -1,0 +1,344 @@
+# Netra Test Categories Configuration
+# Enhanced categorization system with rollup categories and auto-split parameters
+
+categories:
+  # Critical categories - must run first
+  smoke:
+    description: "Quick validation tests for pre-commit checks"
+    priority: "CRITICAL"
+    category_type: "quality"
+    timeout_seconds: 60
+    estimated_duration_minutes: 1.0
+    max_parallel_instances: 4
+    parallel_safe: true
+    tags: ["pre-commit", "quick", "validation"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 2
+      max_windows: 3
+
+  startup:
+    description: "System startup and initialization tests"
+    priority: "CRITICAL"
+    category_type: "technical"
+    timeout_seconds: 180
+    estimated_duration_minutes: 3.0
+    database_dependent: true
+    parallel_safe: false
+    tags: ["startup", "initialization"]
+    auto_split:
+      enabled: false
+
+  # High priority categories  
+  unit:
+    description: "Unit tests for individual components"
+    priority: "HIGH"
+    category_type: "functional"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    parallel_safe: true
+    max_parallel_instances: 8
+    tags: ["unit", "components", "isolated"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 5
+      max_windows: 8
+
+  security:
+    description: "Security and authentication tests"
+    priority: "HIGH"
+    category_type: "security"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    database_dependent: true
+    parallel_safe: true
+    max_parallel_instances: 4
+    tags: ["security", "auth", "validation"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 8
+      max_windows: 4
+
+  database:
+    description: "Database and data persistence tests"
+    priority: "HIGH"
+    category_type: "technical"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    database_dependent: true
+    memory_intensive: true
+    parallel_safe: true
+    max_parallel_instances: 4
+    conflicts: ["performance"]
+    tags: ["database", "persistence", "data"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 6
+      max_windows: 4
+
+  # Medium priority categories
+  integration:
+    description: "Integration tests for feature validation"
+    priority: "MEDIUM"
+    category_type: "integration"
+    timeout_seconds: 600
+    estimated_duration_minutes: 10.0
+    dependencies: ["unit", "database"]
+    network_intensive: true
+    parallel_safe: true
+    max_parallel_instances: 6
+    tags: ["integration", "features", "services"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 12
+      max_windows: 6
+
+  api:
+    description: "API endpoint and route tests"
+    priority: "MEDIUM"
+    category_type: "functional"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    dependencies: ["database"]
+    network_intensive: true
+    parallel_safe: true
+    max_parallel_instances: 6
+    tags: ["api", "endpoints", "routes"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 8
+      max_windows: 4
+
+  websocket:
+    description: "WebSocket communication tests"
+    priority: "MEDIUM"
+    category_type: "technical"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    dependencies: ["unit"]
+    network_intensive: true
+    parallel_safe: true
+    max_parallel_instances: 4
+    tags: ["websocket", "realtime", "communication"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 6
+      max_windows: 3
+
+  agent:
+    description: "AI agent and workflow tests"
+    priority: "MEDIUM"
+    category_type: "functional"
+    timeout_seconds: 600
+    estimated_duration_minutes: 10.0
+    dependencies: ["unit", "database"]
+    memory_intensive: true
+    parallel_safe: true
+    max_parallel_instances: 4
+    tags: ["agents", "ai", "workflows"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 15
+      max_windows: 4
+
+  # Lower priority categories
+  frontend:
+    description: "React component and UI tests"
+    priority: "LOW"
+    category_type: "functional"
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    parallel_safe: true
+    max_parallel_instances: 6
+    tags: ["frontend", "ui", "react"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 8
+      max_windows: 4
+
+  performance:
+    description: "Performance and load tests"
+    priority: "LOW"
+    category_type: "performance"
+    timeout_seconds: 1800
+    estimated_duration_minutes: 30.0
+    dependencies: ["integration"]
+    parallel_safe: false
+    cpu_intensive: true
+    memory_intensive: true
+    network_intensive: true
+    max_parallel_instances: 1
+    conflicts: ["database", "e2e"]
+    tags: ["performance", "load", "stress"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 45
+      max_windows: 2
+
+  e2e:
+    description: "End-to-end user journey tests"
+    priority: "LOW"
+    category_type: "e2e"
+    timeout_seconds: 1800
+    estimated_duration_minutes: 30.0
+    dependencies: ["integration", "api", "frontend"]
+    requires_real_services: true
+    parallel_safe: false
+    max_parallel_instances: 2
+    conflicts: ["performance"]
+    tags: ["e2e", "user-journeys", "end-to-end"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 30
+      max_windows: 3
+
+  # Real service categories
+  real_e2e:
+    description: "E2E tests with real LLM calls and services"
+    priority: "LOW"
+    category_type: "e2e"
+    timeout_seconds: 1800
+    estimated_duration_minutes: 30.0
+    dependencies: ["e2e"]
+    requires_real_services: true
+    requires_real_llm: true
+    parallel_safe: false
+    max_parallel_instances: 1
+    network_intensive: true
+    tags: ["real", "e2e", "llm", "external"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 45
+      max_windows: 2
+
+  real_services:
+    description: "Service integration tests with real services"
+    priority: "LOW"
+    category_type: "integration"
+    timeout_seconds: 900
+    estimated_duration_minutes: 15.0
+    dependencies: ["integration"]
+    requires_real_services: true
+    parallel_safe: true
+    max_parallel_instances: 2
+    network_intensive: true
+    tags: ["real", "services", "integration", "external"]
+    auto_split:
+      enabled: true
+      target_window_minutes: 20
+      max_windows: 3
+
+  # Rollup categories - logical groupings of existing categories
+  critical_path:
+    description: "Critical path tests - smoke, startup, and security"
+    priority: "CRITICAL"
+    category_type: "quality"
+    rollup_categories: ["smoke", "startup", "security"]
+    timeout_seconds: 540
+    estimated_duration_minutes: 9.0
+    tags: ["critical", "essential", "rollup"]
+
+  core_functionality:
+    description: "Core functionality - unit, integration, api, database"
+    priority: "HIGH"
+    category_type: "functional"
+    rollup_categories: ["unit", "integration", "api", "database"]
+    timeout_seconds: 1200
+    estimated_duration_minutes: 25.0
+    tags: ["core", "functionality", "rollup"]
+
+  communication:
+    description: "Communication tests - websocket, api, agent"
+    priority: "MEDIUM"
+    category_type: "integration"
+    rollup_categories: ["websocket", "api", "agent"]
+    timeout_seconds: 1200
+    estimated_duration_minutes: 20.0
+    tags: ["communication", "integration", "rollup"]
+
+  full_stack:
+    description: "Full stack tests - backend, frontend, e2e"
+    priority: "MEDIUM"
+    category_type: "e2e"
+    rollup_categories: ["integration", "frontend", "e2e"]
+    timeout_seconds: 2400
+    estimated_duration_minutes: 45.0
+    tags: ["fullstack", "comprehensive", "rollup"]
+
+  performance_suite:
+    description: "Performance validation suite"
+    priority: "LOW"
+    category_type: "performance"
+    rollup_categories: ["performance", "integration"]
+    timeout_seconds: 2100
+    estimated_duration_minutes: 40.0
+    tags: ["performance", "validation", "rollup"]
+
+  external_dependencies:
+    description: "Tests requiring real external services"
+    priority: "LOW"
+    category_type: "integration"
+    rollup_categories: ["real_e2e", "real_services"]
+    timeout_seconds: 2700
+    estimated_duration_minutes: 45.0
+    requires_real_services: true
+    tags: ["external", "real", "rollup"]
+
+# Environment-specific overrides
+environment_overrides:
+  staging:
+    # In staging, enable real services for more categories
+    integration:
+      requires_real_services: true
+      timeout_seconds: 900
+      estimated_duration_minutes: 15.0
+    
+    api:
+      requires_real_services: true
+      timeout_seconds: 600
+      estimated_duration_minutes: 10.0
+    
+    e2e:
+      timeout_seconds: 3600
+      estimated_duration_minutes: 60.0
+
+  production:
+    # In production, be more conservative
+    performance:
+      timeout_seconds: 3600
+      estimated_duration_minutes: 60.0
+    
+    e2e:
+      timeout_seconds: 5400
+      estimated_duration_minutes: 90.0
+      max_parallel_instances: 1
+
+# Legacy level mapping for backward compatibility
+legacy_mapping:
+  smoke: ["smoke"]
+  critical: ["smoke", "startup", "security"]
+  agents: ["agent"]
+  real_e2e: ["real_e2e"]
+  real_services: ["real_services"]
+  staging: ["integration", "api", "e2e"]
+  staging-real: ["real_e2e", "real_services"]
+  staging-quick: ["smoke", "unit", "integration"]
+  comprehensive: ["smoke", "unit", "integration", "api", "database", "websocket", "agent", "frontend", "e2e"]
+
+# Execution configuration
+execution:
+  splitting_strategy: "hybrid"
+  target_window_duration_minutes: 15
+  max_parallel_workers: 8
+  fail_fast_mode: "smart_adaptive"
+  failure_rate_threshold: 0.3
+  critical_failure_count: 1
+  consecutive_failures: 5
+  evaluation_window_minutes: 5
+  min_sample_size: 10
+  enable_progress_tracking: true
+  auto_save_interval_seconds: 30
+  enable_persistence: true
+  timeout_minutes: 60
+  generate_reports: true
+  report_formats: ["json", "html"]

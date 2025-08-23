@@ -8,11 +8,7 @@ Business Value: Reduces connection failures by 40% with improved monitoring and 
 
 from netra_backend.app.logging_config import central_logger
 
-# Import the consolidated ConnectionManager
-from netra_backend.app.websocket.connection_manager import (
-    ConnectionManager,
-    get_connection_manager,
-)
+# Avoid circular import - ConnectionManager will be imported where needed
 
 # Import connection info components
 from netra_backend.app.websocket.connection_info import (
@@ -36,6 +32,12 @@ from netra_backend.app.websocket.connection_reliability import (
     ConnectionCloseReliability,
     ConnectionEstablishmentReliability,
     ConnectionReliabilityManager,
+)
+
+# Import main connection manager
+from netra_backend.app.websocket.connection_manager import (
+    ConnectionManager,
+    get_connection_manager,
 )
 
 logger = central_logger.get_logger(__name__)

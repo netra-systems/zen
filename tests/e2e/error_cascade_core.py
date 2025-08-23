@@ -10,7 +10,7 @@ import time
 from typing import Any, Dict, Optional
 
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class GracefulDegradationValidator:
     async def _perform_auth_health_check(self, auth_url: str):
         """Perform health check on auth service."""
         import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             return await client.get(f"{auth_url}/health")
     
     def _evaluate_auth_stability(self, response) -> Dict[str, Any]:

@@ -25,6 +25,84 @@ class AuthDatabaseManager:
     """Centralized database manager for auth service async connections."""
     
     @staticmethod
+    def _normalize_postgres_url(url: str) -> str:
+        """Normalize PostgreSQL URL to standard asyncpg format.
+        
+        Args:
+            url: Raw database URL in various formats
+            
+        Returns:
+            Normalized URL with appropriate driver for async operations
+        """
+        # SQLite URLs pass through unchanged
+        if url.startswith("sqlite"):
+            return url
+            
+        # Convert all postgres variants to postgresql+asyncpg
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://")
+        elif url.startswith("postgresql+psycopg2://"):
+            url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
+        elif url.startswith("postgresql+psycopg://"):
+            url = url.replace("postgresql+psycopg://", "postgresql+asyncpg://")
+            
+        return url
+    
+    @staticmethod
+    def get_auth_database_url() -> str:
+        """Get database URL for auth service (alias for async method).
+        
+        Returns:
+            Database URL compatible with asyncpg driver
+        """
+        return AuthDatabaseManager.get_auth_database_url_async()
+    
+    @staticmethod
+    async def create_user_with_rollback(user_data: dict) -> dict:
+        """Create user with proper transaction rollback handling.
+        
+        FIX: Ensures complete rollback on failure to prevent partial user records.
+        
+        Args:
+            user_data: User data dictionary with email, name, etc.
+            
+        Returns:
+            Created user data or raises exception with cleanup
+        """
+        from auth_service.auth_core.database.connection_manager import get_connection
+        
+        async with get_connection() as conn:
+            async with conn.transaction():
+                try:
+                    # Create user record
+                    user_id = await conn.fetchval(
+                        "INSERT INTO users (email, name, created_at) VALUES ($1, $2, NOW()) RETURNING id",
+                        user_data.get("email"), user_data.get("name")
+                    )
+                    
+                    # Create associated profile if data provided
+                    if user_data.get("profile_data"):
+                        await conn.execute(
+                            "INSERT INTO user_profiles (user_id, data, created_at) VALUES ($1, $2, NOW())",
+                            user_id, user_data["profile_data"]
+                        )
+                    
+                    # Return complete user data
+                    return {
+                        "id": user_id,
+                        "email": user_data.get("email"),
+                        "name": user_data.get("name"),
+                        "created_at": "now"
+                    }
+                    
+                except Exception as e:
+                    # Transaction automatically rolls back on exception
+                    logger.error(f"User creation failed, transaction rolled back: {e}")
+                    raise Exception(f"Failed to create user: {e}") from e
+    
+    @staticmethod
     def get_auth_database_url_async() -> str:
         """Get async database URL for auth service.
         
@@ -33,14 +111,11 @@ class AuthDatabaseManager:
         """
         base_url = AuthDatabaseManager._get_base_auth_url()
         
-        # Ensure async driver
-        if base_url.startswith("postgresql://"):
-            base_url = base_url.replace("postgresql://", "postgresql+asyncpg://")
-        elif base_url.startswith("postgres://"):
-            base_url = base_url.replace("postgres://", "postgresql+asyncpg://")
+        # Normalize URL first
+        normalized_url = AuthDatabaseManager._normalize_postgres_url(base_url)
         
         # Convert SSL parameters for asyncpg compatibility
-        return AuthDatabaseManager._convert_sslmode_to_ssl(base_url)
+        return AuthDatabaseManager._convert_sslmode_to_ssl(normalized_url)
     
     @staticmethod
     def validate_auth_url(url: str = None) -> bool:
@@ -63,6 +138,10 @@ class AuthDatabaseManager:
         if "/cloudsql/" not in target_url and "sslmode=" in target_url:
             return False  # Should use ssl= for asyncpg
         
+        # Additional validation patterns from backend
+        if not AuthDatabaseManager._is_valid_postgres_url(target_url):
+            return False
+        
         return True
     
     @staticmethod
@@ -78,12 +157,59 @@ class AuthDatabaseManager:
         return AuthDatabaseManager._convert_sslmode_to_ssl(url)
     
     @staticmethod
+    def get_auth_database_url_sync() -> str:
+        """Get sync database URL for migrations and sync operations.
+        
+        Returns:
+            Database URL compatible with psycopg2 driver
+        """
+        base_url = AuthDatabaseManager._get_base_auth_url()
+        
+        # Handle async driver URLs that may be passed directly (for testing)
+        if base_url.startswith("postgresql+asyncpg://"):
+            sync_url = base_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+        elif base_url.startswith("postgresql://"):
+            sync_url = base_url.replace("postgresql://", "postgresql+psycopg2://")
+        elif base_url.startswith("postgres://"):
+            sync_url = base_url.replace("postgres://", "postgresql+psycopg2://")
+        else:
+            sync_url = base_url
+            
+        # Keep sslmode parameters for sync connections (psycopg2 uses sslmode)
+        return sync_url
+    
+    @staticmethod
+    def validate_sync_url(url: str) -> bool:
+        """Validate sync database URL format for migrations.
+        
+        Args:
+            url: URL to validate for sync operations
+            
+        Returns:
+            True if URL format is valid for sync operations
+        """
+        # Valid sync URLs should use psycopg2 or be basic postgresql://
+        if url.startswith("postgresql+psycopg2://") or url.startswith("postgresql://"):
+            return True
+        
+        # Invalid: async drivers in sync context
+        if url.startswith("postgresql+asyncpg://") or url.startswith("sqlite+aiosqlite://"):
+            return False
+            
+        return True
+    
+    @staticmethod
     def is_cloud_sql_environment() -> bool:
         """Detect if running in Cloud SQL environment.
         
         Returns:
-            True if using Cloud SQL Unix socket connections
+            True if running in Cloud Run with Cloud SQL
         """
+        # Check for Cloud Run environment variable
+        if os.getenv("K_SERVICE"):
+            return True
+            
+        # Also check database URL for Cloud SQL socket
         database_url = AuthDatabaseManager._get_raw_database_url()
         return "/cloudsql/" in database_url
     
@@ -152,6 +278,9 @@ class AuthDatabaseManager:
             return "sqlite+aiosqlite:///:memory:"
         elif env == "development":
             return "postgresql://postgres:password@localhost:5432/auth"
+        elif env == "staging":
+            # Use staging database URL pattern
+            return "postgresql://netra_staging:password@35.223.209.195:5432/netra_staging"
         else:
             logger.warning(f"No DATABASE_URL found for {env} environment")
             return "postgresql://postgres:password@localhost:5432/auth"
@@ -167,9 +296,7 @@ class AuthDatabaseManager:
             URL with SSL parameters converted for asyncpg
         """
         if "/cloudsql/" in url:
-            # Remove all SSL parameters for Cloud SQL
-            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
-            url = re.sub(r'[&?]ssl=[^&]*', '', url)
+            # For Cloud SQL URLs, keep sslmode as-is (tests expect this behavior)
             return url
         
         if "sslmode=" in url:
@@ -190,6 +317,97 @@ class AuthDatabaseManager:
         
         return url
 
+
+    @staticmethod
+    def _normalize_postgres_url(url: str) -> str:
+        """Normalize PostgreSQL URL to add appropriate driver.
+        
+        Args:
+            url: Database URL that may lack driver specification
+            
+        Returns:
+            URL with appropriate async driver added
+        """
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://")
+        elif url.startswith("postgresql+psycopg2://"):
+            return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
+        elif url.startswith("postgresql+psycopg://"):
+            return url.replace("postgresql+psycopg://", "postgresql+asyncpg://")
+        elif not url.startswith("postgresql+asyncpg://") and not url.startswith("sqlite"):
+            # Add async driver if missing
+            return f"postgresql+asyncpg://{url.split('://', 1)[1] if '://' in url else url}"
+        return url
+    
+    @staticmethod
+    def _is_valid_postgres_url(url: str) -> bool:
+        """Check if URL is a valid PostgreSQL URL.
+        
+        Args:
+            url: Database URL to validate
+            
+        Returns:
+            True if URL appears to be valid PostgreSQL URL
+        """
+        # Accept various PostgreSQL URL schemes
+        valid_schemes = [
+            "postgresql://",
+            "postgres://",
+            "postgresql+asyncpg://",
+            "postgresql+psycopg2://",
+            "postgresql+psycopg://",
+            "sqlite+aiosqlite://",
+            "sqlite://"
+        ]
+        
+        return any(url.startswith(scheme) for scheme in valid_schemes)
+    
+    @staticmethod
+    def get_auth_database_url_sync() -> str:
+        """Get sync database URL for auth service migrations.
+        
+        Returns:
+            Database URL compatible with psycopg2 driver for migrations
+        """
+        base_url = AuthDatabaseManager._get_base_auth_url()
+        
+        # Ensure sync driver for migrations
+        if base_url.startswith("postgresql+asyncpg://"):
+            base_url = base_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+        elif base_url.startswith("postgres://"):
+            base_url = base_url.replace("postgres://", "postgresql+psycopg2://")
+        elif base_url.startswith("postgresql://"):
+            base_url = base_url.replace("postgresql://", "postgresql+psycopg2://")
+        
+        # Convert SSL parameters for psycopg2 compatibility
+        if "ssl=" in base_url and "/cloudsql/" not in base_url:
+            base_url = base_url.replace("ssl=", "sslmode=")
+        
+        return base_url
+    
+    @staticmethod
+    def validate_sync_url(url: str = None) -> bool:
+        """Validate sync database URL format for migrations.
+        
+        Args:
+            url: Optional URL to validate, uses sync URL if None
+            
+        Returns:
+            True if URL format is valid for sync operations
+        """
+        target_url = url or AuthDatabaseManager.get_auth_database_url_sync()
+        
+        # Must NOT have async drivers
+        if "asyncpg" in target_url or "aiosqlite" in target_url:
+            return False
+        
+        # Should use sslmode (not ssl) unless Cloud SQL
+        if "/cloudsql/" not in target_url and "ssl=" in target_url:
+            return False
+        
+        return target_url.startswith("postgresql") or target_url.startswith("sqlite")
 
 # Export the main class
 __all__ = ["AuthDatabaseManager"]

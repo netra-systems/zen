@@ -138,13 +138,14 @@ class OAuthSecurityManager:
         try:
             nonce_key = f"oauth_nonce:{nonce}"
             
-            # Check if nonce exists
-            if redis_client.exists(nonce_key):
-                logger.warning(f"Nonce replay attack detected: {nonce}")
+            # CRITICAL FIX: Use SET with NX (Not eXists) option for atomic check-and-set
+            # This prevents race conditions in concurrent OAuth flows
+            result = redis_client.set(nonce_key, "used", ex=600, nx=True)
+            
+            if not result:
+                logger.warning(f"Nonce replay attack detected or concurrent use: {nonce}")
                 return False
             
-            # Store nonce with 10-minute expiry
-            redis_client.setex(nonce_key, 600, "used")
             return True
             
         except Exception as e:
@@ -207,13 +208,14 @@ class OAuthSecurityManager:
         try:
             code_key = f"oauth_code:{code}"
             
-            # Check if code already used
-            if redis_client.exists(code_key):
-                logger.warning(f"Authorization code reuse attack detected: {code}")
+            # CRITICAL FIX: Use atomic SET with NX for authorization code tracking
+            # This prevents race conditions in concurrent OAuth callback processing
+            result = redis_client.set(code_key, "used", ex=600, nx=True)
+            
+            if not result:
+                logger.warning(f"Authorization code reuse attack detected or concurrent use: {code}")
                 return False
             
-            # Mark code as used with 10-minute expiry
-            redis_client.setex(code_key, 600, "used")
             return True
             
         except Exception as e:
@@ -472,6 +474,115 @@ class SessionFixationProtector:
             logger.error(f"Session regeneration error: {e}")
             # Return a fallback session ID
             return secrets.token_urlsafe(32)
+
+
+class OAuthStateCleanupManager:
+    """Manages cleanup of expired OAuth states and tokens"""
+    
+    def __init__(self, redis_client: Optional[redis.Redis] = None):
+        self.redis_client = redis_client
+    
+    def cleanup_expired_states(self) -> int:
+        """
+        Clean up expired OAuth states, nonces, and authorization codes
+        
+        Returns:
+            Number of items cleaned up
+        """
+        if not self.redis_client:
+            return 0
+            
+        cleaned_count = 0
+        
+        try:
+            # Get all OAuth-related keys
+            oauth_patterns = [
+                "oauth_nonce:*",
+                "oauth_code:*", 
+                "oauth_state:*"
+            ]
+            
+            for pattern in oauth_patterns:
+                keys = list(self.redis_client.scan_iter(match=pattern))
+                
+                for key in keys:
+                    # Check TTL - if expired or no TTL set, remove
+                    ttl = self.redis_client.ttl(key)
+                    if ttl == -1:  # No expiry set
+                        self.redis_client.delete(key)
+                        cleaned_count += 1
+                        logger.debug(f"Cleaned up OAuth key with no TTL: {key}")
+                    elif ttl == -2:  # Key doesn't exist (already expired)
+                        cleaned_count += 1
+                        
+            if cleaned_count > 0:
+                logger.info(f"OAuth cleanup: removed {cleaned_count} expired items")
+                
+        except Exception as e:
+            logger.error(f"OAuth state cleanup error: {e}")
+            
+        return cleaned_count
+    
+    def add_state_isolation(self, state: str, user_session_id: str) -> bool:
+        """
+        Add state isolation for concurrent OAuth flows
+        
+        Args:
+            state: OAuth state parameter
+            user_session_id: User's session ID for isolation
+            
+        Returns:
+            True if state was successfully isolated
+        """
+        if not self.redis_client:
+            return True  # Graceful degradation
+            
+        try:
+            # Create isolated state key that includes session ID
+            isolated_key = f"oauth_state:{user_session_id}:{state}"
+            
+            # Set with short TTL (10 minutes) and NX to prevent collisions
+            result = self.redis_client.set(isolated_key, "active", ex=600, nx=True)
+            
+            if not result:
+                logger.warning(f"OAuth state isolation failed - concurrent state detected: {state}")
+                return False
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"OAuth state isolation error: {e}")
+            return True  # Graceful degradation
+    
+    def validate_isolated_state(self, state: str, user_session_id: str) -> bool:
+        """
+        Validate and consume isolated OAuth state
+        
+        Args:
+            state: OAuth state parameter
+            user_session_id: User's session ID
+            
+        Returns:
+            True if state is valid and was consumed
+        """
+        if not self.redis_client:
+            return True  # Graceful degradation
+            
+        try:
+            isolated_key = f"oauth_state:{user_session_id}:{state}"
+            
+            # Check if state exists and delete it atomically
+            result = self.redis_client.delete(isolated_key)
+            
+            if result == 0:
+                logger.warning(f"OAuth state not found or already consumed: {state}")
+                return False
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"OAuth state validation error: {e}")
+            return True  # Graceful degradation
 
 
 def validate_cors_origin(origin: str) -> bool:

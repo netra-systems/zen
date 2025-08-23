@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.monitoring.alerting_service import AlertingService
@@ -49,7 +49,7 @@ class HealthCheckCascadeManager:
         self.health_service = HealthCheckService()
         await self.health_service.start()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         self.redis_service = RedisService()

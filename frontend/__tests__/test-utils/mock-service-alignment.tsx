@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { jest } from '@jest/globals';
-import { WebSocketMessage, Message } from '@/types/registry';
+import { WebSocketMessage, Message } from '@/types/unified';
 import { WebSocketStatus, WebSocketServiceError } from '@/services/webSocketService';
-import { AuthState, User } from '@/types/auth';
+import { AuthState, User } from '@/types/unified';
 
 // Real-aligned WebSocket Service Mock
 export const createAlignedWebSocketServiceMock = () => {

@@ -12,7 +12,7 @@
  * - Functions: ≤8 lines each (MANDATORY)
  */
 
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 import { WebSocketMessageType } from '@/types/shared/enums';
 
 export interface IRealWebSocketTestManager {

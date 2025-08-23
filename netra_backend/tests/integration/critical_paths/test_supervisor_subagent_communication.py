@@ -29,7 +29,7 @@ import pytest
 from netra_backend.app.schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -39,7 +39,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

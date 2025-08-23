@@ -13,7 +13,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAuthState, UserTier } from '@/hooks/useAuthState';
 import { useAuthStore } from '@/store/authStore';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 
 // Mock the auth store dependency
 jest.mock('@/store/authStore');

@@ -6,7 +6,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
 import { generateUniqueId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 
 interface AgentMetrics {
   currentAgent: string | null;

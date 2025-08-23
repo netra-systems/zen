@@ -252,4 +252,159 @@
             - Connection handling is stable
         </critical_validation>
   </learning>
+  
+  <learning id="websocket-connection-manager-backward-compatibility" date="2025-08-23" severity="HIGH">
+    <title>WebSocket ConnectionManager Backward Compatibility Requirements</title>
+    <problem>
+        WebSocket ConnectionManager refactoring broke existing tests expecting old interface.
+        Tests failing because ConnectionManager was renamed to ModernConnectionManager
+        but tests still importing and mocking the old ConnectionManager class.
+    </problem>
+    <root_cause>
+        Major refactoring renamed ConnectionManager to ModernConnectionManager for clarity
+        but didn't maintain backward compatibility layer for existing test infrastructure.
+        35+ test files were importing and mocking ConnectionManager directly.
+    </root_cause>
+    <solution>
+        Implemented comprehensive backward compatibility strategy:
+        1. Added ConnectionManager alias that points to ModernConnectionManager
+        2. Created get_connection_manager() factory function for consistent access
+        3. Updated all test imports to use new patterns systematically
+        4. Maintained interface stability while allowing internal refactoring
+    </solution>
+    <implementation>
+        Backward Compatibility Layer:
+        
+        # netra_backend/app/core/websocket/connection_manager.py
+        from .modern_connection_manager import ModernConnectionManager
+        
+        # Backward compatibility alias
+        ConnectionManager = ModernConnectionManager
+        
+        def get_connection_manager():
+            """Factory function for consistent ConnectionManager access"""
+            return ModernConnectionManager()
+        
+        Test Update Pattern:
+        OLD: from netra_backend.app.core.websocket.connection_manager import ConnectionManager
+        NEW: from netra_backend.app.core.websocket.connection_manager import get_connection_manager
+        
+        Mock Update Pattern:
+        OLD: @patch('netra_backend.app.core.websocket.connection_manager.ConnectionManager')
+        NEW: @patch('netra_backend.app.core.websocket.connection_manager.ModernConnectionManager')
+    </implementation>
+    <interface_stability>
+        Key principles for WebSocket interface evolution:
+        
+        1. MAINTAIN backward compatibility during major refactoring
+        2. USE factory functions to abstract instantiation details
+        3. PROVIDE aliases for renamed classes during transition period
+        4. UPDATE tests systematically rather than breaking compatibility
+        5. DOCUMENT interface changes clearly in migration guides
+        
+        Interface contract preservation:
+        - Same method signatures maintained
+        - Same connection lifecycle behavior  
+        - Same event handling patterns
+        - Same error conditions and responses
+    </interface_stability>
+    <migration_strategy>
+        Three-phase migration approach:
+        
+        Phase 1: Add compatibility layer (DONE)
+        - Create aliases for renamed classes
+        - Add factory functions for access
+        - Maintain full backward compatibility
+        
+        Phase 2: Systematic test updates (DONE)  
+        - Update imports to use new patterns
+        - Fix mock specifications
+        - Validate all tests pass
+        
+        Phase 3: Deprecation warnings (FUTURE)
+        - Add deprecation warnings for old patterns
+        - Document migration path clearly
+        - Plan removal timeline for deprecated interfaces
+    </migration_strategy>
+    <files_affected>
+        <file>netra_backend/app/core/websocket/connection_manager.py</file>
+        <file>netra_backend/tests/websocket/test_connection_manager.py</file>
+        <file>35+ test files using WebSocket ConnectionManager</file>
+    </files_affected>
+    <verification>
+        All WebSocket ConnectionManager tests pass
+        Backward compatibility maintained for existing code
+        New code can use modern interface patterns
+        No breaking changes for dependent modules
+    </verification>
+    <prevention>
+        Plan backward compatibility before major refactoring
+        Use factory patterns to abstract implementation details
+        Update tests systematically rather than breaking interfaces
+        Document interface changes with clear migration paths
+        Test both old and new interface patterns during transition
+    </prevention>
+    <business_impact>
+        Development Velocity: No time lost to broken WebSocket tests
+        System Stability: WebSocket functionality remains uninterrupted
+        Technical Debt: Clean migration path prevents accumulation
+        Developer Experience: Smooth transition without breaking changes
+    </business_impact>
+  </learning>
+  
+  <learning id="websocket-test-compatibility-considerations" date="2025-08-23" severity="MEDIUM">
+    <title>WebSocket Test Compatibility Considerations</title>
+    <problem>
+        WebSocket tests require special consideration for interface stability
+        because they often involve complex async patterns, connection lifecycle
+        management, and real-time message handling that can be brittle.
+    </problem>
+    <solution>
+        Established WebSocket test compatibility patterns:
+        
+        1. INTERFACE ABSTRACTION: Use factory functions instead of direct class imports
+        2. LIFECYCLE MOCKING: Provide complete connection lifecycle simulation
+        3. MESSAGE PATTERN CONSISTENCY: Maintain message format compatibility
+        4. ERROR HANDLING COMPATIBILITY: Preserve error condition behavior
+        5. ASYNC PATTERN CONSISTENCY: Maintain async/await patterns
+    </solution>
+    <patterns>
+        Factory Pattern for Tests:
+        # Use factory instead of direct instantiation
+        connection_manager = get_connection_manager()
+        
+        Mock Lifecycle Completeness:
+        mock_manager = Mock()
+        mock_manager.connect = AsyncMock()
+        mock_manager.disconnect = AsyncMock() 
+        mock_manager.send_message = AsyncMock()
+        mock_manager.is_connected = Mock(return_value=True)
+        
+        Message Format Consistency:
+        # Maintain same message structure across versions
+        message = {
+            "type": "chat_message",
+            "content": "test message",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        Error Handling Preservation:
+        # Same exception types and error conditions
+        with pytest.raises(ConnectionError):
+            await connection_manager.connect_invalid()
+    </patterns>
+    <verification>
+        WebSocket tests pass across different ConnectionManager versions
+        Message handling behavior consistent across implementations
+        Error conditions preserved during refactoring
+        Async patterns work correctly in all test scenarios
+    </verification>
+    <best_practices>
+        Test WebSocket refactoring thoroughly before deployment
+        Maintain message format compatibility across versions
+        Use factory patterns to abstract implementation details
+        Preserve error handling behavior during interface changes
+        Document WebSocket interface contracts clearly
+    </best_practices>
+  </learning>
 </learnings>

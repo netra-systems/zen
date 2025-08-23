@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { generateUniqueId } from '@/lib/utils';
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 import type { SubAgentState as BackendSubAgentState } from '@/types/backend_schema_base';
 import type { SubAgentStatusData } from '@/types/chat-store';
 

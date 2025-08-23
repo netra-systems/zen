@@ -67,7 +67,7 @@ class CORSValidator:
     @asynccontextmanager
     async def http_client(self):
         """Managed HTTP client with timeouts."""
-        self.client = httpx.AsyncClient(timeout=10.0)
+        self.client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
         try:
             yield self.client
         finally:

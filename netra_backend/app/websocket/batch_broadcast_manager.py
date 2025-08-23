@@ -64,7 +64,7 @@ class BatchedBroadcastManager:
     
     async def _send_direct(self, user_id: str, message: Union[Dict[str, Any], ServerMessage]) -> bool:
         """Send message directly without batching."""
-        connections = self.connection_manager.get_user_connections(user_id)
+        connections = await self.connection_manager.get_user_connections(user_id)
         if not connections:
             return False
         

@@ -11,7 +11,7 @@
  */
 
 import { generateUniqueId } from '@/lib/utils';
-import type { ChatMessage, MessageRole } from '@/types/registry';
+import type { ChatMessage, MessageRole } from '@/types/unified';
 import { logger } from '@/utils/debug-logger';
 
 // ============================================================================

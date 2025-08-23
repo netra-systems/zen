@@ -20,6 +20,19 @@ import pytest
 import redis
 import websockets
 
+# Configure logger
+logger = logging.getLogger(__name__)
+
+
+class ServiceEndpoints:
+    """Real service endpoint configuration for E2E testing."""
+    auth_service_url: str = "http://localhost:8001"
+    backend_url: str = "http://localhost:8000"
+    websocket_url: str = "ws://localhost:8000/ws"
+    redis_url: str = "redis://localhost:6379"
+    postgres_url: str = "postgresql://postgres:netra@localhost:5432/netra_test"
+    clickhouse_url: str = "clickhouse://localhost:8123/netra_test"
+
 
 class E2ETestMetrics:
     """Metrics collection for E2E test performance tracking."""
@@ -483,7 +496,7 @@ class RealServiceE2ETestSuite:
         user_email = f"e2e-test-{self.test_session_id}-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         user_password = f"E2ETest{uuid.uuid4().hex[:8]}!"
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.endpoints.auth_service_url}/auth/signup",
                 json={
@@ -510,7 +523,7 @@ class RealServiceE2ETestSuite:
 
     async def _execute_real_user_login(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute real user login via Auth Service."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.endpoints.auth_service_url}/auth/login",
                 json={
@@ -529,7 +542,7 @@ class RealServiceE2ETestSuite:
         """Validate backend service initialization with user context."""
         headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.get(
                 f"{self.endpoints.backend_url}/api/user/profile",
                 headers=headers,
@@ -601,7 +614,7 @@ class RealServiceE2ETestSuite:
         """Update user profile via Auth Service."""
         headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.put(
                 f"{self.endpoints.auth_service_url}/auth/profile",
                 json=updates,
@@ -618,7 +631,7 @@ class RealServiceE2ETestSuite:
         """Get user profile from Backend Service."""
         headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.get(
                 f"{self.endpoints.backend_url}/api/user/profile",
                 headers=headers,
@@ -693,7 +706,7 @@ class RealServiceE2ETestSuite:
         """Update user preferences via API (should populate cache)."""
         headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.put(
                 f"{self.endpoints.backend_url}/api/user/preferences",
                 json=preferences,
@@ -714,7 +727,7 @@ class RealServiceE2ETestSuite:
         # Generate multiple activity events
         activity_types = ["chat_message", "file_upload", "api_call", "optimization_request"]
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             for i in range(5):  # Generate 5 activities
                 activity_data = {
                     "type": activity_types[i % len(activity_types)],
@@ -794,7 +807,7 @@ class RealServiceE2ETestSuite:
             "timestamp": time.time()
         }
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.endpoints.backend_url}/api/analytics/activity",
                 json=activity_data,

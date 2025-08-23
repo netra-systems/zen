@@ -12,7 +12,7 @@ import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from netra_backend.app.schemas.auth_types import (
     AuthConfigResponse,
@@ -61,6 +61,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
+    SecretReference(name="service-secret", target_field="service_secret"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
     SecretReference(name="github-token", target_field="github_token"),
@@ -101,9 +102,16 @@ class ClickHouseNativeConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
+class ClickHouseHTTPConfig(BaseModel):
+    host: str = "clickhouse_host_url_placeholder"
+    port: int = 8123  # Standard ClickHouse HTTP port
+    user: str = "default"
+    password: str = ""
+    database: str = "default"
+
 class ClickHouseHTTPSConfig(BaseModel):
     host: str = "clickhouse_host_url_placeholder"
-    port: int = 8443
+    port: int = 8443  # Standard ClickHouse HTTPS port
     user: str = "default"
     password: str = ""
     database: str = "default"
@@ -154,6 +162,7 @@ class AppConfig(BaseModel):
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
+    clickhouse_http: ClickHouseHTTPConfig = ClickHouseHTTPConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
@@ -192,22 +201,22 @@ class AppConfig(BaseModel):
     # SubAgent Communication Logging Settings (INFO level)
     subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
     
-    # Service modes configuration (local/shared/mock/disabled)
+    # Service modes configuration (local/shared/disabled)
     redis_mode: str = Field(
         default="shared",
-        description="Redis service mode: local, shared, mock, or disabled"
+        description="Redis service mode: local, shared, or disabled"
     )
     clickhouse_mode: str = Field(
         default="shared", 
-        description="ClickHouse service mode: local, shared, mock, or disabled"
+        description="ClickHouse service mode: local, shared, or disabled"
     )
     llm_mode: str = Field(
         default="shared",
-        description="LLM service mode: local, shared, mock, or disabled"
+        description="LLM service mode: local, shared, or disabled"
     )
     
     # Service configuration is now managed through dev_launcher service config
-    # Services use the mode specified in the launcher (local/shared/mock)
+    # Services use the mode specified in the launcher (local/shared)
     dev_mode_redis_enabled: bool = Field(
         default=True, 
         description="Redis service status (managed by dev launcher)"
@@ -266,8 +275,11 @@ class AppConfig(BaseModel):
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
-    service_id: str = Field(default="backend", description="Service ID for authentication")
-    service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
+    service_id: str = Field(default="backend", description="Service ID for cross-service authentication")
+    service_secret: Optional[str] = Field(
+        default=None, 
+        description="Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret."
+    )
     
     # Cloud Run environment variables
     k_service: Optional[str] = Field(default=None, description="Cloud Run service name")
@@ -291,6 +303,40 @@ class AppConfig(BaseModel):
     fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
+    
+    # Robust startup configuration
+    use_robust_startup: str = Field(default="true", description="Use robust startup manager with dependency resolution")
+    graceful_startup_mode: str = Field(default="true", description="Allow graceful degradation during startup")
+    allow_degraded_mode: str = Field(default="true", description="Allow system to run in degraded mode if non-critical services fail")
+    startup_max_retries: int = Field(default=3, description="Maximum retries for startup components")
+    startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
+    startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
+    
+    @validator('service_secret')
+    def validate_service_secret(cls, v, values):
+        """CRITICAL: Validate service secret security requirements"""
+        if v is None:
+            # Allow None for backward compatibility, but log warning
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("service_secret not configured - this reduces security")
+            return v
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"service_secret must be at least 32 characters for security, got {len(v)}")
+        
+        # Ensure it differs from JWT secret if available
+        jwt_secret = values.get('jwt_secret_key')
+        if jwt_secret and v == jwt_secret:
+            raise ValueError("service_secret must be different from jwt_secret_key for security isolation")
+        
+        # Additional security checks for weak patterns
+        weak_patterns = ['default', 'secret', 'password', 'dev-secret', 'test', 'admin', 'user']
+        if any(pattern in v.lower() for pattern in weak_patterns):
+            raise ValueError(f"service_secret cannot contain weak patterns like: {', '.join(weak_patterns)}")
+        
+        return v
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -423,23 +469,9 @@ class DevelopmentConfig(AppConfig):
         self._log_mock_services(logger, service_modes)
     
     def _log_mock_services(self, logger, service_modes: dict) -> None:
-        """Log which services are running in mock mode."""
-        mock_messages = self._get_mock_messages()
-        self._log_services_in_mock_mode(logger, service_modes, mock_messages)
-    
-    def _get_mock_messages(self) -> dict:
-        """Get dictionary of mock service messages."""
-        return {
-            'redis': "Redis running in MOCK mode",
-            'clickhouse': "ClickHouse running in MOCK mode",
-            'llm': "LLM running in MOCK mode"
-        }
-    
-    def _log_services_in_mock_mode(self, logger, service_modes: dict, mock_messages: dict) -> None:
-        """Log each service that is in mock mode."""
-        for service, mode in service_modes.items():
-            if mode == "mock":
-                logger.info(mock_messages[service])
+        """Deprecated: Mock mode is not supported in development."""
+        # Mock mode is only for specific testing cases, not for development
+        pass
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
@@ -486,6 +518,9 @@ class NetraTestingConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
     auth_service_url: str = "http://localhost:8001"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
+    service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
+    jwt_secret_key: str = "test_jwt_secret_key_for_testing_32_chars_minimum_required_length"  # Test-safe JWT secret
+    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
 
 class LLMProvider(str, Enum):
     """LLM provider enum for configuration schemas (local to avoid circular imports)."""

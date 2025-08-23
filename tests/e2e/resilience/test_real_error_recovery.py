@@ -1,13 +1,13 @@
 """E2E Real Error Recovery Test #7 - Critical Service Failure Recovery Validation
 
 Business Value Justification (BVJ):
-    1. Segment: Enterprise & Growth ($25K+ MRR)
+1. Segment: Enterprise & Growth ($25K+ MRR)
 2. Business Goal: Ensure zero data loss during service failures
 3. Value Impact: Protects customer data integrity and service availability
 4. Revenue Impact: Prevents customer churn from poor error handling
 
 ARCHITECTURAL COMPLIANCE:
-    - File size: <500 lines (modular design)
+- File size: <500 lines (modular design)
 - Function size: <25 lines each
 - Real service failures, NO MOCKING
 - Tests circuit breaker behavior
@@ -15,13 +15,13 @@ ARCHITECTURAL COMPLIANCE:
 - Ensures data integrity throughout failure scenarios
 
 TEST COMPONENTS:
-    1. NetworkFailureSimulator - Simulates network timeouts and connection drops
+1. NetworkFailureSimulator - Simulates network timeouts and connection drops
 2. CircuitBreakerTester - Tests circuit breaker activation and recovery
 3. DataIntegrityValidator - Validates data preservation during failures
 4. ServiceRecoveryCoordinator - Manages service recovery processes
 
 USAGE:
-    - Run unit tests: pytest test_real_error_recovery.py -k "unit"
+- Run unit tests: pytest test_real_error_recovery.py -k "unit"
 - Run logic tests: pytest test_real_error_recovery.py::TestRealErrorRecovery::test_complete_error_recovery_flow
 - Run full integration tests (requires live services): pytest test_real_error_recovery.py
 """
@@ -42,14 +42,14 @@ import pytest_asyncio
 
 from tests.e2e.config import TEST_USERS
 from tests.e2e.error_cascade_core import ServiceFailureSimulator
-from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from tests.e2e.service_orchestrator import E2EServiceOrchestrator
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 
 class NetworkFailureSimulator:
-    # """Simulates real network failures and connection drops."""
+    """Simulates real network failures and connection drops."""
     
     def __init__(self):
         """Initialize network failure simulator."""
@@ -66,13 +66,14 @@ class NetworkFailureSimulator:
             "timeout_set": True,
             "original_timeout": original_timeout,
             "new_timeout": timeout_seconds
+        }
     
     async def simulate_intermittent_network(self, duration: float = 10.0) -> Dict[str, Any]:
         """Simulate intermittent network issues."""
         self.failure_active = True
         start_time = time.time()
         
-#         # Simulate network instability for specified duration # Possibly broken comprehension
+        # Simulate network instability for specified duration
         await asyncio.sleep(duration)
         
         self.failure_active = False
@@ -89,7 +90,7 @@ class NetworkFailureSimulator:
         self.failure_active = False
 
 class CircuitBreakerTester:
-    # """Tests circuit breaker behavior during service failures."""
+    """Tests circuit breaker behavior during service failures."""
     
     def __init__(self):
         """Initialize circuit breaker tester."""
@@ -126,6 +127,7 @@ class CircuitBreakerTester:
             "circuit_opened": self.circuit_open,
             "failure_count": self.failure_count,
             "attempts": attempts
+        }
     
     async def test_circuit_breaker_half_open(self, client: RealWebSocketClient) -> Dict[str, Any]:
         """Test circuit breaker transitions to half-open state."""
@@ -147,9 +149,10 @@ class CircuitBreakerTester:
             "half_open_attempted": True,
             "recovery_success": recovery_success,
             "recovery_attempts": self.recovery_attempts
+        }
 
 class DataIntegrityValidator:
-    # """Validates data integrity during and after service failures."""
+    """Validates data integrity during and after service failures."""
     
     def __init__(self):
         """Initialize data integrity validator."""
@@ -164,6 +167,7 @@ class DataIntegrityValidator:
             "user_session": "test_user_123",
             "conversation_id": "conv_456",
             "message_count": 5
+        }
         
         try:
             await client.send_json({"type": "data_checkpoint", "data": test_data})
@@ -180,6 +184,7 @@ class DataIntegrityValidator:
                 "timestamp": time.time(),
                 "status": "during_failure",
                 "action": "data_persistence_test"
+            }
             
             await client.send_json({"type": "failure_data", "data": failure_data})
             self.during_failure_data.append(failure_data)
@@ -198,6 +203,7 @@ class DataIntegrityValidator:
                 "timestamp": time.time(),
                 "status": "post_recovery",
                 "validation": "integrity_check"
+            }
             
             self.post_recovery_data.append(recovery_data)
             
@@ -207,11 +213,12 @@ class DataIntegrityValidator:
                 "during_failure_count": len(self.during_failure_data),
                 "post_recovery_count": len(self.post_recovery_data),
                 "data_loss": False
+            }
         except Exception as e:
             return {"integrity_validated": False, "error": str(e)}
 
 class ServiceRecoveryCoordinator:
-    # """Coordinates service recovery and validates restoration."""
+    """Coordinates service recovery and validates restoration."""
     
     def __init__(self, orchestrator: E2EServiceOrchestrator):
         """Initialize recovery coordinator."""
@@ -246,13 +253,12 @@ class ServiceRecoveryCoordinator:
     async def validate_service_restoration(self, service_name: str) -> Dict[str, Any]:
         """Validate service is fully restored and functional."""
         try:
-    pass
             # Check service health
             service_url = self.orchestrator.get_service_url(service_name)
             
             # Validate health endpoint
-import httpx
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            import httpx
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{service_url}/health")
                 health_ok = response.status_code == 200
             
@@ -270,25 +276,26 @@ import httpx
                 "service_restored": health_ok,
                 "recovery_time": recovery_time,
                 "within_sla": recovery_time < 30.0
+            }
         except Exception as e:
             return {"service_restored": False, "error": str(e)}
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestRealErrorRecovery:
-    # """Test #7: Real Error Recovery with Service Failures."""
+    """Test #7: Real Error Recovery with Service Failures."""
     
-    # @pytest_asyncio.fixture
-    # async def orchestrator(self):
-    # """Initialize service orchestrator."""
-    # orchestrator = E2EServiceOrchestrator()
-    # try:
-    # await orchestrator.start_test_environment("test_error_recovery")
-    # yield orchestrator
-    # finally:
-    # await orchestrator.stop_test_environment("test_error_recovery")
+    @pytest.fixture
+    async def orchestrator(self):
+        """Initialize service orchestrator."""
+        orchestrator = E2EServiceOrchestrator()
+        try:
+            await orchestrator.start_test_environment("test_error_recovery")
+            yield orchestrator
+        finally:
+            await orchestrator.stop_test_environment("test_error_recovery")
     
-    # @pytest.fixture
+    @pytest.fixture
     def failure_simulator(self, orchestrator):
         """Initialize service failure simulator."""
         return ServiceFailureSimulator(orchestrator)
@@ -299,10 +306,6 @@ class TestRealErrorRecovery:
         return NetworkFailureSimulator()
     
     @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def circuit_breaker_tester(self):
         """Initialize circuit breaker tester."""
         return CircuitBreakerTester()
@@ -325,7 +328,6 @@ class TestSyntaxFix:
             pytest.skip("WebSocket connection failed - backend not available")
         
         try:
-    pass
             # Capture pre-failure state
             pre_state = await data_validator.capture_pre_failure_state(ws_client)
             assert pre_state["state_captured"], "Failed to capture pre-failure state"
@@ -380,6 +382,7 @@ class TestSyntaxFix:
             # Restore network conditions
             await network_simulator.restore_network_conditions(
                 ws_client, timeout_result["original_timeout"]
+            )
             
         finally:
             await ws_client.close()
@@ -425,7 +428,7 @@ class TestSyntaxFix:
             {"type": "error", "message": "Connection failed - please try again"}
         ]
         
-#         for error_response in test_error_responses: # Possibly broken comprehension
+        for error_response in test_error_responses:
             # Validate error structure
             assert "error" in error_response.get("type", ""), "Error type not specified"
             assert "message" in error_response, "Error message missing"
@@ -451,7 +454,7 @@ class TestSyntaxFix:
         # Test the complete recovery flow logic without requiring real services
         
         # Phase 1: Test circuit breaker logic
-#         # Create a mock client for testing # Possibly broken comprehension
+        # Create a mock client for testing
         class MockWebSocketClient:
             def __init__(self):
                 self.config = type('Config', (), {'timeout': 10.0})()
@@ -493,6 +496,7 @@ class TestSyntaxFix:
             "during_failure_count": len(data_validator.during_failure_data),
             "post_recovery_count": len(data_validator.post_recovery_data),
             "data_loss": False
+        }
         
         assert integrity_result["integrity_validated"], "Data integrity validation failed"
         assert integrity_result["pre_failure_count"] > 0, "No pre-failure data"
@@ -505,7 +509,7 @@ class TestSyntaxFix:
         logger.info(f"Error recovery logic validated in {total_time:.2f}s")
     
     async def test_unit_data_integrity_validation(self, data_validator):
-#         """Unit test for data integrity validation logic.""" # Possibly broken comprehension
+        """Unit test for data integrity validation logic."""
         # Test pre-failure data capture
         test_data = {"timestamp": time.time(), "user": "test_user", "action": "test"}
         
@@ -523,6 +527,7 @@ class TestSyntaxFix:
         result = {
             "integrity_validated": True,
             "data_loss": len(data_validator.pre_failure_data) == 0
+        }
         
         assert result["integrity_validated"], "Integrity validation failed"
         assert not result["data_loss"], "Data loss incorrectly detected"
@@ -545,7 +550,7 @@ class TestSyntaxFix:
         assert circuit_breaker_tester.failure_count == 3, "Failure count should be 3"
     
     async def _setup_test_connection(self, orchestrator: E2EServiceOrchestrator) -> Optional[RealWebSocketClient]:
-#         """Setup WebSocket connection for testing.""" # Possibly broken comprehension
+        """Setup WebSocket connection for testing."""
         ws_url = orchestrator.get_websocket_url()
         config = ClientConfig(max_retries=2, timeout=10.0)
         ws_client = RealWebSocketClient(ws_url, config)
@@ -566,11 +571,13 @@ class TestSyntaxFix:
             return {
                 "error_propagated": True,
                 "data_handled": failure_result.get("data_queued", False)
+            }
         except Exception as e:
             return {
                 "error_propagated": True,
                 "error_type": type(e).__name__,
                 "error_message": str(e)
+            }
     
     async def _execute_complete_recovery_flow(self, ws_client, failure_simulator,
                                             network_simulator, circuit_breaker_tester,
@@ -606,13 +613,11 @@ class TestSyntaxFix:
             "recovery_initiated": recovery_result.get("recovery_initiated", False),
             "service_restored": restoration.get("service_restored", False),
             "data_integrity": integrity.get("integrity_validated", False)
+        }
 
 # Test execution helper functions
 
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def create_error_recovery_test_suite() -> TestRealErrorRecovery:
+def create_error_recovery_test_suite() -> TestRealErrorRecovery:
     """Create error recovery test suite instance."""
     return TestRealErrorRecovery()
 

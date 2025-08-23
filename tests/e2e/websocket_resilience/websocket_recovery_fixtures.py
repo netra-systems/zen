@@ -211,6 +211,19 @@ class SecurityAuditLogger:
     def get_alert_count(self) -> int:
         """Get number of security alerts triggered."""
         return len(self.alert_triggers)
+    
+    async def log_session_event(self, user_id: str, session_id: str, event_type: str, details: Dict[str, Any] = None):
+        """Log session-related event."""
+        event = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event_type": event_type,
+            "severity": "INFO",
+            "user_id": user_id,
+            "session_id": session_id,
+            "details": details or {}
+        }
+        
+        self.security_events.append(event)
 
 
 class SecureWebSocketTestClient:

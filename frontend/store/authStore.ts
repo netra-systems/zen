@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 
 interface ExtendedUser extends User {
   role?: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';

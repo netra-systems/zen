@@ -1,0 +1,20 @@
+auto_save_interval_seconds: 30
+consecutive_failures: 5
+critical_failure_count: 1
+enable_persistence: true
+enable_progress_tracking: true
+environment: local
+evaluation_window_minutes: 5
+fail_fast_mode: smart_adaptive
+failure_rate_threshold: 0.3
+generate_reports: true
+max_parallel_workers: 8
+min_sample_size: 10
+report_formats:
+- json
+- html
+splitting_strategy: hybrid
+target_window_duration_minutes: 15
+timeout_minutes: 60
+use_real_llm: false
+use_real_services: false

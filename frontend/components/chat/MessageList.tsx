@@ -110,12 +110,36 @@ export const MessageList: React.FC = () => {
     );
   };
 
+  const safeStringify = (obj: any): string => {
+    try {
+      return JSON.stringify(obj, (key, value) => {
+        if (value && typeof value === 'object') {
+          if (value.constructor === Object || Array.isArray(value)) {
+            return value;
+          }
+          // Handle other object types (Date, RegExp, etc.)
+          return `[${value.constructor?.name || 'Object'}]`;
+        }
+        if (typeof value === 'function') {
+          return '[Function]';
+        }
+        if (typeof value === 'symbol') {
+          return '[Symbol]';
+        }
+        return value;
+      });
+    } catch (error) {
+      // Fallback for circular references and other JSON.stringify errors
+      return '[Complex Object - Unable to stringify]';
+    }
+  };
+
   const displayedMessages = messages.map(msg => ({
     id: msg.id,
     type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'ai',
     content: typeof msg.content === 'string' 
       ? msg.content 
-      : (msg.content?.text || JSON.stringify(msg.content)),
+      : (msg.content?.text || safeStringify(msg.content)),
     sub_agent_name: msg.metadata?.agentName || null,
     created_at: (() => {
       try {

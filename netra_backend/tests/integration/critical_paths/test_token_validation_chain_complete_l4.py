@@ -21,11 +21,13 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.core.exceptions import (
-    InvalidTokenError,
     TokenExpiredError,
     TokenRevokedError,
     TokenTamperError,
 )
+
+# JWT library exception
+InvalidTokenError = jwt.InvalidTokenError
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.redis_service import RedisService
 

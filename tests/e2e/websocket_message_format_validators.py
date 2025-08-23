@@ -9,7 +9,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from tests.e2e.config import TEST_ENDPOINTS, TestDataFactory
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class BaseValidator:

@@ -68,7 +68,7 @@ class GCPDeployer:
                 directory="netra_backend",
                 port=8888,
                 dockerfile="Dockerfile.backend",
-                cloud_run_name="netra-backend",
+                cloud_run_name="netra-backend-staging",
                 memory="1Gi",
                 cpu="2",
                 min_instances=1,
@@ -76,6 +76,8 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
+                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
                 }
             ),
             ServiceConfig(
@@ -83,7 +85,7 @@ class GCPDeployer:
                 directory="auth_service",
                 port=8080,
                 dockerfile="Dockerfile.auth",
-                cloud_run_name="netra-auth",
+                cloud_run_name="netra-auth-service",
                 memory="512Mi",
                 cpu="1",
                 min_instances=1,
@@ -91,6 +93,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
+                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
                 }
             ),
             ServiceConfig(
@@ -98,7 +101,7 @@ class GCPDeployer:
                 directory="frontend",
                 port=3000,
                 dockerfile="Dockerfile.frontend",
-                cloud_run_name="netra-frontend",
+                cloud_run_name="netra-frontend-staging",
                 memory="512Mi",
                 cpu="1",
                 min_instances=0,
@@ -531,10 +534,10 @@ CMD ["npm", "start"]
                 "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest"
             ])
         elif service.name == "auth":
-            # Auth service needs database and JWT secrets
+            # Auth service needs database, JWT secrets, and OAuth credentials
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest"
             ])
         elif service.name == "frontend":
             # Frontend needs API URLs - use staging URLs for consistent configuration
@@ -605,13 +608,19 @@ CMD ["npm", "start"]
         
         # CRITICAL: All these secrets are REQUIRED for staging deployment
         # Based on staging_secrets_requirements.xml
+        # Load OAuth credentials from environment variables or use placeholders
+        # NEVER store actual secrets in source code
+        import os
+        
         secrets = {
             "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
             "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
-            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum"  # Auth service uses this name
+            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",  # Auth service uses this name
+            "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
+            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET")
         }
         
         for name, value in secrets.items():

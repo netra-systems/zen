@@ -36,7 +36,7 @@ from netra_backend.app.core.security import SecurityContext
 from netra_backend.app.schemas.tenant import Permission, Tenant, TenantResource
 from netra_backend.app.services.audit.audit_logger import AuditLogger
 from netra_backend.app.services.database.connection_manager import (
-    DatabaseConnectionManager,
+    ConnectionManager,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ class MultiTenantIsolationManager:
             await self.audit_logger.initialize()
             
             # Initialize database manager with tenant-aware connections
-            self.db_manager = DatabaseConnectionManager()
+            self.db_manager = ConnectionManager()
             await self.db_manager.initialize()
             
             logger.info("Multi-tenant isolation services initialized")

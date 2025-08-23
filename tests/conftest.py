@@ -26,6 +26,9 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["JWT_SECRET_KEY"] = (
     "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
 )
+os.environ["SERVICE_SECRET"] = (
+    "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
+)
 os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
 os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
 

@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ class GracefulDegradationTester:
     async def _check_backend_health_degraded(self, backend_url: str):
         """Check backend health during Auth failure."""
         import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             return await client.get(f"{backend_url}/health")
     
     def _analyze_backend_degradation(self, response) -> Dict[str, Any]:

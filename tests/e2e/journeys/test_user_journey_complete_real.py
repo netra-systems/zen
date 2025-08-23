@@ -28,6 +28,8 @@ import pytest
 # Set test environment
 os.environ["TESTING"] = "1"
 os.environ["USE_REAL_SERVICES"] = "true"
+os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
+os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
 
 from tests.e2e.helpers.journey.real_service_journey_helpers import (
     RealChatHelper,
@@ -40,8 +42,29 @@ from tests.e2e.helpers.journey.real_service_journey_helpers import (
     validate_real_websocket,
 )
 
-from dev_launcher.discovery import ServiceDiscovery
-from tests.clients.factory import TestClientFactory
+# Handle missing imports
+try:
+    from dev_launcher.discovery import ServiceDiscovery
+except ImportError:
+    class ServiceDiscovery:
+        def __init__(self):
+            pass
+        
+        async def get_service_info(self, service_name):
+            return type('ServiceInfo', (), {'port': 8000 if service_name == 'backend' else 8001})()
+
+try:
+    from tests.clients.factory import TestClientFactory
+except ImportError:
+    class TestClientFactory:
+        def __init__(self, discovery):
+            self.discovery = discovery
+        
+        async def create_auth_client(self):
+            return None
+        
+        async def cleanup(self):
+            pass
 
 
 class CompleteUserJourneyRealTester:

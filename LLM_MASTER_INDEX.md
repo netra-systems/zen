@@ -80,18 +80,19 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
 | **📖 MAIN TESTING GUIDE** | `/TESTING.md` | **Comprehensive testing documentation** | Start here for all testing |
-| **Unified Test Runner** | `/unified_test_runner.py` | Single entry point for ALL tests | Run with `--help` for options |
-| **Test Configuration** | `/unified_test_config.py` | Central test configuration | Test levels, environments, coverage |
-| **Test Framework** | `/test_framework/` | Test utilities and plumbing | Consolidated infrastructure |
+| **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
+| **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
+| **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **Enhanced Docs** | `/docs/ENHANCED_TEST_RUNNER.md` | Enhanced runner documentation | Advanced testing features |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
 |-----------|----------|---------|-------------|
-| Backend Tests | `/netra_backend/tests/` | `test_*.py` | `python unified_test_runner.py --service backend` |
-| Auth Tests | `/auth_service/tests/` | `test_*.py` | `python unified_test_runner.py --service auth` |
-| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python unified_test_runner.py --service frontend` |
-| E2E Tests | `/tests/unified/e2e/` | `test_*.py` | `python unified_test_runner.py --level comprehensive` |
-| Legacy Tests | `/legacy_integration_tests/` | `test_*.py` | **DEPRECATED - Do not use** |
+| Backend Tests | `/netra_backend/tests/` | `test_*.py` | `python -m test_framework.runner --service backend` |
+| Auth Tests | `/auth_service/tests/` | `test_*.py` | `python -m test_framework.runner --service auth` |
+| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python -m test_framework.runner --service frontend` |
+| E2E Tests | `/tests/e2e/` | `test_*.py` | `python -m test_framework.runner --level e2e` |
+| Resilience Tests | `/tests/e2e/resilience/` | `test_*.py` | `python -m test_framework.runner --level resilience` |
 
 ### Import Testing System
 | Component | Location | Purpose | Key Functions |
@@ -270,6 +271,7 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 | **WebSocket** | `websocket_message_paradox.xml`, `websocket_*.xml` | Async handling, error patterns |
 | **Configuration** | `configuration_secrets.xml`, `environment_*.xml` | Unified config system |
 | **Testing** | `testing.xml`, `e2e_testing.xml`, `bad_test_detection.xml` | TDD workflows, real vs mock |
+| **E2E Test Infrastructure** | `e2e_test_infrastructure_fixes.xml` | Redis async, Postgres config, test collection fixes |
 | **Frontend Testing** | `frontend_testing_patterns.xml` | **NEW: Complete React/Jest patterns** |
 | **Database** | `database_asyncio.xml`, `database_*.xml` | Async patterns, connections |
 | **Frontend** | `frontend.xml`, `react-content-handling.xml` | Zustand patterns, React |
@@ -640,7 +642,7 @@ A comprehensive AI optimization agent system with 30+ specialized tools:
 | **Agent State** | `/app/agents/state.py` | `from netra_backend.app.agents.state import DeepAgentState` | 114 uses |
 | **Tool Dispatcher** | `/app/agents/tool_dispatcher.py` | `from netra_backend.app.agents.tool_dispatcher import ToolDispatcher` | 49 uses |
 | **Supervisor** | `/app/agents/supervisor_consolidated.py` | `from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent` | 32 uses |
-| **Base Agent** | `/app/agents/base.py` | `from netra_backend.app.agents.base import BaseSubAgent` | 21 uses |
+| **Base Agent** | `/app/agents/base.py` | `from netra_backend.app.agents.base_agent import BaseSubAgent` | 21 uses |
 | **Error Handler** | `/app/agents/error_handler.py` | `from netra_backend.app.agents.error_handler import global_error_handler` | Agent errors |
 
 ### Core Services (Business Logic)
@@ -705,4 +707,4 @@ state = DeepAgentState(...)
 
 ---
 
-Last Updated: 2025-08-20
+Last Updated: 2025-08-23

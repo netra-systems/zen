@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class SessionPersistenceManager:
@@ -178,7 +178,7 @@ class SessionPersistenceManager:
         """Check if required services are available for testing."""
         try:
             import httpx
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 # Quick health check on backend service
                 response = await client.get("http://localhost:8000/health")
                 if response.status_code not in [200, 500]:

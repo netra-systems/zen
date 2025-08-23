@@ -17,7 +17,7 @@ from typing import Dict, List, Optional
 import pytest
 import pytest_asyncio
 from netra_backend.app.schemas import SubAgentLifecycle
-from netra_backend.app.ws_manager import WebSocketManager as WSManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WSManager
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState

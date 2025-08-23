@@ -442,7 +442,7 @@ async function detectBarrelFileCircularDependencies(): Promise<Array<{barrel: st
       const moduleContent = await fs.readFile(modulePath, 'utf8');
       if (moduleContent.includes("from './registry'") || 
           moduleContent.includes('from "../registry"') ||
-          moduleContent.includes("from '@/types/registry'")) {
+          moduleContent.includes("from '@/types/unified'")) {
         circularImports.push(module);
       }
     } catch {

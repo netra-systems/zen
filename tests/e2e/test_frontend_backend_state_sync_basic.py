@@ -18,7 +18,7 @@ import pytest
 TEST_MODE_AVAILABLE = False
 try:
     from tests.clients.factory import TestClientFactory
-    from tests.websocket.state_helpers import StateValidator
+    from tests.e2e.websocket.state_helpers import StateValidator
     TEST_MODE_AVAILABLE = True
 except ImportError:
     class TestClientFactory:

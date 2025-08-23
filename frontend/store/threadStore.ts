@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { Thread } from '@/types/registry';
+import { Thread } from '@/types/unified';
 
 interface ThreadStoreState {
   threads: Thread[];

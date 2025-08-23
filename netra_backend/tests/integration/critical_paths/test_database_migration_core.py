@@ -40,7 +40,7 @@ class BackupService:
     async def restore_backup(self, *args, **kwargs):
         return {"status": "restored"}
 from netra_backend.app.core.database_connection_manager import (
-    DatabaseConnectionManager,
+    DatabaseConnectionManager as ConnectionManager,
 )
 
 from netra_backend.app.services.database.migration_service import MigrationService
@@ -63,7 +63,7 @@ class DatabaseMigrationCoreManager:
         """Initialize database migration services."""
         try:
             # Initialize database connection manager
-            self.db_manager = DatabaseConnectionManager()
+            self.db_manager = ConnectionManager()
             await self.db_manager.initialize()
             
             # Initialize migration service

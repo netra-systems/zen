@@ -15,14 +15,28 @@ logger = logging.getLogger(__name__)
 
 # Import settings lazily to avoid circular dependency
 def get_settings():
-    """Get settings lazily to avoid circular import."""
+    """Get settings lazily to avoid circular import.
+    
+    Auth service can run standalone or with backend, so we need to handle both cases.
+    """
     try:
-        from netra_backend.app.config import get_config
-        return get_config()
+        # First try auth service config
+        from auth_service.auth_core.config import AuthConfig
+        # Create a settings-like object with required attributes
+        class AuthSettings:
+            def __init__(self):
+                self.log_async_checkout = AuthConfig.LOG_ASYNC_CHECKOUT if hasattr(AuthConfig, 'LOG_ASYNC_CHECKOUT') else False
+                self.environment = AuthConfig.ENVIRONMENT if hasattr(AuthConfig, 'ENVIRONMENT') else 'development'
+        return AuthSettings()
     except ImportError:
-        # Handle case where netra_backend is not available (auth service running standalone)
-        logger.debug("netra_backend config not available, using defaults")
-        return None
+        try:
+            # Fallback to netra_backend config if available (integrated mode)
+            from netra_backend.app.config import get_config
+            return get_config()
+        except ImportError:
+            # Handle case where neither is available (isolated testing)
+            logger.debug("No config available, using defaults")
+            return None
 
 # Initialize settings at module level
 settings = get_settings()
@@ -112,18 +126,30 @@ def _log_auth_connection_established(connection_record: ConnectionPoolEntry):
 
 def _monitor_auth_pool_usage(pool):
     """Monitor auth service connection pool usage and warn if high."""
-    if not (hasattr(pool, 'size') and hasattr(pool, 'overflow')):
+    if not pool:
         return
     
     try:
-        active = pool.size() - pool.checkedin() + pool.overflow()
-        max_connections = AuthDatabaseConfig.POOL_SIZE + AuthDatabaseConfig.MAX_OVERFLOW
-        threshold = max_connections * AuthDatabaseConfig.POOL_WARNING_THRESHOLD
-        
-        if active > threshold:
-            logger.warning(f"Auth service: Connection pool usage high: {active}/{max_connections}")
+        # Check for pool monitoring methods
+        if hasattr(pool, 'size') and hasattr(pool, 'checkedin') and hasattr(pool, 'overflow'):
+            total_size = pool.size()
+            checked_in = pool.checkedin()
+            overflow_count = pool.overflow()
+            active = total_size - checked_in + overflow_count
+            max_connections = AuthDatabaseConfig.POOL_SIZE + AuthDatabaseConfig.MAX_OVERFLOW
+            threshold = max_connections * AuthDatabaseConfig.POOL_WARNING_THRESHOLD
+            
+            if active > threshold:
+                logger.warning(
+                    f"Auth service: Connection pool usage high: {active}/{max_connections} "
+                    f"(size={total_size}, checkedin={checked_in}, overflow={overflow_count})"
+                )
+                
+                # Log additional pool health metrics if available
+                if hasattr(pool, 'total'):
+                    logger.warning(f"Auth service: Total connections created: {pool.total()}")
     except Exception as e:
-        logger.warning(f"Auth service: Error monitoring pool usage: {e}")
+        logger.debug(f"Auth service: Could not monitor pool usage: {e}")
 
 
 def _create_auth_async_connect_handler(engine: AsyncEngine):
@@ -137,13 +163,19 @@ def _create_auth_async_connect_handler(engine: AsyncEngine):
             _configure_auth_connection_timeouts(dbapi_conn)
         
         _log_auth_connection_established(connection_record)
+        
+        # Monitor initial pool state
+        if hasattr(engine, 'pool'):
+            _monitor_auth_pool_usage(engine.pool)
 
 
 def _create_auth_async_checkout_handler(engine: AsyncEngine):
     """Create async checkout event handler for auth service."""
     @event.listens_for(engine.sync_engine, "checkout")
     def receive_auth_async_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
-        _monitor_auth_pool_usage(engine.pool)
+        # Monitor pool usage on checkout to catch high usage scenarios
+        if hasattr(engine, 'pool'):
+            _monitor_auth_pool_usage(engine.pool)
         _log_auth_checkout_if_enabled(connection_record)
 
 
@@ -169,6 +201,11 @@ def setup_auth_async_engine_events(engine: AsyncEngine):
     try:
         _create_auth_async_connect_handler(engine)
         _create_auth_async_checkout_handler(engine)
+        
+        # Setup additional pool events if available
+        if hasattr(engine.sync_engine, "pool") and hasattr(event, "listens_for"):
+            _setup_pool_overflow_events(engine)
+        
         logger.debug("Auth service: Async engine events configured successfully")
     except Exception as e:
         logger.error(f"Auth service: Failed to setup engine events: {e}")
@@ -188,5 +225,28 @@ def _log_auth_connection_info(dbapi_conn: Connection):
         logger.debug(f"Auth service: Could not get connection info: {e}")
 
 
+def _setup_pool_overflow_events(engine: AsyncEngine):
+    """Setup pool overflow event monitoring."""
+    try:
+        @event.listens_for(engine.sync_engine, "invalidate")
+        def receive_invalidate(dbapi_conn, connection_record, exception):
+            """Log when connections are invalidated."""
+            if exception:
+                logger.warning(
+                    f"Auth service: Connection invalidated due to error: {exception}"
+                )
+
+        @event.listens_for(engine.sync_engine, "reset")
+        def receive_reset(dbapi_conn, connection_record):
+            """Log when connections are reset."""
+            logger.debug("Auth service: Connection reset to pool")
+            
+        @event.listens_for(engine.sync_engine, "close")
+        def receive_close(dbapi_conn, connection_record):
+            """Log when connections are closed."""
+            logger.debug("Auth service: Connection closed")
+    except Exception as e:
+        logger.debug(f"Auth service: Could not setup overflow events: {e}")
+
 # Export main setup function
-__all__ = ["setup_auth_async_engine_events", "AuthDatabaseConfig"]
+__all__ = ["setup_auth_async_engine_events", "AuthDatabaseConfig", "get_settings", "_monitor_auth_pool_usage"]

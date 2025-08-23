@@ -49,7 +49,7 @@ from netra_backend.app.services.database.postgres_service import PostgresService
 # from app.services.redis.session_manager import RedisSessionManager
 
 RedisSessionManager = AsyncMock
-# from netra_backend.app.ws_manager import WebSocketManager
+# from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 WebSocketManager = AsyncMock
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite

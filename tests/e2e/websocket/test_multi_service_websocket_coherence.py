@@ -37,8 +37,8 @@ import pytest_asyncio
 
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig, ConnectionState
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class MultiServiceWebSocketTester:
@@ -93,7 +93,7 @@ class MultiServiceWebSocketTester:
         
         try:
             start_time = time.time()
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"{service_config['url']}{service_config['health_endpoint']}",
                     timeout=5.0

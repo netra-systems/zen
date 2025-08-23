@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 
 export const handlers = [
   // Mock for login

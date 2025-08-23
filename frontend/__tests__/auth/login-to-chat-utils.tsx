@@ -48,19 +48,19 @@ export function setupMockAuthStore() {
 }
 
 export function setupMockAuthService() {
-  jest.mocked(authService.handleLogin) = jest.fn().mockResolvedValue({
+  jest.mocked(authService).handleLogin = jest.fn().mockResolvedValue({
     success: true,
     user: mockUser,
     token: mockToken
   });
-  jest.mocked(authService.setToken) = jest.fn();
-  jest.mocked(authService.getCurrentUser) = jest.fn().mockResolvedValue(mockUser);
-  jest.mocked(authService.validateToken) = jest.fn().mockResolvedValue(true);
-  jest.mocked(authService.refreshToken) = jest.fn().mockResolvedValue(mockToken);
-  jest.mocked(authService.initiateGoogleLogin) = jest.fn();
-  jest.mocked(authService.handleOAuthCallback) = jest.fn();
-  jest.mocked(authService.verifyMFA) = jest.fn().mockResolvedValue({ success: true });
-  jest.mocked(authService.setTokenExpiration) = jest.fn();
+  jest.mocked(authService).setToken = jest.fn();
+  jest.mocked(authService).getCurrentUser = jest.fn().mockResolvedValue(mockUser);
+  jest.mocked(authService).validateToken = jest.fn().mockResolvedValue(true);
+  jest.mocked(authService).refreshToken = jest.fn().mockResolvedValue(mockToken);
+  jest.mocked(authService).initiateGoogleLogin = jest.fn();
+  jest.mocked(authService).handleOAuthCallback = jest.fn();
+  jest.mocked(authService).verifyMFA = jest.fn().mockResolvedValue({ success: true });
+  jest.mocked(authService).setTokenExpiration = jest.fn();
 }
 
 export function setupMockCookies() {
@@ -82,16 +82,20 @@ export function setupMockCookies() {
 }
 
 export function renderLoginComponent(mockPush?: jest.Mock) {
-  return render(<LoginForm onRedirect={mockPush} />);
+  const { TestProviders } = require('../setup/test-providers');
+  return render(
+    <TestProviders>
+      <LoginForm onRedirect={mockPush} />
+    </TestProviders>
+  );
 }
 
-export async function performLogin(email: string, password: string) {
+export async function performLogin(email: string, password: string, screenContext: any) {
   const user = userEvent.setup();
-  const { screen } = await import('@testing-library/react');
   
-  await user.type(screen.getByTestId('email-input'), email);
-  await user.type(screen.getByTestId('password-input'), password);
-  await user.click(screen.getByTestId('login-button'));
+  await user.type(screenContext.getByTestId('email-input'), email);
+  await user.type(screenContext.getByTestId('password-input'), password);
+  await user.click(screenContext.getByTestId('login-button'));
 }
 
 // Mock Login Form Component for testing

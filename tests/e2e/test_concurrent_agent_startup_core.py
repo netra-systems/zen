@@ -213,7 +213,7 @@ class ConcurrentTestEnvironment:
         
         # Test HTTP services
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # Check backend service
 
             backend_response = await client.get(f"{SERVICE_ENDPOINTS['backend']}/health", timeout=10)

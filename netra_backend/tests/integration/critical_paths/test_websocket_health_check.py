@@ -28,7 +28,7 @@ from uuid import uuid4
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class HealthStatus(Enum):

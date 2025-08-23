@@ -71,7 +71,7 @@ def _create_mcp_service():
 
 def _create_websocket_service():
     """Create WebSocketService with proper dependencies."""
-    from netra_backend.app.services.websocket_service import WebSocketService
+    from netra_backend.app.websocket.unified import UnifiedWebSocketManager
     
     message_handler = _create_message_handler_service()
     return WebSocketService(message_handler)

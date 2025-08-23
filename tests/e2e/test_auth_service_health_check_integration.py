@@ -63,7 +63,7 @@ class AuthHealthChecker:
         
         try:
             logger.info(f"Attempting to connect to health endpoint: {self.health_endpoint}")
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 response = await client.get(self.health_endpoint)
                 response_time = (time.perf_counter() - start_time) * 1000
                 
@@ -95,7 +95,7 @@ class AuthHealthChecker:
         
         try:
     pass
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(self.ready_endpoint)
                 
                 # Fallback to basic health if ready doesn't exist

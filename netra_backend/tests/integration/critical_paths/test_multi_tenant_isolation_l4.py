@@ -43,12 +43,12 @@ from unittest.mock import AsyncMock
 
 PermissionsService = AsyncMock
 # from app.services.audit.audit_logger import AuditLogger
-# from app.services.database.connection_manager import DatabaseConnectionManager
+# from app.services.database.connection_manager import ConnectionManager
 # from app.schemas.tenant import Tenant, TenantResource, Permission
 # from app.core.security import SecurityContext
 # from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
-DatabaseConnectionManager = AsyncMock
+ConnectionManager = AsyncMock
 Tenant = dict
 TenantResource = dict
 Permission = dict
@@ -92,7 +92,7 @@ class MultiTenantIsolationL4Manager:
             await self.audit_logger.initialize(use_staging_compliance=True)
             
             # Initialize database manager with staging connection
-            self.db_manager = DatabaseConnectionManager()
+            self.db_manager = ConnectionManager()
             await self.db_manager.initialize(use_staging_config=True)
             
             # Verify staging database connectivity

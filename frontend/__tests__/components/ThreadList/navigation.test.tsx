@@ -243,7 +243,9 @@ describe('ThreadList Navigation Tests', () => {
 
       const threadItem = screen.getByTestId('thread-item-thread-1');
       
-      threadItem.focus();
+      await act(async () => {
+        threadItem.focus();
+      });
       
       expect(threadItem).toHaveClass('hovered');
     });
@@ -314,7 +316,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList();
 
       const firstItem = screen.getByTestId('thread-item-thread-1');
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       
       // Navigate down
       await user.keyboard('{ArrowDown}');
@@ -332,7 +336,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList();
 
       const threadItem = screen.getByTestId('thread-item-thread-2');
-      threadItem.focus();
+      await act(async () => {
+        threadItem.focus();
+      });
       
       await user.keyboard('{Enter}');
       
@@ -344,7 +350,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList();
 
       const threadItem = screen.getByTestId('thread-item-thread-3');
-      threadItem.focus();
+      await act(async () => {
+        threadItem.focus();
+      });
       
       await user.keyboard('{ }');
       
@@ -356,7 +364,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList();
 
       const firstItem = screen.getByTestId('thread-item-thread-1');
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       
       // Navigate down twice
       await user.keyboard('{ArrowDown}');
@@ -371,7 +381,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList({ threads: createTestThreads(3) });
 
       const firstItem = screen.getByTestId('thread-item-thread-1');
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       
       // Try to navigate up from first item
       await user.keyboard('{ArrowUp}');
@@ -418,16 +430,22 @@ describe('ThreadList Navigation Tests', () => {
 
       // Focus first item directly since tab navigation can be unpredictable in tests
       const firstItem = screen.getByTestId('thread-item-thread-1');
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       expect(firstItem).toHaveFocus();
       
       // Check that other items can receive focus
       const secondItem = screen.getByTestId('thread-item-thread-2');
-      secondItem.focus();
+      await act(async () => {
+        secondItem.focus();
+      });
       expect(secondItem).toHaveFocus();
       
       const thirdItem = screen.getByTestId('thread-item-thread-3');
-      thirdItem.focus();
+      await act(async () => {
+        thirdItem.focus();
+      });
       expect(thirdItem).toHaveFocus();
     });
 
@@ -436,7 +454,10 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList();
 
       const threadItem = screen.getByTestId('thread-item-thread-2');
-      threadItem.focus();
+      
+      await act(async () => {
+        threadItem.focus();
+      });
       
       await user.keyboard('{Enter}');
       
@@ -497,7 +518,9 @@ describe('ThreadList Navigation Tests', () => {
       fireEvent.scroll(listContainer, { target: { scrollTop: 200 } });
       
       // Use keyboard navigation
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       await user.keyboard('{ArrowDown}');
       
       // Scroll position should be maintained unless focus moves out of view
@@ -511,7 +534,9 @@ describe('ThreadList Navigation Tests', () => {
       renderThreadList({ threads: manyThreads });
 
       const firstItem = screen.getByTestId('thread-item-thread-1');
-      firstItem.focus();
+      await act(async () => {
+        firstItem.focus();
+      });
       
       // Navigate to the last item
       for (let i = 0; i < 9; i++) {

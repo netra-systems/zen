@@ -93,7 +93,7 @@ class MultiServiceHealthChecker:
         start_time = time.time()
         
         try:
-            async with httpx.AsyncClient(timeout=config["timeout"]) as client:
+            async with httpx.AsyncClient(timeout=config["timeout"], follow_redirects=True) as client:
                 response = await client.get(config["url"])
                 response_time_ms = (time.time() - start_time) * 1000
                 
@@ -287,7 +287,7 @@ class MultiServiceHealthChecker:
         try:
             # Test auth service accessibility
             auth_config = SERVICE_ENDPOINTS["auth"]
-            async with httpx.AsyncClient(timeout=auth_config["timeout"]) as client:
+            async with httpx.AsyncClient(timeout=auth_config["timeout"], follow_redirects=True) as client:
                 auth_response = await client.get(auth_config["url"])
                 
                 if auth_response.status_code == 200:

@@ -19,7 +19,7 @@ import {
   WebSocketConnectionComponent
 } from '../helpers/initial-state-helpers';
 import * as InitialStateStorageHelpers from '@/__tests__/helpers/initial-state-storage-helpers';
-import * as InitialStateMockComponents from '@/__tests__/helpers/initial-state-mock-components';
+import { setupInitialStateMockComponents } from '@/__tests__/helpers/initial-state-mock-components';
 
 // Setup all mocks
 setupInitialStateMockComponents();
@@ -108,7 +108,7 @@ describe('Initial State Integration Tests', () => {
 
   describe('LocalStorage Checks', () => {
     beforeEach(() => {
-      setupStorageTestMocks();
+      setupInitialStateMocks();
     });
 
     it('should access localStorage without errors', () => {
@@ -152,7 +152,7 @@ describe('Initial State Integration Tests', () => {
 
   describe('Cookie Validation', () => {
     beforeEach(() => {
-      setupCookieTestMocks();
+      setupInitialStateMocks();
     });
 
     it('should access cookies without errors', () => {

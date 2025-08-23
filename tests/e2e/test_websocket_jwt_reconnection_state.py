@@ -23,7 +23,7 @@ import pytest
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_SECRETS, TEST_USERS
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.e2e.reconnection_test_helpers import ReconnectionTestHelpers
 
 
 class ReconnectionPhase(Enum):

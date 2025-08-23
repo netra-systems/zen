@@ -186,8 +186,8 @@ class TestOAuthComprehensiveFailures:
         ).decode()
         
         # Store nonce in Redis mock to simulate it's already been used
-        redis_client.exists.return_value = True  # Nonce already exists
-        redis_client.get.return_value = "used"
+        # The check_nonce_replay method uses SET with NX, so mock it to return None (failure)
+        redis_client.set.return_value = None  # SET with NX returns None when key already exists
         
         # Mock successful OAuth responses to isolate nonce testing
         with patch("httpx.AsyncClient") as mock_client:

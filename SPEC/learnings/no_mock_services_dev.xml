@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <title>No Mock Services in Development Mode</title>
+    <description>
+        Mock services are NEVER to be used in development mode. This learning captures the 
+        critical distinction between testing and development environments and ensures that 
+        development always uses real service implementations.
+    </description>
+    
+    <learning>
+        <title>Mock Services Are Testing-Only</title>
+        <problem>
+            The dev configuration kept regressing to include mock service options, causing 
+            confusion about when mock services should be used. Mock implementations were 
+            being offered as a development option alongside local and shared services.
+        </problem>
+        <solution>
+            Mock services are ONLY for specific testing scenarios and must NEVER be used 
+            in development mode. Development should always use either:
+            - LOCAL: Locally installed services (Redis, ClickHouse, PostgreSQL)
+            - SHARED: Cloud-hosted services (for LLM APIs and when local unavailable)
+            - DOCKER: Docker containers for local services
+            
+            Mock mode has been completely removed from development configuration options.
+        </solution>
+        <rationale>
+            1. Development requires real service behavior to catch integration issues early
+            2. Mock services hide real implementation details and can mask bugs
+            3. Testing with mocks is appropriate for unit tests but not for development
+            4. Real services in dev mode ensure parity with production behavior
+            5. Using real services prevents "works with mock but fails with real service" issues
+        </rationale>
+    </learning>
+    
+    <learning>
+        <title>Development Service Configuration Rules</title>
+        <solution>
+            The dev launcher and configuration system now enforce these rules:
+            
+            1. Valid development modes are: LOCAL, SHARED, DOCKER, DISABLED
+            2. Mock mode is completely removed from ResourceMode enum for dev
+            3. Service configuration wizard no longer offers mock as an option
+            4. Default configuration uses real services:
+               - Redis: LOCAL (localhost:6379)
+               - ClickHouse: LOCAL (localhost:9000)
+               - PostgreSQL: LOCAL (localhost:5433)
+               - LLM: SHARED (API providers)
+               - Auth: LOCAL (localhost:8081)
+            
+            5. When local services aren't available, fallback to SHARED, never MOCK
+            6. Mock configurations are only retained in test-specific files
+        </solution>
+    </learning>
+    
+    <learning>
+        <title>Configuration File Updates</title>
+        <solution>
+            Updated files to remove mock service concepts from development:
+            
+            1. netra_backend/app/schemas/Config.py:
+               - Removed "mock" from service mode descriptions
+               - Deprecated mock-related logging methods
+               - Service modes now only support: local, shared, disabled
+            
+            2. dev_launcher/service_config.py:
+               - Removed MOCK from ResourceMode enum (with explanatory comment)
+               - Removed mock_config from ServiceResource dataclass
+               - Removed mock mode from configuration wizard options
+               - Updated user prompts to not mention mock mode
+               - Removed mock fallback for unavailable services
+        </solution>
+    </learning>
+    
+    <learning>
+        <title>Testing vs Development Distinction</title>
+        <rationale>
+            Clear separation between testing and development environments:
+            
+            TESTING (where mocks are appropriate):
+            - Unit tests that need isolated component testing
+            - CI/CD pipelines with limited resources
+            - Specific test scenarios requiring controlled responses
+            - Tests that verify error handling with simulated failures
+            
+            DEVELOPMENT (where mocks are NEVER appropriate):
+            - Local development environment
+            - Integration testing
+            - Feature development
+            - Debugging production issues
+            - Performance testing
+            - Any scenario requiring real service behavior
+        </rationale>
+    </learning>
+    
+    <implementation_notes>
+        - Mock service code remains in test utilities and fixtures
+        - Test-specific configuration (NetraTestingConfig) may use mocks
+        - Development configuration (DevelopmentConfig) must never use mocks
+        - Service availability checker should fallback to SHARED, not MOCK
+        - Environment variables should not accept "mock" as a valid mode in dev
+    </implementation_notes>
+    
+    <related_files>
+        - netra_backend/app/schemas/Config.py
+        - dev_launcher/service_config.py
+        - dev_launcher/service_availability_checker.py
+        - tests/conftest.py (testing mocks only)
+        - netra_backend/tests/conftest.py (testing mocks only)
+    </related_files>
+</learnings>

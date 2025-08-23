@@ -557,12 +557,12 @@ class TestJWTSecurity:
                     # Use appropriate health/status endpoint for each service
                     if service_name == "auth_service":
                         # Auth service validation endpoint
-                        async with httpx.AsyncClient() as client:
+                        async with httpx.AsyncClient(follow_redirects=True) as client:
                             response = await client.get(f"{base_url}/validate", headers=headers)
                             validation_results[service_name] = "valid" if response.status_code == 200 else "invalid"
                     else:
                         # Backend service validation
-                        async with httpx.AsyncClient() as client:
+                        async with httpx.AsyncClient(follow_redirects=True) as client:
                             response = await client.get(f"{base_url}/api/users/profile", headers=headers)
                             validation_results[service_name] = "valid" if response.status_code == 200 else "invalid"
                 except Exception:

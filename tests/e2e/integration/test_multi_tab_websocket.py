@@ -9,8 +9,8 @@ Compliance: <300 lines, <8 lines per function, real connections only, <5s execut
 """
 
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
-from tests.e2e.integration.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.integration.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig, ConnectionState
+from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from typing import Any, Dict, List, Optional
 import asyncio

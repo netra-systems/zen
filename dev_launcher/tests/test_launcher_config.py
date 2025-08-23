@@ -73,7 +73,8 @@ class TestLauncherConfig(unittest.TestCase):
             static=False, verbose=True,
             backend_reload=False, no_reload=False,
             no_secrets=False, project_id="test-project",
-            no_browser=True, no_turbopack=False, dev=False
+            no_browser=True, no_turbopack=False, dev=False,
+            no_parallel=False  # Add missing attribute for parallel startup
         )
     
     def _assert_config_from_args(self, config):

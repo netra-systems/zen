@@ -15,7 +15,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.schemas.agent_state import (

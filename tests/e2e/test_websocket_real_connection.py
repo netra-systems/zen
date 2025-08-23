@@ -38,7 +38,7 @@ from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class WebSocketRealConnectionTester:

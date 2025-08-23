@@ -312,18 +312,17 @@ class OptimizedStartupChecker:
     async def _quick_postgres_check(self, app, check_name: str) -> StartupCheckResult:
         """Quick PostgreSQL connectivity check."""
         try:
-            # Use fast startup connection manager if available
-            from netra_backend.app.db.fast_startup_connection_manager import (
-                connection_registry,
-            )
-            manager = connection_registry.get_manager("postgres")
+            # Use unified DatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager
+            database_manager = DatabaseManager()
             
-            if manager and manager.is_available():
-                async with manager.get_connection() as conn:
-                    await conn.execute("SELECT 1")
+            engine = database_manager.create_application_engine()
+            connection_successful = await database_manager.test_connection_with_retry(engine)
+            
+            if connection_successful:
                 return StartupCheckResult(
                     name=check_name, success=True, critical=True,
-                    message="PostgreSQL fast connection successful"
+                    message="PostgreSQL unified connection successful"
                 )
             else:
                 # Fallback to regular connection test

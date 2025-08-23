@@ -17,7 +17,7 @@ import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.websocket_service import WebSocketService
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as IWebSocketService
 
 class TestWebSocketConnectionLifecycleL3:
     """Test WebSocket connection lifecycle scenarios"""

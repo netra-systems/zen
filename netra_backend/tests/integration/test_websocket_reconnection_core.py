@@ -32,7 +32,7 @@ try:
         ReconnectionManager,
 
     )
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 except ImportError:
     # Provide fallback implementations if modules don't exist

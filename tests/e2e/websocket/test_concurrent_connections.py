@@ -38,8 +38,8 @@ import httpx
 import pytest
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig, ConnectionState
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 class ConcurrentConnectionManager:
     """Manages multiple concurrent WebSocket connections for testing."""

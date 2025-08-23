@@ -38,10 +38,16 @@ from typing import Any, Dict, Optional
 
 import httpx
 import pytest
+try:
+    import websockets
+except ImportError:
+    websockets = None
 
 # Set test environment
 os.environ["TESTING"] = "1" 
 os.environ["USE_REAL_SERVICES"] = "true"
+os.environ["AUTH_SERVICE_URL"] = "http://localhost:8001"
+os.environ["BACKEND_SERVICE_URL"] = "http://localhost:8000"
 
 # Add parent directories to sys.path for imports
 
@@ -67,9 +73,38 @@ from tests.e2e.helpers.auth.oauth_journey_helpers import (
 )
 
 from netra_backend.app.logging_config import central_logger
-from tests.e2e.service_manager import (
-    RealServicesManager as create_real_services_manager,
-)
+try:
+    from tests.e2e.service_manager import RealServicesManager
+    
+    def create_real_services_manager():
+        import os
+        from pathlib import Path
+        project_root = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        return RealServicesManager(project_root)
+except ImportError:
+    # Fallback service manager
+    class RealServicesManagerFallback:
+        def __init__(self, project_root=None):
+            self.services = {}
+        
+        async def start_all_services(self, **kwargs):
+            pass
+        
+        async def stop_all_services(self):
+            pass
+        
+        def get_service_urls(self):
+            return {
+                "auth": "http://localhost:8001",
+                "backend": "http://localhost:8000"
+            }
+        
+        def get_service_info(self, service_name):
+            ports = {"auth": 8001, "backend": 8000}
+            return type('ServiceInfo', (), {'port': ports.get(service_name, 8000)})()
+    
+    def create_real_services_manager():
+        return RealServicesManagerFallback()
 
 logger = central_logger.get_logger(__name__)
 
@@ -80,7 +115,7 @@ class CompleteOAuthChatJourneyTester:
     def __init__(self):
         self.services_manager = create_real_services_manager()
         self.http_client: Optional[httpx.AsyncClient] = None
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[Any] = None  # WebSocket connection
         self.journey_results: Dict[str, Any] = {}
         self.oauth_user_data: Dict[str, Any] = {}
         self.tokens: Dict[str, str] = {}
@@ -89,8 +124,8 @@ class CompleteOAuthChatJourneyTester:
     async def setup_real_services(self):
         """Setup real service connections for OAuth journey."""
         try:
-            await self.services_manager.start_all_services(skip_frontend=True)
-            self.http_client = httpx.AsyncClient(timeout=15.0)
+            await self.services_manager.start_all_services()
+            self.http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
             yield self
         finally:
             await self._cleanup_journey_resources()

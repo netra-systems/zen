@@ -32,7 +32,7 @@ from websockets.exceptions import ConnectionClosedError
 
 from netra_backend.app.auth_integration.auth import get_current_user
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path for tests
@@ -45,7 +45,7 @@ from netra_backend.app.schemas.registry import ServerMessage as WSResponse
 from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.tests.e2e.real_client_types import (
 
     ClientConfig,

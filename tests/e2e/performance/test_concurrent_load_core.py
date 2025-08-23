@@ -18,7 +18,7 @@ import asyncio
 import pytest
 
 # Add project root to path
-from tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
+from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
 
 
 # Add project root to path

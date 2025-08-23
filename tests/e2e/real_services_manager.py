@@ -29,6 +29,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
+from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient, BackendHTTPClient
+
 # Import test environment config for environment-aware configuration
 try:
     from tests.e2e.test_environment_config import TestEnvironmentConfig
@@ -121,7 +123,7 @@ class RealServicesManager:
     
     async def start_all_services(self, skip_frontend: bool = False) -> None:
         """Start all services and wait for health checks."""
-        self.http_client = httpx.AsyncClient(timeout=10.0)
+        self.http_client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
         
         await self._start_auth_service()
         await self._start_backend_service()
@@ -366,7 +368,7 @@ def create_real_services_manager(project_root: Optional[Path] = None) -> RealSer
     """
     # Try to use the new dev_launcher integration if available
     try:
-        from tests.dev_launcher_real_system import create_dev_launcher_system
+        from tests.e2e.dev_launcher_real_system import create_dev_launcher_system
         logger.info("Using dev_launcher_real_system for service management")
         return create_dev_launcher_system(skip_frontend=True)
     except ImportError:

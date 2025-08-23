@@ -22,8 +22,8 @@ import websockets
 
 WebSocketService = AsyncMock
 from netra_backend.app.config import get_config
-from netra_backend.app.models.websocket_message import WebSocketMessage
-from netra_backend.app.services.message_queue_service import MessageQueueService
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.services.message_queue import MessageQueueService
 from netra_backend.app.services.redis_service import RedisService
 
 class TestWebSocketMessageDeliveryGuaranteesL4:

@@ -116,7 +116,7 @@ class TestWebSocketRecovery:
     async def test_state_preservation_on_disconnect(self):
 
         """Test state is preserved when WebSocket disconnects."""
-        from netra_backend.app.services.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         
