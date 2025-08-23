@@ -19,7 +19,7 @@ Architecture:
 
 from typing import Any, Dict, Optional
 
-from tests.e2e.real_client_types import (
+from test_framework.http_client import (
     ClientConfig,
     create_auth_config,
     create_backend_config,

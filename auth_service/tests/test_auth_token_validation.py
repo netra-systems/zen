@@ -94,7 +94,7 @@ class TestJWTTokenValidation(unittest.TestCase):
             "iss": "netra-auth-service",
             "aud": "netra-platform",  # Required audience claim
             "jti": f"access_{int(time.time())}_expired",  # JWT ID for replay protection
-            "env": "development",  # Required environment claim
+            "env": "test",  # Test environment claim
             "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
@@ -168,7 +168,7 @@ class TestJWTTokenValidation(unittest.TestCase):
             "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
             "aud": "netra-platform",  # Required audience claim
             "jti": f"access_{int(time.time())}_wrong_issuer",  # JWT ID for replay protection
-            "env": "development",  # Required environment claim
+            "env": "test",  # Test environment claim
             "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
@@ -245,7 +245,7 @@ class TestJWTTokenValidation(unittest.TestCase):
             "exp": int((future_time + timedelta(minutes=15)).timestamp()),
             "aud": "netra-platform",  # Required audience claim
             "jti": f"access_{int(time.time())}_future",  # JWT ID for replay protection
-            "env": "development",  # Required environment claim
+            "env": "test",  # Test environment claim
             "svc_id": "netra-auth-dev-instance"  # Required service ID claim
         }
         
@@ -273,8 +273,8 @@ class TestJWTTokenValidation(unittest.TestCase):
             "jti": f"access_{int(time.time())}",
             "iss": "netra-auth-service",
             "aud": "netra-platform",        # Required audience claim for access tokens
-            "env": "development",         # Required environment claim (matches AuthConfig default)
-            "svc_id": "netra-auth-dev-instance"  # Required service ID claim (matches AuthConfig default)
+            "env": "test",  # Test environment
+            "svc_id": self.jwt_handler.service_id or "netra-auth-test-instance"  # Use handler's service ID
         }
         
         # Encode token with short expiry

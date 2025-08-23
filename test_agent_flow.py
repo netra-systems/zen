@@ -45,7 +45,8 @@ async def test_supervisor_agent_creation():
         # Import required components
         from netra_backend.app.config import get_config
         from netra_backend.app.llm.llm_manager import LLMManager
-        from netra_backend.app.ws_manager import manager as websocket_manager
+        from netra_backend.app.websocket.unified import get_unified_manager
+        websocket_manager = get_unified_manager()
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         

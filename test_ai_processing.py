@@ -69,7 +69,8 @@ async def test_ai_processing():
             from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
             from netra_backend.app.db.postgres import get_postgres_db
             from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-            from netra_backend.app.ws_manager import manager as ws_manager
+            from netra_backend.app.websocket.unified import get_unified_manager
+            ws_manager = get_unified_manager()
             
             # Create basic supervisor (simplified for testing)
             db_session = await anext(get_postgres_db())

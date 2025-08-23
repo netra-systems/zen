@@ -90,6 +90,10 @@ class RedisManager:
         logger.warning(f"Redis connection failed: {error}. Service will operate without Redis.")
         self.redis_client = None
 
+    async def initialize(self):
+        """Initialize Redis connection. Standard async initialization interface."""
+        return await self.connect()
+
     async def connect(self):
         """Connect to Redis if enabled with local fallback."""
         if not self.enabled:

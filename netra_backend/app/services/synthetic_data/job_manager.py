@@ -68,7 +68,7 @@ class JobManager:
         """Send job started notification"""
         # Lazy import to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         payload = self._build_started_payload(job_id, job_data)
         await manager.broadcasting.broadcast_to_all({
@@ -120,7 +120,7 @@ manager = get_unified_manager()
         """Send progress message via broadcasting"""
         # Lazy import to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_progress",
@@ -218,7 +218,7 @@ manager = get_unified_manager()
         """Send job completion notification"""
         # Lazy import to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         payload = self._build_completion_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
@@ -322,7 +322,7 @@ manager = get_unified_manager()
         """Send job cancellation notification"""
         # Lazy import to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         payload = self._build_cancellation_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
@@ -367,7 +367,7 @@ manager = get_unified_manager()
         """Send error notification via WebSocket"""
         # Lazy import to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         payload = self._build_error_payload(job_id, error)
         await manager.broadcasting.broadcast_to_all({

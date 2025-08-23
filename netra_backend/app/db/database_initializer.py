@@ -491,6 +491,56 @@ class DatabaseInitializer:
         self._trip_circuit_breaker(db_type)
         return False
     
+    async def initialize_postgresql(self) -> bool:
+        """Initialize PostgreSQL database with auto-configuration from environment
+        
+        Convenience method that configures PostgreSQL from environment variables
+        and initializes it. Used by startup manager for backwards compatibility.
+        """
+        try:
+            # Auto-configure PostgreSQL from environment if not already configured
+            if DatabaseType.POSTGRESQL not in self.configs:
+                await self._configure_postgresql_from_environment()
+            
+            # Initialize PostgreSQL database
+            return await self.initialize_database(DatabaseType.POSTGRESQL)
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize PostgreSQL: {e}")
+            return False
+    
+    async def _configure_postgresql_from_environment(self) -> None:
+        """Configure PostgreSQL from environment variables"""
+        import os
+        from urllib.parse import urlparse
+        
+        # Get database URL from environment
+        database_url = os.environ.get("DATABASE_URL")
+        if not database_url:
+            # Use default development settings
+            config = DatabaseConfig(
+                type=DatabaseType.POSTGRESQL,
+                host="localhost",
+                port=5432,
+                database="netra",
+                user="postgres",
+                password="postgres"
+            )
+        else:
+            # Parse the DATABASE_URL
+            parsed = urlparse(database_url)
+            config = DatabaseConfig(
+                type=DatabaseType.POSTGRESQL,
+                host=parsed.hostname or "localhost",
+                port=parsed.port or 5432,
+                database=parsed.path.lstrip("/") if parsed.path else "netra",
+                user=parsed.username or "postgres",
+                password=parsed.password or "postgres"
+            )
+        
+        self.add_database(config)
+        logger.info(f"Auto-configured PostgreSQL: {config.host}:{config.port}/{config.database}")
+
     async def initialize_all(self) -> Dict[DatabaseType, bool]:
         """Initialize all registered databases"""
         results = {}

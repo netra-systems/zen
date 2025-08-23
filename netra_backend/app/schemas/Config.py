@@ -61,6 +61,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
+    SecretReference(name="service-secret", target_field="service_secret"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
     SecretReference(name="github-token", target_field="github_token"),
@@ -200,22 +201,22 @@ class AppConfig(BaseModel):
     # SubAgent Communication Logging Settings (INFO level)
     subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
     
-    # Service modes configuration (local/shared/mock/disabled)
+    # Service modes configuration (local/shared/disabled)
     redis_mode: str = Field(
         default="shared",
-        description="Redis service mode: local, shared, mock, or disabled"
+        description="Redis service mode: local, shared, or disabled"
     )
     clickhouse_mode: str = Field(
         default="shared", 
-        description="ClickHouse service mode: local, shared, mock, or disabled"
+        description="ClickHouse service mode: local, shared, or disabled"
     )
     llm_mode: str = Field(
         default="shared",
-        description="LLM service mode: local, shared, mock, or disabled"
+        description="LLM service mode: local, shared, or disabled"
     )
     
     # Service configuration is now managed through dev_launcher service config
-    # Services use the mode specified in the launcher (local/shared/mock)
+    # Services use the mode specified in the launcher (local/shared)
     dev_mode_redis_enabled: bool = Field(
         default=True, 
         description="Redis service status (managed by dev launcher)"
@@ -468,23 +469,9 @@ class DevelopmentConfig(AppConfig):
         self._log_mock_services(logger, service_modes)
     
     def _log_mock_services(self, logger, service_modes: dict) -> None:
-        """Log which services are running in mock mode."""
-        mock_messages = self._get_mock_messages()
-        self._log_services_in_mock_mode(logger, service_modes, mock_messages)
-    
-    def _get_mock_messages(self) -> dict:
-        """Get dictionary of mock service messages."""
-        return {
-            'redis': "Redis running in MOCK mode",
-            'clickhouse': "ClickHouse running in MOCK mode",
-            'llm': "LLM running in MOCK mode"
-        }
-    
-    def _log_services_in_mock_mode(self, logger, service_modes: dict, mock_messages: dict) -> None:
-        """Log each service that is in mock mode."""
-        for service, mode in service_modes.items():
-            if mode == "mock":
-                logger.info(mock_messages[service])
+        """Deprecated: Mock mode is not supported in development."""
+        # Mock mode is only for specific testing cases, not for development
+        pass
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
@@ -532,6 +519,8 @@ class NetraTestingConfig(AppConfig):
     auth_service_url: str = "http://localhost:8001"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
     service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
+    jwt_secret_key: str = "test_jwt_secret_key_for_testing_32_chars_minimum_required_length"  # Test-safe JWT secret
+    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
 
 class LLMProvider(str, Enum):
     """LLM provider enum for configuration schemas (local to avoid circular imports)."""

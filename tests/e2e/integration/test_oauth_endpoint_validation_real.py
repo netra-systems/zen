@@ -44,7 +44,7 @@ from tests.e2e.oauth_test_providers import (
     OAuthUserFactory,
     get_enterprise_config,
 )
-from tests.e2e.real_client_types import (
+from test_framework.http_client import (
     create_auth_config,
     create_backend_config,
 )

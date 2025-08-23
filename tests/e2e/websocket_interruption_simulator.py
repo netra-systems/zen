@@ -20,7 +20,7 @@ import time
 from typing import Any, Dict, List
 
 from tests.e2e.config import TestDataFactory
-from tests.e2e.real_client_types import ConnectionState
+from test_framework.http_client import ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 

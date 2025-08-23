@@ -288,7 +288,7 @@ class ErrorHandler:
         """Broadcast validation error via WebSocket"""
         # Import locally to avoid circular dependency
         from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         await manager.broadcasting.broadcast_to_all({
             "type": "generation:validation_error",

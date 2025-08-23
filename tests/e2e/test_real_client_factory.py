@@ -19,7 +19,7 @@ from tests.e2e.real_client_factory import (
     RealClientFactory,
     create_real_client_factory,
 )
-from tests.e2e.real_client_types import (
+from test_framework.http_client import (
     ClientConfig,
     create_test_config,
 )

@@ -76,6 +76,7 @@ class UnifiedSecretManager:
         """
         secret_keys = [
             "JWT_SECRET_KEY",
+            "SERVICE_SECRET",
             "DATABASE_PASSWORD",
             "REDIS_PASSWORD",
             "LLM_API_KEY",
@@ -301,6 +302,9 @@ class UnifiedSecretManager:
         if hasattr(config, 'jwt_secret_key'):
             config.jwt_secret_key = self.get_jwt_secret()
         
+        if hasattr(config, 'service_secret'):
+            config.service_secret = self.get_secret("SERVICE_SECRET", config.service_secret)
+        
         if hasattr(config, 'database_password'):
             config.database_password = self.get_secret("DATABASE_PASSWORD", "")
             
@@ -355,6 +359,7 @@ class UnifiedSecretManager:
         """
         return {
             "JWT_SECRET_KEY": "JWT_SECRET_KEY",
+            "SERVICE_SECRET": "SERVICE_SECRET",
             "DATABASE_PASSWORD": "DATABASE_PASSWORD",
             "REDIS_PASSWORD": "REDIS_PASSWORD",
             "LLM_API_KEY": "LLM_API_KEY",

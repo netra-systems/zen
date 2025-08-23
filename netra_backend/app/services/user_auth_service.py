@@ -38,10 +38,24 @@ class UserAuthService:
         service_secret = config.service_secret
         jwt_secret = config.jwt_secret_key
         
-        # CRITICAL: Enforce strict security requirements
+        # CRITICAL: Handle missing service_secret based on environment
         if not service_secret:
-            logger.critical("SECURITY VIOLATION: service_secret not configured - authentication disabled")
-            raise ValueError("service_secret is required for secure authentication")
+            environment = getattr(config, 'environment', 'development').lower()
+            
+            # For testing environments, use the test default from NetraTestingConfig
+            if environment == 'testing' or hasattr(config, 'testing') and config.testing:
+                service_secret = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
+                logger.info("Using test service secret for testing environment")
+            
+            # For development environments, provide a development default but warn
+            elif environment == 'development':
+                service_secret = "dev-service-secret-DO-NOT-USE-IN-PRODUCTION-32-chars-minimum"
+                logger.warning("Using development default service secret - configure SERVICE_SECRET environment variable for security")
+            
+            # For production/staging, this is a critical security violation
+            else:
+                logger.critical("SECURITY VIOLATION: service_secret not configured - authentication disabled")
+                raise ValueError("service_secret is required for secure authentication")
         
         # Validate secret strength
         if len(service_secret) < 32:

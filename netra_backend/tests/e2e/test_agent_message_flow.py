@@ -169,7 +169,7 @@ def websocket_capture():
 def real_websocket_manager():
     """Fixture providing real WebSocket manager."""
     from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager()
+    manager = get_unified_manager()
     from unittest.mock import MagicMock, AsyncMock
     
     # Add broadcasting attribute if it doesn't exist

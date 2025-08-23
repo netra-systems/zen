@@ -1,0 +1,129 @@
+categories:
+  smoke:
+    description: Quick validation tests for pre-commit checks
+    priority: CRITICAL
+    category_type: quality
+    timeout_seconds: 60
+    estimated_duration_minutes: 1.0
+    max_parallel_instances: 4
+    tags:
+    - pre-commit
+    - quick
+    - validation
+  unit:
+    description: Unit tests for individual components
+    priority: HIGH
+    category_type: functional
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    parallel_safe: true
+    max_parallel_instances: 8
+    tags:
+    - unit
+    - components
+    - isolated
+  integration:
+    description: Integration tests for feature validation
+    priority: MEDIUM
+    category_type: integration
+    timeout_seconds: 600
+    estimated_duration_minutes: 10.0
+    dependencies:
+    - unit
+    - database
+    network_intensive: true
+    tags:
+    - integration
+    - features
+    - services
+  database:
+    description: Database and data persistence tests
+    priority: HIGH
+    category_type: technical
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    database_dependent: true
+    memory_intensive: true
+    conflicts:
+    - performance
+    tags:
+    - database
+    - persistence
+    - data
+  api:
+    description: API endpoint and route tests
+    priority: MEDIUM
+    category_type: functional
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    dependencies:
+    - database
+    network_intensive: true
+    tags:
+    - api
+    - endpoints
+    - routes
+  websocket:
+    description: WebSocket communication tests
+    priority: MEDIUM
+    category_type: technical
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    dependencies:
+    - unit
+    network_intensive: true
+    max_parallel_instances: 4
+    tags:
+    - websocket
+    - realtime
+    - communication
+  frontend:
+    description: React component and UI tests
+    priority: LOW
+    category_type: functional
+    timeout_seconds: 300
+    estimated_duration_minutes: 5.0
+    parallel_safe: true
+    max_parallel_instances: 6
+    tags:
+    - frontend
+    - ui
+    - react
+  e2e:
+    description: End-to-end user journey tests
+    priority: LOW
+    category_type: e2e
+    timeout_seconds: 1800
+    estimated_duration_minutes: 30.0
+    dependencies:
+    - integration
+    - api
+    - frontend
+    requires_real_services: true
+    parallel_safe: false
+    max_parallel_instances: 2
+    conflicts:
+    - performance
+    tags:
+    - e2e
+    - user-journeys
+    - end-to-end
+  performance:
+    description: Performance and load tests
+    priority: LOW
+    category_type: performance
+    timeout_seconds: 1800
+    estimated_duration_minutes: 30.0
+    dependencies:
+    - integration
+    parallel_safe: false
+    cpu_intensive: true
+    memory_intensive: true
+    network_intensive: true
+    conflicts:
+    - database
+    - e2e
+    tags:
+    - performance
+    - load
+    - stress

@@ -33,9 +33,9 @@ class ResourceMode(Enum):
     """Resource mode for services."""
     LOCAL = "local"          # Run service locally (requires installation)
     SHARED = "shared"        # Use shared cloud resource
-    MOCK = "mock"           # Use mock/stub implementation
     DOCKER = "docker"       # Use Docker containers for local services
     DISABLED = "disabled"   # Service is disabled (NOT RECOMMENDED)
+    # NOTE: MOCK mode removed - mock services are ONLY for specific test cases, not development
 
 
 @dataclass
@@ -45,7 +45,7 @@ class ServiceResource:
     mode: ResourceMode = ResourceMode.SHARED
     local_config: Dict[str, Any] = field(default_factory=dict)
     shared_config: Dict[str, Any] = field(default_factory=dict)
-    mock_config: Dict[str, Any] = field(default_factory=dict)
+    # mock_config removed - mock services are only for testing, not development
     docker_config: Dict[str, Any] = field(default_factory=dict)
     
     def get_config(self) -> Dict[str, Any]:
@@ -59,8 +59,6 @@ class ServiceResource:
             return config
         elif self.mode == ResourceMode.SHARED:
             return self.shared_config
-        elif self.mode == ResourceMode.MOCK:
-            return self.mock_config
         elif self.mode == ResourceMode.DOCKER:
             return self.docker_config
         else:
@@ -108,8 +106,8 @@ class ServicesConfiguration:
             "db": 0,
             "docker": True,
             "container_name": "netra-dev-redis"
-        },
-        mock_config={"mock": True}
+        }
+        # Mock mode not supported in development
     ))
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -142,8 +140,8 @@ class ServicesConfiguration:
             "secure": False,
             "docker": True,
             "container_name": "netra-dev-clickhouse"
-        },
-        mock_config={"mock": True}
+        }
+        # Mock mode not supported in development
     ))
     
     postgres: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -172,8 +170,8 @@ class ServicesConfiguration:
             "database": "netra_dev",
             "docker": True,
             "container_name": "netra-dev-postgres"
-        },
-        mock_config={"mock": True}
+        }
+        # Mock mode not supported in development
     ))
     
     llm: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -189,7 +187,7 @@ class ServicesConfiguration:
             "providers": ["anthropic", "openai", "gemini"],
             "default_provider": "gemini"
         },
-        mock_config={"mock": True, "response": "Mock LLM response"}
+        # Mock mode not supported in development
     ))
     
     auth_service: ServiceResource = field(default_factory=lambda: ServiceResource(
@@ -208,7 +206,7 @@ class ServicesConfiguration:
             "health_endpoint": "/health",
             "enabled": True
         },
-        mock_config={"mock": True, "enabled": False}
+        # Mock mode not supported in development
     ))
     
     def get_all_env_vars(self) -> Dict[str, str]:
@@ -260,8 +258,7 @@ class ServicesConfiguration:
         existing_db_url = os.environ.get("DATABASE_URL")
         if existing_db_url:
             env_vars["DATABASE_URL"] = existing_db_url
-        elif self.postgres.mode == ResourceMode.MOCK:
-            env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
+        # Mock mode not supported in development - removed mock database URL
         elif self.postgres.mode == ResourceMode.LOCAL:
             self._add_local_postgres_url(env_vars)
         elif self.postgres.mode == ResourceMode.SHARED:
@@ -426,8 +423,7 @@ class ServicesConfiguration:
                     service.local_config.update(service_config.get("config", {}))
                 elif service.mode == ResourceMode.SHARED:
                     service.shared_config.update(service_config.get("config", {}))
-                elif service.mode == ResourceMode.MOCK:
-                    service.mock_config.update(service_config.get("config", {}))
+                # Mock mode removed - only for testing
         
         logger.info(f"Configuration loaded from {path}")
         return config
@@ -449,7 +445,7 @@ class ServiceConfigWizard:
         print("You can choose between:")
         print("  • SHARED: Use cloud-hosted development resources (recommended)")
         print("  • LOCAL:  Use locally installed services")
-        print("  • MOCK:   Use mock implementations (limited functionality)")
+        # Mock mode not shown - only for testing, not development
         print()
         
         # Quick setup option
@@ -530,11 +526,10 @@ class ServiceConfigWizard:
         print("   Options:")
         print("     1. SHARED - Use cloud-hosted service")
         print("     2. LOCAL  - Use locally installed service")
-        print("     3. MOCK   - Use mock implementation")
-        print("     4. SKIP   - Disable this service (not recommended)")
+        print("     3. SKIP   - Disable this service (not recommended)")
         
         try:
-            choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+            choice = input("   Choice [1-3, default=1]: ").strip() or "1"
         except EOFError:
             logger.info("Non-interactive mode: using default choice=1")
             choice = "1"
@@ -542,8 +537,8 @@ class ServiceConfigWizard:
         mode_map = {
             "1": ResourceMode.SHARED,
             "2": ResourceMode.LOCAL,
-            "3": ResourceMode.MOCK,
-            "4": ResourceMode.DISABLED
+            "3": ResourceMode.DISABLED
+            # Mock mode removed - only for testing
         }
         
         service.mode = mode_map.get(choice, ResourceMode.SHARED)
@@ -607,7 +602,7 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
     - Redis: LOCAL (if available) → SHARED (if not)
     - ClickHouse: LOCAL (if available) → SHARED (if not)  
     - PostgreSQL: LOCAL (if available) → SHARED (if not)
-    - LLM: SHARED (if API keys valid) → MOCK (if not)
+    - LLM: SHARED (API providers - requires valid API keys)
     - Auth Service: LOCAL
     
     To override defaults:

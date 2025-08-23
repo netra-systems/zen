@@ -18,11 +18,7 @@ from typing import Any, Dict, Optional, Union
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-try:
-    from tests.e2e.integration.real_client_types import ClientConfig, ConnectionState as IntegrationConnectionState
-except ImportError:
-    from test_framework.http_client import ClientConfig
-    IntegrationConnectionState = None
+from test_framework.http_client import ClientConfig, ConnectionState as IntegrationConnectionState
     
 try:
     from tests.e2e.websocket_dev_utilities import ConnectionMetrics, ConnectionState

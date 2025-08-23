@@ -38,7 +38,7 @@ import pytest
 try:
     # Try relative imports first (for pytest execution)
     from tests.e2e.jwt_token_helpers import JWTTestHelper
-    from tests.e2e.real_client_types import (
+    from test_framework.http_client import (
         ClientConfig,
         ConnectionState,
     )

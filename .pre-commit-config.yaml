@@ -80,6 +80,16 @@ repos:
         pass_filenames: false
         always_run: true
         description: 'Tracks quality improvements without blocking commits'
+        
+      # CLAUDE COMMIT HELPER: Intelligent commit message generation
+      - id: claude-commit-helper
+        name: Claude Commit Message Assistant
+        entry: python scripts/permissive_hooks/claude_commit_hook.py
+        language: system
+        stages: [commit]
+        pass_filenames: false
+        always_run: false  # Only runs when appropriate
+        description: 'Optionally generates intelligent commit messages using Claude Code'
 
 # Configuration for different severity levels
 # These can be toggled based on development phase

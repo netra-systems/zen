@@ -277,6 +277,36 @@ def create_unified_client(base_url: str = "http://localhost:8000",
     return UnifiedHTTPClient(base_url, config)
 
 
+def create_auth_config() -> ClientConfig:
+    """Create default ClientConfig for auth service."""
+    return ClientConfig(
+        base_url="http://localhost:8001",
+        auth_url="http://localhost:8001",
+        timeout=30.0,
+        max_retries=3
+    )
+
+
+def create_backend_config() -> ClientConfig:
+    """Create default ClientConfig for backend service."""
+    return ClientConfig(
+        base_url="http://localhost:8000",
+        timeout=30.0,
+        max_retries=3
+    )
+
+
+def create_test_config(**kwargs) -> ClientConfig:
+    """Create test ClientConfig with optional overrides."""
+    defaults = {
+        "base_url": "http://localhost:8000",
+        "timeout": 30.0,
+        "max_retries": 3
+    }
+    defaults.update(kwargs)
+    return ClientConfig(**defaults)
+
+
 # Legacy compatibility - maintains backward compatibility with existing tests
 class TestClient(UnifiedHTTPClient):
     """Legacy TestClient - forwards to UnifiedHTTPClient for backward compatibility."""
