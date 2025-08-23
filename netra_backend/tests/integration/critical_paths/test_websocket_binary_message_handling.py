@@ -30,7 +30,7 @@ import os
 import tempfile
 
 import redis.asyncio as redis
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified

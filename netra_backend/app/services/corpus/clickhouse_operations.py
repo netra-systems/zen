@@ -32,7 +32,8 @@ from netra_backend.app.services.corpus.clickhouse_helpers import (
     process_table_exists_result,
     process_table_size_result,
 )
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 
 class CorpusClickHouseOperations:

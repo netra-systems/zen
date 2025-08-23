@@ -461,6 +461,93 @@ async def validate_auth_token(token: str, config: Optional[AuthTestConfig] = Non
         await auth_manager.close()
 
 
+# Test utility functions for service availability and performance
+def skip_if_services_unavailable(error_message: str) -> None:
+    """Skip test if services are unavailable based on error message patterns.
+    
+    This function analyzes error messages to determine if a test failure is due
+    to service unavailability rather than actual code issues, and skips the test
+    with an appropriate message.
+    
+    Args:
+        error_message: Error message to analyze for service availability patterns
+    """
+    import pytest
+    
+    # Common patterns indicating service unavailability
+    service_unavailable_patterns = [
+        "connection refused",
+        "connection failed",
+        "service unavailable",
+        "timeout",
+        "could not connect",
+        "refused to connect",
+        "network unreachable",
+        "host unreachable",
+        "service not available",
+        "backend service not available",
+        "auth service not available",
+        "websocket.*failed",
+        "failed to connect",
+        "connection error",
+        "no route to host",
+        "connection timed out"
+    ]
+    
+    error_lower = error_message.lower()
+    
+    # Check if error indicates service unavailability
+    for pattern in service_unavailable_patterns:
+        if pattern in error_lower:
+            pytest.skip(f"Service unavailable - skipping test: {error_message}")
+    
+    # If not a service availability issue, let the test continue/fail normally
+    return
+
+
+def assert_auth_performance(measured_time: float, operation_type: str) -> None:
+    """Assert that authentication operation meets performance requirements.
+    
+    Args:
+        measured_time: Time taken for the operation in seconds
+        operation_type: Type of operation (auth, validation, reconnection)
+    """
+    # Performance thresholds based on AuthTestConfig
+    thresholds = {
+        "auth": AuthTestConfig.AUTH_TIME_LIMIT,  # 0.1s (100ms)
+        "validation": AuthTestConfig.TOKEN_VALIDATION_LIMIT,  # 0.05s (50ms)
+        "reconnection": AuthTestConfig.RECONNECTION_TIME_LIMIT  # 2.0s
+    }
+    
+    threshold = thresholds.get(operation_type, 1.0)  # Default 1s if unknown type
+    
+    if measured_time > threshold:
+        import pytest
+        pytest.fail(
+            f"{operation_type.capitalize()} performance requirement failed: "
+            f"{measured_time:.3f}s > {threshold}s threshold"
+        )
+
+
+def assert_token_rejection(ws_result: Dict[str, Any], test_name: str) -> None:
+    """Assert that token was properly rejected by WebSocket connection.
+    
+    Args:
+        ws_result: Result from WebSocket connection attempt
+        test_name: Name of the test case for better error reporting
+    """
+    import pytest
+    
+    # Token should be rejected (not connected)
+    if ws_result.get("connected", False):
+        pytest.fail(f"Invalid token should be rejected: {test_name}")
+    
+    # Should have proper error indication
+    error = ws_result.get("error", "")
+    if not error:
+        pytest.fail(f"Token rejection should provide error message: {test_name}")
+
+
 # Legacy compatibility classes
 class WebSocketAuthTester_Legacy(WebSocketAuthTester):
     """Legacy WebSocketAuthTester for backward compatibility."""

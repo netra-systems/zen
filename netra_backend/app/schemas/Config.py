@@ -531,6 +531,7 @@ class NetraTestingConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
     auth_service_url: str = "http://localhost:8001"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
+    service_secret: str = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"  # Test-safe default
 
 class LLMProvider(str, Enum):
     """LLM provider enum for configuration schemas (local to avoid circular imports)."""

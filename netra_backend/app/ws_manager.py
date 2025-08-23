@@ -117,6 +117,21 @@ class WebSocketManager:
         return self._connection_manager
     
     @property
+    def broadcasting(self):
+        """CONSOLIDATED: Access to unified broadcasting manager."""
+        return self._unified_manager.broadcasting
+    
+    @property
+    def messaging(self):
+        """CONSOLIDATED: Access to unified messaging manager."""
+        return self._unified_manager.messaging
+    
+    @property
+    def state(self):
+        """CONSOLIDATED: Access to unified state manager."""
+        return self._unified_manager.state
+    
+    @property
     def active_connections(self):
         """CONSOLIDATED: Access to active connections via unified system."""
         return self._connection_manager.active_connections

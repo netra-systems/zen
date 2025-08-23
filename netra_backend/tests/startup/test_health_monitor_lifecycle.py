@@ -13,7 +13,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# from scripts.dev_launcher_staged_health_monitor import  # Should be mocked in tests ServiceConfig, StagedHealthMonitor
+from netra_backend.tests.startup.mock_health_monitor import (
+    ServiceConfig,
+    StagedHealthMonitor,
+)
 
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:

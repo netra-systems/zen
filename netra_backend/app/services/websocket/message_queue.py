@@ -370,7 +370,8 @@ class MessageQueue:
     
     async def _send_failure_message(self, message: QueuedMessage) -> None:
         """Send failure message to user."""
-        from netra_backend.app.ws_manager import manager
+        from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
         await manager.send_error(
             message.user_id,
             f"Message processing failed: {message.error}"

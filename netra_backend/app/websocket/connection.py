@@ -34,6 +34,12 @@ from netra_backend.app.websocket.connection_reliability import (
     ConnectionReliabilityManager,
 )
 
+# Import main connection manager
+from netra_backend.app.websocket.connection_manager import (
+    ConnectionManager,
+    get_connection_manager,
+)
+
 logger = central_logger.get_logger(__name__)
 
 # Connection manager will be initialized lazily when first accessed

@@ -6,7 +6,7 @@ Manages rooms/groups of WebSocket connections for targeted broadcasting.
 from typing import Any, Dict, Set
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection_manager import ConnectionManager
+from netra_backend.app.websocket.connection import ConnectionManager
 
 logger = central_logger.get_logger(__name__)
 

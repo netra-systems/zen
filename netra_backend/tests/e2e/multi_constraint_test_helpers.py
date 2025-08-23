@@ -22,7 +22,7 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 def create_test_llm_manager() -> LLMManager:
 

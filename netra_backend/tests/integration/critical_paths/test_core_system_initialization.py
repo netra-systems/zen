@@ -31,7 +31,7 @@ from netra_backend.app.core.database_connection_manager import DatabaseConnectio
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.websocket.unified import get_unified_manager as get_manager
 
 logger = central_logger.get_logger(__name__)
 

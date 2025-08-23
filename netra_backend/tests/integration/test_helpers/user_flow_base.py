@@ -21,7 +21,7 @@ from netra_backend.app.services.cost_calculator import (
 )
 from netra_backend.app.services.user_service import user_service as UsageService
 from netra_backend.app.services.user_service import user_service as UserService
-from netra_backend.app.ws_manager import WebSocketManager as IWebSocketService
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager as IWebSocketService
     WebSocketService as WebSocketManager,
 )
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager

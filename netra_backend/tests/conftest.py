@@ -41,6 +41,9 @@ if os.environ.get("TEST_ISOLATION") == "1":
     os.environ.setdefault("DEV_MODE_DISABLE_CLICKHOUSE", "true")
 
     os.environ.setdefault("CLICKHOUSE_ENABLED", "false")
+    
+    # Ensure SERVICE_SECRET is set for test isolation mode
+    os.environ.setdefault("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length")
 
 else:
     # Standard test environment setup
@@ -84,6 +87,8 @@ else:
     os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
 
     os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
+
+    os.environ["SERVICE_SECRET"] = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
 
     os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
 
@@ -358,7 +363,7 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
 
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
     manager = WebSocketManager()
 
@@ -516,7 +521,7 @@ def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 
     websocket_manager = WebSocketManager()
 
@@ -1120,7 +1125,7 @@ class MockWebSocket:
 def fresh_manager():
 
     """Create a fresh WebSocketManager instance for each test"""
-    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
     
     # Reset singleton
 

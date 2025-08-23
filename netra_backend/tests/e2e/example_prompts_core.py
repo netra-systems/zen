@@ -25,7 +25,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityLevel,
 
 )
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 # The 9 example prompts from EXAMPLE_PROMPTS list
 

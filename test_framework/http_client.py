@@ -15,9 +15,34 @@ This consolidates all HTTP client functionality from E2E tests into a single, we
 import asyncio
 import json
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Dict, Optional, Union
 import httpx
 from pathlib import Path
+
+
+class ConnectionState(Enum):
+    """WebSocket connection states for E2E testing.
+    
+    Consolidated enum covering all test scenarios across different test modules.
+    This provides a single source of truth for connection state management in tests.
+    """
+    # Core connection states
+    DISCONNECTED = "disconnected"
+    CONNECTING = "connecting" 
+    CONNECTED = "connected"
+    RECONNECTING = "reconnecting"
+    FAILED = "failed"
+    CLOSING = "closing"
+    CLOSED = "closed"
+    
+    # Advanced states for resilience testing
+    STREAMING = "streaming"
+    INTERRUPTED = "interrupted"
+    RECOVERING = "recovering"
+    
+    # Backend-specific states (mapped for compatibility)
+    ACTIVE = "active"
 
 
 @dataclass

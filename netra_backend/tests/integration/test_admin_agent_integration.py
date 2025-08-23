@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
 
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 class TestAdminAgentIntegration:
 

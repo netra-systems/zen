@@ -18,7 +18,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Agent import SubAgentLifecycle
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
-from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.websocket.unified import get_unified_manager as get_manager
 
 logger = central_logger.get_logger(__name__)
 

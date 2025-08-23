@@ -20,7 +20,8 @@ from netra_backend.app.schemas.agent_state import (
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 class ThreadTestDataFactory:
     """Factory for creating thread test data."""

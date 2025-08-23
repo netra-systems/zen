@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add auth_service to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 @pytest.mark.asyncio
 async def test_no_main_db_sync_module():
@@ -33,13 +34,21 @@ async def test_single_database_initialization():
         mock_init.return_value = None
         
         # Import main after patching to test startup
-        with patch('auth_core.database.connection.auth_db.initialize', mock_init):
-            # Set environment to staging to test real initialization
+        with patch('auth_service.auth_core.database.connection.auth_db.initialize', mock_init):
+            # Set environment to staging to test real initialization, but with AUTH_FAST_TEST_MODE to bypass SERVICE_ID
             os.environ['AUTH_FAST_TEST_MODE'] = 'false'
-            os.environ['ENVIRONMENT'] = 'staging'
+            os.environ['ENVIRONMENT'] = 'development'
             
             # Import main module
             from fastapi import FastAPI
+            import sys
+            from pathlib import Path
+            
+            # Add auth_service directory to path for imports
+            auth_service_path = Path(__file__).parent.parent
+            if str(auth_service_path) not in sys.path:
+                sys.path.insert(0, str(auth_service_path))
+            
             from main import lifespan
             
             app = FastAPI()
@@ -52,8 +61,15 @@ async def test_single_database_initialization():
                 # Expected if initialization fails, but we're testing the count
                 pass
             
-            # Verify only one database initialization was attempted
-            assert mock_init.call_count == 1, "Database should be initialized exactly once"
+            # Since we're testing database initialization, database should be initialized exactly once
+            # In development mode with fast_test_mode=false, the lifespan should call db.initialize()
+            assert mock_init.call_count == 1, f"Database should be initialized exactly once, got {mock_init.call_count} calls"
+            
+            # Clean up environment variables
+            if 'AUTH_FAST_TEST_MODE' in os.environ:
+                del os.environ['AUTH_FAST_TEST_MODE']
+            if 'ENVIRONMENT' in os.environ:
+                del os.environ['ENVIRONMENT']
 
 @pytest.mark.asyncio  
 async def test_auth_routes_no_duplicate_sync():

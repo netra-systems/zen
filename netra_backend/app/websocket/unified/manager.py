@@ -28,8 +28,7 @@ from netra_backend.app.schemas.websocket_models import (
     WebSocketStats,
     WebSocketValidationError,
 )
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import ConnectionManager
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.websocket.error_handler import WebSocketErrorHandler
 from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_integrator
 from netra_backend.app.websocket.rate_limiter import RateLimiter

@@ -45,7 +45,7 @@ from netra_backend.app.schemas.registry import ServerMessage as WSResponse
 from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.tests.e2e.real_client_types import (
 
     ClientConfig,

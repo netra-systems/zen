@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 import asyncio
 from datetime import datetime, timezone

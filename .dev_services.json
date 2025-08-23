@@ -15,8 +15,7 @@
       "http_port": 8123,
       "user": "default",
       "password": "netra_dev_password",
-      "database": "netra_dev",
-      "secure": false
+      "database": "netra_dev"
     }
   },
   "postgres": {

@@ -22,7 +22,8 @@ from netra_backend.app.services.corpus.base import (
     CorpusNotAvailableError,
 )
 from netra_backend.app.services.corpus.validation import ValidationManager
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 
 class DocumentManager:

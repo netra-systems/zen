@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# from scripts.dev_launcher_staged_health_monitor import  # Should be mocked in tests (
+from netra_backend.tests.startup.mock_health_monitor import (
     HealthCheckResult,
     HealthStage,
     ServiceConfig,

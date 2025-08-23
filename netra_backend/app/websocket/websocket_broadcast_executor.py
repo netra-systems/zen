@@ -131,7 +131,7 @@ class WebSocketBroadcastExecutor(BaseExecutionInterface):
     
     async def _execute_user_broadcast(self, broadcast_ctx: BroadcastContext) -> Dict[str, Any]:
         """Execute broadcast to user connections."""
-        connections = self.connection_manager.get_user_connections(broadcast_ctx.user_id)
+        connections = await self.connection_manager.get_user_connections(broadcast_ctx.user_id)
         if not utils.validate_user_connections(broadcast_ctx.user_id, connections):
             return {"successful_sends": 0, "is_user_broadcast": True}
         

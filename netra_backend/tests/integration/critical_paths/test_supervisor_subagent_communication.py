@@ -39,7 +39,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

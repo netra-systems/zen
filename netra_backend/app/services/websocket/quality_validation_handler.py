@@ -12,7 +12,8 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
 )
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 logger = central_logger.get_logger(__name__)
 

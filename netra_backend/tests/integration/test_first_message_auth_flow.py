@@ -27,7 +27,7 @@ from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio

@@ -21,7 +21,7 @@ import pytest
 import pytest_asyncio
 from netra_backend.app.schemas.Agent import SubAgentState
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.config import get_config
 from netra_backend.app.agents.state import DeepAgentState

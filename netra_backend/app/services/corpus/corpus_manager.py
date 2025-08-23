@@ -12,7 +12,8 @@ from netra_backend.app import schemas
 from netra_backend.app.db import models_postgres as models
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.corpus.base import CorpusNotFoundError
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.websocket.unified import get_unified_manager
+manager = get_unified_manager()
 
 
 class CorpusManager:

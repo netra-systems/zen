@@ -65,40 +65,47 @@ class ConnectionRegistry:
         if user_id in self.active_connections and not self.active_connections[user_id]:
             del self.active_connections[user_id]
             
-    def get_user_connections(self, user_id: str) -> List[ConnectionInfo]:
+    async def get_user_connections(self, user_id: str) -> List[ConnectionInfo]:
         """Get all connections for a specific user."""
-        return self.active_connections.get(user_id, [])
+        async with self._registry_lock:
+            return list(self.active_connections.get(user_id, []))
         
-    def get_connection_by_id(self, connection_id: str) -> Optional[ConnectionInfo]:
+    async def get_connection_by_id(self, connection_id: str) -> Optional[ConnectionInfo]:
         """Get connection by connection ID."""
-        return self.connection_registry.get(connection_id)
+        async with self._registry_lock:
+            return self.connection_registry.get(connection_id)
         
-    def find_connection_info(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
+    async def find_connection_info(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
         """Find connection info for user and websocket."""
-        for conn in self.active_connections.get(user_id, []):
-            if conn.websocket == websocket:
-                return conn
-        return None
+        async with self._registry_lock:
+            for conn in self.active_connections.get(user_id, []):
+                if conn.websocket == websocket:
+                    return conn
+            return None
         
-    def get_oldest_connection(self, user_id: str) -> Optional[ConnectionInfo]:
+    async def get_oldest_connection(self, user_id: str) -> Optional[ConnectionInfo]:
         """Get the oldest connection for a user."""
-        connections = self.active_connections.get(user_id, [])
-        return connections[0] if connections else None
+        async with self._registry_lock:
+            connections = self.active_connections.get(user_id, [])
+            return connections[0] if connections else None
         
-    def collect_all_connections(self) -> List[ConnectionInfo]:
+    async def collect_all_connections(self) -> List[ConnectionInfo]:
         """Collect all active connections for operations."""
-        all_connections = []
-        for connections in self.active_connections.values():
-            all_connections.extend(connections)
-        return all_connections
+        async with self._registry_lock:
+            all_connections = []
+            for connections in self.active_connections.values():
+                all_connections.extend(connections)
+            return all_connections
         
-    def get_user_connection_count(self, user_id: str) -> int:
+    async def get_user_connection_count(self, user_id: str) -> int:
         """Get connection count for specific user."""
-        return len(self.active_connections.get(user_id, []))
+        async with self._registry_lock:
+            return len(self.active_connections.get(user_id, []))
         
-    def has_user_connections(self, user_id: str) -> bool:
+    async def has_user_connections(self, user_id: str) -> bool:
         """Check if user has any connections."""
-        return user_id in self.active_connections
+        async with self._registry_lock:
+            return user_id in self.active_connections
         
     async def clear_all_connections(self) -> None:
         """Clear all connection tracking structures."""
@@ -106,13 +113,14 @@ class ConnectionRegistry:
             self.active_connections.clear()
             self.connection_registry.clear()
             
-    def get_registry_stats(self) -> Dict[str, int]:
+    async def get_registry_stats(self) -> Dict[str, int]:
         """Get basic registry statistics."""
-        return {
-            "total_active_connections": sum(len(conns) for conns in self.active_connections.values()),
-            "active_users": len(self.active_connections),
-            "registry_entries": len(self.connection_registry)
-        }
+        async with self._registry_lock:
+            return {
+                "total_active_connections": sum(len(conns) for conns in self.active_connections.values()),
+                "active_users": len(self.active_connections),
+                "registry_entries": len(self.connection_registry)
+            }
 
 
 class ConnectionInfoProvider:
@@ -121,9 +129,9 @@ class ConnectionInfoProvider:
     def __init__(self, registry: ConnectionRegistry):
         self.registry = registry
         
-    def get_connection_info(self, user_id: str) -> List[Dict[str, any]]:
+    async def get_connection_info(self, user_id: str) -> List[Dict[str, any]]:
         """Get detailed information about a user's connections."""
-        connections = self.registry.get_user_connections(user_id)
+        connections = await self.registry.get_user_connections(user_id)
         return [self._create_connection_info_dict(conn) for conn in connections]
         
     def _create_connection_info_dict(self, conn: ConnectionInfo) -> Dict[str, any]:
@@ -188,9 +196,9 @@ class ConnectionCleanupManager:
         
     async def enforce_connection_limits(self, user_id: str, max_connections: int) -> bool:
         """Check if connection limits need enforcement."""
-        current_connections = self.registry.get_user_connection_count(user_id)
+        current_connections = await self.registry.get_user_connection_count(user_id)
         return current_connections >= max_connections
         
-    def validate_user_for_disconnect(self, user_id: str) -> bool:
+    async def validate_user_for_disconnect(self, user_id: str) -> bool:
         """Validate user exists in active connections."""
-        return self.registry.has_user_connections(user_id)
+        return await self.registry.has_user_connections(user_id)

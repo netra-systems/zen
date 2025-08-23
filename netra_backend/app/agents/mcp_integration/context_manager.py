@@ -9,10 +9,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-from netra_backend.app.agents.base_agent import (
-    BaseExecutionInterface,
-    ExecutionMonitor,
-)
+from netra_backend.app.agents.base.interface import BaseExecutionInterface
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.core.exceptions_service import ServiceError

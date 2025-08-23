@@ -125,6 +125,12 @@ class ConnectionInfoBuilder:
         if not self._websocket or not self._user_id:
             raise ValueError("WebSocket and user_id required")
         return ConnectionInfo(websocket=self._websocket, user_id=self._user_id)
+        
+    def create_connection_info(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
+        """Create ConnectionInfo instance directly."""
+        return (self.with_user_id(user_id)
+                .with_websocket(websocket)
+                .build())
 
 
 class ConnectionValidator:

@@ -75,7 +75,7 @@ class MessageBatcher:
     async def _queue_message_to_connections(self, user_id: str, message: Union[Dict[str, Any], ServerMessage],
                                           priority: int, connection_id: Optional[str]) -> bool:
         """Queue message to target connections."""
-        connections = self.connection_manager.get_user_connections(user_id)
+        connections = await self.connection_manager.get_user_connections(user_id)
         if not self._validate_connections_exist(user_id, connections):
             return False
         

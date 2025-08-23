@@ -46,7 +46,7 @@ class TestStagingStartup(StagingConfigTestBase):
             from netra_backend.app.core.config import get_config
             from netra_backend.app.db.session import get_db
             from netra_backend.app.main import app
-            from netra_backend.app.ws_manager import WebSocketManager
+            from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
             
             # Initialize configuration
 
