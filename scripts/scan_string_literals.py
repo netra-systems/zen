@@ -342,12 +342,47 @@ class StringLiteralScanner:
         return index
         
     def save_index(self, output_path: Path) -> None:
-        """Save the scan results to a JSON file."""
+        """Save the scan results to a JSON file and create sub-indexes by category."""
         output_path.parent.mkdir(parents=True, exist_ok=True)
         index = self.generate_index()
         
+        # Save main index
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
+        
+        # Create sub-indexes directory
+        sub_index_dir = output_path.parent / 'sub_indexes'
+        sub_index_dir.mkdir(exist_ok=True)
+        
+        # Save sub-indexes by category
+        for category, data in index['categories'].items():
+            sub_index = {
+                'metadata': {
+                    'version': '3.0.0',
+                    'category': category,
+                    'generated_at': datetime.now().isoformat(),
+                    'root_directory': str(self.root_dir),
+                    'total_literals': data['count']
+                },
+                'literals': data['literals']
+            }
+            
+            sub_index_path = sub_index_dir / f'{category}.json'
+            with open(sub_index_path, 'w', encoding='utf-8') as f:
+                json.dump(sub_index, f, indent=2, ensure_ascii=False)
+        
+        # Also create a compact index with just the literal values (no metadata) for quick lookups
+        compact_dir = output_path.parent / 'compact'
+        compact_dir.mkdir(exist_ok=True)
+        
+        for category, data in index['categories'].items():
+            compact_index = {
+                'values': sorted(data['literals'].keys())
+            }
+            
+            compact_path = compact_dir / f'{category}.json'
+            with open(compact_path, 'w', encoding='utf-8') as f:
+                json.dump(compact_index, f, indent=2, ensure_ascii=False)
             
         # Print summary
         print(f"\n{'='*50}")
@@ -364,7 +399,10 @@ class StringLiteralScanner:
         for category, data in index['categories'].items():
             print(f"  {category:20s}: {data['count']:,} unique literals")
             
-        print(f"\nIndex saved to: {output_path}")
+        print(f"\nIndexes saved to:")
+        print(f"  Main index: {output_path}")
+        print(f"  Sub-indexes: {sub_index_dir}")
+        print(f"  Compact indexes: {compact_dir}")
         
         if self.errors and len(self.errors) <= 10:
             print(f"\nErrors:")

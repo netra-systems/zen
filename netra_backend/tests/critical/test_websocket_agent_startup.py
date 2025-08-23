@@ -16,6 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from netra_backend.app.db.models_postgres import Run, Thread
+from netra_backend.app.websocket_core import get_websocket_manager
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -124,7 +125,7 @@ class TestAgentStartupWithoutContext:
         mock_thread_service.get_or_create_thread = AsyncMock(return_value=None)
         message_handler.thread_service = mock_thread_service
         
-        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.get_websocket_manager().send_error') as mock_send_error:
             with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
@@ -227,7 +228,7 @@ class TestAgentStartupWithoutContext:
         other_thread.metadata_ = {"user_id": "different_user"}  # Different user
         mock_thread_service.get_thread = AsyncMock(return_value=other_thread)
         
-        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.get_websocket_manager().send_error') as mock_send_error:
             with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
@@ -252,7 +253,7 @@ class TestAgentStartupWithoutContext:
         # Make supervisor throw exception
         mock_supervisor.run = AsyncMock(side_effect=Exception("Supervisor failed"))
         
-        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+        with patch('netra_backend.app.get_websocket_manager().send_error') as mock_send_error:
             with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)

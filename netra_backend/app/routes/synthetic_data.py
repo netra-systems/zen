@@ -33,10 +33,8 @@ from netra_backend.app.services.synthetic_data_service import (
     SyntheticDataService,
     synthetic_data_service,
 )
-from netra_backend.app.services.user_auth_service import user_auth_service
 
 logger = logging.getLogger(__name__)
-
 
 # Request/Response Models
 class ToolConfig(BaseModel):
@@ -118,8 +116,8 @@ async def generate_synthetic_data(
 ):
     """Initiate synthetic data generation job"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return await _process_generation_request(request, db, current_user.id)
@@ -148,8 +146,8 @@ async def get_generation_status(
 ):
     """Get generation job status"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     job_status = await fetch_and_validate_job_status(job_id, current_user.id)
@@ -181,8 +179,8 @@ async def cancel_generation(
 ):
     """Cancel running generation job"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return await _execute_job_cancellation(job_id, current_user.id)
@@ -214,8 +212,8 @@ async def preview_synthetic_data(
 ):
     """Preview sample generated data"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return await _generate_preview_data(corpus_id, workload_type, sample_size)
@@ -258,8 +256,8 @@ async def export_synthetic_data(
 ):
     """Export synthetic data"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -278,8 +276,8 @@ async def analyze_synthetic_data_quality(
 ):
     """Analyze synthetic data quality"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -298,8 +296,8 @@ async def cleanup_synthetic_data(
 ):
     """Clean up synthetic data jobs"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -318,8 +316,8 @@ async def convert_synthetic_data_format(
 ):
     """Convert synthetic data format"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -338,8 +336,8 @@ async def compare_synthetic_with_real_data(
 ):
     """Compare synthetic with real data"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -358,8 +356,8 @@ async def create_synthetic_data_version(
 ):
     """Create synthetic data version"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -378,8 +376,8 @@ async def setup_auto_refresh(
 ):
     """Setup automated synthetic data refresh"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:

@@ -14,31 +14,31 @@ Architecture:
 from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
 
 # Alert management system
-from .alert_manager_compact import (
+from netra_backend.app.monitoring.alert_manager_compact import (
     CompactAlertManager,
     alert_manager,
 )
-from .alert_models import (
+from netra_backend.app.monitoring.alert_models import (
     Alert,
     AlertLevel,
     AlertRule,
     NotificationChannel,
 )
 from netra_backend.app.monitoring.alert_notifications import NotificationDeliveryManager
-from .dashboard import (
+from netra_backend.app.monitoring.dashboard import (
     OperationMeasurement,
     PerformanceDashboard,
     SystemOverview,
 )
 from netra_backend.app.monitoring.health_calculator import HealthScoreCalculator
-from .metrics_collector import (
+from netra_backend.app.monitoring.metrics_collector import (
     PerformanceMetric,
     SystemResourceMetrics,
     WebSocketMetrics,
 )
 
 # Monitoring models
-from .models import (
+from netra_backend.app.monitoring.models import (
     HealthCheck,
     Metric,
     MetricDataPoint,
@@ -50,7 +50,7 @@ from .models import (
 )
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 # PerformanceMonitor removed - use PerformanceMetric from metrics_collector or SystemPerformanceMonitor
-from .system_monitor import (
+from netra_backend.app.monitoring.system_monitor import (
     MonitoringManager,
     SystemPerformanceMonitor,
     monitoring_manager,

@@ -147,13 +147,13 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with delivery tracking."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -205,7 +205,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
         return MessageDeliveryTracker()
     
-    async def test_basic_message_delivery_guarantee(self, ws_manager, redis_client, pubsub_client, test_users, delivery_tracker):
+    async def test_basic_message_delivery_guarantee(self, websocket_manager, redis_client, pubsub_client, test_users, delivery_tracker):
 
         """Test basic at-least-once message delivery."""
 
@@ -215,7 +215,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         # Setup delivery tracking
 
@@ -271,9 +271,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_message_delivery_with_retry_mechanism(self, ws_manager, redis_client, test_users, delivery_tracker):
+    async def test_message_delivery_with_retry_mechanism(self, websocket_manager, redis_client, test_users, delivery_tracker):
 
         """Test message delivery with retry mechanism."""
 
@@ -283,7 +283,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         # Send message with retry logic
 
@@ -323,7 +323,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
             try:
 
-                success = await ws_manager.send_message_to_user(user.id, test_message)
+                success = await websocket_manager.send_message_to_user(user.id, test_message)
 
                 if success:
 
@@ -345,9 +345,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_bulk_message_delivery_guarantee(self, ws_manager, redis_client, pubsub_client, test_users, delivery_tracker):
+    async def test_bulk_message_delivery_guarantee(self, websocket_manager, redis_client, pubsub_client, test_users, delivery_tracker):
 
         """Test delivery guarantees for bulk messages."""
 
@@ -357,7 +357,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         channel = f"user:{user.id}"
 
@@ -433,9 +433,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_message_ordering_guarantee(self, ws_manager, redis_client, pubsub_client, test_users):
+    async def test_message_ordering_guarantee(self, websocket_manager, redis_client, pubsub_client, test_users):
 
         """Test message ordering preservation in delivery."""
 
@@ -445,7 +445,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         channel = f"user:{user.id}"
 
@@ -518,7 +518,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
     async def test_message_persistence_for_offline_users(self, redis_client, test_users, delivery_tracker):
 
@@ -602,7 +602,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
     
     @mock_justified("L3: Message delivery guarantee testing with real Redis")
 
-    async def test_message_delivery_under_load(self, ws_manager, redis_client, test_users, delivery_tracker):
+    async def test_message_delivery_under_load(self, websocket_manager, redis_client, test_users, delivery_tracker):
 
         """Test message delivery guarantees under system load."""
         # Setup multiple connected users
@@ -613,7 +613,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            await ws_manager.connect_user(user.id, websocket)
+            await websocket_manager.connect_user(user.id, websocket)
 
             connections.append((user, websocket))
         
@@ -653,7 +653,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
                 
                 # Create delivery task
 
-                task = ws_manager.send_message_to_user(user.id, test_message)
+                task = websocket_manager.send_message_to_user(user.id, test_message)
 
                 tasks.append((message_id, task))
         
@@ -697,9 +697,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_high_volume_message_throughput_1000_per_second(self, ws_manager, redis_client, pubsub_client, test_users, delivery_tracker):
+    async def test_high_volume_message_throughput_1000_per_second(self, websocket_manager, redis_client, pubsub_client, test_users, delivery_tracker):
 
         """Test high-volume message delivery at 1000 msg/sec target."""
 
@@ -709,7 +709,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         channel = f"user:{user.id}"
 
@@ -829,9 +829,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_cross_connection_message_broadcasting(self, ws_manager, redis_client, test_users, delivery_tracker):
+    async def test_cross_connection_message_broadcasting(self, websocket_manager, redis_client, test_users, delivery_tracker):
 
         """Test message broadcasting across multiple WebSocket connections."""
         # Connect multiple users
@@ -844,7 +844,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            await ws_manager.connect_user(user.id, websocket)
+            await websocket_manager.connect_user(user.id, websocket)
 
             connections.append((user, websocket))
 
@@ -969,9 +969,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_message_priority_and_routing(self, ws_manager, redis_client, pubsub_client, test_users, delivery_tracker):
+    async def test_message_priority_and_routing(self, websocket_manager, redis_client, pubsub_client, test_users, delivery_tracker):
 
         """Test message priority handling and intelligent routing."""
 
@@ -981,7 +981,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         channel = f"user:{user.id}"
 
@@ -1146,9 +1146,9 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_duplicate_message_prevention(self, ws_manager, redis_client, pubsub_client, test_users, delivery_tracker):
+    async def test_duplicate_message_prevention(self, websocket_manager, redis_client, pubsub_client, test_users, delivery_tracker):
 
         """Test prevention of duplicate message delivery."""
 
@@ -1158,7 +1158,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Connect user
 
-        await ws_manager.connect_user(user.id, websocket)
+        await websocket_manager.connect_user(user.id, websocket)
         
         channel = f"user:{user.id}"
 
@@ -1256,7 +1256,7 @@ class TestWebSocketMessageDeliveryGuaranteeL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
 if __name__ == "__main__":
 

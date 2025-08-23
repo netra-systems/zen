@@ -15,10 +15,10 @@ from typing import Dict, List, Optional, Set, Union, Any
 import yaml
 from dotenv import load_dotenv
 
-from ..category_system import TestCategory, CategoryPriority, CategoryType, CategorySystem
-from ..auto_splitter import SplittingStrategy
-from ..fail_fast_strategies import FailFastMode, ThresholdConfig
-from ..progress_tracker import ProgressTracker
+from test_framework.category_system import TestCategory, CategoryPriority, CategoryType, CategorySystem
+from test_framework.auto_splitter import SplittingStrategy
+from test_framework.fail_fast_strategies import FailFastMode, ThresholdConfig
+from test_framework.progress_tracker import ProgressTracker
 
 
 @dataclass

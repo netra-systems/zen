@@ -138,7 +138,7 @@ class ClusterReshardingL3Manager:
         # Simulate cluster formation (in real Redis this would use CLUSTER MEET commands)
         cluster_info["cluster_url"] = f"redis://localhost:{self.cluster_ports[0]}/0"
         
-        logger.info(f"Redis cluster formed with {len(self.cluster_nodes)} nodes")
+        logger.info(f"Simulated Redis cluster formed with {self.simulated_nodes} nodes")
         return cluster_info
     
     async def populate_cluster_data(self, key_count: int) -> Dict[str, Any]:
@@ -148,9 +148,9 @@ class ClusterReshardingL3Manager:
         for node_info in self.cluster_nodes:
             distributed_keys[f"node_{node_info['id']}"] = []
         
-        # Distribute keys across nodes using consistent hashing simulation
+        # Distribute keys across simulated nodes using prefixes
         for i in range(key_count):
-            key = f"cluster_test_{i}_{uuid.uuid4().hex[:8]}"
+            base_key = f"cluster_test_{i}_{uuid.uuid4().hex[:8]}"
             value = {
                 "data": f"cluster_data_{i}",
                 "timestamp": datetime.utcnow().isoformat(),
@@ -158,67 +158,76 @@ class ClusterReshardingL3Manager:
             }
             
             # Simple hash-based node assignment
-            node_hash = hash(key) % len(self.cluster_nodes)
-            target_node = self.cluster_nodes[node_hash]
+            node_hash = hash(base_key) % self.simulated_nodes
+            node_prefix = self.node_prefixes[node_hash]
             
-            value["node_assignment"] = target_node["id"]
+            value["node_assignment"] = node_hash
             
-            # Write to assigned node
-            await target_node["client"].setex(key, 3600, json.dumps(value))
-            distributed_keys[f"node_{target_node['id']}"].append(key)
-            self.test_keys.add(key)
+            # Write with node prefix to simulate distribution
+            prefixed_key = f"{node_prefix}{base_key}"
+            await self.redis_client.setex(prefixed_key, 3600, json.dumps(value))
+            distributed_keys[f"node_{node_hash}"].append(prefixed_key)
+            self.test_keys.add(prefixed_key)
         
         return {
             "total_keys": key_count,
             "distributed_keys": distributed_keys,
-            "nodes_used": len(self.cluster_nodes)
+            "nodes_used": self.simulated_nodes
         }
     
     async def test_simple_resharding_operation(self, keys_to_migrate: int) -> Dict[str, Any]:
-        """Test a simple resharding operation between two nodes."""
-        if len(self.cluster_nodes) < 2:
+        """Test a simple resharding operation between two virtual nodes."""
+        if self.simulated_nodes < 2:
             raise ValueError("Need at least 2 nodes for resharding test")
         
-        source_node = self.cluster_nodes[0]
-        target_node = self.cluster_nodes[1]
+        source_prefix = self.node_prefixes[0]  # node_0:
+        target_prefix = self.node_prefixes[1]  # node_1:
         
-        # Create keys on source node
+        # Create keys on source node (using source prefix)
         migration_keys = []
         for i in range(keys_to_migrate):
-            key = f"reshard_test_{i}_{uuid.uuid4().hex[:8]}"
+            base_key = f"reshard_test_{i}_{uuid.uuid4().hex[:8]}"
             value = {
                 "data": f"migration_data_{i}",
-                "source_node": source_node["id"],
+                "source_node": 0,
                 "migration_test": True
             }
             
-            await source_node["client"].setex(key, 3600, json.dumps(value))
-            migration_keys.append(key)
-            self.test_keys.add(key)
+            source_key = f"{source_prefix}{base_key}"
+            await self.redis_client.setex(source_key, 3600, json.dumps(value))
+            migration_keys.append(source_key)
+            self.test_keys.add(source_key)
         
         # Verify keys exist on source
         keys_on_source = 0
         for key in migration_keys:
-            if await source_node["client"].exists(key):
+            if await self.redis_client.exists(key):
                 keys_on_source += 1
         
-        # Perform resharding (migrate keys from source to target)
+        # Perform resharding (migrate keys from source to target prefix)
         start_time = time.time()
         migrated_keys = 0
         migration_failures = 0
         
-        for key in migration_keys:
+        for source_key in migration_keys:
             try:
                 # Get value from source
-                value = await source_node["client"].get(key)
+                value = await self.redis_client.get(source_key)
                 if value:
-                    # Write to target
-                    await target_node["client"].setex(key, 3600, value)
+                    # Create target key with new prefix
+                    base_key = source_key[len(source_prefix):]
+                    target_key = f"{target_prefix}{base_key}"
+                    
+                    # Write to target (simulated node)
+                    await self.redis_client.setex(target_key, 3600, value)
                     
                     # Verify write succeeded
-                    if await target_node["client"].exists(key):
+                    if await self.redis_client.exists(target_key):
                         # Delete from source
-                        await source_node["client"].delete(key)
+                        await self.redis_client.delete(source_key)
+                        # Update our tracking
+                        self.test_keys.discard(source_key)
+                        self.test_keys.add(target_key)
                         migrated_keys += 1
                     else:
                         migration_failures += 1
@@ -227,7 +236,7 @@ class ClusterReshardingL3Manager:
                     
             except Exception as e:
                 migration_failures += 1
-                logger.error(f"Migration failed for key {key}: {e}")
+                logger.error(f"Migration failed for key {source_key}: {e}")
         
         resharding_time = time.time() - start_time
         self.metrics.resharding_times.append(resharding_time)
@@ -239,10 +248,13 @@ class ClusterReshardingL3Manager:
         keys_on_target = 0
         keys_remaining_on_source = 0
         
-        for key in migration_keys:
-            if await target_node["client"].exists(key):
+        for source_key in migration_keys:
+            base_key = source_key[len(source_prefix):]
+            target_key = f"{target_prefix}{base_key}"
+            
+            if await self.redis_client.exists(target_key):
                 keys_on_target += 1
-            if await source_node["client"].exists(key):
+            if await self.redis_client.exists(source_key):
                 keys_remaining_on_source += 1
         
         return {
@@ -279,8 +291,7 @@ class ClusterReshardingL3Manager:
             }
             
             # Assign to random node
-            node_hash = hash(key) % len(self.cluster_nodes)
-            target_node = self.cluster_nodes[node_hash]
+            node_hash = hash(key) % self.simulated_nodes
             
             await target_node["client"].setex(key, 3600, json.dumps(value))
             test_keys.append(key)
@@ -344,17 +355,25 @@ class ClusterReshardingL3Manager:
         
         return consistency_results
     
-    async def _simulate_concurrent_resharding(self, source_node: Dict, target_node: Dict, keys: List[str]) -> None:
+    async def _simulate_concurrent_resharding(self, source_prefix: str, target_prefix: str, keys: List[str]) -> None:
         """Simulate resharding operations concurrent with consistency checks."""
-        for key in keys:
+        for source_key in keys:
             try:
-                value = await source_node["client"].get(key)
+                value = await self.redis_client.get(source_key)
                 if value:
-                    await target_node["client"].setex(key, 3600, value)
+                    # Create target key with new prefix
+                    base_key = source_key[len(source_prefix):]
+                    target_key = f"{target_prefix}{base_key}"
+                    
+                    await self.redis_client.setex(target_key, 3600, value)
                     await asyncio.sleep(0.005)  # Simulate migration delay
-                    await source_node["client"].delete(key)
+                    await self.redis_client.delete(source_key)
+                    
+                    # Update tracking
+                    self.test_keys.discard(source_key)
+                    self.test_keys.add(target_key)
             except Exception as e:
-                logger.error(f"Concurrent resharding failed for key {key}: {e}")
+                logger.error(f"Concurrent resharding failed for key {source_key}: {e}")
     
     async def test_performance_impact_during_resharding(self, operation_count: int) -> Dict[str, Any]:
         """Test performance impact during cluster resharding."""
@@ -365,12 +384,14 @@ class ClusterReshardingL3Manager:
             value = {"data": f"baseline_data_{i}"}
             
             start_time = time.time()
-            node = self.cluster_nodes[i % len(self.cluster_nodes)]
-            await node["client"].setex(key, 300, json.dumps(value))
+            # Use rotating node prefixes to simulate distribution
+            node_index = i % self.simulated_nodes
+            prefixed_key = f"{self.node_prefixes[node_index]}{key}"
+            await self.redis_client.setex(prefixed_key, 300, json.dumps(value))
             operation_time = time.time() - start_time
             
             baseline_times.append(operation_time)
-            self.test_keys.add(key)
+            self.test_keys.add(prefixed_key)
         
         self.metrics.performance_samples_before.extend(baseline_times)
         
@@ -390,8 +411,10 @@ class ClusterReshardingL3Manager:
             start_time = time.time()
             
             try:
-                node = self.cluster_nodes[i % len(self.cluster_nodes)]
-                await node["client"].setex(key, 300, json.dumps(value))
+                # Use rotating node prefixes to simulate distribution
+                node_index = i % self.simulated_nodes
+                prefixed_key = f"{self.node_prefixes[node_index]}{key}"
+                await self.redis_client.setex(prefixed_key, 300, json.dumps(value))
                 operation_time = time.time() - start_time
                 resharding_times.append(operation_time)
                 
@@ -408,7 +431,7 @@ class ClusterReshardingL3Manager:
                 logger.warning(f"Operation failed during resharding: {e}")
                 resharding_times.append(1.0)  # Penalty for failed operation
             
-            self.test_keys.add(key)
+            self.test_keys.add(prefixed_key)
         
         # Wait for resharding to complete
         await resharding_task
@@ -618,7 +641,7 @@ async def test_cluster_data_population_and_distribution(cluster_resharding_manag
     
     # Verify data distribution
     assert result["total_keys"] == 200, f"Expected 200 keys, got {result['total_keys']}"
-    assert result["nodes_used"] == len(cluster_resharding_manager.cluster_nodes), "Not all cluster nodes were used"
+    assert result["nodes_used"] == cluster_resharding_manager.simulated_nodes, "Not all simulated nodes were used"
     
     # Verify keys are distributed across nodes
     total_distributed = sum(len(keys) for keys in result["distributed_keys"].values())

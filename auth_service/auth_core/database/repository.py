@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 try:
     from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
 except ImportError:
-    from .models import AuthAuditLog, AuthSession, AuthUser
+    from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
 
 logger = logging.getLogger(__name__)
 

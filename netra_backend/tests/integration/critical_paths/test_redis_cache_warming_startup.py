@@ -202,58 +202,38 @@ class DatabaseSourceMock:
 class RedisCacheWarmingStartupL3Manager:
     """L3 Redis cache warming on startup test manager with real Redis and startup simulation."""
     
-    def __init__(self):
-        self.redis_containers = {}
-        self.redis_clients = {}
+    def __init__(self, redis_client):
+        self.redis_client = redis_client  # Single real Redis client
         self.database_sources = {}
         self.metrics = StartupWarmingMetrics()
         self.warmed_keys = set()
         self.startup_scenarios = [
             "cold_start", "warm_restart", "crash_recovery", "deployment_update"
         ]
-        
-    async def setup_redis_for_startup_warming(self) -> Dict[str, str]:
-        """Setup Redis instances for startup cache warming testing."""
-        redis_configs = {
-            "main_cache": {"port": 6420, "role": "main application cache"},
-            "session_cache": {"port": 6421, "role": "session and auth cache"},
-            "metadata_cache": {"port": 6422, "role": "metadata and config cache"},
-            "backup_cache": {"port": 6423, "role": "backup and recovery"}
+        # Simulate multiple cache namespaces using key prefixes
+        self.cache_prefixes = {
+            "main_cache:": "main application cache",
+            "session_cache:": "session and auth cache",
+            "metadata_cache:": "metadata and config cache",
+            "backup_cache:": "backup and recovery"
         }
         
-        redis_urls = {}
-        
-        for name, config in redis_configs.items():
-            try:
-                container = NetraRedisContainer(port=config["port"])
-                container.container_name = f"netra-startup-{name}-{uuid.uuid4().hex[:8]}"
-                
-                url = await container.start()
-                
-                self.redis_containers[name] = container
-                redis_urls[name] = url
-                
-                # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
-                client = AsyncMock()
-                client.ping = AsyncMock()
-                client.get = AsyncMock(return_value=None)
-                client.set = AsyncMock()
-                client.setex = AsyncMock()
-                client.delete = AsyncMock(return_value=0)
-                client.exists = AsyncMock(return_value=False)
-                client.mget = AsyncMock(return_value=[])
-                client.mset = AsyncMock()
-                client.info = AsyncMock(return_value={"role": config.get('role', 'master')})
-                self.redis_clients[name] = client
-                
-                logger.info(f"Redis {name} ({config['role']}) started: {url}")
-                
-            except Exception as e:
-                logger.error(f"Failed to start Redis {name}: {e}")
-                raise
-        
-        return redis_urls
+    async def setup_redis_for_startup_warming(self) -> Dict[str, str]:
+        """Setup Redis for startup cache warming testing using real client with prefixes."""
+        try:
+            # Test Redis connection
+            await self.redis_client.ping()
+            
+            logger.info(f"Redis client ready for startup warming with {len(self.cache_prefixes)} cache namespaces")
+            
+            return {
+                "redis_url": "redis://localhost:6379/0",  # Using the real client connection
+                "cache_prefixes": list(self.cache_prefixes.keys()),
+                "simulated": True
+            }
+        except Exception as e:
+            logger.error(f"Failed to setup Redis for startup warming: {e}")
+            raise
     
     async def setup_database_sources(self) -> Dict[str, DatabaseSourceMock]:
         """Setup mock database sources for cache warming data."""
@@ -487,15 +467,15 @@ class RedisCacheWarmingStartupL3Manager:
         validation_results["total_keys_checked"] = len(test_keys)
         validation_results["critical_keys_present"] = hits
         
-        # Check memory usage
-        for cache_name, client in self.redis_clients.items():
-            try:
-                info = await client.info('memory')
-                memory_used = info.get('used_memory', 0)
-                validation_results["memory_usage"][cache_name] = memory_used
-                self.metrics.warming_memory_usage.append(memory_used)
-            except Exception:
-                validation_results["memory_usage"][cache_name] = 0
+        # Check memory usage with the real Redis client
+        try:
+            info = await self.redis_client.info('memory')
+            memory_used = int(info.get('used_memory', 0))
+            validation_results["memory_usage"]["total"] = memory_used
+            self.metrics.warming_memory_usage.append(memory_used)
+        except Exception as e:
+            logger.warning(f"Failed to get memory info: {e}")
+            validation_results["memory_usage"]["total"] = 0
         
         return validation_results
     

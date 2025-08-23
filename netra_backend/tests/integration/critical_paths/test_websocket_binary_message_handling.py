@@ -250,13 +250,13 @@ class TestWebSocketBinaryMessageHandlingL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for binary testing."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -492,7 +492,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
-    async def test_binary_message_websocket_transmission(self, ws_manager, binary_handler, test_users):
+    async def test_binary_message_websocket_transmission(self, websocket_manager, binary_handler, test_users):
 
         """Test binary message transmission through WebSocket."""
 
@@ -502,7 +502,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -546,7 +546,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # Send through WebSocket manager
 
-        success = await ws_manager.send_message_to_user(user.id, notification_message)
+        success = await websocket_manager.send_message_to_user(user.id, notification_message)
 
         assert success is True
         
@@ -562,7 +562,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await binary_handler.cleanup_binary_message(message_id)
     

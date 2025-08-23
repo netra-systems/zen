@@ -417,6 +417,164 @@ class DatabaseManager:
             # Staging/production should always have DATABASE_URL set
             logger.warning(f"No DATABASE_URL found for {current_env} environment")
             return "postgresql://postgres:password@localhost:5432/netra"
+    
+    # AUTH SERVICE COMPATIBILITY METHODS
+    # These methods provide auth service compatibility without duplication
+    
+    @staticmethod
+    def get_auth_database_url_async() -> str:
+        """Get async URL for auth service application (asyncpg).
+        Alias for get_application_url_async() for auth service compatibility.
+        
+        Returns:
+            Database URL compatible with asyncpg driver for auth service
+        """
+        return DatabaseManager.get_application_url_async()
+    
+    @staticmethod
+    def get_auth_database_url() -> str:
+        """Get base URL for auth service compatibility.
+        Alias for get_base_database_url() for auth service compatibility.
+        
+        Returns:
+            Clean database URL for auth service
+        """
+        return DatabaseManager.get_base_database_url()
+    
+    @staticmethod
+    def get_auth_database_url_sync() -> str:
+        """Get sync URL for auth service migrations.
+        Alias for get_migration_url_sync_format() for auth service compatibility.
+        
+        Returns:
+            Database URL compatible with synchronous drivers for auth service
+        """
+        return DatabaseManager.get_migration_url_sync_format()
+    
+    @staticmethod
+    def validate_auth_url(url: str = None) -> bool:
+        """Confirm async driver compatibility for auth service.
+        Alias for validate_application_url() for auth service compatibility.
+        
+        Args:
+            url: Optional URL to validate, uses auth URL if None
+            
+        Returns:
+            True if URL is async-compatible
+        """
+        target_url = url or DatabaseManager.get_auth_database_url_async()
+        return DatabaseManager.validate_application_url(target_url)
+    
+    @staticmethod
+    def validate_sync_url(url: str = None) -> bool:
+        """Confirm sync driver compatibility for auth service.
+        Alias for validate_migration_url_sync_format() for auth service compatibility.
+        
+        Args:
+            url: Optional URL to validate, uses migration URL if None
+            
+        Returns:
+            True if URL is sync-compatible
+        """
+        target_url = url or DatabaseManager.get_auth_database_url_sync()
+        return DatabaseManager.validate_migration_url_sync_format(target_url)
+    
+    @staticmethod
+    def is_test_environment() -> bool:
+        """Detect if running in test environment.
+        Auth service compatibility method.
+        
+        Returns:
+            True if running in test environment
+        """
+        current_env = get_current_environment()
+        is_test_mode = os.environ.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        
+        # Check if we're in a pytest environment
+        import sys
+        is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
+        
+        return current_env in ["testing", "test"] or is_test_mode or is_pytest
+    
+    @staticmethod
+    def create_auth_application_engine():
+        """Return async SQLAlchemy engine for auth service.
+        Alias for create_application_engine() for auth service compatibility.
+        
+        Returns:
+            Async SQLAlchemy engine configured for auth service runtime
+        """
+        return DatabaseManager.create_application_engine()
+    
+    @staticmethod
+    def get_auth_application_session():
+        """Return async session factory for auth service runtime.
+        Alias for get_application_session() for auth service compatibility.
+        
+        Returns:
+            Async session factory for auth service operations
+        """
+        return DatabaseManager.get_application_session()
+    
+    @staticmethod
+    def _normalize_postgres_url(url: str) -> str:
+        """Normalize PostgreSQL URL format for consistency.
+        Auth service compatibility method.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            Normalized PostgreSQL URL
+        """
+        # Convert postgres:// to postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://")
+        
+        # Strip async driver prefixes for base URL
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        
+        return url
+    
+    @staticmethod
+    def _convert_sslmode_to_ssl(url: str) -> str:
+        """Convert sslmode parameter to ssl parameter for asyncpg.
+        Auth service compatibility method.
+        
+        Args:
+            url: Database URL with sslmode parameter
+            
+        Returns:
+            URL with ssl parameter for asyncpg compatibility
+        """
+        # Skip conversion for Cloud SQL connections
+        if "/cloudsql/" in url:
+            return url
+        
+        # Convert sslmode= to ssl= for asyncpg
+        if "sslmode=" in url:
+            url = url.replace("sslmode=", "ssl=")
+        
+        return url
+    
+    @staticmethod
+    def _get_default_auth_url() -> str:
+        """Get default database URL for auth service.
+        Auth service compatibility method.
+        
+        Returns:
+            Default database URL for auth service based on environment
+        """
+        current_env = get_current_environment()
+        
+        if current_env == "development":
+            return "postgresql://postgres:password@localhost:5432/netra"
+        elif current_env in ["testing", "test"]:
+            return "sqlite:///:memory:"
+        else:
+            # Staging/production should always have DATABASE_URL set
+            logger.warning(f"No DATABASE_URL found for auth service in {current_env} environment")
+            return "postgresql://postgres:password@localhost:5432/netra"
 
 
 # Export the main class

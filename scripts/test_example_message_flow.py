@@ -229,8 +229,8 @@ class ExampleMessageFlowTestRunner:
         
         try:
             # Check that WebSocket manager can be initialized
-            from netra_backend.app.ws_manager import get_manager
-            ws_manager = get_manager()
+            from netra_backend.app.websocket_core import get_websocket_manager
+            ws_manager = get_websocket_manager()
             
             if ws_manager is None:
                 print("     ❌ WebSocket manager not available")

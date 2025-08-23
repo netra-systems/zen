@@ -129,8 +129,9 @@ class TestCircularImportRegression:
             BaseMessageHandler,
         )
         
-        # Create handler
-        handler = BaseMessageHandler()
+        # Create handler with required parameters
+        from netra_backend.app.websocket_core.types import MessageType
+        handler = BaseMessageHandler([MessageType.USER_MESSAGE])
         
         # Verify it doesn't have execution_engine or it's None
         if hasattr(handler, 'execution_engine'):
@@ -263,28 +264,8 @@ class TestConnectionModuleCircularImportPrevention:
         """
         from netra_backend.app import websocket_core
         
-        # All expected exports for backward compatibility
-        required_exports = [
-            'ConnectionInfo',
-            'ConnectionManager',  # Legacy wrapper class
-            'connection_manager',  # Legacy variable (now None/lazy)
-            'get_connection_manager_instance',  # New lazy getter
-            'ConnectionStats',
-            'ConnectionInfoBuilder',
-            'ConnectionValidator',
-            'ConnectionMetrics',
-            'ConnectionDurationCalculator',
-            'ConnectionExecutor',
-            'ConnectionOperationBuilder',
-            'ConnectionExecutionOrchestrator',
-            'ConnectionReliabilityManager',
-            'ConnectionCloseReliability',
-            'ConnectionEstablishmentReliability',
-            'ConnectionManager'
-        ]
-        
-        # Note: The unified WebSocket architecture consolidates these into websocket_core
-        # Check for core exports in the new structure
+        # Core exports in the unified WebSocket architecture
+        # Most legacy classes were consolidated or removed
         core_exports = ['WebSocketManager', 'get_websocket_manager', 'ConnectionInfo']
         for export in core_exports:
             assert hasattr(websocket_core, export), \

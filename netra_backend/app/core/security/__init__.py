@@ -1,7 +1,7 @@
 """Security module for authentication, encryption, and access control."""
 
-from .encryption_service import EncryptionService, default_encryption_service
-from .security_context import (
+from netra_backend.app.core.security.encryption_service import EncryptionService, default_encryption_service
+from netra_backend.app.core.security.security_context import (
     SecurityContext, 
     UserInfo, 
     TenantContext, 

@@ -179,14 +179,18 @@ class TOTPGenerator:
             
             # Get TOTP data
             totp_key = f"user_totp:{user_id}"
+            logger.info(f"Looking for TOTP data with key: {totp_key}")
             totp_data_json = await self.redis_client.get(totp_key)
             
             if not totp_data_json:
+                logger.error(f"TOTP data not found for key: {totp_key}")
                 return {
                     "success": False,
                     "error": "TOTP not setup for user",
                     "verify_time": time.time() - verify_start
                 }
+            
+            logger.info(f"Retrieved TOTP data: {totp_data_json[:100]}...")
             
             totp_data = json.loads(totp_data_json)
             secret_key = totp_data["secret_key"]
@@ -196,7 +200,9 @@ class TOTPGenerator:
             
             # Verify code with window tolerance
             current_time = datetime.now(timezone.utc)
+            logger.info(f"Verifying code {provided_code} with secret {secret_key}")
             is_valid = totp.verify(provided_code, valid_window=1)  # Allow 1 window before/after
+            logger.info(f"TOTP verification result: {is_valid}")
             
             # Update attempt count
             await self._record_attempt(user_id, is_valid)
@@ -689,7 +695,9 @@ class TwoFactorAuthTestManager:
             current_code = totp.now()
             
             # Step 3: Verify TOTP code
+            logger.info(f"Attempting to verify TOTP code {current_code} for user {user_id}")
             verify_result = await self.totp_generator.verify_totp_code(user_id, current_code)
+            logger.info(f"TOTP verification result: {verify_result}")
             
             # Step 4: Test backup code
             backup_codes = setup_result["backup_codes"]

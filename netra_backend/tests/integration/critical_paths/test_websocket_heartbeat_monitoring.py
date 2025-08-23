@@ -181,13 +181,13 @@ class TestWebSocketHeartbeatMonitoringL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with heartbeat monitoring."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -239,7 +239,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         ]
     
-    async def test_basic_heartbeat_functionality(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_basic_heartbeat_functionality(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test basic heartbeat send and check functionality."""
 
@@ -249,7 +249,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -279,11 +279,11 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    async def test_heartbeat_expiration_detection(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_heartbeat_expiration_detection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test detection of expired heartbeats."""
 
@@ -293,7 +293,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -333,11 +333,11 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    async def test_multiple_connection_heartbeat_tracking(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_multiple_connection_heartbeat_tracking(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat tracking for multiple connections."""
 
@@ -349,7 +349,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await ws_manager.connect_user(user.id, websocket)
+            connection_info = await websocket_manager.connect_user(user.id, websocket)
 
             if connection_info:
 
@@ -395,11 +395,11 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user, websocket, connection_info in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
 
             await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
-    async def test_heartbeat_recovery_after_reconnection(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_heartbeat_recovery_after_reconnection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat recovery after connection drop and reconnection."""
 
@@ -409,7 +409,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         first_websocket = MockWebSocketForRedis(user.id)
 
-        first_connection = await ws_manager.connect_user(user.id, first_websocket)
+        first_connection = await websocket_manager.connect_user(user.id, first_websocket)
 
         assert first_connection is not None
         
@@ -419,7 +419,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Simulate connection drop
 
-        await ws_manager.disconnect_user(user.id, first_websocket)
+        await websocket_manager.disconnect_user(user.id, first_websocket)
         
         # Mark as dead after detection delay
 
@@ -429,7 +429,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         second_websocket = MockWebSocketForRedis(user.id)
 
-        second_connection = await ws_manager.connect_user(user.id, second_websocket)
+        second_connection = await websocket_manager.connect_user(user.id, second_websocket)
 
         assert second_connection is not None
         
@@ -451,11 +451,11 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Cleanup new connection
 
-        await ws_manager.disconnect_user(user.id, second_websocket)
+        await websocket_manager.disconnect_user(user.id, second_websocket)
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, second_connection.connection_id)
     
-    async def test_heartbeat_performance_under_load(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_heartbeat_performance_under_load(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat performance with multiple concurrent connections."""
 
@@ -471,7 +471,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
             websocket = MockWebSocketForRedis(user_id)
 
-            connection_info = await ws_manager.connect_user(user_id, websocket)
+            connection_info = await websocket_manager.connect_user(user_id, websocket)
 
             if connection_info:
 
@@ -527,11 +527,11 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         for user_id, websocket, connection_info in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
 
             await heartbeat_monitor.cleanup_dead_connection(user_id, connection_info.connection_id)
     
-    async def test_automated_dead_connection_cleanup(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_automated_dead_connection_cleanup(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test automated cleanup of dead connections."""
 
@@ -541,7 +541,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Connect and establish heartbeat
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -549,7 +549,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Simulate connection death
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await heartbeat_monitor.mark_connection_dead(user.id, connection_info.connection_id)
         
@@ -581,7 +581,7 @@ class TestWebSocketHeartbeatMonitoringL3:
     
     @mock_justified("L3: Heartbeat monitoring testing with real Redis infrastructure")
 
-    async def test_heartbeat_monitoring_reliability(self, ws_manager, heartbeat_monitor, test_users):
+    async def test_heartbeat_monitoring_reliability(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test reliability of heartbeat monitoring system."""
 
@@ -593,7 +593,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         websocket = MockWebSocketForRedis(user.id)
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -654,7 +654,7 @@ class TestWebSocketHeartbeatMonitoringL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
 

@@ -171,7 +171,7 @@ class AuthDatabase:
         try:
             from auth_service.auth_core.database.models import Base
         except ImportError:
-            from .models import Base
+            from auth_service.auth_core.database.models import Base
         
         # For SQLite :memory: databases, we need to use connect() not begin()
         # to avoid the transaction being rolled back when connection closes

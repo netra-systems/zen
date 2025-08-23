@@ -109,7 +109,7 @@ def setup_database_mocking(mock_database_factory):
                                 mock_broadcasting.leave_all_rooms = AsyncMock()
                                 
                                 try:
-                                    with patch('netra_backend.app.ws_manager.manager.broadcasting', mock_broadcasting):
+                                    with patch('netra_backend.app.get_websocket_manager().broadcasting', mock_broadcasting):
                                         yield
                                 except (ImportError, AttributeError):
                                     # WebSocket manager not available, yield without it

@@ -80,13 +80,13 @@ class TestWebSocketConnectionPoolingL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with Redis connection pooling."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -130,7 +130,7 @@ class TestWebSocketConnectionPoolingL3:
 
         ]
     
-    async def test_connection_pool_initialization(self, ws_manager, redis_client):
+    async def test_connection_pool_initialization(self, websocket_manager, redis_client):
 
         """Test WebSocket connection pool initialization with Redis."""
         # Verify Redis connection pool settings
@@ -151,9 +151,9 @@ class TestWebSocketConnectionPoolingL3:
 
         assert initial_connections >= 0
 
-        assert ws_manager is not None
+        assert websocket_manager is not None
     
-    async def test_concurrent_connection_establishment(self, ws_manager, redis_client, test_users):
+    async def test_concurrent_connection_establishment(self, websocket_manager, redis_client, test_users):
 
         """Test concurrent WebSocket connection establishment."""
 
@@ -169,7 +169,7 @@ class TestWebSocketConnectionPoolingL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            task = ws_manager.connect_user(user.id, websocket)
+            task = websocket_manager.connect_user(user.id, websocket)
 
             tasks.append((user, websocket, task))
         
@@ -205,15 +205,15 @@ class TestWebSocketConnectionPoolingL3:
 
         assert connection_time < 5.0  # Performance requirement
 
-        assert len(ws_manager.active_connections) >= successful_connections
+        assert len(websocket_manager.active_connections) >= successful_connections
         
         # Cleanup
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_connection_pool_scaling(self, ws_manager, redis_client, test_users):
+    async def test_connection_pool_scaling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool scaling under load."""
 
@@ -233,7 +233,7 @@ class TestWebSocketConnectionPoolingL3:
 
                     websocket = MockWebSocketForRedis(user.id)
 
-                    connection_info = await ws_manager.connect_user(user.id, websocket)
+                    connection_info = await websocket_manager.connect_user(user.id, websocket)
 
                     if connection_info:
 
@@ -243,7 +243,7 @@ class TestWebSocketConnectionPoolingL3:
             
             # Verify pool handles scaling
 
-            assert len(ws_manager.active_connections) >= len(connections) * 0.9
+            assert len(websocket_manager.active_connections) >= len(connections) * 0.9
             
             # Test pool performance at this scale
 
@@ -257,9 +257,9 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_connection_pool_message_distribution(self, ws_manager, redis_client, test_users):
+    async def test_connection_pool_message_distribution(self, websocket_manager, redis_client, test_users):
 
         """Test message distribution across connection pool."""
 
@@ -273,7 +273,7 @@ class TestWebSocketConnectionPoolingL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            await ws_manager.connect_user(user.id, websocket)
+            await websocket_manager.connect_user(user.id, websocket)
 
             connections.append((user, websocket))
         
@@ -313,9 +313,9 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_connection_pool_failover_handling(self, ws_manager, redis_client, test_users):
+    async def test_connection_pool_failover_handling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resilience during Redis issues."""
 
@@ -325,7 +325,7 @@ class TestWebSocketConnectionPoolingL3:
         
         # Establish connection
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -345,7 +345,7 @@ class TestWebSocketConnectionPoolingL3:
         
         # Verify connection survives stress
 
-        assert user.id in ws_manager.active_connections
+        assert user.id in websocket_manager.active_connections
 
         assert successful_operations > 0
         
@@ -353,15 +353,15 @@ class TestWebSocketConnectionPoolingL3:
 
         recovery_message = create_test_message("pool_recovery", user.id)
 
-        success = await ws_manager.send_message_to_user(user.id, recovery_message)
+        success = await websocket_manager.send_message_to_user(user.id, recovery_message)
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
     @mock_justified("L3: Connection pool stress testing with real Redis")
 
-    async def test_connection_pool_resource_management(self, ws_manager, redis_client, test_users):
+    async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resource management and cleanup."""
 
@@ -382,7 +382,7 @@ class TestWebSocketConnectionPoolingL3:
 
                     websocket = MockWebSocketForRedis(user.id)
 
-                    await ws_manager.connect_user(user.id, websocket)
+                    await websocket_manager.connect_user(user.id, websocket)
 
                     connections.append((user, websocket))
                     
@@ -410,7 +410,7 @@ class TestWebSocketConnectionPoolingL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
 
             await redis_client.delete(f"ws_pool_state:{user.id}")
         

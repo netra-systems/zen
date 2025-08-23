@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
-from auth_service.auth_core.database.database_manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from auth_service.auth_core.core.session_manager import SessionManager
 from netra_backend.app.db.postgres import Database
 from netra_backend.app.redis_manager import RedisManager

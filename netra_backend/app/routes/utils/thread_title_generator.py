@@ -6,9 +6,9 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.ws_manager import ws_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -74,7 +74,7 @@ async def send_thread_rename_notification(user_id: int, thread_id: str, title: s
         "type": "thread_renamed", "thread_id": thread_id,
         "new_title": title, "timestamp": int(time.time())
     }
-    await ws_manager.send_to_user(str(user_id), event)
+    await websocket_manager.send_to_user(str(user_id), event)
 
 
 async def create_final_thread_response(db: AsyncSession, thread, title: str):
