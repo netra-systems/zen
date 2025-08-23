@@ -27,11 +27,14 @@ class UserAuthService:
     
     def _get_shared_secret(self) -> str:
         """Get shared secret for cross-service validation"""
-        secret = self.config.get("AUTH_SHARED_SECRET")
+        config = self.config.get_config()
+        
+        # Try service_secret first (AUTH_SHARED_SECRET equivalent)
+        secret = config.service_secret
         if not secret:
             # Fallback to JWT secret for backward compatibility
-            secret = self.config.get("JWT_SECRET", "dev-secret")
-            logger.warning("AUTH_SHARED_SECRET not configured, using JWT_SECRET fallback")
+            secret = config.jwt_secret_key or "dev-secret"
+            logger.warning("service_secret not configured, using jwt_secret_key fallback")
         return secret
     
     async def validate_user_token(self, token: str) -> Optional[Dict]:

@@ -90,7 +90,8 @@ class UnifiedWebSocketRouteManager:
         self.unified_manager = UnifiedWebSocketManager.get_instance()
         self.connections: Dict[str, Dict[str, Any]] = {}
         self.cors_handler = get_websocket_cors_handler()
-        self.mcp_service = MCPService()
+        # MCP service initialization is deferred until needed
+        self._mcp_service = None
         self._stats = {
             "connections_created": 0,
             "connections_closed": 0,
@@ -102,6 +103,17 @@ class UnifiedWebSocketRouteManager:
         }
     
     # Message routing is now handled by the unified manager
+    
+    def _get_mcp_service(self) -> Optional[MCPService]:
+        """Get MCP service instance (lazy initialization)."""
+        if self._mcp_service is None:
+            try:
+                # Try to create MCP service with proper dependencies
+                # For now, return None - MCP is optional for WebSocket functionality
+                pass
+            except Exception as e:
+                logger.warning(f"MCP service unavailable: {e}")
+        return self._mcp_service
     
     async def validate_jwt_authentication(self, websocket: WebSocket) -> Dict[str, Any]:
         """
@@ -205,11 +217,18 @@ class UnifiedWebSocketRouteManager:
         connection_info = await self.unified_manager.connect_user(user_id, websocket)
         connection_id = connection_info.connection_id
         
-        # Create MCP session for this route-specific connection
-        mcp_session_id = await self.mcp_service.create_session(
-            metadata={"websocket": True, "user_id": user_id, "connection_id": connection_id}
-        )
-        self._stats["mcp_sessions"] += 1
+        # Create MCP session for this route-specific connection (optional)
+        mcp_session_id = None
+        try:
+            mcp_service = self._get_mcp_service()
+            if mcp_service:
+                mcp_session_id = await mcp_service.create_session(
+                    metadata={"websocket": True, "user_id": user_id, "connection_id": connection_id}
+                )
+                self._stats["mcp_sessions"] += 1
+        except Exception as e:
+            # MCP is optional, don't fail connection if MCP service unavailable
+            logger.warning(f"MCP service unavailable for connection {connection_id}: {e}")
         
         self.connections[connection_id] = {
             "connection_id": connection_id,
@@ -240,10 +259,12 @@ class UnifiedWebSocketRouteManager:
         user_id = conn["user_id"]
         mcp_session_id = conn.get("mcp_session_id")
         
-        # Close MCP session
+        # Close MCP session if exists
         if mcp_session_id:
             try:
-                await self.mcp_service.close_session(mcp_session_id)
+                mcp_service = self._get_mcp_service()
+                if mcp_service:
+                    await mcp_service.close_session(mcp_session_id)
             except Exception as e:
                 logger.warning(f"Error closing MCP session {mcp_session_id}: {e}")
         

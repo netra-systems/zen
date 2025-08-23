@@ -30,7 +30,6 @@ import json
 import pytest
 import time
 
-)
 from test_framework.mock_utils import mock_justified
 
 class MockWebSocket:
@@ -132,10 +131,8 @@ class TestSyntaxFix:
     """Generated test class"""
 
     def mock_cors_handler():
-
-    """Mock CORS handler."""
-
-    handler = MagicMock(spec=WebSocketCORSHandler)
+        """Mock CORS handler."""
+        handler = MagicMock(spec=WebSocketCORSHandler)
 
     handler.is_origin_allowed.return_value = True
 

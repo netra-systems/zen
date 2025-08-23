@@ -17,6 +17,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 from sqlalchemy import text
 
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from auth_service.auth_core.database.connection_events import setup_auth_async_engine_events
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,12 +65,12 @@ class AuthDatabase:
             connect_args = {"check_same_thread": False}
         elif self.is_cloud_run or force_postgres_in_test:
             # Cloud Run with Cloud SQL OR test with PostgreSQL URL
-            database_url = await self._get_cloud_sql_url()
+            database_url = AuthDatabaseManager.get_auth_database_url_async()
             pool_class = NullPool  # Serverless requires NullPool
             connect_args = self._get_cloud_sql_connect_args()
         else:
             # Local development with PostgreSQL
-            database_url = await self._get_local_postgres_url()
+            database_url = AuthDatabaseManager.get_auth_database_url_async()
             pool_class = AsyncAdaptedQueuePool
             connect_args = self._get_local_connect_args()
         
@@ -97,6 +100,10 @@ class AuthDatabase:
             
             self.engine = create_async_engine(database_url, **engine_kwargs)
             
+            # Setup connection events for PostgreSQL connections
+            if not database_url.startswith('sqlite'):
+                setup_auth_async_engine_events(self.engine)
+            
             # Create session factory
             self.async_session_maker = async_sessionmaker(
                 self.engine,
@@ -124,94 +131,17 @@ class AuthDatabase:
             logger.error(f"Failed to initialize auth database: {e}")
             raise RuntimeError(f"Auth database initialization failed: {e}") from e
     
-    async def _get_cloud_sql_url(self) -> str:
-        """Get Cloud SQL connection URL for Cloud Run"""
+    async def _validate_database_url(self) -> bool:
+        """Validate the current database URL configuration.
+        
+        Returns:
+            True if URL is valid, False otherwise
+        """
         try:
-            # Try Cloud SQL connector first
-            from google.cloud.sql.connector import Connector
-            
-            # This would be handled differently with connector
-            # For now, fall back to direct URL
-            return await self._get_direct_cloud_sql_url()
-        except ImportError:
-            # Fallback to direct connection
-            return await self._get_direct_cloud_sql_url()
-    
-    async def _get_direct_cloud_sql_url(self) -> str:
-        """Get direct Cloud SQL connection URL"""
-        try:
-            from auth_service.auth_core.config import AuthConfig
-        except ImportError:
-            from ..config import AuthConfig
-        database_url = AuthConfig.get_database_url()
-        
-        if not database_url:
-            raise ValueError("No database URL configured for Cloud Run")
-        
-        # Convert to async format
-        if database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-        elif database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
-        
-        # Handle SSL for asyncpg
-        if "sslmode=" in database_url:
-            if "/cloudsql/" in database_url:
-                # Remove sslmode for Cloud SQL unix sockets
-                import re
-                database_url = re.sub(r'[&?]sslmode=[^&]*', '', database_url)
-            else:
-                # Convert sslmode to ssl for asyncpg compatibility
-                import re
-                def replace_sslmode(match):
-                    sslmode_value = match.group(1)
-                    if sslmode_value == "require":
-                        return "ssl=require"
-                    elif sslmode_value == "prefer":
-                        return "ssl=prefer" 
-                    elif sslmode_value == "disable":
-                        return "ssl=disable"
-                    else:
-                        return f"ssl={sslmode_value}"
-                
-                database_url = re.sub(r'sslmode=([^&]*)', replace_sslmode, database_url)
-        
-        return database_url
-    
-    async def _get_local_postgres_url(self) -> str:
-        """Get local PostgreSQL connection URL"""
-        try:
-            from auth_service.auth_core.config import AuthConfig
-        except ImportError:
-            from ..config import AuthConfig
-        database_url = AuthConfig.get_database_url()
-        
-        if not database_url:
-            # Default local PostgreSQL
-            database_url = "postgresql+asyncpg://postgres:password@localhost:5432/auth"
-        elif database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-        elif database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
-        
-        # Handle SSL for asyncpg
-        if "sslmode=" in database_url:
-            # Convert sslmode to ssl for asyncpg compatibility
-            import re
-            def replace_sslmode(match):
-                sslmode_value = match.group(1)
-                if sslmode_value == "require":
-                    return "ssl=require"
-                elif sslmode_value == "prefer":
-                    return "ssl=prefer" 
-                elif sslmode_value == "disable":
-                    return "ssl=disable"
-                else:
-                    return f"ssl={sslmode_value}"
-            
-            database_url = re.sub(r'sslmode=([^&]*)', replace_sslmode, database_url)
-        
-        return database_url
+            return AuthDatabaseManager.validate_auth_url()
+        except Exception as e:
+            logger.warning(f"Database URL validation failed: {e}")
+            return False
     
     def _get_cloud_sql_connect_args(self) -> dict:
         """Get connection arguments for Cloud SQL"""
@@ -299,6 +229,9 @@ class AuthDatabase:
             "environment": self.environment,
             "is_cloud_run": self.is_cloud_run,
             "is_test_mode": self.is_test_mode,
+            "is_cloud_sql": AuthDatabaseManager.is_cloud_sql_environment(),
+            "is_test_env": AuthDatabaseManager.is_test_environment(),
+            "url_valid": AuthDatabaseManager.validate_auth_url() if self._initialized else None,
             "pool_type": "NullPool" if (self.is_cloud_run or self.is_test_mode) else "AsyncAdaptedQueuePool",
         }
 
