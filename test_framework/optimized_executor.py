@@ -28,13 +28,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Local imports
-from .intelligent_parallelization import (
+from test_framework.intelligent_parallelization import (
     IntelligentTestParallelizer,
     TestMetrics,
     TestPriority,
     TestType,
 )
-from .resource_monitor import (
+from test_framework.resource_monitor import (
     CacheManager,
     HardwareAwareOptimizer,
     MemoryOptimizer,

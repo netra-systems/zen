@@ -10,7 +10,7 @@ from typing import Any, Callable, Optional, Union
 
 import pytest
 
-from .feature_flags import (
+from test_framework.feature_flags import (
     FeatureStatus,
     get_feature_flag_manager,
     is_feature_enabled,

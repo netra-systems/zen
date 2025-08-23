@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Union
 import yaml
 from dotenv import load_dotenv
 
-from ..unified.base_interfaces import (
+from test_framework.unified.base_interfaces import (
     IConfigurationManager,
     ServiceConfig,
     TestEnvironment,

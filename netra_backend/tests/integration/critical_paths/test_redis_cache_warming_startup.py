@@ -396,14 +396,14 @@ class RedisCacheWarmingStartupL3Manager:
         }
         
         target_cache = cache_mapping.get(data_type, "main_cache")
-        cache_client = self.redis_clients[target_cache]
+        cache_prefix = f"{target_cache}:"
         
-        # Warm cache with data
+        # Warm cache with data using real Redis client
         keys_warmed = 0
         data_entries = data_result["data"]
         
-        # Use pipeline for efficiency
-        pipe = cache_client.pipeline()
+        # Use pipeline for efficiency with the real Redis client
+        pipe = self.redis_client.pipeline()
         
         for key, value in data_entries.items():
             try:
@@ -420,8 +420,10 @@ class RedisCacheWarmingStartupL3Manager:
                 else:
                     ttl = 3600   # 1 hour
                 
-                pipe.setex(key, ttl, cache_value)
-                self.warmed_keys.add(key)
+                # Use cache prefix to simulate different cache namespaces
+                prefixed_key = f"{cache_prefix}{key}"
+                pipe.setex(prefixed_key, ttl, cache_value)
+                self.warmed_keys.add(prefixed_key)
                 keys_warmed += 1
                 
             except Exception as e:
@@ -654,9 +656,9 @@ class RedisCacheWarmingStartupL3Manager:
             logger.error(f"Startup warming cleanup failed: {e}")
 
 @pytest.fixture
-async def startup_warming_manager():
-    """Create L3 Redis cache warming startup manager."""
-    manager = RedisCacheWarmingStartupL3Manager()
+async def startup_warming_manager(isolated_redis_client):
+    """Create L3 Redis cache warming startup manager with real Redis client."""
+    manager = RedisCacheWarmingStartupL3Manager(isolated_redis_client)
     await manager.setup_redis_for_startup_warming()
     await manager.setup_database_sources()
     yield manager

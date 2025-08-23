@@ -10,14 +10,14 @@ from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
-from .alert_models import (
+from netra_backend.app.monitoring.alert_models import (
     Alert,
     AlertLevel,
     AlertRule,
     NotificationChannel,
     NotificationConfig,
 )
-from .alert_notifications import (
+from netra_backend.app.monitoring.alert_notifications import (
     NotificationDeliveryManager,
     create_default_notification_configs,
 )

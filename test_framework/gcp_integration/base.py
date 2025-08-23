@@ -17,7 +17,7 @@ from google.auth.exceptions import GoogleAuthError
 from google.cloud import logging as gcp_logging
 from google.cloud import secretmanager
 
-from ..unified.base_interfaces import (
+from test_framework.unified.base_interfaces import (
     BaseTestComponent,
     ServiceConfig,
     ServiceStatus,

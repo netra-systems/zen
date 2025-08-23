@@ -72,7 +72,7 @@ class TestWebSocketExecutionEngineInitialization:
         broadcast_manager = BroadcastManager()
         
         assert broadcast_manager is not None
-        assert hasattr(broadcast_manager, 'broadcast_to_all')
+        assert hasattr(broadcast_manager, 'broadcast_message')
     
     def test_websocket_manager_initialization(self):
         """Test WebSocketManager is properly initialized."""

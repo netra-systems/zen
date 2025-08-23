@@ -1,6 +1,6 @@
 """Schema definitions for Netra Backend"""
 
-from .admin_corpus_messages import (
+from netra_backend.app.schemas.admin_corpus_messages import (
     ConfigurationSuggestionRequest,
     ConfigurationSuggestionResponse,
     CorpusAutoCompleteRequest,
@@ -19,7 +19,7 @@ from .admin_corpus_messages import (
     CorpusValidationRequest,
     CorpusValidationResponse,
 )
-from .admin_tool_types import (
+from netra_backend.app.schemas.admin_tool_types import (
     AdminToolAuditLog,
     AdminToolInfo,
     AdminToolMetrics,
@@ -43,7 +43,7 @@ from .admin_tool_types import (
     UserAdminOperation,
     UserAdminResponse,
 )
-from .Agent import (
+from netra_backend.app.schemas.Agent import (
     AgentCompleted,
     AgentErrorMessage,
     AgentStarted,
@@ -58,7 +58,7 @@ from .Agent import (
 )
 from netra_backend.app.schemas.agent_models import AgentMetadata, AgentResult, DeepAgentState, ToolResultData
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
-from .agent_state import (
+from netra_backend.app.schemas.agent_state import (
     AgentPhase,
     AgentStateMetadata,
     CheckpointType,
@@ -78,13 +78,13 @@ from .agent_state import (
     StateValidationResult,
 )
 from netra_backend.app.schemas.Analysis import AnalysisResult
-from .audit_models import (
+from netra_backend.app.schemas.audit_models import (
     CorpusAuditMetadata,
     CorpusAuditRecord,
     CorpusAuditReport,
     CorpusAuditSearchFilter,
 )
-from .auth_types import (
+from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthConfig,
     AuthConfigResponse,
@@ -111,7 +111,7 @@ from .auth_types import (
     UserInfo,
     UserPermission,
 )
-from .Config import (
+from netra_backend.app.schemas.Config import (
     AppConfig,
     ClickHouseCredentials,
     ClickHouseHTTPSConfig,
@@ -133,7 +133,7 @@ from .Config import (
     TimePeriodSettings,
     WebSocketConfig,
 )
-from .config_types import (
+from netra_backend.app.schemas.config_types import (
     ClickHouseConfigInfo,
     ConfigBackup,
     ConfigFieldInfo,
@@ -156,7 +156,7 @@ from .config_types import (
     SecretType,
     WebSocketConfigInfo,
 )
-from .core_enums import (
+from netra_backend.app.schemas.core_enums import (
     AgentStatus,
     CircuitBreakerState,
     CorpusAuditAction,
@@ -172,7 +172,7 @@ from .core_enums import (
     WebSocketConnectionState,
     WebSocketMessageType,
 )
-from .core_models import (
+from netra_backend.app.schemas.core_models import (
     CircuitBreakerConfig,
     HealthCheckResult,
     Message,
@@ -185,7 +185,7 @@ from .core_models import (
     UserCreate,
     UserCreateOAuth,
 )
-from .Corpus import (
+from netra_backend.app.schemas.Corpus import (
     ContentCorpus,
     Corpus,
     CorpusBase,
@@ -197,7 +197,7 @@ from .Corpus import (
     DocumentCreate,
     DocumentUpdate,
 )
-from .data_ingestion_types import (
+from netra_backend.app.schemas.data_ingestion_types import (
     DataCatalog,
     DataFormat,
     DataLineage,
@@ -218,7 +218,7 @@ from .data_ingestion_types import (
     TransformationStep,
     ValidationRule,
 )
-from .demo_schemas import (
+from netra_backend.app.schemas.demo_schemas import (
     DemoAnalytics,
     DemoChatRequest,
     DemoChatResponse,
@@ -234,7 +234,7 @@ from .demo_schemas import (
     ROICalculationRequest,
     ROICalculationResponse,
 )
-from .diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DependencyInfo,
     DependencyReport,
     DependencyStatus,
@@ -249,7 +249,7 @@ from .diagnostic_types import (
 )
 from netra_backend.app.schemas.Event import EventMetadata, TraceContext
 from netra_backend.app.schemas.FinOps import CostComparison, DataGenerationType, FinOps, WorkloadProfile
-from .Generation import (
+from netra_backend.app.schemas.Generation import (
     ContentCorpusGenParams,
     ContentGenParams,
     DataIngestionParams,
@@ -258,7 +258,7 @@ from .Generation import (
     SyntheticDataGenParams,
     SyntheticDataResult,
 )
-from .github_analyzer import (
+from netra_backend.app.schemas.github_analyzer import (
     AIOperationsMap,
     AIProvider,
     AnalysisMetrics,
@@ -270,7 +270,7 @@ from .github_analyzer import (
     SecurityInfo,
     ToolInfo,
 )
-from .llm_base_types import (
+from netra_backend.app.schemas.llm_base_types import (
     LLMConfigInfo,
     LLMError,
     LLMHealthCheck,
@@ -281,7 +281,7 @@ from .llm_base_types import (
     LLMRole,
     TokenUsage,
 )
-from .llm_config_types import (
+from netra_backend.app.schemas.llm_config_types import (
     AgentTool,
     AuditContext,
     CacheConfiguration,
@@ -315,14 +315,14 @@ from .llm_config_types import (
     UsageMetrics,
     WorkloadCharacteristics,
 )
-from .llm_request_types import (
+from netra_backend.app.schemas.llm_request_types import (
     BatchLLMRequest,
     LLMFunction,
     LLMRequest,
     LLMTool,
     StructuredOutputSchema,
 )
-from .llm_response_types import (
+from netra_backend.app.schemas.llm_response_types import (
     BatchLLMResponse,
     E2ETestInfrastructure,
     E2ETestResult,
@@ -330,7 +330,7 @@ from .llm_response_types import (
     LLMResponse,
     LLMStreamChunk,
 )
-from .llm_types import (
+from netra_backend.app.schemas.llm_types import (
     AuditContext,
     BaseContext,
     CapacityPlanningContext,
@@ -355,7 +355,7 @@ from .llm_types import (
     ToolMigrationContext,
 )
 from netra_backend.app.schemas.Log import UnifiedLogEntry
-from .mcp_client import (
+from netra_backend.app.schemas.mcp_client import (
     ClearCacheRequest,
     ClearCacheResponse,
     ConnectServerRequest,
@@ -378,7 +378,7 @@ from .mcp_client import (
     RegisterServerRequest,
     RegisterServerResponse,
 )
-from .Metrics import (
+from netra_backend.app.schemas.Metrics import (
     BaselineMetrics,
     CorpusMetric,
     EnrichedMetrics,
@@ -391,7 +391,7 @@ from .Metrics import (
     ResourceUsage,
     TimeSeriesPoint,
 )
-from .monitoring import (
+from netra_backend.app.schemas.monitoring import (
     AlertLevel,
     AlertManagerProtocol,
     BaseAlert,
@@ -417,7 +417,7 @@ from .monitoring import (
     SystemHealth,
     ThresholdAlert,
 )
-from .monitoring_schemas import (
+from netra_backend.app.schemas.monitoring_schemas import (
     ErrorContext,
     ErrorDetailResponse,
     ErrorQuery,
@@ -432,7 +432,7 @@ from .monitoring_schemas import (
     GCPErrorGroup,
     GCPErrorServiceConfig,
 )
-from .monitoring_types import (
+from netra_backend.app.schemas.monitoring_types import (
     AlertEvent,
     AlertRule,
     AlertSeverity,
@@ -452,7 +452,7 @@ from .monitoring_types import (
 from netra_backend.app.schemas.Pattern import DiscoveredPattern
 from netra_backend.app.schemas.Performance import Performance
 from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
-from .quality_types import (
+from netra_backend.app.schemas.quality_types import (
     AgentQualityProfile,
     AlertAcknowledgement,
     AlertAcknowledgementResponse,
@@ -475,7 +475,7 @@ from .quality_types import (
     QualityValidatorInterface,
     User,
 )
-from .rate_limit_types import (
+from netra_backend.app.schemas.rate_limit_types import (
     AdaptiveRateLimitConfig,
     RateLimitAlgorithm,
     RateLimitConfig,
@@ -490,13 +490,13 @@ from .rate_limit_types import (
     SlidingWindowCounter,
     TokenBucket,
 )
-from .Reference import (
+from netra_backend.app.schemas.Reference import (
     ReferenceCreateRequest,
     ReferenceGetResponse,
     ReferenceItem,
     ReferenceUpdateRequest,
 )
-from .reliability_types import (
+from netra_backend.app.schemas.reliability_types import (
     BackoffStrategy,
     CircuitBreakerConfig,
     CircuitBreakerMetrics,
@@ -512,7 +512,7 @@ from .reliability_types import (
     RetryConfig,
     TokenBucket,
 )
-from .Request import (
+from netra_backend.app.schemas.Request import (
     DataSource,
     RequestModel,
     Response,
@@ -523,7 +523,7 @@ from .Request import (
     Workload,
 )
 from netra_backend.app.schemas.Run import RunComplete
-from .service_types import (
+from netra_backend.app.schemas.service_types import (
     BatchOperationResult,
     CRUDServiceInterface,
     FilterParams,
@@ -546,7 +546,7 @@ from .service_types import (
     ServiceValidationError,
     TransactionContext,
 )
-from .shared_types import (
+from netra_backend.app.schemas.shared_types import (
     AgentStatus,
     AnomalyDetail,
     AnomalyDetectionResponse,
@@ -571,7 +571,7 @@ from .shared_types import (
     ValidationResult,
     WebSocketConnectionConfig,
 )
-from .startup_types import (
+from netra_backend.app.schemas.startup_types import (
     CrashEntry,
     Environment,
     ErrorPattern,
@@ -587,7 +587,7 @@ from .startup_types import (
     StartupEvent,
     StartupStatus,
 )
-from .strict_types import (
+from netra_backend.app.schemas.strict_types import (
     AgentExecutionContext,
     AgentExecutionMetrics,
     AgentTypeRegistry,
@@ -602,7 +602,7 @@ from .strict_types import (
     SupervisorAgentProtocol,
     TriageAgentProtocol,
 )
-from .Supply import (
+from netra_backend.app.schemas.Supply import (
     ModelIdentifier,
     SupplyOption,
     SupplyOptionBase,
@@ -611,7 +611,7 @@ from .Supply import (
     SupplyOptionInDBBase,
     SupplyOptionUpdate,
 )
-from .Tool import (
+from netra_backend.app.schemas.Tool import (
     BaseTool,
     SimpleToolPayload,
     ToolArguments,
@@ -629,7 +629,7 @@ from .Tool import (
     ToolStarted,
     ToolStatus,
 )
-from .ToolPermission import (
+from netra_backend.app.schemas.ToolPermission import (
     BusinessRequirement,
     PermissionCheckResult,
     PermissionGrant,
@@ -641,13 +641,13 @@ from .ToolPermission import (
     ToolPermission,
     UserToolPermission,
 )
-from .unified_tools import (
+from netra_backend.app.schemas.unified_tools import (
     ToolAvailabilityResponse,
     ToolExecutionRequest,
     UserPlanResponse,
 )
 from netra_backend.app.schemas.user import UserUpdate
-from .UserPlan import (
+from netra_backend.app.schemas.UserPlan import (
     AutoUpgradeRule,
     PlanDefinition,
     PlanFeatures,
@@ -658,7 +658,7 @@ from .UserPlan import (
     UsageRecord,
     UserPlan,
 )
-from .websocket_message_types import (
+from netra_backend.app.schemas.websocket_message_types import (
     BroadcastResult,
     ClientMessage,
     ConnectionInfo,
@@ -678,7 +678,7 @@ from .websocket_message_types import (
     WebSocketStats,
     WebSocketValidationError,
 )
-from .websocket_models import (
+from netra_backend.app.schemas.websocket_models import (
     AgentCompleted,
     AgentCompletedPayload,
     AgentLog,
@@ -711,7 +711,7 @@ from .websocket_models import (
     WebSocketStats,
     WebSocketValidationError,
 )
-from .websocket_payloads import (
+from netra_backend.app.schemas.websocket_payloads import (
     AgentErrorPayload,
     AgentStartedPayload,
     BaseWebSocketMessage,
@@ -736,7 +736,7 @@ from .websocket_payloads import (
     ToolResultPayload,
     ToolStartedPayload,
 )
-from .websocket_server_messages import (
+from netra_backend.app.schemas.websocket_server_messages import (
     AgentCompletedMessage,
     AgentErrorMessage,
     AgentLogMessage,

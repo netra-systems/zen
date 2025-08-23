@@ -168,6 +168,12 @@ class WebSocketManager:
             return True
         return False
     
+    async def send_message(self, user_id: str, 
+                          message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]],
+                          retry: bool = True) -> bool:
+        """Alias for send_to_user for backward compatibility."""
+        return await self.send_to_user(user_id, message, retry)
+    
     async def _send_to_connection(self, connection_id: str, 
                                 message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
         """Send message to specific connection."""
@@ -350,20 +356,20 @@ class WebSocketManager:
         
         return True
     
-    def get_stats(self) -> WebSocketStats:
+    def get_stats(self) -> Dict[str, Any]:
         """Get comprehensive WebSocket statistics."""
         uptime = time.time() - self.connection_stats["start_time"]
         
-        return WebSocketStats(
-            active_connections=self.connection_stats["active_connections"],
-            total_connections=self.connection_stats["total_connections"], 
-            messages_sent=self.connection_stats["messages_sent"],
-            messages_received=self.connection_stats["messages_received"],
-            errors_handled=self.connection_stats["errors_handled"],
-            uptime_seconds=uptime,
-            rooms_active=len(self.room_memberships),
-            broadcasts_sent=self.connection_stats["broadcasts_sent"]
-        )
+        return {
+            "active_connections": self.connection_stats["active_connections"],
+            "total_connections": self.connection_stats["total_connections"], 
+            "messages_sent": self.connection_stats["messages_sent"],
+            "messages_received": self.connection_stats["messages_received"],
+            "errors_handled": self.connection_stats["errors_handled"],
+            "uptime_seconds": uptime,
+            "rooms_active": len(self.room_memberships),
+            "broadcasts_sent": self.connection_stats["broadcasts_sent"]
+        }
     
     async def cleanup_stale_connections(self) -> int:
         """Clean up connections that are no longer healthy."""

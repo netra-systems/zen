@@ -9,7 +9,7 @@ from test_framework.test_config import COMPONENT_MAPPINGS, SHARD_MAPPINGS, TEST_
 
 # Import discovery and parsing utilities
 from test_framework.test_discovery import TestDiscovery
-from .test_parser import (
+from test_framework.test_parser import (
     extract_failing_tests,
     extract_test_details,
     parse_coverage,
@@ -17,7 +17,7 @@ from .test_parser import (
 )
 
 # Import report generators and managers
-from .report_generators import (
+from test_framework.report_generators import (
     generate_json_report,
     generate_markdown_report,
     generate_text_report,

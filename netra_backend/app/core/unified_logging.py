@@ -52,38 +52,38 @@ class UnifiedLogger:
             return self._config
             
         try:
+            # Avoid circular import during module initialization
             from netra_backend.app.core.configuration import unified_config_manager
-            config = unified_config_manager.get_config()
-            loaded_config = {
-                'log_level': getattr(config, 'log_level', 'INFO').upper(),
-                'enable_file_logging': getattr(config, 'enable_file_logging', False),
-                'enable_json_logging': getattr(config, 'enable_json_logging', False),
-                'log_file_path': getattr(config, 'log_file_path', 'logs/netra.log')
-            }
-        except ImportError:
-            # Fallback configuration if config module not available
-            loaded_config = {
-                # @marked: Logging bootstrap before config initialization
-                'log_level': self._get_fallback_log_level(),
-                'enable_file_logging': False,
-                'enable_json_logging': False,
-                'log_file_path': 'logs/netra.log'
-            }
+            # Check if config manager is in loading state to prevent recursion
+            if hasattr(unified_config_manager, '_loading') and unified_config_manager._loading:
+                # Use fallback during config loading phase
+                loaded_config = self._get_fallback_config()
+            else:
+                config = unified_config_manager.get_config()
+                loaded_config = {
+                    'log_level': getattr(config, 'log_level', 'INFO').upper(),
+                    'enable_file_logging': getattr(config, 'enable_file_logging', False),
+                    'enable_json_logging': getattr(config, 'enable_json_logging', False),
+                    'log_file_path': getattr(config, 'log_file_path', 'logs/netra.log')
+                }
+        except (ImportError, Exception):
+            # Fallback configuration if config module not available or any error
+            loaded_config = self._get_fallback_config()
         
         # Cache the config and mark as loaded
         self._config = loaded_config
         self._config_loaded = True
         return loaded_config
     
-    def _get_fallback_log_level(self) -> str:
-        """Get log level from unified config with fallback."""
-        try:
-            from netra_backend.app.core.configuration.base import get_unified_config
-            config = get_unified_config()
-            return config.logging.level.upper()
-        except:
-            # Ultimate fallback to environment variable or INFO
-            return os.environ.get('LOG_LEVEL', 'INFO').upper()
+    def _get_fallback_config(self) -> Dict[str, Any]:
+        """Get fallback configuration for bootstrap phase."""
+        return {
+            'log_level': os.environ.get('LOG_LEVEL', 'INFO').upper(),
+            'enable_file_logging': False,
+            'enable_json_logging': False,
+            'log_file_path': 'logs/netra.log'
+        }
+    
     
     def _setup_logging(self):
         """Initialize the logging system."""

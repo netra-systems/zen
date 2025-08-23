@@ -4,6 +4,7 @@ Depends on root /tests/conftest.py for common fixtures and environment setup.
 """
 import asyncio
 import os
+import sys
 from typing import AsyncGenerator
 from unittest.mock import patch
 
@@ -11,14 +12,17 @@ import pytest
 import pytest_asyncio
 
 # Set auth-specific environment variables (common ones handled by root conftest)
-os.environ["ENVIRONMENT"] = "test"  # Use test environment for proper test setup
-os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
-os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
-os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
-os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///test_auth.db"
-os.environ["AUTH_USE_FILE_DB"] = "true"  # Force file-based DB for tests
-os.environ["REDIS_URL"] = "redis://localhost:6379/1"
+# CRITICAL: Only set test environment if we're actually running tests
+# This prevents the dev launcher from being affected when modules are imported
+if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    os.environ["ENVIRONMENT"] = "test"  # Use test environment for proper test setup
+    os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
+    os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
+    os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
+    os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
+    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///test_auth.db"
+    os.environ["AUTH_USE_FILE_DB"] = "true"  # Force file-based DB for tests
+    os.environ["REDIS_URL"] = "redis://localhost:6379/1"
 
 @pytest.fixture(scope="session")
 def event_loop():
