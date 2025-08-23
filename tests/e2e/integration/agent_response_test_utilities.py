@@ -5,7 +5,59 @@ Utilities for testing agent response handling and validation.
 """
 
 import asyncio
+import time
+from enum import Enum
 from typing import Dict, Any, List
+
+
+class ResponseTestType(Enum):
+    """Types of response tests."""
+    REGULAR = "regular"
+    STREAMING = "streaming"
+    ERROR = "error"
+    TIMEOUT = "timeout"
+
+class AgentResponseSimulator:
+    """Simulates agent responses for testing."""
+    
+    def __init__(self):
+        self.response_count = 0
+        self.response_delay = 1.0  # Default delay in seconds
+    
+    async def simulate_agent_response(self, prompt: str, delay: float = None) -> Dict[str, Any]:
+        """Simulate an agent response to a prompt."""
+        if delay is None:
+            delay = self.response_delay
+            
+        await asyncio.sleep(delay)
+        self.response_count += 1
+        
+        return {
+            "response_id": f"sim_response_{self.response_count}",
+            "prompt": prompt,
+            "content": f"Simulated response to: {prompt[:50]}...",
+            "timestamp": time.time(),
+            "status": "completed",
+            "metadata": {
+                "simulation": True,
+                "delay_used": delay,
+                "response_count": self.response_count
+            }
+        }
+    
+    async def simulate_streaming_response(self, prompt: str, chunk_count: int = 3) -> List[Dict[str, Any]]:
+        """Simulate a streaming agent response."""
+        chunks = []
+        for i in range(chunk_count):
+            await asyncio.sleep(0.5)  # Delay between chunks
+            chunk = {
+                "chunk_id": i,
+                "content": f"Stream chunk {i+1} for: {prompt[:30]}...",
+                "is_final": i == chunk_count - 1,
+                "timestamp": time.time()
+            }
+            chunks.append(chunk)
+        return chunks
 
 class AgentResponseTester:
     """Test agent response handling."""

@@ -209,6 +209,26 @@ class WIPReportGenerator:
         print(f"Overall System Health: {overall_score:.1f}%")
         print(f"Testing Score: {testing_score:.1f}% (E2E tests: {testing_details['e2e_tests']})")
     
+    def _format_action_items(self) -> str:
+        """Format action items based on severity violations"""
+        items = []
+        
+        critical = self.compliance_data.get('critical_count', 0)
+        high = self.compliance_data.get('high_count', 0)
+        medium = self.compliance_data.get('medium_count', 0)
+        
+        if critical > 0:
+            items.append(f"- [ ] 🚨 **CRITICAL:** Fix {critical} violations blocking deployment")
+        if high > 0:
+            items.append(f"- [ ] 🔴 **HIGH:** Address {high} violations within 24 hours")
+        if medium > 0:
+            items.append(f"- [ ] 🟡 **MEDIUM:** Resolve {medium} violations this sprint")
+        
+        if not items:
+            items.append("- [x] ✅ No blocking violations detected")
+        
+        return "\n".join(items)
+    
     def _generate_markdown_report(self, overall_score: float, arch_score: float, 
                                  test_score: float, test_details: Dict) -> str:
         """Generate the markdown report content."""
@@ -233,6 +253,29 @@ class WIPReportGenerator:
         # Get violation details
         prod_violations = self.compliance_data.get('production_violations', 0)
         test_violations = self.compliance_data.get('test_violations', 0)
+        
+        # Calculate business impact metrics
+        critical_count = self.compliance_data.get('critical_count', 0)
+        high_count = self.compliance_data.get('high_count', 0)
+        
+        if critical_count > 0:
+            risk_level = "🚨 CRITICAL - Immediate action required"
+            customer_impact = "High risk of customer-facing failures"
+            tech_debt_status = "Severe - System stability compromised"
+        elif high_count > 10:
+            risk_level = "🔴 HIGH - Urgent attention needed"
+            customer_impact = "Service degradation likely"
+            tech_debt_status = "High - Accumulating rapidly"
+        elif high_count > 5 or self.compliance_data.get('medium_count', 0) > 50:
+            risk_level = "🟡 MODERATE - Schedule remediation"
+            customer_impact = "Performance issues possible"
+            tech_debt_status = "Moderate - Needs management"
+        else:
+            risk_level = "🟢 LOW - System healthy"
+            customer_impact = "Minimal risk"
+            tech_debt_status = "Low - Well managed"
+        
+        deployment_status = "🚫 BLOCKED" if self.compliance_data.get('deployment_blocked', False) else "✅ READY"
         
         report = f"""# Master Work-In-Progress and System Status Index
 
@@ -261,10 +304,10 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 ### Violation Summary by Severity
 | Severity | Count | Limit | Status | Business Impact |
 |----------|-------|-------|--------|-----------------|
-| 🚨 CRITICAL | {compliance_data.get('critical_count', 0)} | 5 | {get_severity_status(compliance_data.get('critical_count', 0), 5)} | System stability at risk |
-| 🔴 HIGH | {compliance_data.get('high_count', 0)} | 20 | {get_severity_status(compliance_data.get('high_count', 0), 20)} | Service degradation possible |
-| 🟡 MEDIUM | {compliance_data.get('medium_count', 0)} | 100 | {get_severity_status(compliance_data.get('medium_count', 0), 100)} | Technical debt accumulating |
-| 🟢 LOW | {compliance_data.get('low_count', 0)} | ∞ | ✅ | Code quality improvements |
+| 🚨 CRITICAL | {self.compliance_data.get('critical_count', 0)} | 5 | {get_severity_status(self.compliance_data.get('critical_count', 0), 5)} | System stability at risk |
+| 🔴 HIGH | {self.compliance_data.get('high_count', 0)} | 20 | {get_severity_status(self.compliance_data.get('high_count', 0), 20)} | Service degradation possible |
+| 🟡 MEDIUM | {self.compliance_data.get('medium_count', 0)} | 100 | {get_severity_status(self.compliance_data.get('medium_count', 0), 100)} | Technical debt accumulating |
+| 🟢 LOW | {self.compliance_data.get('low_count', 0)} | ∞ | ✅ | Code quality improvements |
 
 ### Violation Distribution
 | Category | Count | Status |
@@ -274,7 +317,7 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 | **Total** | **{prod_violations + test_violations}** | - |
 
 ### Business Impact Assessment
-- **Deployment Readiness:** {"🚫 BLOCKED" if compliance_data.get('deployment_blocked', False) else "✅ READY"}
+- **Deployment Readiness:** {"🚫 BLOCKED" if self.compliance_data.get('deployment_blocked', False) else "✅ READY"}
 - **Risk Level:** {risk_level}
 - **Customer Impact:** {customer_impact}
 - **Technical Debt:** {tech_debt_status}
@@ -300,17 +343,19 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 
 ## Action Items
 
-### Immediate Actions
-- [x] Fix E2E test detection in reporting tools
+### Immediate Actions (By Severity)
+{self._format_action_items()}
+
+### Testing Improvements
 - [ ] Increase test coverage to 60% minimum
-- [ ] Balance test pyramid ratios
+- [ ] Balance test pyramid ratios (Target: 15% E2E, 60% Integration, 20% Unit)
 - [ ] Run full E2E suite validation
 
 ### Next Steps
-1. Continue adding integration tests to reach 60% ratio
-2. Maintain E2E test suite at ~20% of total tests
-3. Improve coverage reporting accuracy
-4. Implement automated coverage tracking
+1. Fix all CRITICAL violations immediately (Max: 5)
+2. Address HIGH severity violations within 24 hours (Max: 20)
+3. Schedule MEDIUM severity fixes for current sprint (Max: 100)
+4. Plan LOW severity improvements for next refactor cycle
 
 ---
 

@@ -515,3 +515,20 @@ class RealServicesManager:
             return False
         process = self.service_processes[service_name]
         return process.poll() is None
+
+# Factory function for backward compatibility with existing imports
+def create_real_services_manager(project_root: Optional[Path] = None) -> RealServicesManager:
+    """Create a real services manager instance.
+    
+    Args:
+        project_root: Path to project root directory. If None, auto-detected.
+        
+    Returns:
+        RealServicesManager instance
+    """
+    if project_root is None:
+        # Auto-detect project root
+        current_file = Path(__file__)
+        project_root = current_file.parent.parent.parent  # Go up from tests/e2e/
+    
+    return RealServicesManager(project_root)

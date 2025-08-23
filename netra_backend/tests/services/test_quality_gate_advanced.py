@@ -14,12 +14,12 @@ from unittest.mock import patch
 import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
-from netra_backend.tests.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
     get_brief_optimization_contents,
 )
-from netra_backend.tests.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     add_multiple_test_metrics,
     create_borderline_metrics,
     create_memory_overflow_metrics,
@@ -33,7 +33,7 @@ from netra_backend.tests.quality_gate_fixtures import (
     setup_pattern_test_texts,
     setup_redis_error_mocks,
 )
-from netra_backend.tests.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_batch_validation_results,
     assert_cache_key_format,
     assert_caching_identical_results,

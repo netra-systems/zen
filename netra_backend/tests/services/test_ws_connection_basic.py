@@ -27,7 +27,7 @@ from netra_backend.app.ws_manager import (
     WebSocketManager,
 
 )
-from netra_backend.tests.test_ws_connection_mocks import (
+from netra_backend.tests.services.test_ws_connection_mocks import (
 
     MockConnectionPool,
 

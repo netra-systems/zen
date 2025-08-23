@@ -40,3 +40,35 @@ export * from './metrics.types';
 // AGENT TYPES
 // ============================================================================
 export * from './agent.types';
+
+// ============================================================================
+// DOMAIN TYPES & UTILITIES  
+// ============================================================================
+// Import and re-export specific items to avoid conflicts
+export type { 
+  Message, 
+  MessageRole, 
+  ChatMessage,
+  MessageMetadata,
+  BaseMessage
+} from '../domains/messages';
+
+export type { 
+  Thread, 
+  ThreadState, 
+  ThreadMetadata 
+} from '../domains/threads';
+
+// Export utility functions
+export { 
+  createMessage, 
+  createChatMessage 
+} from '../domains/messages';
+
+export { 
+  getThreadTitle, 
+  createThread, 
+  createThreadWithTitle,
+  isThreadActive,
+  getThreadStatus 
+} from '../domains/threads';

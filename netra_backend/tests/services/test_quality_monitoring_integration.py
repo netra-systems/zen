@@ -22,11 +22,11 @@ from netra_backend.app.services.quality_monitoring_service import (
     MetricType,
     QualityMonitoringService,
 )
-from netra_backend.tests.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     minimal_quality_metrics,
     service_with_mocks,
 )
-from netra_backend.tests.quality_monitoring_helpers import (
+from netra_backend.tests.helpers.quality_monitoring_helpers import (
     assert_alert_history_max_length,
     assert_buffer_max_length,
     create_alert_history_overflow,

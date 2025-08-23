@@ -130,3 +130,35 @@ class MockDatabaseModel(Base):
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
+
+
+class MockRepository:
+    """Mock repository for testing database operations"""
+    
+    def __init__(self):
+        self._entities = {}
+    
+    async def create(self, session, **kwargs):
+        """Create a new entity"""
+        entity = MockDatabaseModel(**kwargs)
+        self._entities[entity.id] = entity
+        return entity
+    
+    async def get_by_id(self, session, entity_id: str):
+        """Get entity by ID"""
+        return self._entities.get(entity_id)
+
+
+class TransactionTestManager:
+    """Manages transaction test scenarios"""
+    
+    def __init__(self):
+        self.operations = []
+    
+    def record_operation(self, operation_type: str, entity_id: str = None):
+        """Record a database operation for testing"""
+        self.operations.append({'type': operation_type, 'entity_id': entity_id})
+    
+    def get_operations_count(self) -> int:
+        """Get count of recorded operations"""
+        return len(self.operations)

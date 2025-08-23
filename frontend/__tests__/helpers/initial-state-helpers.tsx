@@ -8,6 +8,7 @@ import React from 'react';
 import { jest } from '@jest/globals';
 // Auth service mocks handled by test setup
 import { useAppStore } from '@/store/app';
+import { wrapStateSetterWithAct } from '../test-utils/react-act-utils';
 
 interface MockStorageItem {
   key: string;
@@ -153,21 +154,25 @@ export const WebSocketConnectionComponent: React.FC = () => {
   const [connectionState, setConnectionState] = React.useState('connecting');
   const [attempts, setAttempts] = React.useState(0);
   
+  // Wrap state setters with act() to prevent warnings  
+  const safeSetConnectionState = wrapStateSetterWithAct(setConnectionState);
+  const safeSetAttempts = wrapStateSetterWithAct(setAttempts);
+  
   React.useEffect(() => {
     const connectWebSocket = async () => {
-      setAttempts(prev => prev + 1);
+      safeSetAttempts(prev => prev + 1);
       
       try {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         const mockWebSocketService = require('@/services/webSocketService').webSocketService;
         if (mockWebSocketService.isConnected()) {
-          setConnectionState('connected');
+          safeSetConnectionState('connected');
         } else {
-          setConnectionState('failed');
+          safeSetConnectionState('failed');
         }
       } catch (error) {
-        setConnectionState('error');
+        safeSetConnectionState('error');
       }
     };
     
@@ -185,7 +190,7 @@ export const WebSocketConnectionComponent: React.FC = () => {
       
       {connectionState === 'failed' && (
         <button 
-          onClick={() => setConnectionState('connecting')}
+          onClick={() => safeSetConnectionState('connecting')}
           data-testid="retry-connection"
         >
           Retry Connection

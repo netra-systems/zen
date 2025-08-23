@@ -381,7 +381,7 @@ class LauncherConfig:
             mode_info = {
                 ResourceMode.LOCAL: ("Local", "💻"),
                 ResourceMode.SHARED: ("Cloud", "☁️"),
-                ResourceMode.MOCK: ("Mock", "🧪"),
+                ResourceMode.DOCKER: ("Docker", "🧪"),
                 ResourceMode.DISABLED: ("Off", "❌")
             }
             

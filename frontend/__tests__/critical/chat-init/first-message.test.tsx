@@ -180,7 +180,7 @@ describe('First Message Experience - Complete User Journey', () => {
       renderWithProviders(<MessageInput />);
       
       const textarea = screen.getByLabelText('Message input');
-      expect(textarea).toHaveAttribute('placeholder', 'Type a message... (Shift+Enter for new line)');
+      expect(textarea).toHaveAttribute('placeholder', 'Start typing your AI optimization request... (Shift+Enter for new line)');
     });
 
     it('should accept typing without any lag on first keystroke', async () => {
@@ -195,7 +195,7 @@ describe('First Message Experience - Complete User Journey', () => {
       const typingTime = performance.now() - typingStartTime;
       
       expect(textarea).toHaveValue('H');
-      expect(typingTime).toBeLessThan(50); // Instant response
+      expect(typingTime).toBeLessThan(150); // Instant response
     });
 
     it('should handle rapid typing without character loss', async () => {

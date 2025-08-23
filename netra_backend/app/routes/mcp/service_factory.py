@@ -126,19 +126,34 @@ def _create_service_params(agent_service, thread_service, corpus_service, securi
     )
 
 
-async def create_mcp_service_for_websocket() -> MCPService:
+async def create_mcp_service_for_websocket(websocket=None) -> MCPService:
     """Create MCP service instance for WebSocket endpoints without FastAPI Depends."""
-    from netra_backend.app.dependencies import (
-        get_agent_service,
-        get_corpus_service,
-        get_security_service,
-        get_thread_service,
-    )
     
-    # Manually create service dependencies for WebSocket
-    agent_service = get_agent_service()
-    thread_service = get_thread_service()
-    corpus_service = get_corpus_service()
-    security_service = get_security_service()
+    # Get services directly from websocket app state if available
+    if websocket and hasattr(websocket, 'app') and hasattr(websocket.app, 'state'):
+        app_state = websocket.app.state
+        agent_service = getattr(app_state, 'agent_service', None)
+        thread_service = getattr(app_state, 'thread_service', None)
+        corpus_service = getattr(app_state, 'corpus_service', None)
+        security_service = getattr(app_state, 'security_service', None)
+        
+        if all([agent_service, thread_service, corpus_service, security_service]):
+            return await _get_or_create_service(agent_service, thread_service, corpus_service, security_service)
+    
+    # Fallback: Create services using direct instantiation
+    # This is a temporary workaround for WebSocket context
+    logger.warning("Creating MCP service with fallback method - some features may be limited")
+    
+    # Import service classes directly to avoid dependency injection
+    from netra_backend.app.services.agent_service import AgentService
+    from netra_backend.app.services.thread_service import ThreadService
+    from netra_backend.app.services.corpus_service import CorpusService
+    from netra_backend.app.services.security_service import SecurityService
+    
+    # Create minimal service instances (may need configuration)
+    agent_service = AgentService()
+    thread_service = ThreadService()
+    corpus_service = CorpusService()
+    security_service = SecurityService()
     
     return await _get_or_create_service(agent_service, thread_service, corpus_service, security_service)

@@ -13,7 +13,7 @@ from unittest.mock import MagicMock
 import pytest
 from cryptography.fernet import Fernet
 
-from netra_backend.tests.security_service_test_mocks import (
+from netra_backend.tests.services.security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
 )

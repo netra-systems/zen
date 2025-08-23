@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='utf-8'?>
+<spec>
+  <metadata>
+    <name>Violation Severity System</name>
+    <description>4-tier severity system for compliance violations with deployment blocking thresholds</description>
+    <version>1.0.0</version>
+    <created>2025-08-23</created>
+    <last_updated>2025-08-23</last_updated>
+    <priority>HIGH</priority>
+  </metadata>
+  
+  <purpose>
+    Define a clear, actionable 4-tier severity system for compliance violations that:
+    - Prioritizes violations by business impact
+    - Sets clear limits for deployment blocking
+    - Provides remediation timelines
+    - Ensures focus on critical issues first
+  </purpose>
+  
+  <severity_levels>
+    <level name="CRITICAL" emoji="🚨" marker="[CRIT]">
+      <max_violations>5</max_violations>
+      <blocks_deployment>true</blocks_deployment>
+      <business_impact>System stability at risk, customer-facing failures likely</business_impact>
+      <remediation_timeline>Immediate - Stop all work and fix</remediation_timeline>
+      <examples>
+        - Production test stubs
+        - Missing critical services
+        - Database connection failures
+        - High-severity security vulnerabilities
+        - Infinite loops or memory leaks
+        - Hardcoded secrets in code
+      </examples>
+    </level>
+    
+    <level name="HIGH" emoji="🔴" marker="[HIGH]">
+      <max_violations>20</max_violations>
+      <blocks_deployment>true</blocks_deployment>
+      <business_impact>Service degradation possible, security vulnerabilities</business_impact>
+      <remediation_timeline>Within 24 hours</remediation_timeline>
+      <examples>
+        - Files exceeding 500 lines
+        - Functions exceeding 50 lines
+        - Duplicate critical logic
+        - Missing error handling
+        - Test coverage below 30%
+        - Medium security vulnerabilities
+        - API breaking changes
+        - Unsafe database migrations
+      </examples>
+    </level>
+    
+    <level name="MEDIUM" emoji="🟡" marker="[MED]">
+      <max_violations>100</max_violations>
+      <blocks_deployment>true</blocks_deployment>
+      <business_impact>Technical debt accumulating, maintainability concerns</business_impact>
+      <remediation_timeline>Current sprint</remediation_timeline>
+      <examples>
+        - Files exceeding 300 lines
+        - Functions exceeding 25 lines
+        - Duplicate type definitions
+        - Test coverage below 60%
+        - Missing documentation
+        - Deprecated API usage
+        - Performance inefficiencies
+        - Import cycles detected
+      </examples>
+    </level>
+    
+    <level name="LOW" emoji="🟢" marker="[LOW]">
+      <max_violations>unlimited</max_violations>
+      <blocks_deployment>false</blocks_deployment>
+      <business_impact>Code quality improvements, best practice violations</business_impact>
+      <remediation_timeline>Next refactor cycle</remediation_timeline>
+      <examples>
+        - Files exceeding 200 lines
+        - Functions exceeding 15 lines
+        - Naming convention violations
+        - Unused imports
+        - Code style issues
+        - Missing type hints
+        - Test naming issues
+        - Comment quality
+      </examples>
+    </level>
+  </severity_levels>
+  
+  <deployment_rules>
+    <rule>
+      Deployment is BLOCKED if ANY of these conditions are met:
+      - CRITICAL violations exceed 5
+      - HIGH violations exceed 20
+      - MEDIUM violations exceed 100
+    </rule>
+    <rule>
+      LOW severity violations do NOT block deployment
+    </rule>
+    <rule>
+      All blocking violations must be resolved before production deployment
+    </rule>
+  </deployment_rules>
+  
+  <context_modifiers>
+    <modifier type="production_code">
+      Violations in production code may have severity elevated:
+      - LOW → MEDIUM for production files
+      - MEDIUM → HIGH for critical paths
+    </modifier>
+    <modifier type="test_code">
+      Violations in test code may have severity reduced:
+      - HIGH → MEDIUM for test files
+      - MEDIUM → LOW for example/demo files
+    </modifier>
+    <modifier type="critical_types">
+      Duplicate definitions of critical types (Agent, Service, Config, Auth, Security)
+      are elevated from MEDIUM → HIGH
+    </modifier>
+  </context_modifiers>
+  
+  <reporting_guidelines>
+    <guideline>
+      CRITICAL violations: Show ALL violations with full details
+    </guideline>
+    <guideline>
+      HIGH violations: Show up to 20 violations with descriptions
+    </guideline>
+    <guideline>
+      MEDIUM violations: Show up to 100 violations grouped by type
+    </guideline>
+    <guideline>
+      LOW violations: Show summary counts only
+    </guideline>
+  </reporting_guidelines>
+  
+  <implementation>
+    <file>scripts/compliance/severity_tiers.py</file>
+    <file>scripts/compliance/enhanced_reporter.py</file>
+    <file>scripts/generate_wip_report.py</file>
+    <integration>
+      The severity system is integrated into:
+      - Architecture compliance checking
+      - WIP status reporting
+      - CI/CD deployment gates
+    </integration>
+  </implementation>
+  
+  <benefits>
+    <benefit>Clear prioritization of issues by business impact</benefit>
+    <benefit>Deployment blocking based on severity limits</benefit>
+    <benefit>Actionable remediation timelines</benefit>
+    <benefit>Focus on critical issues first</benefit>
+    <benefit>Scalable reporting (detailed for critical, summary for low)</benefit>
+  </benefits>
+  
+  <learnings>
+    <learning>
+      The previous 3-tier system (high/medium/low) lacked granularity for
+      truly critical issues that should block deployment immediately
+    </learning>
+    <learning>
+      Having unlimited violations at lower severity levels creates noise.
+      The 4-tier system with specific limits (5/20/100/∞) provides better focus
+    </learning>
+    <learning>
+      Context matters - the same violation type can have different severities
+      based on whether it's in production code, test code, or critical paths
+    </learning>
+  </learnings>
+</spec>

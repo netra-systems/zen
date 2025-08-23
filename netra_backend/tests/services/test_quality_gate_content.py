@@ -11,7 +11,7 @@ from netra_backend.tests.test_utils import setup_test_path
 import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.tests.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_content import (
     get_complete_action_plan_content,
     get_data_analysis_content,
     get_domain_specific_content,
@@ -21,11 +21,11 @@ from netra_backend.tests.quality_gate_content import (
     get_redundant_report_content,
     get_triage_content,
 )
-from netra_backend.tests.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     quality_service,
     redis_mock,
 )
-from netra_backend.tests.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_action_plan_completeness,
     assert_domain_terms_recognition,
     assert_error_message_clarity,

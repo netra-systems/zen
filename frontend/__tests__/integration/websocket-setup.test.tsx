@@ -22,6 +22,7 @@ import WS from 'jest-websocket-mock';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { AuthContext } from '@/auth/context';
 import { webSocketService } from '@/services/webSocketService';
+import { createActCallback } from '../test-utils/react-act-utils';
 
 // ============================================================================
 // TEST UTILITIES & SETUP
@@ -45,10 +46,10 @@ const TestComponent: React.FC<{ onStatusChange?: (status: string) => void }> = (
   const [status, setStatus] = React.useState('disconnected');
 
   React.useEffect(() => {
-    webSocketService.onStatusChange = (newStatus) => {
+    webSocketService.onStatusChange = createActCallback((newStatus) => {
       setStatus(newStatus);
       onStatusChange?.(newStatus);
-    };
+    });
   }, [onStatusChange]);
 
   const handleConnect = () => {

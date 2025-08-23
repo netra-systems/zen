@@ -27,6 +27,7 @@ import {
   retryUntilSuccess,
   cleanupTest
 } from '../utils';
+import { createActCallback, wrapStateSetterWithAct } from '../test-utils/react-act-utils';
 
 // ============================================================================
 // MOCK SETUP - WebSocket and authentication mocking
@@ -125,6 +126,11 @@ const WebSocketSetupTestComponent: React.FC = () => {
   const [authState, setAuthState] = React.useState('unauthenticated');
   const [messages, setMessages] = React.useState<string[]>([]);
   
+  // Wrap state setters with act() to prevent warnings
+  const safeSetConnectionState = wrapStateSetterWithAct(setConnectionState);
+  const safeSetAuthState = wrapStateSetterWithAct(setAuthState);
+  const safeSetMessages = wrapStateSetterWithAct(setMessages);
+  
   React.useEffect(() => {
     checkAuthAndConnect();
   }, []);
@@ -133,18 +139,18 @@ const WebSocketSetupTestComponent: React.FC = () => {
     try {
       const token = mockAuthService.getToken();
       if (token) {
-        setAuthState('authenticated');
+        safeSetAuthState('authenticated');
         await initiateWebSocketConnection(token);
       }
     } catch (error) {
-      setAuthState('error');
-      setConnectionState('failed');
+      safeSetAuthState('error');
+      safeSetConnectionState('failed');
     }
   };
   
   const initiateWebSocketConnection = async (token: string) => {
     try {
-      setConnectionState('connecting');
+      safeSetConnectionState('connecting');
       
       const wsUrl = `${wsBaseUrl}/ws?token=${token}`;
       await mockWebSocketService.connect(wsUrl, {
@@ -152,9 +158,9 @@ const WebSocketSetupTestComponent: React.FC = () => {
         userId: testUser.id
       });
       
-      setConnectionState('connected');
+      safeSetConnectionState('connected');
     } catch (error) {
-      setConnectionState('failed');
+      safeSetConnectionState('failed');
     }
   };
   
@@ -163,11 +169,11 @@ const WebSocketSetupTestComponent: React.FC = () => {
       const result = await mockAuthService.handleLogin();
       if (result.token) {
         localStorage.setItem('jwt_token', result.token);
-        setAuthState('authenticated');
+        safeSetAuthState('authenticated');
         await initiateWebSocketConnection(result.token);
       }
     } catch (error) {
-      setAuthState('login_failed');
+      safeSetAuthState('login_failed');
     }
   };
   

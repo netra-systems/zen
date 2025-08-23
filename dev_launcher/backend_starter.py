@@ -65,8 +65,10 @@ class BackendStarter:
                 service_modes.append(f"{name}:local")
             elif service.mode == ResourceMode.SHARED:
                 service_modes.append(f"{name}:cloud")
-            elif service.mode == ResourceMode.MOCK:
-                service_modes.append(f"{name}:mock")
+            elif service.mode == ResourceMode.DOCKER:
+                service_modes.append(f"{name}:docker")
+            elif service.mode == ResourceMode.DISABLED:
+                service_modes.append(f"{name}:disabled")
         
         mode_str = ", ".join(service_modes) if service_modes else "default configuration"
         self._print("🚀", "BACKEND", f"Starting backend server ({mode_str})...")

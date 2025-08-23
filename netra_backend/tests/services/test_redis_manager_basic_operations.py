@@ -14,11 +14,11 @@ import pytest
 
 from netra_backend.app.redis_manager import RedisManager
 
-from netra_backend.tests.redis_test_fixtures import (
+from netra_backend.tests.helpers.redis_test_fixtures import (
     mock_redis_client,
     redis_manager,
 )
-from netra_backend.tests.redis_test_helpers import (
+from netra_backend.tests.helpers.redis_test_helpers import (
     create_disabled_redis_manager,
     setup_failing_redis_client,
     setup_redis_settings_mock,

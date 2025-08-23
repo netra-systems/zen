@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.registry import UserCreate
-from netra_backend.app.schemas.User import UserUpdate
+from netra_backend.app.schemas.user import UserUpdate
 
 from netra_backend.app.services.user_service import CRUDUser, pwd_context, user_service
 
@@ -59,6 +59,11 @@ class TestUserService:
         # Arrange
         user_create = UserCreate(**sample_user_data)
         crud_user = CRUDUser("test_user_service", User)
+        
+        # Mock the get_by_email to return None (no existing user)
+        mock_result = Mock()
+        mock_result.scalars.return_value.first.return_value = None
+        mock_db_session.execute.return_value = mock_result
         
         # Mock the database refresh to set user attributes
         async def mock_refresh(obj):
@@ -286,6 +291,11 @@ class TestUserService:
         # Arrange
         user_create = UserCreate(**sample_user_data)
         crud_user = CRUDUser("test_user_service", User)
+        
+        # Mock the get_by_email to return None (no existing user)
+        mock_result = Mock()
+        mock_result.scalars.return_value.first.return_value = None
+        mock_db_session.execute.return_value = mock_result
         
         # Mock database to raise integrity error
         from sqlalchemy.exc import IntegrityError

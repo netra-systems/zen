@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.tests.llm_manager_helpers import LLMProvider
-from netra_backend.tests.llm_mock_clients import MockLLMClient
+from netra_backend.tests.helpers.llm_manager_helpers import LLMProvider
+from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
 
 class EnhancedLLMManager(LLMManager):
     """Enhanced LLM Manager with provider switching and failover"""

@@ -8,7 +8,7 @@ from netra_backend.tests.test_utils import setup_test_path
 import pytest
 
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.tests.quality_gate_comprehensive_helpers import (
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
     create_excessive_acronyms_content,
     create_high_overlap_content,
     create_nested_parentheses_content,

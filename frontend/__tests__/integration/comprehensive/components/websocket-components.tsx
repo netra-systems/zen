@@ -13,6 +13,7 @@ import {
   setupReconnectionTimer,
   startCountdownTimer
 } from '../helpers/websocket-helpers';
+import { wrapStateSetterWithAct } from '../../../test-utils/react-act-utils';
 
 interface ResilientWebSocketProps {
   messageBuffer: any[];
@@ -23,34 +24,39 @@ export const ResilientWebSocketComponent: React.FC<ResilientWebSocketProps> = ({
   const [messages, setMessages] = React.useState<any[]>([]);
   const [reconnectAttempts, setReconnectAttempts] = React.useState(0);
   const wsRef = React.useRef<WebSocket | null>(null);
+  
+  // Wrap state setters with act() to prevent warnings
+  const safeSetConnectionState = wrapStateSetterWithAct(setConnectionState);
+  const safeSetMessages = wrapStateSetterWithAct(setMessages);
+  const safeSetReconnectAttempts = wrapStateSetterWithAct(setReconnectAttempts);
 
   const sendMessage = (message: any) => {
     return sendMessageOrBuffer(wsRef.current, message, messageBuffer);
   };
 
   const handleWebSocketOpen = () => {
-    setConnectionState('connected');
-    setReconnectAttempts(0);
+    safeSetConnectionState('connected');
+    safeSetReconnectAttempts(0);
     flushMessageBuffer(wsRef.current!, messageBuffer);
   };
 
   const handleWebSocketClose = () => {
-    setConnectionState('disconnected');
-    setReconnectAttempts(prev => prev + 1);
+    safeSetConnectionState('disconnected');
+    safeSetReconnectAttempts(prev => prev + 1);
     setupReconnectionTimer(reconnectAttempts, 5, connect);
   };
 
   const handleWebSocketError = () => {
-    setConnectionState('error');
+    safeSetConnectionState('error');
   };
 
   const handleWebSocketMessage = (event: MessageEvent) => {
     const message = JSON.parse(event.data);
-    setMessages(prev => [...prev, message]);
+    safeSetMessages(prev => [...prev, message]);
   };
 
   const connect = () => {
-    setConnectionState('connecting');
+    safeSetConnectionState('connecting');
     
     try {
       const ws = new WebSocket('ws://localhost:8000/ws');
@@ -60,7 +66,7 @@ export const ResilientWebSocketComponent: React.FC<ResilientWebSocketProps> = ({
       ws.onmessage = handleWebSocketMessage;
       wsRef.current = ws;
     } catch (error) {
-      setConnectionState('error');
+      safeSetConnectionState('error');
     }
   };
 
@@ -99,19 +105,26 @@ export const ExponentialBackoffComponent = () => {
   const [lastDelay, setLastDelay] = React.useState(0);
   const [delayHistory, setDelayHistory] = React.useState<number[]>([]);
 
+  // Wrap state setters with act() to prevent warnings
+  const safeSetAttempts = wrapStateSetterWithAct(setAttempts);
+  const safeSetNextRetryIn = wrapStateSetterWithAct(setNextRetryIn);
+  const safeSetConnectionState = wrapStateSetterWithAct(setConnectionState);
+  const safeSetLastDelay = wrapStateSetterWithAct(setLastDelay);
+  const safeSetDelayHistory = wrapStateSetterWithAct(setDelayHistory);
+
   const attemptReconnect = async () => {
     const delay = calculateBackoffDelay(attempts);
-    setDelayHistory(prev => [...prev, delay]);
-    setLastDelay(delay);
-    setNextRetryIn(Math.round(delay / 1000));
-    setConnectionState('waiting');
-    setAttempts(prev => prev + 1);
+    safeSetDelayHistory(prev => [...prev, delay]);
+    safeSetLastDelay(delay);
+    safeSetNextRetryIn(Math.round(delay / 1000));
+    safeSetConnectionState('waiting');
+    safeSetAttempts(prev => prev + 1);
   };
 
   const executeReconnectionWithCountdown = async (delay: number) => {
-    const countdownInterval = startCountdownTimer(Math.round(delay / 1000), setNextRetryIn);
+    const countdownInterval = startCountdownTimer(Math.round(delay / 1000), safeSetNextRetryIn);
     await new Promise(resolve => setTimeout(resolve, delay));
-    setConnectionState('failed');
+    safeSetConnectionState('failed');
     
     if (attempts < 3) {
       setTimeout(() => attemptReconnect(), 100);
@@ -124,11 +137,11 @@ export const ExponentialBackoffComponent = () => {
   };
 
   const resetAttempts = () => {
-    setAttempts(0);
-    setNextRetryIn(0);
-    setConnectionState('disconnected');
-    setLastDelay(0);
-    setDelayHistory([]);
+    safeSetAttempts(0);
+    safeSetNextRetryIn(0);
+    safeSetConnectionState('disconnected');
+    safeSetLastDelay(0);
+    safeSetDelayHistory([]);
   };
 
   return (

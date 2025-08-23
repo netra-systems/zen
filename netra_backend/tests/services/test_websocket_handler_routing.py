@@ -17,7 +17,7 @@ import pytest
 from netra_backend.app.core.exceptions_base import NetraException
 
 from netra_backend.app.services.websocket.message_router import MessageRouter
-from netra_backend.tests.websocket_test_utilities import MockMessageHandler
+from netra_backend.tests.services.websocket_test_utilities import MockMessageHandler
 
 class TestWebSocketMessageHandlerRouting:
     """Test WebSocket message handler routing."""

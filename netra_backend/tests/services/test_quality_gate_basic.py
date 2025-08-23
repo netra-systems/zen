@@ -11,7 +11,7 @@ from netra_backend.tests.test_utils import setup_test_path
 import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.tests.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_content import (
     get_borderline_quality_content,
     get_circular_reasoning_content,
     get_high_quality_optimization_content,
@@ -19,13 +19,13 @@ from netra_backend.tests.quality_gate_content import (
     get_optimization_context,
     get_relevant_context,
 )
-from netra_backend.tests.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     quality_service,
     redis_mock,
     setup_quality_level_test_cases,
     setup_validation_error_mock,
 )
-from netra_backend.tests.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_circular_reasoning_detected,
     assert_context_improves_relevance,
     assert_error_handling_result,

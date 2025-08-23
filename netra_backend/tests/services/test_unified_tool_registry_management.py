@@ -13,14 +13,14 @@ from unittest.mock import MagicMock
 import pytest
 
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.tool_registry_management_core import (
+from netra_backend.tests.services.tool_registry_management_core import (
     ToolHealthMonitor,
     ToolLifecycleManager,
     ToolMetricsCollector,
     ToolOrchestrator,
     UnifiedToolRegistry,
 )
-from netra_backend.tests.tool_registry_test_mocks import (
+from netra_backend.tests.services.tool_registry_test_mocks import (
     MockAdvancedTool,
     ToolStatus,
     assert_tool_status,

@@ -17,7 +17,7 @@ from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.tests.tool_permission_helpers import (
+from netra_backend.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     assert_missing_permissions,
     assert_permission_allowed,

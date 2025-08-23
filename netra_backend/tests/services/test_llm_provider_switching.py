@@ -15,8 +15,8 @@ from typing import Any, Dict, List
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
-from netra_backend.tests.llm_manager_helpers import (
+from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.helpers.llm_manager_helpers import (
     assert_failure_count,
     assert_health_status,
     count_provider_usage,

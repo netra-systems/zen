@@ -17,7 +17,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityMetrics,
 )
-from netra_backend.tests.quality_gate_comprehensive_helpers import (
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
     setup_completeness_general_content,
     setup_completeness_report_content,
     setup_redis_mock_with_error,

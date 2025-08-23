@@ -35,6 +35,7 @@ class ConnectionState(Enum):
     AUTHENTICATED = "authenticated"
     DISCONNECTED = "disconnected"
     ERROR = "error"
+    FAILED = "failed"
     RECONNECTING = "reconnecting"
 
 
@@ -46,6 +47,10 @@ class ConnectionMetrics:
     message_count: int = 0
     error_count: int = 0
     reconnection_count: int = 0
+    retry_count: int = 0
+    requests_sent: int = 0
+    responses_received: int = 0
+    last_error: str = ""
     last_ping: Optional[float] = None
     last_pong: Optional[float] = None
 
