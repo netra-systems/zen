@@ -100,19 +100,15 @@ class UnifiedTestRunner:
         
         # Initialize test splitter
         if not args.disable_auto_split:
-            self.test_splitter = TestSplitter(
-                project_root=self.project_root,
-                strategy=SplittingStrategy(args.splitting_strategy)
-            )
+            self.test_splitter = TestSplitter(project_root=self.project_root)
+            self.test_splitter.strategy = SplittingStrategy(args.splitting_strategy)
             self.target_window_duration = timedelta(minutes=args.window_size)
         
         # Initialize fail-fast strategy
         if args.fail_fast_mode:
-            config = self.config_loader.load_config()
-            threshold_config = self.config_loader.create_threshold_config(config)
             self.fail_fast_strategy = FailFastStrategy(
-                mode=FailFastMode(args.fail_fast_mode),
-                threshold_config=threshold_config
+                project_root=self.project_root,
+                mode=FailFastMode(args.fail_fast_mode)
             )
     
     def run(self, args: argparse.Namespace) -> int:
@@ -260,11 +256,19 @@ class UnifiedTestRunner:
             if self.fail_fast_strategy:
                 failed_categories = [cat for cat, result in phase_results.items() if not result["success"]]
                 if failed_categories:
-                    decision = self.fail_fast_strategy.should_stop_execution(
-                        failed_categories[0],
-                        self.progress_tracker.get_current_progress() if self.progress_tracker else None
+                    for failed_cat in failed_categories:
+                        # Record the failure
+                        self.fail_fast_strategy.record_failure(
+                            test_name=f"{failed_cat}_tests",
+                            category=failed_cat,
+                            error_message="Category failed",
+                            error_type="CategoryFailure"
+                        )
+                    
+                    should_stop, decision = self.fail_fast_strategy.should_fail_fast(
+                        current_stats=self.progress_tracker.get_current_progress() if self.progress_tracker else None
                     )
-                    if decision.should_stop:
+                    if should_stop and decision:
                         print(f"\nStopping execution: {decision.reason}")
                         # Mark remaining categories as skipped
                         for remaining_phase in execution_plan.phases[phase_num + 1:]:

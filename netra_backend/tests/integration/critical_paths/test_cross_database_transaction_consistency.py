@@ -31,7 +31,7 @@ from sqlalchemy.orm import sessionmaker
 from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 
-import asyncio_clickhouse
+# import asyncio_clickhouse  # Module not available
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 from netra_backend.app.db.postgres import get_async_db

@@ -82,7 +82,7 @@ class RealCircuitBreakerTester:
         self.failure_counts[service_name] = 0
         return circuit
     
-    async def test_circuit_activation(self, service_name: str):
+    async def test_circuit_activation(self, service_name: str,
                                     failing_operation: callable) -> Dict[str, Any]:
         """Test circuit breaker activation with real failing operations."""
         circuit = self.circuit_breakers.get(service_name)
@@ -304,7 +304,7 @@ class DataIntegrityTracker:
                 "recovery_timestamp": time.time(),
                 "messages_delivered": delivered_count,
                 "total_expected": len(self.message_queue)
-            
+            }
             data_loss = delivered_count < len(self.message_queue)
             
             return {
@@ -344,10 +344,6 @@ class TestCompleteErrorRecovery:
         return ServiceIsolationValidator(orchestrator)
     
     @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
     def data_tracker(self):
         """Initialize data integrity tracker."""
         return DataIntegrityTracker()
@@ -380,6 +376,7 @@ class TestSyntaxFix:
             # Phase 3: Verify circuit breaker activates
             circuit_result = await self._test_circuit_breaker_activation(
                 circuit_breaker_tester, ws_client
+            )
             assert circuit_result["circuit_activated"], "Circuit breaker did not activate"
             
             # Phase 4: Test isolation (other services still work)
@@ -394,7 +391,7 @@ class TestSyntaxFix:
             await self._restore_database_connection(failure_simulator)
             recovery_result = await self._test_automatic_recovery(
                 circuit_breaker_tester, ws_client
-            
+            )
             # Phase 7: Validate recovery within 30 seconds
             total_recovery_time = time.time() - start_time
             assert total_recovery_time < 30.0, f"Recovery took {total_recovery_time:.2f}s, exceeds 30s SLA"
@@ -408,7 +405,7 @@ class TestSyntaxFix:
             self._validate_complete_recovery(
                 circuit_result, isolation_result, data_result, 
                 recovery_result, integrity_result, total_recovery_time
-            
+            )
         finally:
             if ws_client:
                 await ws_client.close()

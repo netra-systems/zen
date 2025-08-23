@@ -85,7 +85,7 @@ class DatabaseConnectionRetryManager:
             ch_host = self.clickhouse_container.get_container_host_ip()
             ch_port = self.clickhouse_container.get_exposed_port(9000)
             
-            import asyncio_clickhouse
+            # import asyncio_clickhouse  # Module not available
             self.clickhouse_client = asyncio_clickhouse.connect(
                 host=ch_host,
                 port=ch_port,
@@ -424,7 +424,7 @@ class DatabaseConnectionRetryManager:
                         ch_host = self.clickhouse_container.get_container_host_ip()
                         ch_port = self.clickhouse_container.get_exposed_port(9000)
                         
-                        import asyncio_clickhouse
+                        # import asyncio_clickhouse  # Module not available
                         self.clickhouse_client = asyncio_clickhouse.connect(
                             host=ch_host,
                             port=ch_port,

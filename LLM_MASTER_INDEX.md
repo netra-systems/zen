@@ -80,18 +80,19 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | Component | Location | Purpose | Documentation |
 |-----------|----------|---------|---------------|
 | **📖 MAIN TESTING GUIDE** | `/TESTING.md` | **Comprehensive testing documentation** | Start here for all testing |
-| **Unified Test Runner** | `/unified_test_runner.py` | Single entry point for ALL tests | Run with `--help` for options |
-| **Test Configuration** | `/unified_test_config.py` | Central test configuration | Test levels, environments, coverage |
-| **Test Framework** | `/test_framework/` | Test utilities and plumbing | Consolidated infrastructure |
+| **Test Framework** | `/test_framework/` | Enhanced test framework | Core runner and configuration |
+| **Test Runner** | `/test_framework/runner.py` | Main test runner | Unified test execution |
+| **Test Config** | `/test_framework/test_config.py` | Test configuration | Test levels, environments |
+| **Enhanced Docs** | `/docs/ENHANCED_TEST_RUNNER.md` | Enhanced runner documentation | Advanced testing features |
 
 #### Test Locations by Service
 | Test Type | Location | Pattern | Run Command |
 |-----------|----------|---------|-------------|
-| Backend Tests | `/netra_backend/tests/` | `test_*.py` | `python unified_test_runner.py --service backend` |
-| Auth Tests | `/auth_service/tests/` | `test_*.py` | `python unified_test_runner.py --service auth` |
-| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python unified_test_runner.py --service frontend` |
-| E2E Tests | `/tests/unified/e2e/` | `test_*.py` | `python unified_test_runner.py --level comprehensive` |
-| Legacy Tests | `/legacy_integration_tests/` | `test_*.py` | **DEPRECATED - Do not use** |
+| Backend Tests | `/netra_backend/tests/` | `test_*.py` | `python -m test_framework.runner --service backend` |
+| Auth Tests | `/auth_service/tests/` | `test_*.py` | `python -m test_framework.runner --service auth` |
+| Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `python -m test_framework.runner --service frontend` |
+| E2E Tests | `/tests/e2e/` | `test_*.py` | `python -m test_framework.runner --level e2e` |
+| Resilience Tests | `/tests/e2e/resilience/` | `test_*.py` | `python -m test_framework.runner --level resilience` |
 
 ### Import Testing System
 | Component | Location | Purpose | Key Functions |
@@ -706,4 +707,4 @@ state = DeepAgentState(...)
 
 ---
 
-Last Updated: 2025-08-20
+Last Updated: 2025-08-23
