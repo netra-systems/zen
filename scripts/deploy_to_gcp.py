@@ -545,10 +545,10 @@ CMD ["npm", "start"]
                 "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest"
             ])
         elif service.name == "auth":
-            # Auth service needs database, JWT secrets, and OAuth credentials
+            # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
             ])
         elif service.name == "frontend":
             # Frontend needs API URLs - use staging URLs for consistent configuration
@@ -708,6 +708,8 @@ CMD ["npm", "start"]
         import os
         
         secrets = {
+            # Note: Using standard psycopg2 format with sslmode=require
+            # DatabaseManager will automatically convert to ssl=require for asyncpg
             "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
             "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
@@ -715,7 +717,10 @@ CMD ["npm", "start"]
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
             "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",  # Auth service uses this name
             "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
-            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET")
+            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
+            # Enhanced JWT security for auth service
+            "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
+            "service-id-staging": f"netra-auth-staging-{int(time.time())}"
         }
         
         for name, value in secrets.items():

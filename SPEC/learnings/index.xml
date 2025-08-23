@@ -184,18 +184,21 @@
             <critical-takeaway>Separate sync migration URLs from async application URLs to avoid greenlet errors.</critical-takeaway>
         </category>
 
-        <category name="Dev Launcher" path="SPEC/learnings/dev_launcher.xml" keywords="Development, Startup, Local, Health Checks, Configuration">
+        <category name="Dev Launcher" path="SPEC/learnings/dev_launcher.xml" keywords="Development, Startup, Local, Health Checks, Configuration, LLM, Environment">
             <critical-takeaway>CONSOLIDATED: All dev launcher learnings now in single file. SECRET_KEY must be 64+ characters.</critical-takeaway>
             <critical-takeaway>Health checks must use dynamic ports from .service_discovery/*.json files.</critical-takeaway>
             <critical-takeaway>Extended timeouts required: Backend/Auth 30s, Frontend 60s, Overall 120s.</critical-takeaway>
+            <critical-takeaway>LLM must stay in "shared" mode even without API keys - do not auto-disable (service_availability_checker.py).</critical-takeaway>
+            <critical-takeaway>Backend environment loading must avoid circular dependencies - check env vars, not config system (main.py).</critical-takeaway>
         </category>
 
-        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy">
+        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy, Gunicorn, Workers">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
             <critical-takeaway>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
             <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL (e.g., https://api.staging.netrasystems.ai) for proxy rewrites to work.</critical-takeaway>
             <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check DATABASE_URL and SSL settings.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain (e.g., auth.staging.netrasystems.ai) with proper CORS and callback URL configuration.</critical-takeaway>
+            <critical-takeaway>Gunicorn workers require proper lifecycle hooks and tini for signal handling to prevent ProcessLookupError in containers.</critical-takeaway>
             <critical-takeaway>CRITICAL: USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service, even if OAUTH_PROXY_URL is correctly set.</critical-takeaway>
         </category>
 
@@ -358,6 +361,13 @@
             <critical-takeaway>Health check /health/ready endpoint failures in staging usually indicate database connectivity issues.</critical-takeaway>
             <critical-takeaway>OAuth flow requires auth service at separate domain with proper CORS and callback URL configuration.</critical-takeaway>
             <critical-takeaway>USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service.</critical-takeaway>
+        </category>
+        
+        <category name="Cloud Run Traffic Management" path="SPEC/learnings/cloud_run_traffic_management.xml" keywords="Cloud Run, Traffic, Revision, Deployment, GCP">
+            <critical-takeaway>Cloud Run does NOT automatically route traffic to new revisions - must explicitly update traffic after deployment.</critical-takeaway>
+            <critical-takeaway>Use 'gcloud run services update-traffic --to-latest' after successful deployment to route traffic to new revision.</critical-takeaway>
+            <critical-takeaway>Wait for revision readiness (status.conditions[0].status = True) before switching traffic to avoid 503 errors.</critical-takeaway>
+            <critical-takeaway>Monitor revision health before traffic switch to ensure zero-downtime deployments.</critical-takeaway>
         </category>
         
         <category name="AI Processing Flow" path="SPEC/learnings/ai_processing_flow.xml" keywords="AI, LLM, Agent, Processing, Streaming, Real-time">

@@ -47,12 +47,16 @@ class AsyncPostgresManager:
         if not database_url:
             raise RuntimeError("DATABASE_URL not configured in unified configuration")
         
+        # CRITICAL: Use DatabaseManager for proper sslmode->ssl conversion
+        from netra_backend.app.db.database_manager import DatabaseManager
+        converted_url = DatabaseManager.get_application_url_async()
+        
         logger.info(f"Creating async engine for local development")
         
         try:
             # Create async engine with proper pooling for local dev
             self.engine = create_async_engine(
-                database_url,
+                converted_url,
                 echo=config.database.sql_echo,
                 echo_pool=config.database.sql_echo_pool,
                 poolclass=AsyncAdaptedQueuePool,

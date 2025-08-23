@@ -574,5 +574,102 @@ frontend/cypress
         <practice>Keep Dockerfile COPY commands simple, let .dockerignore handle exclusions</practice>
       </best_practices>
     </learning>
+    <learning>
+      <id>auth-service-enhanced-security-secrets</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>Auth Service Requires SERVICE_SECRET and SERVICE_ID in Staging/Production</title>
+      <problem>
+        <description>Auth service fails to start in staging/production without enhanced security environment variables</description>
+        <symptoms>
+          <symptom>Service startup failures with ValueError: SERVICE_SECRET must be set in production/staging</symptom>
+          <symptom>Worker processes crash during gunicorn/uvicorn initialization</symptom>
+          <symptom>Health checks return 503 Service Unavailable</symptom>
+          <symptom>Continuous worker restart loops in Cloud Run logs</symptom>
+          <symptom>Service marked as unhealthy despite container being ready</symptom>
+        </symptoms>
+        <root_cause>Enhanced JWT security requires SERVICE_SECRET and SERVICE_ID for production environments</root_cause>
+      </problem>
+      <solution>
+        <description>Create and map SERVICE_SECRET and SERVICE_ID secrets in GCP Secret Manager</description>
+        <implementation>
+          <step>Generate secure SERVICE_SECRET: openssl rand -hex 32</step>
+          <step>Create SERVICE_ID with timestamp: netra-auth-staging-$(date +%s)</step>
+          <step>Add secrets to GCP Secret Manager:
+            - gcloud secrets create service-secret-staging --data-file=-
+            - gcloud secrets create service-id-staging --data-file=-
+          </step>
+          <step>Update Cloud Run service to map secrets:
+            --update-secrets="SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
+          </step>
+          <step>Update deploy_to_gcp.py to include these secrets in auth service deployment</step>
+        </implementation>
+        <verification>
+          <step>Check /health endpoint returns 200 OK</step>
+          <step>Verify service uptime is stable</step>
+          <step>Confirm no worker restart loops in logs</step>
+          <step>Test JWT token validation works correctly</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always include SERVICE_SECRET and SERVICE_ID in auth service deployments</guideline>
+        <guideline>Document all required environment variables in deployment scripts</guideline>
+        <guideline>Test auth service startup in staging before production</guideline>
+        <guideline>Monitor for startup failures after deployments</guideline>
+      </prevention>
+      <impact>Without these secrets, auth service cannot start and authentication is completely unavailable</impact>
+    </learning>
+
+    <learning>
+      <id>staging-url-domain-consistency</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>high</severity>
+      <title>Always Use Staging Domain Names, Not Raw Cloud Run URLs</title>
+      <problem>
+        <description>Regression where staging domain URLs were replaced with raw Cloud Run URLs</description>
+        <symptoms>
+          <symptom>Frontend configured with Cloud Run URLs instead of domain names</symptom>
+          <symptom>API calls may fail if Cloud Run URLs change</symptom>
+          <symptom>CORS configuration becomes brittle</symptom>
+          <symptom>SSL certificate validation issues</symptom>
+          <symptom>Difficult to migrate or update services</symptom>
+        </symptoms>
+        <root_cause>Direct use of Cloud Run URLs bypasses domain abstraction layer</root_cause>
+      </problem>
+      <solution>
+        <description>Always use consistent staging domain names for service configuration</description>
+        <implementation>
+          <correct_configuration>
+            staging_api_url = "https://api.staging.netrasystems.ai"
+            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
+          </correct_configuration>
+          <incorrect_configuration>
+            # NEVER use raw Cloud Run URLs like these:
+            staging_api_url = "https://netra-backend-staging-701982941522.us-central1.run.app"
+            staging_auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
+          </incorrect_configuration>
+        </implementation>
+        <verification>
+          <step>Check deploy_to_gcp.py uses domain names not Cloud Run URLs</step>
+          <step>Verify frontend environment variables use proper domains</step>
+          <step>Test that services are accessible via domain names</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>ALWAYS use domain names for service URLs in configuration</guideline>
+        <guideline>Never hardcode Cloud Run URLs in deployment scripts</guideline>
+        <guideline>Set up domain mapping in Cloud Run for all services</guideline>
+        <guideline>Document the correct domain URLs for each environment</guideline>
+      </prevention>
+      <benefits>
+        <benefit>Services can be migrated without breaking configurations</benefit>
+        <benefit>Consistent URLs across deployments</benefit>
+        <benefit>Better SSL certificate management</benefit>
+        <benefit>Cleaner CORS configuration</benefit>
+      </benefits>
+    </learning>
   </critical_deployment_learnings>
 </specification>

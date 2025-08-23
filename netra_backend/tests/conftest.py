@@ -233,13 +233,7 @@ def pytest_configure(config):
 # Database initialization moved to fixtures - no longer done at module level
 # This avoids slow startup during test collection
 
-# Temporarily disabled to fix test hanging issue
-# @pytest.fixture(scope="function")
-# def event_loop():
-#     import asyncio
-#     loop = asyncio.get_event_loop()
-#     yield loop
-#     loop.close()
+# Event loop fixture is provided by root conftest.py
 
 @pytest.fixture(scope="function")
 def ensure_db_initialized():

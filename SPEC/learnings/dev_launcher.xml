@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <learnings category="dev-launcher" priority="high">
   <metadata>
-    <last_edited>2025-08-21T08:47:29.126419</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.126419">
+    <last_edited>2025-08-23T15:30:00.000000</last_edited>
+    <legacy_status is_legacy="false">
       <reasons>
-        <reason>Content contains: old</reason>
+        <reason>Updated with latest LLM configuration fixes</reason>
       </reasons>
     </legacy_status>
   </metadata>
   <title>Dev Launcher Comprehensive Guide</title>
   <description>Consolidated learnings for dev launcher setup, configuration, and troubleshooting</description>
-  <last_updated>2025-08-20</last_updated>
+  <last_updated>2025-08-23</last_updated>
   <section name="Configuration">
     <learning id="secret-key-configuration">
       <problem>Backend fails with "SECRET_KEY must be at least 32 characters"</problem>
@@ -42,6 +42,30 @@
         DEV_MODE_*_ENABLED=true
       </solution>
       <files_affected>dev_launcher/service_config.py, .env</files_affected>
+    </learning>
+    <learning id="llm-shared-mode-not-respected" date="2025-08-23">
+      <problem>LLM service configured as "shared" but not respected at runtime</problem>
+      <root_cause>
+        1. Service availability checker was changing LLM mode from "shared" to "disabled" when no API keys found
+        2. Backend had circular dependency in environment loading (_setup_environment_files)
+        3. Project root path was incorrect (2 levels instead of 3)
+      </root_cause>
+      <solution>
+        1. Keep LLM in shared mode even without API keys (dev_launcher/service_availability_checker.py)
+        2. Fix circular dependency by checking env vars instead of config system (netra_backend/app/main.py)
+        3. Correct project root path: Path(__file__).parent.parent.parent
+        4. Change display from "Cloud" to "On" for better UX (dev_launcher/config.py)
+      </solution>
+      <prevention>
+        - Avoid circular dependencies in environment initialization
+        - Ensure service modes are respected throughout the stack
+        - Test both dev launcher and direct run scenarios
+      </prevention>
+      <files_affected>
+        dev_launcher/service_availability_checker.py,
+        dev_launcher/config.py,
+        netra_backend/app/main.py
+      </files_affected>
     </learning>
   </section>
   <section name="Database">
@@ -187,6 +211,11 @@
     </issue>
     <issue symptom="ClickHouse connection errors">
       Non-critical in development, can ignore
+    </issue>
+    <issue symptom="LLM shows as Off when should be On">
+      Check service_availability_checker.py - ensure LLM stays in shared mode
+      Verify backend loads .env correctly without circular dependencies
+      Check display mapping in config.py (should show "On" for shared mode)
     </issue>
   </troubleshooting>
 </learnings>

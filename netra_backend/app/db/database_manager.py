@@ -104,9 +104,17 @@ class DatabaseManager:
         if base_url.startswith("postgresql://"):
             base_url = base_url.replace("postgresql://", "postgresql+asyncpg://")
         
-        # Convert psycopg2 SSL params to asyncpg format
-        if "sslmode=" in base_url and "/cloudsql/" not in base_url:
-            base_url = base_url.replace("sslmode=", "ssl=")
+        # Handle SSL parameters based on connection type
+        if "/cloudsql/" in base_url:
+            # Cloud SQL Unix socket - remove all SSL parameters
+            base_url = re.sub(r'[&?]sslmode=[^&]*', '', base_url)
+            base_url = re.sub(r'[&?]ssl=[^&]*', '', base_url)
+        else:
+            # CRITICAL FIX: For ALL non-Cloud SQL async connections,
+            # convert psycopg2 'sslmode=' to asyncpg 'ssl=' format
+            # This is REQUIRED because asyncpg doesn't understand 'sslmode'
+            if "sslmode=" in base_url:
+                base_url = base_url.replace("sslmode=", "ssl=")
         
         return base_url
     

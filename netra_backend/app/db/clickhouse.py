@@ -147,7 +147,9 @@ def _get_connection_config():
     """Get ClickHouse connection configuration."""
     config = get_clickhouse_config()
     app_config = get_configuration()
-    use_secure = app_config.clickhouse_mode != "local"
+    # Never use HTTPS for localhost connections to avoid SSL errors
+    is_localhost = config.host in ["localhost", "127.0.0.1", "::1"]
+    use_secure = app_config.clickhouse_mode != "local" and not is_localhost
     return config, use_secure
 
 def _get_connection_details(config) -> dict:

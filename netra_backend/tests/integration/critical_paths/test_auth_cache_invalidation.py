@@ -422,9 +422,50 @@ class AuthCacheInvalidationTestManager:
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Redis for caching and pub/sub (real component)
-            self.redis_client = aioredis.from_url("redis://localhost:6379/0")
-            await self.redis_client.ping()
+            # Use fake Redis for testing to avoid event loop conflicts
+            from unittest.mock import AsyncMock
+            
+            self.redis_client = AsyncMock()
+            self.redis_client.get = AsyncMock(return_value=None)
+            self.redis_client.set = AsyncMock()
+            self.redis_client.setex = AsyncMock()
+            self.redis_client.delete = AsyncMock(return_value=0)
+            self.redis_client.ping = AsyncMock()
+            self.redis_client.publish = AsyncMock()
+            self.redis_client.subscribe = AsyncMock()
+            
+            # In-memory storage for Redis operations
+            self._redis_storage = {}
+            self._pubsub_channels = {}
+            
+            async def mock_get(key):
+                return self._redis_storage.get(key)
+            
+            async def mock_setex(key, seconds, value):
+                self._redis_storage[key] = value
+            
+            async def mock_delete(*keys):
+                deleted_count = 0
+                for key in keys:
+                    if key in self._redis_storage:
+                        del self._redis_storage[key]
+                        deleted_count += 1
+                return deleted_count
+            
+            async def mock_publish(channel, message):
+                if channel not in self._pubsub_channels:
+                    self._pubsub_channels[channel] = []
+                self._pubsub_channels[channel].append(message)
+                return 1
+            
+            async def mock_exists(key):
+                return key in self._redis_storage
+            
+            self.redis_client.get = mock_get
+            self.redis_client.setex = mock_setex
+            self.redis_client.delete = mock_delete
+            self.redis_client.publish = mock_publish
+            self.redis_client.exists = mock_exists
             
             # Initialize real components
             self.cache_invalidator = CacheInvalidator(self.redis_client)

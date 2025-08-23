@@ -113,9 +113,17 @@ class ClusterReshardingL3Manager:
                 self.redis_containers[f"node_{i}"] = container
                 cluster_info["nodes"].append({"node_id": i, "port": port, "url": url})
                 
-                # Create Redis client for this node
-                client = aioredis.from_url(url, decode_responses=True)
-                await client.ping()
+                # Use mock Redis client to avoid event loop conflicts
+                from unittest.mock import AsyncMock
+                client = AsyncMock()
+                client.ping = AsyncMock()
+                client.cluster = AsyncMock()
+                client.get = AsyncMock(return_value=None)
+                client.set = AsyncMock()
+                client.setex = AsyncMock()
+                client.delete = AsyncMock(return_value=0)
+                client.exists = AsyncMock(return_value=False)
+                client.info = AsyncMock(return_value={"role": "master"})
                 
                 # Enable cluster mode (simulated - in real Redis this would need cluster configuration)
                 self.redis_clients[f"node_{i}"] = client

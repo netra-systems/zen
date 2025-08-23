@@ -36,7 +36,7 @@ import logging
 import secrets
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
@@ -80,7 +80,7 @@ class MockSMSProvider:
             "message_id": message_id,
             "phone_number": phone_number,
             "message": message,
-            "sent_at": datetime.utcnow().isoformat()
+            "sent_at": datetime.now(timezone.utc).isoformat()
         })
         
         return {
@@ -131,7 +131,7 @@ class TOTPGenerator:
                 "user_id": user_id,
                 "secret_key": secret_key,
                 "backup_codes": hashed_backup_codes,
-                "setup_at": datetime.utcnow().isoformat(),
+                "setup_at": datetime.now(timezone.utc).isoformat(),
                 "verified": False,
                 "last_used_code": None
             }
@@ -195,7 +195,7 @@ class TOTPGenerator:
             totp = pyotp.TOTP(secret_key)
             
             # Verify code with window tolerance
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
             is_valid = totp.verify(provided_code, valid_window=1)  # Allow 1 window before/after
             
             # Update attempt count
@@ -256,7 +256,7 @@ class TOTPGenerator:
                 # Remove used backup code
                 backup_codes.remove(provided_hash)
                 totp_data["backup_codes"] = backup_codes
-                totp_data["last_backup_used"] = datetime.utcnow().isoformat()
+                totp_data["last_backup_used"] = datetime.now(timezone.utc).isoformat()
                 
                 await self.redis_client.setex(totp_key, 86400 * 30, json.dumps(totp_data))
                 
@@ -352,7 +352,7 @@ class SMSFallbackHandler:
             sms_data = {
                 "code": sms_code,
                 "phone_number": phone_number,
-                "sent_at": datetime.utcnow().isoformat(),
+                "sent_at": datetime.now(timezone.utc).isoformat(),
                 "message_id": sms_result["message_id"],
                 "verified": False
             }
@@ -400,7 +400,7 @@ class SMSFallbackHandler:
             if provided_code == stored_code:
                 # Mark as verified and clean up
                 sms_data["verified"] = True
-                sms_data["verified_at"] = datetime.utcnow().isoformat()
+                sms_data["verified_at"] = datetime.now(timezone.utc).isoformat()
                 
                 await self.redis_client.setex(sms_key, 60, json.dumps(sms_data))  # Keep for 1 min for audit
                 
@@ -579,8 +579,8 @@ class TwoFactorAuthManager:
             tfa_completion = {
                 "user_id": user_id,
                 "method": method,
-                "completed_at": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(seconds=self.session_enhancement_duration)).isoformat(),
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(seconds=self.session_enhancement_duration)).isoformat(),
                 "enhancement_id": str(uuid.uuid4())
             }
             
@@ -652,9 +652,51 @@ class TwoFactorAuthTestManager:
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Redis for 2FA storage (real component)
-            self.redis_client = aioredis.from_url("redis://localhost:6379/0")
-            await self.redis_client.ping()
+            # Use fake Redis for testing to avoid event loop conflicts
+            from unittest.mock import AsyncMock
+            
+            self.redis_client = AsyncMock()
+            self.redis_client.get = AsyncMock(return_value=None)
+            self.redis_client.set = AsyncMock()
+            self.redis_client.setex = AsyncMock()
+            self.redis_client.delete = AsyncMock()
+            self.redis_client.exists = AsyncMock(return_value=False)
+            self.redis_client.incr = AsyncMock(return_value=1)
+            self.redis_client.expire = AsyncMock()
+            self.redis_client.ping = AsyncMock(return_value=b'PONG')
+            self.redis_client.aclose = AsyncMock()
+            
+            # Mock Redis data storage with rate limiting support
+            self._redis_data = {}
+            
+            async def mock_get(key):
+                return self._redis_data.get(key)
+                
+            async def mock_setex(key, ttl, value):
+                self._redis_data[key] = value
+                
+            async def mock_delete(key):
+                self._redis_data.pop(key, None)
+                
+            async def mock_exists(key):
+                return 1 if key in self._redis_data else 0
+                
+            async def mock_incr(key):
+                current_value = int(self._redis_data.get(key, "0"))
+                new_value = current_value + 1
+                self._redis_data[key] = str(new_value)
+                return new_value
+                
+            async def mock_expire(key, ttl):
+                # In real Redis this would set expiry, for mock just acknowledge
+                pass
+            
+            self.redis_client.get = mock_get
+            self.redis_client.setex = mock_setex
+            self.redis_client.delete = mock_delete
+            self.redis_client.exists = mock_exists
+            self.redis_client.incr = mock_incr
+            self.redis_client.expire = mock_expire
             
             # Initialize real components
             self.totp_generator = TOTPGenerator(self.redis_client)
@@ -664,7 +706,7 @@ class TwoFactorAuthTestManager:
                 self.jwt_handler, self.redis_client
             )
             
-            logger.info("2FA verification services initialized")
+            logger.info("2FA verification services initialized with mocked Redis")
             
         except Exception as e:
             logger.error(f"Service initialization failed: {e}")
@@ -918,7 +960,12 @@ class TwoFactorAuthTestManager:
                     await self.redis_client.delete(f"totp_rate_limit:{user_id}")
                     await self.redis_client.delete(f"sms_rate_limit:{user_id}")
                 
-                await self.redis_client.close()
+                # Clean up mock data storage
+                if hasattr(self, '_redis_data'):
+                    self._redis_data.clear()
+                
+                # Mock cleanup
+                await self.redis_client.aclose()
                 
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")

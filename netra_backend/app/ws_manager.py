@@ -16,10 +16,10 @@ from fastapi import WebSocket
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.unified import (
-    UnifiedWebSocketManager,
-    get_unified_manager,
+from netra_backend.app.websocket_core import (
+    WebSocketManager as CoreWebSocketManager,
+    get_websocket_manager,
+    ConnectionInfo,
 )
 
 logger = central_logger.get_logger(__name__)
@@ -34,7 +34,7 @@ class WebSocketManager:
     
     def __init__(self):
         """Initialize WebSocket manager with unified system."""
-        self._unified_manager = get_unified_manager()
+        self._unified_manager = get_websocket_manager()
         self._connections: Dict[str, WebSocket] = {}
         self._connection_info: Dict[str, ConnectionInfo] = {}
         
@@ -85,7 +85,8 @@ class WebSocketManager:
         
     def get_stats(self) -> Dict[str, Any]:
         """Get WebSocket statistics (legacy API)."""
-        return self._unified_manager.get_unified_stats()
+        stats = self._unified_manager.get_stats()
+        return stats.model_dump() if hasattr(stats, 'model_dump') else stats
         
     @property
     def connections(self) -> Dict[str, WebSocket]:

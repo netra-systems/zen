@@ -76,15 +76,8 @@ except ImportError:
 pytest_plugins = ["pytest_asyncio"]
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    # Don't close loop to avoid hanging
+# Remove custom event_loop fixture to let pytest-asyncio handle it properly
+# The --asyncio-mode=auto setting in pytest.ini will provide the event loop
 
 
 # =============================================================================

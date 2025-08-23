@@ -207,9 +207,17 @@ def _setup_optimization_components(app: FastAPI) -> None:
 async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Schedule index optimization as background task."""
     if hasattr(app.state, 'background_task_manager'):
-        task = _run_index_optimization_background(logger)
-        app.state.background_task_manager.add_task(task)
-        logger.info("Database index optimization scheduled as background task")
+        # Create wrapper coroutine for the background task
+        async def optimization_task():
+            return await _run_index_optimization_background(logger)
+        
+        # Use create_task method with coroutine function
+        task_id = await app.state.background_task_manager.create_task(
+            coro=optimization_task,
+            name="database_index_optimization",
+            timeout=120  # 2-minute timeout to prevent hanging
+        )
+        logger.info(f"Database index optimization scheduled as background task (ID: {task_id})")
 
 
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
