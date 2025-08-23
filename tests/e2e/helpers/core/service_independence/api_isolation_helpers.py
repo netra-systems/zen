@@ -90,7 +90,7 @@ class ApiIsolationValidator:
     
     async def _test_endpoints(self, service_config, working_port: int, result: Dict[str, Any]):
         """Test all endpoints for a service."""
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             for endpoint in service_config.api_endpoints:
                 result["total_tested"] += 1
                 endpoint_result = await self._test_single_endpoint(client, working_port, endpoint)
@@ -114,7 +114,7 @@ class ApiIsolationValidator:
     async def _is_port_accessible(self, port: int) -> bool:
         """Check if a port is accessible (has a service running)."""
         try:
-            async with httpx.AsyncClient(timeout=1.0) as client:
+            async with httpx.AsyncClient(timeout=1.0, follow_redirects=True) as client:
                 response = await client.get(f"http://localhost:{port}/")
                 return True
         except:
@@ -213,7 +213,7 @@ class AuthServiceFailureSimulator:
     
     async def _simulate_auth_timeout(self, result: Dict[str, Any]):
         """Simulate auth service timeout."""
-        async with httpx.AsyncClient(timeout=2.0) as client:
+        async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
             try:
                 # Try to call a non-existent auth endpoint
                 response = await client.get("http://localhost:9999/auth/validate")

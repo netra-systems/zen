@@ -253,7 +253,7 @@ class RealDevLauncherTester:
             if service_name == "frontend":
                 health_url = f"http://localhost:{port}/"  # Frontend uses root path
             
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return response.status_code == 200
                 
@@ -279,7 +279,7 @@ class RealDevLauncherTester:
                     if service_name == "frontend":
                         health_url = f"http://localhost:{port}/"
                     
-                    async with httpx.AsyncClient(timeout=2.0) as client:
+                    async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                         response = await client.get(health_url)
                         if response.status_code == 200:
                             logger.info(f"Found {service_name} service on port {port}")
@@ -334,7 +334,7 @@ class RealDevLauncherTester:
             if service_name == "frontend":
                 health_url = f"http://localhost:{port}/"
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 response_time = (time.time() - start_check) * 1000
                 

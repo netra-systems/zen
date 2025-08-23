@@ -83,7 +83,7 @@ class AuthFlowTester:
     """Comprehensive authentication flow testing class"""
     
     def __init__(self):
-        self.client = httpx.AsyncClient(timeout=TEST_CONFIG["timeout"])
+        self.client = httpx.AsyncClient(timeout=TEST_CONFIG["timeout"], follow_redirects=True)
         self.auth_tokens = {}
         self.session_data = {}
         self.cors_errors = []
@@ -1111,7 +1111,7 @@ class TestMultiTabSessionHandling:
         """Test login/logout across multiple tabs - Should expose session sync issues"""
         
         # Simulate multiple tabs with different clients
-        clients = [httpx.AsyncClient(timeout=TEST_CONFIG["timeout"]) for _ in range(3)]
+        clients = [httpx.AsyncClient(timeout=TEST_CONFIG["timeout"], follow_redirects=True) for _ in range(3)]
         
         try:
             tokens = []

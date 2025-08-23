@@ -142,7 +142,7 @@ class TestColdStartCriticalIssues:
     async def test_oauth_state_parameter_validation_race_condition(self):
         """Test 2.1: Concurrent OAuth flows cause state validation failures."""
         async def initiate_oauth_flow():
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{self.auth_url}/auth/login")
                 return response.json()
                 
@@ -299,7 +299,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         os.environ["BACKEND_PORT"] = "8888"
         
         # Try frontend API call
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             with pytest.raises(httpx.ConnectError):
                 await client.get("http://localhost:3000/api/health")
 
@@ -362,7 +362,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         conn.close()
         
         # Attempt dev mode login
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             with pytest.raises(httpx.HTTPStatusError) as exc_info:
                 response = await client.post(
                     f"{self.auth_url}/auth/dev/login",
@@ -398,7 +398,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         subprocess.run(["pkill", "-f", "redis-server"], capture_output=True)
         
         # Attempt login
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.auth_url}/auth/dev/login",
                 json={"email": "dev@example.com"}
@@ -557,7 +557,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_thread_id_generation_race_condition(self):
         """Test 8.1: Concurrent thread creation generates duplicate IDs."""
         async def create_thread():
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.post(
                     f"{self.base_url}/api/threads",
                     json={"name": "Test Thread"},
@@ -589,7 +589,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         await asyncio.sleep(1)
         
         # Create thread via API
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.base_url}/api/threads",
                 json={"name": "Test Thread"}
@@ -644,7 +644,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         await asyncio.sleep(2)
         
         # Check health of other services
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             backend_health = await client.get(f"{self.base_url}/health")
             
         # Backend should report unhealthy due to auth dependency
@@ -664,7 +664,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             
             start_time = time.time()
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 with pytest.raises(httpx.TimeoutException):
                     await client.get(
                         f"{self.base_url}/health",

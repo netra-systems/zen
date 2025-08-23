@@ -536,7 +536,7 @@ class TestSyntaxFix:
             # Get auth service URL (should remain healthy)
             auth_url = orchestrator.get_service_url("auth")
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{auth_url}/health")
                 
             assert response.status_code == 200, "Health endpoint should remain accessible"

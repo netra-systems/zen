@@ -119,7 +119,7 @@ class CrossServiceJWTValidator:
         start_time = self.performance.start_timer()
         
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 response = await client.get(f"{self.auth_url}/health", headers=headers)
                 
@@ -152,7 +152,7 @@ class CrossServiceJWTValidator:
         start_time = self.performance.start_timer()
         
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 
                 # Test multiple backend endpoints
@@ -314,7 +314,7 @@ class CrossServiceJWTValidator:
                 }
             
             # Test database access via backend API
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 
                 # Try to get user data via backend

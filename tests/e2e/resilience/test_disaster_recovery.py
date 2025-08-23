@@ -313,7 +313,7 @@ class TestDisasterRecovery:
         """Check individual service health."""
         try:
             import httpx
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return response.status_code == 200
         except Exception:

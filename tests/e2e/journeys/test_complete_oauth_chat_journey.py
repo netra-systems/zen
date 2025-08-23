@@ -125,7 +125,7 @@ class CompleteOAuthChatJourneyTester:
         """Setup real service connections for OAuth journey."""
         try:
             await self.services_manager.start_all_services()
-            self.http_client = httpx.AsyncClient(timeout=15.0)
+            self.http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
             yield self
         finally:
             await self._cleanup_journey_resources()

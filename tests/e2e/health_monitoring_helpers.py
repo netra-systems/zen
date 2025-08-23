@@ -75,7 +75,7 @@ class HealthMonitor:
         """Make HTTP health check request."""
         import httpx
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return self._analyze_health_response(response, service_name)
         except Exception as e:

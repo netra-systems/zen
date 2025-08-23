@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.real_services_health import RealServicesContext, ServiceHealthMonitor
+from tests.e2e.real_services_health import RealServicesContext, ServiceHealthMonitor
 from tests.e2e.real_services_manager import create_real_services_manager
 
 

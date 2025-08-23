@@ -66,7 +66,7 @@ class ServiceStartupDependencyChainValidator:
     
     def __init__(self):
         """Initialize dependency chain validator."""
-        self.http_client = httpx.AsyncClient(timeout=15.0)
+        self.http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
         self.validation_start_time = time.time()
         self.dependency_order = ["auth", "backend", "frontend"]
         self.startup_results: Dict[str, DependencyChainResult] = {}

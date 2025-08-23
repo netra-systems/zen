@@ -27,7 +27,7 @@ async def check_service_health(url: str, timeout: float = 5.0) -> bool:
     """
     try:
         import httpx
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
             response = await client.get(url)
             return response.status_code == 200
     except Exception as e:

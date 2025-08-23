@@ -85,7 +85,7 @@ class StagingTestSuite:
         if self._setup_complete:
             return
             
-        self.test_client = httpx.AsyncClient(timeout=30.0)
+        self.test_client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
         self.aio_session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=30)
         )

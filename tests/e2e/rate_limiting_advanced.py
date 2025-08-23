@@ -74,7 +74,7 @@ class APIRateLimitTester:
                                         method: str = "GET", json_data: Dict = None, 
                                         max_attempts: int = 20) -> Dict[str, Any]:
         """Hit endpoint until rate limited."""
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             for attempt in range(1, max_attempts + 1):
                 try:
                     if method == "GET":
@@ -159,7 +159,7 @@ class AgentThrottleTester:
         throttled_requests = 0
         total_requests = 10
         
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             for i in range(total_requests):
                 try:
                     response = await client.post(
@@ -307,7 +307,7 @@ class ResponseHeaderValidator:
     
     async def _trigger_429_response(self, headers: Dict[str, str]) -> Optional[Dict[str, Any]]:
         """Trigger 429 response by hitting rate limits."""
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             for _ in range(15):  # Try multiple requests to trigger rate limit
                 try:
                     response = await client.post(

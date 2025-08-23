@@ -85,7 +85,7 @@ class DevModeTester:
         
         try:
             # Check backend health
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"http://localhost:{self.backend_port}/health/ready")
                 backend_healthy = response.status_code == 200
                 backend_data = response.json() if backend_healthy else None
@@ -178,7 +178,7 @@ class DevModeTester:
         
         try:
             # Send example message via API
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 test_message = {
                     "message": "I need to reduce costs but keep quality the same.",
                     "thread_id": "test_thread_001",
@@ -227,7 +227,7 @@ class DevModeTester:
         
         try:
             # Check supervisor agent health
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"http://localhost:{self.backend_port}/health/agents/supervisor_agent"
                 )
@@ -283,7 +283,7 @@ class DevModeTester:
         
         try:
             # Test CORS headers
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.options(
                     f"http://localhost:{self.backend_port}/api/v1/messages",
                     headers={
@@ -334,7 +334,7 @@ class DevModeTester:
     async def _verify_database_connections(self) -> Dict[str, Any]:
         """Verify all database connections are working"""
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"http://localhost:{self.backend_port}/health/database-env"
                 )
@@ -355,7 +355,7 @@ class DevModeTester:
         """Verify service discovery is working"""
         try:
             # Check if services are discoverable
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"http://localhost:{self.backend_port}/api/v1/services"
                 )

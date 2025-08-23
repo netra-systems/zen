@@ -141,7 +141,7 @@ class QuotaManager:
     
     async def _get_current_quota_status(self) -> Dict[str, Any]:
         """Get current quota status from API."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
             response = await client.get(f"{self.tester.backend_base_url}/api/v1/user/quota", headers=headers)
             assert response.status_code == 200, f"Quota status failed: {response.status_code}"
@@ -189,7 +189,7 @@ class UpgradeFlowManager:
     
     async def _process_upgrade(self, upgrade_request: Dict[str, Any]) -> Dict[str, Any]:
         """Process the upgrade transaction."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {self.tester.current_token}"}
             response = await client.post(
                 f"{self.tester.backend_base_url}/api/v1/user/upgrade",
@@ -211,7 +211,7 @@ class RateLimitFlowTester(RateLimitFlowTester):  # Extend original class
     
     async def _create_free_user_with_quota(self) -> Dict[str, Any]:
         """Create free tier user with quota limits."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # Dev signup creates user with FREE tier by default
             response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             assert response.status_code == 200, f"User creation failed: {response.status_code}"

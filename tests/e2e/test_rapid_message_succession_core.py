@@ -387,7 +387,7 @@ class TestQueueOverflowBackpressureHandling:
     # if E2E_TEST_CONFIG["test_mode"] == "real":
     # # Use real authentication service
     # try:
-    # async with httpx.AsyncClient() as client:
+    # async with httpx.AsyncClient(follow_redirects=True) as client:
     # response = await client.post(
     # f"{E2E_TEST_CONFIG['auth_service_url']}/auth/test-user",
     # json={"email": f"test-{uuid.uuid4().hex[:8]}@example.com"},

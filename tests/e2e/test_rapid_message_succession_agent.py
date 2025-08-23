@@ -60,7 +60,7 @@ class AgentStateMonitor:
             "state_corruption_detected": False,
             "consistency_violations": [],
             "memory_leak_detected": False
-        
+        }
         # Check memory growth
         initial_memory = self.state_snapshots[0]["memory_usage"]["rss"]
         final_memory = self.state_snapshots[-1]["memory_usage"]["rss"]

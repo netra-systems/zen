@@ -93,7 +93,7 @@ class MultiServiceWebSocketTester:
         
         try:
             start_time = time.time()
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(
                     f"{service_config['url']}{service_config['health_endpoint']}",
                     timeout=5.0

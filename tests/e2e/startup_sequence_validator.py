@@ -262,4 +262,4 @@ class ServiceStartupSequenceValidator:
         """Cleanup test resources."""
         await self.client.aclose()
         await self.db_connections.disconnect_all()
-        await self.orchestrator.stop_test_environment("test_startup")
+        await self.orchestrator.test_stop_test_environment("test_startup")

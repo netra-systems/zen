@@ -81,7 +81,7 @@ class MessageSender:
         headers = {"Authorization": f"Bearer {self.auth_token}"}
         payload = {"message": content, "timestamp": datetime.now(timezone.utc).isoformat()}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.backend_url}/api/v1/chat/message",
                 headers=headers,
@@ -135,7 +135,7 @@ class UserManager:
     
     async def create_free_user(self) -> Dict[str, Any]:
         """Create a free tier user."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             assert response.status_code == 200, f"User creation failed: {response.status_code}"
             
@@ -144,7 +144,7 @@ class UserManager:
     
     async def create_paid_user(self, plan: str = "pro") -> Dict[str, Any]:
         """Create a paid tier user."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             # First create user
             auth_response = await client.post(f"{self.auth_base_url}/auth/dev/login")
             assert auth_response.status_code == 200, f"User creation failed: {auth_response.status_code}"
@@ -171,7 +171,7 @@ class UserManager:
         headers = {"Authorization": f"Bearer {auth_token}"}
         payload = {"plan": plan, "reason": "rate_limit_upgrade"}
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
                 f"{self.backend_base_url}/api/v1/user/upgrade",
                 headers=headers,

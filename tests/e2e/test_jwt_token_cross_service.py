@@ -113,7 +113,7 @@ class TestTokenExpiryAndRefresh(JWTTestFixtures):
         refresh_payload = jwt_helper.create_refresh_payload()
         refresh_token = await jwt_helper.create_jwt_token(refresh_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             data = {"refresh_token": refresh_token}
             response = await client.post(f"{jwt_helper.auth_url}/auth/refresh", json=data)
             
@@ -212,7 +212,7 @@ class TestAgentContextExtraction(JWTTestFixtures):
         """Test agent service receives correct user context from token."""
         token = await jwt_helper.get_real_token_from_auth()
         if token:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 data = {"message": "Test message", "thread_id": f"test-{int(time.time())}"}
                 
@@ -232,7 +232,7 @@ class TestAgentContextExtraction(JWTTestFixtures):
         admin_payload["permissions"] = ["read", "write", "admin"]
         admin_token = await jwt_helper.create_jwt_token(admin_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {admin_token}"}
             data = {"message": "Generate admin report", "thread_id": f"admin-test-{int(time.time())}"}
             

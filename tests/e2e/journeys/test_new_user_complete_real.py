@@ -105,7 +105,7 @@ class CompleteNewUserJourneyTester:
                 pass  # Continue with SQLite fallback
                 
             await self.harness.state.databases.setup_databases()
-            self.http_client = httpx.AsyncClient(timeout=15.0)
+            self.http_client = httpx.AsyncClient(timeout=15.0, follow_redirects=True)
             yield self
         finally:
             await self._cleanup_all_services()

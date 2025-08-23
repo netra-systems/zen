@@ -35,7 +35,7 @@ from tests.e2e.health_check_core import (
     create_service_error_result,
     get_critical_services,
 )
-from tests.health_service_checker import ServiceHealthChecker
+from tests.e2e.health_service_checker import ServiceHealthChecker
 
 logger = central_logger.get_logger(__name__)
 
@@ -108,7 +108,7 @@ class ServiceHealthMonitor:
         
         try:
             start_time = time.time()
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(url)
                 response_time_ms = (time.time() - start_time) * 1000
                 

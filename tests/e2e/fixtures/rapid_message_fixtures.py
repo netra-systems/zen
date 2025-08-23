@@ -113,7 +113,7 @@ async def user_token():
         return f"test_token_{uuid.uuid4().hex[:8]}"
     
     # Real token generation would go here
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.post(
             f"{E2E_TEST_CONFIG['auth_service_url']}/test/token",
             json={"user_type": "test", "permissions": ["message:send"]}

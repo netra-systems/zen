@@ -410,7 +410,7 @@ class TestClient:
     def _setup_http_client(self) -> None:
         """Setup HTTP client with proper configuration."""
         import httpx
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
     
     async def auth_request(self, method: str, endpoint: str, **kwargs) -> Any:
         """Make authenticated request to auth service."""

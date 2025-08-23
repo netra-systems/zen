@@ -423,7 +423,7 @@ class SessionPersistenceValidator:
     async def check_service_availability(self) -> bool:
         """Check if backend service is available."""
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get("http://localhost:8000/health")
                 return response.status_code == 200
         except Exception:

@@ -94,7 +94,7 @@ class DegradedModeValidator:
     async def _test_auth_health_endpoint(self, auth_url: str):
         """Test auth service health endpoint."""
         import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             return await client.get(f"{auth_url}/health")
     
     def _analyze_auth_response(self, response) -> Dict[str, Any]:
@@ -156,7 +156,7 @@ class HealthCheckCascadeValidator:
     async def _check_health_endpoint(self, backend_url: str, endpoint: str) -> Dict[str, Any]:
         """Check individual health endpoint."""
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}{endpoint}")
                 return {"status_code": response.status_code, "data": response.json()}
         except Exception as e:
@@ -204,7 +204,7 @@ class RecoveryValidator:
         """Check health status after recovery."""
         backend_url = orchestrator.get_service_url("backend")
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}/health/system/comprehensive")
                 return {"status_code": response.status_code, "data": response.json()}
         except Exception as e:

@@ -418,7 +418,7 @@ class ServiceAvailabilityChecker:
         
         try:
             # Test API with simple request
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 response = await client.get(
                     "https://api.openai.com/v1/models",
                     headers={"Authorization": f"Bearer {api_key}"}
@@ -473,7 +473,7 @@ class ServiceAvailabilityChecker:
         
         try:
             # Test API with simple request (note: different endpoint structure)
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 response = await client.get(
                     "https://api.anthropic.com/v1/messages",
                     headers={

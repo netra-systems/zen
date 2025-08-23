@@ -165,7 +165,7 @@ class ComprehensiveRateLimitTester:
         # Test expensive operation endpoint
         endpoint = "http://localhost:8000/api/v1/chat/message"
         
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
             for attempt in range(expected_limit + 10):  # Try beyond expected limit
                 try:
                     response = await client.post(
@@ -263,7 +263,7 @@ class ComprehensiveRateLimitTester:
         """Validate rate limit headers in API responses."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 # Make initial request to check headers
                 response = await client.post(
@@ -344,7 +344,7 @@ class ComprehensiveRateLimitTester:
             "response_times": []
         }
         
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             tasks = []
             for i in range(concurrent_requests):
                 task = self._make_concurrent_request(client, headers, i)
@@ -439,7 +439,7 @@ class ComprehensiveRateLimitTester:
         # Test that paid user is unaffected
         paid_headers = {"Authorization": f"Bearer {paid_token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 response = await client.post(
                     "http://localhost:8000/api/v1/chat/message",
@@ -533,7 +533,7 @@ class ComprehensiveRateLimitTester:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Try to trigger rate limiting and examine error response
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             error_data = {
                 "correct_codes": [],
                 "helpful_messages": [],
@@ -638,7 +638,7 @@ class ComprehensiveRateLimitTester:
         await asyncio.sleep(recovery_wait)
         
         # Test if we can make requests again
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 response = await client.post(
                     "http://localhost:8000/api/v1/chat/message",

@@ -42,7 +42,7 @@ class ServiceHealthChecker:
         start_time = time.time()
         
         try:
-            async with httpx.AsyncClient(timeout=config["timeout"]) as client:
+            async with httpx.AsyncClient(timeout=config["timeout"], follow_redirects=True) as client:
                 response = await client.get(config["url"])
                 response_time_ms = (time.time() - start_time) * 1000
                 
@@ -149,7 +149,7 @@ class ServiceHealthChecker:
         """Test communication between auth and backend services."""
         timeout = min(auth_config.get("timeout", 5.0), backend_config.get("timeout", 5.0))
         
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
             # Parallel health checks to both services
             tasks = [
                 client.get(auth_config["url"]),

@@ -1,0 +1,93 @@
+# Permissive Pre-commit Configuration for Netra Apex
+# Focus: New files and edited sections only, not entire legacy codebase
+# Philosophy: Progressive enhancement over rigid enforcement
+
+repos:
+  - repo: local
+    hooks:
+      # NEW FILES ONLY: Strict enforcement for new code
+      - id: new-file-compliance
+        name: New File Standards (strict for new files only)
+        entry: python scripts/permissive_hooks/check_new_files.py
+        language: system
+        files: '\.(py|ts|tsx)$'
+        stages: [commit]
+        description: 'Applies strict standards ONLY to newly created files'
+        
+      # EDITED SECTIONS: Check only modified lines, not entire file
+      - id: edited-lines-check
+        name: Modified Lines Check (incremental)
+        entry: python scripts/permissive_hooks/check_edited_lines.py
+        language: system
+        files: '\.(py|ts|tsx)$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Validates only the lines being modified, not the entire file'
+        
+      # CRITICAL IMPORTS: Prevent new relative imports (warning for existing)
+      - id: prevent-new-relative-imports
+        name: Prevent New Relative Imports
+        entry: python scripts/permissive_hooks/check_new_imports.py --warn-only
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Blocks new relative imports, warns about existing ones'
+        
+      # MAIN CODE PRIORITY: Stricter for app code, lenient for tests
+      - id: main-code-quality
+        name: Main Codebase Quality (app > tests)
+        entry: python scripts/permissive_hooks/prioritized_check.py --priority app
+        language: system
+        files: '^(netra_backend/app|auth_service/auth_core|frontend/src)/.*\.(py|ts|tsx)$'
+        stages: [commit]
+        description: 'Prioritizes main application code quality over test files'
+        
+      # TEST FILE LENIENCY: Relaxed rules for test files
+      - id: test-file-leniency
+        name: Test File Check (permissive)
+        entry: python scripts/permissive_hooks/test_check_lenient.py --max-lines 1000
+        language: system
+        files: '(test_.*\.py|.*_test\.py|tests/.*\.py)$'
+        stages: [commit]
+        description: 'Relaxed limits for test files - focus on functionality over form'
+        
+      # DUPLICATE DETECTION: Only for new code patterns
+      - id: new-duplicate-prevention
+        name: Prevent New Duplicates (incremental)
+        entry: python scripts/permissive_hooks/check_new_duplicates.py --threshold 0.9
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Prevents introduction of NEW duplicate patterns only'
+        
+      # EMERGENCY BYPASS: Allow quick fixes with flag
+      - id: emergency-bypass-check
+        name: Emergency Fix Mode
+        entry: python scripts/permissive_hooks/emergency_check.py
+        language: system
+        stages: [commit]
+        pass_filenames: false
+        description: 'Allows bypass with EMERGENCY_FIX flag in commit message'
+        
+      # PROGRESSIVE ENHANCEMENT: Track improvement over time
+      - id: progress-tracker
+        name: Code Quality Progress Tracker
+        entry: python scripts/permissive_hooks/track_progress.py --log-only
+        language: system
+        stages: [commit]
+        pass_filenames: false
+        always_run: true
+        description: 'Tracks quality improvements without blocking commits'
+
+# Configuration for different severity levels
+# These can be toggled based on development phase
+default_stages: [commit]
+fail_fast: false  # Continue checking even after first failure
+verbose: true     # Show detailed feedback to help developers
+
+# Environment-specific overrides
+# Development: More permissive
+# Staging: Moderate enforcement  
+# Production: Strict enforcement (use original config)

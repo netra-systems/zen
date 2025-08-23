@@ -152,7 +152,7 @@ class TestRefreshTokenFlow(TestTokenExpiryUnified):
         refresh_token = jwt_helper.create_token(refresh_payload)
         
         # Attempt token refresh
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             data = {"refresh_token": refresh_token}
             response = await client.post(f"{jwt_helper.auth_url}/auth/refresh", json=data)
             
@@ -173,7 +173,7 @@ class TestRefreshTokenFlow(TestTokenExpiryUnified):
         expired_refresh_token = jwt_helper.create_token(expired_refresh_payload)
         
         # Attempt refresh with expired token
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             data = {"refresh_token": expired_refresh_token}
             response = await client.post(f"{jwt_helper.auth_url}/auth/refresh", json=data)
             

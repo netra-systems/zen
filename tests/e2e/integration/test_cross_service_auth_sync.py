@@ -65,7 +65,7 @@ class CrossServiceAuthValidator:
         
     async def setup(self) -> None:
         """Setup cross-service auth validator."""
-        self.http_client = httpx.AsyncClient(timeout=10.0)
+        self.http_client = httpx.AsyncClient(timeout=10.0, follow_redirects=True)
         
     async def cleanup(self) -> None:
         """Cleanup resources."""

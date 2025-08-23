@@ -827,7 +827,7 @@ class DevLauncherStartupTester:
                 return False
                 
             # Try to connect - this may fail if ClickHouse not running
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{clickhouse_url}/ping")
                 return response.status_code == 200
                 
@@ -848,7 +848,7 @@ class DevLauncherStartupTester:
             auth_url = f"http://localhost:{auth_port}"
             
             # This may fail due to auth configuration issues
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}/health")
                 if response.status_code != 200:
                     return False
@@ -873,7 +873,7 @@ class DevLauncherStartupTester:
             # Test CORS and API connectivity
             backend_url = f"http://localhost:{backend_port}" 
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 # Test basic API endpoint that frontend would use
                 response = await client.get(f"{backend_url}/api/health", 
                                           headers={"Origin": f"http://localhost:{frontend_port}"})
@@ -890,7 +890,7 @@ class DevLauncherStartupTester:
             backend_port = ports.get('backend', 8000)
             
             # Test database health endpoint
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"http://localhost:{backend_port}/health/db")
                 return response.status_code == 200
                 
@@ -905,7 +905,7 @@ class DevLauncherStartupTester:
             auth_port = ports.get('auth', 8081)
             
             # Test auth service database health
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.get(f"http://localhost:{auth_port}/health/db")
                 return response.status_code == 200
                 
@@ -944,7 +944,7 @@ class DevLauncherStartupTester:
             frontend_port = ports.get('frontend', 3000)
             
             # Test CORS headers
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 response = await client.options(
                     f"http://localhost:{backend_port}/api/health",
                     headers={

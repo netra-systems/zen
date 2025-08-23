@@ -64,7 +64,7 @@ class WebSocketAuthTester:
         """Generate real JWT token from Auth service with performance tracking."""
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 # Use test user credentials
                 test_user = TEST_USERS.get(user_tier)
@@ -107,7 +107,7 @@ class WebSocketAuthTester:
         """Validate JWT token in Backend service with timing."""
         start_time = time.time()
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 headers = {"Authorization": f"Bearer {token}"}
                 response = await client.get(f"{self.backend_url}/health", headers=headers)
@@ -166,7 +166,7 @@ class WebSocketAuthTester:
         refresh_payload = self.jwt_helper.create_refresh_payload()
         refresh_token = self.jwt_helper.create_token(refresh_payload)
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             try:
                 refresh_data = {"refresh_token": refresh_token}
                 response = await client.post(f"{self.auth_url}/auth/refresh", json=refresh_data)

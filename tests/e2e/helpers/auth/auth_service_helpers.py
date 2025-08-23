@@ -503,7 +503,7 @@ class AuthServiceIndependenceValidator:
         """Wait for service to respond to health check."""
         end_time = time.time() + timeout
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             while time.time() < end_time:
                 try:
                     response = await client.get(health_url, timeout=5.0)
@@ -593,7 +593,7 @@ class AuthServiceIndependenceValidator:
             "/openapi.json"
         ]
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             for endpoint in endpoints_to_test:
                 try:
                     url = f"http://localhost:{port}{endpoint}"

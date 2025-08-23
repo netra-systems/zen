@@ -113,7 +113,7 @@ class SessionSyncTestHelper:
             test_email = f"session_test_{user_suffix}_{uuid.uuid4().hex[:8]}@example.com"
             test_name = f"Session Test User {user_suffix}"
             
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
                 response = await client.post(
                     f"{self.backend_url}/api/auth/dev_login",
                     json={"email": test_email, "name": test_name}
@@ -142,7 +142,7 @@ class SessionSyncTestHelper:
     async def verify_backend_session(self, user: SessionTestUser) -> Tuple[bool, Optional[Dict]]:
         """Verify user session is accessible via backend."""
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 response = await client.get(
                     f"{self.backend_url}/api/auth/me",
                     headers={"Authorization": f"Bearer {user.token}"}

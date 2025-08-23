@@ -193,7 +193,7 @@ class CascadeHealthValidator:
     async def _test_backend_direct(self) -> Dict[str, Any]:
         """Test backend service directly."""
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(SERVICE_ENDPOINTS["backend"]["url"])
                 return {"healthy": response.status_code == 200, "status_code": response.status_code}
         except Exception as e:
@@ -202,7 +202,7 @@ class CascadeHealthValidator:
     async def _test_frontend_backend_connectivity(self) -> Dict[str, Any]:
         """Test frontend to backend connectivity."""
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
                 # Test if frontend can serve content (even if backend is down)
                 response = await client.get(SERVICE_ENDPOINTS["frontend"]["url"])
                 return {
@@ -245,14 +245,14 @@ class CircuitBreakerValidator:
         
         for i in range(count):
             try:
-                async with httpx.AsyncClient(timeout=1.0) as client:
+                async with httpx.AsyncClient(timeout=1.0, follow_redirects=True) as client:
                     await client.get("http://localhost:9999/health")  # Invalid endpoint
             except Exception:
                 pass  # Expected failures
         
         # Circuit breaker should activate and make subsequent calls fail fast
         try:
-            async with httpx.AsyncClient(timeout=1.0) as client:
+            async with httpx.AsyncClient(timeout=1.0, follow_redirects=True) as client:
                 start_call = time.time()
                 await client.get("http://localhost:9999/health")
                 call_duration = time.time() - start_call
@@ -274,7 +274,7 @@ class CircuitBreakerValidator:
             for i in range(total_tests):
                 start_time = time.time()
                 try:
-                    async with httpx.AsyncClient(timeout=2.0) as client:
+                    async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                         await client.get(f"http://localhost:999{i}/health")
                 except Exception:
                     pass

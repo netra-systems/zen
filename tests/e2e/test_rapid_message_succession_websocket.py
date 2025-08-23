@@ -93,6 +93,7 @@ class MockWebSocketServer:
                 "message_id": message_id,
                 "message": "Message already processed",
                 "timestamp": time.time()
+            }
             await websocket.send(json.dumps(duplicate_response))
             return
         

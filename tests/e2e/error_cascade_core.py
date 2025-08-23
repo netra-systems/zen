@@ -109,7 +109,7 @@ class GracefulDegradationValidator:
     async def _perform_auth_health_check(self, auth_url: str):
         """Perform health check on auth service."""
         import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             return await client.get(f"{auth_url}/health")
     
     def _evaluate_auth_stability(self, response) -> Dict[str, Any]:

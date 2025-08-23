@@ -51,7 +51,7 @@ except ImportError:
     class RealHTTPClient:
         def __init__(self, base_url):
             self.base_url = base_url
-            self.client = httpx.AsyncClient()
+            self.client = httpx.AsyncClient(follow_redirects=True)
         
         async def post(self, endpoint, data):
             return await self.client.post(f"{self.base_url}{endpoint}", json=data)

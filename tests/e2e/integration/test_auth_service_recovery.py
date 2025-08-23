@@ -149,7 +149,7 @@ class AuthServiceRecoveryTester:
             backend_url = self._get_service_url("backend")
             headers = {"Authorization": f"Bearer {token}"}
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}/health", headers=headers)
                 return {"status_code": response.status_code, "authenticated": True}
         except Exception as e:
@@ -247,7 +247,7 @@ class AuthServiceRecoveryTester:
             auth_port = auth_service.port if auth_service else 8081
             auth_url = f"http://localhost:{auth_port}"
             
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 await client.get(f"{auth_url}/health")
                 raise RuntimeError("Auth service still responding after failure simulation")
         except (httpx.ConnectError, httpx.TimeoutException, httpx.ConnectTimeout):
@@ -313,7 +313,7 @@ class AuthServiceRecoveryTester:
             backend_url = self._get_service_url("backend")
             headers = {"Authorization": f"Bearer {token}"}
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}/health", headers=headers)
                 # Backend should work with cached token even if Auth is down
                 return {"working": response.status_code == 200, "status_code": response.status_code}
@@ -422,7 +422,7 @@ class AuthServiceRecoveryTester:
         
         for attempt in range(max_attempts):
             try:
-                async with httpx.AsyncClient(timeout=3.0) as client:
+                async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                     response = await client.get(f"{auth_url}/health")
                     if response.status_code == 200:
                         return  # Auth service is healthy
@@ -461,7 +461,7 @@ class AuthServiceRecoveryTester:
         try:
             # Test that Backend still responds during Auth outage
             backend_url = self._get_service_url("backend")
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{backend_url}/health")
                 return {
                     "degraded_properly": response.status_code in [200, 503],
@@ -558,7 +558,7 @@ async def test_auth_service_failure_isolation():
         
         # Test Backend service isolation
         backend_url = tester.orchestrator.get_service_url("backend")
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             # Backend health should still work
             response = await client.get(f"{backend_url}/health")
             assert response.status_code == 200, "Backend service affected by Auth failure"

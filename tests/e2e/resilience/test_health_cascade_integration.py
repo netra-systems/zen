@@ -55,7 +55,7 @@ class HealthEndpointTester:
         """Call individual health endpoint."""
         try:
             import httpx
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{self.base_url}{endpoint}")
                 return {
                     "status_code": response.status_code,

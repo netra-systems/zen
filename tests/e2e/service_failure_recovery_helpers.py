@@ -96,7 +96,7 @@ class GracefulDegradationTester:
     async def _check_backend_health_degraded(self, backend_url: str):
         """Check backend health during Auth failure."""
         import httpx
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             return await client.get(f"{backend_url}/health")
     
     def _analyze_backend_degradation(self, response) -> Dict[str, Any]:

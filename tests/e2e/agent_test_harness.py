@@ -62,7 +62,7 @@ class AgentTestHarness:
         self.project_root = project_root
         self.config = config or self._get_default_config()
         self.state = TestServiceState()
-        self.http_client = httpx.AsyncClient(timeout=30.0)
+        self.http_client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
         self._setup_components()
     
     def _get_default_config(self) -> Dict[str, Any]:

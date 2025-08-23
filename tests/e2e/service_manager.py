@@ -35,7 +35,7 @@ class ServiceManager:
         """Initialize service manager."""
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.ServiceManager")
-        self.http_client = httpx.AsyncClient(timeout=30.0)
+        self.http_client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
     
     async def start_auth_service(self) -> None:
         """Start the auth service on port 8001."""
@@ -325,7 +325,7 @@ class HealthMonitor:
     async def _verify_service_health(self, config: ServiceConfig) -> bool:
         """Verify service health with additional checks."""
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 url = f"http://{config.host}:{config.port}{config.health_endpoint}"
                 response = await client.get(url)
                 
@@ -481,7 +481,7 @@ class RealServicesManager:
         
         while retry_count < max_retries:
             try:
-                async with httpx.AsyncClient(timeout=2.0) as client:
+                async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                     response = await client.get(f"http://localhost:{port}{health_path}")
                     if response.status_code == 200:
                         self.logger.info(f"{service_name} is ready on port {port}")

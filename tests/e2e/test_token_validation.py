@@ -49,7 +49,7 @@ class TestTokenValidationFlow:
     
     async def _make_auth_request(self, endpoint: str, token: str) -> dict:
         """Make authenticated request to auth service."""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {token}"}
             response = await client.get(f"http://localhost:8001{endpoint}", headers=headers)
             return {"status": response.status_code, "data": response.json()}
@@ -71,7 +71,7 @@ class TestValidTokenAccepted(TestTokenValidationFlow):
         """Test backend validates token correctly."""
         token = await self._generate_test_token(valid_token_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {token}"}
             response = await client.get("http://localhost:8000/health", headers=headers)
             assert response.status_code in [200, 401]  # Service may require setup
@@ -125,7 +125,7 @@ class TestInvalidSignatureRejected(TestTokenValidationFlow):
         """Test backend rejects tampered signature."""
         token = await self._create_tampered_token(valid_token_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {token}"}
             response = await client.get("http://localhost:8000/protected", headers=headers)
             assert response.status_code == 401
@@ -148,7 +148,7 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
         """Test refresh token generates new access token."""
         refresh_token = await self._generate_test_token(refresh_token_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             data = {"refresh_token": refresh_token}
             response = await client.post("http://localhost:8001/refresh", json=data)
             
@@ -162,7 +162,7 @@ class TestTokenRefreshFlow(TestTokenValidationFlow):
         """Test access token cannot be used for refresh."""
         access_token = await self._generate_test_token(valid_token_payload)
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             data = {"refresh_token": access_token}
             response = await client.post("http://localhost:8001/refresh", json=data)
             assert response.status_code == 401
@@ -233,7 +233,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
         with patch('app.services.agent_service.process_message') as mock_process:
             mock_process.return_value = AsyncMock()
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 data = {"message": "Test message", "thread_id": "test-thread"}
                 response = await client.post(
@@ -258,7 +258,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
         with patch('app.agents.supervisor_consolidated.SupervisorAgent.execute') as mock_execute:
             mock_execute.return_value = {"response": "Admin action completed"}
             
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
                 headers = {"Authorization": f"Bearer {token}"}
                 data = {"message": "Create admin report", "thread_id": "test"}
                 response = await client.post(
@@ -321,7 +321,7 @@ class TestCrossServiceTokenFlow(TestTokenValidationFlow):
         auth_result = await self._make_auth_request("/validate", token)
         
         # Use in backend service
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {token}"}
             backend_response = await client.get("http://localhost:8000/api/user/profile", headers=headers)
             
@@ -335,7 +335,7 @@ class TestCrossServiceTokenFlow(TestTokenValidationFlow):
         token = await self._generate_test_token(valid_token_payload)
         
         # First validate via backend
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             headers = {"Authorization": f"Bearer {token}"}  
             response = await client.get("http://localhost:8000/health", headers=headers)
             

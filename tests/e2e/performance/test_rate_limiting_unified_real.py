@@ -156,7 +156,7 @@ class UnifiedRateLimitTester:
         """Hit auth endpoints until rate limited with header validation."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             for attempt in range(15):  # Reduced attempts for test speed
                 try:
                     response = await client.get("http://localhost:8001/auth/me", headers=headers)
@@ -213,7 +213,7 @@ class UnifiedRateLimitTester:
         """Hit backend API until rate limited."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
             for attempt in range(10):  # Reduced attempts for test speed
                 try:
                     response = await client.post(
@@ -402,7 +402,7 @@ class UnifiedRateLimitTester:
         """Find the rate limit for a user by testing messages."""
         headers = {"Authorization": f"Bearer {token}"}
         
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
             for attempt in range(8):  # Reduced test range for speed
                 try:
                     response = await client.post(
@@ -484,7 +484,7 @@ class UnifiedRateLimitTester:
     async def _send_attack_request(self, headers: Dict[str, str], request_id: int) -> Dict[str, Any]:
         """Send single attack request."""
         try:
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=2.0, follow_redirects=True) as client:
                 response = await client.post(
                     "http://localhost:8000/api/v1/chat/message",
                     headers=headers,
@@ -520,7 +520,7 @@ class UnifiedRateLimitTester:
         await asyncio.sleep(2)
         
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.post(
                     "http://localhost:8000/api/v1/chat/message",
                     headers=headers,

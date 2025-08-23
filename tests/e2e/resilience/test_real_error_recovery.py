@@ -258,7 +258,7 @@ class ServiceRecoveryCoordinator:
             
             # Validate health endpoint
             import httpx
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(f"{service_url}/health")
                 health_ok = response.status_code == 200
             

@@ -48,7 +48,7 @@ async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGene
         'duration': time.perf_counter() - start_time,
         'success_rate': spike_result['success_rate'],
         'requests_per_second': spike_result['requests_per_second']
-    
+    }
     # Benchmark 2: WebSocket avalanche performance
     start_time = time.perf_counter()
     ws_result = await load_generator.generate_websocket_avalanche()

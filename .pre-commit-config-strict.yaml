@@ -1,0 +1,113 @@
+# Elite Enforcement Pre-commit Configuration for Netra Apex
+# MANDATORY: 450-line file limit, 25-line function limit
+repos:
+  - repo: local
+    hooks:
+      # CRITICAL: Architecture Compliance Check (blocks commits on violations)
+      - id: architecture-compliance
+        name: Architecture Compliance Enforcer
+        entry: python scripts/enforce_limits.py --mode strict --fail-fast
+        language: system
+        files: '^(app|frontend|scripts|tests).*\.(py|ts|tsx)$'
+        stages: [commit]
+        description: 'Enforces 450-line file and 25-line function limits'
+        
+      # File Size Enforcement (450-line limit)
+      - id: file-size-limit
+        name: File Size Limit (300 lines)
+        entry: python scripts/enforce_limits.py --check-files-only --max-lines 300
+        language: system
+        files: '\.(py|ts|tsx)$'
+        stages: [commit]
+        pass_filenames: true
+        
+      # Function Complexity Enforcement (25-line limit)  
+      - id: function-complexity-limit
+        name: Function Complexity Limit (8 lines)
+        entry: python scripts/enforce_limits.py --check-functions-only --max-function-lines 8
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        
+      # Type Safety and Duplicate Prevention
+      - id: type-safety-check
+        name: Type Safety and Duplicate Prevention
+        entry: python scripts/enforce_limits.py --check-types --prevent-duplicates
+        language: system
+        files: '\.(py|ts|tsx)$'
+        stages: [commit]
+        
+      # Test Stub Detection (prevents production stubs)
+      - id: test-stub-prevention
+        name: Test Stub Prevention
+        entry: python scripts/enforce_limits.py --check-stubs --fail-on-stubs
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        
+      # TEST FILES: Enforce same limits as production code (SPEC/testing.xml)
+      - id: test-file-size-enforcement
+        name: Test File Size Enforcement (300 lines)
+        entry: python scripts/compliance/test_size_validator.py --strict --format json
+        language: system
+        files: '(test_.*\.py|.*_test\.py|tests/.*\.py)$'
+        stages: [commit]
+        description: 'Test files MUST follow same 450-line limit as production code (SPEC/testing.xml)'
+        
+      # PREVENT NUMBERED FILE NAMES: Enforce semantic naming
+      - id: prevent-numbered-files
+        name: Prevent Numbered File Names
+        entry: python scripts/prevent_numbered_files.py
+        language: system
+        types: [python]
+        pass_filenames: true
+        stages: [commit]
+        description: 'Prevents non-semantic numbered file naming patterns like _1.py, _2.py, _core_1.py'
+        
+      # UNIFIED IMPORT COMPLIANCE: Enforce import standards across all components
+      - id: unified-import-compliance
+        name: Unified Import Compliance Check
+        entry: python scripts/unified_import_manager.py precommit
+        language: system
+        files: '\.(py)$'
+        stages: [commit]
+        description: 'Enforces canonical import patterns across backend, tests, and frameworks'
+        
+      # IMPORT PATH VALIDATION: Validate against forbidden patterns
+      - id: import-path-validation
+        name: Import Path Pattern Validation
+        entry: python scripts/check_netra_backend_imports.py
+        language: system
+        files: '^netra_backend/.*\.py$'
+        stages: [commit]
+        description: 'Validates that all netra_backend imports follow canonical patterns'
+        
+      # PREVENT RELATIVE IMPORTS: Enforce absolute imports only
+      - id: prevent-relative-imports
+        name: Prevent Relative Imports
+        entry: python scripts/check_relative_imports.py
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Prevents relative imports (. or ..) - all imports must be absolute'
+        
+      # DUPLICATE CODE DETECTION: Prevent regression of duplicate patterns
+      - id: duplicate-code-detection
+        name: Duplicate Code Detection
+        entry: python scripts/precommit_duplicate_detector.py
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Detects duplicate classes, functions, and WebSocket pattern regressions'
+        
+      # COMPREHENSIVE DUPLICATE SCAN: Full codebase scan (manual trigger)
+      - id: duplicate-code-scan-full
+        name: Full Duplicate Code Scan
+        entry: python scripts/detect_duplicate_code.py --threshold 0.8
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        description: 'Comprehensive duplicate detection across entire codebase'
