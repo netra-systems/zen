@@ -1,6 +1,14 @@
 """
 Backend-specific test configuration.
-Depends on root /tests/conftest.py for common fixtures and environment setup.
+Uses consolidated test framework infrastructure with backend-specific customizations.
+"""
+
+# Import all common fixtures from the consolidated base
+from test_framework.conftest_base import *
+
+# Import backend-specific utilities
+from test_framework.fixtures.database_fixtures import *
+from test_framework.mocks.service_mocks import MockClickHouseService, MockLLMService
 
 # Setup Python path for imports
 import sys
@@ -10,8 +18,6 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
-
-"""
 
 import os
 

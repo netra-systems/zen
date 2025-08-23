@@ -1,7 +1,16 @@
 """
 Auth service specific test configuration.
-Depends on root /tests/conftest.py for common fixtures and environment setup.
+Uses consolidated test framework infrastructure with auth-specific customizations.
 """
+
+# Import all common fixtures from the consolidated base
+from test_framework.conftest_base import *
+
+# Import auth-specific utilities
+from test_framework.fixtures.auth_fixtures import *
+from test_framework.fixtures.database_fixtures import test_db_session
+from test_framework.mocks.database_mocks import MockAsyncDatabaseFactory
+
 import asyncio
 import os
 import sys

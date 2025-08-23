@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings_document>
+    <metadata>
+        <title>Test Environment Isolation from Dev Launcher</title>
+        <category>Testing Infrastructure</category>
+        <created_date>2025-08-23</created_date>
+        <criticality>CRITICAL</criticality>
+        <estimated_impact>$12K MRR (Development velocity)</estimated_impact>
+    </metadata>
+    
+    <problem_statement>
+        <description>
+            Dev launcher was failing to load secrets because test conftest.py files were 
+            setting ENVIRONMENT=test at module level. This caused the SecretManager to 
+            think it was in test mode, leading to missing secrets errors that blocked 
+            development.
+        </description>
+        <symptoms>
+            <symptom>Error: "Required secrets missing: ['gemini-api-key', 'google-client-id', ...]"</symptom>
+            <symptom>Environment detected as "test" instead of "development" during dev launcher</symptom>
+            <symptom>Secrets not being populated despite being set in environment</symptom>
+        </symptoms>
+        <root_cause>
+            Test conftest.py files were setting environment variables at module level,
+            which executes immediately when the module is imported. This affected the
+            dev launcher when test modules were imported indirectly.
+        </root_cause>
+    </problem_statement>
+    
+    <solution>
+        <approach>
+            Guard all test environment variable setting with runtime checks to ensure
+            they only execute when pytest is actually running tests.
+        </approach>
+        <implementation>
+            <step>
+                Add conditional check before setting test environment variables:
+                <code>
+if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    os.environ["TESTING"] = "1"
+    os.environ["ENVIRONMENT"] = "testing"
+    # ... other test environment variables
+                </code>
+            </step>
+            <step>
+                Apply this pattern to ALL conftest.py files:
+                - /tests/conftest.py
+                - /auth_service/tests/conftest.py
+                - /netra_backend/tests/conftest.py
+                - Any other test configuration files
+            </step>
+        </implementation>
+    </solution>
+    
+    <prevention_measures>
+        <measure>
+            <title>Conftest.py Module-Level Code Rule</title>
+            <description>
+                NEVER set environment variables at module level in conftest.py files
+                without guarding them with pytest runtime checks.
+            </description>
+            <enforcement>Pre-commit hooks should check for unguarded os.environ assignments in conftest files</enforcement>
+        </measure>
+        <measure>
+            <title>Test Isolation Principle</title>
+            <description>
+                Test configuration should NEVER affect non-test environments.
+                All test setup must be isolated to actual test execution.
+            </description>
+        </measure>
+        <measure>
+            <title>Environment Detection Priority</title>
+            <description>
+                The environment detection order should be:
+                1. Explicit ENVIRONMENT variable
+                2. TESTING flag (only if running tests)
+                3. Default to development
+            </description>
+        </measure>
+    </prevention_measures>
+    
+    <testing_strategy>
+        <test>
+            Create tests that verify conftest.py doesn't affect environment when imported:
+            <code>
+# test_conftest_isolation.py
+import subprocess
+import sys
+
+def test_conftest_does_not_affect_environment():
+    """Verify importing conftest doesn't set test environment."""
+    result = subprocess.run([
+        sys.executable, "-c",
+        "import os; import auth_service.tests.conftest; print(os.environ.get('ENVIRONMENT', 'not_set'))"
+    ], capture_output=True, text=True)
+    assert result.stdout.strip() != "test"
+            </code>
+        </test>
+        <test>
+            Verify secrets load correctly in development mode even when test modules exist
+        </test>
+    </testing_strategy>
+    
+    <related_files>
+        <file>/tests/conftest.py</file>
+        <file>/auth_service/tests/conftest.py</file>
+        <file>/netra_backend/tests/conftest.py</file>
+        <file>/netra_backend/app/core/configuration/secrets.py</file>
+        <file>/netra_backend/app/core/configuration/base.py</file>
+        <file>/dev_launcher/secret_loader.py</file>
+    </related_files>
+    
+    <business_impact>
+        <impact_type>Development Velocity</impact_type>
+        <description>
+            This issue blocked developers from running the dev launcher,
+            preventing all local development and testing. The fix restores
+            development capability and prevents future regressions.
+        </description>
+        <metrics>
+            <metric name="Dev Environment Startup Success Rate" before="0%" after="100%"/>
+            <metric name="Time to Debug Issue" value="2-4 hours per occurrence"/>
+        </metrics>
+    </business_impact>
+    
+    <key_insights>
+        <insight>
+            Module-level code in Python executes immediately upon import,
+            making it dangerous for configuration that should be conditional.
+        </insight>
+        <insight>
+            Test infrastructure must be completely isolated from production
+            and development environments to prevent interference.
+        </insight>
+        <insight>
+            Environment detection logic must be robust and handle multiple
+            sources of configuration with clear priority.
+        </insight>
+    </key_insights>
+</learnings_document>

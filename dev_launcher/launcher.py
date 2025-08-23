@@ -58,7 +58,8 @@ class DevLauncher:
         # Initialize Docker service discovery attributes
         self._docker_discovery_report = {}
         self._running_docker_services = {}
-        self._load_env_file()  # Load .env file first
+        # NOTE: Removed _load_env_file() here to avoid duplicate loading
+        # SecretLoader will handle all env loading with correct priority
         self._setup_startup_mode()  # Setup startup mode and filtering
         self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
@@ -105,6 +106,12 @@ class DevLauncher:
         self.environment_checker = EnvironmentChecker(self.config.project_root, self.use_emoji)
         self.config.set_emoji_support(self.use_emoji)
         self.secret_loader = self._create_secret_loader()
+        self._secrets_loaded = False  # Track if secrets have been loaded
+        
+        # Load local env files immediately (critical for initialization)
+        # This ensures environment is set up before other components initialize
+        self._load_local_secrets_early()
+        
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
     
@@ -132,73 +139,6 @@ class DevLauncher:
             self.config, self.config.services_config,
             self.log_manager, self.service_discovery, self.use_emoji)
     
-    def _load_env_file(self):
-        """Load .env file into os.environ with proper priority handling.
-        
-        Priority order:
-        1. System environment variables (highest priority)
-        2. .env file variables  
-        3. .secrets file variables (lowest priority)
-        """
-        # Store original environment state
-        original_env = dict(os.environ)
-        env_changes = []
-        
-        # Load .env file (second priority)
-        env_file = self.config.project_root / ".env"
-        if env_file.exists():
-            try:
-                with open(env_file, 'r', encoding='utf-8') as f:
-                    for line_num, line in enumerate(f, 1):
-                        line = line.strip()
-                        if line and not line.startswith('#') and '=' in line:
-                            try:
-                                key, value = line.split('=', 1)
-                                key = key.strip()
-                                value = value.strip('"\'').strip()
-                                
-                                # Only set if not already in environment (system env has priority)
-                                if key not in original_env:
-                                    os.environ[key] = value
-                                    env_changes.append(f"{key}=<set from .env>")
-                                else:
-                                    logger.debug(f"Skipping {key} from .env (system env takes priority)")
-                            except ValueError:
-                                logger.warning(f"Invalid line in .env file line {line_num}: {line}")
-            except Exception as e:
-                logger.warning(f"Failed to load .env file: {e}")
-        
-        # Load .secrets file (lowest priority, only if not set by system or .env)
-        secrets_file = self.config.project_root / ".secrets"
-        if secrets_file.exists():
-            try:
-                with open(secrets_file, 'r', encoding='utf-8') as f:
-                    for line_num, line in enumerate(f, 1):
-                        line = line.strip()
-                        if line and not line.startswith('#') and '=' in line:
-                            try:
-                                key, value = line.split('=', 1)
-                                key = key.strip()
-                                value = value.strip('"\'').strip()
-                                
-                                # Only set if not in original env or .env file
-                                if key not in os.environ:
-                                    os.environ[key] = value
-                                    env_changes.append(f"{key}=<set from .secrets>")
-                                else:
-                                    logger.debug(f"Skipping {key} from .secrets (higher priority source exists)")
-                            except ValueError:
-                                logger.warning(f"Invalid line in .secrets file line {line_num}: {line}")
-            except Exception as e:
-                logger.debug(f"No .secrets file or failed to load: {e}")
-        
-        # Log environment changes if verbose
-        if env_changes and self.config.verbose:
-            logger.info(f"Loaded {len(env_changes)} environment variables from config files")
-            for change in env_changes[:5]:  # Show first 5
-                logger.debug(f"Environment: {change}")
-            if len(env_changes) > 5:
-                logger.debug(f"... and {len(env_changes) - 5} more environment variables")
     
     def _setup_logging(self):
         """Setup logging and show verbose configuration."""
@@ -1054,17 +994,53 @@ class DevLauncher:
         return not self.cache_manager.has_dependencies_changed("frontend")
     
     
+    def _load_local_secrets_early(self):
+        """Load local secrets early for initialization.
+        
+        This method loads only local env files early in the initialization 
+        process to ensure environment is properly set up before other 
+        components are created.
+        """
+        if not self._secrets_loaded:
+            # Load with local-only mode (no GCP)
+            self.secret_loader.local_first = True
+            self.secret_loader.load_secrets = False  # Ensure no GCP loading
+            self.secret_loader.load_all_secrets()
+            self._secrets_loaded = True
+    
     def load_secrets(self) -> bool:
-        """Load secrets if configured."""
+        """Load secrets if configured.
+        
+        This method handles GCP secret loading if enabled.
+        Local secrets are already loaded in _load_local_secrets_early.
+        """
+        if self._secrets_loaded and not self.config.load_secrets:
+            # Already loaded local secrets, no GCP needed
+            self._print("🔒", "SECRETS", "Local secrets loaded (GCP disabled)")
+            return True
+        
         if not self.config.load_secrets:
             self._print("🔒", "SECRETS", "Secret loading disabled (--no-secrets flag)")
             return True
+        
         return self._load_secrets_with_debug()
     
     def _load_secrets_with_debug(self) -> bool:
-        """Load secrets with debug information."""
-        self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
-        result = self.secret_loader.load_all_secrets()
+        """Load secrets with debug information.
+        
+        This handles GCP secret loading when enabled.
+        """
+        if self._secrets_loaded:
+            # Local secrets already loaded, only load GCP secrets if needed
+            self._print("🔐", "SECRETS", "Loading additional secrets from GCP...")
+            # Re-enable GCP loading for this call
+            self.secret_loader.load_secrets = True
+            result = self.secret_loader.load_all_secrets()
+        else:
+            self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
+            result = self.secret_loader.load_all_secrets()
+            self._secrets_loaded = True
+        
         if self.config.verbose:
             self.config.show_env_var_debug_info()
         return result

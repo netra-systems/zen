@@ -541,11 +541,17 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     try:
-        from netra_backend.app.websocket_core.large_message_handler import (
-            get_large_message_handler,
+        from netra_backend.app.websocket_core import (
+            get_websocket_manager,
+            WebSocketManager,
         )
-        handler = get_large_message_handler()
-        await handler.initialize()
+        # Get the consolidated WebSocket manager instance
+        manager = get_websocket_manager()
+        
+        # Initialize if the manager has an initialize method
+        if hasattr(manager, 'initialize'):
+            await manager.initialize()
+        
         logger.info("WebSocket components initialized")
     except Exception as e:
         if graceful_startup:

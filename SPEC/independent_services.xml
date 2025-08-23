@@ -14,6 +14,11 @@
   <critical-principle id="MS-P1">
     <title>Absolute Independence (Backend Services Only)</title>
     <instruction>Ensure each backend microservice is 100% self-contained. ZERO direct code dependencies (imports) on the main application (`app/`) or other services. This principle applies to backend services only - frontend is excluded.</instruction>
+    <clarification>
+      Each service MAY have its own implementations of similar infrastructure (e.g., DatabaseManager, Config, Monitoring).
+      This is NOT duplication but necessary for service independence. 
+      See SPEC/learnings/microservice_independence.xml for detailed explanation of "Unique Concept = ONCE per service" principle.
+    </clarification>
   </critical-principle>
   <scope-clarification id="MS-SCOPE-001">
     <title>Backend-Only Application</title>

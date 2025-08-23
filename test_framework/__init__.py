@@ -1,4 +1,23 @@
-"""Test framework module for Netra AI Platform."""
+"""
+Test framework module for Netra AI Platform.
+
+Unified test infrastructure providing:
+- Consolidated conftest fixtures (conftest_base.py)
+- Unified WebSocket testing utilities (websocket_helpers.py)
+- Organized fixtures by domain (fixtures/)
+- Reusable mock objects (mocks/)
+- Helper functions (helpers/)
+
+Usage:
+    # Import base fixtures in your conftest.py
+    from test_framework.conftest_base import *
+    
+    # Import specific utilities as needed
+    from test_framework.websocket_helpers import WebSocketTestHelpers
+    from test_framework.fixtures.auth_fixtures import test_user_token
+    from test_framework.mocks.service_mocks import MockLLMService
+    from test_framework.helpers.auth_helpers import create_test_jwt_token
+"""
 
 import sys
 from pathlib import Path
@@ -31,6 +50,12 @@ from test_framework.test_quality_analyzer import TestQualityAnalyzer, TestQualit
 from test_framework.mock_utils import mock_justified
 from test_framework.feature_flags import FeatureFlagManager, FeatureStatus
 from test_framework.decorators import feature_flag, requires_feature, tdd_test
+
+# Import consolidated test infrastructure
+from test_framework.websocket_helpers import WebSocketTestHelpers
+from test_framework.helpers.auth_helpers import AuthTestHelpers, create_test_jwt_token
+from test_framework.helpers.database_helpers import DatabaseTestHelpers
+from test_framework.helpers.api_helpers import APITestHelpers
 
 
 def setup_test_path():
@@ -92,4 +117,11 @@ __all__ = [
     'requires_feature',
     'tdd_test',
     'setup_test_path',
+    
+    # Consolidated test infrastructure
+    'WebSocketTestHelpers',
+    'AuthTestHelpers',
+    'DatabaseTestHelpers', 
+    'APITestHelpers',
+    'create_test_jwt_token',
 ]

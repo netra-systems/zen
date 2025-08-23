@@ -13,7 +13,7 @@ from test_framework.archived.duplicates.failure_patterns import FailurePatternAn
 from test_framework.archived.duplicates.test_discovery import TestDiscovery
 from test_framework.archived.duplicates.test_execution_engine import execute_test_suite
 from test_framework.archived.duplicates.test_insights import TestInsightGenerator
-from .test_profile_models import (
+from test_framework.archived.duplicates.test_profile_models import (
     TestPriority,
     TestProfile,
     TestProfileManager,
