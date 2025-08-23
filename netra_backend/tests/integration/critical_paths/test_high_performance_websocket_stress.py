@@ -55,7 +55,7 @@ from netra_backend.app.websocket.high_performance_broadcast import (
 
 )
 # LoadBalancedConnectionManager has been consolidated - using WebSocketManager
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager as LoadBalancedConnectionManager
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as LoadBalancedConnectionManager
 from enum import Enum
 
 class LoadBalancingStrategy(Enum):

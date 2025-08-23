@@ -90,6 +90,16 @@ repos:
         pass_filenames: false
         always_run: false  # Only runs when appropriate
         description: 'Optionally generates intelligent commit messages using Claude Code'
+        
+      # DUPLICATE AND LEGACY AUDIT: Comprehensive code quality check
+      - id: audit-duplicates-legacy
+        name: Duplicate and Legacy Code Audit
+        entry: python scripts/permissive_hooks/audit_duplicates_hook.py
+        language: system
+        stages: [commit]
+        pass_filenames: false
+        always_run: true
+        description: 'Audits for duplicate code and legacy patterns with configurable blocking'
 
 # Configuration for different severity levels
 # These can be toggled based on development phase

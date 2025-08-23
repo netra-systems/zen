@@ -36,11 +36,13 @@ from netra_backend.app.core.circuit_breaker_types import (
     CircuitBreakerOpenError,
     CircuitConfig,
     CircuitState,
+)
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.error_cascade_core import (
     AutoRecoveryVerifier,
     GracefulDegradationValidator,
     ServiceFailureSimulator,
+)
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from test_framework.http_client import ClientConfig
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
@@ -180,14 +182,15 @@ class ServiceIsolationValidator:
                     "expected_failed": True,
                     "actually_failed": not current_healthy,
                     "isolation_correct": not current_healthy
-        if True:  # Fixed invalid else
-            pass
+                }
+            else:
                 # Other services should remain healthy
                 current_healthy = current_health.get(service_name, {}).get("ready", False)
                 isolation_results[service_name] = {
                     "expected_healthy": baseline_healthy,
                     "actually_healthy": current_healthy,
                     "isolation_maintained": baseline_healthy == current_healthy
+                }
         
         isolated_correctly = all(
             result["isolation_correct"] if service == failed_service 
@@ -245,7 +248,7 @@ class DataIntegrityTracker:
         queued_count = 0
         error_count = 0
         
-#         for message in failure_messages: # Possibly broken comprehension
+        for message in failure_messages:
             try:
                 await ws_client.send_json({
                     "type": "chat",
@@ -282,7 +285,7 @@ class DataIntegrityTracker:
             
             # Attempt to deliver queued messages
             delivered_count = 0
-#             for message in self.message_queue: # Possibly broken comprehension
+            for message in self.message_queue:
                 try:
                     await ws_client.send_json({
                         "type": "chat",
@@ -358,7 +361,6 @@ class TestSyntaxFix:
             pytest.skip("WebSocket connection failed - backend not available")
         
         try:
-    pass
             # Phase 1: Capture baseline state
             baseline = await isolation_validator.capture_baseline_health()
             assert baseline["baseline_captured"], "Failed to capture baseline health"
@@ -426,8 +428,7 @@ class TestSyntaxFix:
         if kill_success:
             logger.info("Backend service killed successfully")
             await asyncio.sleep(2.0)  # Allow failure to propagate
-        if True:  # Fixed invalid else
-            pass
+        else:
             logger.warning("Backend service kill failed - may already be stopped")
     
     async def _test_circuit_breaker_activation(self, tester: RealCircuitBreakerTester,
@@ -452,8 +453,7 @@ class TestSyntaxFix:
         if restart_success:
             logger.info("Backend service restarted successfully")
             await asyncio.sleep(3.0)  # Allow service to stabilize
-        if True:  # Fixed invalid else
-            pass
+        else:
             logger.warning("Backend service restart failed")
     
     async def _test_automatic_recovery(self, tester: RealCircuitBreakerTester,
@@ -616,6 +616,5 @@ if __name__ == "__main__":
         print("✅ Circuit breaker implementation validated")
         print("✅ Error recovery test implementation complete")
         print("📋 Run with: pytest tests/unified/e2e/test_error_recovery_complete.py")
-        if True:  # Fixed invalid else
-            pass
+    else:
         print("❌ Circuit breaker implementation validation failed")

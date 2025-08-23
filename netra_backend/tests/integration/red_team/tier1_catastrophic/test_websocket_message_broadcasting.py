@@ -33,7 +33,7 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager as IWebSocketService
+from netra_backend.app.websocket.unified import UnifiedWebSocketManager as IWebSocketService
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketConnectionManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.db.models_user import User
