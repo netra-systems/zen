@@ -51,24 +51,38 @@ class LocalSecretManager:
         return resolved_secrets, validation
     
     def _build_fallback_chain(self) -> Dict[str, Tuple[str, str]]:
-        """Build secret fallback chain with source tracking."""
+        """Build secret fallback chain with source tracking.
+        
+        Priority order (lowest to highest):
+        1. .secrets file (lowest priority - legacy/fallback)
+        2. .env file (base configuration)
+        3. .env.local (local overrides)
+        4. OS environment (highest priority - always wins)
+        """
         secrets = {}
         
-        # Layer 1: .env file (lowest priority)
+        # Layer 1: .secrets file (lowest priority - legacy support)
+        secrets_file = self.project_root / ".secrets"
+        if secrets_file.exists():
+            secrets_from_file = self.env_parser.parse_env_file(secrets_file, "secrets_file")
+            secrets.update(secrets_from_file)
+            logger.info(f"  [SECRETS] Loaded {len(secrets_from_file)} from .secrets")
+        
+        # Layer 2: .env file (base configuration)
         env_file = self.project_root / ".env"
         if env_file.exists():
             env_secrets = self.env_parser.parse_env_file(env_file, "env_file")
             secrets.update(env_secrets)
             logger.info(f"  [ENV] Loaded {len(env_secrets)} from .env")
         
-        # Layer 2: .env.local (higher priority)
+        # Layer 3: .env.local (local overrides)
         env_local = self.project_root / ".env.local"
         if env_local.exists():
             local_secrets = self.env_parser.parse_env_file(env_local, "env_local")
             secrets.update(local_secrets)
             logger.info(f"  [LOCAL] Loaded {len(local_secrets)} from .env.local")
         
-        # Layer 3: OS environment (highest priority)
+        # Layer 4: OS environment (highest priority - always wins)
         os_secrets = self._capture_os_environment()
         secrets.update(os_secrets)
         logger.info(f"  [OS] Found {len(os_secrets)} in OS environment")
@@ -87,14 +101,27 @@ class LocalSecretManager:
         return secrets
     
     def _is_relevant_env_var(self, key: str) -> bool:
-        """Check if environment variable is relevant for our application."""
+        """Check if environment variable is relevant for our application.
+        
+        Extended to capture ALL potentially relevant variables including TEST_ 
+        variables for testing scenarios.
+        """
+        # Common configuration patterns
         relevant_patterns = [
             'GEMINI_', 'GOOGLE_', 'LANGFUSE_', 'CLICKHOUSE_',
             'REDIS_', 'JWT_', 'FERNET_', 'ANTHROPIC_', 'OPENAI_',
-            'ENVIRONMENT', 'PORT'
+            'ENVIRONMENT', 'PORT', 'DATABASE_', 'API_', 'SECRET_',
+            'KEY_', 'TOKEN_', 'AUTH_', 'SERVICE_', 'NETRA_',
+            'TEST_'  # Include test variables for testing
         ]
         
-        return any(key.startswith(pattern) for pattern in relevant_patterns)
+        # Check if the key starts with any relevant pattern
+        if any(key.startswith(pattern) for pattern in relevant_patterns):
+            return True
+        
+        # Also include specific single-word configs
+        single_configs = {'ENVIRONMENT', 'DEBUG', 'TESTING', 'PORT', 'HOST'}
+        return key in single_configs
     
     def _resolve_interpolations(self, secrets: Dict[str, Tuple[str, str]]) -> Dict[str, str]:
         """Resolve ${VAR} style interpolations in secret values."""

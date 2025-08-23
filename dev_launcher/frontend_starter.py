@@ -142,6 +142,8 @@ class FrontendStarter:
             NEXT_PUBLIC_WS_URL=backend_info["ws_url"],
             PORT=str(port),
             PYTHONPATH=str(self.config.project_root),
+            # Increase Node.js memory limit to 4GB to handle large test suite and development build
+            NODE_OPTIONS="--max-old-space-size=4096",
             **service_env_vars,
             **self.config.env_overrides
         )

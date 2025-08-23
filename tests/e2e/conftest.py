@@ -1,11 +1,21 @@
-"""E2E test fixtures and configuration."""
+"""
+E2E test fixtures and configuration.
+Uses consolidated test framework infrastructure.
+"""
+
+# Import all common fixtures from the consolidated base
+from test_framework.conftest_base import *
+
+# Import specific utilities we need
+from test_framework.websocket_helpers import WebSocketTestHelpers
+from test_framework.helpers.auth_helpers import AuthTestHelpers
 
 import pytest
 import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
-# E2E Configuration
+# E2E Configuration - Project specific
 E2E_CONFIG = {
     "timeout": 30,
     "base_url": "http://localhost:8000",

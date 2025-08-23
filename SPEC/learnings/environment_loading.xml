@@ -252,4 +252,76 @@
       <file>app/db/clickhouse.py</file>
     </related>
   </learning>
+  <learning id="dev-launcher-env-loading-regression">
+    <date>2025-08-23</date>
+    <category>Environment Loading</category>
+    <title>Dev Launcher Environment Loading Regression - Duplicate Loading and Priority Issues</title>
+    <problem>
+      <description>Dev launcher had duplicate environment loading with incorrect priority order</description>
+      <symptoms>
+        <symptom>Environment variables not loading from local .env file properly</symptom>
+        <symptom>Secrets loaded twice - once by launcher, once by SecretLoader</symptom>
+        <symptom>Wrong priority order - .env could override system environment</symptom>
+        <symptom>Inconsistent priority chains between launcher and SecretLoader</symptom>
+        <symptom>.secrets file not included in LocalSecretManager fallback chain</symptom>
+      </symptoms>
+      <root_cause>
+        <item>Launcher had _load_env_file() loading .env and .secrets in __init__</item>
+        <item>SecretLoader also loaded .env and .env.local files separately</item>
+        <item>Launcher priority: System > .env > .secrets (but loaded .env AFTER system)</item>
+        <item>SecretLoader priority: OS > .env.local > .env > defaults (.secrets missing)</item>
+        <item>This created duplicate loading and confusion about actual priority</item>
+      </root_cause>
+      <impact>
+        <item>Environment variables from .env not being used correctly</item>
+        <item>System environment variables could be overridden incorrectly</item>
+        <item>Duplicate file I/O operations slowing startup</item>
+        <item>Confusion about which loading mechanism had authority</item>
+        <item>Critical secrets potentially loaded with wrong values</item>
+      </impact>
+    </problem>
+    <solution>
+      <description>Unified environment loading through SecretLoader with correct priority order</description>
+      <implementation>
+        <step>Removed _load_env_file() method from launcher completely</step>
+        <step>Made SecretLoader the single source of truth for all env loading</step>
+        <step>Added .secrets file support to LocalSecretManager fallback chain</step>
+        <step>Fixed priority order: OS env > .env.local > .env > .secrets</step>
+        <step>Load local secrets early in launcher initialization</step>
+        <step>Prevent duplicate loading by tracking _secrets_loaded state</step>
+      </implementation>
+      <code_changes>
+        <file>dev_launcher/launcher.py - removed _load_env_file(), added _load_local_secrets_early()</file>
+        <file>dev_launcher/local_secrets.py - added .secrets file to fallback chain</file>
+        <file>dev_launcher/local_secrets.py - expanded _is_relevant_env_var patterns</file>
+      </code_changes>
+    </solution>
+    <result>
+      <outcome>Unified, correct environment loading with proper priority</outcome>
+      <benefits>
+        <benefit>System environment variables always have highest priority</benefit>
+        <benefit>No duplicate file loading - improved startup performance</benefit>
+        <benefit>Clear single source of truth for environment loading</benefit>
+        <benefit>Consistent priority order across all loading paths</benefit>
+        <benefit>Support for .secrets file as lowest-priority fallback</benefit>
+        <benefit>Proper loading order for variable interpolation</benefit>
+      </benefits>
+    </result>
+    <prevention>
+      <practice>Have ONE authoritative environment loading mechanism</practice>
+      <practice>ALWAYS respect system environment as highest priority</practice>
+      <practice>Load environment files in correct order for interpolation</practice>
+      <practice>Track loading state to prevent duplicate operations</practice>
+      <practice>Test with actual OS environment variables set</practice>
+      <practice>Document and enforce consistent priority chain</practice>
+      <practice>Create comprehensive tests for all priority scenarios</practice>
+    </prevention>
+    <related>
+      <spec>SPEC/environment_loading.xml</spec>
+      <file>dev_launcher/launcher.py</file>
+      <file>dev_launcher/local_secrets.py</file>
+      <file>dev_launcher/secret_loader.py</file>
+      <test>dev_launcher/tests/test_env_loading_regression.py</test>
+    </related>
+  </learning>
 </learnings>

@@ -11,6 +11,9 @@ RUN npm ci
 COPY frontend/ .
 COPY shared/ ../shared/
 
+# Set memory limit for build process
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Build the application
 RUN npm run build
 
@@ -30,6 +33,8 @@ RUN npm ci --production
 
 # Set environment variables
 ENV NODE_ENV=production
+# Set memory limit for runtime (can be lower than build time)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 EXPOSE 3000
 

@@ -13,28 +13,14 @@ export function middleware(request: NextRequest) {
   if (!isDevelopment) {
     // Production/staging environments
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    response.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self' https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https: wss:; font-src 'self' https:; media-src 'self' https:; frame-src 'self' https:; upgrade-insecure-requests;"
-    );
+    // Remove CSP header here - let Next.js handle it with proper nonce support
+    // The CSP should be configured in next.config.ts or _document.tsx for proper nonce injection
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  } else {
-    // Development mode: Explicitly allow all localhost connections
-    response.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*; " +
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:* http://127.0.0.1:*; " +
-      "style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:*; " +
-      "img-src 'self' data: blob: http://localhost:* http://127.0.0.1:*; " +
-      "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* wss://localhost:* wss://127.0.0.1:*; " +
-      "font-src 'self' data: http://localhost:* http://127.0.0.1:*; " +
-      "media-src 'self' http://localhost:* http://127.0.0.1:*; " +
-      "frame-src 'self' http://localhost:* http://127.0.0.1:*;"
-    );
   }
+  // In development, don't set CSP to avoid conflicts with Next.js hot reload
 
   return response;
 }

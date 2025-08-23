@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>WebSocket Legacy Import Cleanup</name>
+        <type>Learning</type>
+        <version>1.0</version>
+        <date>2025-08-23</date>
+        <description>Resolution of legacy WebSocket imports after architecture consolidation</description>
+    </metadata>
+    
+    <problem-statement>
+        <title>Missing WebSocket large_message_handler Module Causing Startup Failures</title>
+        <description>
+            The backend startup module was failing during WebSocket component initialization 
+            due to a missing module: netra_backend.app.websocket_core.large_message_handler.
+            This module was removed during WebSocket consolidation but was still being imported.
+        </description>
+        <error-message>
+            [BACKEND] ❌ 2025-08-23 16:31:35.796 | WARNING | WebSocket components initialization failed but continuing (optional service): No module named 'netra_backend.app.websocket_core.large_message_handler'
+        </error-message>
+        <impact>
+            - Backend startup with warnings (graceful mode)
+            - Potential runtime failures if WebSocket features were accessed
+            - Developer confusion about missing modules
+        </impact>
+    </problem-statement>
+    
+    <root-cause-analysis>
+        <finding>
+            <type>Architecture Consolidation Incomplete</type>
+            <description>
+                During WebSocket architecture consolidation, the large_message_handler module 
+                was removed as its functionality was integrated into the main WebSocket manager.
+                However, imports in startup_module.py were not updated to reflect this change.
+            </description>
+        </finding>
+        <finding>
+            <type>Consolidated Architecture Structure</type>
+            <description>
+                The WebSocket infrastructure was consolidated from 90+ files into 5 focused modules:
+                - manager.py: Connection lifecycle and message routing
+                - types.py: Data models and type definitions
+                - handlers.py: Message processing and routing
+                - auth.py: Authentication and security (includes validate_message_size)
+                - utils.py: Shared utilities and helpers
+            </description>
+        </finding>
+    </root-cause-analysis>
+    
+    <solution>
+        <change>
+            <file>netra_backend/app/startup_module.py</file>
+            <action>Replace legacy large_message_handler import with consolidated WebSocket manager</action>
+            <before><![CDATA[
+from netra_backend.app.websocket_core.large_message_handler import (
+    get_large_message_handler,
+)
+handler = get_large_message_handler()
+await handler.initialize()
+]]></before>
+            <after><![CDATA[
+from netra_backend.app.websocket_core import (
+    get_websocket_manager,
+    WebSocketManager,
+)
+# Get the consolidated WebSocket manager instance
+manager = get_websocket_manager()
+
+# Initialize if the manager has an initialize method
+if hasattr(manager, 'initialize'):
+    await manager.initialize()
+]]></after>
+        </change>
+    </solution>
+    
+    <learnings>
+        <learning id="websocket-consolidated-imports">
+            <principle>Always use consolidated WebSocket imports from websocket_core</principle>
+            <details>
+                The websocket_core package is the ONLY WebSocket implementation.
+                All legacy imports from app.websocket.* should be replaced with websocket_core imports.
+            </details>
+        </learning>
+        
+        <learning id="message-size-validation-location">
+            <principle>Message size validation is now in auth module</principle>
+            <details>
+                The functionality previously in large_message_handler is now handled by
+                validate_message_size() in netra_backend.app.websocket_core.auth module.
+                Default max message size is 8192 bytes.
+            </details>
+        </learning>
+        
+        <learning id="graceful-startup-mode">
+            <principle>Graceful startup mode prevents crashes from optional services</principle>
+            <details>
+                When graceful_startup_mode is enabled, failures in optional services like
+                WebSocket initialization log warnings but don't crash the application.
+                This helps maintain stability during development and deployment.
+            </details>
+        </learning>
+        
+        <learning id="post-consolidation-cleanup">
+            <principle>After architecture consolidation, audit all imports</principle>
+            <details>
+                When consolidating multiple modules into a unified architecture,
+                systematically audit all imports across the codebase to ensure
+                they're updated to use the new consolidated modules.
+            </details>
+        </learning>
+    </learnings>
+    
+    <prevention-strategies>
+        <strategy>
+            <title>Import Validation Script</title>
+            <description>
+                Create or enhance existing import validation scripts to detect
+                imports from removed/deprecated modules during CI/CD.
+            </description>
+        </strategy>
+        
+        <strategy>
+            <title>Consolidation Checklist</title>
+            <description>
+                When performing architecture consolidation:
+                1. Identify all modules being consolidated
+                2. Create migration mapping (old imports -> new imports)
+                3. Search entire codebase for old imports
+                4. Update all imports systematically
+                5. Remove old modules only after all imports updated
+                6. Run comprehensive tests to verify no broken imports
+            </description>
+        </strategy>
+        
+        <strategy>
+            <title>Backward Compatibility Aliases</title>
+            <description>
+                During transitions, maintain backward compatibility aliases
+                with deprecation warnings to give time for migration.
+                Example in websocket_core/__init__.py shows this pattern.
+            </description>
+        </strategy>
+    </prevention-strategies>
+    
+    <test-coverage>
+        <test-file>netra_backend/tests/integration/test_websocket_initialization.py</test-file>
+        <test-cases>
+            - Test that large_message_handler import fails (confirms removal)
+            - Test WebSocket initialization with consolidated imports
+            - Test message size validation functionality
+            - Test graceful fallback for optional components
+            - Test all legacy WebSocket imports are removed
+        </test-cases>
+    </test-coverage>
+    
+    <related-specs>
+        <spec>SPEC/learnings/websocket_consolidation.xml</spec>
+        <spec>SPEC/websocket_core.xml</spec>
+        <spec>SPEC/learnings/index.xml</spec>
+    </related-specs>
+</specification>

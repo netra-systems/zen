@@ -230,3 +230,70 @@ class AuthDatabaseManager:
             return True
         
         return False
+    
+    @staticmethod
+    def _get_default_auth_url() -> str:
+        """Get default database URL for auth service based on environment.
+        
+        Returns:
+            Default database URL for the current environment
+        """
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        
+        if environment == "development":
+            return "postgresql://postgres:password@localhost:5432/netra"
+        elif environment in ["test", "testing"]:
+            return "sqlite:///:memory:"
+        elif environment == "staging":
+            # Use staging-specific database URL
+            return "postgresql://postgres:password@35.223.92.123:5432/netra_staging"
+        elif environment == "production":
+            return "postgresql://postgres:password@35.223.92.123:5432/netra_production"
+        else:
+            logger.warning(f"Unknown environment '{environment}', using development default")
+            return "postgresql://postgres:password@localhost:5432/netra"
+    
+    @staticmethod
+    def _normalize_postgres_url(url: str) -> str:
+        """Normalize PostgreSQL URL format for consistency.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            Normalized PostgreSQL URL
+        """
+        if not url:
+            return url
+            
+        # Convert postgres:// to postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://")
+        
+        # Strip async driver prefixes for base URL
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        
+        return url
+    
+    @staticmethod
+    def _convert_sslmode_to_ssl(url: str) -> str:
+        """Convert sslmode parameter to ssl parameter for asyncpg.
+        
+        Args:
+            url: Database URL with sslmode parameter
+            
+        Returns:
+            URL with ssl parameter for asyncpg compatibility
+        """
+        if not url:
+            return url
+            
+        # Skip conversion for Cloud SQL connections
+        if "/cloudsql/" in url:
+            return url
+        
+        # Convert sslmode= to ssl= for asyncpg
+        if "sslmode=" in url:
+            url = url.replace("sslmode=", "ssl=")
+        
+        return url

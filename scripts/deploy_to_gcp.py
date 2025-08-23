@@ -113,7 +113,7 @@ class GCPDeployer:
                 port=3000,
                 dockerfile="Dockerfile.frontend",
                 cloud_run_name="netra-frontend-staging",
-                memory="1Gi",
+                memory="8Gi",
                 cpu="1",
                 min_instances=0,
                 max_instances=10,
