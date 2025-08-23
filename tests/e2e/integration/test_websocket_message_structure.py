@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 import pytest
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 @pytest.mark.asyncio

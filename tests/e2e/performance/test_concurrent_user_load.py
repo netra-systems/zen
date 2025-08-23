@@ -23,8 +23,8 @@ setup_test_path()
 from tests.e2e.service_manager import ServiceManager
 from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.e2e.real_client_types import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.http_client import ClientConfig
 
 
 @dataclass

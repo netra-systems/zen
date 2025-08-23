@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

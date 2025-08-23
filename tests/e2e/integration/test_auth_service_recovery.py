@@ -48,7 +48,7 @@ from tests.e2e.service_failure_recovery_helpers import (
 )
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)

@@ -47,36 +47,35 @@ class TestSyntaxFix:
 
     @staticmethod
     def find_free_port(start_port: int = 8000) -> int:
-    """Find a free port starting from the given port."""
-    port = start_port
-    while port < start_port + 100:  # Try 100 ports
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("localhost", port))
-                return port
-            except OSError:
-                port += 1
-    raise RuntimeError(f"No free port found starting from {start_port}")
+        """Find a free port starting from the given port."""
+        port = start_port
+        while port < start_port + 100:  # Try 100 ports
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("localhost", port))
+                    return port
+                except OSError:
+                    port += 1
+        raise RuntimeError(f"No free port found starting from {start_port}")
 
-@contextmanager
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def mock_service_discovery(config: DynamicServiceConfig):
-    """Mock service discovery with dynamic port configuration."""
-    mock_discovery = MagicMock()
-    mock_discovery.read_backend_info.return_value = {
-        "port": config.backend_port,
-        "api_url": config.backend_url,
-        "ws_url": f"ws://localhost:{config.backend_port}/ws",
-    mock_discovery.read_frontend_info.return_value = {
-        "port": config.frontend_port,
-        "url": config.frontend_url,
-    mock_discovery.read_auth_info.return_value = {
-        "port": config.auth_port,
-        "url": config.auth_url,
-        "api_url": config.auth_url,
+    @staticmethod
+    def mock_service_discovery(config):
+        """Mock service discovery with dynamic port configuration."""
+        mock_discovery = MagicMock()
+        mock_discovery.read_backend_info.return_value = {
+            "port": config.backend_port,
+            "api_url": config.backend_url,
+            "ws_url": f"ws://localhost:{config.backend_port}/ws",
+        }
+        mock_discovery.read_frontend_info.return_value = {
+            "port": config.frontend_port,
+            "url": config.frontend_url,
+        }
+        mock_discovery.read_auth_info.return_value = {
+            "port": config.auth_port,
+            "url": config.auth_url,
+            "api_url": config.auth_url,
+        }
 
     with patch(
         "app.core.middleware_setup.ServiceDiscovery", return_value=mock_discovery

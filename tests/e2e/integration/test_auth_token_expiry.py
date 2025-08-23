@@ -22,7 +22,7 @@ import time
 import pytest
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
-from tests.e2e.auth_test_fixtures import (
+from test_framework.auth_helpers import (
     WebSocketAuthTester, TokenExpiryTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance,
     WebSocketAuthTester,
     TokenExpiryTester,

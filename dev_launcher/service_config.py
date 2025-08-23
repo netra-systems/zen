@@ -34,6 +34,7 @@ class ResourceMode(Enum):
     LOCAL = "local"          # Run service locally (requires installation)
     SHARED = "shared"        # Use shared cloud resource
     MOCK = "mock"           # Use mock/stub implementation
+    DOCKER = "docker"       # Use Docker containers for local services
     DISABLED = "disabled"   # Service is disabled (NOT RECOMMENDED)
 
 
@@ -45,15 +46,23 @@ class ServiceResource:
     local_config: Dict[str, Any] = field(default_factory=dict)
     shared_config: Dict[str, Any] = field(default_factory=dict)
     mock_config: Dict[str, Any] = field(default_factory=dict)
+    docker_config: Dict[str, Any] = field(default_factory=dict)
     
     def get_config(self) -> Dict[str, Any]:
         """Get the configuration based on the current mode."""
         if self.mode == ResourceMode.LOCAL:
-            return self.local_config
+            # Check if this is actually Docker-based local
+            config = self.local_config.copy()
+            if config.get('docker', False):
+                # Merge with Docker config
+                config.update(self.docker_config)
+            return config
         elif self.mode == ResourceMode.SHARED:
             return self.shared_config
         elif self.mode == ResourceMode.MOCK:
             return self.mock_config
+        elif self.mode == ResourceMode.DOCKER:
+            return self.docker_config
         else:
             return {}
     
@@ -93,6 +102,13 @@ class ServicesConfiguration:
             "password": "cpmdn7pVpsJSK2mb7lUTj2VaQhSC1L3S",
             "db": 0
         },
+        docker_config={
+            "host": "localhost",
+            "port": 6379,
+            "db": 0,
+            "docker": True,
+            "container_name": "netra-dev-redis"
+        },
         mock_config={"mock": True}
     ))
     
@@ -116,6 +132,17 @@ class ServicesConfiguration:
             "database": "default",
             "secure": True
         },
+        docker_config={
+            "host": "localhost",
+            "port": 9000,
+            "http_port": 8123,
+            "user": "default",
+            "password": "netra_dev_password",
+            "database": "netra_dev",
+            "secure": False,
+            "docker": True,
+            "container_name": "netra-dev-clickhouse"
+        },
         mock_config={"mock": True}
     ))
     
@@ -136,6 +163,15 @@ class ServicesConfiguration:
             "user": "dev_user",
             "password": "",  # Will be loaded from secrets
             "database": "netra_dev"
+        },
+        docker_config={
+            "host": "localhost",
+            "port": 5433,
+            "user": "postgres",
+            "password": "",
+            "database": "netra_dev",
+            "docker": True,
+            "container_name": "netra-dev-postgres"
         },
         mock_config={"mock": True}
     ))
@@ -274,18 +310,33 @@ class ServicesConfiguration:
             if service.mode == ResourceMode.DISABLED:
                 warnings.append(f"⚠️  {service.name.upper()} is disabled - some features may not work")
         
-        # Check for local services that require installation
-        if self.redis.mode == ResourceMode.LOCAL:
+        # Check for local services that require installation (skip Docker-based)
+        if self.redis.mode == ResourceMode.LOCAL and not self.redis.get_config().get('docker', False):
             if not self._check_redis_installed():
                 warnings.append("⚠️  Redis is set to LOCAL but doesn't appear to be installed")
         
-        if self.clickhouse.mode == ResourceMode.LOCAL:
+        if self.clickhouse.mode == ResourceMode.LOCAL and not self.clickhouse.get_config().get('docker', False):
             if not self._check_clickhouse_installed():
                 warnings.append("⚠️  ClickHouse is set to LOCAL but doesn't appear to be installed")
         
-        if self.postgres.mode == ResourceMode.LOCAL:
+        if self.postgres.mode == ResourceMode.LOCAL and not self.postgres.get_config().get('docker', False):
             if not self._check_postgres_installed():
                 warnings.append("⚠️  PostgreSQL is set to LOCAL but doesn't appear to be installed")
+        
+        # Check Docker availability for Docker mode services
+        docker_services = []
+        if self.redis.get_config().get('docker', False):
+            docker_services.append('Redis')
+        if self.clickhouse.get_config().get('docker', False):
+            docker_services.append('ClickHouse')
+        if self.postgres.get_config().get('docker', False):
+            docker_services.append('PostgreSQL')
+        
+        if docker_services:
+            from dev_launcher.docker_services import check_docker_availability
+            if not check_docker_availability():
+                services_str = ', '.join(docker_services)
+                warnings.append(f"⚠️  Docker not available but required for: {services_str}")
         
         return warnings
     

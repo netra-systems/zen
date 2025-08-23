@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage, Message } from '@/types/registry';
+import { WebSocketMessage, Message } from '@/types/unified';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
 import { logger as debugLogger } from '@/utils/debug-logger';

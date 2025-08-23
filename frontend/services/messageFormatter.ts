@@ -11,7 +11,7 @@
  * consistent formatting preservation, directly impacting conversion rates.
  */
 
-import type { Message, MessageMetadata } from '@/types/registry';
+import type { Message, MessageMetadata } from '@/types/unified';
 
 // ============================================================================
 // CONTENT TYPE DETECTION

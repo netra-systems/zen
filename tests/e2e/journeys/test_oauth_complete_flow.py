@@ -45,7 +45,7 @@ except ImportError:
             return {"id": "test_user", "email": "test@example.com"}
 
 try:
-    from tests.e2e.real_http_client import RealHTTPClient
+    from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
 except ImportError:
     import httpx
     class RealHTTPClient:

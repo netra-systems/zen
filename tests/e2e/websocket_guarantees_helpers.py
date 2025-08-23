@@ -17,8 +17,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
 from tests.e2e.config import TEST_ENDPOINTS, TestDataFactory
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class MessageState(Enum):

@@ -48,7 +48,7 @@ from tests.e2e.real_client_types import (
     create_auth_config,
     create_backend_config,
 )
-from tests.e2e.real_http_client import RealHTTPClient
+from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
 from tests.e2e.service_manager import (
     RealServicesManager as create_real_services_manager,
 )

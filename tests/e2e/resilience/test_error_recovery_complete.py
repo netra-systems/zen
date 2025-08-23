@@ -42,8 +42,8 @@ from tests.e2e.error_cascade_core import (
     GracefulDegradationValidator,
     ServiceFailureSimulator,
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

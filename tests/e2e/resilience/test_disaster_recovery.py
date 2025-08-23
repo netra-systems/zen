@@ -39,8 +39,8 @@ from tests.e2e.disaster_recovery_helpers import (
     create_rto_validator
 )
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.e2e.real_client_types import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.http_client import ClientConfig
 
 
 @pytest_asyncio.fixture

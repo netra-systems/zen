@@ -43,8 +43,8 @@ import pytest_asyncio
 from tests.e2e.config import TEST_USERS
 from tests.e2e.error_cascade_core import ServiceFailureSimulator
 from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

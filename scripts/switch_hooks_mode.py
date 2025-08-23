@@ -17,39 +17,39 @@ def switch_mode(mode):
     
     # Backup current config if it's not already backed up
     if not strict_config.exists() and current_config.exists():
-        print("📦 Backing up current (strict) configuration...")
+        print("Backing up current (strict) configuration...")
         shutil.copy2(current_config, strict_config)
     
     if mode == 'strict':
         if not strict_config.exists():
-            print("❌ Strict configuration not found!")
+            print("ERROR: Strict configuration not found!")
             return False
         
-        print("🔒 Switching to STRICT mode...")
+        print("Switching to STRICT mode...")
         shutil.copy2(strict_config, current_config)
-        print("✅ Strict hooks enabled - Full compliance enforcement")
+        print("SUCCESS: Strict hooks enabled - Full compliance enforcement")
         print("   Use for: Production releases, major refactors")
         
     elif mode == 'permissive':
         if not permissive_config.exists():
-            print("❌ Permissive configuration not found!")
+            print("ERROR: Permissive configuration not found!")
             return False
         
-        print("🔓 Switching to PERMISSIVE mode...")
+        print("Switching to PERMISSIVE mode...")
         shutil.copy2(permissive_config, current_config)
-        print("✅ Permissive hooks enabled - Focus on new code only")
+        print("SUCCESS: Permissive hooks enabled - Focus on new code only")
         print("   Use for: Feature development, quick fixes, legacy code work")
         
     elif mode == 'off':
-        print("⏸️  Disabling pre-commit hooks...")
+        print("Disabling pre-commit hooks...")
         if current_config.exists():
             current_config.rename(current_config.with_suffix('.yaml.disabled'))
-        print("✅ Pre-commit hooks disabled")
-        print("   ⚠️  Remember to re-enable before committing!")
+        print("SUCCESS: Pre-commit hooks disabled")
+        print("   WARNING: Remember to re-enable before committing!")
         
     elif mode == 'status':
         if not current_config.exists():
-            print("❌ No active pre-commit configuration")
+            print("ERROR: No active pre-commit configuration")
             return True
         
         # Try to detect which mode is active
@@ -57,22 +57,22 @@ def switch_mode(mode):
             content = f.read()
             
         if 'Permissive' in content:
-            print("📊 Current mode: PERMISSIVE 🔓")
+            print("Current mode: PERMISSIVE")
             print("   - Checking new files strictly")
             print("   - Checking only modified lines in existing files")
             print("   - Lenient on test files")
         elif 'Elite Enforcement' in content:
-            print("📊 Current mode: STRICT 🔒")
+            print("Current mode: STRICT")
             print("   - Full compliance enforcement")
             print("   - 300-line file limits")
             print("   - 25-line function limits")
         else:
-            print("📊 Current mode: CUSTOM")
+            print("Current mode: CUSTOM")
         
         return True
     
     else:
-        print(f"❌ Unknown mode: {mode}")
+        print(f"ERROR: Unknown mode: {mode}")
         return False
     
     return True
@@ -107,7 +107,7 @@ Modes:
     success = switch_mode(args.mode)
     
     if success and args.mode != 'status':
-        print("\n💡 Tip: Run 'pre-commit install' to apply changes")
+        print("\nTip: Run 'pre-commit install' to apply changes")
         print("   Or use: git commit --no-verify to bypass hooks once")
     
     return 0 if success else 1

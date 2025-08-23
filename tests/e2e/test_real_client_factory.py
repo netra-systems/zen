@@ -23,8 +23,8 @@ from tests.e2e.real_client_types import (
     ClientConfig,
     create_test_config,
 )
-from tests.e2e.real_http_client import RealHTTPClient
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class TestRealClientFactory:

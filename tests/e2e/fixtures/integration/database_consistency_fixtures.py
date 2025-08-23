@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class MockServicesManager:

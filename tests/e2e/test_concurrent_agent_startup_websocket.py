@@ -55,11 +55,11 @@ async def test_websocket_connection_scaling(concurrent_test_environment,
     cleanup_success = await cleanup_websocket_connections(isolated_test_users)
     
     # Assertions
-    assert connection_count >= CONCURRENT_TEST_CONFIG["user_count"], 
+    assert connection_count >= CONCURRENT_TEST_CONFIG["user_count"], \
         f"Insufficient connections: {connection_count}/{CONCURRENT_TEST_CONFIG['user_count']}"
-    assert stable_connections == connection_count, 
+    assert stable_connections == connection_count, \
         f"Connection stability failed: {stable_connections}/{connection_count}"
-    assert routing_accuracy >= 0.99, 
+    assert routing_accuracy >= 0.99, \
         f"Message routing accuracy below threshold: {routing_accuracy:.3f}"
     assert cleanup_success, "WebSocket cleanup failed"
     

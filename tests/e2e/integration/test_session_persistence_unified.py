@@ -32,7 +32,7 @@ from tests.e2e.session_persistence_core import SessionPersistenceManager
 from tests.e2e.session_persistence_validators import SessionPersistenceValidator
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 from tests.e2e.real_client_factory import RealClientFactory
-from tests.e2e.real_client_types import ClientConfig
+from test_framework.http_client import ClientConfig
 
 
 @pytest.mark.critical

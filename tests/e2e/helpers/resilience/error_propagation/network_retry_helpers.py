@@ -19,8 +19,8 @@ sys.path.insert(0, str(project_root))
 from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     RealErrorPropagationTester,
 )
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_http_client import RealHTTPClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
 
 logger = logging.getLogger(__name__)
 

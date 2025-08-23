@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 class SessionPersistenceManager:

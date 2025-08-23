@@ -84,7 +84,7 @@ repos:
 # Configuration for different severity levels
 # These can be toggled based on development phase
 default_stages: [commit]
-fail_fast: false  # Continue checking even after first failure
+fail_fast: true   # Stop at first failure for faster feedback
 verbose: true     # Show detailed feedback to help developers
 
 # Environment-specific overrides

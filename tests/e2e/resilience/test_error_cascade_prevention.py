@@ -33,8 +33,8 @@ from tests.e2e.error_cascade_core import (
     create_degradation_validator,
     create_recovery_verifier
 )
-from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.e2e.real_client_types import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
+from test_framework.http_client import ClientConfig
 from tests.e2e.config import TEST_USERS
 
 logger = logging.getLogger(__name__)

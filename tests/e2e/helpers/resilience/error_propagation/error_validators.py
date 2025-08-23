@@ -22,9 +22,9 @@ from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     MockTokenGenerator,
     RealErrorPropagationTester,
 )
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.real_http_client import RealHTTPClient
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import ClientConfig
+from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

@@ -106,7 +106,7 @@ class MockWebSocketServer:
             "sequence_id": data.get("sequence_id"),
             "content": f"AI response to: {data.get('content', 'unknown')}",
             "timestamp": time.time()
-        
+        }
         # Add small delay to simulate processing
         await asyncio.sleep(0.1)
         await websocket.send(json.dumps(response))
@@ -126,6 +126,7 @@ class MockWebSocketServer:
                 "reporting_sub_agent": {"messages_processed": 1, "shared_state": {"dashboard_export": "ready"}}
             },
             "timestamp": time.time()
+        }
         await websocket.send(json.dumps(state))
     
     async def handle_queue_state_request(self, websocket, data):
@@ -135,6 +136,7 @@ class MockWebSocketServer:
             "queue_size": random.randint(0, 50),
             "max_capacity": 500,
             "timestamp": time.time()
+        }
         await websocket.send(json.dumps(state))
     
     async def handle_agent_configuration(self, websocket, data):
@@ -143,6 +145,7 @@ class MockWebSocketServer:
             "type": "agents_configured",
             "agents": data.get("agents", []),
             "timestamp": time.time()
+        }
         await websocket.send(json.dumps(response))
 
 class TestWebSocketStabilityMessageBursts:

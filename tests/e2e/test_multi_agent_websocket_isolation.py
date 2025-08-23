@@ -28,7 +28,7 @@ import pytest
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.e2e.real_client_factory import create_real_client_factory
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 
 @dataclass

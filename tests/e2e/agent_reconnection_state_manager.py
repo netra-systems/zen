@@ -12,7 +12,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from tests.e2e.real_websocket_client import RealWebSocketClient
+from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.reconnection_test_helpers import create_test_token
 
 

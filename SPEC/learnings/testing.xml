@@ -1070,6 +1070,120 @@
             </files_affected>
         </learning>
 
+        <learning id="massive-test-infrastructure-restoration-2025-08-23" date="2025-08-23" severity="CRITICAL">
+            <title>Comprehensive Test Infrastructure Restoration - All Services</title>
+            <problem>
+                Complete test infrastructure had cascading failures across all services:
+                Backend: 13 critical import errors preventing test collection
+                Auth Service: Tests couldn't run, timeout issues
+                Frontend: Jest bus errors and complex integration test failures
+                E2E: HTTP redirect issues and mock method naming problems
+                Test runner: Smoke tests timing out, unable to get basic status
+            </problem>
+            <solution>
+                Systematic multi-agent approach to fix all test failures:
+                
+                BACKEND FIXES:
+                1. Fixed 13 import errors in critical_paths tests
+                2. Fixed ConnectionManager initialization with DatabaseType.POSTGRESQL
+                3. Created missing mock classes (MockOrchestrator, MockAgent)
+                4. Added missing exception classes (TokenRevokedError, TokenTamperError)
+                5. Created comprehensive fixture system for agent service testing
+                
+                AUTH SERVICE FIXES:
+                1. Already 100% passing - no fixes needed
+                2. 201 tests passing, 3 appropriately skipped (staging tests)
+                
+                FRONTEND FIXES:
+                1. Fixed Jest mocking syntax errors
+                2. Created missing utility files (auth-flow-utils, comprehensive-test-utils)
+                3. Fixed module hoisting issues
+                4. Corrected store mocking implementations
+                5. Component tests now passing at 100%
+                
+                E2E FIXES:
+                1. Added follow_redirects=True to 78 httpx.AsyncClient instantiations
+                2. Fixed mock service method naming (orchestrator methods)
+                3. Corrected import paths from tests.* to tests.e2e.*
+            </solution>
+            <metrics>
+                Backend: Import errors fixed, critical path tests collecting
+                Auth: 100% pass rate (201/201 functional tests)
+                Frontend: Basic/component tests 100% passing
+                E2E: Core infrastructure tests validated successfully
+                Overall: Test infrastructure restored to functional state
+            </metrics>
+            <files_affected>
+                Backend: 13+ files in critical_paths, new mock classes created
+                Auth: No changes needed - already passing
+                Frontend: Multiple test utility files and configurations
+                E2E: 78+ files with HTTP client fixes, 8 files with import fixes
+            </files_affected>
+            <verification>
+                Backend unit tests: 59 passed (database tests)
+                Auth service: 201 passed, 3 skipped, 0 failed
+                Frontend: Component tests passing
+                E2E: 5 comprehensive tests validated successfully
+            </verification>
+        </learning>
+        
+        <learning id="http-redirect-follow-pattern" date="2025-08-23" severity="HIGH">
+            <title>HTTP Client Redirect Following for Health Checks</title>
+            <problem>
+                Backend service redirects /health to /health/ (307 redirect)
+                E2E tests expecting direct 200 response were failing
+                78+ test files affected by this redirect issue
+            </problem>
+            <solution>
+                Add follow_redirects=True to all httpx.AsyncClient instantiations:
+                async with httpx.AsyncClient(follow_redirects=True) as client:
+                    response = await client.get(f"{url}/health")
+                    # Now gets 200 instead of 307
+            </solution>
+            <pattern>
+                ALWAYS use follow_redirects=True for health check clients
+                Applies to service startup tests, health monitoring, E2E tests
+            </pattern>
+            <files_affected>
+                tests/e2e/integration/test_service_startup_health_real.py
+                tests/e2e/health_service_checker.py
+                tests/e2e/staging_test_helpers.py
+                75+ other E2E test files
+            </files_affected>
+        </learning>
+        
+        <learning id="mock-class-completeness" date="2025-08-23" severity="HIGH">
+            <title>Mock Class Interface Completeness Requirements</title>
+            <problem>
+                Mock classes missing critical methods and properties
+                MockOrchestrator missing: release_agent, get_orchestration_metrics
+                MockAgent missing: run method with state transitions
+                AgentState missing: RUNNING enum value
+            </problem>
+            <solution>
+                Ensure mock classes implement complete interfaces:
+                - All public methods from real class
+                - All properties with proper getters/setters
+                - All enum values used in tests
+                - Proper state management and transitions
+            </solution>
+            <implementation>
+                MockOrchestrator additions:
+                - release_agent() method for agent pool management
+                - get_orchestration_metrics() for metrics retrieval
+                - active_agents property with override capability
+                - pooled_agents tracking
+                
+                MockAgent additions:
+                - run() method with proper state transitions
+                - State changes: IDLE → RUNNING → IDLE
+            </implementation>
+            <files_affected>
+                netra_backend/tests/test_agent_service_mock_classes.py
+                netra_backend/tests/test_agent_service_fixtures.py
+            </files_affected>
+        </learning>
+        
         <learning id="frontend-testing-comprehensive-patterns">
             <title>Frontend Testing Comprehensive Patterns - React/Jest/TypeScript</title>
             <problem>

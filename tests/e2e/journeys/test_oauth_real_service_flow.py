@@ -36,7 +36,7 @@ try:
         OAuthUserFactory,
         get_enterprise_config,
     )
-    from tests.e2e.real_http_client import RealHTTPClient
+    from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
     from tests.e2e.real_services_manager import create_real_services_manager
 except ImportError:
     # Standalone execution - add parent directories to path

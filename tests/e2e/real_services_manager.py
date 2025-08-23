@@ -29,6 +29,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
+from test_framework.http_client import UnifiedHTTPClient, AuthHTTPClient, BackendHTTPClient
+
 # Import test environment config for environment-aware configuration
 try:
     from tests.e2e.test_environment_config import TestEnvironmentConfig
