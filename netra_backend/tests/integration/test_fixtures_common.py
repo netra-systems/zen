@@ -24,7 +24,7 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.db.base import Base
 
 from netra_backend.app.db.models_postgres import Message, Run, Thread, User
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 @pytest.fixture
 

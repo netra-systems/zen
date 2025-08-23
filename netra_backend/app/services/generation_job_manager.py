@@ -21,7 +21,7 @@ from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Corpus import ContentCorpus
 from netra_backend.app.services.job_store import job_store
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -31,7 +31,7 @@ from netra_backend.app.auth_integration.auth import create_access_token, validat
 
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 JWTService = AsyncMock
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

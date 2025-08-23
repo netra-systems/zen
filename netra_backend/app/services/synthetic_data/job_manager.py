@@ -16,7 +16,7 @@ from netra_backend.app.services.synthetic_data.metrics import calculate_generati
 # Lazy import to avoid circular dependency
 # WebSocket manager → synthetic_data.error_handler → synthetic_data → job_manager → WebSocket manager
 if TYPE_CHECKING:
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+    from netra_backend.app.ws_manager import WebSocketManager
 
 
 class JobManager:
@@ -67,7 +67,7 @@ class JobManager:
     async def _send_started_notification(self, job_id: str, job_data: Dict) -> None:
         """Send job started notification"""
         # Lazy import to avoid circular dependency
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         payload = self._build_started_payload(job_id, job_data)
         await manager.broadcasting.broadcast_to_all({
@@ -118,7 +118,7 @@ class JobManager:
     async def _send_progress_message(self, payload: Dict) -> None:
         """Send progress message via broadcasting"""
         # Lazy import to avoid circular dependency
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         await manager.broadcasting.broadcast_to_all({
             "type": "generation_progress",
@@ -215,7 +215,7 @@ class JobManager:
     async def _send_completion_notification(self, job_id: str, active_jobs: Dict) -> None:
         """Send job completion notification"""
         # Lazy import to avoid circular dependency
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         payload = self._build_completion_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
@@ -318,7 +318,7 @@ class JobManager:
     async def _send_cancellation_notification(self, job_id: str, active_jobs: Dict) -> None:
         """Send job cancellation notification"""
         # Lazy import to avoid circular dependency
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         payload = self._build_cancellation_payload(job_id, active_jobs)
         await manager.broadcasting.broadcast_to_all({
@@ -362,7 +362,7 @@ class JobManager:
     async def send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
         # Lazy import to avoid circular dependency
-        from netra_backend.app.services.websocket.ws_manager import manager
+        from netra_backend.app.ws_manager import manager
         
         payload = self._build_error_payload(job_id, error)
         await manager.broadcasting.broadcast_to_all({

@@ -34,8 +34,8 @@ import pytest
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.agent_conversation_helpers import AgentConversationHelpers
 from tests.e2e.token_lifecycle_helpers import TokenLifecycleManager
-from tests.reconnection_test_fixtures import reconnection_fixture
-from tests.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.e2e.reconnection_test_fixtures import reconnection_fixture
+from tests.e2e.reconnection_test_helpers import ReconnectionTestHelpers
 
 
 class MockWebSocketReconnectionManager:

@@ -26,7 +26,7 @@ from netra_backend.app.services.websocket.quality_report_handler import (
 from netra_backend.app.services.websocket.quality_validation_handler import (
     QualityValidationHandler,
 )
-from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

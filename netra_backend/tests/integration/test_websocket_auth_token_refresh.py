@@ -19,7 +19,7 @@ import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio

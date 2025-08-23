@@ -19,7 +19,7 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import (
+from netra_backend.app.ws_manager import (
 
     ConnectionInfo,
 

@@ -12,7 +12,7 @@ import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from netra_backend.app.schemas.auth_types import (
     AuthConfigResponse,
@@ -274,8 +274,11 @@ class AppConfig(BaseModel):
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
-    service_id: str = Field(default="backend", description="Service ID for authentication")
-    service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
+    service_id: str = Field(default="backend", description="Service ID for cross-service authentication")
+    service_secret: Optional[str] = Field(
+        default=None, 
+        description="Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret."
+    )
     
     # Cloud Run environment variables
     k_service: Optional[str] = Field(default=None, description="Cloud Run service name")
@@ -307,6 +310,32 @@ class AppConfig(BaseModel):
     startup_max_retries: int = Field(default=3, description="Maximum retries for startup components")
     startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
     startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
+    
+    @validator('service_secret')
+    def validate_service_secret(cls, v, values):
+        """CRITICAL: Validate service secret security requirements"""
+        if v is None:
+            # Allow None for backward compatibility, but log warning
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("service_secret not configured - this reduces security")
+            return v
+        
+        # Validate minimum length for security
+        if len(v) < 32:
+            raise ValueError(f"service_secret must be at least 32 characters for security, got {len(v)}")
+        
+        # Ensure it differs from JWT secret if available
+        jwt_secret = values.get('jwt_secret_key')
+        if jwt_secret and v == jwt_secret:
+            raise ValueError("service_secret must be different from jwt_secret_key for security isolation")
+        
+        # Additional security checks for weak patterns
+        weak_patterns = ['default', 'secret', 'password', 'dev-secret', 'test', 'admin', 'user']
+        if any(pattern in v.lower() for pattern in weak_patterns):
+            raise ValueError(f"service_secret cannot contain weak patterns like: {', '.join(weak_patterns)}")
+        
+        return v
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(

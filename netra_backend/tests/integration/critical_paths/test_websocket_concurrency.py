@@ -18,7 +18,7 @@ import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.services.websocket_service import WebSocketService
+from netra_backend.app.ws_manager import WebSocketManager as IWebSocketService
 
 class TestWebSocketConcurrencyL3:
     """Test WebSocket concurrency scenarios"""

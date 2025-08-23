@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock
 import pytest
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import (
+from netra_backend.app.ws_manager import (
 
     ConnectionInfo,
 

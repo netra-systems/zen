@@ -22,9 +22,9 @@ import time
 
 import pytest
 
-from tests.agent_reconnection_state_manager import AgentStateReconnectionManager
-from tests.concurrent_user_isolation_manager import ConcurrentUserIsolationManager
-from tests.real_client_factory import create_real_client_factory
+from tests.e2e.agent_reconnection_state_manager import AgentStateReconnectionManager
+from tests.e2e.concurrent_user_isolation_manager import ConcurrentUserIsolationManager
+from tests.e2e.real_client_factory import create_real_client_factory
 
 
 @pytest.mark.asyncio

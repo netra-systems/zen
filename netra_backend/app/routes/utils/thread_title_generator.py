@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.services.websocket.ws_manager import ws_manager
+from netra_backend.app.ws_manager import ws_manager
 
 logger = central_logger.get_logger(__name__)
 

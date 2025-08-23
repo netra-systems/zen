@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from tests.real_client_factory import (
+from tests.e2e.real_client_factory import (
     RealClientFactory,
     create_real_client_factory,
 )

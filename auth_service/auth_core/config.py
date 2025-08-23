@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 class AuthConfig:
     """Centralized configuration for auth service"""
     
-    # Class attribute for environment (used by tests)
+    # Class-level attributes for settings compatibility
     ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+    LOG_ASYNC_CHECKOUT = os.getenv("LOG_ASYNC_CHECKOUT", "false").lower() == "true"
     
     @staticmethod
     def get_environment() -> str:
@@ -37,6 +38,42 @@ class AuthConfig:
     def get_jwt_secret() -> str:
         """Get JWT secret key using unified secret loader"""
         return AuthSecretLoader.get_jwt_secret()
+    
+    @staticmethod
+    def get_service_secret() -> str:
+        """Get service secret for enhanced JWT security (distinct from JWT secret)"""
+        service_secret = os.getenv("SERVICE_SECRET", "")
+        if not service_secret:
+            env = AuthConfig.get_environment()
+            if env in ["staging", "production"]:
+                raise ValueError("SERVICE_SECRET must be set in production/staging")
+            logger.warning("Using default service secret for development")
+            return "dev-service-secret-DO-NOT-USE-IN-PRODUCTION"
+        
+        # Validate service secret is distinct from JWT secret
+        jwt_secret = AuthSecretLoader.get_jwt_secret()
+        if service_secret == jwt_secret:
+            raise ValueError("SERVICE_SECRET must be different from JWT_SECRET")
+        
+        if len(service_secret) < 32:
+            env = AuthConfig.get_environment()
+            if env in ["staging", "production"]:
+                raise ValueError("SERVICE_SECRET must be at least 32 characters in production")
+        
+        return service_secret
+    
+    @staticmethod
+    def get_service_id() -> str:
+        """Get service instance ID for enhanced JWT security"""
+        service_id = os.getenv("SERVICE_ID", "")
+        if not service_id:
+            env = AuthConfig.get_environment()
+            if env in ["staging", "production"]:
+                raise ValueError("SERVICE_ID must be set in production/staging")
+            logger.warning("Using default service ID for development")
+            return "netra-auth-dev-instance"
+        
+        return service_id
     
     @staticmethod
     def get_jwt_algorithm() -> str:
@@ -129,6 +166,12 @@ class AuthConfig:
         logger.info(f"  Google Client ID: {'*' * 10 if AuthConfig.get_google_client_id() else 'NOT SET'}")
         logger.info(f"  Google Client Secret: {'*' * 10 if AuthConfig.get_google_client_secret() else 'NOT SET'}")
         logger.info(f"  JWT Secret: {'*' * 10 if AuthConfig.get_jwt_secret() else 'NOT SET'}")
+        logger.info(f"  Service Secret: {'*' * 10 if AuthConfig.get_service_secret() else 'NOT SET'}")
+        logger.info(f"  Service ID: {AuthConfig.get_service_id()}")
+        logger.info(f"  JWT Algorithm: {AuthConfig.get_jwt_algorithm()}")
+        logger.info(f"  JWT Access Expiry: {AuthConfig.get_jwt_access_expiry_minutes()} minutes")
+        logger.info(f"  JWT Refresh Expiry: {AuthConfig.get_jwt_refresh_expiry_days()} days")
+        logger.info(f"  JWT Service Expiry: {AuthConfig.get_jwt_service_expiry_minutes()} minutes")
         
         # Log database URL (masked)
         db_url = AuthConfig.get_database_url()

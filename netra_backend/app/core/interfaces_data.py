@@ -275,7 +275,7 @@ class CoreClickHouseOperations:
                                        event_type: str, error: Optional[str] = None):
         """Send WebSocket notification for corpus events."""
         try:
-            from netra_backend.app.services.websocket.ws_manager import manager
+            from netra_backend.app.ws_manager import manager
             
             if event_type == "created":
                 payload = {
