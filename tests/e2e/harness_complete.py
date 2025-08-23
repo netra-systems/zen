@@ -2,7 +2,7 @@
 Unified Test Harness - Complete Implementation
 Final part that ties everything together and adds missing methods
 
-This completes the UnifiedTestHarness implementation started in test_harness.py
+This completes the UnifiedE2ETestHarness implementation started in test_harness.py
 """
 
 import asyncio
@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Import components
-from tests.e2e.test_harness import UnifiedTestHarness
+from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +172,7 @@ class TestState:
         self.databases = None  # Will be initialized by DatabaseManager
 
 
-class UnifiedTestHarnessComplete(UnifiedTestHarness):
+class UnifiedTestHarnessComplete(UnifiedE2ETestHarness):
     """
     Complete implementation of the Unified Test Harness.
     Extends the base class with all required functionality.
@@ -193,7 +193,11 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         self.service_manager = ServiceManager(self)
         self.data_seeder = TestDataSeeder(self)
         self.health_monitor = HealthMonitor(self)
-        self.auth_service = TestAuthService()
+    
+    @property
+    def project_root(self):
+        """Get project root from the orchestrator."""
+        return self.orchestrator.project_root
     
     async def _setup_databases(self) -> None:
         """Setup all test databases using database manager."""

@@ -44,6 +44,10 @@ class DatabaseManager:
         import os
         raw_url = os.environ.get("DATABASE_URL", "")
         
+        # Skip configuration loading during test collection to prevent hanging
+        if os.environ.get('TEST_COLLECTION_MODE') == '1':
+            return raw_url or "sqlite:///:memory:"
+        
         # If not found, try unified config
         if not raw_url:
             try:

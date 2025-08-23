@@ -19,7 +19,7 @@ from tests.e2e.jwt_token_helpers import (
     JWTTestFixtures,
     JWTTestHelper,
 )
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class TestRealTokenGeneration(JWTTestFixtures):
@@ -28,7 +28,7 @@ class TestRealTokenGeneration(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -59,7 +59,7 @@ class TestCrossServiceTokenValidation(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -92,7 +92,7 @@ class TestTokenExpiryAndRefresh(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -133,7 +133,7 @@ class TestWebSocketAuthentication(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -172,7 +172,7 @@ class TestTokenSecurity(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -202,7 +202,7 @@ class TestAgentContextExtraction(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()
@@ -252,7 +252,7 @@ class TestCrossServiceConsistency(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()

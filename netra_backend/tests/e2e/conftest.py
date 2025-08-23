@@ -62,6 +62,12 @@ def mock_database_factory():
 @pytest.fixture
 def setup_database_mocking(mock_database_factory):
     """Auto-setup database mocking for all E2E tests."""
+    # Skip during collection mode to avoid heavy imports
+    import os
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        yield
+        return
+        
     import netra_backend.app.services.database.unit_of_work as uow_module
     import netra_backend.app.db.postgres_core as postgres_module
     from netra_backend.app.db.models_postgres import Thread, Run

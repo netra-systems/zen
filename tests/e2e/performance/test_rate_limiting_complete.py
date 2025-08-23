@@ -32,13 +32,13 @@ from tests.e2e.rate_limiting_core import (
     RedisManager,
     UserManager,
 )
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class ComprehensiveRateLimitTester:
     """Tests comprehensive rate limiting across all API endpoints and services."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.test_session_id = f"complete-rate-test-{uuid.uuid4().hex[:8]}"
         self.redis_client: Optional[redis.Redis] = None
@@ -732,7 +732,7 @@ async def test_rate_limiting_complete():
     Business Impact: Prevents $50K+ revenue loss from service abuse and outages.
     """
     # Create comprehensive test harness
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     tester = ComprehensiveRateLimitTester(harness)
     
     try:

@@ -22,8 +22,8 @@ import httpx
 from tests.e2e.test_harness import (
     DatabaseManager,
     ServiceConfig,
-    UnifiedTestHarness,
 )
+from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class ServiceManager:
     """Manages individual service startup and lifecycle."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness):
         """Initialize service manager."""
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.ServiceManager")
@@ -198,7 +198,7 @@ class ServiceManager:
 class TestDataSeeder:
     """Creates realistic test data for unified testing."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness):
         """Initialize test data seeder."""
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.TestDataSeeder")
@@ -272,7 +272,7 @@ class TestDataSeeder:
 class HealthMonitor:
     """Monitors health and readiness of all services."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness):
         """Initialize health monitor."""
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.HealthMonitor")

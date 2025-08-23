@@ -59,8 +59,9 @@ global.clearInterval = function(id) {
   return originalClearInterval.call(this, id);
 };
 
-// Clean up all timers after each test
+// Clean up all timers after each test - more aggressive cleanup
 afterEach(() => {
+  // Clear all tracked timers
   for (const id of timeoutIds) {
     originalClearTimeout(id);
   }
@@ -69,6 +70,20 @@ afterEach(() => {
   }
   timeoutIds.clear();
   intervalIds.clear();
+  
+  // Force clear any remaining Node.js timers (aggressive cleanup)
+  if (typeof global._getActiveHandles === 'function') {
+    const handles = global._getActiveHandles();
+    handles.forEach(handle => {
+      if (handle && typeof handle.close === 'function') {
+        try {
+          handle.close();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+    });
+  }
 });
 
 global.TransformStream = class TransformStream {
@@ -778,6 +793,43 @@ jest.mock('@/hooks/useError', () => ({
   }))
 }));
 
+// Mock event processor hook to prevent timer leaks
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: jest.fn(() => ({
+    processedCount: 0,
+    errorCount: 0,
+    queueSize: 0,
+    duplicatesDropped: 0,
+    getStats: jest.fn(() => ({
+      totalProcessed: 0,
+      totalDropped: 0,
+      totalErrors: 0,
+      queueSize: 0,
+      duplicatesDropped: 0,
+      lastProcessedTimestamp: 0
+    })),
+    clearQueue: jest.fn()
+  }))
+}));
+
+// Mock circuit breaker to prevent timer leaks
+jest.mock('@/lib/circuit-breaker', () => ({
+  CircuitBreaker: jest.fn().mockImplementation(() => ({
+    recordFailure: jest.fn(),
+    recordSuccess: jest.fn(),
+    isOpen: jest.fn(() => false),
+    getState: jest.fn(() => ({
+      isOpen: false,
+      failureCount: 0,
+      lastFailureTime: 0,
+      openedAt: 0
+    })),
+    getFailureRate: jest.fn(() => 0),
+    reset: jest.fn(),
+    destroy: jest.fn()
+  }))
+}));
+
 // Mock MCP client service
 jest.mock('@/services/mcp-client-service', () => {
   const mockFactories = {
@@ -890,6 +942,16 @@ jest.mock('./components/chat/RawJsonView', () => {
   };
 });
 
+// Mock ExamplePrompts component to prevent UI component issues
+jest.mock('@/components/chat/ExamplePrompts', () => {
+  const React = require('react');
+  return {
+    ExamplePrompts: () => React.createElement('div', { 
+      'data-testid': 'example-prompts' 
+    }, 'Example prompts component')
+  };
+});
+
 // ============================================================================
 // CONSOLE SUPPRESSION
 // ============================================================================
@@ -963,4 +1025,8 @@ afterEach(() => {
     Object.defineProperty(window, 'pageXOffset', { value: 0, writable: true });
     Object.defineProperty(window, 'pageYOffset', { value: 0, writable: true });
   }
+  
+  // Ensure all mocks are properly cleaned up to prevent cross-test contamination
+  jest.restoreAllMocks();
+  jest.clearAllTimers();
 });

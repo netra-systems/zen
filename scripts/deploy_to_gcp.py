@@ -260,9 +260,29 @@ class GCPDeployer:
                 check=False,
                 shell=self.use_shell
             )
-            if result.returncode != 0 and "already enabled" not in result.stderr:
-                print(f"  ❌ Failed to enable {api}: {result.stderr}")
-                return False
+            if result.returncode != 0:
+                if "already enabled" in result.stderr.lower():
+                    print(f"  ✓ {api} already enabled")
+                elif "permission_denied" in result.stderr.lower() or "auth_permission_denied" in result.stderr.lower():
+                    print(f"  ⚠️ {api} - checking if already enabled...")
+                    # Check if the API is already enabled
+                    check_result = subprocess.run(
+                        [self.gcloud_cmd, "services", "list", "--enabled", "--filter", f"name:{api}"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        shell=self.use_shell
+                    )
+                    if api in check_result.stdout:
+                        print(f"  ✓ {api} is already enabled")
+                    else:
+                        print(f"  ❌ Failed to enable {api}: Permission denied")
+                        print(f"     The service account may lack permissions to enable APIs.")
+                        print(f"     Please ensure {api} is enabled in the GCP Console.")
+                        return False
+                else:
+                    print(f"  ❌ Failed to enable {api}: {result.stderr}")
+                    return False
                 
         print("✅ All required APIs enabled")
         return True

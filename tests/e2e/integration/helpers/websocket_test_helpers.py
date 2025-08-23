@@ -139,8 +139,6 @@ def create_test_websocket_message(message_type: str, data: Dict[str, Any], **kwa
     Returns:
         Properly structured WebSocket message
     """
-    import time
-    import uuid
     
     return {
         "type": message_type,

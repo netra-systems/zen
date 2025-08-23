@@ -43,13 +43,13 @@ from tests.e2e.oauth_test_providers import (
     get_enterprise_config,
 )
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class RealOAuthFlowTester:
     """Executes real OAuth Google flow with provider simulation."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.config = get_enterprise_config()
@@ -322,7 +322,7 @@ class OAuthE2ETestManager:
     @asynccontextmanager
     async def setup_oauth_e2e_test(self):
         """Setup and teardown for OAuth E2E testing."""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.tester = RealOAuthFlowTester(self.harness)
         
         try:

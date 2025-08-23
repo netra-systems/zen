@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-# # # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
+# # # from app.agents.supervisor_agent_modern import SupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
@@ -38,10 +38,10 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
     L4StagingCriticalPathTestBase,
 )
 
-ModernSupervisorAgent = AsyncMock
+SupervisorAgent = AsyncMock
 from unittest.mock import AsyncMock
 
-ModernSupervisorAgent = AsyncMock
+SupervisorAgent = AsyncMock
 # # # from app.agents.base.interface import ExecutionContext, ExecutionResult
 from unittest.mock import AsyncMock
 
@@ -100,7 +100,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         """Initialize L4 real LLM agent orchestration test."""
         super().__init__("L4RealLLMAgentOrchestration")
         self.llm_manager: Optional[LLMManager] = None
-        self.supervisor_agent: Optional[ModernSupervisorAgent] = None
+        self.supervisor_agent: Optional[SupervisorAgent] = None
         self.tool_dispatcher: Optional[ToolDispatcher] = None
         self.orchestration_metrics = LLMOrchestrationMetrics()
         self.test_scenarios: List[PromptTestScenario] = []
@@ -266,7 +266,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
             
             db_session = await get_db_session()
             
-            self.supervisor_agent = ModernSupervisorAgent(
+            self.supervisor_agent = SupervisorAgent(
                 db_session=db_session,
                 llm_manager=self.llm_manager,
                 websocket_manager=self.staging_suite.websocket_manager,

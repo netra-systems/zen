@@ -67,6 +67,7 @@ class AuthHealthChecker:
                 response_data = response.json() if response.text else {}
                 
                 return HealthCheckResult(
+                    endpoint=self.health_endpoint,
                     status_code=response.status_code,
                     response_time_ms=response_time,
                     response_data=response_data,
@@ -77,6 +78,7 @@ class AuthHealthChecker:
         except Exception as e:
             response_time = (time.perf_counter() - start_time) * 1000
             return HealthCheckResult(
+                endpoint=self.health_endpoint,
                 status_code=0,
                 response_time_ms=response_time,
                 response_data={},

@@ -16,7 +16,7 @@ import pytest
 
 # Import test utilities with fallback mocks
 try:
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+    from test_framework.auth_helpers import (
         create_test_token,
     )
 except ImportError:
@@ -24,9 +24,9 @@ except ImportError:
         return f"mock_token_{user_id}_{exp_offset}"
 
 try:
-    from netra_backend.app.tests.test_utilities.websocket_mocks import (
+    from netra_backend.tests.helpers.websocket_test_helpers import (
         MockWebSocket,
-        WebSocketBuilder,
+        create_mock_websocket,
     )
 except ImportError:
     # Fallback mock implementations
@@ -45,7 +45,7 @@ except ImportError:
         async def close(self, code: int = 1000, reason: str = "Normal closure"): 
             self.state = "disconnected"
     
-    class WebSocketBuilder:
+    class create_mock_websocket:
         def __init__(self):
             self._websocket = MockWebSocket()
         def with_user_id(self, user_id: str): 
@@ -70,7 +70,7 @@ class ReconnectionTestFixture:
     def create_connection_with_state(self, user_id: str) -> MockWebSocket:
         """Create WebSocket connection with preserved state."""
         token = create_test_token(user_id)
-        websocket = WebSocketBuilder().with_user_id(user_id).with_authentication(token).build()
+        websocket = create_mock_websocket().with_user_id(user_id).with_authentication(token).build()
         self.active_connections.append(websocket)
         return websocket
     

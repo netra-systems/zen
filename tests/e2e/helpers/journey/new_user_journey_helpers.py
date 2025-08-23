@@ -15,7 +15,7 @@ import aiosqlite
 
 # Using direct import approach to avoid import issues
 # from netra_backend.app.clients.auth_client import auth_client
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 from tests.e2e.database_test_connections import DatabaseTestConnections
 
 

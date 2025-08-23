@@ -45,6 +45,7 @@ class TestServices:
     """Test service URLs"""
     auth: str
     backend: str
+    frontend: str = "http://localhost:3000"
     
     
 @dataclass
@@ -317,9 +318,11 @@ TEST_SECRETS = TEST_CONFIG.secrets
 TEST_ENDPOINTS = TEST_CONFIG.endpoints
 
 
-def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentType.LOCAL) -> TestEnvironmentConfig:
+def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentType.LOCAL, environment: Optional[TestEnvironmentType] = None) -> TestEnvironmentConfig:
     """Get test environment configuration for specified environment type"""
-    if env_type == TestEnvironmentType.LOCAL:
+    # Support both parameter names for backward compatibility
+    target_env = environment or env_type
+    if target_env == TestEnvironmentType.LOCAL:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.LOCAL,
             base_url="http://localhost:8000",
@@ -327,10 +330,11 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             auth_url="http://localhost:8001",
             services=TestServices(
                 auth="http://localhost:8001",
-                backend="http://localhost:8000"
+                backend="http://localhost:8000",
+                frontend="http://localhost:3000"
             )
         )
-    elif env_type == TestEnvironmentType.DEV:
+    elif target_env == TestEnvironmentType.DEV:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.DEV,
             base_url="https://dev.netra-apex.com",
@@ -338,10 +342,11 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             auth_url="https://auth-dev.netra-apex.com",
             services=TestServices(
                 auth="https://auth-dev.netra-apex.com",
-                backend="https://dev.netra-apex.com"
+                backend="https://dev.netra-apex.com",
+                frontend="https://dev.netra-apex.com"
             )
         )
-    elif env_type == TestEnvironmentType.STAGING:
+    elif target_env == TestEnvironmentType.STAGING:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.STAGING,
             base_url="https://staging.netra-apex.com",
@@ -349,7 +354,8 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             auth_url="https://auth-staging.netra-apex.com",
             services=TestServices(
                 auth="https://auth-staging.netra-apex.com",
-                backend="https://staging.netra-apex.com"
+                backend="https://staging.netra-apex.com",
+                frontend="https://staging.netra-apex.com"
             )
         )
     else:

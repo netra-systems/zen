@@ -139,7 +139,7 @@ class TestContentAnalyzer:
         
     def analyze_test_file(self, test_file: Path) -> TestValidationResult:
         """Analyze individual test file for coverage"""
-        with open(test_file, 'r') as f:
+        with open(test_file, 'r', encoding='utf-8') as f:
             content = f.read()
             
         test_count = self._count_test_functions(content)

@@ -48,7 +48,6 @@ class TestTokenLifecycleE2E:
     @pytest.fixture
     def test_thread_id(self):
         """Provide test thread ID."""
-        import uuid
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio

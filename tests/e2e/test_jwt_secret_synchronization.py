@@ -17,11 +17,11 @@ import pytest
 import websockets
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class JWTSecretSynchronizationTester:
-    """Comprehensive JWT secret synchronization validator with UnifiedTestHarness integration."""
+    """Comprehensive JWT secret synchronization validator with UnifiedE2ETestHarness integration."""
     
     def __init__(self):
         self.auth_url = "http://localhost:8080"  # Fixed: auth service runs on 8080
@@ -29,7 +29,7 @@ class JWTSecretSynchronizationTester:
         self.websocket_url = "ws://localhost:8000"
         self.jwt_helper = JWTTestHelper()
         self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"  # Use actual env JWT secret
-        self.harness = UnifiedTestHarness()  # Integration with UnifiedTestHarness
+        self.harness = UnifiedE2ETestHarness()  # Integration with UnifiedE2ETestHarness
     
     async def test_jwt_creation_and_cross_service_validation(self) -> Dict[str, Any]:
         """Test 1: Create JWT in Auth and validate across Backend and WebSocket."""

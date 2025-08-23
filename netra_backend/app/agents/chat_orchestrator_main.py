@@ -28,7 +28,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
     PipelineExecutor,
 )
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
@@ -36,7 +36,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ChatOrchestrator(ModernSupervisorAgent):
+class ChatOrchestrator(SupervisorAgent):
     """NACIS Chat Orchestrator with veracity-first architecture (<300 lines)."""
     
     def __init__(self,

@@ -21,7 +21,8 @@ import httpx
 import websockets
 
 from tests.e2e.service_manager import HealthMonitor, ServiceManager, TestDataSeeder
-from tests.e2e.test_harness import ServiceConfig, UnifiedTestHarness
+from tests.e2e.test_harness import ServiceConfig
+from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class AgentTestHarness:
     
     def _setup_components(self):
         """Setup all test harness components."""
-        self.base_harness = UnifiedTestHarness()
+        self.base_harness = UnifiedE2ETestHarness()
         self.service_manager = ServiceManager(self.base_harness)
         self.data_seeder = TestDataSeeder(self.base_harness)
         self.health_monitor = HealthMonitor(self.base_harness)

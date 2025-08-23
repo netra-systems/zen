@@ -246,7 +246,7 @@ class WebSocketStateSyncTester:
     def __init__(self):
         """Initialize state sync tester with real components."""
         if TEST_MODE_AVAILABLE:
-            self.harness = UnifiedTestHarness()
+            self.harness = UnifiedE2ETestHarness()
             self.ws_url = TEST_ENDPOINTS.ws_url
             self.config = ClientConfig(timeout=10.0, max_retries=3, verify_ssl=False)
         else:

@@ -121,7 +121,7 @@ class AuthErrorPropagationValidator:
         """Test that expired token errors provide actionable messages."""
         # Create expired token (if test infrastructure supports it)
         try:
-            from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+            from test_framework.auth_helpers import (
                 create_expired_test_token,
             )
             expired_token = create_expired_test_token("test_user")
@@ -300,7 +300,7 @@ class WebSocketErrorRecoveryValidator:
         
         try:
             # Create test token for authentication
-            from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+            from test_framework.auth_helpers import (
                 create_test_token,
             )
             test_token = create_test_token("error_recovery_user")

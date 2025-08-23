@@ -88,7 +88,7 @@ class TestState:
         self.project_root = Path.cwd()
 
 
-class UnifiedTestHarness:
+class UnifiedE2ETestHarness:
     """
     Unified test harness for comprehensive system testing.
     Supports authentication, WebSocket, and service integration testing.
@@ -307,7 +307,7 @@ class UnifiedTestHarness:
 class AuthFlowTestHelper:
     """Specialized helper for authentication flow testing"""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedE2ETestHarness):
         self.harness = harness
         self.auth_scenarios = []
     
@@ -348,7 +348,7 @@ class AuthFlowTestHelper:
 class WebSocketTestHelper:
     """Specialized helper for WebSocket testing"""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedE2ETestHarness):
         self.harness = harness
         self.connection_scenarios = []
     

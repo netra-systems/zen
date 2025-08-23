@@ -15,7 +15,7 @@ import jwt
 import pytest
 import websockets
 
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class TestTokenValidationFlow:
@@ -24,7 +24,7 @@ class TestTokenValidationFlow:
     @pytest.fixture
     async def test_harness(self):
         """Setup unified test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()

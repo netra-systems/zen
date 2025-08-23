@@ -36,7 +36,7 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent as SupervisorAgent
 # Agent models - creating mocks for tests
 from unittest.mock import Mock
 Agent = Mock

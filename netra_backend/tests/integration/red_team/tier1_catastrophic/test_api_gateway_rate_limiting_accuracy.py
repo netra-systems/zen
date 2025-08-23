@@ -19,8 +19,8 @@ import json
 from typing import List, Dict, Any
 
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.middleware.rate_limiting import RateLimiter
-from netra_backend.app.core.redis_manager import RedisManager
+from netra_backend.app.services.rate_limiter import RateLimiter
+from netra_backend.app.redis_manager import RedisManager
 
 # Import absolute paths  
 from netra_backend.tests.helpers.redis_test_helpers import (

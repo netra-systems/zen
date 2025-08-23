@@ -12,8 +12,8 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
-from tests.e2e.test_harness import UnifiedTestHarness
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 from typing import Any, Dict, List, Optional
 import asyncio
 import json
@@ -28,7 +28,7 @@ class ThreadWebSocketManager:
     """Core WebSocket thread management testing infrastructure."""
     
 
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
 
         self.harness = harness
 

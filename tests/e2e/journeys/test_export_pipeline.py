@@ -42,13 +42,13 @@ from tests.e2e.export_pipeline_helpers import (
     ExportFileValidator,
     PerformanceTracker
 )
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class ExportPipelineCore:
     """Core export pipeline test infrastructure."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.data_generator = LargeDatasetGenerator()
         self.request_manager = ExportRequestManager(harness)
@@ -67,7 +67,7 @@ class ExportPipelineCore:
 class ExportPipelineE2ETester:
     """Executes complete export pipeline E2E test flow."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.core = ExportPipelineCore(harness)
     
@@ -188,7 +188,7 @@ async def test_large_dataset_export_pipeline():
     - Memory efficient processing
     - Real API integration (minimal mocking)
     """
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     tester = ExportPipelineE2ETester(harness)
     
     try:
@@ -231,7 +231,7 @@ async def test_multi_format_export_support():
     Test multiple export formats: CSV, JSON, Excel
     Business Value: Format flexibility for different enterprise requirements
     """
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     tester = ExportPipelineE2ETester(harness)
     
     try:
@@ -266,7 +266,7 @@ async def test_export_performance_under_load():
     Performance validation for export pipeline under load conditions.
     Business Value: Ensure export reliability during peak usage
     """
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     tester = ExportPipelineE2ETester(harness)
     
     try:

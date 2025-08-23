@@ -29,8 +29,10 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.config import setup_test_environment
 from tests.e2e.unified_e2e_harness import (
-    UnifiedTestHarness,
-    WebSocketTestHelper,
+    UnifiedE2ETestHarness,
+)
+from netra_backend.tests.helpers.websocket_test_helpers import (
+    MockWebSocketManager,
 )
 
 
@@ -72,7 +74,7 @@ def streaming_websocket():
 def streaming_harness():
     """Create test harness for streaming scenarios."""
     setup_test_environment()  # Ensure test environment is configured
-    return UnifiedTestHarness()
+    return UnifiedE2ETestHarness()
 
 
 @pytest.fixture

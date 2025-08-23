@@ -182,7 +182,6 @@ class DatabaseBackupManager:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL database URL."""
-        import os
         return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:

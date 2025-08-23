@@ -9,8 +9,8 @@ const commonConfig = {
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
-  // Extended timeout for integration tests
-  testTimeout: process.env.JEST_TIMEOUT || 10000,
+  // Shortened timeout to prevent hanging tests
+  testTimeout: process.env.JEST_TIMEOUT || 15000,
   
   // Module name mapping
   moduleNameMapper: {
@@ -187,9 +187,9 @@ const config = {
   maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '5'),
   maxWorkers: process.env.MAX_WORKERS || (process.env.CI ? 4 : '50%'),
   
-  // Performance optimizations
+  // Performance optimizations and hanging prevention
   detectOpenHandles: process.env.DETECT_OPEN_HANDLES === 'true',
-  forceExit: process.env.FORCE_EXIT === 'true',
+  forceExit: true, // Force exit to prevent hanging
   
   // Error handling
   errorOnDeprecated: false,

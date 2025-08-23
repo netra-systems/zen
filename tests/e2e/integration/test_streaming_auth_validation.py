@@ -38,7 +38,7 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.config import TEST_CONFIG, setup_test_environment
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 class StreamingAuthManager:
     # """Manages streaming operations with authentication validation."""
@@ -48,7 +48,7 @@ class StreamingAuthManager:
         self.auth_checks: List[Dict] = []
         self.rate_limits: Dict[str, List[float]] = {}
         self.resource_usage: Dict[str, int] = {"memory": 0, "connections": 0}
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
 #         self.test_mode = True  # Enable test mode for reliable testing # Possibly broken comprehension
         
     def create_valid_token(self, user_id: str, exp_minutes: int = 60) -> str:

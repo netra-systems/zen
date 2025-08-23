@@ -430,10 +430,10 @@ class UnifiedTestRunner:
             "unit": "-m 'not integration and not e2e'",
             "integration": "-m 'integration'",
             "api": "-k 'api'",
-            "database": "-k 'database or db'",
-            "websocket": "-k 'websocket or ws'",
+            "database": "-k \"database or db\"",
+            "websocket": "-k \"websocket or ws\"",
             "agent": "-k 'agent'",
-            "security": "-k 'auth or security'",
+            "security": "-k \"auth or security\"",
             "e2e": "-m 'e2e'",
             "performance": "-m 'performance'"
         }

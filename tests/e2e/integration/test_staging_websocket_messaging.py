@@ -24,11 +24,12 @@ from tests.e2e.integration.user_journey_executor import TestUser
 from test_framework.http_client import ClientConfig, ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from tests.e2e.test_environment_config import TestEnvironmentType
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 class StagingWebSocketTester:
     # """Staging WebSocket test coordinator with comprehensive validation."""
     
-    def __init__(self, harness: UnifiedE2ETestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.test_users: List[TestUser] = []
         self.websocket_clients: List[RealWebSocketClient] = []

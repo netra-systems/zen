@@ -27,7 +27,7 @@ from tests.e2e.config import (
     TestDataFactory,
 )
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 logger = central_logger.get_logger(__name__)
 
@@ -77,7 +77,7 @@ class ThreadTestDataFactory:
 class ThreadWebSocketFixtures:
     """Shared WebSocket fixtures for thread testing."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.active_connections: Dict[str, Any] = {}
         self.thread_events: List[Dict[str, Any]] = []
@@ -256,7 +256,7 @@ class ThreadPerformanceUtils:
 @pytest.fixture
 def unified_harness():
     """Unified test harness fixture."""
-    return UnifiedTestHarness()
+    return UnifiedE2ETestHarness()
 
 
 @pytest.fixture

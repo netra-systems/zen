@@ -24,14 +24,14 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-# # from app.agents.supervisor_agent_modern import ModernSupervisorAgent
+# # from app.agents.supervisor_agent_modern import SupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
 
-ModernSupervisorAgent = AsyncMock
+SupervisorAgent = AsyncMock
 
-ModernSupervisorAgent = AsyncMock
+SupervisorAgent = AsyncMock
 # from app.agents.sub_agents.optimization_agent import OptimizationAgent
 
 OptimizationAgent = AsyncMock
@@ -66,7 +66,7 @@ class MultiAgentL4TestSuite:
 
         self.staging_suite: Optional[StagingTestSuite] = None
 
-        self.supervisor_agent: Optional[ModernSupervisorAgent] = None
+        self.supervisor_agent: Optional[SupervisorAgent] = None
 
         self.llm_manager: Optional[LLMManager] = None
 
@@ -120,7 +120,7 @@ class MultiAgentL4TestSuite:
         
         # Initialize supervisor with real dependencies
 
-        self.supervisor_agent = ModernSupervisorAgent(
+        self.supervisor_agent = SupervisorAgent(
 
             db_session=self.postgres_service.get_session(),
 

@@ -15,12 +15,13 @@ if str(project_root) not in sys.path:
 
 import os
 
-# Lazy imports moved to fixtures to avoid slow startup during test collection
-from netra_backend.app.core.network_constants import (
-    DatabaseConstants,
-    HostConstants,
-    ServicePorts,
-)
+# Import constants at module level only if not in collection mode  
+if not os.environ.get("TEST_COLLECTION_MODE"):
+    from netra_backend.app.core.network_constants import (
+        DatabaseConstants,
+        HostConstants,
+        ServicePorts,
+    )
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
@@ -49,34 +50,35 @@ else:
     # Standard test environment setup
 
     os.environ["TESTING"] = "1"
-    # Import network constants lazily to avoid slow startup
-    from netra_backend.app.core.network_constants import (
-        DatabaseConstants,
-        HostConstants, 
-        ServicePorts,
-    )
+    # Import network constants lazily only if not in collection mode
+    if not os.environ.get("TEST_COLLECTION_MODE"):
+        from netra_backend.app.core.network_constants import (
+            DatabaseConstants,
+            HostConstants, 
+            ServicePorts,
+        )
     
     # Use PostgreSQL URL format even for tests to satisfy validator
+    if not os.environ.get("TEST_COLLECTION_MODE"):
+        os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
+            user="test", password="test", 
+            port=ServicePorts.POSTGRES_DEFAULT,
+            database="netra_test"
+        )
 
-    os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
+        os.environ["REDIS_URL"] = DatabaseConstants.build_redis_url(
+            database=DatabaseConstants.REDIS_TEST_DB
+        )
 
-        user="test", password="test", 
+        os.environ["REDIS_HOST"] = HostConstants.LOCALHOST
 
-        port=ServicePorts.POSTGRES_DEFAULT,
-
-        database="netra_test"
-
-    )
-
-    os.environ["REDIS_URL"] = DatabaseConstants.build_redis_url(
-
-        database=DatabaseConstants.REDIS_TEST_DB
-
-    )
-
-    os.environ["REDIS_HOST"] = HostConstants.LOCALHOST
-
-    os.environ["REDIS_PORT"] = str(ServicePorts.REDIS_DEFAULT)
+        os.environ["REDIS_PORT"] = str(ServicePorts.REDIS_DEFAULT)
+    else:
+        # Use simple defaults during collection mode
+        os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/netra_test"
+        os.environ["REDIS_URL"] = "redis://localhost:6379/1"
+        os.environ["REDIS_HOST"] = "localhost"
+        os.environ["REDIS_PORT"] = "6379"
 
     os.environ["REDIS_USERNAME"] = ""
 
@@ -134,38 +136,32 @@ else:
         os.environ.setdefault("ANTHROPIC_API_KEY", "test-anthropic-api-key")
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
-# Configuration imports moved to fixtures to avoid slow startup during test collection
-from netra_backend.app.core.configuration.base import get_unified_config
+# Only import heavy modules if not in collection mode
+if not os.environ.get("TEST_COLLECTION_MODE"):
+    from fastapi.testclient import TestClient
+    from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+
+    # Configuration imports moved to fixtures to avoid slow startup during test collection
+    from netra_backend.app.core.configuration.base import get_unified_config
+
+    # Database imports moved to fixtures to avoid slow startup during test collection
+    from netra_backend.app.db.session import get_db_session
+    from netra_backend.tests.conftest_helpers import (
+        _create_mock_tool_dispatcher,
+        _create_real_tool_dispatcher,
+        _import_agent_classes,
+        _instantiate_agents,
+        _setup_basic_llm_mocks,
+        _setup_performance_llm_mocks,
+        _setup_websocket_interface_compatibility,
+        _setup_websocket_test_mocks,
+    )
 
 # NOTE: Import main app lazily in fixtures to avoid slow startup during test collection
 # The app will be imported when actually needed in fixtures, not during conftest loading
-
-# Database imports moved to fixtures to avoid slow startup during test collection
-from netra_backend.app.db.session import get_db_session
-from netra_backend.tests.conftest_helpers import (
-
-    _create_mock_tool_dispatcher,
-
-    _create_real_tool_dispatcher,
-
-    _import_agent_classes,
-
-    _instantiate_agents,
-
-    _setup_basic_llm_mocks,
-
-    _setup_performance_llm_mocks,
-
-    _setup_websocket_interface_compatibility,
-
-    _setup_websocket_test_mocks,
-
-)
 
 # Configure pytest with custom markers
 
@@ -243,32 +239,35 @@ def pytest_configure(config):
 #     loop.close()
 
 @pytest.fixture(scope="function")
-
 def ensure_db_initialized():
-
     """Ensure database is initialized for tests that need it."""
+    # Skip this fixture during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
     from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
     if async_session_factory is None:
-
         try:
-
             initialize_postgres()
-
         except Exception as e:
-
             pytest.skip(f"Cannot initialize database for test: {e}")
     
     # Return the session factory for convenience
-
     return async_session_factory
 
 @pytest.fixture(scope="function")
-
 async def test_engine():
     """Create test database engine."""
-    # Import Base lazily to avoid slow startup during test collection
+    # Skip this fixture during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        yield None
+        return
+        
+    # Import modules lazily to avoid slow startup during test collection
     from netra_backend.app.db.base import Base
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy.pool import StaticPool
 
     # Use in-memory SQLite for tests to avoid requiring real database
     # This ensures tests are isolated and fast
@@ -284,42 +283,48 @@ async def test_engine():
     )
 
     async with engine.begin() as conn:
-
         await conn.run_sync(Base.metadata.create_all)
 
     yield engine
 
     async with engine.begin() as conn:
-
         await conn.run_sync(Base.metadata.drop_all)
 
     await engine.dispose()
 
 @pytest.fixture(scope="function")
-
 async def db_session(test_engine):
+    # Skip this fixture during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        yield None
+        return
+        
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.orm import sessionmaker
 
     async_session = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
 
     async with async_session() as session:
-
         yield session
 
 @pytest.fixture(scope="function")
-
 def client(db_session):
     """Create FastAPI test client with database session override."""
-    # Import app lazily to avoid startup during test collection
+    # Skip this fixture during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
+    # Import modules lazily to avoid startup during test collection
     from netra_backend.app.main import app
+    from netra_backend.app.db.session import get_db_session
+    from fastapi.testclient import TestClient
 
     def override_get_db():
-
         yield db_session
 
     app.dependency_overrides[get_db_session] = override_get_db
 
     with TestClient(app) as c:
-
         yield c
 
     del app.dependency_overrides[get_db_session]
@@ -327,11 +332,12 @@ def client(db_session):
 # Real LLM Testing Fixtures
 
 @pytest.fixture(scope="function")
-
 def real_llm_manager():
-
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
-
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
         # Use unified configuration system
         from netra_backend.app.config import get_unified_config as get_config
@@ -339,51 +345,60 @@ def real_llm_manager():
 
         config = get_config()
         return LLMManager(config)
-
     else:
-
         return _create_mock_llm_manager()
 
 def _create_mock_llm_manager():
-
     """Create properly configured async mock LLM manager."""
     from unittest.mock import AsyncMock, MagicMock
 
     # Use AsyncMock for async methods, regular Mock for sync methods
     mock_manager = AsyncMock()
 
-    _setup_basic_llm_mocks(mock_manager)
-
-    _setup_performance_llm_mocks(mock_manager)
+    # Import helpers only if not in collection mode
+    if not os.environ.get("TEST_COLLECTION_MODE"):
+        from netra_backend.tests.conftest_helpers import _setup_basic_llm_mocks, _setup_performance_llm_mocks
+        _setup_basic_llm_mocks(mock_manager)
+        _setup_performance_llm_mocks(mock_manager)
 
     return mock_manager
 
 @pytest.fixture(scope="function") 
-
 def real_websocket_manager():
-
     """Create real WebSocket manager for E2E tests with interface compatibility."""
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
     from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
 
     manager = WebSocketManager()
 
-    _setup_websocket_interface_compatibility(manager)
-
-    _setup_websocket_test_mocks(manager)
+    # Import helpers only if not in collection mode
+    if not os.environ.get("TEST_COLLECTION_MODE"):
+        from netra_backend.tests.conftest_helpers import _setup_websocket_interface_compatibility, _setup_websocket_test_mocks
+        _setup_websocket_interface_compatibility(manager)
+        _setup_websocket_test_mocks(manager)
 
     return manager
 
 @pytest.fixture(scope="function")
-
 def real_tool_dispatcher():
-
     """Create real tool dispatcher when needed, otherwise proper mock."""
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
+    # Import helpers only if not in collection mode
+    if not os.environ.get("TEST_COLLECTION_MODE"):
+        from netra_backend.tests.conftest_helpers import _create_real_tool_dispatcher, _create_mock_tool_dispatcher
+        
+        if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+            return _create_real_tool_dispatcher()
 
-    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-
-        return _create_real_tool_dispatcher()
-
-    return _create_mock_tool_dispatcher()
+        return _create_mock_tool_dispatcher()
+    
+    return None
 
 @pytest.fixture(scope="function")
 

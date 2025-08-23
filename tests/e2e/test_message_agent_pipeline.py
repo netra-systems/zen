@@ -16,9 +16,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.tests.test_utilities.websocket_mocks import (
+from netra_backend.tests.helpers.websocket_test_helpers import (
     MockWebSocket,
-    WebSocketBuilder,
+    create_mock_websocket,
 )
 from tests.e2e.config import (
     TEST_CONFIG,
@@ -78,10 +78,10 @@ async def pipeline_tester():
 @pytest.fixture
 async def mock_websocket():
     """Create authenticated mock WebSocket."""
-    websocket = (WebSocketBuilder()
-                .with_user_id("test_pipeline_user")
-                .with_authentication("valid.jwt.token")
-                .build())
+    websocket = create_mock_websocket(
+        token="valid.jwt.token",
+        query_params={"user_id": "test_pipeline_user"}
+    )
     await websocket.accept()
     return websocket
 
@@ -274,7 +274,7 @@ class TestPipelineErrorHandling:
     async def test_pipeline_error_handling(self, pipeline_tester):
         """Test WebSocket, agent, and degradation error handling."""
         # Test WebSocket error and recovery
-        websocket = WebSocketBuilder().with_user_id("error_test_user").build()
+        websocket = create_mock_websocket(query_params={"user_id": "error_test_user"})
         await websocket.accept()
         recovery_message = {"type": "message", "content": "Recovery test"}
         await websocket.send_json(recovery_message)

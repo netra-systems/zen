@@ -1,5 +1,6 @@
 """Helper functions for conftest.py fixtures to maintain 25-line function limit."""
 
+import os
 from unittest.mock import AsyncMock, MagicMock
 
 def _setup_basic_llm_mocks(mock_manager):
@@ -33,6 +34,9 @@ def _setup_websocket_test_mocks(manager):
 
 def _create_real_tool_dispatcher():
     """Create real tool dispatcher instance."""
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return MagicMock()
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     return ToolDispatcher()
 
@@ -56,12 +60,18 @@ def _import_agent_classes():
 
 def _import_base_agent_classes():
     """Import base agent classes."""
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return {}
     from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
     return {'triage': TriageSubAgent, 'data': DataSubAgent}
 
 def _import_additional_agent_classes():
     """Import additional agent classes."""
+    # Skip during collection mode
+    if os.environ.get("TEST_COLLECTION_MODE"):
+        return {}
     from netra_backend.app.agents.optimizations_core_sub_agent import (
         OptimizationsCoreSubAgent,
     )
