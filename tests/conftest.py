@@ -12,30 +12,33 @@ import pytest
 # =============================================================================
 
 # Set base testing environment variables
-os.environ["TESTING"] = "1"
-os.environ["NETRA_ENV"] = "testing"
-os.environ["ENVIRONMENT"] = "testing"
-os.environ["LOG_LEVEL"] = "ERROR"
-
-# Network and service configuration
-os.environ["REDIS_HOST"] = "localhost"
-os.environ["CLICKHOUSE_HOST"] = "localhost"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-
-# Authentication secrets required for tests
-os.environ["JWT_SECRET_KEY"] = (
-    "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
-)
-os.environ["SERVICE_SECRET"] = (
-    "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
-)
-os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
-os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
-
-# Disable heavy services for faster testing
-os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
-os.environ["CLICKHOUSE_ENABLED"] = "false"
-os.environ["TEST_DISABLE_REDIS"] = "true"
+# CRITICAL: Only set test environment if we're actually running tests
+# This prevents the dev launcher from being affected when modules are imported
+if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    os.environ["TESTING"] = "1"
+    os.environ["NETRA_ENV"] = "testing"
+    os.environ["ENVIRONMENT"] = "testing"
+    os.environ["LOG_LEVEL"] = "ERROR"
+    
+    # Network and service configuration
+    os.environ["REDIS_HOST"] = "localhost"
+    os.environ["CLICKHOUSE_HOST"] = "localhost"
+    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    
+    # Authentication secrets required for tests
+    os.environ["JWT_SECRET_KEY"] = (
+        "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
+    )
+    os.environ["SERVICE_SECRET"] = (
+        "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
+    )
+    os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
+    os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
+    
+    # Disable heavy services for faster testing
+    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
+    os.environ["CLICKHOUSE_ENABLED"] = "false"
+    os.environ["TEST_DISABLE_REDIS"] = "true"
 
 # Add parent directory to path
 
@@ -76,15 +79,8 @@ except ImportError:
 pytest_plugins = ["pytest_asyncio"]
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    yield loop
-    # Don't close loop to avoid hanging
+# Remove custom event_loop fixture to let pytest-asyncio handle it properly
+# The --asyncio-mode=auto setting in pytest.ini will provide the event loop
 
 
 # =============================================================================

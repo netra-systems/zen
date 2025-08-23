@@ -317,7 +317,14 @@ def get_converted_async_db_url() -> str:
 
 def initialize_postgres():
     """Initialize PostgreSQL connection with robust database initialization."""
+    import os
     global async_engine, async_session_factory
+    
+    # Skip initialization during test collection to prevent hanging
+    if os.environ.get('TEST_COLLECTION_MODE') == '1':
+        logger.debug("Skipping PostgreSQL initialization during test collection")
+        return None
+        
     logger.debug(f"initialize_postgres called. Current async_engine: {async_engine is not None}, async_session_factory: {async_session_factory is not None}")
     
     # Check if both engine and session factory are properly initialized

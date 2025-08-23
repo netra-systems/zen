@@ -40,7 +40,7 @@ from netra_backend.app.services.websocket.message_queue import (
     MessageStatus,
     QueuedMessage,
 )
-from netra_backend.app.websocket.unified.job_queue import JobQueueManager
+from netra_backend.app.websocket_core.unified.job_queue import JobQueueManager
 
 logger = central_logger.get_logger(__name__)
 

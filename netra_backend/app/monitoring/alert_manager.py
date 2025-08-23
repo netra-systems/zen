@@ -6,7 +6,7 @@ Re-export from modular alert system components.
 # Import types for backward compatibility
 # Import the main alert manager from the modular core
 from netra_backend.app.monitoring.alert_manager_core import AlertManager, alert_manager
-from .alert_models import (
+from netra_backend.app.monitoring.alert_models import (
     Alert,
     AlertLevel,
     AlertRule,

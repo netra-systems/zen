@@ -21,7 +21,7 @@ try:
         ReconnectionConfig,
         ReconnectionReason,
     )
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+    from test_framework.auth_helpers import (
         create_expired_token,
         create_test_token,
     )
@@ -58,9 +58,9 @@ except ImportError:
             return self.attempts
 
 try:
-    from netra_backend.app.tests.test_utilities.websocket_mocks import (
+    from netra_backend.tests.helpers.websocket_test_helpers import (
         MockWebSocket,
-        WebSocketBuilder,
+        create_mock_websocket,
     )
 except ImportError:
     class MockWebSocket:
@@ -77,7 +77,7 @@ except ImportError:
         async def close(self, code: int = 1000, reason: str = "Normal closure"): 
             self.state = "disconnected"
     
-    class WebSocketBuilder:
+    class create_mock_websocket:
         def __init__(self):
             self._websocket = MockWebSocket()
         def with_user_id(self, user_id: str): 

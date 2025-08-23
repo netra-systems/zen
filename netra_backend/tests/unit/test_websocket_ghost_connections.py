@@ -18,9 +18,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from fastapi import WebSocket
 
-from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
+from netra_backend.app.websocket_core_info import ConnectionInfo, ConnectionState
 
-from netra_backend.app.websocket.connection import ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
 
 class TestGhostConnectionPrevention:
     """Test suite for ghost connection prevention and cleanup."""

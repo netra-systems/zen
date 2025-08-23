@@ -16,13 +16,9 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock
-import uuid
-import json
-from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from dataclasses import dataclass
 
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper

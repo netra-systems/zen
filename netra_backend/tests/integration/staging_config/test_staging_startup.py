@@ -5,7 +5,7 @@ Validates full application startup in staging environment
 with all dependencies and configurations.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -46,7 +46,7 @@ class TestStagingStartup(StagingConfigTestBase):
             from netra_backend.app.core.config import get_config
             from netra_backend.app.db.session import get_db
             from netra_backend.app.main import app
-            from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+            from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
             
             # Initialize configuration
 

@@ -14,12 +14,13 @@ from typing import Any, Dict
 import aiofiles
 
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class FileUploadTestContext:
     """Context for file upload testing operations."""
     
-    def __init__(self, harness: UnifiedE2ETestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         """Initialize file upload test context."""
         self.harness = harness
         self.test_files = {}

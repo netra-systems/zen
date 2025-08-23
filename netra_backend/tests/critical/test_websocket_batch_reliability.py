@@ -16,14 +16,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.websocket.batch_message_core import MessageBatcher
-from netra_backend.app.websocket.batch_message_types import (
+from netra_backend.app.websocket_core.batch_message_core import MessageBatcher
+from netra_backend.app.websocket_core.batch_message_types import (
     BatchConfig,
     BatchingStrategy,
     MessageState,
     PendingMessage,
 )
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
 
 class TestNetworkFailureZeroMessageLoss:
     """Test zero message loss during network failures."""

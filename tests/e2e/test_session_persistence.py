@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+from netra_backend.tests.helpers.websocket_test_helpers import MockWebSocket
 from tests.e2e.config import TEST_USERS
 
 logger = central_logger.get_logger(__name__)

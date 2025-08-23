@@ -17,7 +17,6 @@ class CompleteNewUserFlowTester:
     
     async def execute_complete_flow(self, **kwargs) -> Dict[str, Any]:
         """Execute complete new user flow test."""
-        import time
         start_time = time.time()
         
         try:

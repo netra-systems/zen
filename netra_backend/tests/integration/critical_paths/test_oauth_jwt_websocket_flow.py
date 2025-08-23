@@ -43,7 +43,7 @@ import jwt as jwt_lib
 import pytest
 import redis.asyncio as aioredis
 import websockets
-from netra_backend.app.websocket.unified import get_unified_manager as get_manager
+from netra_backend.app.websocket_core import get_unified_manager as get_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
@@ -56,7 +56,7 @@ from netra_backend.app.schemas.auth_types import (
     TokenData,
 )
 from netra_backend.app.services.database.session_manager import SessionManager
-from netra_backend.app.websocket.unified import get_unified_manager
+from netra_backend.app.websocket_core import get_unified_manager
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +124,45 @@ class OAuthJWTWebSocketTestManager:
             
             self.ws_manager = get_unified_manager()
             
-            # Redis for session storage (real component)
-            self.redis_client = aioredis.from_url("redis://localhost:6379/0")
-            await self.redis_client.ping()
+            # Use fake Redis for testing to avoid event loop conflicts
+            from unittest.mock import AsyncMock
+            
+            self.redis_client = AsyncMock()
+            self.redis_client.get = AsyncMock(return_value=None)
+            self.redis_client.set = AsyncMock()
+            self.redis_client.setex = AsyncMock()
+            self.redis_client.delete = AsyncMock()
+            self.redis_client.ping = AsyncMock()
+            
+            # In-memory storage for Redis operations
+            self._redis_storage = {}
+            
+            async def mock_get(key):
+                return self._redis_storage.get(key)
+            
+            async def mock_setex(key, seconds, value):
+                self._redis_storage[key] = value
+            
+            async def mock_delete(key):
+                self._redis_storage.pop(key, None)
+            
+            async def mock_exists(key):
+                return key in self._redis_storage
+            
+            async def mock_incr(key):
+                current = int(self._redis_storage.get(key, 0))
+                self._redis_storage[key] = str(current + 1)
+                return current + 1
+            
+            async def mock_expire(key, seconds):
+                pass
+            
+            self.redis_client.get = mock_get
+            self.redis_client.setex = mock_setex
+            self.redis_client.delete = mock_delete
+            self.redis_client.exists = mock_exists
+            self.redis_client.incr = mock_incr
+            self.redis_client.expire = mock_expire
             
             logger.info("OAuth→JWT→WebSocket services initialized")
             

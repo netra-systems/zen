@@ -321,7 +321,7 @@ class ExecutionMonitor:
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED
-from netra_backend.app.monitoring.models import MetricsCollector as CoreMetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
 
 
 class MetricsCollector:

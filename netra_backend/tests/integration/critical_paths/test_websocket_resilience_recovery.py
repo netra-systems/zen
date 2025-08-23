@@ -10,7 +10,7 @@ Critical Path: Connection loss detection -> State preservation -> Reconnection -
 Coverage: Connection resilience, state persistence, automatic recovery, message integrity
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -28,9 +28,9 @@ import pytest
 
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.websocket.recovery import WebSocketRecoveryManager as ConnectionRecovery
+from netra_backend.app.websocket_core.recovery import WebSocketRecoveryManager as ConnectionRecovery
 
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 logger = logging.getLogger(__name__)
 

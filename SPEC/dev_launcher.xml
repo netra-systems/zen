@@ -1,14 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <specification>
   <metadata>
-    <last_edited>2025-08-21T08:47:28.424916</last_edited>
+    <last_edited>2025-08-23T14:30:00.000000</last_edited>
   </metadata>
   <name>Dev Launcher</name>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
   <description>
         High-performance development environment launcher with intelligent caching,
         optimized startup sequences, real-time logging, health monitoring,
-        and multi-service orchestration. Target: Sub-10 second cached startup.
+        multi-service orchestration, Docker service discovery, and parallel execution.
+        Features 13-step startup sequence with cascade failure handling.
+        Target: Sub-10 second cached startup with 90%+ concurrent load success rate.
     </description>
   <performance_optimization_reference>
     <spec>SPEC/dev_launcher_performance.xml</spec>
@@ -46,6 +48,18 @@
       <component name="StartupOptimizer" file="dev_launcher/startup_optimizer.py">
         <responsibility>Optimize startup sequence and skip unnecessary steps</responsibility>
         <max_lines>300</max_lines>
+      </component>
+      <component name="ParallelExecutor" file="dev_launcher/parallel_executor.py">
+        <responsibility>Parallel execution engine with dependency management and retry logic</responsibility>
+        <max_lines>500</max_lines>
+      </component>
+      <component name="ContainerDiscovery" file="dev_launcher/container_discovery.py">
+        <responsibility>Docker service discovery and container reuse functionality</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="ServiceConfig" file="dev_launcher/service_config.py">
+        <responsibility>Service configuration management with LLM defaults</responsibility>
+        <max_lines>600</max_lines>
       </component>
     </components>
   </architecture>
@@ -153,21 +167,25 @@
   </performance_optimizations>
   <health_monitoring>
     <requirement id="HEALTH-001" priority="CRITICAL">
-      <description>Health checks wait for startup completion</description>
+      <description>Delayed start after readiness with enhanced validation</description>
       <implementation>
                 - Health monitoring MUST NOT start immediately after service launch
                 - MUST wait for startup checks to pass before beginning health monitoring
                 - Backend: Wait for /health/ready endpoint to respond successfully
                 - Frontend: Wait for initial compilation and readiness check
-                - Only AFTER startup verification should health monitoring begin
+                - Minimum 10-second grace period for service stabilization
+                - Cross-service connectivity validation before enabling monitoring
+                - Only AFTER startup verification AND grace period should health monitoring begin
             </implementation>
     </requirement>
     <requirement id="HEALTH-002">
-      <description>Startup grace period</description>
+      <description>Enhanced startup grace period with retry logic</description>
       <implementation>
                 - Backend: 30 second grace period for initial startup
                 - Frontend: 90 second grace period for Next.js compilation
                 - Health checks begin AFTER grace period AND readiness confirmation
+                - Maximum 3 readiness validation attempts with 2-second intervals
+                - Fallback monitoring enabled if not all services ready after maximum attempts
             </implementation>
     </requirement>
     <requirement id="HEALTH-003">
@@ -181,20 +199,69 @@
     </requirement>
   </health_monitoring>
   <service_startup_sequence>
-    <step order="1">Check cache for previous startup state</step>
-    <step order="2">Environment check (skip if cached and unchanged)</step>
-    <step order="3">Load secrets if configured</step>
-    <step order="4">Check if migrations needed (use file hash cache)</step>
-    <step order="5">Run migrations only if needed</step>
-    <step order="6">Start backend process (with --no-reload if flag set)</step>
-    <step order="7">Start auth service (with --no-reload if flag set)</step>
-    <step order="8">Wait for backend readiness (/health/ready)</step>
-    <step order="9">Verify auth system (/api/auth/config)</step>
-    <step order="10">Start frontend process (optimized mode)</step>
-    <step order="11">Wait for frontend readiness</step>
-    <step order="12">Cache successful startup state</step>
-    <step order="13">ONLY NOW start health monitoring</step>
+    <description>Enhanced 13-step startup sequence with timeout handling and cascade failure management</description>
+    <step order="0" timeout="10s">Docker Service Discovery - Identify reusable containers</step>
+    <step order="1" timeout="N/A">Check cache for previous startup state (Pre-check)</step>
+    <step order="2" timeout="N/A">Environment check - skip if cached and unchanged (Pre-check)</step>
+    <step order="3" timeout="N/A">Load secrets if configured (Pre-check)</step>
+    <step order="4" timeout="30s">Database validation with mock mode detection</step>
+    <step order="5" timeout="45s">Migration check and execution if needed</step>
+    <step order="6" timeout="30s">Start backend process with cascade handling</step>
+    <step order="7" timeout="20s">Start auth service with cascade handling</step>
+    <step order="8" timeout="45s">Wait for backend readiness (/health/ready)</step>
+    <step order="9" timeout="30s">Verify auth system (/api/auth/config)</step>
+    <step order="10" timeout="30s">Start frontend process</step>
+    <step order="11" timeout="120s">Wait for frontend readiness (extended for build)</step>
+    <step order="11.5" timeout="20s">Validate WebSocket endpoints (non-critical)</step>
+    <step order="12" timeout="5s">Cache successful startup state</step>
+    <step order="13" timeout="15s">Start health monitoring with 10s grace period</step>
   </service_startup_sequence>
+  <parallel_execution>
+    <requirement id="PARALLEL-001" priority="HIGH">
+      <description>ParallelTask enhancement with retry and timeout</description>
+      <implementation>
+                - retry_count parameter: Configure task retry attempts (0-3 recommended)
+                - timeout enforcement: Per-task timeout validation during execution
+                - dependency resolution: Enhanced circular dependency detection and breaking
+                - Worker pool sizing: CPU workers 2-8, I/O workers 4-24 based on system capacity
+                - Performance tracking: Concurrent task metrics and success rate monitoring
+            </implementation>
+    </requirement>
+    <requirement id="PARALLEL-002" priority="HIGH">
+      <description>Concurrent load performance targets</description>
+      <implementation>
+                - Target: ≥90% success rate under concurrent load
+                - Retry delay progression: 0.1 * attempt seconds
+                - Global execution timeout: Adaptive (5s for test, 15s for production)
+                - Task prioritization: Sort by priority and dependency count
+                - Graceful degradation: Fall back to sequential execution on failure
+            </implementation>
+    </requirement>
+  </parallel_execution>
+  <llm_configuration>
+    <requirement id="LLM-001" priority="CRITICAL">
+      <description>LLM must default to shared (real) mode</description>
+      <implementation>
+                - Default LLM_MODE: "shared" (real API providers)
+                - Support providers: Anthropic, OpenAI, Gemini
+                - Gemini API key detection: Check GEMINI_API_KEY environment variable
+                - Environment variable priority: System env > .env > .secrets
+                - Mock mode ONLY for specific test cases, never for development
+            </implementation>
+    </requirement>
+  </llm_configuration>
+  <docker_service_discovery>
+    <requirement id="DOCKER-001" priority="HIGH">
+      <description>Container reuse functionality</description>
+      <implementation>
+                - Discover existing Netra containers: netra-dev-redis, netra-dev-clickhouse, netra-dev-postgres
+                - Health check integration: Redis PING, ClickHouse SELECT 1, PostgreSQL pg_isready
+                - Discovery report generation: Reusable services, unhealthy containers, restart candidates
+                - Container reuse decision: Running + healthy containers can be reused
+                - Fallback behavior: Create new containers if existing ones are unhealthy
+            </implementation>
+    </requirement>
+  </docker_service_discovery>
   <port_management>
     <requirement id="PORT-001" priority="CRITICAL">
       <description>Dynamic port allocation for auth service</description>
@@ -216,31 +283,51 @@
             </implementation>
     </requirement>
   </port_management>
+  <cross_service_authentication>
+    <requirement id="AUTH-001" priority="CRITICAL">
+      <description>32+ character token requirement with enhanced security</description>
+      <implementation>
+                - Minimum token length: 32 characters (enforced)
+                - Token generation: Cryptographically secure using secrets.token_urlsafe(64)
+                - Character validation: URL-safe base64 pattern (A-Za-z0-9_-)
+                - Entropy validation: No character appears >25% of the time
+                - Token validation: Length and character set checks before acceptance
+                - Environment propagation: CROSS_SERVICE_AUTH_TOKEN set in all services
+            </implementation>
+    </requirement>
+  </cross_service_authentication>
+  <environment_loading>
+    <requirement id="ENV-001" priority="HIGH">
+      <description>Priority-based environment loading</description>
+      <implementation>
+                - Priority order: System env > .env > .secrets (highest to lowest)
+                - UTF-8 encoding support: Handle international characters in config files
+                - Error handling: Graceful handling of malformed config files with line-by-line parsing
+                - Debug reporting: Log environment variable sources and conflicts
+                - Skip duplicate keys: Higher priority sources override lower priority
+            </implementation>
+    </requirement>
+  </environment_loading>
   <error_messaging>
     <requirement id="ERROR-001" priority="CRITICAL">
-      <description>Clear and actionable error messages</description>
+      <description>Enhanced error messages with cascade context</description>
       <implementation>
-                - Phase timeout errors should show what was expected vs what happened
-                - Instead of generic "Phase timeout", show:
-                  - Which service failed to start
-                  - What readiness check failed
-                  - Actual response or error from the service
-                  - Suggested actions to resolve the issue
-                - Example: "Backend failed to start: /health/ready returned 500 after 21.4s (expected 200 within 5s). Check backend logs for startup errors."
+                - Phase timeout errors show expected vs actual behavior
+                - Cascade failure reporting: Which services failed and impact on dependent services
+                - Step-specific context: "Step 8: Backend Readiness" instead of generic timeouts
+                - Recovery suggestions: Actionable steps to resolve specific failures
+                - Example: "Step 8 failed: Backend /health/ready returned 500 after 21.4s (expected 200 within 45s). Cascade impact: Frontend startup will continue but auth integration may fail."
             </implementation>
     </requirement>
     <requirement id="ERROR-004" priority="CRITICAL">
-      <description>Critical error handling</description>
+      <description>Enhanced critical error handling with cascade awareness</description>
       <implementation>
-                - STOP entire process on critical errors (database connection, auth failure, etc)
-                - Display clear critical error message with specific failure reason
-                - Exit with appropriate error code (1 for general, specific codes for types)
-                - Critical errors include:
-                  - Database connection failures
-                  - Missing required environment variables
-                  - Authentication service failures
-                  - Port binding failures
-                - Non-critical errors should log warnings but continue
+                - Cascade failure handling: Allow partial service startup (backend-only, auth-only modes)
+                - Non-blocking database validation: Continue with mock/fallback on connection issues
+                - Critical vs warning classification: Database issues are warnings, missing JWT_SECRET_KEY is critical
+                - Graceful degradation: Services continue with reduced functionality rather than complete failure
+                - Exit codes: 0=success, 1=general failure, specific codes for different failure types
+                - Recovery logging: Clear indication of which services are available vs unavailable
             </implementation>
     </requirement>
     <requirement id="ERROR-002" priority="HIGH">
@@ -266,42 +353,45 @@
   </error_messaging>
   <graceful_shutdown>
     <requirement id="SHUTDOWN-001" priority="CRITICAL">
-      <description>Proper signal handling for graceful shutdown</description>
+      <description>Enhanced signal handling with emergency recovery</description>
       <implementation>
-                - Install signal handlers for SIGINT (Ctrl+C) and SIGTERM
-                - On Windows, handle keyboard interrupt and console close events
-                - Ensure all cleanup functions are called on any exit path
+                - Signal handlers: SIGINT, SIGTERM, SIGBREAK (Windows)
+                - Emergency cleanup mode: 4-phase cleanup sequence with timeouts
+                - Recursive call prevention: _emergency_cleanup_running flag
+                - Thread safety: Daemon threads for cleanup operations with timeouts
+                - Platform-specific process termination: Enhanced Windows/Unix handling
             </implementation>
     </requirement>
     <requirement id="SHUTDOWN-002" priority="CRITICAL">
-      <description>Port cleanup on shutdown</description>
+      <description>Enhanced port cleanup with retry logic</description>
       <implementation>
-                - Auth service port (dynamic or 8081) MUST be freed on shutdown
-                - Backend service ports MUST be freed on shutdown
-                - Frontend service ports MUST be freed on shutdown
-                - Use taskkill with /F /T flags on Windows to ensure child processes are terminated
-                - Verify ports are free after shutdown
-                - Clean up dynamically allocated ports from cache
+                - Multi-platform port cleanup: Windows (netstat+taskkill), Unix (lsof+kill)
+                - Retry logic: 3 attempts with progressive delays (0.5s * attempt)
+                - Signal escalation: SIGTERM -> SIGKILL on Unix, normal -> force on Windows
+                - Port verification: Check port availability after cleanup
+                - Comprehensive port list: Standard + dynamic + discovery-based ports
+                - Last resort cleanup: Aggressive cleanup when all else fails
             </implementation>
     </requirement>
     <requirement id="SHUTDOWN-003" priority="HIGH">
-      <description>Service termination order</description>
+      <description>Enhanced service termination with phase management</description>
       <implementation>
-                - Stop health monitoring first
-                - Terminate frontend process
-                - Terminate backend process
-                - Terminate auth service process
-                - Stop all log streamers
-                - Cleanup cache and temporary files
+                - Phase 1: Stop monitoring systems (health monitor, database monitoring)
+                - Phase 2: Stop database monitoring to prevent connection errors
+                - Phase 3: Terminate services in order (Frontend 5s → Backend 10s → Auth 5s)
+                - Phase 4: Stop supporting services (logs, optimizer, parallel executor)
+                - Phase 5: Force port cleanup with verification
+                - Inter-phase delays: 0.5s between service terminations for clean shutdown
             </implementation>
     </requirement>
     <requirement id="SHUTDOWN-004" priority="HIGH">
-      <description>Timeout handling for shutdown</description>
+      <description>Timeout enforcement with performance tracking</description>
       <implementation>
-                - Give each service 5 seconds to gracefully terminate
-                - Force kill if graceful termination fails
-                - Log any services that required force termination
-                - Total shutdown should complete within 15 seconds
+                - Per-service timeouts: Frontend 5s, Backend 10s, Auth 5s
+                - Graceful vs force termination: Try graceful first, force on timeout
+                - Performance tracking: Report shutdown phases and timing
+                - Success/failure logging: Track which services terminated cleanly
+                - Emergency mode: 4-phase emergency cleanup with aggressive timeouts
             </implementation>
     </requirement>
   </graceful_shutdown>
@@ -315,13 +405,54 @@
     <standard name="DEBUG" color="\033[90m" description="Gray" />
     <standard name="RESET" color="\033[0m" description="Reset to default" />
   </color_codes>
+  <legacy_code_removal>
+    <requirement id="LEGACY-001" priority="HIGH">
+      <description>Single implementation principle</description>
+      <implementation>
+                - Remove legacy wrapper methods: Consolidate duplicate functionality
+                - Method consolidation: Single implementation per concept
+                - Clean architecture: No duplicate code paths or fallback methods
+                - File cleanup: Remove temporary files with suffixes, maintain clean filenames
+            </implementation>
+    </requirement>
+  </legacy_code_removal>
   <testing>
     <test_file>dev_launcher/tests/test_launcher.py</test_file>
     <test_file>dev_launcher/tests/test_launcher_health.py</test_file>
+    <test_file>dev_launcher/tests/test_launcher_critical_mainline.py</test_file>
     <test_scenarios>
-      <scenario>Verify service name color isolation</scenario>
-      <scenario>Verify health check startup delay</scenario>
-      <scenario>Verify startup sequence order</scenario>
+      <scenario>Docker service discovery integration</scenario>
+      <scenario>Port conflict resolution with auto-fallback</scenario>
+      <scenario>Service availability auto-adjustment</scenario>
+      <scenario>13-step startup sequence with cascade failure handling</scenario>
+      <scenario>Health monitoring delayed start with grace period</scenario>
+      <scenario>Database validation with mock mode detection</scenario>
+      <scenario>Cross-service authentication with 32+ character tokens</scenario>
+      <scenario>Parallel pre-check execution with retry logic</scenario>
+      <scenario>Enhanced graceful shutdown with 5-phase cleanup</scenario>
+      <scenario>Emergency recovery scenarios</scenario>
+      <scenario>Mainline scenario testing with comprehensive edge cases</scenario>
     </test_scenarios>
   </testing>
+  <performance_requirements>
+    <requirement id="PERF-005" priority="HIGH">
+      <description>Concurrent load targets and worker optimization</description>
+      <implementation>
+                - Success rate target: ≥90% under concurrent load
+                - Worker pool optimization: CPU 2-8 workers, I/O 4-24 workers based on system
+                - Performance tracking: Task execution time, concurrent task count, timeout events
+                - Retry configuration: 0-3 retries with progressive delay (0.1 * attempt)
+                - Timeout handling: Adaptive timeouts based on environment (test vs production)
+            </implementation>
+    </requirement>
+    <requirement id="PERF-006" priority="HIGH">
+      <description>Database validation performance</description>
+      <implementation>
+                - Mock mode detection: Skip validation when all databases in mock/disabled mode
+                - Validation timeout: 25 seconds with graceful fallback on timeout
+                - Service-specific validation: Only validate non-mock services
+                - Fallback continuation: Continue startup with warnings on database issues
+            </implementation>
+    </requirement>
+  </performance_requirements>
 </specification>

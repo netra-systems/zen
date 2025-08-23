@@ -20,14 +20,14 @@ os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.auth_flow_testers import AuthFlowE2ETester
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedE2ETestHarness
 
 
 class AuthCompleteFlowManager:
     """Manager for complete authentication E2E test execution."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.auth_tester = AuthFlowE2ETester(self.harness)
     
     @asynccontextmanager

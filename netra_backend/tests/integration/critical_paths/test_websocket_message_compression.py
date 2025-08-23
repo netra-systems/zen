@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for message compression/decompression validation.
 Compression target: 70%+ reduction for large payloads with <50ms processing time.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -218,13 +218,13 @@ class TestWebSocketMessageCompressionL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for compression testing."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -475,7 +475,7 @@ class TestWebSocketMessageCompressionL3:
 
         await redis_client.delete(message_key)
     
-    async def test_websocket_compression_integration(self, ws_manager, redis_client, message_compressor, test_users):
+    async def test_websocket_compression_integration(self, websocket_manager, redis_client, message_compressor, test_users):
 
         """Test compression integration with WebSocket messaging."""
 
@@ -485,7 +485,7 @@ class TestWebSocketMessageCompressionL3:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         assert connection_info is not None
         
@@ -547,7 +547,7 @@ class TestWebSocketMessageCompressionL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await redis_client.delete(storage_key)
     

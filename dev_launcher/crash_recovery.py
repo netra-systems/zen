@@ -29,7 +29,7 @@ from netra_backend.app.schemas.service_types import ServiceHealthCheck, ServiceS
 from dev_launcher.crash_detector import CrashDetector
 
 # Import modular components
-from .crash_recovery_models import (
+from dev_launcher.crash_recovery_models import (
     CrashReport,
     CrashSeverity,
     DetectionMethod,

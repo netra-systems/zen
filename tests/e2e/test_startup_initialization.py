@@ -40,9 +40,8 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
-from netra_backend.app.core.configuration.secrets import SecretsManager
+from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.db.database_manager import DatabaseManager
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 
@@ -511,7 +510,6 @@ async def test_health_check_cascade_timeout(test_env):
 @pytest.mark.asyncio
 async def test_websocket_route_registration_missing(test_env):
     """Test 15: Detect missing WebSocket route registration"""
-    from netra_backend.app.main import app
     
     client = TestClient(app)
     
@@ -553,7 +551,6 @@ async def test_jwt_secret_mismatch_between_services(test_env):
         "JWT_SECRET_KEY": "backend_secret_64_chars_minimum_for_security_test_environment_only",
         "JWT_SECRET": "auth_secret_different_64_chars_minimum_for_security_test_environment"
     }):
-        from netra_backend.app.core.security import TokenValidator
         from auth_service.auth_core.security import TokenGenerator
         
         # Generate token with auth service
@@ -601,7 +598,6 @@ async def test_configuration_file_corruption(test_env):
     # Write corrupted JSON
     config_file.write_text("{ invalid json }")
     
-    from dev_launcher.service_discovery import ServiceDiscovery
     
     discovery = ServiceDiscovery()
     
@@ -731,7 +727,6 @@ async def test_zombie_process_cleanup_failure(test_env):
     """Test 25: Clean up zombie processes properly"""
     if sys.platform != "win32":
         # Create a process that becomes zombie
-        import subprocess
         
         # Start process that exits immediately
         proc = subprocess.Popen(["sleep", "0"])
@@ -807,7 +802,6 @@ async def test_ssl_tls_certificate_validation_failure(test_env):
 @pytest.mark.asyncio
 async def test_network_partition_during_service_registration(test_env):
     """Test 29: Handle network partitions during registration"""
-    from dev_launcher.service_discovery import ServiceDiscovery
     
     discovery = ServiceDiscovery()
     
@@ -830,7 +824,6 @@ async def test_network_partition_during_service_registration(test_env):
 @pytest.mark.asyncio
 async def test_websocket_connection_pool_exhaustion(test_env):
     """Test 30: Handle WebSocket connection limits"""
-    from netra_backend.app.main import app
     
     client = TestClient(app)
     connections = []

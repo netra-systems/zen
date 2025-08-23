@@ -13,7 +13,7 @@ This test suite validates production-ready fixes addressing the
 identified WebSocket reliability concerns.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -38,7 +38,7 @@ from netra_backend.app.routes.websocket import (
     db_pool,
 
 )
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
 
 class TestDatabaseConnectionPooling:
 

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     # Import TriageResult only for type checking to prevent circular imports
     from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 
-from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
+from netra_backend.app.core.configuration.secrets import SecretManager
 from netra_backend.app.logging_config import central_logger as logger
 
 

@@ -37,7 +37,7 @@ from auth_service.auth_core.models.auth_models import (
     TokenResponse,
 )
 from auth_service.auth_core.services.auth_service import AuthService
-from netra_backend.tests.e2e.factories.user_factory import UserFactory
+from auth_service.tests.factories.user_factory import UserFactory
 
 # Configure logger
 logger = logging.getLogger(__name__)

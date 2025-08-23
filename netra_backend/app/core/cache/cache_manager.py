@@ -6,7 +6,7 @@ cache module for better modularity and import compatibility.
 """
 
 # Re-export from main cache module for backward compatibility
-from . import (
+from netra_backend.app.core.cache import (
     CacheManager,
     cache_manager,
     get_cache_manager,

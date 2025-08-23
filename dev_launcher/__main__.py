@@ -92,9 +92,10 @@ DEFAULT CONFIGURATION (Optimized for Development):
   python -m dev_launcher
   
   This provides:
+    - Docker containers for databases (no local installation needed)
     - Dynamic port allocation (no conflicts)
-    - No backend hot reload (30-50% faster)
-    - Automatic Google secret loading
+    - No hot reload by default (maximum performance)
+    - Local-only secret loading (no GCP by default)
     - Real-time log streaming with emoji indicators
     - Professional syntax highlighting
     - Better error detection and reporting
@@ -103,7 +104,7 @@ EXAMPLES:
   python -m dev_launcher                           # Default: dynamic ports, no backend reload
   python -m dev_launcher --static                  # Use fixed ports (8000/3000)
   python -m dev_launcher --backend-reload          # Enable backend hot reload
-  python -m dev_launcher --no-secrets              # Skip secret loading
+  python -m dev_launcher --load-secrets            # Enable GCP secret loading
   python -m dev_launcher --no-turbopack            # Use webpack instead of turbopack
   python -m dev_launcher --verbose                 # Show detailed debug information
 
@@ -170,14 +171,14 @@ QUICK SHORTCUTS:
     # Secret management
     secret_group = parser.add_argument_group('Secret Management')
     secret_group.add_argument(
-        "--no-secrets",
-        action="store_true",
-        help="Skip loading secrets from Google Cloud"
-    )
-    secret_group.add_argument(
         "--load-secrets",
         action="store_true",
-        help="Force loading secrets (default in dev mode)"
+        help="Enable loading secrets from Google Cloud (default: local .env only)"
+    )
+    secret_group.add_argument(
+        "--no-secrets", 
+        action="store_true",
+        help="Explicitly disable all secret loading (for compatibility)"
     )
     secret_group.add_argument(
         "--project-id",
@@ -248,18 +249,18 @@ QUICK SHORTCUTS:
     )
     service_group.add_argument(
         "--set-redis",
-        choices=["local", "shared", "mock"],
-        help="Set Redis mode (local/shared/mock)"
+        choices=["local", "shared", "docker", "mock"],
+        help="Set Redis mode (local/shared/docker/mock)"
     )
     service_group.add_argument(
         "--set-clickhouse",
-        choices=["local", "shared", "mock"],
-        help="Set ClickHouse mode (local/shared/mock)"
+        choices=["local", "shared", "docker", "mock"],
+        help="Set ClickHouse mode (local/shared/docker/mock)"
     )
     service_group.add_argument(
         "--set-postgres",
-        choices=["local", "shared", "mock"],
-        help="Set PostgreSQL mode (local/shared/mock)"
+        choices=["local", "shared", "docker", "mock"],
+        help="Set PostgreSQL mode (local/shared/docker/mock)"
     )
     service_group.add_argument(
         "--set-llm",

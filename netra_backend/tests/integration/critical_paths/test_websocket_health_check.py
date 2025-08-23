@@ -11,7 +11,7 @@ L2 Test: Real internal health check components with mocked external monitoring.
 Performance target: <10s health check cycles, 99.5% uptime detection accuracy.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -28,7 +28,7 @@ from uuid import uuid4
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class HealthStatus(Enum):
@@ -564,11 +564,11 @@ class TestWebSocketHealthCheck:
     
     @pytest.fixture
 
-    def ws_manager(self):
+    def websocket_manager(self):
 
         """Create WebSocket manager with mocked external services."""
 
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
 
@@ -616,7 +616,7 @@ class TestWebSocketHealthCheck:
 
         ]
     
-    async def test_basic_connection_health_check(self, ws_manager, health_checker, test_users):
+    async def test_basic_connection_health_check(self, websocket_manager, health_checker, test_users):
 
         """Test basic connection health checking."""
 
@@ -626,7 +626,7 @@ class TestWebSocketHealthCheck:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
         assert connection_info is not None
         
@@ -664,7 +664,7 @@ class TestWebSocketHealthCheck:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, mock_websocket)
+        await websocket_manager.disconnect_user(user.id, mock_websocket)
     
     async def test_service_dependency_health_checks(self, health_checker):
 
@@ -724,7 +724,7 @@ class TestWebSocketHealthCheck:
 
         assert "error_rate" in auth_health
     
-    async def test_health_history_tracking(self, ws_manager, health_checker, test_users):
+    async def test_health_history_tracking(self, websocket_manager, health_checker, test_users):
 
         """Test health history tracking functionality."""
 
@@ -734,7 +734,7 @@ class TestWebSocketHealthCheck:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
         assert connection_info is not None
         
@@ -778,7 +778,7 @@ class TestWebSocketHealthCheck:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, mock_websocket)
+        await websocket_manager.disconnect_user(user.id, mock_websocket)
     
     async def test_metric_collection_and_aggregation(self, metric_collector):
 
@@ -831,7 +831,7 @@ class TestWebSocketHealthCheck:
 
         assert "timestamp" in aggregated
     
-    async def test_unhealthy_connection_detection(self, ws_manager, health_checker, test_users):
+    async def test_unhealthy_connection_detection(self, websocket_manager, health_checker, test_users):
 
         """Test detection of unhealthy connections."""
 
@@ -841,7 +841,7 @@ class TestWebSocketHealthCheck:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
         assert connection_info is not None
         
@@ -865,9 +865,9 @@ class TestWebSocketHealthCheck:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, mock_websocket)
+        await websocket_manager.disconnect_user(user.id, mock_websocket)
     
-    async def test_concurrent_health_checks(self, ws_manager, health_checker, test_users):
+    async def test_concurrent_health_checks(self, websocket_manager, health_checker, test_users):
 
         """Test concurrent health checking for multiple connections."""
 
@@ -879,7 +879,7 @@ class TestWebSocketHealthCheck:
 
             mock_websocket = AsyncMock()
 
-            connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+            connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
             if connection_info:
 
@@ -929,11 +929,11 @@ class TestWebSocketHealthCheck:
 
         for user, websocket, _ in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
     @mock_justified("L2: WebSocket health checking with real internal components")
 
-    async def test_health_check_integration_flow(self, ws_manager, health_checker, metric_collector, test_users):
+    async def test_health_check_integration_flow(self, websocket_manager, health_checker, metric_collector, test_users):
 
         """Test complete health check integration flow."""
 
@@ -943,7 +943,7 @@ class TestWebSocketHealthCheck:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
         assert connection_info is not None
         
@@ -1006,7 +1006,7 @@ class TestWebSocketHealthCheck:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, mock_websocket)
+        await websocket_manager.disconnect_user(user.id, mock_websocket)
     
     async def test_health_check_performance_benchmarks(self, health_checker, test_users):
 

@@ -17,8 +17,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from netra_backend.app.monitoring.models import MetricsCollector
-from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
 
 class TestMetricsCollectorSummary:
 

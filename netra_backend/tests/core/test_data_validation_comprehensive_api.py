@@ -16,7 +16,7 @@ from netra_backend.app.schemas.registry import WebSocketMessageType
 
 from netra_backend.app.schemas.shared_types import ApiResponse
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
-from netra_backend.app.websocket.validation import MessageValidator
+from netra_backend.app.websocket_core.validation import MessageValidator
 
 def test_api_response_field_completeness():
     """Test ApiResponse includes all required fields."""

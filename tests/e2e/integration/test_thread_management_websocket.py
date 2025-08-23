@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.config import TEST_USERS
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 from typing import Dict, List, Any
 import asyncio
 import pytest
@@ -33,7 +33,7 @@ logger = central_logger.get_logger(__name__)
 @pytest_asyncio.fixture
 async def thread_manager():
     """Create thread WebSocket manager fixture."""
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     manager = ThreadWebSocketManager(harness)
     
 

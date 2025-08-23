@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -28,7 +28,7 @@ import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -103,13 +103,13 @@ class TestWebSocketRedisPubSubL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with real Redis connection."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -153,7 +153,7 @@ class TestWebSocketRedisPubSubL3:
 
         ]
     
-    async def test_websocket_redis_connection_setup(self, ws_manager, redis_client, test_users):
+    async def test_websocket_redis_connection_setup(self, websocket_manager, redis_client, test_users):
 
         """Test WebSocket connection establishment with Redis integration."""
 
@@ -163,7 +163,7 @@ class TestWebSocketRedisPubSubL3:
         
         # Connect WebSocket user
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
         
         # Verify connection establishment
 
@@ -171,7 +171,7 @@ class TestWebSocketRedisPubSubL3:
 
         assert connection_info.user_id == user.id
 
-        assert user.id in ws_manager.active_connections
+        assert user.id in websocket_manager.active_connections
         
         # Verify Redis connection
 
@@ -189,9 +189,9 @@ class TestWebSocketRedisPubSubL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_redis_pubsub_message_broadcasting(self, ws_manager, redis_client, pubsub_client, test_users):
+    async def test_redis_pubsub_message_broadcasting(self, websocket_manager, redis_client, pubsub_client, test_users):
 
         """Test message broadcasting through Redis pub/sub."""
         # Setup WebSocket connections
@@ -204,7 +204,7 @@ class TestWebSocketRedisPubSubL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            await ws_manager.connect_user(user.id, websocket)
+            await websocket_manager.connect_user(user.id, websocket)
 
             connections.append((user, websocket))
 
@@ -242,9 +242,9 @@ class TestWebSocketRedisPubSubL3:
 
         for user, websocket in connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
     
-    async def test_websocket_reconnection_redis_state(self, ws_manager, redis_client, test_users):
+    async def test_websocket_reconnection_redis_state(self, websocket_manager, redis_client, test_users):
 
         """Test WebSocket reconnection with Redis state recovery."""
 
@@ -254,7 +254,7 @@ class TestWebSocketRedisPubSubL3:
 
         first_websocket = MockWebSocketForRedis(user.id)
 
-        connection_info = await ws_manager.connect_user(user.id, first_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, first_websocket)
         
         # Store state in Redis
 
@@ -272,7 +272,7 @@ class TestWebSocketRedisPubSubL3:
         
         # Disconnect and verify state persistence
 
-        await ws_manager.disconnect_user(user.id, first_websocket)
+        await websocket_manager.disconnect_user(user.id, first_websocket)
 
         stored_state = await redis_client.get(state_key)
 
@@ -282,17 +282,17 @@ class TestWebSocketRedisPubSubL3:
 
         second_websocket = MockWebSocketForRedis(user.id)
 
-        new_connection_info = await ws_manager.connect_user(user.id, second_websocket)
+        new_connection_info = await websocket_manager.connect_user(user.id, second_websocket)
         
         assert new_connection_info is not None
 
-        assert user.id in ws_manager.active_connections
+        assert user.id in websocket_manager.active_connections
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, second_websocket)
+        await websocket_manager.disconnect_user(user.id, second_websocket)
     
-    async def test_concurrent_connections_performance(self, ws_manager, redis_client):
+    async def test_concurrent_connections_performance(self, websocket_manager, redis_client):
 
         """Test performance with multiple concurrent WebSocket connections."""
 
@@ -310,13 +310,13 @@ class TestWebSocketRedisPubSubL3:
 
             websocket = MockWebSocketForRedis(user_id)
 
-            await ws_manager.connect_user(user_id, websocket)
+            await websocket_manager.connect_user(user_id, websocket)
 
             connections.append((user_id, websocket))
         
         setup_time = time.time() - setup_start
 
-        assert len(ws_manager.active_connections) >= connection_count
+        assert len(websocket_manager.active_connections) >= connection_count
         
         # Broadcast test
 
@@ -338,13 +338,13 @@ class TestWebSocketRedisPubSubL3:
 
         for user_id, websocket in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
         
         # Performance assertions
 
         assert setup_time < 10.0  # Should setup quickly
     
-    async def test_redis_channel_isolation(self, ws_manager, redis_client, pubsub_client, test_users):
+    async def test_redis_channel_isolation(self, websocket_manager, redis_client, pubsub_client, test_users):
 
         """Test Redis channel management and isolation."""
 
@@ -356,9 +356,9 @@ class TestWebSocketRedisPubSubL3:
 
         ws2 = MockWebSocketForRedis(user2.id)
 
-        await ws_manager.connect_user(user1.id, ws1)
+        await websocket_manager.connect_user(user1.id, ws1)
 
-        await ws_manager.connect_user(user2.id, ws2)
+        await websocket_manager.connect_user(user2.id, ws2)
         
         # Setup channels
 
@@ -383,13 +383,13 @@ class TestWebSocketRedisPubSubL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user1.id, ws1)
+        await websocket_manager.disconnect_user(user1.id, ws1)
 
-        await ws_manager.disconnect_user(user2.id, ws2)
+        await websocket_manager.disconnect_user(user2.id, ws2)
     
     @mock_justified("L3: Using real Redis container for integration validation")
 
-    async def test_redis_failover_recovery(self, redis_container, ws_manager, test_users):
+    async def test_redis_failover_recovery(self, redis_container, websocket_manager, test_users):
 
         """Test WebSocket resilience during Redis connection issues."""
 
@@ -401,7 +401,7 @@ class TestWebSocketRedisPubSubL3:
 
         websocket = MockWebSocketForRedis(user.id)
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
         
         assert connection_info is not None
 
@@ -423,17 +423,17 @@ class TestWebSocketRedisPubSubL3:
         
         # Verify WebSocket survives Redis restart
 
-        assert user.id in ws_manager.active_connections
+        assert user.id in websocket_manager.active_connections
         
         # Test message after recovery
 
         recovery_message = create_test_message("recovery_test", user.id, {"status": "redis_recovered"})
 
-        success = await ws_manager.send_message_to_user(user.id, recovery_message)
+        success = await websocket_manager.send_message_to_user(user.id, recovery_message)
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
 if __name__ == "__main__":
 

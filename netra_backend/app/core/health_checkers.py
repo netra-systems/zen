@@ -168,7 +168,7 @@ async def check_websocket_health() -> HealthCheckResult:
 
 async def _get_websocket_stats_and_score() -> tuple[Dict[str, Any], float]:
     """Get WebSocket connection stats and calculate health score."""
-    from netra_backend.app.websocket.connection_manager import get_connection_manager
+    from netra_backend.app.websocket_core_manager import get_connection_manager
     conn_manager = get_connection_manager()
     stats = await conn_manager.get_stats()
     health_score = _calculate_websocket_health_score(stats)

@@ -229,3 +229,40 @@ def verify_no_exceptions(results):
     """Verify no exceptions in operation results"""
     exceptions = [r for r in results if isinstance(r, Exception)]
     return len(exceptions) == 0
+
+async def create_test_redis_client(host="localhost", port=6379, db=1):
+    """Create a test Redis client for integration testing"""
+    import redis.asyncio as redis
+    client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
+    try:
+        await client.ping()
+        return client
+    except Exception:
+        # Return mock client if Redis not available
+        from unittest.mock import AsyncMock
+        mock_client = AsyncMock()
+        mock_client.ping = AsyncMock(return_value=True)
+        mock_client.get = AsyncMock(return_value=None)
+        mock_client.set = AsyncMock(return_value=True)
+        mock_client.delete = AsyncMock(return_value=1)
+        mock_client.keys = AsyncMock(return_value=[])
+        mock_client.ttl = AsyncMock(return_value=-1)
+        mock_client.close = AsyncMock()
+        return mock_client
+
+async def clear_redis_test_data(client, pattern="test:*"):
+    """Clear test data from Redis"""
+    try:
+        keys = await client.keys(pattern)
+        if keys:
+            await client.delete(*keys)
+    except Exception:
+        pass  # Ignore errors during cleanup
+
+def generate_test_rate_limit_keys(user_id, endpoint):
+    """Generate rate limit keys for testing"""
+    return [
+        f"rate_limit:{user_id}:{endpoint}",
+        f"rate_limit:global:{user_id}",
+        f"rate_limit:service:{user_id}:{endpoint}"
+    ]

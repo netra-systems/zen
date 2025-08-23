@@ -59,6 +59,40 @@ class StagingTestSuite:
             "auth": os.getenv("AUTH_URL", "http://localhost:8001"),
             "frontend": os.getenv("FRONTEND_URL", "http://localhost:3000")
         }
+        
+        # Add env_config attribute for compatibility with L4 tests
+        self.env_config = self._create_env_config()
+        
+        # Add websocket_manager for compatibility with L4 tests
+        self.websocket_manager = None  # Will be initialized if needed
+    
+    def _create_env_config(self):
+        """Create env_config structure compatible with L4 tests."""
+        # Create a simple object with services attribute containing service URLs
+        env_config = type('EnvConfig', (), {})()
+        env_config.services = type('Services', (), {})()
+        
+        # Map base_urls to services structure
+        env_config.services.backend = self.base_urls["backend"]
+        env_config.services.auth = self.base_urls["auth"]
+        env_config.services.frontend = self.base_urls["frontend"]
+        env_config.services.websocket = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/ws")
+        
+        # Add additional service endpoints that may be used by L4 tests
+        env_config.database_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/netra_test")
+        env_config.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        env_config.clickhouse = type('ClickHouse', (), {})()
+        env_config.clickhouse.host = os.getenv("CLICKHOUSE_HOST", "localhost")
+        env_config.clickhouse.port = int(os.getenv("CLICKHOUSE_PORT", "8123"))
+        env_config.clickhouse.database = os.getenv("CLICKHOUSE_DB", "netra_test")
+        
+        # Add database and cache objects for compatibility
+        env_config.database = type('Database', (), {})()
+        env_config.database.postgres_url = env_config.database_url
+        env_config.cache = type('Cache', (), {})()
+        env_config.cache.redis_url = env_config.redis_url
+        
+        return env_config
     
     async def setup(self) -> None:
         """Setup test environment for staging validation."""

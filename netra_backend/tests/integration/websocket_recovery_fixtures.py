@@ -17,9 +17,9 @@ from datetime import datetime, timezone
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_models import WebSocketValidationError
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket.reconnection_manager import (
+from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.reconnection_manager import (
     WebSocketReconnectionManager,
 )
 from starlette.websockets import WebSocketDisconnect, WebSocketState
@@ -30,12 +30,12 @@ import json
 import random
 import time
 import uuid
-from netra_backend.app.websocket.reconnection_types import (
+from netra_backend.app.websocket_core.reconnection_types import (
     DisconnectReason,
     ReconnectionConfig,
     ReconnectionState,
 )
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

@@ -16,12 +16,12 @@ import pytest
 import websockets
 
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 @pytest.fixture
 async def test_harness():
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     await harness.setup()
     yield harness
     await harness.cleanup()

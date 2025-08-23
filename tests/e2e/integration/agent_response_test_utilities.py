@@ -69,7 +69,6 @@ class AgentResponseTester:
     
     async def test_response_time(self, agent_func, max_time: float = 5.0) -> Dict[str, Any]:
         """Test agent response time."""
-        import time
         start_time = time.time()
         result = await agent_func()
         end_time = time.time()

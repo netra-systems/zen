@@ -21,7 +21,7 @@ from test_framework import setup_test_path
 setup_test_path()
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from test_framework.http_client import ClientConfig
@@ -44,7 +44,7 @@ class LoadTestMetrics:
 class ConcurrentUserLoadTester:
     """Manages concurrent user load testing."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.jwt_helper = JWTTestHelper()

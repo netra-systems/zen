@@ -32,7 +32,7 @@ class TestUser:
     user_id: Optional[str] = None
     jwt_token: Optional[str] = None
     
-class UnifiedTestHarness:
+class UnifiedE2ETestHarness:
     """Manages real service connections for unified testing"""
     
     def __init__(self):
@@ -119,7 +119,7 @@ class TestCriticalUnifiedFlows:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Setup test harness"""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         
     async def _check_services(self):
         """Check if services are ready"""
@@ -282,7 +282,7 @@ class TestDataConsistency:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Setup test harness"""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         
     async def _check_services(self):
         """Check if services are ready"""

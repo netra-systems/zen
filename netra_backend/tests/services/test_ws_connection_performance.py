@@ -3,7 +3,7 @@ WebSocket connection performance and scaling tests
 Tests high volume connections, memory usage, recovery, and broadcast performance
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -21,7 +21,6 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-from netra_backend.app.ws_manager import (
 
     ConnectionInfo,
 
@@ -44,7 +43,7 @@ class TestWebSocketManagerPerformanceAndScaling:
     
     @pytest.fixture
 
-    def performance_ws_manager(self):
+    def performance_websocket_manager(self):
 
         """Create WebSocket manager for performance testing"""
 
@@ -60,7 +59,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         return MockConnectionPool(max_connections=50)
     
-    async def test_high_volume_connection_handling(self, performance_ws_manager):
+    async def test_high_volume_connection_handling(self, performance_websocket_manager):
 
         """Test handling high volume of connections"""
 
@@ -68,7 +67,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         start_time = time.time()
 
-        connection_tasks = self._create_volume_connection_tasks(performance_ws_manager, num_connections)
+        connection_tasks = self._create_volume_connection_tasks(performance_websocket_manager, num_connections)
 
         connections = await self._execute_volume_connections(connection_tasks)
 
@@ -76,9 +75,9 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         self._verify_volume_performance(connections, num_connections, connection_time)
 
-        await self._cleanup_volume_connections(performance_ws_manager, connections)
+        await self._cleanup_volume_connections(performance_websocket_manager, connections)
         
-    def _create_volume_connection_tasks(self, ws_manager, num_connections):
+    def _create_volume_connection_tasks(self, websocket_manager, num_connections):
 
         """Create high volume connection tasks"""
 
@@ -90,7 +89,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             websocket = MockWebSocket(user_id)
 
-            task = ws_manager.connect_user(user_id, websocket)
+            task = websocket_manager.connect_user(user_id, websocket)
 
             tasks.append((user_id, websocket, task))
 
@@ -122,13 +121,13 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert throughput > 20  # At least 20 connections per second
         
-    async def _cleanup_volume_connections(self, ws_manager, connections):
+    async def _cleanup_volume_connections(self, websocket_manager, connections):
 
         """Cleanup volume test connections"""
 
         for user_id, websocket, conn_info in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
             
     async def test_connection_pool_utilization(self, connection_pool):
 
@@ -180,21 +179,21 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert updated_stats['utilization_rate'] < 1.0
         
-    async def test_memory_usage_under_load(self, performance_ws_manager):
+    async def test_memory_usage_under_load(self, performance_websocket_manager):
 
         """Test memory usage under connection load"""
 
         tracemalloc.start()
 
-        connections = await self._create_memory_test_connections(performance_ws_manager)
+        connections = await self._create_memory_test_connections(performance_websocket_manager)
 
         memory_peak = self._measure_memory_usage()
 
         self._verify_memory_efficiency(memory_peak)
 
-        await self._cleanup_memory_test_connections(performance_ws_manager, connections)
+        await self._cleanup_memory_test_connections(performance_websocket_manager, connections)
         
-    async def _create_memory_test_connections(self, ws_manager):
+    async def _create_memory_test_connections(self, websocket_manager):
 
         """Create connections for memory testing"""
 
@@ -208,7 +207,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             websocket = self._create_memory_loaded_websocket(user_id, i)
 
-            conn_info = await ws_manager.connect_user(user_id, websocket)
+            conn_info = await websocket_manager.connect_user(user_id, websocket)
 
             connections.append((user_id, websocket, conn_info))
 
@@ -248,15 +247,15 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert memory_peak < max_memory_mb
         
-    async def _cleanup_memory_test_connections(self, ws_manager, connections):
+    async def _cleanup_memory_test_connections(self, websocket_manager, connections):
 
         """Cleanup memory test connections"""
 
         for user_id, websocket, conn_info in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
             
-    async def test_connection_recovery_after_failure(self, performance_ws_manager):
+    async def test_connection_recovery_after_failure(self, performance_websocket_manager):
 
         """Test connection recovery after failures"""
 
@@ -264,67 +263,67 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         websocket1 = MockWebSocket(user_id)
 
-        conn_info1 = await performance_ws_manager.connect_user(user_id, websocket1)
+        conn_info1 = await performance_websocket_manager.connect_user(user_id, websocket1)
 
-        await self._simulate_connection_failure(performance_ws_manager, user_id, websocket1)
+        await self._simulate_connection_failure(performance_websocket_manager, user_id, websocket1)
 
-        self._verify_failure_cleanup(performance_ws_manager, user_id)
+        self._verify_failure_cleanup(performance_websocket_manager, user_id)
 
-        conn_info2 = await self._test_connection_recovery(performance_ws_manager, user_id)
+        conn_info2 = await self._test_connection_recovery(performance_websocket_manager, user_id)
 
-        self._verify_recovery_success(performance_ws_manager, user_id, conn_info1, conn_info2)
+        self._verify_recovery_success(performance_websocket_manager, user_id, conn_info1, conn_info2)
         
-    async def _simulate_connection_failure(self, ws_manager, user_id, websocket):
+    async def _simulate_connection_failure(self, websocket_manager, user_id, websocket):
 
         """Simulate connection failure scenario"""
 
         websocket.state = WebSocketState.DISCONNECTED
 
-        await ws_manager.disconnect_user(user_id, websocket, code=1006, reason="Connection lost")
+        await websocket_manager.disconnect_user(user_id, websocket, code=1006, reason="Connection lost")
         
-    def _verify_failure_cleanup(self, ws_manager, user_id):
+    def _verify_failure_cleanup(self, websocket_manager, user_id):
 
         """Verify connection failure was cleaned up"""
 
-        user_connections = ws_manager.connection_manager.active_connections.get(user_id, [])
+        user_connections = websocket_manager.connection_manager.active_connections.get(user_id, [])
 
         assert len(user_connections) == 0
         
-    async def _test_connection_recovery(self, ws_manager, user_id):
+    async def _test_connection_recovery(self, websocket_manager, user_id):
 
         """Test connection recovery process"""
 
         websocket2 = MockWebSocket(user_id)
 
-        conn_info2 = await ws_manager.connect_user(user_id, websocket2)
+        conn_info2 = await websocket_manager.connect_user(user_id, websocket2)
 
-        await ws_manager.disconnect_user(user_id, websocket2)
+        await websocket_manager.disconnect_user(user_id, websocket2)
 
         return conn_info2
         
-    def _verify_recovery_success(self, ws_manager, user_id, original_conn, recovered_conn):
+    def _verify_recovery_success(self, websocket_manager, user_id, original_conn, recovered_conn):
 
         """Verify connection recovery was successful"""
 
         assert recovered_conn.connection_id != original_conn.connection_id
         
-    async def test_heartbeat_performance_under_load(self, performance_ws_manager):
+    async def test_heartbeat_performance_under_load(self, performance_websocket_manager):
 
         """Test heartbeat mechanism performance under load"""
 
         num_connections = 50
 
-        connections = await self._create_heartbeat_load_connections(performance_ws_manager, num_connections)
+        connections = await self._create_heartbeat_load_connections(performance_websocket_manager, num_connections)
 
-        self._verify_heartbeat_tasks_created(performance_ws_manager, num_connections)
+        self._verify_heartbeat_tasks_created(performance_websocket_manager, num_connections)
 
-        await self._test_heartbeat_under_load(performance_ws_manager, num_connections)
+        await self._test_heartbeat_under_load(performance_websocket_manager, num_connections)
 
-        await self._cleanup_heartbeat_load_connections(performance_ws_manager, connections)
+        await self._cleanup_heartbeat_load_connections(performance_websocket_manager, connections)
 
-        await self._verify_heartbeat_cleanup(performance_ws_manager)
+        await self._verify_heartbeat_cleanup(performance_websocket_manager)
         
-    async def _create_heartbeat_load_connections(self, ws_manager, num_connections):
+    async def _create_heartbeat_load_connections(self, websocket_manager, num_connections):
 
         """Create connections for heartbeat load testing"""
 
@@ -336,61 +335,61 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             websocket = MockWebSocket(user_id)
 
-            conn_info = await ws_manager.connect_user(user_id, websocket)
+            conn_info = await websocket_manager.connect_user(user_id, websocket)
 
             connections.append((user_id, websocket, conn_info))
 
         return connections
         
-    def _verify_heartbeat_tasks_created(self, ws_manager, expected_count):
+    def _verify_heartbeat_tasks_created(self, websocket_manager, expected_count):
 
         """Verify heartbeat tasks were created"""
 
-        assert len(ws_manager.core.heartbeat_manager.heartbeat_tasks) == expected_count
+        assert len(websocket_manager.core.heartbeat_manager.heartbeat_tasks) == expected_count
         
-    async def _test_heartbeat_under_load(self, ws_manager, num_connections):
+    async def _test_heartbeat_under_load(self, websocket_manager, num_connections):
 
         """Test heartbeat performance under load"""
 
         await asyncio.sleep(0.5)
 
-        active_heartbeats = self._count_active_heartbeats(ws_manager)
+        active_heartbeats = self._count_active_heartbeats(websocket_manager)
 
         min_expected = int(num_connections * 0.8)  # Allow variation
 
         assert active_heartbeats >= min_expected
         
-    def _count_active_heartbeats(self, ws_manager):
+    def _count_active_heartbeats(self, websocket_manager):
 
         """Count active heartbeat tasks"""
 
         return sum(
 
-            1 for task in ws_manager.core.heartbeat_manager.heartbeat_tasks.values()
+            1 for task in websocket_manager.core.heartbeat_manager.heartbeat_tasks.values()
 
             if not task.done()
 
         )
         
-    async def _cleanup_heartbeat_load_connections(self, ws_manager, connections):
+    async def _cleanup_heartbeat_load_connections(self, websocket_manager, connections):
 
         """Cleanup heartbeat load test connections"""
 
         for user_id, websocket, conn_info in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
             
-    async def _verify_heartbeat_cleanup(self, ws_manager):
+    async def _verify_heartbeat_cleanup(self, websocket_manager):
 
         """Verify heartbeat tasks were cleaned up"""
 
         await asyncio.sleep(0.1)  # Allow cleanup time
 
-        remaining_tasks = self._count_active_heartbeats(ws_manager)
+        remaining_tasks = self._count_active_heartbeats(websocket_manager)
 
         assert remaining_tasks == 0
         
-    async def test_broadcast_performance(self, performance_ws_manager):
+    async def test_broadcast_performance(self, performance_websocket_manager):
 
         """Test broadcast message performance"""
 
@@ -398,21 +397,21 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         all_connections = await self._setup_broadcast_performance_test(
 
-            performance_ws_manager, num_users, connections_per_user
+            performance_websocket_manager, num_users, connections_per_user
 
         )
 
         broadcast_time = await self._measure_broadcast_performance(
 
-            performance_ws_manager, num_users
+            performance_websocket_manager, num_users
 
         )
 
         self._verify_broadcast_efficiency(num_users, connections_per_user, broadcast_time)
 
-        await self._cleanup_broadcast_performance_connections(performance_ws_manager, all_connections)
+        await self._cleanup_broadcast_performance_connections(performance_websocket_manager, all_connections)
         
-    async def _setup_broadcast_performance_test(self, ws_manager, num_users, connections_per_user):
+    async def _setup_broadcast_performance_test(self, websocket_manager, num_users, connections_per_user):
 
         """Setup connections for broadcast performance testing"""
 
@@ -426,25 +425,25 @@ class TestWebSocketManagerPerformanceAndScaling:
 
                 websocket = MockWebSocket(f"{user_id}_{conn_idx}")
 
-                conn_info = await ws_manager.connect_user(user_id, websocket)
+                conn_info = await websocket_manager.connect_user(user_id, websocket)
 
                 all_connections.append((user_id, websocket, conn_info))
 
         return all_connections
         
-    async def _measure_broadcast_performance(self, ws_manager, num_users):
+    async def _measure_broadcast_performance(self, websocket_manager, num_users):
 
         """Measure broadcast performance timing"""
 
         start_time = time.time()
 
-        broadcast_tasks = self._create_broadcast_tasks(ws_manager, num_users)
+        broadcast_tasks = self._create_broadcast_tasks(websocket_manager, num_users)
 
         await asyncio.gather(*broadcast_tasks)
 
         return time.time() - start_time
         
-    def _create_broadcast_tasks(self, ws_manager, num_users):
+    def _create_broadcast_tasks(self, websocket_manager, num_users):
 
         """Create broadcast tasks for performance testing"""
 
@@ -456,7 +455,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             message = {"type": "performance_test", "user_idx": user_idx}
 
-            task = ws_manager.send_message_to_user(user_id, message)
+            task = websocket_manager.send_message_to_user(user_id, message)
 
             broadcast_tasks.append(task)
 
@@ -472,29 +471,29 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert message_throughput > 100  # At least 100 messages per second
         
-    async def _cleanup_broadcast_performance_connections(self, ws_manager, all_connections):
+    async def _cleanup_broadcast_performance_connections(self, websocket_manager, all_connections):
 
         """Cleanup broadcast performance test connections"""
 
         for user_id, websocket, conn_info in all_connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
     
-    def test_connection_statistics_accuracy(self, performance_ws_manager):
+    def test_connection_statistics_accuracy(self, performance_websocket_manager):
 
         """Test accuracy of connection statistics"""
 
-        self._reset_manager_statistics(performance_ws_manager)
+        self._reset_manager_statistics(performance_websocket_manager)
 
-        asyncio.run(self._execute_statistics_test_operations(performance_ws_manager))
+        asyncio.run(self._execute_statistics_test_operations(performance_websocket_manager))
 
-        self._verify_statistics_accuracy(performance_ws_manager)
+        self._verify_statistics_accuracy(performance_websocket_manager)
         
-    def _reset_manager_statistics(self, ws_manager):
+    def _reset_manager_statistics(self, websocket_manager):
 
         """Reset WebSocket manager statistics"""
 
-        ws_manager._stats = {
+        websocket_manager._stats = {
 
             "total_connections": 0,
 
@@ -508,17 +507,17 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         }
         
-    async def _execute_statistics_test_operations(self, ws_manager):
+    async def _execute_statistics_test_operations(self, websocket_manager):
 
         """Execute known operations for statistics testing"""
 
-        connections = await self._create_statistics_test_connections(ws_manager)
+        connections = await self._create_statistics_test_connections(websocket_manager)
 
-        await self._send_statistics_test_messages(ws_manager, connections)
+        await self._send_statistics_test_messages(websocket_manager, connections)
 
-        await self._cleanup_statistics_test_connections(ws_manager, connections)
+        await self._cleanup_statistics_test_connections(websocket_manager, connections)
         
-    async def _create_statistics_test_connections(self, ws_manager):
+    async def _create_statistics_test_connections(self, websocket_manager):
 
         """Create connections for statistics testing"""
 
@@ -530,13 +529,13 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             websocket = MockWebSocket(user_id)
 
-            conn_info = await ws_manager.connect_user(user_id, websocket)
+            conn_info = await websocket_manager.connect_user(user_id, websocket)
 
             connections.append((user_id, websocket))
 
         return connections
         
-    async def _send_statistics_test_messages(self, ws_manager, connections):
+    async def _send_statistics_test_messages(self, websocket_manager, connections):
 
         """Send test messages for statistics verification"""
 
@@ -544,7 +543,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             for msg_idx in range(3):
 
-                await ws_manager.send_message_to_user(
+                await websocket_manager.send_message_to_user(
 
                     user_id, 
 
@@ -552,19 +551,19 @@ class TestWebSocketManagerPerformanceAndScaling:
 
                 )
                 
-    async def _cleanup_statistics_test_connections(self, ws_manager, connections):
+    async def _cleanup_statistics_test_connections(self, websocket_manager, connections):
 
         """Cleanup statistics test connections"""
 
         for user_id, websocket in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
             
-    def _verify_statistics_accuracy(self, ws_manager):
+    def _verify_statistics_accuracy(self, websocket_manager):
 
         """Verify statistics match expected values"""
 
-        stats = ws_manager.get_stats()
+        stats = websocket_manager.get_stats()
 
         assert stats["total_connections"] == 5
 

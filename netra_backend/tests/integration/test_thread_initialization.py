@@ -5,7 +5,7 @@ Components: WebSocket → Thread Service → Database → Supervisor
 Critical: Thread context required for all agent interactions
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -320,7 +320,7 @@ class TestFirstMessageThreadInit:
     async def test_websocket_notification_on_thread_creation(self, thread_data):
 
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
 

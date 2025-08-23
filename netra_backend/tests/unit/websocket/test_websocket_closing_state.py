@@ -16,9 +16,9 @@ import pytest
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket.broadcast_core import BroadcastManager
+from netra_backend.app.websocket_core.broadcast_core import BroadcastManager
 
-from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
 
 class TestWebSocketClosingState:
     """Test WebSocket closing state handling."""

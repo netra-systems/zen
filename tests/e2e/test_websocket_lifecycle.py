@@ -27,7 +27,8 @@ import websockets
 from websockets.exceptions import ConnectionClosed
 
 from netra_backend.app.logging_config import central_logger
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
+from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 
 logger = central_logger.get_logger(__name__)
 
@@ -65,7 +66,7 @@ class WebSocketLifecycleTracker:
 class WebSocketAgentClient:
     """Real WebSocket client for agent communication testing."""
     
-    def __init__(self, test_harness: UnifiedTestHarness, user_id: str):
+    def __init__(self, test_harness: UnifiedE2ETestHarness, user_id: str):
         self.harness = test_harness
         self.user_id = user_id
         self.websocket = None
@@ -176,7 +177,7 @@ class StreamingResponseValidator:
 @pytest.fixture
 async def lifecycle_harness():
     """Create WebSocket lifecycle testing harness."""
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     yield harness
     # Cleanup handled by harness
 

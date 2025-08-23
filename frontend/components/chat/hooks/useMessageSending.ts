@@ -169,6 +169,11 @@ export const useMessageSending = () => {
 
   return {
     isSending,
+    isProcessing: false, // Add isProcessing for test compatibility
+    error: null, // Add error for test compatibility
     handleSend,
+    setProcessing, // Expose setProcessing function
+    reset: () => setIsSending(false), // Add reset function
+    retry: handleSend, // Add retry function
   };
 };

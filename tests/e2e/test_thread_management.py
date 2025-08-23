@@ -27,16 +27,16 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import Message, Thread, ThreadMetadata
-from netra_backend.app.tests.test_utilities.websocket_mocks import (
+from netra_backend.tests.helpers.websocket_test_helpers import (
     MockWebSocket,
-    WebSocketBuilder,
+    create_mock_websocket,
 )
 from tests.e2e.config import (
     TEST_ENDPOINTS,
     TEST_USERS,
     TestDataFactory,
 )
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 logger = central_logger.get_logger(__name__)
 
@@ -45,7 +45,7 @@ class ThreadManagementTester:
     """Core thread management testing infrastructure with engagement focus."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.active_threads: Dict[str, Thread] = {}
         self.client_connections: List[MockWebSocket] = []
         self.broadcast_events: List[Dict[str, Any]] = []
@@ -77,7 +77,7 @@ class ThreadManagementTester:
     
     def _create_mock_connection(self, user_id: str, headers: Dict[str, str]) -> MockWebSocket:
         """Create and track mock WebSocket connection."""
-        connection = WebSocketBuilder.create_authenticated_mock(user_id, headers)
+        connection = create_mock_websocket.create_authenticated_mock(user_id, headers)
         self.client_connections.append(connection)
         return connection
     

@@ -207,7 +207,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         quality_service.metrics_history = None
         
         # Should not raise, just log warning
-        with patch('app.services.quality_gate.quality_gate_core.logger') as mock_logger:
+        with patch('netra_backend.app.services.quality_gate.quality_gate_core.logger') as mock_logger:
             await quality_service._store_metrics(metrics, ContentType.GENERAL)
             mock_logger.warning.assert_called()
 

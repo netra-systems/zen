@@ -23,13 +23,13 @@ import pytest
 import websockets
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class RealUserFlowTester:
     """Executes real user flow without mocking - all network calls."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.test_user_email = f"e2e-test-{uuid.uuid4().hex[:8]}@example.com"
@@ -216,7 +216,7 @@ class E2ETestManager:
     @asynccontextmanager
     async def setup_e2e_test(self):
         """Setup and teardown for E2E testing."""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.tester = RealUserFlowTester(self.harness)
         
         try:

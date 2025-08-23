@@ -37,7 +37,7 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket.rate_limiter import RateLimiter
+from netra_backend.app.websocket_core.rate_limiter import RateLimiter
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,

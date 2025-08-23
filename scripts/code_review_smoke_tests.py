@@ -42,7 +42,7 @@ class CodeReviewSmokeTests:
             ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')\""),
             ("Agent Service", "python -c \"from netra_backend.app.services.agent_service import AgentService; print('✓ Agent service available')\""),
             ("Tool Dispatcher", "python -c \"from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')\""),
-            ("WebSocket Manager", "python -c \"from netra_backend.app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')\""),
+            ("WebSocket Manager", "python -c \"from netra_backend.app.websocket_core.manager import WebSocketManager; print('✓ WebSocket manager loads')\""),
             ("Message Handler", "python -c \"from netra_backend.app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')\""),
         ]
         

@@ -1,0 +1,103 @@
+{
+  "timestamp": "20250823_131354",
+  "environment": "local",
+  "categories": {
+    "database": {
+      "success": false,
+      "duration": 3.999321222305298,
+      "output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- C:\\Program Files\\Python312\\python.exe\ncachedir: .pytest_cache\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function\ncollecting ... collected 0 items\n\n============================== warnings summary ===============================\napp\\schemas\\Config.py:315\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\schemas\\Config.py:315: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    @validator('service_secret')\n\n..\\..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_fields.py:198\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_fields.py:198: UserWarning: Field name \"schema\" in \"DataSample\" shadows an attribute in parent \"BaseModel\"\n    warnings.warn(\n\n..\\..\\..\\..\\..\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_fields.py:198\n  C:\\Users\\antho\\AppData\\Roaming\\Python\\Python312\\site-packages\\pydantic\\_internal\\_fields.py:198: UserWarning: Field name \"schema\" in \"DataCatalog\" shadows an attribute in parent \"BaseModel\"\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n============================= 3 warnings in 0.03s =============================\n",
+      "errors": "ERROR: file or directory not found: or\n\n"
+    }
+  },
+  "overall_success": false,
+  "total_duration": 3.999321222305298,
+  "execution_plan": null,
+  "category_statistics": {
+    "total_categories": 9,
+    "by_priority": {
+      "CRITICAL": 1,
+      "HIGH": 2,
+      "MEDIUM": 3,
+      "LOW": 3,
+      "OPTIONAL": 0
+    },
+    "by_type": {
+      "functional": 3,
+      "technical": 2,
+      "quality": 1,
+      "integration": 1,
+      "performance": 1,
+      "security": 0,
+      "e2e": 1
+    },
+    "parallel_safe": 7,
+    "requires_real_services": 1,
+    "requires_real_llm": 0,
+    "memory_intensive": 2,
+    "cpu_intensive": 1,
+    "database_dependent": 1,
+    "average_estimated_duration": "0:10:40",
+    "categories_with_history": 0,
+    "average_success_rate": 0.0
+  },
+  "progress_tracking": {
+    "run_id": "run_1755980030",
+    "start_time": "2025-08-23T13:13:50.422027",
+    "end_time": "2025-08-23T13:13:54.421348",
+    "status": "failed",
+    "categories": {
+      "database": {
+        "name": "database",
+        "status": "failed",
+        "start_time": "2025-08-23T13:13:50.422027",
+        "end_time": "2025-08-23T13:13:54.421348",
+        "duration": 0.0,
+        "total_tests": 0,
+        "passed_tests": 0,
+        "failed_tests": 0,
+        "skipped_tests": 0,
+        "error_tests": 0,
+        "progress_percentage": 100.0,
+        "estimated_remaining": 0.0,
+        "output_log": [],
+        "error_messages": [],
+        "warnings": [],
+        "peak_memory_mb": 0.0,
+        "cpu_usage_percent": 0.0,
+        "retry_count": 0,
+        "max_retries": 0,
+        "phase": 0,
+        "parallel_group": null,
+        "worker_id": null,
+        "tags": [],
+        "success_rate": 0.0,
+        "execution_time": 3.999321
+      }
+    },
+    "total_categories": 1,
+    "completed_categories": 1,
+    "current_phase": 0,
+    "total_phases": 0,
+    "total_tests": 0,
+    "passed_tests": 0,
+    "failed_tests": 0,
+    "skipped_tests": 0,
+    "error_tests": 0,
+    "overall_progress": 100.0,
+    "estimated_total_duration": 0.0,
+    "estimated_remaining": 0.0,
+    "test_level": "category",
+    "service_filter": null,
+    "parallel_workers": 4,
+    "fail_fast_enabled": false,
+    "real_llm_enabled": false,
+    "environment": "local",
+    "peak_memory_mb": 0.0,
+    "average_cpu_percent": 0.0,
+    "execution_duration": 3.999321,
+    "success_rate": 0.0,
+    "completion_percentage": 100.0,
+    "resumable": true,
+    "checkpoint_data": {}
+  }
+}

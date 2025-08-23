@@ -20,7 +20,6 @@ from typing import Any, Dict, Optional, Tuple
 from pydantic import ValidationError
 
 from netra_backend.app.core.exceptions_config import ConfigurationError
-from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig
 
 # Import actual configuration managers
@@ -65,11 +64,11 @@ except ImportError:
             pass
 
 try:
-    from netra_backend.app.core.configuration.unified_secrets import (
-        UnifiedSecretManager as ActualSecretManager,
+    from netra_backend.app.core.configuration.secrets import (
+        SecretManager as ActualSecretManager,
     )
 except ImportError:
-    # Fallback placeholder if unified_secrets module not available
+    # Fallback placeholder if secrets module not available
     class ActualSecretManager:
         """Placeholder for secret manager."""
         def populate_secrets(self, config):
@@ -128,7 +127,8 @@ class UnifiedConfigManager:
     
     def _initialize_core_components(self) -> None:
         """Initialize core configuration components."""
-        self._logger = logger
+        # Lazy logger initialization to prevent circular dependency
+        self._logger = None  # Will be initialized on first use
         self._validator = ConfigurationValidator()
         self._load_timestamp: Optional[datetime] = None
         self._environment = self._detect_environment()
@@ -152,7 +152,9 @@ class UnifiedConfigManager:
         import os
         if os.environ.get("TESTING"):
             return "testing"
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        env = os.environ.get("ENVIRONMENT", "development").lower()
+        # Handle empty string case - default to development
+        return env if env else "development"
     
     def _check_hot_reload_enabled(self) -> bool:
         """Check if hot reload is enabled for this environment.
@@ -226,12 +228,59 @@ class UnifiedConfigManager:
             raise ConfigurationError(f"Configuration validation failed: {validation_result.errors}")
         # Skip logging during initial load to prevent recursion
     
+    def _get_logger(self):
+        """Get or initialize logger lazily to avoid circular dependency."""
+        if self._logger is None:
+            try:
+                # Only import logger when actually needed, not during module import
+                from netra_backend.app.logging_config import central_logger
+                self._logger = central_logger
+            except Exception:
+                # If logger import fails, keep using print fallback
+                pass
+        return self._logger
+    
+    def _safe_log_error(self, message: str) -> None:
+        """Safely log errors with fallback to print during bootstrap."""
+        try:
+            logger = self._get_logger()
+            if logger is None:
+                # During bootstrap, use print as fallback
+                print(f"[CONFIG ERROR] {message}", flush=True)
+            else:
+                logger.error(message)
+        except Exception:
+            # Ultimate fallback if logger fails
+            print(f"[CONFIG ERROR] {message}", flush=True)
+    
+    def _safe_log_warning(self, message: str) -> None:
+        """Safely log warnings with fallback to print during bootstrap."""
+        try:
+            logger = self._get_logger()
+            if logger is None:
+                print(f"[CONFIG WARNING] {message}", flush=True)
+            else:
+                logger.warning(message)
+        except Exception:
+            print(f"[CONFIG WARNING] {message}", flush=True)
+    
+    def _safe_log_info(self, message: str) -> None:
+        """Safely log info with fallback to print during bootstrap."""
+        try:
+            logger = self._get_logger()
+            if logger is None:
+                print(f"[CONFIG INFO] {message}", flush=True)
+            else:
+                logger.info(message)
+        except Exception:
+            print(f"[CONFIG INFO] {message}", flush=True)
+    
     def _handle_configuration_error(self, error: Exception) -> None:
         """Handle configuration loading errors."""
         error_msg = f"CRITICAL: Configuration loading failed: {error}"
-        # Only log if not RecursionError to prevent further recursion
+        # Safe logging with fallback to print for bootstrap phase
         if not isinstance(error, RecursionError):
-            self._logger.error(error_msg)
+            self._safe_log_error(error_msg)
         if isinstance(error, ValidationError):
             raise ConfigurationError(f"Configuration validation error: {error}")
         raise ConfigurationError(error_msg)
@@ -239,11 +288,11 @@ class UnifiedConfigManager:
     def reload_config(self, force: bool = False) -> None:
         """Force reload configuration (hot-reload capability)."""
         if not self._hot_reload_enabled and not force:
-            self._logger.warning("Hot reload disabled in this environment")
+            self._safe_log_warning("Hot reload disabled in this environment")
             return
         self._clear_configuration_cache()
         self._refresh_environment_detection()
-        self._logger.info("Configuration reloaded")
+        self._safe_log_info("Configuration reloaded")
     
     def _clear_configuration_cache(self) -> None:
         """Clear configuration cache for reload."""
@@ -256,7 +305,7 @@ class UnifiedConfigManager:
         old_env = self._environment
         self._environment = self._detect_environment()
         if old_env != self._environment:
-            self._logger.info(f"Environment changed from {old_env} to {self._environment}")
+            self._safe_log_info(f"Environment changed from {old_env} to {self._environment}")
         
         # Also refresh all component environments
         self._validator.refresh_environment()

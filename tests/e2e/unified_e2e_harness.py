@@ -52,7 +52,7 @@ class UnifiedE2ETestHarness:
         self.session = self._create_test_session()
         self.ready = False
         
-        logger.info(f"E2E Harness initialized for {self.env_config.environment.value} environment")
+        logger.info(f"E2E Harness initialized for {self.env_config.environment_type.value} environment")
     
     def _create_test_session(self) -> E2ETestSession:
         """Create new test session."""

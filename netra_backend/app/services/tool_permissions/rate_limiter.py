@@ -12,7 +12,7 @@ logger = central_logger
 
 
 # Import general RateLimiter from canonical location - CONSOLIDATED  
-from netra_backend.app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
+from netra_backend.app.websocket_core import RateLimiter as CoreRateLimiter
 
 
 class ToolPermissionRateLimiter:

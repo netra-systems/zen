@@ -29,7 +29,7 @@ from netra_backend.app.core.error_handlers import get_http_status_code, handle_e
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.websocket.error_recovery_handler import (
+from netra_backend.app.websocket_core.error_recovery_handler import (
     ErrorContext,
     ErrorType,
     WebSocketErrorRecoveryHandler,

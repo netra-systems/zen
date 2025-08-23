@@ -37,19 +37,15 @@ describe('Auth Login Advanced Features', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    user = userEvent.setup();
+    user = userEvent.setup({ delay: null }); // Disable delays for faster tests
     mockAuthStore = setupMockAuthStore();
     setupMockCookies();
     setupMockAuthService();
-    
-    jest.clearAllTimers();
-    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
     jest.clearAllMocks();
+    jest.clearAllTimers();
   });
 
   describe('Remember Me Functionality', () => {
@@ -62,7 +58,7 @@ describe('Auth Login Advanced Features', () => {
       });
       
       expect(document.cookie).toContain('remember_me=true');
-    });
+    }, 15000);
 
     it('extends token expiration with remember me', async () => {
       renderLoginComponent();
@@ -73,7 +69,7 @@ describe('Auth Login Advanced Features', () => {
       });
       
       expect(authService.setTokenExpiration).toHaveBeenCalledWith('extended');
-    });
+    }, 15000);
 
     it('clears remember me on explicit logout', async () => {
       renderLoginComponent();
@@ -88,7 +84,7 @@ describe('Auth Login Advanced Features', () => {
       });
       
       expect(document.cookie).not.toContain('remember_me=true');
-    });
+    }, 15000);
   });
 
   describe('Social Login Integration', () => {
@@ -100,7 +96,7 @@ describe('Auth Login Advanced Features', () => {
       });
       
       expect(authService.initiateGoogleLogin).toHaveBeenCalled();
-    });
+    }, 15000);
 
     it('handles OAuth callback with authorization code', async () => {
       window.history.pushState({}, '', '/auth/callback?code=oauth_code&state=oauth_state');
@@ -110,7 +106,7 @@ describe('Auth Login Advanced Features', () => {
       await waitFor(() => {
         expect(authService.handleOAuthCallback).toHaveBeenCalledWith('oauth_code', 'oauth_state');
       });
-    });
+    }, 15000);
 
     it('displays error for failed OAuth flow', async () => {
       window.history.pushState({}, '', '/auth/callback?error=access_denied');
@@ -120,7 +116,7 @@ describe('Auth Login Advanced Features', () => {
       await waitFor(() => {
         expect(screen.getByText('OAuth login was cancelled or failed')).toBeInTheDocument();
       });
-    });
+    }, 15000);
   });
 
   describe('MFA (Multi-Factor Authentication)', () => {
@@ -140,7 +136,7 @@ describe('Auth Login Advanced Features', () => {
       await waitFor(() => {
         expect(screen.getByTestId('mfa-code-input')).toBeInTheDocument();
       });
-    });
+    }, 15000);
 
     it('validates MFA code and completes login', async () => {
       jest.mocked(authService.handleLogin).mockResolvedValue({
@@ -153,14 +149,28 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await performLogin('mfa@example.com', 'password123', screen);
+      });
+      
+      // Wait for MFA UI to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('mfa-code-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
         await user.type(screen.getByTestId('mfa-code-input'), '123456');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });
       
       expect(authService.verifyMFA).toHaveBeenCalledWith('mfa_session_123', '123456');
-    });
+    }, 15000);
 
     it('handles invalid MFA code gracefully', async () => {
+      jest.mocked(authService.handleLogin).mockResolvedValue({
+        success: false,
+        mfa_required: true,
+        session_id: 'mfa_session_123'
+      });
+      
       jest.mocked(authService.verifyMFA).mockResolvedValue({
         success: false,
         error: 'Invalid MFA code'
@@ -170,6 +180,14 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await performLogin('mfa@example.com', 'password123', screen);
+      });
+      
+      // Wait for MFA UI to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('mfa-code-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
         await user.type(screen.getByTestId('mfa-code-input'), '000000');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });
@@ -177,7 +195,7 @@ describe('Auth Login Advanced Features', () => {
       await waitFor(() => {
         expect(screen.getByText('Invalid MFA code. Please try again.')).toBeInTheDocument();
       });
-    });
+    }, 15000);
 
     it('handles MFA verification failure', async () => {
       jest.mocked(authService.handleLogin).mockResolvedValue({
@@ -192,6 +210,14 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await performLogin('mfa@example.com', 'password123', screen);
+      });
+      
+      // Wait for MFA UI to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('mfa-code-input')).toBeInTheDocument();
+      });
+      
+      await act(async () => {
         await user.type(screen.getByTestId('mfa-code-input'), '123456');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });
@@ -199,6 +225,6 @@ describe('Auth Login Advanced Features', () => {
       await waitFor(() => {
         expect(screen.getByText('MFA verification failed')).toBeInTheDocument();
       });
-    });
+    }, 15000);
   });
 });

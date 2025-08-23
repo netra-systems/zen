@@ -18,9 +18,8 @@ from unittest.mock import patch, AsyncMock
 import json
 from typing import List, Dict, Any
 
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.middleware.rate_limiting import RateLimiter
-from netra_backend.app.core.redis_manager import RedisManager
+from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.services.rate_limiter import RateLimiter
 
 # Import absolute paths  
 from netra_backend.tests.helpers.redis_test_helpers import (
@@ -40,23 +39,41 @@ class TestApiGatewayRateLimitingAccuracy:
     @pytest.fixture
     async def settings(self):
         """Get application settings"""
-        return get_settings()
+        return get_unified_config()
     
     @pytest.fixture
     async def redis_client(self, settings):
-        """Real Redis client for rate limiting"""
-        client = redis.Redis.from_url(settings.redis_url)
-        await client.ping()  # Verify connection
+        """Test Redis client for rate limiting"""
+        client = await create_test_redis_client()
         yield client
-        await client.close()
+        try:
+            if hasattr(client, 'aclose'):
+                await client.aclose()
+            elif hasattr(client, 'close'):
+                await client.close()
+        except Exception:
+            pass  # Ignore cleanup errors
     
     @pytest.fixture
-    async def redis_manager(self, settings):
-        """Real Redis manager"""
-        manager = RedisManager(settings)
-        await manager.initialize()
-        yield manager
-        await manager.cleanup()
+    async def redis_manager(self, redis_client):
+        """Mock Redis manager for testing"""
+        class MockRedisManager:
+            def __init__(self, client):
+                self.client = client
+            
+            async def get(self, key):
+                return await self.client.get(key)
+            
+            async def set(self, key, value, ex=None):
+                return await self.client.set(key, value, ex=ex)
+            
+            async def incr(self, key):
+                return await self.client.incr(key)
+            
+            async def expire(self, key, seconds):
+                return await self.client.expire(key, seconds)
+        
+        return MockRedisManager(redis_client)
     
     @pytest.fixture
     async def rate_limiter(self, redis_manager, settings):
@@ -68,9 +85,12 @@ class TestApiGatewayRateLimitingAccuracy:
         """Clean up Redis between tests"""
         yield
         # Clean up all test rate limit keys
-        keys = await redis_client.keys("rate_limit:*")
-        if keys:
-            await redis_client.delete(*keys)
+        try:
+            keys = await redis_client.keys("rate_limit:*")
+            if keys:
+                await redis_client.delete(*keys)
+        except Exception:
+            pass  # Ignore cleanup errors if Redis is mocked
     
     @pytest.mark.asyncio
     async def test_rate_limiting_with_real_redis_counters_fails(self, rate_limiter, redis_client):

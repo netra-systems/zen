@@ -18,7 +18,7 @@ import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as IWebSocketService
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as IWebSocketService
 
 class TestWebSocketMessageDeliveryL3:
     """Test WebSocket message delivery scenarios"""

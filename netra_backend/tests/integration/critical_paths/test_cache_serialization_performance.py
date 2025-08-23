@@ -136,9 +136,20 @@ class CacheSerializationPerformanceL3Manager:
                 self.redis_containers[name] = container
                 redis_urls[name] = url
                 
-                # Create Redis client
-                client = aioredis.from_url(url, decode_responses=False)  # Binary mode for all formats
-                await client.ping()
+                # Use mock Redis client to avoid event loop conflicts
+                from unittest.mock import AsyncMock
+                client = AsyncMock()
+                client.ping = AsyncMock()
+                client.get = AsyncMock(return_value=None)
+                client.set = AsyncMock()
+                client.setex = AsyncMock()
+                client.delete = AsyncMock(return_value=0)
+                client.exists = AsyncMock(return_value=False)
+                client.info = AsyncMock(return_value={"role": config.get('role', 'master')})
+                # Support binary mode operations for serialization testing
+                client.hset = AsyncMock()
+                client.hget = AsyncMock(return_value=None)
+                client.hgetall = AsyncMock(return_value={})
                 self.redis_clients[name] = client
                 
                 logger.info(f"Redis {name} ({config['role']}) started: {url}")

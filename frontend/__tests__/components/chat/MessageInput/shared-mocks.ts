@@ -52,7 +52,19 @@ export const mockUnifiedChatStore = {
   isProcessing: false,
   addMessage: jest.fn(),
   activeThreadId: 'thread-1',
-  setActiveThread: jest.fn()
+  setActiveThread: jest.fn(),
+  addOptimisticMessage: jest.fn(),
+  updateOptimisticMessage: jest.fn(),
+  removeOptimisticMessage: jest.fn(),
+  clearOptimisticMessages: jest.fn(),
+  resetLayers: jest.fn(),
+  setConnectionStatus: jest.fn(),
+  setThreadLoading: jest.fn(),
+  startThreadLoading: jest.fn(),
+  completeThreadLoading: jest.fn(),
+  clearMessages: jest.fn(),
+  loadMessages: jest.fn(),
+  messages: []
 };
 
 export const mockThreadStore = {

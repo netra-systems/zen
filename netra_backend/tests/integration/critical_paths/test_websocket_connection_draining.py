@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for connection draining and graceful shutdown.
 Draining target: 100% connection preservation during graceful shutdown.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -26,7 +26,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -79,13 +79,13 @@ class TestWebSocketConnectionDrainingL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager for draining testing."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -103,7 +103,7 @@ class TestWebSocketConnectionDrainingL3:
             
             await test_redis_mgr.redis_client.close()
     
-    async def test_graceful_connection_draining(self, ws_manager, redis_client):
+    async def test_graceful_connection_draining(self, websocket_manager, redis_client):
 
         """Test graceful draining of WebSocket connections."""
         # Establish multiple connections
@@ -116,7 +116,7 @@ class TestWebSocketConnectionDrainingL3:
 
             websocket = MockWebSocketForRedis(user_id)
 
-            connection_info = await ws_manager.connect_user(user_id, websocket)
+            connection_info = await websocket_manager.connect_user(user_id, websocket)
 
             if connection_info:
 
@@ -137,7 +137,7 @@ class TestWebSocketConnectionDrainingL3:
 
                                               {"reason": "server_maintenance"})
 
-            await ws_manager.send_message_to_user(user_id, drain_message)
+            await websocket_manager.send_message_to_user(user_id, drain_message)
 
             await asyncio.sleep(0.1)  # Brief delay between notifications
         
@@ -145,13 +145,13 @@ class TestWebSocketConnectionDrainingL3:
 
         for user_id, websocket in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
         
         drain_time = time.time() - drain_start
 
         assert drain_time < 5.0  # Should complete quickly
 
-        assert len(ws_manager.active_connections) == 0
+        assert len(websocket_manager.active_connections) == 0
 
     async def test_connection_migration_during_draining(self, redis_client):
 

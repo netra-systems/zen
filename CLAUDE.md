@@ -280,14 +280,15 @@ python unified_test_runner.py
 
 **CRITICAL: Use ONLY the official deployment script - Do NOT create new deployment scripts**
 
-*   **RECOMMENDED (Fast + Safe)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks`
-*   **Quick Deploy (Local Build)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
+*   **DEFAULT (Fast Deploy)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
+*   **With Checks (For Production)**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks`
 *   **Cloud Build (Slower)**: `python scripts/deploy_to_gcp.py --project netra-staging`
 *   **Cleanup**: `python scripts/deploy_to_gcp.py --project netra-staging --cleanup`
 
 **Key Points:**
 - **DEFAULT to local builds** (--build-local) - 5-10x faster than Cloud Build
-- **ALWAYS run checks** (--run-checks) before production deployments
+- **Checks are OPTIONAL** for staging (useful when testing deployment-specific issues)
+- **RUN checks for production deployments** (--run-checks)
 - **NEVER create new deployment scripts** - enhance the existing one
 ## 7. Critical Specifications Reference
 

@@ -47,7 +47,6 @@ try:
     from netra_backend.app.schemas.UserPlan import PlanTier
 except ImportError:
     # Fallback for missing schemas
-    from enum import Enum
     
     class PlanTier(str, Enum):
         FREE = "free"
@@ -55,13 +54,13 @@ except ImportError:
         ENTERPRISE = "enterprise"
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
 
 
 class RateLimitFlowTester:
     """Executes real rate limiting flow with quota enforcement."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.test_user_email = f"quota-test-{uuid.uuid4().hex[:8]}@example.com"

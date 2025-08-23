@@ -53,9 +53,9 @@ from tests.e2e.helpers.journey.new_user_journey_helpers import (
 
 # Handle missing imports with fallbacks
 try:
-    from tests.e2e.harness_complete import UnifiedTestHarness
+    from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 except ImportError:
-    class UnifiedTestHarness:
+    class UnifiedE2ETestHarness:
         def __init__(self):
             self.state = type('State', (), {'databases': self})()
         
@@ -84,7 +84,7 @@ class CompleteNewUserJourneyTester:
     
     def __init__(self):
         self.db_connections = DatabaseTestConnections()
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.http_client: Optional[httpx.AsyncClient] = None
         self.user_data: Dict[str, Any] = {}
         self.journey_results: Dict[str, Any] = {}

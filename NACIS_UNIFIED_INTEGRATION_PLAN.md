@@ -86,7 +86,7 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.core.cache.redis_cache_manager import RedisCacheManager
 
-class ChatOrchestrator(ModernSupervisorAgent):
+class ChatOrchestrator(SupervisorAgent):
     """NACIS Chat Orchestrator with full unified integration."""
     
     def __init__(self,
@@ -462,7 +462,7 @@ async def test_nacis_uses_unified_websocket():
 async def test_nacis_full_flow():
     """Test complete NACIS flow from request to response."""
     # Start with supervisor
-    supervisor = ModernSupervisorAgent(db, llm, websocket, dispatcher)
+    supervisor = SupervisorAgent(db, llm, websocket, dispatcher)
     
     state = DeepAgentState(
         current_request="What's the ROI of implementing Claude vs GPT-4?"

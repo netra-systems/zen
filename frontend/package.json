@@ -117,7 +117,7 @@
     "react-dom": "^19.1.1",
     "react-json-view-lite": "^2.4.2",
     "react-markdown": "^10.1.0",
-    "react-syntax-highlighter": "^15.6.1",
+    "react-syntax-highlighter": "^5.8.0",
     "react-use-websocket": "^4.13.0",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",

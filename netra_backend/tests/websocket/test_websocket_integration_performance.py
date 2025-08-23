@@ -15,11 +15,11 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock
 
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
-from netra_backend.app.websocket.compression import WebSocketCompressor
+from netra_backend.app.websocket_core.compression import WebSocketCompressor
 
-from netra_backend.app.websocket.memory_manager import WebSocketMemoryManager
-from netra_backend.app.websocket.message_batcher import WebSocketMessageBatcher
-from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
+from netra_backend.app.websocket_core.memory_manager import WebSocketMemoryManager
+from netra_backend.app.websocket_core.message_batcher import WebSocketMessageBatcher
+from netra_backend.app.websocket_core.performance_monitor import PerformanceMonitor
 
 class WebSocketIntegrationTestHelper:
     """Helper class for integration testing."""

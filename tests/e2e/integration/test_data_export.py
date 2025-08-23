@@ -30,13 +30,13 @@ import pytest
 import websockets
 
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class ChatHistoryCreator:
     """Creates realistic chat history for export testing."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.messages = []
         
@@ -75,7 +75,7 @@ class ChatHistoryCreator:
 class ChatExportService:
     """Handles chat data export operations."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.backend_url = "http://localhost:8000"
         
@@ -157,7 +157,7 @@ class ChatExportService:
 class ChatExportVerifier:
     """Verifies chat export functionality and data integrity."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         
     async def verify_export_download(self, file_path: str, expected_messages: List[Dict[str, Any]]) -> bool:
@@ -224,7 +224,7 @@ class ChatExportVerifier:
 class DataExportE2ETester:
     """Executes complete data export E2E test flow."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.history_creator = ChatHistoryCreator(harness)
@@ -324,7 +324,7 @@ class DataExportE2ETester:
 class FastDataExportTester:
     """Optimized tester for performance testing with minimal network calls."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.history_creator = ChatHistoryCreator(harness)
         self.export_service = ChatExportService(harness)
@@ -373,7 +373,7 @@ class DataExportTestManager:
     @asynccontextmanager
     async def setup_export_test(self):
         """Setup and teardown for export testing."""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.tester = DataExportE2ETester(self.harness)
         
         try:

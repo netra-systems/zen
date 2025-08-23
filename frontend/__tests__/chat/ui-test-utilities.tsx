@@ -69,6 +69,7 @@ export function createUnifiedChatStoreMock(overrides: any = {}) {
     messages: [],
     threads: [],
     currentThreadId: null,
+    activeThreadId: null,
     isLoading: false,
     isProcessing: false,
     error: null,
@@ -76,7 +77,20 @@ export function createUnifiedChatStoreMock(overrides: any = {}) {
     loadMessages: jest.fn(),
     createThread: jest.fn(),
     setCurrentThread: jest.fn(),
+    setActiveThread: jest.fn(),
     deleteThread: jest.fn(),
+    addMessage: jest.fn(),
+    setProcessing: jest.fn(),
+    addOptimisticMessage: jest.fn(),
+    updateOptimisticMessage: jest.fn(),
+    removeOptimisticMessage: jest.fn(),
+    clearOptimisticMessages: jest.fn(),
+    resetLayers: jest.fn(),
+    setConnectionStatus: jest.fn(),
+    setThreadLoading: jest.fn(),
+    startThreadLoading: jest.fn(),
+    completeThreadLoading: jest.fn(),
+    clearMessages: jest.fn(),
     ...overrides
   };
 }

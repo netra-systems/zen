@@ -67,18 +67,59 @@
         <description>Include sslmode=require parameter in DATABASE_URL for staging/production</description>
         <implementation>
           <example>postgresql://user:pass@host:5432/db?sslmode=require</example>
-          <note>Required for all Cloud SQL connections</note>
+          <note>Use sslmode=require in secrets - DatabaseManager will convert for asyncpg</note>
+          <conversion_matrix>
+            <sync_driver>Keeps sslmode=require (psycopg2 understands it)</sync_driver>
+            <async_driver>Converts sslmode=require to ssl=require (asyncpg requirement)</async_driver>
+            <unix_socket>Removes ALL SSL parameters (Cloud SQL proxy handles SSL)</unix_socket>
+          </conversion_matrix>
         </implementation>
         <verification>
           <step>Test database connection with SSL parameter</step>
-          <step>Verify health checks pass in staging</step>
-          <step>Check connection works in production</step>
+          <step>Verify DatabaseManager converts sslmode to ssl for asyncpg</step>
+          <step>Check health checks pass in staging</step>
         </verification>
       </solution>
       <prevention>
-        <guideline>Always include sslmode=require for Cloud SQL connections</guideline>
-        <guideline>Validate database URLs in deployment scripts</guideline>
-        <guideline>Test database connectivity before deploying</guideline>
+        <guideline>Always include sslmode=require in GCP secrets (standard format)</guideline>
+        <guideline>Use DatabaseManager for all URL conversions</guideline>
+        <guideline>Never bypass DatabaseManager conversion logic</guideline>
+      </prevention>
+    </learning>
+    
+    <learning>
+      <id>database-url-secret-source-and-flow</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>Database URL Flow from GCP Secrets to Application</title>
+      <problem>
+        <description>Health checker fails with sslmode parameter errors in staging</description>
+        <symptoms>
+          <symptom>connect() got an unexpected keyword argument 'sslmode'</symptom>
+          <symptom>Health checks fail in GCP staging but work locally</symptom>
+        </symptoms>
+        <root_cause>
+          <source>GCP Secret Manager stores DATABASE_URL with sslmode=require</source>
+          <bug>DatabaseManager.get_application_url_async() had logic bug preventing conversion</bug>
+        </root_cause>
+      </problem>
+      <solution>
+        <description>Fixed DatabaseManager conversion logic for async connections</description>
+        <url_flow>
+          <step1>deploy_to_gcp.py creates secret with sslmode=require (standard format)</step1>
+          <step2>Cloud Run mounts secret as DATABASE_URL environment variable</step2>
+          <step3>DatabaseManager.get_base_database_url() reads and normalizes</step3>
+          <step4>DatabaseManager.get_application_url_async() converts for asyncpg</step4>
+        </url_flow>
+        <critical_fix>
+          Changed "elif" to "else" in get_application_url_async() to ensure conversion happens
+        </critical_fix>
+      </solution>
+      <prevention>
+        <guideline>Store URLs with sslmode=require in secrets (standard psycopg2 format)</guideline>
+        <guideline>Always use DatabaseManager for URL processing</guideline>
+        <guideline>Test URL conversion with actual staging URLs</guideline>
       </prevention>
     </learning>
     
@@ -425,6 +466,251 @@
       </prevention>
       <violation_severity>CRITICAL</violation_severity>
       <violation_message>Creating minimal backend versions is a CRITICAL VIOLATION that breaks production functionality</violation_message>
+    </learning>
+    
+    <learning>
+      <id>docker-build-node-modules-exclusion</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>Frontend Docker Builds Must Exclude node_modules</title>
+      <problem>
+        <description>Frontend Docker builds include massive node_modules directory causing 1.4GB+ context transfers</description>
+        <symptoms>
+          <symptom>Docker build context exceeds 1GB for frontend</symptom>
+          <symptom>Extremely slow build times (10+ minutes)</symptom>
+          <symptom>Deployment failures due to timeouts</symptom>
+          <symptom>Unnecessary bandwidth usage</symptom>
+          <symptom>Docker daemon performance issues</symptom>
+        </symptoms>
+        <root_cause>Missing or improperly configured .dockerignore for frontend directory</root_cause>
+      </problem>
+      <solution>
+        <description>Create frontend-specific .dockerignore to exclude node_modules and other unnecessary files</description>
+        <implementation>
+          <step>Create frontend/.dockerignore file</step>
+          <step>Include node_modules as first line</step>
+          <step>Add other build artifacts (.next, coverage, etc.)</step>
+          <step>Optionally add cleanup step in Dockerfile: RUN rm -rf node_modules</step>
+          <note>Root .dockerignore may not apply to subdirectory contexts</note>
+        </implementation>
+        <example_dockerignore>
+node_modules
+.next
+coverage
+cypress
+__tests__
+*.log
+*.md
+.env
+.env.*
+test-*
+jest.*
+*.test.*
+*.spec.*
+tsconfig.tsbuildinfo
+        </example_dockerignore>
+        <verification>
+          <step>Monitor Docker build context size (should be under 100MB)</step>
+          <step>Verify build completes in under 2 minutes</step>
+          <step>Check that node_modules is excluded from context</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>ALWAYS create service-specific .dockerignore files</guideline>
+        <guideline>Monitor Docker build context sizes during deployment</guideline>
+        <guideline>Test Docker builds locally before deploying</guideline>
+        <guideline>Never rely solely on root .dockerignore for subdirectories</guideline>
+      </prevention>
+      <impact>
+        <performance>10x faster Docker builds</performance>
+        <bandwidth>1.3GB+ bandwidth saved per build</bandwidth>
+        <reliability>Prevents deployment timeouts</reliability>
+      </impact>
+    </learning>
+    
+    <learning>
+      <id>dockerignore-multiple-files-conflict</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>high</severity>
+      <title>Multiple .dockerignore Files Can Cause Confusion</title>
+      <problem>
+        <description>Having .dockerignore files in both root and subdirectories creates confusion about which exclusions apply</description>
+        <symptoms>
+          <symptom>Unexpected files included in Docker context</symptom>
+          <symptom>Subdirectory .dockerignore files ignored when building from root</symptom>
+          <symptom>Different behavior between local and CI/CD builds</symptom>
+          <symptom>Context size varies unexpectedly</symptom>
+        </symptoms>
+        <root_cause>Docker only uses the .dockerignore from the build context directory, not subdirectories</root_cause>
+      </problem>
+      <solution>
+        <description>Use only root .dockerignore with proper path specifications for all services</description>
+        <implementation>
+          <step>Remove subdirectory .dockerignore files (e.g., frontend/.dockerignore)</step>
+          <step>Consolidate all exclusions in root .dockerignore</step>
+          <step>Use proper path prefixes for service-specific exclusions</step>
+          <example>
+# Root .dockerignore
+# Frontend exclusions
+frontend/node_modules
+frontend/.next
+frontend/coverage
+frontend/__tests__
+frontend/cypress
+# Backend exclusions  
+**/__pycache__
+**/*.pyc
+# General exclusions
+**/node_modules
+**/.env
+          </example>
+        </implementation>
+        <verification>
+          <step>Verify only one .dockerignore exists at root</step>
+          <step>Test Docker builds for all services</step>
+          <step>Monitor context sizes remain small</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>ONLY use root .dockerignore when building from root context</guideline>
+        <guideline>Document Docker build context clearly in deployment scripts</guideline>
+        <guideline>Test exclusions work for all services</guideline>
+        <guideline>Remove any subdirectory .dockerignore files to avoid confusion</guideline>
+      </prevention>
+      <key_insight>When Docker builds from root with "docker build -f Dockerfile.frontend .", it uses root .dockerignore, NOT frontend/.dockerignore</key_insight>
+    </learning>
+
+    <learning>
+      <id>docker-context-size-optimization-success</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>info</severity>
+      <title>Successfully Reduced Frontend Docker Context from 1.5GB to 179MB</title>
+      <problem_solved>
+        <original_issue>Frontend Docker build context was 1.5GB+ causing slow deployments</original_issue>
+        <root_cause>node_modules and test files were being included in context</root_cause>
+      </problem_solved>
+      <solution_applied>
+        <description>Fixed root .dockerignore to properly exclude frontend/node_modules and other unnecessary files</description>
+        <changes>
+          <change>Added frontend/node_modules to root .dockerignore</change>
+          <change>Added **/node_modules for comprehensive exclusion</change>
+          <change>Added frontend-specific test and build artifact exclusions</change>
+          <change>Kept Dockerfile simple with COPY frontend/ instead of selective copying</change>
+        </changes>
+        <results>
+          <result>Backend context: 147MB (good)</result>
+          <result>Auth context: 7.8MB (excellent)</result>
+          <result>Frontend context: 179MB (down from 1.5GB - 88% reduction)</result>
+          <result>Build time reduced significantly</result>
+          <result>Deployment reliability improved</result>
+        </results>
+      </solution_applied>
+      <best_practices>
+        <practice>Always check Docker context size during builds</practice>
+        <practice>Use root .dockerignore for all exclusions when building from root</practice>
+        <practice>Test .dockerignore effectiveness before deployments</practice>
+        <practice>Keep Dockerfile COPY commands simple, let .dockerignore handle exclusions</practice>
+      </best_practices>
+    </learning>
+    <learning>
+      <id>auth-service-enhanced-security-secrets</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>Auth Service Requires SERVICE_SECRET and SERVICE_ID in Staging/Production</title>
+      <problem>
+        <description>Auth service fails to start in staging/production without enhanced security environment variables</description>
+        <symptoms>
+          <symptom>Service startup failures with ValueError: SERVICE_SECRET must be set in production/staging</symptom>
+          <symptom>Worker processes crash during gunicorn/uvicorn initialization</symptom>
+          <symptom>Health checks return 503 Service Unavailable</symptom>
+          <symptom>Continuous worker restart loops in Cloud Run logs</symptom>
+          <symptom>Service marked as unhealthy despite container being ready</symptom>
+        </symptoms>
+        <root_cause>Enhanced JWT security requires SERVICE_SECRET and SERVICE_ID for production environments</root_cause>
+      </problem>
+      <solution>
+        <description>Create and map SERVICE_SECRET and SERVICE_ID secrets in GCP Secret Manager</description>
+        <implementation>
+          <step>Generate secure SERVICE_SECRET: openssl rand -hex 32</step>
+          <step>Create SERVICE_ID with timestamp: netra-auth-staging-$(date +%s)</step>
+          <step>Add secrets to GCP Secret Manager:
+            - gcloud secrets create service-secret-staging --data-file=-
+            - gcloud secrets create service-id-staging --data-file=-
+          </step>
+          <step>Update Cloud Run service to map secrets:
+            --update-secrets="SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
+          </step>
+          <step>Update deploy_to_gcp.py to include these secrets in auth service deployment</step>
+        </implementation>
+        <verification>
+          <step>Check /health endpoint returns 200 OK</step>
+          <step>Verify service uptime is stable</step>
+          <step>Confirm no worker restart loops in logs</step>
+          <step>Test JWT token validation works correctly</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always include SERVICE_SECRET and SERVICE_ID in auth service deployments</guideline>
+        <guideline>Document all required environment variables in deployment scripts</guideline>
+        <guideline>Test auth service startup in staging before production</guideline>
+        <guideline>Monitor for startup failures after deployments</guideline>
+      </prevention>
+      <impact>Without these secrets, auth service cannot start and authentication is completely unavailable</impact>
+    </learning>
+
+    <learning>
+      <id>staging-url-domain-consistency</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>high</severity>
+      <title>Always Use Staging Domain Names, Not Raw Cloud Run URLs</title>
+      <problem>
+        <description>Regression where staging domain URLs were replaced with raw Cloud Run URLs</description>
+        <symptoms>
+          <symptom>Frontend configured with Cloud Run URLs instead of domain names</symptom>
+          <symptom>API calls may fail if Cloud Run URLs change</symptom>
+          <symptom>CORS configuration becomes brittle</symptom>
+          <symptom>SSL certificate validation issues</symptom>
+          <symptom>Difficult to migrate or update services</symptom>
+        </symptoms>
+        <root_cause>Direct use of Cloud Run URLs bypasses domain abstraction layer</root_cause>
+      </problem>
+      <solution>
+        <description>Always use consistent staging domain names for service configuration</description>
+        <implementation>
+          <correct_configuration>
+            staging_api_url = "https://api.staging.netrasystems.ai"
+            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
+          </correct_configuration>
+          <incorrect_configuration>
+            # NEVER use raw Cloud Run URLs like these:
+            staging_api_url = "https://netra-backend-staging-701982941522.us-central1.run.app"
+            staging_auth_url = "https://netra-auth-service-701982941522.us-central1.run.app"
+          </incorrect_configuration>
+        </implementation>
+        <verification>
+          <step>Check deploy_to_gcp.py uses domain names not Cloud Run URLs</step>
+          <step>Verify frontend environment variables use proper domains</step>
+          <step>Test that services are accessible via domain names</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>ALWAYS use domain names for service URLs in configuration</guideline>
+        <guideline>Never hardcode Cloud Run URLs in deployment scripts</guideline>
+        <guideline>Set up domain mapping in Cloud Run for all services</guideline>
+        <guideline>Document the correct domain URLs for each environment</guideline>
+      </prevention>
+      <benefits>
+        <benefit>Services can be migrated without breaking configurations</benefit>
+        <benefit>Consistent URLs across deployments</benefit>
+        <benefit>Better SSL certificate management</benefit>
+        <benefit>Cleaner CORS configuration</benefit>
+      </benefits>
     </learning>
   </critical_deployment_learnings>
 </specification>

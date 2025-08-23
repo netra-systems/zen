@@ -26,7 +26,7 @@ class ServiceConfigManager:
 # Supply chain services
 # Thread services
 # New service modules
-from . import (
+from netra_backend.app.services import (
     api_gateway,
     billing,
     llm_manager,

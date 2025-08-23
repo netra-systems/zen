@@ -256,7 +256,6 @@ async def should_skip_test_without_real_services(test_name: str = "") -> str:
     try:
         skip_reason = await ServiceConfigHelper.skip_test_if_no_real_services()
         if skip_reason and test_name:
-            import logging
             logger = logging.getLogger(__name__)
             logger.info(f"Skipping test '{test_name}': {skip_reason}")
         return skip_reason
@@ -279,7 +278,6 @@ async def should_skip_test_without_real_llm(test_name: str = "") -> str:
     try:
         skip_reason = await ServiceConfigHelper.skip_test_if_no_real_llm()
         if skip_reason and test_name:
-            import logging
             logger = logging.getLogger(__name__)
             logger.info(f"Skipping test '{test_name}': {skip_reason}")
         return skip_reason

@@ -13,7 +13,7 @@ from typing import Optional, Tuple
 from fastapi import FastAPI
 
 from netra_backend.app.agents.base.monitoring import performance_monitor
-from netra_backend.app.background import BackgroundTaskManager
+from netra_backend.app.services.background_task_manager import BackgroundTaskManager
 from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.background_task_manager import background_task_manager
 from netra_backend.app.services.startup_fixes_integration import startup_fixes
@@ -207,9 +207,17 @@ def _setup_optimization_components(app: FastAPI) -> None:
 async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Schedule index optimization as background task."""
     if hasattr(app.state, 'background_task_manager'):
-        task = _run_index_optimization_background(logger)
-        app.state.background_task_manager.add_task(task)
-        logger.info("Database index optimization scheduled as background task")
+        # Use partial to bind the logger argument to the coroutine function
+        from functools import partial
+        optimization_coro = partial(_run_index_optimization_background, logger)
+        
+        # Use create_task method with coroutine function
+        task_id = await app.state.background_task_manager.create_task(
+            coro=optimization_coro,
+            name="database_index_optimization",
+            timeout=120  # 2-minute timeout to prevent hanging
+        )
+        logger.info(f"Database index optimization scheduled as background task (ID: {task_id})")
 
 
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
@@ -510,7 +518,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.websocket.unified import get_unified_manager
+    from netra_backend.app.websocket_core import get_unified_manager
     websocket_manager = get_unified_manager()
     return SupervisorAgent(
         app.state.db_session_factory, 
@@ -533,7 +541,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     try:
-        from netra_backend.app.websocket.large_message_handler import (
+        from netra_backend.app.websocket_core.large_message_handler import (
             get_large_message_handler,
         )
         handler = get_large_message_handler()

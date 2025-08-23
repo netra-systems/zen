@@ -13,8 +13,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { monokai } from 'react-syntax-highlighter/dist/styles';
 import type { Message } from '@/types/unified';
 import { 
   MessageFormatterService, 
@@ -142,7 +142,7 @@ const createSyntaxHighlighter = (
   
   return (
     <SyntaxHighlighter 
-      style={oneDark} 
+      style={monokai} 
       language={language || 'text'} 
       PreTag="div"
       className="rounded-lg"

@@ -101,7 +101,6 @@ class StagingTestSuite:
         required_env_vars = ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_URL"]
         missing_vars = [var for var in required_env_vars if not os.getenv(var)]
         if missing_vars:
-            import pytest
             pytest.skip(f"Missing staging environment variables: {missing_vars}")
     
     async def check_service_health(self, url: str) -> ServiceHealthStatus:

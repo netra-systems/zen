@@ -13,15 +13,15 @@ from typing import Any, Dict, List
 
 # Import utilities with fallbacks
 try:
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+    from test_framework.auth_helpers import (
         create_test_token,
     )
-    from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+    from netra_backend.tests.helpers.websocket_test_helpers import create_mock_websocket
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"
     
-    class WebSocketBuilder:
+    class create_mock_websocket:
         def __init__(self):
             self._websocket = type('MockWS', (), {
                 'user_id': 'test', 'connection_id': 'conn_123', 'state': 'connected',
@@ -39,7 +39,7 @@ class TokenExpiryTestMethods:
     async def handle_token_refresh_reconnection(fixture, user_id: str) -> Dict[str, Any]:
         """Handle token refresh and reconnection process."""
         fresh_token = create_test_token(user_id, exp_offset=3600)
-        refreshed_connection = WebSocketBuilder().with_user_id(user_id).with_authentication(fresh_token).build()
+        refreshed_connection = create_mock_websocket().with_user_id(user_id).with_authentication(fresh_token).build()
         fixture.active_connections.append(refreshed_connection)
         fixture.record_reconnection_attempt(refreshed_connection.connection_id, True, "token_refresh")
         
@@ -145,7 +145,7 @@ class MessageIntegrityTestMethods:
     async def reconnect_with_message_recovery(fixture, user_id: str):
         """Reconnect with message recovery enabled."""
         fresh_token = create_test_token(user_id)
-        reconnected_ws = WebSocketBuilder().with_user_id(user_id).with_authentication(fresh_token).build()
+        reconnected_ws = create_mock_websocket().with_user_id(user_id).with_authentication(fresh_token).build()
         fixture.active_connections.append(reconnected_ws)
         
         return reconnected_ws

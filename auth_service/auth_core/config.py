@@ -146,7 +146,19 @@ class AuthConfig:
         """Get Redis URL for session management"""
         env = AuthConfig.get_environment()
         # @marked: Redis URL for session storage
-        default_redis_url = "redis://redis:6379" if env not in ["development", "test"] else "redis://localhost:6379"
+        if env == "staging":
+            # In staging, use Redis container name unless explicitly overridden
+            default_redis_url = "redis://redis:6379/1"
+        elif env == "production":
+            # In production, use Redis container name
+            default_redis_url = "redis://redis:6379/0"
+        elif env in ["development", "test"]:
+            # In development/test, use localhost
+            default_redis_url = "redis://localhost:6379/1"
+        else:
+            # Fallback for unknown environments
+            default_redis_url = "redis://redis:6379/1"
+        
         return os.getenv("REDIS_URL", default_redis_url)
     
     @staticmethod

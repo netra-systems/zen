@@ -36,7 +36,7 @@ import logging
 import secrets
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
@@ -80,7 +80,7 @@ class MockSMSProvider:
             "message_id": message_id,
             "phone_number": phone_number,
             "message": message,
-            "sent_at": datetime.utcnow().isoformat()
+            "sent_at": datetime.now(timezone.utc).isoformat()
         })
         
         return {
@@ -131,7 +131,7 @@ class TOTPGenerator:
                 "user_id": user_id,
                 "secret_key": secret_key,
                 "backup_codes": hashed_backup_codes,
-                "setup_at": datetime.utcnow().isoformat(),
+                "setup_at": datetime.now(timezone.utc).isoformat(),
                 "verified": False,
                 "last_used_code": None
             }
@@ -179,14 +179,18 @@ class TOTPGenerator:
             
             # Get TOTP data
             totp_key = f"user_totp:{user_id}"
+            logger.info(f"Looking for TOTP data with key: {totp_key}")
             totp_data_json = await self.redis_client.get(totp_key)
             
             if not totp_data_json:
+                logger.error(f"TOTP data not found for key: {totp_key}")
                 return {
                     "success": False,
                     "error": "TOTP not setup for user",
                     "verify_time": time.time() - verify_start
                 }
+            
+            logger.info(f"Retrieved TOTP data: {totp_data_json[:100]}...")
             
             totp_data = json.loads(totp_data_json)
             secret_key = totp_data["secret_key"]
@@ -195,8 +199,10 @@ class TOTPGenerator:
             totp = pyotp.TOTP(secret_key)
             
             # Verify code with window tolerance
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
+            logger.info(f"Verifying code {provided_code} with secret {secret_key}")
             is_valid = totp.verify(provided_code, valid_window=1)  # Allow 1 window before/after
+            logger.info(f"TOTP verification result: {is_valid}")
             
             # Update attempt count
             await self._record_attempt(user_id, is_valid)
@@ -256,7 +262,7 @@ class TOTPGenerator:
                 # Remove used backup code
                 backup_codes.remove(provided_hash)
                 totp_data["backup_codes"] = backup_codes
-                totp_data["last_backup_used"] = datetime.utcnow().isoformat()
+                totp_data["last_backup_used"] = datetime.now(timezone.utc).isoformat()
                 
                 await self.redis_client.setex(totp_key, 86400 * 30, json.dumps(totp_data))
                 
@@ -352,7 +358,7 @@ class SMSFallbackHandler:
             sms_data = {
                 "code": sms_code,
                 "phone_number": phone_number,
-                "sent_at": datetime.utcnow().isoformat(),
+                "sent_at": datetime.now(timezone.utc).isoformat(),
                 "message_id": sms_result["message_id"],
                 "verified": False
             }
@@ -400,7 +406,7 @@ class SMSFallbackHandler:
             if provided_code == stored_code:
                 # Mark as verified and clean up
                 sms_data["verified"] = True
-                sms_data["verified_at"] = datetime.utcnow().isoformat()
+                sms_data["verified_at"] = datetime.now(timezone.utc).isoformat()
                 
                 await self.redis_client.setex(sms_key, 60, json.dumps(sms_data))  # Keep for 1 min for audit
                 
@@ -579,8 +585,8 @@ class TwoFactorAuthManager:
             tfa_completion = {
                 "user_id": user_id,
                 "method": method,
-                "completed_at": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(seconds=self.session_enhancement_duration)).isoformat(),
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(seconds=self.session_enhancement_duration)).isoformat(),
                 "enhancement_id": str(uuid.uuid4())
             }
             
@@ -640,23 +646,19 @@ class TwoFactorAuthManager:
 class TwoFactorAuthTestManager:
     """Manages 2FA verification testing."""
     
-    def __init__(self):
+    def __init__(self, redis_client):
         self.sms_provider = MockSMSProvider()
         self.totp_generator = None
         self.sms_handler = None
         self.tfa_manager = None
-        self.redis_client = None
+        self.redis_client = redis_client
         self.jwt_handler = JWTHandler()
         self.test_users = []
 
     async def initialize_services(self):
         """Initialize real services for testing."""
         try:
-            # Redis for 2FA storage (real component)
-            self.redis_client = aioredis.from_url("redis://localhost:6379/0")
-            await self.redis_client.ping()
-            
-            # Initialize real components
+            # Initialize real components with the provided Redis client
             self.totp_generator = TOTPGenerator(self.redis_client)
             self.sms_handler = SMSFallbackHandler(self.sms_provider, self.redis_client)
             self.tfa_manager = TwoFactorAuthManager(
@@ -664,7 +666,7 @@ class TwoFactorAuthTestManager:
                 self.jwt_handler, self.redis_client
             )
             
-            logger.info("2FA verification services initialized")
+            logger.info("2FA verification services initialized with real Redis client")
             
         except Exception as e:
             logger.error(f"Service initialization failed: {e}")
@@ -693,7 +695,9 @@ class TwoFactorAuthTestManager:
             current_code = totp.now()
             
             # Step 3: Verify TOTP code
+            logger.info(f"Attempting to verify TOTP code {current_code} for user {user_id}")
             verify_result = await self.totp_generator.verify_totp_code(user_id, current_code)
+            logger.info(f"TOTP verification result: {verify_result}")
             
             # Step 4: Test backup code
             backup_codes = setup_result["backup_codes"]
@@ -918,15 +922,15 @@ class TwoFactorAuthTestManager:
                     await self.redis_client.delete(f"totp_rate_limit:{user_id}")
                     await self.redis_client.delete(f"sms_rate_limit:{user_id}")
                 
-                await self.redis_client.close()
+                logger.info(f"Cleaned up 2FA data for {len(self.test_users)} test users")
                 
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
 @pytest.fixture
-async def tfa_verification_manager():
-    """Create 2FA verification test manager."""
-    manager = TwoFactorAuthTestManager()
+async def tfa_verification_manager(isolated_redis_client):
+    """Create 2FA verification test manager with real Redis client."""
+    manager = TwoFactorAuthTestManager(isolated_redis_client)
     await manager.initialize_services()
     yield manager
     await manager.cleanup()

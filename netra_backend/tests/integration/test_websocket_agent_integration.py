@@ -18,6 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket_core import get_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -65,8 +66,8 @@ class TestWebSocketAgentIntegration:
         async def mock_send_message(user_id: str, message: Dict[str, Any]):
             sent_messages.append(message)
         
-        with patch('app.ws_manager.manager.send_message', new=mock_send_message):
-            with patch('app.ws_manager.manager.send_error', new=AsyncMock()):
+        with patch('app.get_websocket_manager().send_message', new=mock_send_message):
+            with patch('app.get_websocket_manager().send_error', new=AsyncMock()):
                 # Execute
                 await agent_service.handle_websocket_message(
                     user_id="test_user",
@@ -130,7 +131,7 @@ class TestWebSocketAgentIntegration:
         mock_db = Mock()
         
         # Execute
-        with patch('netra_backend.app.ws_manager.manager'):
+        with patch('netra_backend.app.get_websocket_manager()'):
             await handler.handle_user_message(
                 user_id="test_user",
                 payload=payload,
@@ -168,8 +169,8 @@ class TestWebSocketAgentIntegration:
             error_sent = True
         
         # Execute with error handling
-        with patch('app.ws_manager.manager.send_error', new=mock_send_error):
-            with patch('app.ws_manager.manager.send_message', new=AsyncMock()):
+        with patch('app.get_websocket_manager().send_error', new=mock_send_error):
+            with patch('app.get_websocket_manager().send_message', new=AsyncMock()):
                 await agent_service.handle_websocket_message(
                     user_id="test_user",
                     message=test_message,
@@ -204,7 +205,7 @@ class TestWebSocketAgentIntegration:
         ]
         
         # Execute concurrently
-        with patch('netra_backend.app.ws_manager.manager'):
+        with patch('netra_backend.app.get_websocket_manager()'):
             tasks = [
                 agent_service.handle_websocket_message(
                     user_id=f"user_{i}",

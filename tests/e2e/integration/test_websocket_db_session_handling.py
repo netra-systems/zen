@@ -469,8 +469,7 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         # Test 3: Demonstrate the Depends() issue without database
         depends_issue_demo = {}
         try:
-            from fastapi import Depends
-            from netra_backend.app.db.postgres import get_async_db
+            from netra_backend.app.database.database_manager import get_async_db
         except ImportError:
             # Mock for standalone execution
             async def get_async_db():

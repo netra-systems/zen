@@ -7,7 +7,7 @@ IMPORTANT: This is the OFFICIAL deployment script. Do NOT create new deployment 
 Use this script with appropriate flags for all GCP staging deployments.
 
 Quick Start:
-    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 See SPEC/gcp_deployment.xml for comprehensive deployment guidelines.
 """
@@ -23,11 +23,22 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
+# Import centralized GCP authentication
+sys.path.insert(0, str(Path(__file__).parent))
+from gcp_auth_config import GCPAuthConfig
+
 # Fix Unicode encoding issues on Windows
 if sys.platform == "win32":
     import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    try:
+        # Only wrap if not already wrapped
+        if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
+        if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
+    except:
+        # If wrapping fails, continue with default encoding
+        pass
 
 
 @dataclass
@@ -76,8 +87,8 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
-                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
+                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
@@ -93,7 +104,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app",
+                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
@@ -159,39 +170,17 @@ class GCPDeployer:
     
     def authenticate_with_service_account(self) -> bool:
         """Authenticate using service account key file."""
-        if not self.service_account_path:
-            return True
-            
-        service_account_file = Path(self.service_account_path)
-        if not service_account_file.exists():
-            print(f"❌ Service account file not found: {service_account_file}")
-            return False
-            
-        print(f"🔐 Authenticating with service account: {service_account_file}")
+        # If explicit path provided, use it
+        if self.service_account_path:
+            service_account_file = Path(self.service_account_path)
+            if not service_account_file.exists():
+                print(f"❌ Service account file not found: {service_account_file}")
+                return False
+            return GCPAuthConfig.setup_authentication(service_account_file)
         
-        try:
-            # Activate service account
-            result = subprocess.run(
-                [
-                    self.gcloud_cmd, "auth", "activate-service-account",
-                    "--key-file", str(service_account_file)
-                ],
-                capture_output=True,
-                text=True,
-                check=True,
-                shell=self.use_shell
-            )
-            
-            print("✅ Service account authentication successful")
-            
-            # Also set GOOGLE_APPLICATION_CREDENTIALS for ADC
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(service_account_file)
-            
-            return True
-            
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to authenticate with service account: {e.stderr}")
-            return False
+        # Otherwise use centralized auth config to find and set up authentication
+        print("🔍 Using centralized authentication configuration...")
+        return GCPAuthConfig.ensure_authentication()
     
     def run_pre_deployment_checks(self) -> bool:
         """Run pre-deployment checks to ensure code quality."""
@@ -271,9 +260,29 @@ class GCPDeployer:
                 check=False,
                 shell=self.use_shell
             )
-            if result.returncode != 0 and "already enabled" not in result.stderr:
-                print(f"  ❌ Failed to enable {api}: {result.stderr}")
-                return False
+            if result.returncode != 0:
+                if "already enabled" in result.stderr.lower():
+                    print(f"  ✓ {api} already enabled")
+                elif "permission_denied" in result.stderr.lower() or "auth_permission_denied" in result.stderr.lower():
+                    print(f"  ⚠️ {api} - checking if already enabled...")
+                    # Check if the API is already enabled
+                    check_result = subprocess.run(
+                        [self.gcloud_cmd, "services", "list", "--enabled", "--filter", f"name:{api}"],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                        shell=self.use_shell
+                    )
+                    if api in check_result.stdout:
+                        print(f"  ✓ {api} is already enabled")
+                    else:
+                        print(f"  ❌ Failed to enable {api}: Permission denied")
+                        print(f"     The service account may lack permissions to enable APIs.")
+                        print(f"     Please ensure {api} is enabled in the GCP Console.")
+                        return False
+                else:
+                    print(f"  ❌ Failed to enable {api}: {result.stderr}")
+                    return False
                 
         print("✅ All required APIs enabled")
         return True
@@ -343,11 +352,12 @@ CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port ${PORT:-80
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY frontend/package*.json ./
 RUN npm ci
 
-# Copy application code
+# Copy all frontend source files
+# The .dockerignore file handles exclusions (node_modules, tests, etc.)
 COPY frontend/ .
 COPY shared/ ../shared/
 
@@ -502,7 +512,7 @@ CMD ["npm", "start"]
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
-        # Build base command
+        # Build base command - automatically route traffic to new revision once healthy
         cmd = [
             self.gcloud_cmd, "run", "deploy", service.cloud_run_name,
             "--image", image_tag,
@@ -515,7 +525,8 @@ CMD ["npm", "start"]
             "--max-instances", str(service.max_instances),
             "--timeout", str(service.timeout),
             "--allow-unauthenticated",  # Remove for production
-            "--no-cpu-throttling"
+            "--no-cpu-throttling",
+            "--ingress", "all"  # Allow traffic from anywhere
         ]
         
         # Add environment variables
@@ -531,13 +542,13 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_DEFAULT_PASSWORD=clickhouse-default-password-staging:latest"
             ])
         elif service.name == "auth":
-            # Auth service needs database, JWT secrets, and OAuth credentials
+            # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
             ])
         elif service.name == "frontend":
             # Frontend needs API URLs - use staging URLs for consistent configuration
@@ -571,11 +582,95 @@ CMD ["npm", "start"]
             if url:
                 print(f"   URL: {url}")
                 
+            # Ensure traffic is routed to the latest revision
+            self.update_traffic_to_latest(service.cloud_run_name)
+            
             return True, url
             
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to deploy {service.name}: {e.stderr}")
             return False, None
+    
+    def wait_for_revision_ready(self, service_name: str, max_wait: int = 60) -> bool:
+        """Wait for the latest revision to be ready before routing traffic."""
+        print(f"  ⏳ Waiting for {service_name} revision to be ready...")
+        
+        start_time = time.time()
+        while time.time() - start_time < max_wait:
+            try:
+                # Check if the latest revision is ready
+                cmd = [
+                    self.gcloud_cmd, "run", "revisions", "list",
+                    "--service", service_name,
+                    "--platform", "managed",
+                    "--region", self.region,
+                    "--format", "value(status.conditions[0].status)",
+                    "--limit", "1"
+                ]
+                
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if result.returncode == 0 and "True" in result.stdout:
+                    print(f"  ✅ Revision is ready")
+                    return True
+                    
+            except Exception:
+                pass
+            
+            time.sleep(5)
+        
+        print(f"  ⚠️ Revision not ready after {max_wait} seconds")
+        return False
+    
+    def update_traffic_to_latest(self, service_name: str) -> bool:
+        """Update traffic to route 100% to the latest revision."""
+        print(f"  📡 Updating traffic to latest revision for {service_name}...")
+        
+        # First wait for the revision to be ready
+        if not self.wait_for_revision_ready(service_name):
+            print(f"  ⚠️ Skipping traffic update - revision not ready")
+            return False
+        
+        try:
+            # Update traffic to send 100% to the latest revision
+            cmd = [
+                self.gcloud_cmd, "run", "services", "update-traffic",
+                service_name,
+                "--to-latest",
+                "--platform", "managed",
+                "--region", self.region
+            ]
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode == 0:
+                print(f"  ✅ Traffic updated to latest revision")
+                return True
+            else:
+                # This may fail if the service doesn't exist yet or if traffic is already at latest
+                # which is okay
+                if "already receives 100%" in result.stderr or "not found" in result.stderr:
+                    print(f"  ✓ Traffic already routing to latest revision")
+                    return True
+                else:
+                    print(f"  ⚠️ Could not update traffic: {result.stderr[:200]}")
+                    return False
+                    
+        except Exception as e:
+            print(f"  ⚠️ Error updating traffic: {e}")
+            return False
     
     def get_service_url(self, service_name: str) -> Optional[str]:
         """Get the URL of a deployed Cloud Run service."""
@@ -613,6 +708,8 @@ CMD ["npm", "start"]
         import os
         
         secrets = {
+            # Note: Using standard psycopg2 format with sslmode=require
+            # DatabaseManager will automatically convert to ssl=require for asyncpg
             "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
             "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
@@ -620,7 +717,10 @@ CMD ["npm", "start"]
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
             "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",  # Auth service uses this name
             "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
-            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET")
+            "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
+            # Enhanced JWT security for auth service
+            "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
+            "service-id-staging": f"netra-auth-staging-{int(time.time())}"
         }
         
         for name, value in secrets.items():
@@ -801,11 +901,11 @@ def main():
     Do NOT create new deployment scripts. Use this with appropriate flags.
     
     Examples:
-        # Recommended: Fast local build with checks
-        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
-        
-        # Quick deployment (local build, no checks)
+        # Default: Fast local build (no checks for testing deployment issues)
         python scripts/deploy_to_gcp.py --project netra-staging --build-local
+        
+        # With checks (for production readiness)
+        python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
         
         # Cloud Build (slower)
         python scripts/deploy_to_gcp.py --project netra-staging
@@ -823,11 +923,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  Recommended deployment:
-    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
-    
-  Quick local build:
+  Default deployment (fast, no checks):
     python scripts/deploy_to_gcp.py --project netra-staging --build-local
+    
+  With pre-deployment checks:
+    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks
     
   Cloud Build (slower):
     python scripts/deploy_to_gcp.py --project netra-staging
@@ -842,18 +942,18 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
     parser.add_argument("--build-local", action="store_true",
                        help="Build images locally (5-10x faster than Cloud Build)")
     parser.add_argument("--run-checks", action="store_true",
-                       help="Run pre-deployment checks (architecture, tests, etc.)")
+                       help="Run pre-deployment checks (architecture, tests, etc.) - optional for staging")
     parser.add_argument("--cleanup", action="store_true", 
                        help="Clean up deployments")
     parser.add_argument("--service-account", 
-                       help="Path to service account JSON key file for authentication")
+                       help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
     
     args = parser.parse_args()
     
     # Print warning if not using recommended flags
     if not args.cleanup and not args.build_local and not args.skip_build:
         print("\n⚠️ NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.")
-        print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local --run-checks\n".format(args.project))
+        print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local\n".format(args.project))
         time.sleep(2)
     
     deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account)

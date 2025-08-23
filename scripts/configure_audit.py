@@ -220,8 +220,7 @@ def compute_sum(items):
         sum += item.price
     return sum
 
-# Legacy patterns
-from ..utils import helper  # Relative import
+# Legacy patterns - removed relative import example
 print("Debug output")  # Print in production
         """)
         

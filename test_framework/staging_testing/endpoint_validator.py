@@ -16,7 +16,7 @@ import aiohttp
 import yaml
 
 from test_framework.gcp_integration.base import CloudRunService, GCPConfig
-from ..unified.base_interfaces import (
+from test_framework.unified.base_interfaces import (
     BaseTestComponent,
     HealthCheckResult,
     IDeploymentValidator,

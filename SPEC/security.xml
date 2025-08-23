@@ -2,10 +2,26 @@
 <specification>
     <metadata>
         <name>NetraPlatform.SecurityProtocol</name>
-        <version>2.0</version>
+        <version>3.0</version>
+        <updated>2025-08-23</updated>
+        <change>Authentication consolidation - auth_service is now SINGLE SOURCE OF TRUTH</change>
     </metadata>
     
-    <section title="Authentication (OAuth and JWT)">
+    <section title="Authentication (OAuth and JWT) - CONSOLIDATED ARCHITECTURE">
+        <protocol id="SEC-AUTH-000">
+            <title>CRITICAL: Single Source of Truth Architecture</title>
+            <instruction>ALL authentication operations MUST use auth_service as the SINGLE SOURCE OF TRUTH.</instruction>
+            <constraints>
+                <constraint>MANDATORY: Use auth_service.auth_core.unified_auth_interface for all auth operations.</constraint>
+                <constraint>FORBIDDEN: Direct authentication logic in other services (netra_backend, frontend).</constraint>
+                <constraint>DEPRECATED: netra_backend.app.services.user_auth_service (use shim for migration).</constraint>
+                <constraint>CANONICAL: auth_service handles JWT, sessions, OAuth, API keys.</constraint>
+            </constraints>
+            <migration>
+                <old>from netra_backend.app.clients.auth_client import auth_client</old>
+                <new>from auth_service.auth_core.unified_auth_interface import get_unified_auth</new>
+            </migration>
+        </protocol>
         <protocol id="SEC-AUTH-001">
             <title>Token Management and Storage (Frontend)</title>
             <constraints>

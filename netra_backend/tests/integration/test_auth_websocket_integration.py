@@ -5,7 +5,7 @@ Components: Auth Service → Backend → WebSocket Manager
 Critical: Users can't interact without successful auth→WS flow
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -70,7 +70,7 @@ class TestAuthToWebSocketFlow:
 
         """Test successful auth flow leading to WS connection."""
         from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-        from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
         
         # Setup mocks
 

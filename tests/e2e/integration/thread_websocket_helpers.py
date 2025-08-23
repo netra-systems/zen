@@ -148,7 +148,6 @@ def create_message_test_data(message_id: str, thread_id: str, content: str = Non
     Returns:
         Dictionary containing message test data
     """
-    import time
     
     return {
         "message_id": message_id,

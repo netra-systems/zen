@@ -52,14 +52,14 @@ from tests.e2e.helpers.core.unified_flow_helpers import (
 )
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class RealUnifiedFlowTester:
     """Tests complete user journey with hybrid real/controlled services."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()  
+        self.harness = UnifiedE2ETestHarness()  
         self.db_manager = DatabaseConnectionManager()
         self.http_client: Optional[httpx.AsyncClient] = None
         self.test_user_data: Dict[str, Any] = {}

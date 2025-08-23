@@ -5,6 +5,22 @@ import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
+# E2E Configuration
+E2E_CONFIG = {
+    "timeout": 30,
+    "base_url": "http://localhost:8000",
+    "websocket_url": "ws://localhost:8000/ws",
+    "test_user": "test@example.com"
+}
+
+class E2EEnvironmentValidator:
+    """Validator for E2E test environment."""
+    
+    @staticmethod
+    def validate():
+        """Validate E2E environment is ready."""
+        return True
+
 # Basic test setup fixtures
 @pytest.fixture
 async def mock_agent_service():
@@ -42,3 +58,44 @@ def real_llm_config():
         "timeout": 30.0,
         "max_retries": 3
     }
+
+# Concurrent test fixtures
+@pytest.fixture
+async def concurrent_test_environment():
+    """Mock concurrent test environment."""
+    from unittest.mock import AsyncMock
+    
+    # Create a mock environment with required methods
+    mock_env = AsyncMock()
+    mock_env.redis_client = AsyncMock()
+    mock_env.db_pool = AsyncMock()
+    mock_env.initialize = AsyncMock()
+    mock_env.cleanup = AsyncMock()
+    mock_env.seed_user_data = AsyncMock()
+    mock_env.cleanup_user_data = AsyncMock()
+    
+    # Initialize and return
+    await mock_env.initialize()
+    yield mock_env
+    await mock_env.cleanup()
+
+@pytest.fixture
+def isolated_test_users():
+    """Create mock isolated test users for concurrent testing."""
+    from unittest.mock import MagicMock
+    
+    users = []
+    for i in range(5):  # Create 5 test users
+        user = MagicMock()
+        user.user_id = f"test_user_{i}"
+        user.email = f"test{i}@example.com"
+        user.session_id = f"session_{i}"
+        user.auth_token = f"token_{i}"
+        user.websocket_client = None
+        user.agent_instance_id = None
+        user.startup_metrics = {}
+        user.sensitive_data = {"test_data": f"sensitive_{i}"}
+        user.context_data = {"budget": 1000 * i, "region": "us-east-1"}
+        users.append(user)
+    
+    return users

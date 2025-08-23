@@ -16,7 +16,7 @@ from auth_service.auth_core.models.auth_models import (
     AuthProvider,
     LoginRequest
 )
-from netra_backend.tests.e2e.factories.user_factory import UserFactory
+from auth_service.tests.factories.user_factory import UserFactory
 
 # Add auth_service to path for imports
 

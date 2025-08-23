@@ -94,8 +94,19 @@ class BackgroundTaskManager:
         metadata = self.task_metadata[task_id]
         
         try:
+            # Handle both coroutine functions and coroutine objects
+            if asyncio.iscoroutinefunction(coro):
+                # It's a coroutine function, call it to get the coroutine
+                coroutine_obj = coro()
+            elif asyncio.iscoroutine(coro):
+                # It's already a coroutine object
+                coroutine_obj = coro
+            else:
+                # It might be a regular async callable, try calling it
+                coroutine_obj = coro()
+            
             # Execute with timeout
-            result = await asyncio.wait_for(coro, timeout=timeout)
+            result = await asyncio.wait_for(coroutine_obj, timeout=timeout)
             metadata["status"] = "completed"
             metadata["completed_at"] = datetime.now()
             metadata["result"] = result

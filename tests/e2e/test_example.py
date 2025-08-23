@@ -6,7 +6,7 @@ This shows the REAL service testing approach per SPEC/unified_system_testing.xml
 """
 
 from test_framework.http_client import TestClient
-from tests.e2e.harness_complete import TestHarnessContext, UnifiedTestHarness
+from tests.e2e.harness_complete import TestHarnessContext, UnifiedE2ETestHarness
 from typing import Any, Dict
 import asyncio
 import pytest
@@ -19,7 +19,7 @@ async def test_first_time_user_journey():
 
     async with TestHarnessContext("first_time_user_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Verify all services are healthy
 
@@ -53,7 +53,7 @@ async def test_returning_user_login():
 
     async with TestHarnessContext("returning_user_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Get test user
 
@@ -104,7 +104,7 @@ async def test_service_isolation():
 
     """Test that services are properly isolated but can communicate."""
 
-    harness = await UnifiedTestHarness.create_minimal_harness("isolation_test")
+    harness = await UnifiedE2ETestHarness.create_minimal_harness("isolation_test")
     
 
     try:
@@ -136,9 +136,9 @@ async def test_database_isolation():
 
     """Test that each test gets isolated database."""
 
-    harness1 = await UnifiedTestHarness.create_minimal_harness("db_test_1")
+    harness1 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_1")
 
-    harness2 = await UnifiedTestHarness.create_minimal_harness("db_test_2")
+    harness2 = await UnifiedE2ETestHarness.create_minimal_harness("db_test_2")
     
 
     try:
@@ -167,7 +167,7 @@ class TestRealServiceIntegration:
 
         """Fixture providing a test harness for the test class."""
 
-        harness = await UnifiedTestHarness.create_test_harness("class_test")
+        harness = await UnifiedE2ETestHarness.create_test_harness("class_test")
 
         yield harness
 
@@ -187,7 +187,7 @@ class TestRealServiceIntegration:
         
         # Backend should be able to validate tokens from auth service
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
 
         headers = {"Authorization": f"Bearer {token}"}
         
@@ -228,7 +228,7 @@ async def test_concurrent_requests():
 
     async with TestHarnessContext("load_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Make multiple concurrent requests to test system stability
 

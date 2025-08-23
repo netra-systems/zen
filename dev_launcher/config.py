@@ -30,17 +30,17 @@ class LauncherConfig:
     
     # Reload configuration (uses native reload)
     backend_reload: bool = False  # Default to no reload for performance
-    frontend_reload: bool = True  # Next.js always has reload
+    frontend_reload: bool = False  # Default to no reload for performance
     auth_reload: bool = False  # Auth service reload for performance
     
     # Secret management
-    load_secrets: bool = True
+    load_secrets: bool = False  # Default to local-only secrets (use --load-secrets to enable GCP)
     project_id: Optional[str] = None
     
     # UI configuration
     no_browser: bool = False
     verbose: bool = False
-    non_interactive: bool = False  # Non-interactive mode for CI/automation
+    non_interactive: bool = True  # Non-interactive mode by default (no prompts)
     
     # Performance optimizations
     parallel_startup: bool = True  # Enable parallel service startup by default
@@ -132,27 +132,67 @@ class LauncherConfig:
             raise ValueError(f"Frontend directory not found: {frontend_dir}\nAre you running from the correct directory?")
     
     def _resolve_port_conflicts(self):
-        """FIX: Resolve port conflicts using service discovery system."""
+        """FIX: Resolve port conflicts using robust retry logic with exponential backoff."""
+        import socket
+        import time
+        import random
+        
+        def is_port_available(port, max_retries=3):
+            """Check if port is available with retry logic."""
+            for attempt in range(max_retries):
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                        sock.settimeout(2 + attempt)  # Increase timeout with retries
+                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                        sock.bind(('127.0.0.1', port))
+                        return True
+                except OSError as e:
+                    if attempt < max_retries - 1:
+                        # Exponential backoff with jitter
+                        backoff_time = (0.1 * (2 ** attempt)) + (random.random() * 0.1)
+                        time.sleep(backoff_time)
+                        continue
+                    logger.debug(f"Port {port} unavailable after {max_retries} attempts: {e}")
+                    return False
+            return False
+        
+        def find_available_port_with_retry(start_port, end_port, max_retries=5):
+            """Find available port in range with retry logic."""
+            for attempt in range(max_retries):
+                # Randomize port selection to avoid conflicts
+                ports = list(range(start_port, end_port + 1))
+                random.shuffle(ports)
+                
+                for port in ports:
+                    if is_port_available(port):
+                        return port
+                
+                if attempt < max_retries - 1:
+                    # Exponential backoff between full scans
+                    backoff_time = (0.5 * (2 ** attempt)) + (random.random() * 0.2)
+                    logger.info(f"No available ports found in range {start_port}-{end_port}, retrying in {backoff_time:.1f}s...")
+                    time.sleep(backoff_time)
+            
+            return None
+        
         try:
+            # Try service discovery first if available
             from dev_launcher.service_discovery_system import service_discovery
             
             # Load existing service registrations
             service_discovery.load_discovery_file()
             
-            # Check backend port
-            if self.backend_port and not service_discovery.is_port_available(self.backend_port):
+            # Check backend port with retry
+            if self.backend_port and not is_port_available(self.backend_port):
                 logger.warning(f"Backend port {self.backend_port} is in use, enabling dynamic allocation")
                 self.backend_port = None
                 self.dynamic_ports = True
             
-            # Check frontend port
-            if not service_discovery.is_port_available(self.frontend_port):
-                logger.warning(f"Frontend port {self.frontend_port} is in use, will find alternative")
-                # Find alternative port using service discovery
-                alt_port = service_discovery.find_available_port(
-                    preferred_port=None, 
-                    port_range=(3001, 3010)
-                )
+            # Check frontend port with retry and fallback
+            if not is_port_available(self.frontend_port):
+                logger.warning(f"Frontend port {self.frontend_port} is in use, finding alternative")
+                # Find alternative port with enhanced retry logic
+                alt_port = find_available_port_with_retry(3001, 3020)
                 if alt_port:
                     logger.info(f"Using alternative frontend port {alt_port}")
                     self.frontend_port = alt_port
@@ -161,31 +201,28 @@ class LauncherConfig:
                     self.dynamic_ports = True
                     
         except ImportError:
-            logger.warning("Service discovery system not available, falling back to basic port checking")
-            # Fallback to original implementation
-            import socket
+            logger.warning("Service discovery system not available, using enhanced fallback port checking")
             
-            def is_port_available(port):
-                try:
-                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                        sock.settimeout(1)
-                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                        sock.bind(('127.0.0.1', port))
-                        return True
-                except OSError:
-                    return False
-            
+            # Enhanced fallback implementation
             if self.backend_port and not is_port_available(self.backend_port):
+                logger.warning(f"Backend port {self.backend_port} conflict detected, enabling dynamic allocation")
                 self.backend_port = None
                 self.dynamic_ports = True
             
             if not is_port_available(self.frontend_port):
-                for alt_port in range(3001, 3010):
-                    if is_port_available(alt_port):
-                        self.frontend_port = alt_port
-                        break
+                logger.warning(f"Frontend port {self.frontend_port} conflict detected, searching for alternative")
+                # Use enhanced port finding with retry logic
+                alt_port = find_available_port_with_retry(3001, 3020)
+                if alt_port:
+                    logger.info(f"Found alternative frontend port {alt_port}")
+                    self.frontend_port = alt_port
                 else:
+                    logger.warning("No alternative frontend ports found, enabling dynamic allocation")
                     self.dynamic_ports = True
+        
+        except Exception as e:
+            logger.error(f"Port conflict resolution failed: {e}, falling back to dynamic allocation")
+            self.dynamic_ports = True
     
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
@@ -214,13 +251,17 @@ class LauncherConfig:
             frontend_reload = False  # Disable frontend reload for maximum performance
             auth_reload = False
         else:
-            # Default: no backend reload for performance
+            # Default: no reload for performance
             backend_reload = False
-            frontend_reload = True
+            frontend_reload = False
             auth_reload = False
         
-        # Default to loading secrets unless --no-secrets is specified
-        load_secrets = not args.no_secrets if hasattr(args, 'no_secrets') else True
+        # Default to local-only secrets unless --load-secrets is explicitly specified
+        load_secrets = False  # Default to local-only
+        if hasattr(args, 'load_secrets') and args.load_secrets:
+            load_secrets = True
+        elif hasattr(args, 'no_secrets') and args.no_secrets:
+            load_secrets = False
         
         # Handle startup mode
         startup_mode = "minimal"  # Default
@@ -303,7 +344,7 @@ class LauncherConfig:
             import sys
 
             from dev_launcher.service_config import load_or_create_config
-            interactive = sys.stdin.isatty() and not self.non_interactive
+            interactive = False  # Always use non-interactive mode
             self._services_config = load_or_create_config(interactive=interactive)
         except ImportError:
             # Handle case where service_config is not available
@@ -380,7 +421,7 @@ class LauncherConfig:
             # Map modes to descriptive text and emojis
             mode_info = {
                 ResourceMode.LOCAL: ("Local", "💻"),
-                ResourceMode.SHARED: ("Cloud", "☁️"),
+                ResourceMode.SHARED: ("On", "☁️"),  # Changed from "Cloud" to "On" for better UX
                 ResourceMode.DOCKER: ("Docker", "🧪"),
                 ResourceMode.DISABLED: ("Off", "❌")
             }

@@ -1,0 +1,30 @@
+{
+  "values": [
+    ":event",
+    "_EVENT",
+    "_event",
+    "auth_event",
+    "broadcast:",
+    "business_event",
+    "connect",
+    "cost_per_event",
+    "def\\s+process_event",
+    "disconnect",
+    "emit:",
+    "error",
+    "filtered_by_event",
+    "high_cost_per_event",
+    "listen:",
+    "llm_event",
+    "message",
+    "newest_event",
+    "oldest_event",
+    "onFilterChange",
+    "onSearchChange",
+    "ping",
+    "pong",
+    "subscribe",
+    "trigger_event",
+    "unsubscribe"
+  ]
+}

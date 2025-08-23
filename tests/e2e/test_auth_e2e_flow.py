@@ -25,7 +25,7 @@ os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 
-class UnifiedTestHarness:
+class UnifiedE2ETestHarness:
     """Unified test harness for authentication flow testing"""
     
     def __init__(self):
@@ -74,7 +74,7 @@ class TestAuthE2EFlow:
     
     def setup_method(self):
         """Setup test harness for each test"""
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         # Sync setup for compatibility
         self.harness.auth_service = MagicMock()
         self.harness.websocket_manager = MagicMock()

@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for state persistence and recovery validation.
 Recovery target: <5 second reconnection with full state restoration.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -26,7 +26,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -153,13 +153,13 @@ class TestWebSocketReconnectionStateRecoveryL3:
     
     @pytest.fixture
 
-    async def ws_manager(self, redis_container):
+    async def websocket_manager(self, redis_container):
 
         """Create WebSocket manager with state recovery."""
 
         _, redis_url = redis_container
         
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -211,7 +211,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         ]
     
-    async def test_basic_state_persistence_and_recovery(self, ws_manager, state_manager, test_users):
+    async def test_basic_state_persistence_and_recovery(self, websocket_manager, state_manager, test_users):
 
         """Test basic connection state persistence and recovery."""
 
@@ -221,7 +221,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         first_websocket = MockWebSocketForRedis(user.id)
 
-        connection_info = await ws_manager.connect_user(user.id, first_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, first_websocket)
         
         assert connection_info is not None
         
@@ -247,15 +247,15 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Disconnect (simulating network failure)
 
-        await ws_manager.disconnect_user(user.id, first_websocket)
+        await websocket_manager.disconnect_user(user.id, first_websocket)
 
-        assert user.id not in ws_manager.active_connections
+        assert user.id not in websocket_manager.active_connections
         
         # Reconnect and recover state
 
         second_websocket = MockWebSocketForRedis(user.id)
 
-        new_connection_info = await ws_manager.connect_user(user.id, second_websocket)
+        new_connection_info = await websocket_manager.connect_user(user.id, second_websocket)
         
         # Load and verify state recovery
 
@@ -271,11 +271,11 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, second_websocket)
+        await websocket_manager.disconnect_user(user.id, second_websocket)
 
         await state_manager.clear_state(user.id)
     
-    async def test_message_queue_recovery_after_reconnection(self, ws_manager, redis_client, state_manager, test_users):
+    async def test_message_queue_recovery_after_reconnection(self, websocket_manager, redis_client, state_manager, test_users):
 
         """Test recovery of queued messages after reconnection."""
 
@@ -285,7 +285,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         first_websocket = MockWebSocketForRedis(user.id)
 
-        await ws_manager.connect_user(user.id, first_websocket)
+        await websocket_manager.connect_user(user.id, first_websocket)
         
         # Queue messages while connected (for later recovery)
 
@@ -335,13 +335,13 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Disconnect
 
-        await ws_manager.disconnect_user(user.id, first_websocket)
+        await websocket_manager.disconnect_user(user.id, first_websocket)
         
         # Reconnect
 
         second_websocket = MockWebSocketForRedis(user.id)
 
-        await ws_manager.connect_user(user.id, second_websocket)
+        await websocket_manager.connect_user(user.id, second_websocket)
         
         # Recover and process queued messages
 
@@ -371,9 +371,9 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, second_websocket)
+        await websocket_manager.disconnect_user(user.id, second_websocket)
     
-    async def test_subscription_state_recovery(self, ws_manager, redis_client, state_manager, test_users):
+    async def test_subscription_state_recovery(self, websocket_manager, redis_client, state_manager, test_users):
 
         """Test recovery of subscription state after reconnection."""
 
@@ -383,7 +383,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         first_websocket = MockWebSocketForRedis(user.id)
 
-        await ws_manager.connect_user(user.id, first_websocket)
+        await websocket_manager.connect_user(user.id, first_websocket)
         
         # Setup subscriptions
 
@@ -429,13 +429,13 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Disconnect
 
-        await ws_manager.disconnect_user(user.id, first_websocket)
+        await websocket_manager.disconnect_user(user.id, first_websocket)
         
         # Reconnect
 
         second_websocket = MockWebSocketForRedis(user.id)
 
-        await ws_manager.connect_user(user.id, second_websocket)
+        await websocket_manager.connect_user(user.id, second_websocket)
         
         # Recover subscription state
 
@@ -461,11 +461,11 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, second_websocket)
+        await websocket_manager.disconnect_user(user.id, second_websocket)
 
         await redis_client.delete(subscription_key)
     
-    async def test_rapid_reconnection_handling(self, ws_manager, state_manager, test_users):
+    async def test_rapid_reconnection_handling(self, websocket_manager, state_manager, test_users):
 
         """Test handling of rapid reconnection attempts."""
 
@@ -483,7 +483,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
             
             # Connect
 
-            connection_info = await ws_manager.connect_user(user.id, websocket)
+            connection_info = await websocket_manager.connect_user(user.id, websocket)
 
             if connection_info:
 
@@ -511,23 +511,23 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
             if connection_info:
 
-                await ws_manager.disconnect_user(user.id, websocket)
+                await websocket_manager.disconnect_user(user.id, websocket)
         
         # Final connection should succeed
 
         final_websocket = MockWebSocketForRedis(user.id)
 
-        final_connection = await ws_manager.connect_user(user.id, final_websocket)
+        final_connection = await websocket_manager.connect_user(user.id, final_websocket)
         
         assert final_connection is not None
 
-        assert user.id in ws_manager.active_connections
+        assert user.id in websocket_manager.active_connections
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, final_websocket)
+        await websocket_manager.disconnect_user(user.id, final_websocket)
     
-    async def test_concurrent_reconnection_state_isolation(self, ws_manager, state_manager, test_users):
+    async def test_concurrent_reconnection_state_isolation(self, websocket_manager, state_manager, test_users):
 
         """Test state isolation during concurrent reconnections."""
 
@@ -541,7 +541,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
             websocket = MockWebSocketForRedis(user.id)
 
-            connection_info = await ws_manager.connect_user(user.id, websocket)
+            connection_info = await websocket_manager.connect_user(user.id, websocket)
             
             if connection_info:
 
@@ -569,7 +569,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         for user, websocket, _ in connections:
 
-            task = ws_manager.disconnect_user(user.id, websocket)
+            task = websocket_manager.disconnect_user(user.id, websocket)
 
             disconnect_tasks.append(task)
         
@@ -585,7 +585,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
             new_websocket = MockWebSocketForRedis(user.id)
 
-            task = ws_manager.connect_user(user.id, new_websocket)
+            task = websocket_manager.connect_user(user.id, new_websocket)
 
             reconnect_tasks.append((user, new_websocket, task))
         
@@ -621,13 +621,13 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         for user, websocket in new_connections:
 
-            await ws_manager.disconnect_user(user.id, websocket)
+            await websocket_manager.disconnect_user(user.id, websocket)
 
             await state_manager.clear_state(user.id)
     
     @mock_justified("L3: State recovery testing with real Redis persistence")
 
-    async def test_state_recovery_performance(self, ws_manager, state_manager, test_users):
+    async def test_state_recovery_performance(self, websocket_manager, state_manager, test_users):
 
         """Test performance of state recovery operations."""
 
@@ -681,7 +681,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         reconnect_start = time.time()
 
-        connection_info = await ws_manager.connect_user(user.id, websocket)
+        connection_info = await websocket_manager.connect_user(user.id, websocket)
 
         recovered_state = await state_manager.load_state(user.id)
 
@@ -695,7 +695,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, websocket)
+        await websocket_manager.disconnect_user(user.id, websocket)
 
         await state_manager.clear_state(user.id)
 

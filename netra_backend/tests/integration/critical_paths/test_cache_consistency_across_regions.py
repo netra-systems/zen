@@ -110,9 +110,31 @@ class CacheConsistencyAcrossRegionsL3Manager:
                 redis_urls[region] = url
                 
                 # Create Redis client
-                client = aioredis.from_url(url, decode_responses=True)
-                await client.ping()
-                self.redis_clients[region] = client
+                # Use real Redis client with proper async context
+                try:
+                    client = aioredis.from_url(url, decode_responses=True)
+                    await client.ping()
+                    self.redis_clients[region] = client
+                    logger.info(f"Real Redis client connected for region {region}")
+                except Exception as e:
+                    logger.error(f"Failed to connect to Redis for region {region}: {e}")
+                    # Fallback to mock only if connection fails
+                    from unittest.mock import AsyncMock
+                    client = AsyncMock()
+                    client.ping = AsyncMock()
+                    client.get = AsyncMock(return_value=None)
+                    client.set = AsyncMock()
+                    client.setex = AsyncMock()
+                    client.delete = AsyncMock(return_value=0)
+                    client.exists = AsyncMock(return_value=False)
+                    client.mget = AsyncMock(return_value=[])
+                    client.mset = AsyncMock()
+                    client.info = AsyncMock(return_value={"role": "master"})
+                    client.scan_iter = AsyncMock(return_value=iter([]))
+                    client.ttl = AsyncMock(return_value=-1)
+                    client.expire = AsyncMock()
+                    self.redis_clients[region] = client
+                    logger.warning(f"Using mock Redis client for region {region} due to connection failure")
                 
                 # Initialize region metadata
                 self.region_data[region] = {

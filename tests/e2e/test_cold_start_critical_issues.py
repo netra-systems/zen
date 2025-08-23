@@ -26,9 +26,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
-from auth_service.auth_core.database.database_manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from auth_service.auth_core.core.session_manager import SessionManager
-from netra_backend.app.db.postgres import PostgreSQLDatabase
+from netra_backend.app.db.postgres import Database
 from netra_backend.app.redis_manager import RedisManager
 from database_scripts.create_postgres_tables import create_all_tables
 
@@ -164,7 +164,6 @@ class TestColdStartCriticalIssues:
         os.environ["JWT_SECRET_KEY"] = "backend_secret_456"
         
         # Generate token with auth service secret
-        from auth_service.auth_core.core.session_manager import SessionManager
         session_mgr = SessionManager()
         token = session_mgr.create_session({
             "user_id": "test_user",
@@ -263,7 +262,6 @@ class TestColdStartCriticalIssues:
     async def test_authentication_context_missing_during_websocket(self):
         """Test 3.3: WebSocket connections fail due to missing user context."""
         # Create valid JWT but don't create user in database
-        from auth_service.auth_core.core.session_manager import SessionManager
         session_mgr = SessionManager()
         token = session_mgr.create_session({
             "user_id": "nonexistent_user",
@@ -383,7 +381,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             token = session_mgr.create_session({"user_id": "123"})
             
             # Validate token
-            from netra_backend.app.auth.jwt_handler import JWTHandler
             jwt_handler = JWTHandler()
             
             with pytest.raises(Exception) as exc_info:
@@ -423,7 +420,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         os.environ["CLICKHOUSE_PORT"] = "8443"
         os.environ["CLICKHOUSE_PROTOCOL"] = "https"
         
-        from netra_backend.app.db.clickhouse import ClickHouseConnection
         ch_conn = ClickHouseConnection()
         
         with pytest.raises(Exception) as exc_info:
@@ -438,8 +434,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         # Set very small connection pool
         os.environ["POSTGRES_MAX_CONNECTIONS"] = "1"
         
-        from netra_backend.app.db.postgres import PostgreSQLDatabase
-        db = PostgreSQLDatabase()
+        db = Database()
         
         # Create multiple concurrent connections
         async def get_connection():
@@ -505,8 +500,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_agent_state_persistence_database_failure(self):
         """Test 7.2: Agent state cannot be saved due to database issues."""
         # Simulate intermittent database failures
-        from netra_backend.app.db.postgres import PostgreSQLDatabase
-        original_execute = PostgreSQLDatabase.execute
+        original_execute = Database.execute
         
         call_count = [0]
         async def failing_execute(self, *args, **kwargs):
@@ -515,9 +509,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                 raise Exception("Database connection lost")
             return await original_execute(self, *args, **kwargs)
             
-        PostgreSQLDatabase.execute = failing_execute
+        Database.execute = failing_execute
         
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         agent = SupervisorAgent()
         
         with pytest.raises(Exception) as exc_info:
@@ -613,7 +606,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
         
         # Create thread with 1000+ messages
-        from netra_backend.app.services.database.thread_repository import ThreadRepository
         repo = ThreadRepository()
         
         thread_id = await repo.create_thread({
@@ -656,7 +648,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_health_check_database_query_timeout(self):
         """Test 9.2: Health checks hang on database queries without timeout."""
         # Simulate slow database
-        with patch('netra_backend.app.db.postgres.PostgreSQLDatabase.execute') as mock_execute:
+        with patch('netra_backend.app.db.postgres.Database.execute') as mock_execute:
             async def slow_query(*args, **kwargs):
                 await asyncio.sleep(30)  # 30 second delay
                 
@@ -712,7 +704,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         os.environ["REDIS_URL"] = "redis://remote-redis.example.com:6379"
         os.environ["REDIS_MODE"] = "remote"
         
-        from netra_backend.app.redis_manager import RedisManager
         redis_mgr = RedisManager()
         
         with pytest.raises(Exception) as exc_info:
@@ -731,7 +722,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             r.set(f"dummy_key_{i}", "x" * 1000)
             
         # Create session
-        from auth_service.auth_core.core.session_manager import SessionManager
         session_mgr = SessionManager()
         session_token = session_mgr.create_session({
             "user_id": "test_user",
@@ -753,7 +743,6 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         os.environ["REDIS_CLUSTER_MODE"] = "true"
         os.environ["REDIS_NODES"] = "localhost:7000,localhost:7001,localhost:7002"
         
-        from netra_backend.app.redis_manager import RedisManager
         redis_mgr = RedisManager()
         
         # Try operations that would fail with cluster

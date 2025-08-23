@@ -144,7 +144,7 @@ class TestExecutionContextHashableRegression:
     @pytest.mark.asyncio
     async def test_websocket_connection_executor_context_handling(self):
         """Test WebSocket connection executor handles context correctly."""
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
+        from netra_backend.app.websocket_core.connection_executor import ConnectionExecutor
         
         executor = ConnectionExecutor()
         

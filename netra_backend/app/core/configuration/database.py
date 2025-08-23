@@ -25,6 +25,10 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig
 
 
+# Global set to track logged messages across all instances
+_GLOBAL_LOGGED_MESSAGES = set()
+
+
 class DatabaseConfigManager:
     """Unified database configuration management.
     
@@ -174,7 +178,11 @@ class DatabaseConfigManager:
         
         # Skip validation for Cloud SQL Unix socket connections (like auth service)
         if "/cloudsql/" in url:
-            self._logger.info("Cloud SQL Unix socket detected, skipping SSL validation")
+            # Only log this message once globally to prevent log spam
+            log_key = "cloudsql_socket_detected"
+            if log_key not in _GLOBAL_LOGGED_MESSAGES:
+                self._logger.info("Cloud SQL Unix socket detected, skipping SSL validation")
+                _GLOBAL_LOGGED_MESSAGES.add(log_key)
             return
         
         rules = self._validation_rules.get(self._environment, {})

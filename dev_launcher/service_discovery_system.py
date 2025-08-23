@@ -79,7 +79,18 @@ class ServiceDiscoverySystem:
             
         Returns:
             True if port is available, False otherwise
+        
+        Raises:
+            ValueError: If port is not in valid range (0-65535)
         """
+        # Validate port range (0-65535 is valid TCP/UDP port range)
+        if not isinstance(port, int) or port < 0 or port > 65535:
+            raise ValueError(f"Port must be an integer between 0 and 65535, got: {port}")
+        
+        # Port 0 is special (let OS choose), ports 1-1023 require elevated privileges
+        if port == 0:
+            return True  # Let OS choose
+        
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 sock.settimeout(1)

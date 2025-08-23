@@ -84,8 +84,8 @@ class StartupFixesIntegration:
             from dev_launcher.service_discovery_system import service_discovery
             status["service_discovery_available"] = True
             
-            # Test port availability checking
-            test_port_available = service_discovery.is_port_available(99999)  # Should be available
+            # Test port availability checking with valid port number
+            test_port_available = service_discovery.is_port_available(8080)  # Valid port in range 0-65535
             if test_port_available:
                 status["port_conflict_resolution"] = True
                 logger.info("Port conflict resolution system is working")
@@ -180,17 +180,17 @@ class StartupFixesIntegration:
         }
         
         try:
-            from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager
             status["auth_database_manager_available"] = True
             
             # Check if the rollback method is available
-            if hasattr(AuthDatabaseManager, 'create_user_with_rollback'):
+            if hasattr(DatabaseManager, 'create_user_with_rollback'):
                 status["rollback_method_available"] = True
                 logger.info("Database transaction rollback fix is available")
                 self.fixes_applied.add("database_transaction_rollback")
             
         except ImportError:
-            logger.warning("Auth database manager not available")
+            logger.warning("Database manager not available")
         
         return status
     

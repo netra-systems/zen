@@ -202,49 +202,38 @@ class DatabaseSourceMock:
 class RedisCacheWarmingStartupL3Manager:
     """L3 Redis cache warming on startup test manager with real Redis and startup simulation."""
     
-    def __init__(self):
-        self.redis_containers = {}
-        self.redis_clients = {}
+    def __init__(self, redis_client):
+        self.redis_client = redis_client  # Single real Redis client
         self.database_sources = {}
         self.metrics = StartupWarmingMetrics()
         self.warmed_keys = set()
         self.startup_scenarios = [
             "cold_start", "warm_restart", "crash_recovery", "deployment_update"
         ]
-        
-    async def setup_redis_for_startup_warming(self) -> Dict[str, str]:
-        """Setup Redis instances for startup cache warming testing."""
-        redis_configs = {
-            "main_cache": {"port": 6420, "role": "main application cache"},
-            "session_cache": {"port": 6421, "role": "session and auth cache"},
-            "metadata_cache": {"port": 6422, "role": "metadata and config cache"},
-            "backup_cache": {"port": 6423, "role": "backup and recovery"}
+        # Simulate multiple cache namespaces using key prefixes
+        self.cache_prefixes = {
+            "main_cache:": "main application cache",
+            "session_cache:": "session and auth cache",
+            "metadata_cache:": "metadata and config cache",
+            "backup_cache:": "backup and recovery"
         }
         
-        redis_urls = {}
-        
-        for name, config in redis_configs.items():
-            try:
-                container = NetraRedisContainer(port=config["port"])
-                container.container_name = f"netra-startup-{name}-{uuid.uuid4().hex[:8]}"
-                
-                url = await container.start()
-                
-                self.redis_containers[name] = container
-                redis_urls[name] = url
-                
-                # Create Redis client
-                client = aioredis.from_url(url, decode_responses=True)
-                await client.ping()
-                self.redis_clients[name] = client
-                
-                logger.info(f"Redis {name} ({config['role']}) started: {url}")
-                
-            except Exception as e:
-                logger.error(f"Failed to start Redis {name}: {e}")
-                raise
-        
-        return redis_urls
+    async def setup_redis_for_startup_warming(self) -> Dict[str, str]:
+        """Setup Redis for startup cache warming testing using real client with prefixes."""
+        try:
+            # Test Redis connection
+            await self.redis_client.ping()
+            
+            logger.info(f"Redis client ready for startup warming with {len(self.cache_prefixes)} cache namespaces")
+            
+            return {
+                "redis_url": "redis://localhost:6379/0",  # Using the real client connection
+                "cache_prefixes": list(self.cache_prefixes.keys()),
+                "simulated": True
+            }
+        except Exception as e:
+            logger.error(f"Failed to setup Redis for startup warming: {e}")
+            raise
     
     async def setup_database_sources(self) -> Dict[str, DatabaseSourceMock]:
         """Setup mock database sources for cache warming data."""
@@ -407,14 +396,14 @@ class RedisCacheWarmingStartupL3Manager:
         }
         
         target_cache = cache_mapping.get(data_type, "main_cache")
-        cache_client = self.redis_clients[target_cache]
+        cache_prefix = f"{target_cache}:"
         
-        # Warm cache with data
+        # Warm cache with data using real Redis client
         keys_warmed = 0
         data_entries = data_result["data"]
         
-        # Use pipeline for efficiency
-        pipe = cache_client.pipeline()
+        # Use pipeline for efficiency with the real Redis client
+        pipe = self.redis_client.pipeline()
         
         for key, value in data_entries.items():
             try:
@@ -431,8 +420,10 @@ class RedisCacheWarmingStartupL3Manager:
                 else:
                     ttl = 3600   # 1 hour
                 
-                pipe.setex(key, ttl, cache_value)
-                self.warmed_keys.add(key)
+                # Use cache prefix to simulate different cache namespaces
+                prefixed_key = f"{cache_prefix}{key}"
+                pipe.setex(prefixed_key, ttl, cache_value)
+                self.warmed_keys.add(prefixed_key)
                 keys_warmed += 1
                 
             except Exception as e:
@@ -478,15 +469,15 @@ class RedisCacheWarmingStartupL3Manager:
         validation_results["total_keys_checked"] = len(test_keys)
         validation_results["critical_keys_present"] = hits
         
-        # Check memory usage
-        for cache_name, client in self.redis_clients.items():
-            try:
-                info = await client.info('memory')
-                memory_used = info.get('used_memory', 0)
-                validation_results["memory_usage"][cache_name] = memory_used
-                self.metrics.warming_memory_usage.append(memory_used)
-            except Exception:
-                validation_results["memory_usage"][cache_name] = 0
+        # Check memory usage with the real Redis client
+        try:
+            info = await self.redis_client.info('memory')
+            memory_used = int(info.get('used_memory', 0))
+            validation_results["memory_usage"]["total"] = memory_used
+            self.metrics.warming_memory_usage.append(memory_used)
+        except Exception as e:
+            logger.warning(f"Failed to get memory info: {e}")
+            validation_results["memory_usage"]["total"] = 0
         
         return validation_results
     
@@ -665,9 +656,9 @@ class RedisCacheWarmingStartupL3Manager:
             logger.error(f"Startup warming cleanup failed: {e}")
 
 @pytest.fixture
-async def startup_warming_manager():
-    """Create L3 Redis cache warming startup manager."""
-    manager = RedisCacheWarmingStartupL3Manager()
+async def startup_warming_manager(isolated_redis_client):
+    """Create L3 Redis cache warming startup manager with real Redis client."""
+    manager = RedisCacheWarmingStartupL3Manager(isolated_redis_client)
     await manager.setup_redis_for_startup_warming()
     await manager.setup_database_sources()
     yield manager

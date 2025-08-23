@@ -44,13 +44,13 @@ from tests.e2e.rate_limiting_core import (
     UserManager,
 )
 from tests.e2e.service_manager import ServiceManager
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class UnifiedRateLimitTester:
     """Tests rate limiting across all service boundaries."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.service_manager = ServiceManager(harness)
         self.test_session_id = f"unified-rate-test-{uuid.uuid4().hex[:8]}"
@@ -592,7 +592,7 @@ async def test_rate_limiting_unified_real():
     Must complete within 60 seconds for CI/CD integration.
     """
     # Create unified test harness
-    harness = UnifiedTestHarness()
+    harness = UnifiedE2ETestHarness()
     tester = UnifiedRateLimitTester(harness)
     
     try:

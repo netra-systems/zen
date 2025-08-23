@@ -86,8 +86,7 @@ class StringLiteralQuery:
                 'valid': True,
                 'value': value,
                 'category': exact['category'],
-                'type': exact['type'],
-                'locations': exact['locations']
+                'locations': exact.get('locations', [])
             }
         else:
             suggestions = self.suggest(value, category)
@@ -118,12 +117,8 @@ class StringLiteralQuery:
                 'types': {}
             }
             
-            # Count by type
-            for entry in data['literals'].values():
-                entry_type = entry['type']
-                if entry_type not in stats['categories'][cat]['types']:
-                    stats['categories'][cat]['types'][entry_type] = 0
-                stats['categories'][cat]['types'][entry_type] += 1
+            # Count literals (no type field in new structure)
+            stats['categories'][cat]['literals_count'] = len(data['literals'])
                 
         return stats
 
@@ -152,10 +147,10 @@ def main():
         if results:
             print(f"Found {len(results)} matches:")
             for r in results:
-                print(f"\n  {r['value']} ({r['category']}/{r['type']})")
-                for loc in r['locations'][:3]:
+                print(f"\n  {r['value']} ({r['category']})")
+                for loc in r.get('locations', [])[:3]:
                     print(f"    - {loc}")
-                if len(r['locations']) > 3:
+                if len(r.get('locations', [])) > 3:
                     print(f"    ... and {len(r['locations']) - 3} more")
         else:
             print("No matches found")
@@ -170,12 +165,11 @@ def main():
             
         result = query.validate(args.value, args.category)
         if result['valid']:
-            print(f"✓ Valid: '{result['value']}'")
+            print(f"[VALID] '{result['value']}'")
             print(f"  Category: {result['category']}")
-            print(f"  Type: {result['type']}")
             print(f"  Used in {len(result['locations'])} locations")
         else:
-            print(f"✗ Invalid: '{result['value']}'")
+            print(f"[INVALID] '{result['value']}'")
             if result['suggestions']:
                 print(f"  Did you mean: {', '.join(result['suggestions'])}?")
                 

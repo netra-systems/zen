@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical - security incidents destroy customer trust
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

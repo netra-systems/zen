@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict
 
 from test_framework.comprehensive_reporter import ComprehensiveTestReporter
-from .report_generators import (
+from test_framework.report_generators import (
     calculate_total_counts,
     generate_markdown_report,
     status_badge,

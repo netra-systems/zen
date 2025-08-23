@@ -126,14 +126,12 @@ class RealDevLauncherTester:
             
             # Copy test config to main config location
             if self.test_config_path.exists():
-                import shutil
                 shutil.copy2(self.test_config_path, self.original_config_path)
                 print(f"Using test config with mock databases")
             else:
                 print(f"Warning: Test config file not found: {self.test_config_path}")
             
             # Force mock database URLs in environment to override any existing values
-            import os
             import secrets
             self.backup_env_vars = {}
             mock_env_vars = {
@@ -167,7 +165,6 @@ class RealDevLauncherTester:
         """Restore original environment configuration."""
         try:
             # Restore environment variables
-            import os
             if hasattr(self, 'backup_env_vars'):
                 for key, original_value in self.backup_env_vars.items():
                     if original_value is None:
@@ -186,7 +183,6 @@ class RealDevLauncherTester:
             
             # Restore original config if backup exists
             if self.backup_config_path.exists():
-                import shutil
                 shutil.move(self.backup_config_path, self.original_config_path)
                 print("Restored original configuration")
                 

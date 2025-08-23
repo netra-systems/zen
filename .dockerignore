@@ -49,6 +49,17 @@ test_reports
 
 # Node modules (for frontend)
 node_modules
+frontend/node_modules
+**/node_modules
+# Frontend specific exclusions
+frontend/.next
+frontend/coverage
+frontend/cypress
+frontend/__tests__
+frontend/test-*
+frontend/*.log
+frontend/jest.*
+frontend/test-results
 # Preserve .next/cache for build optimization
 .next/server
 .next/static

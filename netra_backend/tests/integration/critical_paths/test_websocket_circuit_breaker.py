@@ -11,7 +11,7 @@ L2 Test: Real internal circuit breaker components with mocked external services.
 Performance target: <100ms failure detection, <30s recovery time.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ from uuid import uuid4
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class CircuitState(Enum):
@@ -724,11 +724,11 @@ class TestWebSocketCircuitBreaker:
     
     @pytest.fixture
 
-    def ws_manager(self):
+    def websocket_manager(self):
 
         """Create WebSocket manager with mocked external services."""
 
-        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis:
+        with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
 
@@ -1061,7 +1061,7 @@ class TestWebSocketCircuitBreaker:
     
     @mock_justified("L2: Circuit breaker with real internal components")
 
-    async def test_websocket_integration_with_circuit_breaker(self, ws_manager, circuit_breaker, fallback_handler, test_users):
+    async def test_websocket_integration_with_circuit_breaker(self, websocket_manager, circuit_breaker, fallback_handler, test_users):
 
         """Test WebSocket integration with circuit breaker protection."""
 
@@ -1071,7 +1071,7 @@ class TestWebSocketCircuitBreaker:
         
         # Connect user
 
-        connection_info = await ws_manager.connect_user(user.id, mock_websocket)
+        connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
 
         assert connection_info is not None
         
@@ -1079,7 +1079,7 @@ class TestWebSocketCircuitBreaker:
 
         async def protected_send_message(message_content):
 
-            return await ws_manager.send_message_to_user(user.id, message_content)
+            return await websocket_manager.send_message_to_user(user.id, message_content)
         
         # Test successful operations
 
@@ -1099,13 +1099,13 @@ class TestWebSocketCircuitBreaker:
         
         # Simulate failures by mocking WebSocket manager
 
-        original_send = ws_manager.send_message_to_user
+        original_send = websocket_manager.send_message_to_user
         
         async def failing_send(*args, **kwargs):
 
             raise Exception("WebSocket connection failed")
         
-        ws_manager.send_message_to_user = failing_send
+        websocket_manager.send_message_to_user = failing_send
         
         # Generate failures to open circuit
 
@@ -1150,7 +1150,7 @@ class TestWebSocketCircuitBreaker:
         
         # Restore WebSocket manager and test recovery
 
-        ws_manager.send_message_to_user = original_send
+        websocket_manager.send_message_to_user = original_send
         
         # Force half-open state
 
@@ -1174,7 +1174,7 @@ class TestWebSocketCircuitBreaker:
         
         # Cleanup
 
-        await ws_manager.disconnect_user(user.id, mock_websocket)
+        await websocket_manager.disconnect_user(user.id, mock_websocket)
     
     async def test_concurrent_circuit_breaker_operations(self, circuit_breaker):
 

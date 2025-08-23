@@ -10,6 +10,9 @@ require('whatwg-fetch');
 require('@testing-library/jest-dom');
 const fetchMock = require('jest-fetch-mock');
 
+// Add React for JSX components
+global.React = require('react');
+
 // ============================================================================
 // GLOBAL POLYFILLS FOR NODE.JS ENVIRONMENT
 // ============================================================================
@@ -22,7 +25,66 @@ global.BroadcastChannel = class BroadcastChannel {
   close() {}
   addEventListener() {}
   removeEventListener() {}
+  dispatchEvent() { return true; }
 };
+
+// Prevent hanging tests by ensuring all timers are cleaned up
+let timeoutIds = new Set();
+let intervalIds = new Set();
+
+const originalSetTimeout = global.setTimeout;
+const originalSetInterval = global.setInterval;
+const originalClearTimeout = global.clearTimeout;
+const originalClearInterval = global.clearInterval;
+
+global.setTimeout = function(callback, delay, ...args) {
+  const id = originalSetTimeout.call(this, callback, delay, ...args);
+  timeoutIds.add(id);
+  return id;
+};
+
+global.setInterval = function(callback, delay, ...args) {
+  const id = originalSetInterval.call(this, callback, delay, ...args);
+  intervalIds.add(id);
+  return id;
+};
+
+global.clearTimeout = function(id) {
+  timeoutIds.delete(id);
+  return originalClearTimeout.call(this, id);
+};
+
+global.clearInterval = function(id) {
+  intervalIds.delete(id);
+  return originalClearInterval.call(this, id);
+};
+
+// Clean up all timers after each test - more aggressive cleanup
+afterEach(() => {
+  // Clear all tracked timers
+  for (const id of timeoutIds) {
+    originalClearTimeout(id);
+  }
+  for (const id of intervalIds) {
+    originalClearInterval(id);
+  }
+  timeoutIds.clear();
+  intervalIds.clear();
+  
+  // Force clear any remaining Node.js timers (aggressive cleanup)
+  if (typeof global._getActiveHandles === 'function') {
+    const handles = global._getActiveHandles();
+    handles.forEach(handle => {
+      if (handle && typeof handle.close === 'function') {
+        try {
+          handle.close();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+    });
+  }
+});
 
 global.TransformStream = class TransformStream {
   constructor() {
@@ -106,39 +168,101 @@ global.cancelAnimationFrame = jest.fn(id => clearTimeout(id));
 // WEBSOCKET MOCKS
 // ============================================================================
 class MockWebSocket {
-  constructor(url) {
+  constructor(url, protocols) {
     this.url = url + `-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    this.readyState = MockWebSocket.OPEN;
-    this.send = jest.fn();
-    this.close = jest.fn();
-    this.addEventListener = jest.fn();
-    this.removeEventListener = jest.fn();
+    this.protocols = protocols || [];
+    this.readyState = MockWebSocket.CONNECTING;
+    this.bufferedAmount = 0;
+    this.binaryType = 'blob';
+    this.extensions = '';
+    this.protocol = '';
+    
+    // Event handlers
     this.onopen = null;
     this.onclose = null;
     this.onerror = null;
     this.onmessage = null;
     
-    // Simulate connection
-    setTimeout(() => {
-      if (this.onopen) {
-        this.onopen(new Event('open'));
+    // Event listener management
+    this.eventListeners = new Map();
+    this.send = jest.fn();
+    this.close = jest.fn((code, reason) => {
+      this.readyState = MockWebSocket.CLOSING;
+      setTimeout(() => {
+        this.readyState = MockWebSocket.CLOSED;
+        const closeEvent = new CloseEvent('close', { code: code || 1000, reason: reason || '' });
+        this.onclose?.(closeEvent);
+        this.dispatchEvent(closeEvent);
+      }, 0);
+    });
+    this.addEventListener = jest.fn((type, listener) => {
+      if (!this.eventListeners.has(type)) {
+        this.eventListeners.set(type, new Set());
       }
-    }, 0);
+      this.eventListeners.get(type).add(listener);
+    });
+    this.removeEventListener = jest.fn((type, listener) => {
+      if (this.eventListeners.has(type)) {
+        this.eventListeners.get(type).delete(listener);
+      }
+    });
+    this.dispatchEvent = jest.fn((event) => {
+      if (this.eventListeners.has(event.type)) {
+        this.eventListeners.get(event.type).forEach(listener => {
+          try {
+            listener(event);
+          } catch (e) {
+            // Ignore listener errors in tests
+          }
+        });
+      }
+      return true;
+    });
+    
+    // Simulate realistic connection process
+    setTimeout(() => {
+      if (this.readyState === MockWebSocket.CONNECTING) {
+        this.readyState = MockWebSocket.OPEN;
+        const openEvent = new Event('open');
+        this.onopen?.(openEvent);
+        this.dispatchEvent(openEvent);
+      }
+    }, 10);
   }
   
   simulateMessage(data) {
-    const event = new MessageEvent('message', { 
-      data: typeof data === 'string' ? data : JSON.stringify(data) 
-    });
-    if (this.onmessage) {
-      this.onmessage(event);
+    if (this.readyState === MockWebSocket.OPEN) {
+      const messageData = typeof data === 'string' ? data : JSON.stringify(data);
+      const event = new MessageEvent('message', { data: messageData });
+      this.onmessage?.(event);
+      this.dispatchEvent(event);
     }
   }
   
   simulateError(error) {
-    const event = new ErrorEvent('error', { error });
-    if (this.onerror) {
-      this.onerror(event);
+    const errorEvent = new ErrorEvent('error', { error: error || new Error('WebSocket error') });
+    this.onerror?.(errorEvent);
+    this.dispatchEvent(errorEvent);
+  }
+  
+  simulateOpen() {
+    if (this.readyState === MockWebSocket.CONNECTING) {
+      this.readyState = MockWebSocket.OPEN;
+      const openEvent = new Event('open');
+      this.onopen?.(openEvent);
+      this.dispatchEvent(openEvent);
+    }
+  }
+  
+  simulateClose(code = 1000, reason = '') {
+    if (this.readyState !== MockWebSocket.CLOSED) {
+      this.readyState = MockWebSocket.CLOSING;
+      setTimeout(() => {
+        this.readyState = MockWebSocket.CLOSED;
+        const closeEvent = new CloseEvent('close', { code, reason });
+        this.onclose?.(closeEvent);
+        this.dispatchEvent(closeEvent);
+      }, 0);
     }
   }
 }
@@ -154,10 +278,21 @@ global.WebSocket = MockWebSocket;
 // STORAGE MOCKS
 // ============================================================================
 const localStorageData = new Map();
+// Initialize with auth token for consistent test state
+localStorageData.set('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature');
+localStorageData.set('auth_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature');
+
 const localStorageMock = {
   getItem: jest.fn((key) => localStorageData.get(key) || null),
   setItem: jest.fn((key, value) => {
-    if (localStorageData.size > 100) localStorageData.clear();
+    if (localStorageData.size > 100) {
+      // Preserve auth tokens when clearing storage
+      const token = localStorageData.get('token');
+      const authToken = localStorageData.get('auth_token');
+      localStorageData.clear();
+      if (token) localStorageData.set('token', token);
+      if (authToken) localStorageData.set('auth_token', authToken);
+    }
     localStorageData.set(key, String(value));
   }),
   removeItem: jest.fn((key) => localStorageData.delete(key)),
@@ -244,50 +379,91 @@ const mockUser = {
   full_name: 'Test User'
 };
 
+// Mock JWT token for consistent use across tests
+const mockJWTToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
+
 // Mock auth service
 jest.mock('@/auth/service', () => ({
   authService: {
     getAuthConfig: jest.fn().mockResolvedValue(mockAuthConfig),
     handleDevLogin: jest.fn().mockResolvedValue({
-      access_token: 'mock-token',
+      access_token: mockJWTToken,
       token_type: 'Bearer'
     }),
-    getToken: jest.fn().mockReturnValue('mock-token'),
-    getAuthHeaders: jest.fn().mockReturnValue({ Authorization: 'Bearer mock-token' }),
-    removeToken: jest.fn(),
+    getToken: jest.fn().mockReturnValue(mockJWTToken),
+    getAuthHeaders: jest.fn().mockReturnValue({ Authorization: `Bearer ${mockJWTToken}` }),
+    removeToken: jest.fn(() => {
+      localStorageData.delete('token');
+      localStorageData.delete('auth_token');
+    }),
     getDevLogoutFlag: jest.fn().mockReturnValue(false),
     setDevLogoutFlag: jest.fn(),
     clearDevLogoutFlag: jest.fn(),
-    handleLogin: jest.fn(),
-    handleLogout: jest.fn(),
+    handleLogin: jest.fn((credentials) => {
+      localStorageData.set('token', mockJWTToken);
+      localStorageData.set('auth_token', mockJWTToken);
+      return Promise.resolve({ token: mockJWTToken, user: mockUser });
+    }),
+    handleLogout: jest.fn(() => {
+      localStorageData.delete('token');
+      localStorageData.delete('auth_token');
+      return Promise.resolve();
+    }),
     useAuth: jest.fn().mockReturnValue({
       user: mockUser,
       login: jest.fn(),
       logout: jest.fn(),
       loading: false,
       authConfig: mockAuthConfig,
-      token: 'mock-token'
+      token: mockJWTToken,
+      isAuthenticated: true
     })
   }
 }));
 
 // Mock auth context
 jest.mock('@/auth/context', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const mockAuthContextValue = {
-    user: mockUser,
-    login: jest.fn(),
-    logout: jest.fn(),
+    user: {
+      id: 'test-user',
+      email: 'test@example.com',
+      full_name: 'Test User'
+    },
+    login: jest.fn((credentials) => {
+      localStorageData.set('token', mockJWTToken);
+      localStorageData.set('auth_token', mockJWTToken);
+      return Promise.resolve({ token: mockJWTToken, user: mockUser });
+    }),
+    logout: jest.fn(() => {
+      localStorageData.delete('token');
+      localStorageData.delete('auth_token');
+      return Promise.resolve();
+    }),
     loading: false,
-    authConfig: mockAuthConfig,
-    token: 'mock-token'
+    authConfig: {
+      development_mode: true,
+      google_client_id: 'mock-google-client-id',
+      endpoints: {
+        login: 'http://localhost:8081/auth/login',
+        logout: 'http://localhost:8081/auth/logout',
+        callback: 'http://localhost:8081/auth/callback',
+        token: 'http://localhost:8081/auth/token',
+        user: 'http://localhost:8081/auth/me',
+        dev_login: 'http://localhost:8081/auth/dev/login'
+      },
+      authorized_javascript_origins: ['http://localhost:3000'],
+      authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+    },
+    token: mockJWTToken,
+    isAuthenticated: true
   };
 
-  const MockAuthContext = React.createContext(mockAuthContextValue);
+  const MockAuthContext = mockReact.createContext(mockAuthContextValue);
 
   return {
     AuthContext: MockAuthContext,
-    AuthProvider: ({ children }) => React.createElement(MockAuthContext.Provider, { value: mockAuthContextValue }, children),
+    AuthProvider: ({ children }) => mockReact.createElement(MockAuthContext.Provider, { value: mockAuthContextValue }, children),
     useAuth: () => mockAuthContextValue
   };
 });
@@ -296,7 +472,7 @@ jest.mock('@/auth/context', () => {
 // WEBSOCKET PROVIDER MOCKS
 // ============================================================================
 jest.mock('@/providers/WebSocketProvider', () => {
-  const React = require('react');
+  const mockReact = require('react');
   const mockWebSocketContextValue = {
     sendMessage: jest.fn(),
     addOptimisticMessage: jest.fn(),
@@ -325,10 +501,10 @@ jest.mock('@/providers/WebSocketProvider', () => {
     }
   };
   
-  const MockWebSocketContext = React.createContext(mockWebSocketContextValue);
+  const MockWebSocketContext = mockReact.createContext(mockWebSocketContextValue);
   
   return {
-    WebSocketProvider: ({ children }) => React.createElement(MockWebSocketContext.Provider, { value: mockWebSocketContextValue }, children),
+    WebSocketProvider: ({ children }) => mockReact.createElement(MockWebSocketContext.Provider, { value: mockWebSocketContextValue }, children),
     WebSocketContext: MockWebSocketContext,
     useWebSocketContext: () => mockWebSocketContextValue
   };
@@ -387,7 +563,10 @@ jest.mock('@/hooks/useMCPTools', () => ({
       is_error: false,
       execution_time_ms: 150
     }),
-    getServerStatus: jest.fn().mockReturnValue('CONNECTED'),
+    getServerStatus: jest.fn().mockImplementation((serverName) => {
+      // Return CONNECTED for mock-server, DISCONNECTED for unknown servers
+      return serverName === 'mock-server' ? 'CONNECTED' : 'DISCONNECTED';
+    }),
     refreshTools: jest.fn().mockResolvedValue(undefined),
     isLoading: false,
     error: undefined,
@@ -405,12 +584,26 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(() => ({
     isAuthenticated: true,
     user: mockUser,
-    token: 'mock-token',
-    login: jest.fn(),
-    logout: jest.fn(),
-    clearAuth: jest.fn(),
+    token: mockJWTToken,
+    login: jest.fn((user, token) => {
+      localStorageData.set('token', token || mockJWTToken);
+      localStorageData.set('auth_token', token || mockJWTToken);
+      return Promise.resolve();
+    }),
+    logout: jest.fn(() => {
+      localStorageData.delete('token');
+      localStorageData.delete('auth_token');
+      return Promise.resolve();
+    }),
+    clearAuth: jest.fn(() => {
+      localStorageData.delete('token');
+      localStorageData.delete('auth_token');
+    }),
     setUser: jest.fn(),
-    setToken: jest.fn()
+    setToken: jest.fn((token) => {
+      localStorageData.set('token', token);
+      localStorageData.set('auth_token', token);
+    })
   }))
 }));
 
@@ -421,8 +614,20 @@ jest.mock('@/store/unified-chat', () => ({
     isProcessing: false,
     messages: [],
     sendMessage: jest.fn(),
+    addMessage: jest.fn(),
+    setProcessing: jest.fn(),
+    setActiveThread: jest.fn(),
     addOptimisticMessage: jest.fn(),
-    clearMessages: jest.fn()
+    updateOptimisticMessage: jest.fn(),
+    removeOptimisticMessage: jest.fn(),
+    clearOptimisticMessages: jest.fn(),
+    resetLayers: jest.fn(),
+    setConnectionStatus: jest.fn(),
+    setThreadLoading: jest.fn(),
+    startThreadLoading: jest.fn(),
+    completeThreadLoading: jest.fn(),
+    clearMessages: jest.fn(),
+    loadMessages: jest.fn()
   }))
 }));
 
@@ -482,6 +687,149 @@ jest.mock('@/services/threadService', () => ({
   }
 }));
 
+// Mock message sending hooks to prevent API calls and missing function errors
+jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+  useMessageSending: jest.fn(() => ({
+    isSending: false,
+    isProcessing: false,
+    error: null,
+    handleSend: jest.fn().mockImplementation(async (params) => {
+      // Simulate real behavior - validate params and resolve quickly
+      if (params?.message && params?.isAuthenticated) {
+        return Promise.resolve();
+      }
+      return Promise.reject(new Error('Invalid params'));
+    }),
+    setProcessing: jest.fn(), // Add missing setProcessing function
+    reset: jest.fn(),
+    retry: jest.fn().mockResolvedValue(undefined)
+  }))
+}));
+
+// Mock additional hooks that might be causing issues
+jest.mock('@/hooks/useAgent', () => ({
+  useAgent: jest.fn(() => ({
+    agent: null,
+    isRunning: false,
+    isStarting: false,
+    error: null,
+    startAgent: jest.fn().mockResolvedValue(undefined),
+    stopAgent: jest.fn().mockResolvedValue(undefined),
+    restartAgent: jest.fn().mockResolvedValue(undefined)
+  }))
+}));
+
+jest.mock('@/hooks/useAgentStart', () => ({
+  useAgentStart: jest.fn(() => ({
+    isStarting: false,
+    error: null,
+    startAgent: jest.fn().mockResolvedValue(undefined)
+  }))
+}));
+
+jest.mock('@/hooks/useAgentUpdates', () => ({
+  useAgentUpdates: jest.fn(() => ({
+    updates: [],
+    lastUpdate: null,
+    isReceivingUpdates: false
+  }))
+}));
+
+jest.mock('@/hooks/usePerformanceMetrics', () => ({
+  usePerformanceMetrics: jest.fn(() => ({
+    metrics: {
+      renderCount: 1,
+      lastRenderTime: Date.now(),
+      averageResponseTime: 100,
+      wsLatency: 50,
+      memoryUsage: 1024,
+      fps: 60,
+      componentRenderTimes: new Map()
+    },
+    startTracking: jest.fn(),
+    stopTracking: jest.fn(),
+    reset: jest.fn()
+  }))
+}));
+
+// Mock additional missing hooks
+jest.mock('@/hooks/useKeyboardShortcuts', () => ({
+  useKeyboardShortcuts: jest.fn(() => ({
+    shortcuts: {},
+    registerShortcut: jest.fn(),
+    unregisterShortcut: jest.fn(),
+    isEnabled: true
+  }))
+}));
+
+// Mock framer-motion to prevent animation issues in tests
+jest.mock('framer-motion', () => {
+  const mockReact = require('react');
+  return {
+    motion: {
+      div: ({ children, whileHover, whileTap, initial, animate, exit, transition, ...props }) => 
+        mockReact.createElement('div', props, children),
+      button: ({ children, whileHover, whileTap, initial, animate, exit, transition, ...props }) => 
+        mockReact.createElement('button', props, children)
+    },
+    AnimatePresence: ({ children, mode }) => children
+  };
+});
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: jest.fn(() => ({
+    isLoading: false,
+    setLoading: jest.fn(),
+    withLoading: jest.fn((fn) => fn)
+  }))
+}));
+
+jest.mock('@/hooks/useError', () => ({
+  useError: jest.fn(() => ({
+    error: null,
+    setError: jest.fn(),
+    clearError: jest.fn(),
+    hasError: false
+  }))
+}));
+
+// Mock event processor hook to prevent timer leaks
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: jest.fn(() => ({
+    processedCount: 0,
+    errorCount: 0,
+    queueSize: 0,
+    duplicatesDropped: 0,
+    getStats: jest.fn(() => ({
+      totalProcessed: 0,
+      totalDropped: 0,
+      totalErrors: 0,
+      queueSize: 0,
+      duplicatesDropped: 0,
+      lastProcessedTimestamp: 0
+    })),
+    clearQueue: jest.fn()
+  }))
+}));
+
+// Mock circuit breaker to prevent timer leaks
+jest.mock('@/lib/circuit-breaker', () => ({
+  CircuitBreaker: jest.fn().mockImplementation(() => ({
+    recordFailure: jest.fn(),
+    recordSuccess: jest.fn(),
+    isOpen: jest.fn(() => false),
+    getState: jest.fn(() => ({
+      isOpen: false,
+      failureCount: 0,
+      lastFailureTime: 0,
+      openedAt: 0
+    })),
+    getFailureRate: jest.fn(() => 0),
+    reset: jest.fn(),
+    destroy: jest.fn()
+  }))
+}));
+
 // Mock MCP client service
 jest.mock('@/services/mcp-client-service', () => {
   const mockFactories = {
@@ -520,7 +868,39 @@ jest.mock('@/services/mcp-client-service', () => {
   let mockServers = [mockFactories.createMockServer()];
   let mockTools = [mockFactories.createMockTool()];
 
+  // Class-based mock for both default and named exports
+  class MCPClientService {
+    static async initialize() {
+      return Promise.resolve();
+    }
+
+    static async connect() {
+      return Promise.resolve(true);
+    }
+
+    static async disconnect() {
+      return Promise.resolve(true);
+    }
+
+    static async getAvailableTools() {
+      return Promise.resolve(mockTools);
+    }
+
+    static async executeTool(serverName, toolName, arguments_) {
+      return Promise.resolve(mockFactories.createMockToolResult({
+        tool_name: toolName,
+        server_name: serverName
+      }));
+    }
+
+    static getConnectionStatus() {
+      return 'CONNECTED';
+    }
+  }
+
   return {
+    default: MCPClientService,
+    MCPClientService,
     listServers: jest.fn().mockResolvedValue(mockServers),
     getServerStatus: jest.fn().mockResolvedValue(mockServers[0] || null),
     connectServer: jest.fn().mockResolvedValue(true),
@@ -545,7 +925,8 @@ jest.mock('@/services/mcp-client-service', () => {
     __mockReset: () => {
       mockServers = [mockFactories.createMockServer()];
       mockTools = [mockFactories.createMockTool()];
-    }
+    },
+    mockFactories
   };
 });
 
@@ -558,6 +939,16 @@ jest.mock('./components/chat/RawJsonView', () => {
     RawJsonView: ({ data }) => React.createElement('div', { 
       'data-testid': 'raw-json-view' 
     }, JSON.stringify(data, null, 2))
+  };
+});
+
+// Mock ExamplePrompts component to prevent UI component issues
+jest.mock('@/components/chat/ExamplePrompts', () => {
+  const React = require('react');
+  return {
+    ExamplePrompts: () => React.createElement('div', { 
+      'data-testid': 'example-prompts' 
+    }, 'Example prompts component')
   };
 });
 
@@ -610,9 +1001,22 @@ beforeEach(() => {
 afterEach(() => {
   jest.clearAllMocks();
   fetchMock.resetMocks();
+  
+  // Reset storage but preserve auth tokens for consistent test state
+  const token = localStorageData.get('token');
+  const authToken = localStorageData.get('auth_token');
+  
   if (localStorage && localStorage.clear) localStorage.clear();
   if (sessionStorage && sessionStorage.clear) sessionStorage.clear();
+  localStorageData.clear();
   mockCookieData.clear();
+  
+  // Restore default auth tokens
+  if (token || authToken) {
+    const defaultToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
+    localStorageData.set('token', defaultToken);
+    localStorageData.set('auth_token', defaultToken);
+  }
   
   // Reset scroll positions
   if (typeof window !== 'undefined') {
@@ -621,4 +1025,8 @@ afterEach(() => {
     Object.defineProperty(window, 'pageXOffset', { value: 0, writable: true });
     Object.defineProperty(window, 'pageYOffset', { value: 0, writable: true });
   }
+  
+  // Ensure all mocks are properly cleaned up to prevent cross-test contamination
+  jest.restoreAllMocks();
+  jest.clearAllTimers();
 });

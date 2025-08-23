@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple
 # Import comprehensive reporter
 from test_framework.comprehensive_reporter import ComprehensiveTestReporter
 import subprocess
-from .failing_tests_manager import (
+from test_framework.failing_tests_manager import (
     clear_failing_tests,
     load_failing_tests,
     organize_failures_by_category,
@@ -17,7 +17,7 @@ from .failing_tests_manager import (
     update_failing_tests,
 )
 from test_framework.feature_flags import FeatureFlagManager, FeatureStatus
-from .report_generators import (
+from test_framework.report_generators import (
     generate_json_report,
     generate_markdown_report,
     generate_text_report,

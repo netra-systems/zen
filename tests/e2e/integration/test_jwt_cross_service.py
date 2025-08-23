@@ -31,7 +31,7 @@ from tests.e2e.jwt_token_helpers import (
 from tests.e2e.test_data_factory import (
     create_test_service_credentials,
 )
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class CrossServiceJWTValidator:
@@ -239,7 +239,7 @@ class TestJWTCrossServiceFlow(JWTTestFixtures):
     @pytest.fixture
     async def test_harness(self):
         """Setup test harness."""
-        harness = UnifiedTestHarness()
+        harness = UnifiedE2ETestHarness()
         await harness.setup()
         yield harness
         await harness.cleanup()

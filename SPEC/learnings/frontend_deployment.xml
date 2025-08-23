@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+  <metadata>
+    <title>Frontend Deployment Learnings</title>
+    <date>2025-08-23</date>
+    <category>deployment</category>
+    <tags>frontend, gcp, docker, next.js, cloud-run</tags>
+  </metadata>
+
+  <critical_issues>
+    <issue id="1">
+      <title>React Syntax Highlighter Import Path Issue</title>
+      <description>
+        The react-syntax-highlighter package v5.8.0 doesn't have the expected 
+        '/dist/esm/styles/prism' or '/dist/cjs/styles/prism' paths.
+      </description>
+      <root_cause>
+        Package structure changed in version 5.x - styles are directly in /dist/styles/
+      </root_cause>
+      <solution>
+        Import directly from 'react-syntax-highlighter/dist/styles' without prism/hljs subdirectories
+      </solution>
+      <example>
+        // WRONG
+        import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+        
+        // CORRECT
+        import { monokai } from 'react-syntax-highlighter/dist/styles';
+      </example>
+    </issue>
+
+    <issue id="2">
+      <title>Frontend Memory Requirements</title>
+      <description>
+        Next.js 15 applications require more than 512MB of memory to run in production
+      </description>
+      <symptoms>
+        - 503 Service Unavailable errors
+        - "Memory limit exceeded" in logs
+        - Container termination during startup
+      </symptoms>
+      <solution>
+        Set memory allocation to at least 1GB for frontend services
+      </solution>
+      <configuration>
+        memory: "1Gi"  # Minimum for Next.js production
+      </configuration>
+    </issue>
+
+    <issue id="3">
+      <title>Deployment Script Environment Variable Conflict</title>
+      <description>
+        Cannot use both --set-env-vars and --update-env-vars in the same gcloud run deploy command
+      </description>
+      <error_message>
+        ERROR: (gcloud.run.deploy) argument --set-env-vars: At most one of 
+        --clear-env-vars | --env-vars-file | --set-env-vars | --remove-env-vars 
+        --update-env-vars can be specified.
+      </error_message>
+      <solution>
+        Combine all environment variables into a single --set-env-vars argument
+        by extending the env_vars list before the command is built
+      </solution>
+      <implementation>
+        ```python
+        # Build env_vars list first
+        env_vars = []
+        for key, value in service.environment_vars.items():
+            env_vars.append(f"{key}={value}")
+        
+        # Add service-specific env vars to the same list
+        if service.name == "frontend":
+            env_vars.extend([
+                f"NEXT_PUBLIC_API_URL={api_url}",
+                f"NEXT_PUBLIC_AUTH_URL={auth_url}",
+                f"NEXT_PUBLIC_WS_URL={ws_url}"
+            ])
+        
+        # Then use single --set-env-vars
+        if env_vars:
+            cmd.extend(["--set-env-vars", ",".join(env_vars)])
+        ```
+      </implementation>
+    </issue>
+  </critical_issues>
+
+  <deployment_checklist>
+    <step order="1">
+      <action>Verify react-syntax-highlighter imports</action>
+      <command>grep -r "react-syntax-highlighter" frontend/components/</command>
+      <expected>All imports should be from '/dist/styles' without subdirectories</expected>
+    </step>
+    
+    <step order="2">
+      <action>Build frontend locally first</action>
+      <command>cd frontend && npm run build</command>
+      <expected>Build completes without module resolution errors</expected>
+    </step>
+    
+    <step order="3">
+      <action>Build Docker image with correct platform</action>
+      <command>docker build -t gcr.io/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend --platform linux/amd64 .</command>
+      <expected>Build succeeds with linux/amd64 platform for Cloud Run compatibility</expected>
+    </step>
+    
+    <step order="4">
+      <action>Push to GCR</action>
+      <command>docker push gcr.io/netra-staging/netra-frontend-staging:latest</command>
+    </step>
+    
+    <step order="5">
+      <action>Deploy with correct memory allocation</action>
+      <command>
+        gcloud run deploy netra-frontend-staging \
+          --image gcr.io/netra-staging/netra-frontend-staging:latest \
+          --platform managed \
+          --region us-central1 \
+          --port 3000 \
+          --memory 1Gi \
+          --allow-unauthenticated \
+          --set-env-vars="NODE_ENV=production,..."
+      </command>
+    </step>
+  </deployment_checklist>
+
+  <configuration_requirements>
+    <frontend_service>
+      <memory>1Gi</memory>
+      <cpu>1</cpu>
+      <port>3000</port>
+      <min_instances>0</min_instances>
+      <max_instances>10</max_instances>
+      <environment_variables>
+        <NODE_ENV>production</NODE_ENV>
+        <NEXT_PUBLIC_API_URL>https://netra-backend-staging-*.run.app</NEXT_PUBLIC_API_URL>
+        <NEXT_PUBLIC_AUTH_URL>https://netra-auth-service-*.run.app</NEXT_PUBLIC_AUTH_URL>
+        <NEXT_PUBLIC_WS_URL>wss://netra-backend-staging-*.run.app</NEXT_PUBLIC_WS_URL>
+      </environment_variables>
+    </frontend_service>
+  </configuration_requirements>
+
+  <prevention_measures>
+    <measure>
+      Always test frontend builds locally before deploying
+    </measure>
+    <measure>
+      Use --build-local flag with deploy_to_gcp.py for faster iteration
+    </measure>
+    <measure>
+      Monitor memory usage in Cloud Run metrics dashboard
+    </measure>
+    <measure>
+      Keep deployment script env var handling consolidated in one place
+    </measure>
+  </prevention_measures>
+</learning_document>

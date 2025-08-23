@@ -4,7 +4,7 @@ Components: AuthService → JWT Refresh → WebSocket → Session Continuity
 Critical: Seamless token refresh without disrupting active conversations
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -19,7 +19,7 @@ import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio

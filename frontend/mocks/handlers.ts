@@ -8,7 +8,26 @@ import type {
 } from '@/types/mcp-types';
 
 export const handlers = [
-  // Mock for login
+  // Mock for login - return JWT token
+  http.post('/api/auth/login', async ({ request }) => {
+    const body = await request.json() as { username: string; password?: string; email?: string };
+    if (body.username === 'testuser' || body.email === 'test@example.com') {
+      const user: User = {
+        id: 'c7b3d8e0-5e0b-4b0f-8b3a-3b9f4b3d3b3d',
+        full_name: 'John Maverick',
+        email: 'testuser@example.com',
+      };
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
+      return HttpResponse.json({ token, user, access_token: token, token_type: 'Bearer' });
+    } else {
+      return new HttpResponse(
+        JSON.stringify({ error: 'Invalid credentials' }), 
+        { status: 401 }
+      );
+    }
+  }),
+
+  // Legacy login endpoint for backward compatibility
   http.post('/api/login', async ({ request }) => {
     const body = await request.json() as { username: string };
     if (body.username === 'testuser') {
@@ -17,13 +36,19 @@ export const handlers = [
         full_name: 'John Maverick',
         email: 'testuser@example.com',
       };
-      return HttpResponse.json(user);
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
+      return HttpResponse.json({ token, user });
     } else {
       return new HttpResponse(null, { status: 401 });
     }
   }),
 
   // Mock for logout
+  http.post('/api/auth/logout', () => {
+    return HttpResponse.json({ success: true, message: 'Logged out successfully' });
+  }),
+
+  // Legacy logout endpoint for backward compatibility
   http.post('/api/logout', () => {
     return new HttpResponse(null, { status: 200 });
   }),
@@ -206,5 +231,86 @@ export const handlers = [
 
   http.post('/api/mcp/connections/refresh', () => {
     return HttpResponse.json({ success: true, message: 'All connections refreshed' });
+  }),
+
+  // Mock protected data endpoint for auth testing
+  http.get('/api/protected-data', async ({ request }) => {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ') && 
+        authHeader.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9')) {
+      return HttpResponse.json({ message: 'Protected data', success: true });
+    }
+    return new HttpResponse(
+      JSON.stringify({ error: 'Unauthorized' }),
+      { status: 401 }
+    );
+  }),
+
+  // ============================================
+  // WebSocket Mock Handlers
+  // ============================================
+  // Note: WebSocket connections are mocked globally in jest.setup.js
+  // These handlers are for WebSocket-related HTTP endpoints
+  
+  // Mock auth token verification endpoint
+  http.post('/api/auth/verify', async ({ request }) => {
+    const authHeader = request.headers.get('authorization');
+    const body = await request.json().catch(() => ({})) as { token?: string };
+    const token = body.token || authHeader?.replace('Bearer ', '');
+    
+    if (token && token.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9') && token !== 'invalid_token') {
+      return HttpResponse.json({ 
+        valid: true,
+        user: {
+          id: 'test-user-123',
+          email: 'test@example.com',
+          full_name: 'Test User'
+        }
+      });
+    }
+    return new HttpResponse(
+      JSON.stringify({ valid: false, error: 'Invalid token' }),
+      { status: 401 }
+    );
+  }),
+
+  // Mock WebSocket authentication endpoint
+  http.post('/api/websocket/auth', async ({ request }) => {
+    const authHeader = request.headers.get('authorization');
+    const body = await request.json().catch(() => ({})) as { token?: string };
+    const token = body.token || authHeader?.replace('Bearer ', '');
+    
+    if (token && token.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9') && token !== 'invalid_token') {
+      return HttpResponse.json({ 
+        success: true, 
+        user_id: 'test-user-123',
+        permissions: ['chat', 'agent_control']
+      });
+    }
+    return new HttpResponse(
+      JSON.stringify({ success: false, error: 'Invalid token' }),
+      { status: 401 }
+    );
+  }),
+
+  // Mock WebSocket connection info endpoint
+  http.get('/api/websocket/info', () => {
+    return HttpResponse.json({
+      url: 'ws://localhost:8000/ws',
+      protocols: ['netra-v1'],
+      heartbeat_interval: 30000,
+      max_message_size: 1048576
+    });
+  }),
+
+  // Mock WebSocket metrics endpoint
+  http.get('/api/websocket/metrics', () => {
+    return HttpResponse.json({
+      active_connections: 1,
+      total_messages_sent: 42,
+      total_messages_received: 38,
+      average_latency_ms: 150,
+      uptime_seconds: 3600
+    });
   }),
 ];

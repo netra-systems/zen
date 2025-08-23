@@ -40,7 +40,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ModernSupervisorAgent(BaseExecutionInterface, BaseSubAgent):
+class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     """Modern supervisor agent with unified spec compliance.
     
     Implements complete supervisor pattern with:

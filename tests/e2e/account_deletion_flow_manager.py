@@ -20,14 +20,14 @@ os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from tests.e2e.account_deletion_helpers import AccountDeletionE2ETester
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedE2ETestHarness
 
 
 class AccountDeletionFlowManager:
     """Manager for complete account deletion E2E test execution."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.deletion_tester = AccountDeletionE2ETester(self.harness)
     
     @asynccontextmanager

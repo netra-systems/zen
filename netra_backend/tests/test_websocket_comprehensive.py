@@ -35,8 +35,8 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from fastapi import WebSocket
 
-from netra_backend.app.websocket.connection_info import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import ConnectionManager
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo
+from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 class TestWebSocketConnectionEstablishment:
     """Test 1: Connection establishment with auth"""

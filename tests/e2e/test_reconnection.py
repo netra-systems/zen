@@ -33,15 +33,15 @@ from tests.e2e.reconnection_test_methods import (
 
 # Import utilities with fallbacks
 try:
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+    from test_framework.auth_helpers import (
         create_test_token,
     )
-    from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+    from netra_backend.tests.helpers.websocket_test_helpers import create_mock_websocket
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"
     
-    class WebSocketBuilder:
+    class create_mock_websocket:
         def __init__(self):
             self._websocket = type('MockWS', (), {
                 'user_id': 'test', 'connection_id': 'conn_123', 'state': 'connected',
@@ -71,7 +71,7 @@ class TestGracefulReconnectWithStatePreservation:
     async def _perform_graceful_reconnect(self, fixture, user_id: str):
         """Perform graceful reconnection with state restoration."""
         new_token = create_test_token(user_id)
-        reconnected_ws = WebSocketBuilder().with_user_id(user_id).with_authentication(new_token).build()
+        reconnected_ws = create_mock_websocket().with_user_id(user_id).with_authentication(new_token).build()
         fixture.active_connections.append(reconnected_ws)
         fixture.record_reconnection_attempt(reconnected_ws.connection_id, True, "graceful_reconnect")
         return reconnected_ws

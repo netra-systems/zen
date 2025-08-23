@@ -1,26 +1,27 @@
 """
-🔴 CRITICAL: Auth Service Client - HTTP Client to EXTERNAL Auth Service
+🔴 DEPRECATED: Auth Service Client - USE UNIFIED AUTH INTERFACE INSTEAD
 
-This client connects to an EXTERNAL auth microservice via HTTP.
-The auth service runs SEPARATELY from the main backend.
+DEPRECATION NOTICE: This module is DEPRECATED.
+All authentication now uses auth_service unified interface.
 
-ARCHITECTURE:
-- Auth Service: Runs at AUTH_SERVICE_URL (e.g., http://localhost:8001)
-- This Client: Makes HTTP calls to auth service endpoints
-- Main Backend: Uses this client for ALL auth operations
+MIGRATION:
+OLD: from netra_backend.app.clients.auth_client import auth_client
+NEW: from auth_service.auth_core.unified_auth_interface import get_unified_auth
 
-⚠️ IMPORTANT:
-- This is NOT implementing auth - it's calling an external service
-- The auth service is a SEPARATE application (see app/auth/auth_service.py)
-- ALL auth logic lives in the auth service, NOT here
-
-See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
+Business Value: Eliminates duplicate auth logic, prevents security inconsistencies
+Single Source of Truth: auth_service is now the ONLY authentication provider
 """
 
-# Import core functionality
+# DEPRECATED: Import shim for backward compatibility
+from netra_backend.app.clients.auth_client_unified_shim import (
+    AuthClientUnifiedShim,
+    auth_client_unified_shim
+)
+
+# DEPRECATED: Keep old imports for backward compatibility
 from netra_backend.app.clients.auth_client_cache import (
     AuthCircuitBreakerManager,
-    AuthServiceSettings,
+    AuthServiceSettings, 
     AuthTokenCache,
     CachedToken,
 )
@@ -30,19 +31,20 @@ from netra_backend.app.clients.auth_client_config import (
     OAuthConfig,
     OAuthConfigGenerator,
 )
-from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client
 
-# Alias for backward compatibility
-AuthClient = AuthServiceClient
+# DEPRECATED: Alias for backward compatibility
+AuthServiceClient = AuthClientUnifiedShim
+AuthClient = AuthClientUnifiedShim
+auth_client = auth_client_unified_shim
 
-# Re-export for backward compatibility
+# DEPRECATED: Re-export for backward compatibility
 __all__ = [
     'AuthServiceClient',
-    'AuthClient',
+    'AuthClient', 
     'auth_client',
-    'Environment', 
+    'Environment',
     'OAuthConfig',
-    'EnvironmentDetector',
+    'EnvironmentDetector', 
     'OAuthConfigGenerator',
     'CachedToken',
     'AuthTokenCache',

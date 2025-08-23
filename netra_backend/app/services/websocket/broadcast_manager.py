@@ -54,6 +54,10 @@ class BroadcastManager:
         results = await self._deliver_message_to_recipients(recipients, message_data)
         self._record_broadcast_results(message_data, results, target_users)
         return results
+    
+    async def broadcast_to_all(self, message_data: Dict[str, Any]) -> Dict[str, int]:
+        """Broadcast message to all subscribers (alias for broadcast_message without target_users)."""
+        return await self.broadcast_message(message_data, target_users=None)
 
     def _log_subscription_event(self, user_id: str, filters: Optional[Dict[str, Any]]) -> None:
         """Log user subscription event."""
@@ -143,7 +147,7 @@ class BroadcastManager:
         """Count successful and failed delivery results."""
         successful = sum(1 for result in delivery_results if result is True)
         failed = len(delivery_results) - successful
-        return {'success': successful, 'failed': failed}
+        return {'successful': successful, 'failed': failed}
 
     def _record_broadcast_results(self, message_data: Dict[str, Any], results: Dict[str, int], target_users: Optional[List[str]]) -> None:
         """Record broadcast results in history and update stats."""
@@ -177,5 +181,5 @@ class BroadcastManager:
     def _update_delivery_statistics(self, results: Dict[str, int]) -> None:
         """Update delivery statistics."""
         self.delivery_stats['total_broadcasts'] += 1
-        self.delivery_stats['successful_deliveries'] += results['success']
+        self.delivery_stats['successful_deliveries'] += results['successful']
         self.delivery_stats['failed_deliveries'] += results['failed']

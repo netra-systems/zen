@@ -18,7 +18,7 @@ from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentStat
 from netra_backend.app.schemas.agent_models import (
     DeepAgentState as SchemaDeepAgentState,
 )
-from netra_backend.app.websocket.connection_executor import ConnectionOperationBuilder
+from netra_backend.app.websocket_core.connection_executor import ConnectionOperationBuilder
 
 class TestDeepAgentStateRegression:
     """Regression tests for DeepAgentState validation issues."""

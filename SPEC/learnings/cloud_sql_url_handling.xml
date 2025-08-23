@@ -38,23 +38,23 @@
     </incorrect_approach>
     
     <correct_approach>
-      <description>Simple URL scheme replacement with sslmode conversion</description>
+      <description>Centralized DatabaseManager handles all URL conversions</description>
       <code>
-        # CORRECT: Simple replacement with sslmode conversion
-        if database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-            # Convert sslmode to ssl for asyncpg (unless Unix socket)
-            if "sslmode=" in database_url and "/cloudsql/" not in database_url:
-                database_url = database_url.replace("sslmode=", "ssl=")
-        elif database_url.startswith("postgres://"):
-            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
-            if "sslmode=" in database_url and "/cloudsql/" not in database_url:
-                database_url = database_url.replace("sslmode=", "ssl=")
+        # CORRECT: DatabaseManager.get_application_url_async() handles all cases
+        if "/cloudsql/" in base_url:
+            # Cloud SQL Unix socket - remove ALL SSL parameters
+            base_url = re.sub(r'[&?]sslmode=[^&]*', '', base_url)
+            base_url = re.sub(r'[&?]ssl=[^&]*', '', base_url)
+        else:
+            # CRITICAL FIX: For ALL non-Cloud SQL async connections,
+            # convert psycopg2 'sslmode=' to asyncpg 'ssl=' format
+            if "sslmode=" in base_url:
+                base_url = base_url.replace("sslmode=", "ssl=")
       </code>
       <benefits>
-        - Handles asyncpg's different SSL parameter name
-        - Works with all PostgreSQL URL formats
-        - Skips conversion for Unix socket connections
+        - Single source of truth for URL conversion logic
+        - Handles all driver/connection type combinations
+        - Fixed logic bug that prevented sslmode conversion
       </benefits>
     </correct_approach>
   </root_cause_analysis>
@@ -85,22 +85,46 @@
     </format>
   </cloud_sql_formats>
   
+  <comprehensive_conversion_matrix>
+    <title>Complete Driver/Connection Type Matrix</title>
+    
+    <scenario name="Sync TCP Connection (Alembic/psycopg2)">
+      <input>postgresql://user:pass@host:5432/db?sslmode=require</input>
+      <output>postgresql://user:pass@host:5432/db?sslmode=require</output>
+      <changes>None - psycopg2 understands sslmode</changes>
+    </scenario>
+    
+    <scenario name="Async TCP Connection (FastAPI/asyncpg)">
+      <input>postgresql://user:pass@host:5432/db?sslmode=require</input>
+      <output>postgresql+asyncpg://user:pass@host:5432/db?ssl=require</output>
+      <changes>Add asyncpg driver, convert sslmode to ssl</changes>
+    </scenario>
+    
+    <scenario name="Sync Unix Socket (Alembic with Cloud SQL)">
+      <input>postgresql://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require</input>
+      <output>postgresql://user:pass@/db?host=/cloudsql/project:region:instance</output>
+      <changes>Remove ALL SSL parameters for Unix socket</changes>
+    </scenario>
+    
+    <scenario name="Async Unix Socket (FastAPI with Cloud SQL)">
+      <input>postgresql://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require</input>
+      <output>postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance</output>
+      <changes>Add asyncpg driver, remove ALL SSL parameters</changes>
+    </scenario>
+  </comprehensive_conversion_matrix>
+  
   <asyncpg_considerations>
     <note>asyncpg handles connection parameters differently than psycopg2</note>
-    <url_conversion>
-      <from>postgresql://</from>
-      <to>postgresql+asyncpg://</to>
-      <sslmode_conversion>
-        <from>sslmode=require</from>
-        <to>ssl=require</to>
-        <reason>asyncpg uses 'ssl' parameter instead of 'sslmode'</reason>
-        <exception>Not needed for Unix socket connections (/cloudsql/)</exception>
-      </sslmode_conversion>
-    </url_conversion>
-    <unix_socket_support>
-      <supported>Yes, via host parameter in query string</supported>
-      <format>?host=/path/to/socket</format>
-    </unix_socket_support>
+    <critical_distinction>
+      <psycopg2>Uses 'sslmode' parameter (sslmode=require)</psycopg2>
+      <asyncpg>Uses 'ssl' parameter (ssl=require) - DOES NOT understand sslmode</asyncpg>
+      <unix_socket>Neither driver needs SSL params for Unix socket connections</unix_socket>
+    </critical_distinction>
+    <url_flow>
+      <step1>GCP Secret Manager stores URL with sslmode=require</step1>
+      <step2>DatabaseManager reads and processes based on use case</step2>
+      <step3>Each driver gets the correct format it understands</step3>
+    </url_flow>
   </asyncpg_considerations>
   
   <best_practices>

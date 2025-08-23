@@ -11,14 +11,14 @@ import time
 from pathlib import Path
 from typing import Optional, Tuple
 
-from .dev_launcher_config import (
+from scripts.dev_launcher_config import (
     get_free_port,
     print_with_emoji_fallback,
     resolve_path,
     setup_environment_variables,
     setup_frontend_environment,
 )
-from .dev_launcher_processes import (
+from scripts.dev_launcher_processes import (
     LogStreamer,
     create_backend_process,
     create_frontend_process,

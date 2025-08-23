@@ -77,8 +77,6 @@ try:
     from tests.e2e.service_manager import RealServicesManager
     
     def create_real_services_manager():
-        import os
-        from pathlib import Path
         project_root = Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
         return RealServicesManager(project_root)
 except ImportError:

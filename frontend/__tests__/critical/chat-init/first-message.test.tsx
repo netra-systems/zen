@@ -19,6 +19,15 @@ import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 
+// Import enhanced act utilities
+import { 
+  actFireEvent, 
+  createActUserEvent, 
+  actWaitFor, 
+  flushMicrotasks,
+  createActAsyncMockFunction 
+} from '../../test-utils/react-act-utils';
+
 // Import real components for integration testing
 import { MessageInput } from '@/components/chat/MessageInput';
 import { MessageList } from '@/components/chat/MessageList';
@@ -30,8 +39,8 @@ import { simulateMobileViewport, resetViewport } from '../../components/MessageI
 
 // Mock WebSocket for streaming simulation
 const mockWebSocket = createMockWebSocket();
-const mockSendMessage = jest.fn();
-const mockHandleSend = jest.fn();
+const mockSendMessage = createActAsyncMockFunction();
+const mockHandleSend = createActAsyncMockFunction();
 
 // Store mocks for real component integration
 const mockUseUnifiedChatStore = jest.fn();
@@ -150,9 +159,11 @@ describe('First Message Experience - Complete User Journey', () => {
     // Reset mock implementations
     mockHandleSend.mockImplementation(async ({ message }) => {
       // Simulate successful send
-      mockSendMessage({
-        type: 'user_message',
-        payload: { content: message, thread_id: 'thread-123' }
+      await act(async () => {
+        mockSendMessage({
+          type: 'user_message',
+          payload: { content: message, thread_id: 'thread-123' }
+        });
       });
     });
   });
@@ -164,11 +175,13 @@ describe('First Message Experience - Complete User Journey', () => {
   describe('P0: Instant Input Focus & Readiness', () => {
     it('should auto-focus message input on chat open < 100ms', async () => {
       const focusTime = await measurePerformance(async () => {
-        renderWithProviders(<MessageInput />);
+        await act(async () => {
+          renderWithProviders(<MessageInput />);
+        });
         
         const textarea = screen.getByLabelText('Message input');
         
-        await waitFor(() => {
+        await actWaitFor(() => {
           expect(textarea).toHaveFocus();
         });
       });
@@ -176,8 +189,10 @@ describe('First Message Experience - Complete User Journey', () => {
       expect(focusTime).toBeLessThan(100);
     });
 
-    it('should show helpful placeholder text immediately', () => {
-      renderWithProviders(<MessageInput />);
+    it('should show helpful placeholder text immediately', async () => {
+      await act(async () => {
+        renderWithProviders(<MessageInput />);
+      });
       
       const textarea = screen.getByLabelText('Message input');
       expect(textarea).toHaveAttribute('placeholder', 'Start typing your AI optimization request... (Shift+Enter for new line)');
@@ -313,7 +328,7 @@ describe('First Message Experience - Complete User Journey', () => {
       
       // Click send button to see sending state
       const sendButton = screen.getByLabelText('Send message');
-      fireEvent.click(sendButton);
+      await actFireEvent.click(sendButton);
       
       // Should show sending state immediately
       expect(sendButton).toHaveTextContent('Sending...');
@@ -490,8 +505,8 @@ def optimize_model_selection(task_complexity):
       const sendButton = screen.getByLabelText('Send message');
       
       // Simulate touch on textarea
-      fireEvent.touchStart(textarea);
-      fireEvent.focus(textarea);
+      await actFireEvent.touchStart(textarea);
+      await actFireEvent.focus(textarea);
       
       expect(textarea).toHaveFocus();
       

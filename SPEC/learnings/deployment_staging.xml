@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <metadata>
+        <category>Deployment</category>
+        <subcategory>Staging/Production</subcategory>
+        <keywords>GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy, Gunicorn, Workers</keywords>
+        <last_updated>2025-08-23</last_updated>
+    </metadata>
+
+    <learning id="cloud-run-uvicorn-workers">
+        <title>Use gunicorn with uvicorn workers for Cloud Run</title>
+        <description>Cloud Run requires gunicorn with uvicorn workers for proper async FastAPI deployment</description>
+        <solution>Use --worker-class uvicorn.workers.UvicornWorker in gunicorn command</solution>
+    </learning>
+
+    <learning id="database-url-sslmode">
+        <title>DATABASE_URL requires sslmode parameter</title>
+        <description>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections</description>
+        <solution>Append ?sslmode=require to DATABASE_URL for Cloud SQL connections</solution>
+    </learning>
+
+    <learning id="frontend-api-url">
+        <title>Frontend API URL configuration</title>
+        <description>Frontend NEXT_PUBLIC_API_URL must point to backend API URL for proxy rewrites to work</description>
+        <solution>Set NEXT_PUBLIC_API_URL to https://api.staging.netrasystems.ai or appropriate backend URL</solution>
+    </learning>
+
+    <learning id="health-check-staging">
+        <title>Health check endpoint configuration</title>
+        <description>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured</description>
+        <solution>Check DATABASE_URL and SSL settings, ensure Cloud SQL instance is accessible</solution>
+    </learning>
+
+    <learning id="oauth-flow-staging">
+        <title>OAuth flow requires separate auth service domain</title>
+        <description>OAuth flow requires auth service at separate domain with proper CORS and callback URL configuration</description>
+        <solution>Deploy auth service to separate domain like auth.staging.netrasystems.ai with proper CORS headers</solution>
+    </learning>
+
+    <learning id="gunicorn-worker-management">
+        <title>Gunicorn worker management and graceful shutdown</title>
+        <description>
+            ProcessLookupError and worker reload issues occur when Gunicorn workers aren't properly managed in containers.
+            Workers may become zombies or orphaned, causing "No such process" errors when Gunicorn tries to kill them.
+        </description>
+        <problem>
+            - ProcessLookupError: [Errno 3] No such process in gunicorn/arbiter.py
+            - Workers not shutting down gracefully
+            - Missing proper signal handling in containers
+        </problem>
+        <solution>
+            1. Create gunicorn_config.py with proper lifecycle hooks:
+               - child_exit handler to prevent ProcessLookupError
+               - pre_fork, post_fork for worker lifecycle logging
+               - Signal handlers for SIGTERM/SIGINT
+               - max_requests=1000 for worker recycling
+               - graceful_timeout=30 for proper shutdown
+               - preload_app=True for better memory usage
+               - reuse_port=True for container restarts
+            
+            2. Use tini in Docker for proper signal propagation:
+               - Install tini in Dockerfile
+               - Use ENTRYPOINT ["tini", "-g", "--"]
+               - Set PYTHONUNBUFFERED=1 for real-time logging
+            
+            3. Configure workers appropriately for Cloud Run:
+               - workers=2 (Cloud Run recommendation)
+               - worker_class='uvicorn.workers.UvicornWorker'
+               - timeout=120 for long requests
+        </solution>
+        <files_modified>
+            - auth_service/gunicorn_config.py (created)
+            - Dockerfile.auth (updated with tini)
+            - auth_service/health_check.py (created)
+        </files_modified>
+        <verification>
+            Check logs for proper worker lifecycle:
+            - "Worker spawned with pid: X"
+            - "Worker X exited"
+            - No ProcessLookupError messages
+        </verification>
+    </learning>
+</learnings>

@@ -37,8 +37,8 @@ from netra_backend.app.schemas.websocket_message_types import (
     UserMessage,
 )
 from netra_backend.app.services.state_persistence import DateTimeEncoder
-from netra_backend.app.websocket.broadcast import BroadcastManager
-from netra_backend.app.websocket.validation import MessageValidator
+from netra_backend.app.websocket_core.broadcast import BroadcastManager
+from netra_backend.app.websocket_core.validation import MessageValidator
 
 class TestWebSocketSerializationCritical:
     """Critical serialization tests for production issues"""

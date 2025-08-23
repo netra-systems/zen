@@ -10,7 +10,7 @@ Critical Path: WebSocket message -> Authentication -> Routing -> Agent processin
 Coverage: End-to-end message flow, error handling, performance validation, state consistency
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -31,7 +31,7 @@ from netra_backend.app.auth_integration.auth import create_access_token, validat
 
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 
 JWTService = AsyncMock
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

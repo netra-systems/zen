@@ -11,7 +11,6 @@ from netra_backend.app.services.clickhouse_service import clickhouse_service
 from netra_backend.app.services.corpus_service import (
     corpus_service_instance as corpus_service,
 )
-from netra_backend.app.services.user_auth_service import user_auth_service
 
 router = APIRouter()
 
@@ -31,8 +30,8 @@ class ExtractMetadataRequest(BaseModel):
 @router.get("/tables", response_model=List[str])
 async def list_corpus_tables(db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)) -> List[str]:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     return await clickhouse_service.list_corpus_tables()
 
@@ -52,8 +51,8 @@ async def create_corpus(
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     db_corpus = _create_corpus_record(db, corpus, current_user.id)
@@ -68,8 +67,8 @@ async def read_corpora(
     current_user = Depends(get_current_user)
 ) -> List[schemas.Corpus]:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     corpora = corpus_service.get_corpora(db, skip=skip, limit=limit)
@@ -93,8 +92,8 @@ async def read_corpus(
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return _get_corpus_by_id(db, corpus_id)
@@ -113,8 +112,8 @@ async def update_corpus(
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return _update_corpus_record(db, corpus_id, corpus)
@@ -132,8 +131,8 @@ async def delete_corpus(
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return _delete_corpus_record(db, corpus_id)
@@ -145,8 +144,8 @@ async def regenerate_corpus(
     current_user = Depends(get_current_user)
 ) -> schemas.Corpus:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     db_corpus = _get_corpus_by_id(db, corpus_id)
@@ -167,8 +166,8 @@ async def get_corpus_status(
     current_user = Depends(get_current_user)
 ) -> Dict[str, Any]:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     status = _get_corpus_status_validated(db, corpus_id)
@@ -188,8 +187,8 @@ async def get_corpus_content(
     current_user = Depends(get_current_user)
 ) -> Any:
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return _get_corpus_content_validated(db, corpus_id)
@@ -223,8 +222,8 @@ async def _search_corpus_safe(corpus_id: str, q: str):
 async def search_corpus(q: str = Query(...), corpus_id: str = Query(default="default"), db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Search corpus documents"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     return await _search_corpus_safe(corpus_id, q)
@@ -239,8 +238,8 @@ class SearchRequest(BaseModel):
 async def search_corpus_advanced(request: SearchRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Advanced corpus search with filters"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:
@@ -264,8 +263,8 @@ async def bulk_index_documents(request: BulkIndexRequest):
 async def extract_document_metadata(request: ExtractMetadataRequest, db: AsyncSession = Depends(get_db_session), current_user = Depends(get_current_user)):
     """Extract metadata from document using file URL"""
     # Validate user through service layer
-    user = await user_auth_service.get_user_by_id(db, str(current_user.id))
-    if not user or not user_auth_service.validate_user_active(user):
+    user = await auth_interface.get_user_by_id(db, str(current_user.id))
+    if not user or not auth_interface.validate_user_active(user):
         raise HTTPException(status_code=401, detail="User not authorized")
     
     try:

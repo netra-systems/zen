@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from .dev_launcher_config import (
+from scripts.dev_launcher_config import (
     check_emoji_support,
     get_project_root,
     import_service_discovery,
@@ -18,7 +18,7 @@ from .dev_launcher_config import (
     validate_dependencies,
     validate_frontend_directory,
 )
-from .dev_launcher_monitoring import (
+from scripts.dev_launcher_monitoring import (
     monitor_processes_loop,
     open_browser,
     print_configuration_summary,

@@ -42,7 +42,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from test_framework.http_client import ClientConfig, ConnectionState
 from tests.e2e.service_manager import ServiceManager
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
-from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete, create_test_harness
 
 
 @dataclass
@@ -75,7 +75,7 @@ class UserConnection:
 class ConcurrentWebSocketManager:
     """Manages 100 concurrent WebSocket connections for load testing."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         """Initialize concurrent connection manager."""
         self.harness = harness
         self.jwt_helper = JWTTestHelper()

@@ -374,7 +374,6 @@ class AuthServiceRecoveryTester:
     async def _manual_auth_restart(self) -> bool:
         """Manual auth service restart as last resort."""
         try:
-            import subprocess
             
             auth_port = 8081  # Default auth port
             

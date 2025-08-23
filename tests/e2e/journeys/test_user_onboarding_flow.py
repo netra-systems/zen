@@ -21,14 +21,14 @@ from contextlib import asynccontextmanager
 import pytest
 
 from tests.e2e.onboarding_flow_executor import OnboardingFlowExecutor
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class OnboardingTestManager:
     """Manager for complete onboarding E2E test execution."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.executor = OnboardingFlowExecutor(self.harness)
     
     @asynccontextmanager

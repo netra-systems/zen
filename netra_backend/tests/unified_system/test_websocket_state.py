@@ -30,13 +30,13 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo, ConnectionState
 
-from netra_backend.app.websocket.connection_manager import (
+from netra_backend.app.websocket_core.connection_manager import (
     ConnectionManager,
     get_connection_manager,
 )
-from netra_backend.app.websocket.reconnection_handler import (
+from netra_backend.app.websocket_core.reconnection_handler import (
     ReconnectionContext,
     get_reconnection_handler,
 )

@@ -18,7 +18,7 @@ The original comprehensive file was refactored into focused modules:
 - Additional modules for API management, provider integration, etc.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

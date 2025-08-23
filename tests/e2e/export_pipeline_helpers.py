@@ -26,7 +26,8 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedE2ETestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 
 
 class LargeDatasetGenerator:
@@ -71,7 +72,7 @@ class LargeDatasetGenerator:
 class ExportRequestManager:
     """Manages export requests and file generation."""
     
-    def __init__(self, harness: UnifiedTestHarness):
+    def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
         self.backend_url = "http://localhost:8000"
         self.client = None

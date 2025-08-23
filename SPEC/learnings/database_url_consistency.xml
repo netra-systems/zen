@@ -56,18 +56,37 @@
         - No need to manage SSL certificates
         - Automatic authentication via service account
       </benefits>
+      <ssl_handling>ALL SSL parameters (sslmode/ssl) must be removed for Unix socket connections</ssl_handling>
     </unix_socket_format>
     <direct_ip_format>
       <description>For direct connections without Cloud SQL proxy</description>
       <format>postgresql://user:password@ip:port/database?sslmode=require</format>
-      <example>postgresql://netra:password@34.171.226.17:5432/netra_staging?sslmode=require</example>
+      <example>postgresql://netra:password@34.132.142.103:5432/netra?sslmode=require</example>
       <requirements>
-        - Valid IP address from actual Cloud SQL instance
-        - SSL mode configuration
+        - Valid IP address from actual Cloud SQL instance (34.132.142.103 is current)
+        - SSL mode configuration (sslmode=require for psycopg2, converted to ssl=require for asyncpg)
         - Network access configured (authorized networks)
       </requirements>
     </direct_ip_format>
   </correct_configuration>
+  
+  <url_conversion_matrix>
+    <sync_drivers note="Used by Alembic migrations, psycopg2/pg8000">
+      <tcp_connection>Keep sslmode=require parameter</tcp_connection>
+      <unix_socket>Remove ALL SSL parameters</unix_socket>
+    </sync_drivers>
+    <async_driver note="Used by FastAPI app, asyncpg">
+      <tcp_connection>Convert sslmode=require to ssl=require (asyncpg doesn't understand sslmode)</tcp_connection>
+      <unix_socket>Remove ALL SSL parameters</unix_socket>
+    </async_driver>
+    <conversion_flow>
+      <step1>GCP Secret Manager: stores with sslmode=require (standard format)</step1>
+      <step2>Cloud Run: mounts as DATABASE_URL env var</step2>
+      <step3>DatabaseManager.get_base_database_url(): strips driver prefixes</step3>
+      <step4a>DatabaseManager.get_migration_url_sync_format(): keeps sslmode for sync</step4a>
+      <step4b>DatabaseManager.get_application_url_async(): converts sslmode→ssl for async</step4b>
+    </conversion_flow>
+  </url_conversion_matrix>
   <service_configuration_consistency>
     <principle>All services must use the same database configuration approach</principle>
     <backend_service>

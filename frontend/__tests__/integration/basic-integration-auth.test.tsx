@@ -11,7 +11,7 @@ import WS from 'jest-websocket-mock';
 import { useAuthStore } from '@/store/authStore';
 import { LoginComponent, LogoutComponent } from './helpers/test-components';
 import { setupTestEnvironment, clearStorages, resetStores, setupGlobalFetch, cleanupWebSocket } from './helpers/test-setup';
-import { createMockUser, createMockToken } from './helpers/test-builders';
+import { createMockUser, createMockToken, createMockAuthResponse, createAuthenticatedRequest } from './helpers/test-builders';
 import { assertTextContent, assertAuthState } from './helpers/test-assertions';
 
 // Mock Next.js
@@ -45,12 +45,22 @@ describe('Authentication Integration Tests', () => {
   });
 
   describe('Authentication Flow', () => {
-    it('should handle login and authentication', async () => {
+    it('should handle login and authentication with JWT token', async () => {
       const mockUser = createMockUser();
       const mockToken = createMockToken();
+      const mockAuthResponse = createMockAuthResponse();
+      
+      // Mock fetch to return auth response
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockAuthResponse)
+      });
       
       const handleLogin = async () => {
         await useAuthStore.getState().login(mockUser, mockToken);
+        // Verify token is stored in localStorage
+        expect(localStorage.getItem('token')).toBe(mockToken);
+        expect(localStorage.getItem('auth_token')).toBe(mockToken);
       };
       
       const { getByText, getByTestId } = render(
@@ -59,7 +69,9 @@ describe('Authentication Integration Tests', () => {
       
       await assertTextContent(getByTestId('auth-status'), 'Not logged in');
       
-      fireEvent.click(getByText('Login'));
+      await act(async () => {
+        fireEvent.click(getByText('Login'));
+      });
       
       await assertTextContent(getByTestId('auth-status'), 'Logged in as test@example.com');
       assertAuthState(true, mockToken);
@@ -68,6 +80,10 @@ describe('Authentication Integration Tests', () => {
     it('should handle logout and cleanup', async () => {
       const mockUser = createMockUser();
       const mockToken = createMockToken();
+      
+      // Set up authenticated state
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('auth_token', mockToken);
       
       useAuthStore.setState({
         user: mockUser,
@@ -79,27 +95,47 @@ describe('Authentication Integration Tests', () => {
       
       await assertTextContent(getByTestId('auth-status'), 'Logged in');
       
-      fireEvent.click(getByText('Logout'));
+      await act(async () => {
+        fireEvent.click(getByText('Logout'));
+      });
       
       await assertTextContent(getByTestId('auth-status'), 'Logged out');
+      // Verify tokens are removed from localStorage
+      expect(localStorage.getItem('token')).toBeNull();
+      expect(localStorage.getItem('auth_token')).toBeNull();
       assertAuthState(false, null);
     });
   });
 
   describe('Error Handling', () => {
-    it('should handle network errors gracefully', async () => {
-      const ErrorComponent = () => {
+    it('should handle authenticated network requests', async () => {
+      const AuthenticatedRequestComponent = () => {
+        const [data, setData] = React.useState(null);
         const [error, setError] = React.useState(null);
         const [loading, setLoading] = React.useState(false);
         
-        const fetchData = async () => {
+        const fetchAuthenticatedData = async () => {
           setLoading(true);
           setError(null);
           
           try {
-            const response = await fetch('/api/data');
-            if (!response.ok) throw new Error('Network error');
-            await response.json();
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('No auth token');
+            
+            const response = await fetch('/api/protected-data', {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (!response.ok) {
+              if (response.status === 401) throw new Error('Authentication failed');
+              throw new Error('Request failed');
+            }
+            
+            const result = await response.json();
+            setData(result);
           } catch (err) {
             setError(err.message);
           } finally {
@@ -109,22 +145,69 @@ describe('Authentication Integration Tests', () => {
         
         return (
           <div>
-            <button onClick={fetchData}>Fetch Data</button>
+            <button onClick={fetchAuthenticatedData}>Fetch Protected Data</button>
             {loading && <div data-testid="loading">Loading...</div>}
+            {error && <div data-testid="error">{error}</div>}
+            {data && <div data-testid="data">Data loaded</div>}
+          </div>
+        );
+      };
+      
+      // Mock successful authenticated request
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ message: 'Protected data' })
+      });
+      
+      const { getByText, getByTestId } = render(<AuthenticatedRequestComponent />);
+      
+      await act(async () => {
+        fireEvent.click(getByText('Fetch Protected Data'));
+      });
+      
+      await assertTextContent(getByTestId('data'), 'Data loaded');
+    });
+
+    it('should handle authentication failures', async () => {
+      const FailedAuthComponent = () => {
+        const [error, setError] = React.useState(null);
+        
+        const fetchWithBadToken = async () => {
+          try {
+            const response = await fetch('/api/auth/verify', {
+              headers: {
+                'Authorization': 'Bearer invalid_token'
+              }
+            });
+            
+            if (!response.ok) throw new Error('Authentication failed');
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+        
+        return (
+          <div>
+            <button onClick={fetchWithBadToken}>Test Bad Token</button>
             {error && <div data-testid="error">{error}</div>}
           </div>
         );
       };
       
-      (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
-      
-      const { getByText, getByTestId } = render(<ErrorComponent />);
-      
-      await act(async () => {
-        fireEvent.click(getByText('Fetch Data'));
+      // Mock 401 response for invalid token
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ valid: false, error: 'Invalid token' })
       });
       
-      await assertTextContent(getByTestId('error'), 'Network error');
+      const { getByText, getByTestId } = render(<FailedAuthComponent />);
+      
+      await act(async () => {
+        fireEvent.click(getByText('Test Bad Token'));
+      });
+      
+      await assertTextContent(getByTestId('error'), 'Authentication failed');
     });
 
     it('should handle WebSocket disconnection', async () => {

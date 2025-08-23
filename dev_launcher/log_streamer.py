@@ -79,7 +79,8 @@ class LogStreamer(threading.Thread):
         info_patterns = [
             'critical secrets present',
             'critical secrets loaded',
-            'critical secrets missing'
+            'critical secrets missing',
+            'registered startup component'
         ]
         return any(pattern in lower_line for pattern in info_patterns)
     

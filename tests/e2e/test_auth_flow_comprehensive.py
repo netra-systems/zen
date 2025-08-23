@@ -408,7 +408,6 @@ class TestJWTTokenHandling:
                 pytest.fail(f"Invalid JWT structure: {len(token_parts)} parts instead of 3")
             
             # Decode JWT payload (without verification for testing)
-            import base64
             try:
                 # Add padding if needed
                 payload_part = token_parts[1]

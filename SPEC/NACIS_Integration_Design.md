@@ -58,7 +58,7 @@ This document outlines the integration of the Netra's Agentic Customer Interacti
 #### 1.1 Chat Orchestrator (Day 1-2)
 ```python
 # netra_backend/app/agents/chat_orchestrator.py
-# Extends ModernSupervisorAgent with chat-specific orchestration
+# Extends SupervisorAgent with chat-specific orchestration
 # - Intent classification
 # - Confidence assessment (≥90% threshold)
 # - Dynamic DAG generation

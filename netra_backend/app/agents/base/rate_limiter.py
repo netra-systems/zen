@@ -14,8 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
+from netra_backend.app.websocket_core import ConnectionInfo, RateLimiter as CoreRateLimiter
 
 logger = central_logger.get_logger(__name__)
 

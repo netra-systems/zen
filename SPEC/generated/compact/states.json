@@ -1,0 +1,32 @@
+{
+  "values": [
+    "Connected",
+    "Disabled",
+    "Enabled",
+    "Error",
+    "Failed",
+    "Loaded",
+    "Pending",
+    "Ready",
+    "Success",
+    "Warning",
+    "active",
+    "busy",
+    "closed",
+    "connected",
+    "disabled",
+    "disconnected",
+    "enabled",
+    "failed",
+    "idle",
+    "inactive",
+    "info",
+    "loaded",
+    "loading",
+    "open",
+    "pending",
+    "ready",
+    "success",
+    "warning"
+  ]
+}

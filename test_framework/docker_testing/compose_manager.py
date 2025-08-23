@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import test_framework.aiofiles_mock as aiofiles
 import yaml
 
-from ..unified.base_interfaces import (
+from test_framework.unified.base_interfaces import (
     BaseTestComponent,
     IContainerManager,
     ServiceConfig,

@@ -34,12 +34,12 @@ from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest,
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.tests.test_utilities.websocket_mocks import (
+from netra_backend.tests.helpers.websocket_test_helpers import (
     MockWebSocket,
-    WebSocketBuilder,
+    create_mock_websocket,
 )
 from tests.e2e.config import TEST_USERS, TestDataFactory
-from tests.e2e.harness_complete import UnifiedTestHarness
+from tests.e2e.harness_complete import UnifiedTestHarnessComplete
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
@@ -48,7 +48,7 @@ class StatePersistenceTester:
     """Core state persistence testing with conversation continuity focus."""
     
     def __init__(self):
-        self.harness = UnifiedTestHarness()
+        self.harness = UnifiedE2ETestHarness()
         self.active_states: Dict[str, DeepAgentState] = {}
         self.conversation_history: Dict[str, List[Dict[str, Any]]] = {}
         self.user_preferences: Dict[str, Dict[str, Any]] = {}
@@ -98,7 +98,7 @@ class StatePersistenceTester:
     
     def _build_authenticated_websocket(self, user_id: str, token: str) -> MockWebSocket:
         """Build authenticated WebSocket connection."""
-        return (WebSocketBuilder()
+        return (create_mock_websocket()
                .with_user_id(user_id)
                .with_authentication(token)
                .build())
@@ -237,7 +237,7 @@ async def test_agent_state_persistence_across_reconnect(persistence_tester, cont
     
     # Step 4: Reconnect with same token and restore state
     token = persistence_tester.connection_tokens[run_id]
-    reconnected_ws = (WebSocketBuilder()
+    reconnected_ws = (create_mock_websocket()
                      .with_user_id(user.id)
                      .with_authentication(token)
                      .build())

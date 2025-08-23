@@ -49,7 +49,6 @@ except ImportError:
     import os
     import sys
 
-from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_models import (

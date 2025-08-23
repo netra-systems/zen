@@ -3,7 +3,7 @@ WebSocket connection test mocks and shared utilities
 Provides mock classes and fixtures for WebSocket connection testing
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -19,7 +19,6 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-from netra_backend.app.ws_manager import (
 
     ConnectionInfo,
 
@@ -339,7 +338,7 @@ class WebSocketTestHelpers:
         
     @staticmethod
 
-    async def connect_multiple_users(ws_manager: WebSocketManager, 
+    async def connect_multiple_users(websocket_manager: WebSocketManager, 
 
                                    websockets: Dict[str, MockWebSocket]):
 
@@ -349,7 +348,7 @@ class WebSocketTestHelpers:
 
         for user_id, websocket in websockets.items():
 
-            conn_info = await ws_manager.connect_user(user_id, websocket)
+            conn_info = await websocket_manager.connect_user(user_id, websocket)
 
             connections.append((user_id, websocket, conn_info))
 
@@ -357,13 +356,13 @@ class WebSocketTestHelpers:
         
     @staticmethod
 
-    async def cleanup_connections(ws_manager: WebSocketManager, connections: List):
+    async def cleanup_connections(websocket_manager: WebSocketManager, connections: List):
 
         """Clean up list of WebSocket connections"""
 
         for user_id, websocket, _ in connections:
 
-            await ws_manager.disconnect_user(user_id, websocket)
+            await websocket_manager.disconnect_user(user_id, websocket)
             
     @staticmethod
 

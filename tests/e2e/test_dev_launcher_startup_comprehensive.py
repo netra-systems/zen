@@ -864,7 +864,6 @@ class DevLauncherStartupTester:
     async def _test_frontend_to_backend_connection(self) -> bool:
         """Test frontend to backend connection."""
         try:
-            import httpx
             
             ports = self._collect_port_info()
             backend_port = ports.get('backend', 8000)
@@ -937,7 +936,6 @@ class DevLauncherStartupTester:
     async def _test_cors_validation(self) -> bool:
         """Test CORS configuration."""
         try:
-            import httpx
             
             ports = self._collect_port_info()
             backend_port = ports.get('backend', 8000)

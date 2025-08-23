@@ -4,7 +4,7 @@ Tests to prevent circular imports, agent registration failures, and message flow
 These tests ensure the WebSocket-Agent integration remains functional.
 """
 
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -32,13 +32,13 @@ class TestCircularImportPrevention:
     def test_websocket_modules_import_independently(self):
 
         """Ensure WebSocket modules can be imported without circular dependency."""
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-        from netra_backend.app.websocket.message_handler_core import (
+        from netra_backend.app.websocket_core_executor import ConnectionExecutor
+        from netra_backend.app.websocket_core.message_handler_core import (
 
             ReliableMessageHandler,
 
         )
-        from netra_backend.app.websocket.websocket_broadcast_executor import (
+        from netra_backend.app.websocket_core.websocket_broadcast_executor import (
 
             BroadcastExecutor,
 
@@ -84,7 +84,7 @@ class TestAgentRegistration:
         """Create real components for testing."""
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.llm.llm_manager import LLMManager
-        from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
         
         llm_manager = LLMManager()
 
@@ -327,7 +327,7 @@ class TestWebSocketBroadcasting:
     async def test_broadcast_to_user(self):
 
         """Test broadcasting message to specific user."""
-        from netra_backend.app.websocket.unified import get_unified_manager
+        from netra_backend.app.websocket_core import get_unified_manager
 manager = get_unified_manager()
         
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:

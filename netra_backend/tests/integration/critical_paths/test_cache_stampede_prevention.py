@@ -87,46 +87,23 @@ class StampedeMetrics:
 class CacheStampedePreventionL3Manager:
     """L3 cache stampede prevention test manager with real Redis distributed locks."""
     
-    def __init__(self):
-        self.redis_containers = {}
-        self.redis_clients = {}
+    def __init__(self, redis_client):
+        self.redis_client = redis_client  # Single real Redis client
         self.metrics = StampedeMetrics()
         self.test_keys = set()
         self.computation_results = {}
         self.active_computations = set()
         
-    async def setup_redis_for_stampede_testing(self) -> Dict[str, str]:
-        """Setup Redis instances for stampede prevention testing."""
-        redis_configs = {
-            "main_cache": {"port": 6400, "role": "primary cache"},
-            "lock_service": {"port": 6401, "role": "distributed locks"},
-            "backup_cache": {"port": 6402, "role": "backup cache"}
-        }
-        
-        redis_urls = {}
-        
-        for name, config in redis_configs.items():
-            try:
-                container = NetraRedisContainer(port=config["port"])
-                container.container_name = f"netra-stampede-{name}-{uuid.uuid4().hex[:8]}"
-                
-                url = await container.start()
-                
-                self.redis_containers[name] = container
-                redis_urls[name] = url
-                
-                # Create Redis client
-                client = aioredis.from_url(url, decode_responses=True)
-                await client.ping()
-                self.redis_clients[name] = client
-                
-                logger.info(f"Redis {name} ({config['role']}) started: {url}")
-                
-            except Exception as e:
-                logger.error(f"Failed to start Redis {name}: {e}")
-                raise
-        
-        return redis_urls
+    async def setup_redis_for_stampede_testing(self) -> bool:
+        """Setup Redis for stampede prevention testing using the real client."""
+        try:
+            # Test Redis connection
+            await self.redis_client.ping()
+            logger.info("Redis client ready for stampede testing")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to setup Redis for stampede testing: {e}")
+            return False
     
     async def simulate_expensive_computation(self, key: str, duration: float = 0.1) -> Dict[str, Any]:
         """Simulate expensive computation that should be cached."""
@@ -152,14 +129,13 @@ class CacheStampedePreventionL3Manager:
     
     async def acquire_distributed_lock(self, lock_key: str, timeout: float = 5.0, ttl: float = 10.0) -> Optional[str]:
         """Acquire distributed lock to prevent stampede."""
-        lock_client = self.redis_clients["lock_service"]
         lock_id = str(uuid.uuid4())
         
         start_time = time.time()
         
         try:
             # Use SET with NX and EX for atomic lock acquisition
-            acquired = await lock_client.set(
+            acquired = await self.redis_client.set(
                 lock_key, 
                 lock_id, 
                 nx=True,  # Only set if key doesn't exist
@@ -183,8 +159,6 @@ class CacheStampedePreventionL3Manager:
     
     async def release_distributed_lock(self, lock_key: str, lock_id: str) -> bool:
         """Release distributed lock safely."""
-        lock_client = self.redis_clients["lock_service"]
-        
         try:
             # Lua script for atomic lock release (only if we own the lock)
             lua_script = """
@@ -195,7 +169,7 @@ class CacheStampedePreventionL3Manager:
             end
             """
             
-            result = await lock_client.eval(lua_script, 1, lock_key, lock_id)
+            result = await self.redis_client.eval(lua_script, 1, lock_key, lock_id)
             return bool(result)
             
         except Exception as e:
@@ -204,12 +178,11 @@ class CacheStampedePreventionL3Manager:
     
     async def get_or_compute_with_stampede_prevention(self, key: str, computation_duration: float = 0.1) -> Dict[str, Any]:
         """Get value from cache or compute with stampede prevention."""
-        cache_client = self.redis_clients["main_cache"]
         lock_key = f"lock:{key}"
         
         # First, try to get from cache
         try:
-            cached_value = await cache_client.get(key)
+            cached_value = await self.redis_client.get(key)
             if cached_value:
                 self.metrics.requests_served_from_cache += 1
                 return {
@@ -231,7 +204,7 @@ class CacheStampedePreventionL3Manager:
         if lock_id:
             try:
                 # We got the lock - check cache again (double-checked locking)
-                cached_value = await cache_client.get(key)
+                cached_value = await self.redis_client.get(key)
                 if cached_value:
                     # Someone else computed while we were acquiring lock
                     await self.release_distributed_lock(lock_key, lock_id)
@@ -255,7 +228,7 @@ class CacheStampedePreventionL3Manager:
                 
                 # Store in cache
                 cache_value = json.dumps(computed_result)
-                await cache_client.setex(key, 300, cache_value)  # 5 minutes TTL
+                await self.redis_client.setex(key, 300, cache_value)  # 5 minutes TTL
                 
                 cache_population_time = time.time() - start_time
                 self.metrics.cache_population_times.append(cache_population_time)
@@ -285,7 +258,7 @@ class CacheStampedePreventionL3Manager:
             await asyncio.sleep(0.01)  # Brief wait
             
             try:
-                cached_value = await cache_client.get(key)
+                cached_value = await self.redis_client.get(key)
                 if cached_value:
                     self.metrics.requests_served_from_cache += 1
                     return {
@@ -542,33 +515,24 @@ class CacheStampedePreventionL3Manager:
         return recommendations
     
     async def cleanup(self):
-        """Clean up Redis containers and test resources."""
+        """Clean up Redis test resources."""
         try:
-            # Clean up test keys
+            # Clean up test keys from the Redis client
             for key in self.test_keys:
-                for client in self.redis_clients.values():
-                    try:
-                        await client.delete(key)
-                        # Also clean up lock keys
-                        await client.delete(f"lock:{key}")
-                    except Exception:
-                        pass
-            
-            # Close Redis clients
-            for client in self.redis_clients.values():
-                await client.close()
-            
-            # Stop Redis containers
-            for container in self.redis_containers.values():
-                await container.stop()
+                try:
+                    await self.redis_client.delete(key)
+                    # Also clean up lock keys
+                    await self.redis_client.delete(f"lock:{key}")
+                except Exception as e:
+                    logger.warning(f"Failed to delete test key {key}: {e}")
                 
         except Exception as e:
             logger.error(f"Stampede prevention cleanup failed: {e}")
 
 @pytest.fixture
-async def stampede_prevention_manager():
-    """Create L3 cache stampede prevention manager."""
-    manager = CacheStampedePreventionL3Manager()
+async def stampede_prevention_manager(isolated_redis_client):
+    """Create L3 cache stampede prevention manager with real Redis client."""
+    manager = CacheStampedePreventionL3Manager(isolated_redis_client)
     await manager.setup_redis_for_stampede_testing()
     yield manager
     await manager.cleanup()
