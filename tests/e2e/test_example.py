@@ -19,7 +19,7 @@ async def test_first_time_user_journey():
 
     async with TestHarnessContext("first_time_user_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Verify all services are healthy
 
@@ -53,7 +53,7 @@ async def test_returning_user_login():
 
     async with TestHarnessContext("returning_user_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Get test user
 
@@ -187,7 +187,7 @@ class TestRealServiceIntegration:
         
         # Backend should be able to validate tokens from auth service
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
 
         headers = {"Authorization": f"Bearer {token}"}
         
@@ -228,7 +228,7 @@ async def test_concurrent_requests():
 
     async with TestHarnessContext("load_test") as harness:
 
-        client = TestClient(harness)
+        client = TestClient(harness.backend_url)
         
         # Make multiple concurrent requests to test system stability
 

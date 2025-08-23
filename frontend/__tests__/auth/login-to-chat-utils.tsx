@@ -32,7 +32,10 @@ export function setupMockAuthStore() {
     loading: false,
     error: null,
     login: jest.fn(),
-    logout: jest.fn(),
+    logout: jest.fn(() => {
+      // Clear remember me cookie when logging out
+      document.cookie = 'remember_me=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }),
     setLoading: jest.fn(),
     setError: jest.fn(),
     updateUser: jest.fn(),
@@ -81,8 +84,10 @@ export function setupMockCookies() {
   (localStorageMock.getItem as jest.Mock).mockReturnValue(mockToken);
 }
 
+// Import TestProviders at module level
+import { TestProviders } from '../setup/test-providers';
+
 export function renderLoginComponent(mockPush?: jest.Mock) {
-  const { TestProviders } = require('../setup/test-providers');
   return render(
     <TestProviders>
       <LoginForm onRedirect={mockPush} />
@@ -212,7 +217,8 @@ export const LoginForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
 
 // Helper functions (≤8 lines each)
 async function processSuccessfulLogin(result: any, rememberMe: boolean, onRedirect?: jest.Mock) {
-  const mockAuthStore = require('@/store/authStore').useAuthStore();
+  // Use the mocked useAuthStore instead of requiring it
+  const mockAuthStore = useAuthStore();
   
   await authService.setToken(result.token);
   localStorage.setItem('jwt_token', result.token);

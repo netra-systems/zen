@@ -10,7 +10,7 @@ const commonConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   
   // Extended timeout for integration tests
-  testTimeout: process.env.JEST_TIMEOUT || 30000,
+  testTimeout: process.env.JEST_TIMEOUT || 10000,
   
   // Module name mapping
   moduleNameMapper: {

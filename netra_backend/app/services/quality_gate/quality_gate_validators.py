@@ -6,6 +6,10 @@ from netra_backend.app.core.interfaces_quality import (
     QualityValidator as CoreQualityValidator,
 )
 from netra_backend.app.core.quality_types import (
+    ContentType as CoreContentType,
+    QualityMetrics as CoreQualityMetrics,
+)
+from netra_backend.app.services.quality_gate.quality_gate_models import (
     ContentType,
     QualityLevel,
     QualityMetrics,
@@ -28,10 +32,13 @@ class QualityValidator(QualityValidatorInterface):
     
     def get_weights_for_type(self, content_type: ContentType) -> Dict[str, float]:
         """Get scoring weights based on content type"""
-        return self._core_validator.get_weights_for_type(content_type)
+        # Convert to core content type for compatibility
+        core_content_type = CoreContentType(content_type.value)
+        return self._core_validator.get_weights_for_type(core_content_type)
     
     def calculate_weighted_score(self, metrics: QualityMetrics, weights: Dict[str, float]) -> float:
         """Calculate weighted overall score"""
+        # The QualityMetrics dataclass is compatible between modules
         return self._core_validator.calculate_weighted_score(metrics, weights)
     
     def determine_quality_level(self, score: float) -> QualityLevel:
@@ -54,11 +61,15 @@ class QualityValidator(QualityValidatorInterface):
         strict_mode: bool
     ) -> bool:
         """Check if metrics meet thresholds for the content type"""
-        return self._core_validator.check_thresholds(metrics, content_type, strict_mode)
+        # Convert to core content type for compatibility
+        core_content_type = CoreContentType(content_type.value)
+        return self._core_validator.check_thresholds(metrics, core_content_type, strict_mode)
     
     def generate_suggestions(self, metrics: QualityMetrics, content_type: ContentType) -> List[str]:
         """Generate improvement suggestions based on metrics"""
-        return self._core_validator.generate_suggestions(metrics, content_type)
+        # Convert to core content type for compatibility
+        core_content_type = CoreContentType(content_type.value)
+        return self._core_validator.generate_suggestions(metrics, core_content_type)
     
     def generate_prompt_adjustments(self, metrics: QualityMetrics) -> Dict[str, Any]:
         """Generate prompt adjustments for retry based on quality issues"""

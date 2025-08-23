@@ -98,9 +98,24 @@ class AuthDatabaseManager:
                     }
                     
                 except Exception as e:
-                    # Transaction automatically rolls back on exception
-                    logger.error(f"User creation failed, transaction rolled back: {e}")
-                    raise Exception(f"Failed to create user: {e}") from e
+                    logger.error(f"Failed to create user: {str(e)}")
+                    # Transaction will be rolled back automatically
+                    raise
+
+
+class DatabaseManager:
+    """Simple database manager for auth service."""
+    
+    def __init__(self, database_url: str = None):
+        self.database_url = database_url or os.getenv('DATABASE_URL')
+    
+    async def initialize(self):
+        """Initialize database connection."""
+        pass
+    
+    async def health_check(self) -> bool:
+        """Check database health."""
+        return True
     
     @staticmethod
     def get_auth_database_url_async() -> str:

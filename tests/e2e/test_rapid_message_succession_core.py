@@ -18,30 +18,11 @@ import pytest
 from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 class MessageSequenceEntry:
-    # """Tracking entry for message sequence validation."""
-
-    # sequence_id: int
-    # message_id: str
-    # content: str
-    # timestamp: float
-    # sent_time: Optional[float] = None
-    # received_time: Optional[float] = None
-    # processed_time: Optional[float] = None
-    # status: str = "pending"
-    # response_data: Optional[Dict] = None
+    pass
 
 class MessageBurstResult:
-    # """Result tracking for message burst operations."""
-
-    # total_sent: int = 0
-    # total_received: int = 0
-    # total_failed: int = 0
-    # total_duplicates: int = 0
-    # avg_latency: float = 0.0
-    # max_latency: float = 0.0
-    # sequence_violations: List[str] = field(default_factory=list)
-    # memory_growth: int = 0
-    # queue_overflows: int = 0
+    """Result tracking for message burst operations."""
+    pass
 
 class MessageSequenceValidator:
     # """Advanced message sequence integrity validator."""
@@ -163,98 +144,7 @@ class TestSyntaxFix:
         return validation_result
 
 class TestBurstMessageIdempotencyEnforcement:
-    # """Test Case 2: Burst Message Idempotency Enforcement"""
-
-    # @pytest.mark.asyncio
-    # @pytest.mark.e2e
-    # async def test_burst_message_idempotency_enforcement(, self, rapid_message_sender, message_sequence_validator, agent_state_monitor
-    # ):
-    # """
-    # Scenario: User sends same message multiple times rapidly due to UI lag
-    # Expected: Only one processing per unique message, duplicates rejected gracefully
-    # """
-    # await agent_state_monitor.capture_state_snapshot(
-    # "idempotency_test_start", rapid_message_sender
-
-    # # Create base message with unique ID
-    # base_message = {
-    # "type": "user_message",
-    # "content": "Analyze the Q3 sales data trends",
-    # "message_id": f"unique-message-{uuid.uuid4().hex[:8]}",
-    # "timestamp": time.time(),
-    # "requires_processing": True,
-    # }
-
-    # message_sequence_validator.track_expected_sequence(
-    # 0, base_message["message_id"], base_message["content"]
-
-    # # Send same message 10 times rapidly (simulating UI issues)
-    # duplicate_messages = []
-    # for i in range(10):
-    # message_copy = base_message.copy()
-    # message_copy["duplicate_attempt"] = i
-    # duplicate_messages.append(message_copy)
-
-    # # Send all duplicates with minimal delay variations
-    # start_time = time.perf_counter()
-    # results = await rapid_message_sender.send_rapid_burst(
-    # duplicate_messages,
-    # burst_interval=random.uniform(0, 0.05),  # 0-50ms variations
-
-    # # Collect responses with extended timeout for processing
-    # responses = await rapid_message_sender.receive_responses(
-    # expected_count=10, timeout=15.0  # Allow for rejection messages
-
-    # # Analyze responses
-    # processed_responses = []
-    # duplicate_rejections = []
-
-    # for response in responses:
-    # response_type = response.get("type", "unknown")
-    # message_id = response.get("message_id", response.get("correlation_id"))
-
-    # if (
-    # response_type in ["ai_response", "processed"]
-    # and message_id == base_message["message_id"]
-    # ):
-    # processed_responses.append(response)
-    # message_sequence_validator.track_received_sequence(
-    # 0, message_id, response
-    # elif (
-    # response_type in ["duplicate_rejected", "error"]
-    # and "duplicate" in response.get("message", "").lower()
-    # ):
-    # duplicate_rejections.append(response)
-
-    # # Validation: Only one should be processed
-    # assert (
-    # len(processed_responses) <= 1
-    # ), f"Multiple messages processed: {
-    # len(processed_responses)} (expected: 0 or 1)"
-
-    # # Should have rejection messages for duplicates
-    # assert (
-    # len(duplicate_rejections) >= 8
-    # ), f"Insufficient duplicate rejections: {
-    # len(duplicate_rejections)} (expected: ≥8)"
-
-    # # Verify no duplicate processing in agent state
-    # agent_state = await rapid_message_sender.get_agent_state()
-    # if isinstance(agent_state, dict):
-    # processed_message_ids = agent_state.get("processed_message_ids", [])
-    # if base_message["message_id"] in processed_message_ids:
-    # count = processed_message_ids.count(base_message["message_id"])
-    # assert (
-    # count == 1
-    # ), f"Message processed {count} times despite idempotency"
-
-    # await agent_state_monitor.capture_state_snapshot(
-    # "idempotency_test_end", rapid_message_sender
-
-    # logger.info(
-    # f"Idempotency test completed: {
-    # len(processed_responses)} processed, {
-    # len(duplicate_rejections)} rejected"
+    pass
 
 class TestQueueOverflowBackpressureHandling:
     # """Test Case 3: Queue Overflow and Backpressure Handling"""

@@ -5,11 +5,13 @@ Extracted from test_llm_manager_provider_switching.py for 25-line function compl
 
 import asyncio
 import json
+import os
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from pydantic import BaseModel
 
 from netra_backend.app.schemas.Config import AppConfig, LLMConfig
@@ -29,25 +31,56 @@ class MockLLMResponse:
         self.timestamp = datetime.now(UTC)
 
 def create_mock_app_config() -> AppConfig:
-    """Create mock app configuration"""
+    """Create mock app configuration with environment detection"""
     config = AppConfig()
     config.environment = "testing"
     config.llm_configs = _create_llm_configs()
+    
+    # Set LLM enabled flag based on environment
+    config.dev_mode_llm_enabled = _should_enable_llm()
+    
     return config
 
+def _should_enable_llm() -> bool:
+    """Determine if LLM should be enabled based on environment"""
+    # Check for real LLM markers or API keys
+    if _has_real_llm_marker() or _has_api_keys():
+        return True
+    return False  # Default to mock for faster tests
+
+def _has_real_llm_marker() -> bool:
+    """Check if real LLM is explicitly requested"""
+    # Check pytest markers or environment flags
+    return os.getenv("USE_REAL_LLM", "false").lower() == "true"
+
+def _has_api_keys() -> bool:
+    """Check if any LLM API keys are available"""
+    api_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+    return any(os.getenv(key) for key in api_keys)
+
 def _create_llm_configs() -> Dict[str, LLMConfig]:
-    """Create LLM configurations"""
-    return {
-        'openai_gpt4': LLMConfig(
-            provider='openai', model_name='gpt-4', api_key='test_openai_key'
-        ),
-        'google_gemini': LLMConfig(
-            provider='google', model_name='gemini-pro', api_key='test_google_key'
-        ),
-        'anthropic_claude': LLMConfig(
-            provider='anthropic', model_name='claude-3-sonnet', api_key='test_anthropic_key'
-        )
-    }
+    """Create LLM configurations with real or test keys"""
+    configs = {}
+    
+    # OpenAI configuration
+    openai_key = os.getenv('OPENAI_API_KEY', 'test_openai_key')
+    configs['openai_gpt4'] = LLMConfig(
+        provider='openai', model_name='gpt-4', api_key=openai_key
+    )
+    
+    # Google configuration
+    google_key = os.getenv('GOOGLE_API_KEY', 'test_google_key')
+    configs['google_gemini'] = LLMConfig(
+        provider='google', model_name='gemini-pro', api_key=google_key
+    )
+    
+    # Anthropic configuration
+    anthropic_key = os.getenv('ANTHROPIC_API_KEY', 'test_anthropic_key')
+    configs['anthropic_claude'] = LLMConfig(
+        provider='anthropic', model_name='claude-3-sonnet', api_key=anthropic_key
+    )
+    
+    return configs
 
 def create_mock_providers() -> Dict[str, Any]:
     """Create mock provider clients"""

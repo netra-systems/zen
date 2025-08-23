@@ -10,6 +10,8 @@ import subprocess
 import time
 from typing import Dict, List, Optional, Tuple
 
+from dev_launcher.container_discovery import ContainerDiscovery
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,6 +26,7 @@ class DockerServiceManager:
     def __init__(self):
         self.container_configs = self._get_container_configs()
         self.running_containers: List[str] = []
+        self.container_discovery = ContainerDiscovery()
     
     def start_redis_container(self) -> Tuple[bool, str]:
         """
@@ -34,9 +37,14 @@ class DockerServiceManager:
         """
         container_name = "netra-dev-redis"
         
-        # Check if container already running
-        if self._is_container_running(container_name):
-            return True, f"Redis container '{container_name}' already running"
+        # First check if we can reuse existing container
+        if self.container_discovery.can_reuse_container(container_name):
+            return True, f"Redis container '{container_name}' already running and healthy"
+        
+        # Also check alternative container names
+        alt_container_name = "netra-redis-dev"
+        if self.container_discovery.can_reuse_container(alt_container_name):
+            return True, f"Redis container '{alt_container_name}' already running and healthy"
         
         try:
             # Remove existing container if exists
@@ -78,9 +86,14 @@ class DockerServiceManager:
         """
         container_name = "netra-dev-clickhouse"
         
-        # Check if container already running
-        if self._is_container_running(container_name):
-            return True, f"ClickHouse container '{container_name}' already running"
+        # First check if we can reuse existing container
+        if self.container_discovery.can_reuse_container(container_name):
+            return True, f"ClickHouse container '{container_name}' already running and healthy"
+        
+        # Also check alternative container names
+        alt_container_name = "netra-clickhouse-dev"
+        if self.container_discovery.can_reuse_container(alt_container_name):
+            return True, f"ClickHouse container '{alt_container_name}' already running and healthy"
         
         try:
             # Remove existing container if exists
@@ -125,9 +138,14 @@ class DockerServiceManager:
         """
         container_name = "netra-dev-postgres"
         
-        # Check if container already running
-        if self._is_container_running(container_name):
-            return True, f"PostgreSQL container '{container_name}' already running"
+        # First check if we can reuse existing container
+        if self.container_discovery.can_reuse_container(container_name):
+            return True, f"PostgreSQL container '{container_name}' already running and healthy"
+        
+        # Also check alternative container names
+        alt_container_name = "netra-postgres-dev"
+        if self.container_discovery.can_reuse_container(alt_container_name):
+            return True, f"PostgreSQL container '{alt_container_name}' already running and healthy"
         
         try:
             # Remove existing container if exists
@@ -247,6 +265,23 @@ class DockerServiceManager:
                 status[container_name] = "unknown"
         
         return status
+    
+    def get_service_discovery_report(self) -> Dict[str, any]:
+        """Get comprehensive service discovery report."""
+        return self.container_discovery.get_service_discovery_report()
+    
+    def discover_running_services(self) -> Dict[str, str]:
+        """
+        Discover running Netra services and return their status.
+        
+        Returns:
+            Dictionary mapping service names to container info
+        """
+        running_services = self.container_discovery.get_running_service_containers()
+        return {
+            service: f"{info.name} ({info.status})"
+            for service, info in running_services.items()
+        }
     
     def _is_container_running(self, container_name: str) -> bool:
         """Check if a container is currently running."""

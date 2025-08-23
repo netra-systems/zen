@@ -39,22 +39,7 @@ import time
 @dataclass
 
 class PerformanceMetrics:
-
-    # """Comprehensive performance metrics container"""
-
-    # operation_name: str
-
-    # start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
-    # end_time: Optional[datetime] = None
-
-    # response_times: List[float] = field(default_factory=list)
-
-    # error_count: int = 0
-
-    # success_count: int = 0
-
-    # memory_samples: List[float] = field(default_factory=list)
+    pass
 
 class AgentStartupTimer:
 
@@ -476,9 +461,7 @@ class PerformanceTestHarness:
         target_met = self.percentile_calculator.validate_p99_target()
         
 
-        return {
-
-            "percentiles": percentiles,
+        return ["percentiles": percentiles,
 
             "p99_target_met": target_met,
 
@@ -518,7 +501,7 @@ class TestSyntaxFix:
 
             percentiles.get("p99_target_met", False)
 
-        ])
+        ]
         
 
         return {

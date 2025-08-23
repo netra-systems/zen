@@ -67,10 +67,19 @@ class StreamBuffer:
 @dataclass
 class NetworkCondition:
     """Network condition simulation parameters."""
-    latency_ms: int = 50
+    name: str = "default"
     packet_loss_rate: float = 0.0
+    latency_ms: int = 50
     bandwidth_kbps: int = 1000
     jitter_ms: int = 10
+    
+    def __init__(self, name: str = "default", packet_loss_rate: float = 0.0, 
+                 latency_ms: int = 50, bandwidth_kbps: int = 1000, jitter_ms: int = 10):
+        self.name = name
+        self.packet_loss_rate = packet_loss_rate
+        self.latency_ms = latency_ms
+        self.bandwidth_kbps = bandwidth_kbps
+        self.jitter_ms = jitter_ms
 
 @pytest.fixture
 def network_condition():

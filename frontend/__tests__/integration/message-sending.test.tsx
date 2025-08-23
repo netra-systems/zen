@@ -46,6 +46,16 @@ jest.mock('@/store/unified-chat', () => ({
     setActiveThread: jest.fn(),
     addOptimisticMessage: jest.fn(),
     updateOptimisticMessage: jest.fn(),
+    removeOptimisticMessage: jest.fn(),
+    clearOptimisticMessages: jest.fn(),
+    resetLayers: jest.fn(),
+    setConnectionStatus: jest.fn(),
+    setThreadLoading: jest.fn(),
+    startThreadLoading: jest.fn(),
+    completeThreadLoading: jest.fn(),
+    clearMessages: jest.fn(),
+    loadMessages: jest.fn(),
+    messages: []
   }))
 }));
 

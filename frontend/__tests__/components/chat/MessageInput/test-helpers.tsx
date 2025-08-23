@@ -57,5 +57,5 @@ export const expectMessageSent = async (mockSend: jest.Mock, content: string) =>
       currentThreadId: 'thread-1', 
       isAuthenticated: true
     });
-  }, { timeout: 3000 });
+  }, { timeout: 1000 });
 };

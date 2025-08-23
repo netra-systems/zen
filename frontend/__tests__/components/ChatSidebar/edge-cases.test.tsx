@@ -21,6 +21,8 @@ describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
 
   beforeEach(() => {
     resetAllMocks();
+    // Always set up auth mock for all tests
+    testSetup.configureAuth({ isDeveloperOrHigher: jest.fn(() => false) });
   });
 
   afterEach(() => {

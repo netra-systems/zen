@@ -3,20 +3,15 @@ Tests for LLM Manager with structured output and provider switching
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-import sys
-from pathlib import Path
-
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
+import os
 from typing import Any, Dict, List
 
 import pytest
 from pydantic import BaseModel
-from netra_backend.app.schemas import AppConfig
 
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
-
 from netra_backend.tests.helpers.llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
@@ -36,14 +31,31 @@ class TestLLMManagerStructuredOutput:
     @pytest.fixture
     def structured_llm_manager(self):
         """Create LLM manager for structured output testing"""
-        config = AppConfig()
-        config.environment = "testing"
+        config = self._create_test_config()
         manager = EnhancedLLMManager(config)
         
         providers = self._create_structured_output_providers()
         self._register_structured_providers(manager, providers)
         
         return manager
+    
+    def _create_test_config(self) -> AppConfig:
+        """Create test configuration with environment detection"""
+        config = AppConfig()
+        config.environment = "testing"
+        
+        # Handle real LLM scenario when API keys are available
+        if self._has_real_llm_keys():
+            config.dev_mode_llm_enabled = True
+        else:
+            config.dev_mode_llm_enabled = False  # Use mock setup
+            
+        return config
+    
+    def _has_real_llm_keys(self) -> bool:
+        """Check if real LLM API keys are available"""
+        keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        return any(os.getenv(key) for key in keys)
     
     def _create_structured_output_providers(self) -> List[MockLLMClient]:
         """Create providers with structured output support"""

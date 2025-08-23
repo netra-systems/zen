@@ -3,12 +3,8 @@ Tests for LLM Manager provider switching and failover functionality
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-import sys
-from pathlib import Path
-
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
+import os
 import time
 from typing import Any, Dict, List
 
@@ -34,7 +30,18 @@ class TestLLMManagerProviderSwitching:
     @pytest.fixture
     def mock_app_config(self):
         """Create mock app configuration"""
-        return create_mock_app_config()
+        config = create_mock_app_config()
+        
+        # Enhance config with real LLM detection
+        config.dev_mode_llm_enabled = self._should_use_real_llm()
+        
+        return config
+    
+    def _should_use_real_llm(self) -> bool:
+        """Determine if real LLM should be used based on environment"""
+        # Use real LLM if explicitly requested via pytest marker or env vars
+        real_llm_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        return any(os.getenv(key) for key in real_llm_keys)
     
     @pytest.fixture
     def enhanced_llm_manager(self, mock_app_config):

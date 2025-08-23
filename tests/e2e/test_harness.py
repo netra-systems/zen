@@ -287,6 +287,21 @@ class UnifiedTestHarness:
         
         self.mock_services.clear()
         self.test_data.clear()
+    
+    # Factory methods for creating test harnesses
+    @classmethod
+    async def create_test_harness(cls, test_name: str = "unified_test"):
+        """Create and start a complete test harness."""
+        # Import here to avoid circular imports
+        from tests.e2e.harness_complete import create_test_harness
+        return await create_test_harness(test_name)
+    
+    @classmethod 
+    async def create_minimal_harness(cls, test_name: str = "minimal_test"):
+        """Create a minimal test harness without test data."""
+        # Import here to avoid circular imports
+        from tests.e2e.harness_complete import create_minimal_harness
+        return await create_minimal_harness(test_name)
 
 
 class AuthFlowTestHelper:

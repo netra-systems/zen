@@ -40,6 +40,7 @@ class ParallelTask:
     dependencies: List[str] = field(default_factory=list)
     timeout: Optional[float] = None
     priority: int = 0
+    retry_count: int = 0
 
 
 @dataclass  
@@ -217,31 +218,47 @@ class ParallelExecutor:
         return self.thread_executor
     
     def _execute_task(self, task: ParallelTask) -> TaskResult:
-        """Execute single task with error handling."""
+        """Execute single task with error handling and retry logic."""
         start_time = time.time()
+        last_exception = None
         
-        try:
-            result = task.func(*task.args, **task.kwargs)
-            duration = time.time() - start_time
-            
-            return TaskResult(
-                task_id=task.task_id,
-                success=True, 
-                result=result,
-                duration=duration,
-                worker_type=task.task_type.value
-            )
-        except Exception as e:
-            duration = time.time() - start_time
-            logger.error(f"Task {task.task_id} failed: {e}")
-            
-            return TaskResult(
-                task_id=task.task_id,
-                success=False,
-                error=e,
-                duration=duration,
-                worker_type=task.task_type.value
-            )
+        # Attempt execution with retries
+        for attempt in range(task.retry_count + 1):  # +1 for initial attempt
+            try:
+                if attempt > 0:
+                    logger.info(f"Retrying task {task.task_id}, attempt {attempt + 1}/{task.retry_count + 1}")
+                    # Brief delay before retry to allow transient issues to resolve
+                    time.sleep(0.5 * attempt)
+                
+                result = task.func(*task.args, **task.kwargs)
+                duration = time.time() - start_time
+                
+                if attempt > 0:
+                    logger.info(f"Task {task.task_id} succeeded on retry {attempt}")
+                
+                return TaskResult(
+                    task_id=task.task_id,
+                    success=True, 
+                    result=result,
+                    duration=duration,
+                    worker_type=task.task_type.value
+                )
+            except Exception as e:
+                last_exception = e
+                if attempt < task.retry_count:
+                    logger.warning(f"Task {task.task_id} failed on attempt {attempt + 1}: {e}")
+                else:
+                    logger.error(f"Task {task.task_id} failed after {task.retry_count + 1} attempts: {e}")
+        
+        # All attempts failed
+        duration = time.time() - start_time
+        return TaskResult(
+            task_id=task.task_id,
+            success=False,
+            error=last_exception,
+            duration=duration,
+            worker_type=task.task_type.value
+        )
     
     def _execute_synchronous(self, task: ParallelTask):
         """Execute task synchronously as fallback."""
@@ -293,13 +310,14 @@ class ParallelExecutor:
 
 
 def create_dependency_task(task_id: str, func: Callable, dependencies: List[str] = None,
-                          task_type: TaskType = TaskType.IO_BOUND, **kwargs) -> ParallelTask:
+                          task_type: TaskType = TaskType.IO_BOUND, retry_count: int = 0, **kwargs) -> ParallelTask:
     """Helper to create dependency-aware parallel task."""
     return ParallelTask(
         task_id=task_id,
         func=func,
         dependencies=dependencies or [],
         task_type=task_type,
+        retry_count=retry_count,
         **kwargs
     )
 

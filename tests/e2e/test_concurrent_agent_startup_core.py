@@ -27,30 +27,12 @@ import uuid
 import websockets
 
 class TestUser:
-
-    # """Test user for concurrent agent startup testing."""
-
-    # user_id: str
-
-    # email: str
-
-    # session_id: str
-
-    # auth_token: str
-
-    # context_data: Dict[str, Any] = field(default_factory=dict)
-
-    # sensitive_data: Dict[str, Any] = field(default_factory=dict)
-
-    # websocket_client: Optional[websockets.WebSocketServerProtocol] = None
-
-    # agent_instance_id: Optional[str] = None
-
-    # startup_metrics: Dict[str, float] = field(default_factory=dict)
+    """Test user for concurrent agent startup testing."""
+    pass
 
 class IsolationReport:
-
-    # """Report for isolation validation results."""
+    """Report for isolation validation results."""
+    pass
 
     # unique_agents: bool = False
 
@@ -102,28 +84,7 @@ class TestSyntaxFix:
         return len(self.incidents)
 
 class ConcurrentTestReport:
-
-    # """Comprehensive test report for concurrent agent startup testing."""
-
-    # test_start_time: float = field(default_factory=time.time)
-
-    # test_end_time: Optional[float] = None
-
-    # total_users: int = 0
-
-    # successful_startups: int = 0
-
-    # basic_startup: Optional[IsolationReport] = None
-
-    # contamination: Optional[ContaminationReport] = None
-
-    # performance: Optional[Dict[str, Any]] = None
-
-    # websocket_scaling: Optional[Dict[str, Any]] = None
-
-    # state_isolation: Optional[IsolationReport] = None
-    
-    # @property
+    pass
 
 class TestSyntaxFix:
     """Generated test class"""

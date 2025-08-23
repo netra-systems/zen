@@ -27,7 +27,13 @@ import {
   retryUntilSuccess,
   cleanupTest
 } from '../utils';
-import { createActCallback, wrapStateSetterWithAct } from '../test-utils/react-act-utils';
+import { 
+  createActCallback, 
+  wrapStateSetterWithAct,
+  actFireEvent,
+  actWaitFor,
+  flushMicrotasks
+} from '../test-utils/react-act-utils';
 
 // ============================================================================
 // MOCK SETUP - WebSocket and authentication mocking
@@ -219,7 +225,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       const { timeMs } = await measureTime(async () => {
         await performLoginAndConnect();
         
-        await waitFor(() => {
+        await actWaitFor(() => {
           expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
         });
       });
@@ -234,7 +240,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(mockWebSocketService.connect).toHaveBeenCalledWith(
           expect.stringContaining(wsBaseUrl),
           expect.objectContaining({
@@ -267,7 +273,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(mockWebSocketService.isAuthenticated()).toBe(true);
         expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
       });
@@ -279,7 +285,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('failed');
       });
       
@@ -312,11 +318,13 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
         
         // Brief moment during connection
         await waitMs(10);
-        expect(screen.getByTestId('connection-state')).toHaveTextContent('connecting');
       });
       
+      await flushMicrotasks();
+      expect(screen.getByTestId('connection-state')).toHaveTextContent('connecting');
+      
       // After successful connection
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
       });
     });
@@ -327,15 +335,15 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
       });
       
       // Test disconnection
       const disconnectButton = screen.getByTestId('disconnect-button');
-      await fireEvent.click(disconnectButton);
+      await actFireEvent.click(disconnectButton);
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(mockWebSocketService.disconnect).toHaveBeenCalled();
       });
     });
@@ -346,7 +354,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('auth-state')).toHaveTextContent('authenticated');
         expect(screen.getByTestId('connection-state')).toHaveTextContent('connected');
       });
@@ -363,7 +371,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(mockWebSocketService.connect).toHaveBeenCalledWith(
           expect.stringMatching(new RegExp(`^${wsBaseUrl}/ws\\?token=.+`)),
           expect.any(Object)
@@ -377,7 +385,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(mockWebSocketService.connect).toHaveBeenCalledWith(
           expect.any(String),
           expect.objectContaining({
@@ -394,7 +402,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('failed');
       });
     });
@@ -407,7 +415,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('failed');
       });
       
@@ -421,7 +429,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
       
       await performLoginAndConnect();
       
-      await waitFor(() => {
+      await actWaitFor(() => {
         expect(screen.getByTestId('connection-state')).toHaveTextContent('failed');
       }, { timeout: 2000 });
     });
@@ -452,7 +460,7 @@ describe('Login WebSocket Setup Integration - Agent 2', () => {
 
   async function performLoginAndConnect() {
     const loginButton = screen.getByTestId('login-button');
-    await fireEvent.click(loginButton);
+    await actFireEvent.click(loginButton);
   }
 
   function setupSuccessfulAuthAndWSScenario() {

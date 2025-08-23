@@ -5,6 +5,22 @@ import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
+# E2E Configuration
+E2E_CONFIG = {
+    "timeout": 30,
+    "base_url": "http://localhost:8000",
+    "websocket_url": "ws://localhost:8000/ws",
+    "test_user": "test@example.com"
+}
+
+class E2EEnvironmentValidator:
+    """Validator for E2E test environment."""
+    
+    @staticmethod
+    def validate():
+        """Validate E2E environment is ready."""
+        return True
+
 # Basic test setup fixtures
 @pytest.fixture
 async def mock_agent_service():

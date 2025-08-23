@@ -25,7 +25,6 @@ import pytest
 
 # Add project root to path
 from tests.conftest import *
-from netra_backend.tests.helpers import FirstTimeUserTestHelpers
 
 # Add project root to path
 

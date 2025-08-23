@@ -293,6 +293,20 @@ export const createMockChatState = (overrides: any = {}) => ({
   messages: [createMockMessage()],
   isProcessing: false,
   error: null,
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  setActiveThread: jest.fn(),
+  addOptimisticMessage: jest.fn(),
+  updateOptimisticMessage: jest.fn(),
+  removeOptimisticMessage: jest.fn(),
+  clearOptimisticMessages: jest.fn(),
+  resetLayers: jest.fn(),
+  setConnectionStatus: jest.fn(),
+  setThreadLoading: jest.fn(),
+  startThreadLoading: jest.fn(),
+  completeThreadLoading: jest.fn(),
+  clearMessages: jest.fn(),
+  loadMessages: jest.fn(),
   ...overrides
 });
 

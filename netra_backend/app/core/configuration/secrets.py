@@ -309,7 +309,9 @@ class SecretManager:
     def _read_local_secret_files(self) -> Dict[str, str]:
         """Read secrets from local development files."""
         secrets = {}
-        secret_files = [".env.local", ".secrets", "secrets.json"]
+        # .secrets file is only for ACT/GitHub Actions testing, not for dev mode
+        # Real development should use .env.local or environment variables
+        secret_files = [".env.local", "secrets.json"]
         for file_path in secret_files:
             if os.path.exists(file_path):
                 secrets.update(self._parse_secret_file(file_path))

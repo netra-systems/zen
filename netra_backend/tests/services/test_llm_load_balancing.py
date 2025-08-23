@@ -3,20 +3,15 @@ Tests for LLM Manager load balancing strategies
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-import sys
-from pathlib import Path
-
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
+import os
 import time
 from typing import Any, Dict, List
 
 import pytest
-from netra_backend.app.schemas import AppConfig
 
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
-
 from netra_backend.tests.helpers.llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
@@ -31,14 +26,28 @@ class TestLLMManagerLoadBalancing:
     @pytest.fixture
     def load_balanced_manager(self):
         """Create LLM manager configured for load balancing testing"""
-        config = AppConfig()
-        config.environment = "testing"
+        config = self._create_load_balancing_config()
         manager = EnhancedLLMManager(config)
         
         providers = self._create_load_balancing_providers()
         self._register_load_balancing_providers(manager, providers)
         
         return manager, dict(providers)
+    
+    def _create_load_balancing_config(self) -> AppConfig:
+        """Create configuration for load balancing tests"""
+        config = AppConfig()
+        config.environment = "testing"
+        
+        # Detect real LLM environment
+        config.dev_mode_llm_enabled = self._detect_real_llm_environment()
+        
+        return config
+    
+    def _detect_real_llm_environment(self) -> bool:
+        """Detect if real LLM environment is available"""
+        api_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
+        return any(os.getenv(key) for key in api_keys)
     
     def _create_load_balancing_providers(self) -> List[tuple]:
         """Create providers with different capabilities"""

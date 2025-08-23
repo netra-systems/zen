@@ -4,12 +4,16 @@ Extracted from test_llm_manager_provider_switching.py for 25-line function compl
 """
 
 import asyncio
+import logging
+import os
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
 
 from netra_backend.tests.helpers.llm_manager_helpers import LLMProvider, MockLLMResponse
+
+logger = logging.getLogger(__name__)
 
 class MockLLMClient:
     """Mock LLM client that can simulate different provider behaviors"""
@@ -24,7 +28,8 @@ class MockLLMClient:
         self.response_time = 0.1
         self.should_fail = False
         self.failure_rate = 0.0
-        self.failure_message = "Mock LLM failure"
+        self.failure_message = f"Mock {self.provider.value} LLM failure"
+        self.use_real_error_types = False
         self._init_counters()
     
     def _init_counters(self):
@@ -34,16 +39,23 @@ class MockLLMClient:
         self.failed_requests = 0
         
     async def ainvoke(self, prompt: str):
-        """Mock async invoke"""
+        """Mock async invoke with enhanced error handling"""
         self.request_count += 1
-        await asyncio.sleep(self.response_time)
         
-        if self._should_fail_request():
+        try:
+            await asyncio.sleep(self.response_time)
+            
+            if self._should_fail_request():
+                self.failed_requests += 1
+                self._raise_realistic_error()
+            
+            self.successful_requests += 1
+            return self._create_response(prompt)
+            
+        except Exception as e:
+            logger.warning(f"Mock LLM {self.provider.value} invoke failed: {e}")
             self.failed_requests += 1
-            raise Exception(self.failure_message)
-        
-        self.successful_requests += 1
-        return self._create_response(prompt)
+            raise
     
     def _should_fail_request(self) -> bool:
         """Check if request should fail"""
@@ -52,6 +64,18 @@ class MockLLMClient:
         if self.failure_rate > 0:
             return __import__('random').random() < self.failure_rate
         return False
+    
+    def _raise_realistic_error(self):
+        """Raise realistic errors based on provider type"""
+        if self.use_real_error_types:
+            if self.provider == LLMProvider.OPENAI:
+                raise ConnectionError("OpenAI API connection failed")
+            elif self.provider == LLMProvider.GOOGLE:
+                raise TimeoutError("Google API request timed out")
+            elif self.provider == LLMProvider.ANTHROPIC:
+                raise ValueError("Anthropic API rate limit exceeded")
+        
+        raise Exception(self.failure_message)
     
     def _create_response(self, prompt: str) -> MockLLMResponse:
         """Create mock response"""

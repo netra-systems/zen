@@ -59,8 +59,8 @@ export const createMockResource = (overrides?: Partial<MCPResource>): MCPResourc
 
 export const createMockExecution = (overrides?: Partial<MCPToolExecution>): MCPToolExecution => ({
   id: 'exec-1',
-  tool_name: 'test-tool',
-  server_name: 'test-server',
+  tool_name: 'mock-tool',
+  server_name: 'mock-server',
   status: 'COMPLETED',
   arguments: { param1: 'value1' },
   started_at: new Date().toISOString(),
@@ -187,46 +187,77 @@ export const setupMCPMocks = () => {
   mcpMockState.reset();
 
   // Mock the MCP client service module
-  jest.doMock('@/services/mcp-client-service', () => ({
-    listServers: jest.fn().mockImplementation(() => Promise.resolve(mcpMockState.getServers())),
-    getServerStatus: jest.fn().mockImplementation((serverName: string) => {
-      const server = mcpMockState.getServers().find(s => s.name === serverName);
-      return Promise.resolve(server || null);
-    }),
-    connectServer: jest.fn().mockImplementation((serverName: string) => {
-      mcpMockState.updateServer(serverName, { status: 'CONNECTED' });
-      return Promise.resolve(true);
-    }),
-    disconnectServer: jest.fn().mockImplementation((serverName: string) => {
-      mcpMockState.updateServer(serverName, { status: 'DISCONNECTED' });
-      return Promise.resolve(true);
-    }),
-    discoverTools: jest.fn().mockImplementation((serverName?: string) => {
-      return Promise.resolve(mcpMockState.getTools(serverName));
-    }),
-    executeTool: jest.fn().mockImplementation((serverName: string, toolName: string, args: Record<string, any>) => {
-      const result = createMockToolResult({ tool_name: toolName, server_name: serverName });
-      return Promise.resolve(result);
-    }),
-    getToolSchema: jest.fn().mockResolvedValue({
-      type: 'object',
-      properties: {
-        input: { type: 'string', description: 'Mock schema' }
+  jest.doMock('@/services/mcp-client-service', () => {
+    class MCPClientService {
+      static async initialize() {
+        return Promise.resolve();
       }
-    }),
-    listResources: jest.fn().mockImplementation(() => Promise.resolve(mcpMockState.getResources())),
-    fetchResource: jest.fn().mockImplementation((serverName: string, uri: string) => {
-      const resource = mcpMockState.getResources().find(r => r.uri === uri);
-      return Promise.resolve(resource || null);
-    }),
-    clearCache: jest.fn().mockResolvedValue(true),
-    healthCheck: jest.fn().mockResolvedValue(true),
-    serverHealthCheck: jest.fn().mockResolvedValue(true),
-    getServerConnections: jest.fn().mockImplementation(() => {
-      return Promise.resolve(mcpMockState.getServers().filter(s => s.status === 'CONNECTED'));
-    }),
-    refreshAllConnections: jest.fn().mockResolvedValue(true)
-  }));
+
+      static async connect() {
+        return Promise.resolve(true);
+      }
+
+      static async disconnect() {
+        return Promise.resolve(true);
+      }
+
+      static async getAvailableTools() {
+        return Promise.resolve(mcpMockState.getTools());
+      }
+
+      static async executeTool(serverName: string, toolName: string, arguments_: Record<string, any>) {
+        const result = createMockToolResult({ tool_name: toolName, server_name: serverName });
+        return Promise.resolve(result);
+      }
+
+      static getConnectionStatus() {
+        return 'CONNECTED';
+      }
+    }
+
+    return {
+      default: MCPClientService,
+      MCPClientService,
+      listServers: jest.fn().mockImplementation(() => Promise.resolve(mcpMockState.getServers())),
+      getServerStatus: jest.fn().mockImplementation((serverName: string) => {
+        const server = mcpMockState.getServers().find(s => s.name === serverName);
+        return Promise.resolve(server || null);
+      }),
+      connectServer: jest.fn().mockImplementation((serverName: string) => {
+        mcpMockState.updateServer(serverName, { status: 'CONNECTED' });
+        return Promise.resolve(true);
+      }),
+      disconnectServer: jest.fn().mockImplementation((serverName: string) => {
+        mcpMockState.updateServer(serverName, { status: 'DISCONNECTED' });
+        return Promise.resolve(true);
+      }),
+      discoverTools: jest.fn().mockImplementation((serverName?: string) => {
+        return Promise.resolve(mcpMockState.getTools(serverName));
+      }),
+      executeTool: jest.fn().mockImplementation((serverName: string, toolName: string, args: Record<string, any>) => {
+        const result = createMockToolResult({ tool_name: toolName, server_name: serverName });
+        return Promise.resolve(result);
+      }),
+      getToolSchema: jest.fn().mockResolvedValue({
+        type: 'object',
+        properties: {
+          input: { type: 'string', description: 'Mock schema' }
+        }
+      }),
+      listResources: jest.fn().mockImplementation(() => Promise.resolve(mcpMockState.getResources())),
+      fetchResource: jest.fn().mockImplementation((serverName: string, uri: string) => {
+        const resource = mcpMockState.getResources().find(r => r.uri === uri);
+        return Promise.resolve(resource || null);
+      }),
+      clearCache: jest.fn().mockResolvedValue(true),
+      healthCheck: jest.fn().mockResolvedValue(true),
+      serverHealthCheck: jest.fn().mockResolvedValue(true),
+      getServerConnections: jest.fn().mockImplementation(() => {
+        return Promise.resolve(mcpMockState.getServers().filter(s => s.status === 'CONNECTED'));
+      }),
+      refreshAllConnections: jest.fn().mockResolvedValue(true)
+    };
+  });
 
   // Mock the useMCPTools hook
   jest.doMock('@/hooks/useMCPTools', () => ({

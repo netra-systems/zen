@@ -249,22 +249,5 @@ class TestResponseQuality:
 
 @pytest.mark.critical
 class TestCriticalQualityScenarios:
-    # """Critical quality validation scenarios."""
-    
-    # @pytest.mark.asyncio
-    # async def test_enterprise_quality_standards(self):
-    # """Test enterprise-level quality standards."""
-    # tester = ResponseQualityTester(use_mock_llm=True)
-        
-    # enterprise_response = await tester.create_test_response(
-    # "enterprise",
-    # "Enterprise infrastructure optimization plan: Implement microservices architecture "
-    # "with Docker containers, Kubernetes orchestration, and service mesh. "
-    # "Expected benefits: 50% improved scalability, 30% cost reduction, 99.9% uptime. "
-    # "Implementation timeline: 12 weeks. Budget required: $500K. ROI: 18 months."
-        
-    # quality_result = await tester.validate_response_quality(
-    # enterprise_response, QualityLevel.EXCELLENT, ContentType.ACTION_PLAN
-        
-    # assert quality_result["validation_result"]["score"] >= 0.8  # Enterprise standard
-    # assert quality_result["validation_time"] < 3.0  # Enterprise SLA
+    pass
+

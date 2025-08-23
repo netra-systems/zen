@@ -249,6 +249,16 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
             return f"http://{config.host}:{config.port}"
         raise ValueError(f"Unknown service: {service_name}")
     
+    @property
+    def backend_url(self) -> str:
+        """Get the backend service URL for TestClient compatibility."""
+        return self.get_service_url('backend')
+    
+    @property
+    def auth_url(self) -> str:
+        """Get the auth service URL for TestClient compatibility."""
+        return self.get_service_url('auth_service')
+    
     async def get_auth_token(self, user_index: int = 0) -> Optional[str]:
         """Get an authentication token for testing."""
         user = self.get_test_user(user_index)

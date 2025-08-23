@@ -38,8 +38,8 @@ afterEach(() => {
 
 const createMockExecution = (overrides?: Partial<MCPToolExecution>): MCPToolExecution => ({
   id: 'exec-1',
-  tool_name: 'test-tool',
-  server_name: 'test-server',
+  tool_name: 'mock-tool',
+  server_name: 'mock-server',
   status: 'COMPLETED',
   arguments: { param1: 'value1' },
   started_at: new Date().toISOString(),
@@ -64,8 +64,8 @@ describe('MCPToolIndicator', () => {
         show_details={true}
       />
     );
-    expect(screen.getByText('test-tool')).toBeInTheDocument();
-    expect(screen.getByText('@test-server')).toBeInTheDocument();
+    expect(screen.getByText('mock-tool')).toBeInTheDocument();
+    expect(screen.getByText('@mock-server')).toBeInTheDocument();
   });
 
   it('shows empty state when no executions', () => {
@@ -116,9 +116,9 @@ describe('MCPToolIndicator', () => {
 
 describe('MCPServerStatus', () => {
   it('renders server list correctly', () => {
-    const servers = [createMockServer({ name: 'test-server' })];
+    const servers = [createMockServer({ name: 'mock-server' })];
     render(<MCPServerStatus servers={servers} connections={[]} />);
-    expect(screen.getByText('test-server')).toBeInTheDocument();
+    expect(screen.getByText('mock-server')).toBeInTheDocument();
     expect(screen.getByText('1/1 Connected')).toBeInTheDocument();
   });
 
@@ -144,7 +144,7 @@ describe('MCPServerStatus', () => {
   });
 
   it('renders in compact mode', () => {
-    const servers = [createMockServer({ name: 'test-server' })];
+    const servers = [createMockServer({ name: 'mock-server' })];
     render(
       <MCPServerStatus 
         servers={servers} 
@@ -152,7 +152,7 @@ describe('MCPServerStatus', () => {
         compact={true} 
       />
     );
-    expect(screen.getByText('test-server')).toBeInTheDocument();
+    expect(screen.getByText('mock-server')).toBeInTheDocument();
   });
 });
 
@@ -172,9 +172,9 @@ describe('MCPResultCard', () => {
         collapsible={false}
       />
     );
-    expect(screen.getByText('test-tool')).toBeInTheDocument();
-    expect(screen.getByText('@test-server')).toBeInTheDocument();
-    expect(screen.getByText('1.5s')).toBeInTheDocument();
+    expect(screen.getByText('mock-tool')).toBeInTheDocument();
+    expect(screen.getByText('@mock-server')).toBeInTheDocument();
+    expect(screen.getByText('150ms')).toBeInTheDocument();
   });
 
   it('renders error result correctly', () => {
@@ -237,7 +237,7 @@ describe('MCPResultCard', () => {
 describe('MCP Components Integration', () => {
   it('works together in message context', () => {
     const executions = [createMockExecution()];
-    const servers = [createMockServer({ name: 'test-server' })];
+    const servers = [createMockServer({ name: 'mock-server' })];
     
     render(
       <div>
@@ -249,7 +249,7 @@ describe('MCP Components Integration', () => {
       </div>
     );
     
-    expect(screen.getByText('test-server')).toBeInTheDocument();
-    expect(screen.getByText('test-tool')).toBeInTheDocument();
+    expect(screen.getByText('mock-server')).toBeInTheDocument();
+    expect(screen.getByText('mock-tool')).toBeInTheDocument();
   });
 });

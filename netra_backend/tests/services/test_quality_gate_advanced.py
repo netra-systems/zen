@@ -162,7 +162,7 @@ class TestQualityGateAdvanced:
         setup_redis_error_mocks(quality_service)
         metrics = create_test_quality_metrics()
         
-        with patch('app.services.quality_gate.quality_gate_core.logger') as mock_logger:
+        with patch('netra_backend.app.services.quality_gate.quality_gate_core.logger') as mock_logger:
             await quality_service._store_metrics(metrics, ContentType.GENERAL)
             mock_logger.warning.assert_called()
 

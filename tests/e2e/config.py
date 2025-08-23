@@ -354,3 +354,13 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
         )
     else:
         raise ValueError(f"Unknown environment type: {env_type}")
+
+
+def get_auth_service_url() -> str:
+    """Get the auth service URL."""
+    return os.environ.get("AUTH_SERVICE_URL", "http://localhost:8001")
+
+
+def get_backend_service_url() -> str:
+    """Get the backend service URL."""
+    return os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")

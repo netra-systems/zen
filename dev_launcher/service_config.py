@@ -2,9 +2,9 @@
 Service configuration management for the dev launcher.
 
 DEFAULT CONFIGURATION:
-- Redis:       LOCAL (localhost:6379)
-- ClickHouse:  LOCAL (localhost:9000)
-- PostgreSQL:  LOCAL (localhost:5433)
+- Redis:       DOCKER (localhost:6379 via container)
+- ClickHouse:  DOCKER (localhost:9000 via container)
+- PostgreSQL:  DOCKER (localhost:5433 via container)
 - LLM:         SHARED (API providers - Anthropic, OpenAI, Gemini)
 - Auth:        LOCAL (localhost:8081)
 
@@ -88,7 +88,7 @@ class ServicesConfiguration:
     # Core services with their configurations
     redis: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="redis",
-        mode=ResourceMode(os.environ.get("REDIS_MODE", "local").lower()) if os.environ.get("REDIS_MODE") else ResourceMode.LOCAL,
+        mode=ResourceMode(os.environ.get("REDIS_MODE", "docker").lower()) if os.environ.get("REDIS_MODE") else ResourceMode.DOCKER,
         local_config={
             "host": os.environ.get("REDIS_HOST", "localhost"),
             "port": int(os.environ.get("REDIS_PORT", "6379")),
@@ -112,7 +112,7 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode(os.environ.get("CLICKHOUSE_MODE", "local").lower()) if os.environ.get("CLICKHOUSE_MODE") else ResourceMode.LOCAL,
+        mode=ResourceMode(os.environ.get("CLICKHOUSE_MODE", "docker").lower()) if os.environ.get("CLICKHOUSE_MODE") else ResourceMode.DOCKER,
         local_config={
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),
@@ -146,7 +146,7 @@ class ServicesConfiguration:
     
     postgres: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="postgres",
-        mode=ResourceMode(os.environ.get("POSTGRES_MODE", "local").lower()) if os.environ.get("POSTGRES_MODE") else ResourceMode.LOCAL,
+        mode=ResourceMode(os.environ.get("POSTGRES_MODE", "docker").lower()) if os.environ.get("POSTGRES_MODE") else ResourceMode.DOCKER,
         local_config={
             "host": "localhost",
             "port": 5433,
@@ -589,7 +589,7 @@ class ServiceConfigWizard:
         return response in ["y", "yes", "true", "1"]
 
 
-def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
+def load_or_create_config(interactive: bool = False) -> ServicesConfiguration:
     """Load existing configuration or create a new one with smart service detection.
     
     This function now includes intelligent service availability checking:

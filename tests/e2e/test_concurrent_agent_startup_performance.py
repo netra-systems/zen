@@ -156,7 +156,7 @@ class TestSyntaxFix:
 
             'avg_cpu_usage_percent': statistics.mean(self.metrics['cpu_usage_percent']) if self.metrics['cpu_usage_percent'] else 0
 
-async def test_performance_under_concurrent_load(, 
+async def test_performance_under_concurrent_load(self, 
     concurrent_test_environment, 
 
     isolated_test_users

@@ -62,8 +62,14 @@ export const setupInitialStateMocks = () => {
     toggleSidebar: jest.fn()
   });
   
+  // Initialize with auth token for consistent test state
+  const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdC11c2VyLTEyMyIsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImV4cCI6OTk5OTk5OTk5OX0.test-signature';
+  
   Object.defineProperty(window, 'localStorage', {
-    value: createMockStorage(),
+    value: createMockStorage([
+      { key: 'token', value: authToken },
+      { key: 'auth_token', value: authToken }
+    ]),
     configurable: true
   });
   
@@ -72,7 +78,9 @@ export const setupInitialStateMocks = () => {
     configurable: true
   });
   
-  setupMockCookies();
+  setupMockCookies([
+    { name: 'auth_token', value: authToken }
+  ]);
 };
 
 export const validateStorageAccess = () => {
@@ -88,12 +96,15 @@ export const validateCookieAccess = () => {
 export const InitialStateTestComponent: React.FC<{ testType: string }> = ({ testType }) => {
   const [stateLoaded, setStateLoaded] = React.useState(false);
   const [errors, setErrors] = React.useState<string[]>([]);
+  const [authToken, setAuthToken] = React.useState<string | null>(null);
   
   React.useEffect(() => {
     const checkInitialState = async () => {
       try {
         if (testType === 'localStorage') {
           const saved = localStorage.getItem('app-storage');
+          const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+          setAuthToken(token);
           if (saved) {
             JSON.parse(saved);
           }
@@ -113,7 +124,11 @@ export const InitialStateTestComponent: React.FC<{ testType: string }> = ({ test
           
           if (authCookie) {
             const token = authCookie.split('=')[1];
+            setAuthToken(token);
             if (!token) throw new Error('Invalid auth cookie');
+            if (!token.includes('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9')) {
+              throw new Error('Invalid JWT token format');
+            }
           }
         }
         
@@ -132,6 +147,9 @@ export const InitialStateTestComponent: React.FC<{ testType: string }> = ({ test
         <div data-testid="state-loaded">
           <p>Initial state loaded successfully</p>
           <p data-testid="test-type">Type: {testType}</p>
+          {authToken && (
+            <p data-testid="auth-token">Token: {authToken.substring(0, 20)}...</p>
+          )}
         </div>
       ) : (
         <div data-testid="state-loading">Loading initial state...</div>

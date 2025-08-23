@@ -14,6 +14,11 @@ export * from './comprehensive-test-factories';
 // Export all helpers
 export * from './comprehensive-test-helpers';
 
+// Export all mock utilities
+export * from './websocket-test-mocks';
+export * from './auth-test-mocks';
+export * from './api-test-mocks';
+
 // Re-export commonly used testing library functions
 export {
   render,

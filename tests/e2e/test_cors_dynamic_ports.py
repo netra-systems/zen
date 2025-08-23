@@ -102,7 +102,7 @@ class TestCORSDynamicFrontendPorts:
         ]
 
     @pytest.mark.asyncio
-    async def test_cors_hardcoded_localhost_origins_limitation(, self, dynamic_frontend_configs
+    async def test_cors_hardcoded_localhost_origins_limitation(self, dynamic_frontend_configs
     ):
         """
         Test that demonstrates the hardcoded localhost origins limitation.
@@ -245,7 +245,6 @@ from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
             headers = {"Origin": dynamic_origin, "Content-Type": "application/json"}
 
             try:
-    pass
                 # Test preflight request
                 preflight_response = await client.options(
                     "http://localhost:8000/health", headers=headers, timeout=5.0

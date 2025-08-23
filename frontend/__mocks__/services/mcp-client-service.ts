@@ -1,226 +1,199 @@
-// Mock MCP Client Service - Prevents 404 errors in tests
-// Provides complete mock implementation for all MCP service functions
+/**
+ * MCP Client Service Mock Implementation
+ * Comprehensive mock for MCP (Model Context Protocol) client service
+ * Used in frontend integration tests to prevent real API calls
+ */
 
-import type {
-  MCPServerInfo,
-  MCPTool,
-  MCPToolResult,
-  MCPResource,
-  MCPApiResponse,
-  ListServersResponse,
-  DiscoverToolsResponse,
-  ExecuteToolResponse,
-  ServerStatusResponse,
-  MCPServerStatus
-} from '@/types/mcp-types';
+export interface MCPServerInfo {
+  id: string;
+  name: string;
+  url: string;
+  transport: 'HTTP' | 'WEBSOCKET';
+  status: 'CONNECTED' | 'DISCONNECTED' | 'ERROR';
+  created_at: string;
+  updated_at: string;
+}
 
-// ============================================
-// Mock Data Factory Functions
-// ============================================
-
-const createMockServer = (overrides?: Partial<MCPServerInfo>): MCPServerInfo => ({
-  id: 'mock-server-1',
-  name: 'mock-server',
-  url: 'http://localhost:3001',
-  transport: 'HTTP',
-  status: 'CONNECTED' as MCPServerStatus,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  ...overrides
-});
-
-const createMockTool = (overrides?: Partial<MCPTool>): MCPTool => ({
-  name: 'mock-tool',
-  server_name: 'mock-server',
-  description: 'Mock MCP tool for testing',
+export interface MCPTool {
+  name: string;
+  server_name: string;
+  description: string;
   input_schema: {
-    type: 'object',
-    properties: {
-      input: { type: 'string', description: 'Test input' }
-    }
-  },
-  ...overrides
-});
+    type: string;
+    properties: Record<string, any>;
+  };
+}
 
-const createMockToolResult = (overrides?: Partial<MCPToolResult>): MCPToolResult => ({
-  tool_name: 'mock-tool',
-  server_name: 'mock-server',
-  content: [{ type: 'text', text: 'Mock result content' }],
-  is_error: false,
-  execution_time_ms: 150,
-  ...overrides
-});
+export interface MCPToolResult {
+  tool_name: string;
+  server_name: string;
+  content: Array<{ type: string; text: string }>;
+  is_error: boolean;
+  execution_time_ms: number;
+}
 
-const createMockResource = (overrides?: Partial<MCPResource>): MCPResource => ({
-  uri: 'mock://resource/1',
-  name: 'Mock Resource',
-  description: 'Mock MCP resource for testing',
-  mimeType: 'text/plain',
-  content: 'Mock resource content',
-  ...overrides
-});
+export interface MCPResource {
+  uri: string;
+  name: string;
+  description: string;
+  mimeType: string;
+  content: string;
+}
 
-// ============================================
-// Mock State Management
-// ============================================
+// Mock data factories
+export const mockFactories = {
+  createMockServer: (overrides: Partial<MCPServerInfo> = {}): MCPServerInfo => ({
+    id: 'mock-server-1',
+    name: 'mock-server',
+    url: 'http://localhost:3001',
+    transport: 'HTTP',
+    status: 'CONNECTED',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...overrides
+  }),
 
-let mockServers: MCPServerInfo[] = [createMockServer()];
-let mockTools: MCPTool[] = [createMockTool()];
-let mockResources: MCPResource[] = [createMockResource()];
+  createMockTool: (overrides: Partial<MCPTool> = {}): MCPTool => ({
+    name: 'mock-tool',
+    server_name: 'mock-server',
+    description: 'Mock MCP tool for testing',
+    input_schema: {
+      type: 'object',
+      properties: {
+        input: { type: 'string', description: 'Test input' }
+      }
+    },
+    ...overrides
+  }),
 
-// ============================================
-// Server Management Mock Functions
-// ============================================
+  createMockToolResult: (overrides: Partial<MCPToolResult> = {}): MCPToolResult => ({
+    tool_name: 'mock-tool',
+    server_name: 'mock-server',
+    content: [{ type: 'text', text: 'Mock result content' }],
+    is_error: false,
+    execution_time_ms: 150,
+    ...overrides
+  }),
 
-export const listServers = jest.fn().mockImplementation(async (): Promise<MCPServerInfo[]> => {
-  return Promise.resolve(mockServers);
-});
+  createMockResource: (overrides: Partial<MCPResource> = {}): MCPResource => ({
+    uri: 'mock://resource/1',
+    name: 'Mock Resource',
+    description: 'Mock MCP resource for testing',
+    mimeType: 'text/plain',
+    content: 'Mock resource content',
+    ...overrides
+  })
+};
 
-export const getServerStatus = jest.fn().mockImplementation(async (serverName: string): Promise<MCPServerInfo | null> => {
+// Global mock state
+let mockServers: MCPServerInfo[] = [mockFactories.createMockServer()];
+let mockTools: MCPTool[] = [mockFactories.createMockTool()];
+let mockResources: MCPResource[] = [mockFactories.createMockResource()];
+
+// Main MCP Client Service class mock
+export class MCPClientService {
+  static async initialize(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  static async connect(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  static async disconnect(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  static async getAvailableTools(): Promise<MCPTool[]> {
+    return Promise.resolve(mockTools);
+  }
+
+  static async executeTool(
+    serverName: string, 
+    toolName: string, 
+    arguments_: Record<string, any>
+  ): Promise<MCPToolResult> {
+    return Promise.resolve(mockFactories.createMockToolResult({
+      tool_name: toolName,
+      server_name: serverName
+    }));
+  }
+
+  static getConnectionStatus(): string {
+    return 'CONNECTED';
+  }
+}
+
+// Individual service functions
+export const listServers = jest.fn().mockResolvedValue(mockServers);
+
+export const getServerStatus = jest.fn().mockImplementation((serverName: string) => {
   const server = mockServers.find(s => s.name === serverName);
   return Promise.resolve(server || null);
 });
 
-export const connectServer = jest.fn().mockImplementation(async (serverName: string): Promise<boolean> => {
-  const serverIndex = mockServers.findIndex(s => s.name === serverName);
-  if (serverIndex >= 0) {
-    mockServers[serverIndex].status = 'CONNECTED';
-    return Promise.resolve(true);
-  }
-  return Promise.resolve(false);
-});
+export const connectServer = jest.fn().mockResolvedValue(true);
 
-export const disconnectServer = jest.fn().mockImplementation(async (serverName: string): Promise<boolean> => {
-  const serverIndex = mockServers.findIndex(s => s.name === serverName);
-  if (serverIndex >= 0) {
-    mockServers[serverIndex].status = 'DISCONNECTED';
-    return Promise.resolve(true);
-  }
-  return Promise.resolve(false);
-});
+export const disconnectServer = jest.fn().mockResolvedValue(true);
 
-// ============================================
-// Tool Management Mock Functions
-// ============================================
+export const discoverTools = jest.fn().mockResolvedValue(mockTools);
 
-export const discoverTools = jest.fn().mockImplementation(async (serverName?: string): Promise<MCPTool[]> => {
-  if (serverName) {
-    return Promise.resolve(mockTools.filter(t => t.server_name === serverName));
-  }
-  return Promise.resolve(mockTools);
-});
-
-export const executeTool = jest.fn().mockImplementation(async (
+export const executeTool = jest.fn().mockImplementation((
   serverName: string,
-  toolName: string,
-  arguments_: Record<string, any>
-): Promise<MCPToolResult> => {
-  const result = createMockToolResult({
+  toolName: string, 
+  args: Record<string, any>
+) => {
+  return Promise.resolve(mockFactories.createMockToolResult({
     tool_name: toolName,
     server_name: serverName
-  });
-  return Promise.resolve(result);
+  }));
 });
 
-export const getToolSchema = jest.fn().mockImplementation(async (
-  serverName: string,
-  toolName: string
-): Promise<Record<string, any>> => {
-  return Promise.resolve({
-    type: 'object',
-    properties: {
-      input: { type: 'string', description: 'Mock schema' }
-    }
-  });
+export const getToolSchema = jest.fn().mockResolvedValue({
+  type: 'object',
+  properties: {
+    input: { type: 'string', description: 'Mock schema' }
+  }
 });
 
-// ============================================
-// Resource Management Mock Functions
-// ============================================
+export const listResources = jest.fn().mockResolvedValue(mockResources);
 
-export const listResources = jest.fn().mockImplementation(async (serverName: string): Promise<MCPResource[]> => {
-  return Promise.resolve(mockResources);
+export const fetchResource = jest.fn().mockImplementation((uri: string) => {
+  return Promise.resolve(mockFactories.createMockResource({ uri }));
 });
 
-export const fetchResource = jest.fn().mockImplementation(async (
-  serverName: string,
-  uri: string
-): Promise<MCPResource | null> => {
-  const resource = mockResources.find(r => r.uri === uri);
-  return Promise.resolve(resource || null);
-});
+export const clearCache = jest.fn().mockResolvedValue(true);
 
-// ============================================
-// Cache Management Mock Functions
-// ============================================
+export const healthCheck = jest.fn().mockResolvedValue(true);
 
-export const clearCache = jest.fn().mockImplementation(async (
-  serverName?: string,
-  cacheType?: string
-): Promise<boolean> => {
+export const serverHealthCheck = jest.fn().mockImplementation((serverName: string) => {
   return Promise.resolve(true);
 });
 
-// ============================================
-// Health Check Mock Functions
-// ============================================
-
-export const healthCheck = jest.fn().mockImplementation(async (): Promise<boolean> => {
-  return Promise.resolve(true);
-});
-
-export const serverHealthCheck = jest.fn().mockImplementation(async (serverName: string): Promise<boolean> => {
-  return Promise.resolve(true);
-});
-
-// ============================================
-// Batch Operations Mock Functions
-// ============================================
-
-export const getServerConnections = jest.fn().mockImplementation(async (): Promise<MCPServerInfo[]> => {
+export const getServerConnections = jest.fn().mockImplementation(() => {
   return Promise.resolve(mockServers.filter(s => s.status === 'CONNECTED'));
 });
 
-export const refreshAllConnections = jest.fn().mockImplementation(async (): Promise<boolean> => {
-  return Promise.resolve(true);
-});
+export const refreshAllConnections = jest.fn().mockResolvedValue(true);
 
-// ============================================
-// Mock State Utilities
-// ============================================
-
-export const __mockSetServers = (servers: MCPServerInfo[]) => {
+// Test utilities for mock state management
+export const __mockSetServers = (servers: MCPServerInfo[]): void => {
   mockServers = servers;
 };
 
-export const __mockSetTools = (tools: MCPTool[]) => {
+export const __mockSetTools = (tools: MCPTool[]): void => {
   mockTools = tools;
 };
 
-export const __mockSetResources = (resources: MCPResource[]) => {
+export const __mockSetResources = (resources: MCPResource[]): void => {
   mockResources = resources;
 };
 
-export const __mockReset = () => {
-  mockServers = [createMockServer()];
-  mockTools = [createMockTool()];
-  mockResources = [createMockResource()];
-  
-  // Reset all jest mock functions
-  Object.values(module.exports).forEach(fn => {
-    if (jest.isMockFunction(fn)) {
-      fn.mockClear();
-    }
-  });
+export const __mockReset = (): void => {
+  mockServers = [mockFactories.createMockServer()];
+  mockTools = [mockFactories.createMockTool()];
+  mockResources = [mockFactories.createMockResource()];
 };
 
-// ============================================
-// Mock Factory Exports for Tests
-// ============================================
-
-export const mockFactories = {
-  createMockServer,
-  createMockTool,
-  createMockToolResult,
-  createMockResource
-};
+// Default export for compatibility
+export default MCPClientService;

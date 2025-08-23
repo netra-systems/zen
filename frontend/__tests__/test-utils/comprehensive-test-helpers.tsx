@@ -154,29 +154,39 @@ export const renderWithError = (ui: React.ReactElement, error: string = 'Test er
 export const createUserEvent = () => userEvent.setup();
 
 export const typeInInput = async (input: HTMLElement, text: string) => {
-  const user = createUserEvent();
-  await user.clear(input);
-  await user.type(input, text);
+  await act(async () => {
+    const user = createUserEvent();
+    await user.clear(input);
+    await user.type(input, text);
+  });
 };
 
 export const clickButton = async (button: HTMLElement) => {
-  const user = createUserEvent();
-  await user.click(button);
+  await act(async () => {
+    const user = createUserEvent();
+    await user.click(button);
+  });
 };
 
 export const submitForm = async (form: HTMLElement) => {
-  const user = createUserEvent();
-  await user.click(form.querySelector('button[type="submit"]') || form.querySelector('button') || form);
+  await act(async () => {
+    const user = createUserEvent();
+    await user.click(form.querySelector('button[type="submit"]') || form.querySelector('button') || form);
+  });
 };
 
 export const selectOption = async (select: HTMLElement, option: string) => {
-  const user = createUserEvent();
-  await user.selectOptions(select, option);
+  await act(async () => {
+    const user = createUserEvent();
+    await user.selectOptions(select, option);
+  });
 };
 
 export const pressKey = async (element: HTMLElement, key: string) => {
-  const user = createUserEvent();
-  await user.type(element, `{${key}}`);
+  await act(async () => {
+    const user = createUserEvent();
+    await user.type(element, `{${key}}`);
+  });
 };
 
 export const pressEnter = async (element: HTMLElement) => {
