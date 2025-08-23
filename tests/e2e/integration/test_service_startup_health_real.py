@@ -202,13 +202,13 @@ class ServiceStartupSequencer:
     async def _is_port_responsive(self, port: int) -> bool:
         """Check if port is responsive."""
         try:
-            async with httpx.AsyncClient(timeout=3.0) as client:
+            async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                 response = await client.get(f"http://localhost:{port}/health")
                 return response.status_code == 200
         except Exception:
             try:
                 # For frontend, try root path
-                async with httpx.AsyncClient(timeout=3.0) as client:
+                async with httpx.AsyncClient(timeout=3.0, follow_redirects=True) as client:
                     response = await client.get(f"http://localhost:{port}/")
                     return response.status_code in [200, 404]  # 404 is valid for React apps
             except Exception:
@@ -221,7 +221,7 @@ class ServiceStartupSequencer:
             if service_name == "frontend":
                 health_url = f"http://localhost:{port}/"
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 if response.status_code == 200:
                     return "healthy"
@@ -370,7 +370,7 @@ class HealthCascadeValidator:
                 port = 3000
                 health_url = f"http://localhost:{port}/"
             
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get(health_url)
                 return "healthy" if response.status_code == 200 else "unhealthy"
         except Exception:
@@ -380,7 +380,7 @@ class HealthCascadeValidator:
         """Test if frontend can connect to backend."""
         try:
             # Frontend should be able to reach backend API
-            async with httpx.AsyncClient(timeout=5.0) as client:
+            async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
                 response = await client.get("http://localhost:8000/health")
                 return response.status_code == 200
         except Exception:
