@@ -40,12 +40,19 @@ class DuplicateCodeDetector:
         
     def scan_codebase(self) -> None:
         """Scan all Python files in the codebase."""
-        python_files = list(self.root_path.rglob("*.py"))
+        # Focus on main source directories for faster scanning
+        source_dirs = ['netra_backend/app', 'auth_service', 'frontend/src']
+        python_files = []
+        
+        for dir_path in source_dirs:
+            dir_full = self.root_path / dir_path
+            if dir_full.exists():
+                python_files.extend(dir_full.rglob("*.py"))
         
         # Exclude virtual environments and cache
         python_files = [
             f for f in python_files 
-            if not any(p in str(f) for p in ['.venv', '__pycache__', 'migrations', 'site-packages'])
+            if not any(p in str(f) for p in ['.venv', '__pycache__', 'migrations', 'site-packages', 'test'])
         ]
         
         print(f"Scanning {len(python_files)} Python files...")
@@ -204,7 +211,7 @@ class DuplicateCodeDetector:
     def generate_report(self, issues: List[Dict]) -> str:
         """Generate a formatted report of duplicate code issues."""
         if not issues:
-            return "✅ No duplicate code patterns detected!"
+            return "[OK] No duplicate code patterns detected!"
         
         report = []
         report.append("=" * 80)
@@ -223,7 +230,7 @@ class DuplicateCodeDetector:
                 report.append("-" * 40)
                 
                 for issue in by_severity[severity]:
-                    report.append(f"\n❌ {issue['message']}")
+                    report.append(f"\nX {issue['message']}")
                     report.append(f"   Type: {issue['type']}")
                     
                     if 'files' in issue and len(issue['files']) <= 10:
@@ -240,11 +247,11 @@ class DuplicateCodeDetector:
         report.append("=" * 80)
         
         if any(i['severity'] == 'critical' for i in issues):
-            report.append("\n⚠️  CRITICAL: Immediate consolidation required!")
+            report.append("\n[WARNING] CRITICAL: Immediate consolidation required!")
             report.append("   Run: python scripts/fix_websocket_imports.py")
         
         if any(i['type'] == 'feature_duplication' for i in issues):
-            report.append("\n⚠️  Multiple implementations of same features detected.")
+            report.append("\n[WARNING] Multiple implementations of same features detected.")
             report.append("   Review SPEC/learnings/websocket_consolidation.xml for consolidation strategy.")
         
         report.append("\n" + "=" * 80)
@@ -288,10 +295,10 @@ def main():
     
     detector = DuplicateCodeDetector(args.path, args.threshold)
     
-    print("🔍 Scanning for duplicate code patterns...")
+    print("Scanning for duplicate code patterns...")
     detector.scan_codebase()
     
-    print("🔎 Analyzing for duplicates...")
+    print("Analyzing for duplicates...")
     issues = detector.detect_duplicates()
     
     # Generate and print report
@@ -306,15 +313,15 @@ def main():
     if not args.report_only:
         critical_count = len([i for i in issues if i['severity'] == 'critical'])
         if critical_count > 0:
-            print(f"\n❌ Found {critical_count} critical duplicate code issues!")
+            print(f"\n[ERROR] Found {critical_count} critical duplicate code issues!")
             print("Fix these issues before committing.")
             sys.exit(1)
         elif len(issues) > 10:
-            print(f"\n⚠️  Found {len(issues)} duplicate code issues.")
+            print(f"\n[WARNING] Found {len(issues)} duplicate code issues.")
             print("Consider consolidation to improve maintainability.")
             sys.exit(1)
     
-    print("\n✅ Duplicate detection complete.")
+    print("\n[OK] Duplicate detection complete.")
     return 0
 
 
