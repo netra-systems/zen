@@ -380,14 +380,14 @@ def handle_service_configuration(args):
             mode_emoji = {
                 ResourceMode.LOCAL: get_emoji('computer'),
                 ResourceMode.SHARED: get_emoji('cloud'),
-                ResourceMode.MOCK: get_emoji('test_tube'),
+                ResourceMode.DOCKER: get_emoji('test_tube'),
                 ResourceMode.DISABLED: get_emoji('x')
             }.get(service.mode, '')
             
             mode_desc = {
                 ResourceMode.LOCAL: "Local instance",
                 ResourceMode.SHARED: "Cloud/shared resource",
-                ResourceMode.MOCK: "Mock implementation",
+                ResourceMode.DOCKER: "Docker container",
                 ResourceMode.DISABLED: "Disabled"
             }.get(service.mode, service.mode.value)
             

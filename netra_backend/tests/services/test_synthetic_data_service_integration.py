@@ -20,11 +20,11 @@ from netra_backend.app.services.corpus_service import CorpusService
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.websocket.unified import get_unified_manager
-manager = get_unified_manager() as ws_manager
+ws_manager = get_unified_manager()
 from netra_backend.tests.services.helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )
-from netra_backend.tests.test_synthetic_data_service_basic import (
+from netra_backend.tests.services.test_synthetic_data_service_basic import (
     ClickHouseService,
     GenerationConfig,
 )

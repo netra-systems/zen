@@ -19,7 +19,7 @@ from netra_backend.app.services.quality_monitoring_service import (
     QualityMonitoringService,
 )
 
-from netra_backend.tests.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     actual_metrics,
     sample_quality_metrics,
     sla_targets,

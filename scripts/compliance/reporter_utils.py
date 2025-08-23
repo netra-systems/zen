@@ -19,10 +19,10 @@ class ReporterUtils:
         self.use_emoji = use_emoji
     
     def sort_violations_by_severity(self, violations: List[Violation]) -> List[Violation]:
-        """Sort violations by severity and impact"""
-        severity_order = {'high': 0, 'medium': 1, 'low': 2}
+        """Sort violations by severity and impact - 4-tier system"""
+        severity_order = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
         return sorted(violations, key=lambda v: (
-            severity_order.get(v.severity, 3),
+            severity_order.get(v.severity, 4),
             -(v.actual_value or 0),
             v.file_path
         ))
@@ -41,9 +41,19 @@ class ReporterUtils:
             return min(base_limit or self.default_limit, max(5, total_count // 10))
     
     def get_severity_marker(self, severity: str) -> str:
-        """Get visual marker for severity level"""
+        """Get visual marker for severity level - 4-tier system"""
         if not self.use_emoji:
-            text_markers = {'high': '[H]', 'medium': '[M]', 'low': '[L]'}
+            text_markers = {
+                'critical': '[CRIT]',
+                'high': '[HIGH]',
+                'medium': '[MED]',
+                'low': '[LOW]'
+            }
             return text_markers.get(severity, '[ ]')
-        markers = {'high': '🔴', 'medium': '🟡', 'low': '🟢'}
+        markers = {
+            'critical': '🚨',
+            'high': '🔴',
+            'medium': '🟡',
+            'low': '🟢'
+        }
         return markers.get(severity, '⚪')

@@ -11,7 +11,7 @@ from netra_backend.tests.test_utils import setup_test_path
 import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
-from netra_backend.tests.quality_gate_content import (
+from netra_backend.tests.helpers.quality_gate_content import (
     get_clear_content,
     get_complete_action_plan_simple,
     get_complete_optimization_content,
@@ -30,13 +30,13 @@ from netra_backend.tests.quality_gate_content import (
     get_relevant_context,
     get_unclear_content,
 )
-from netra_backend.tests.quality_gate_fixtures import (
+from netra_backend.tests.helpers.quality_gate_fixtures import (
     quality_service,
     redis_mock,
     setup_novelty_mocks_duplicate,
     setup_novelty_mocks_fresh,
 )
-from netra_backend.tests.quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     assert_actionability_score_range,
     assert_clarity_score_approximation,
     assert_completeness_by_content_type,

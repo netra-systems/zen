@@ -17,7 +17,7 @@ import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.services.services.shared.transaction_test_helpers import (
+from netra_backend.tests.services.database_transaction_test_helpers import (
     MockDatabaseModel,
     MockRepository,
     TransactionTestManager,

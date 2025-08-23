@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.test_tool_registry_registration_core import MockTool
+from netra_backend.tests.services.test_tool_registry_registration_core import MockTool
 
 class TestToolRegistryPerformance:
     """Test performance aspects of tool registry"""

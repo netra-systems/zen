@@ -15,15 +15,15 @@ from typing import Any, Dict, List
 import pytest
 from netra_backend.app.schemas import AppConfig
 
-from netra_backend.tests.enhanced_llm_manager import EnhancedLLMManager
+from netra_backend.tests.helpers.enhanced_llm_manager import EnhancedLLMManager
 
-from netra_backend.tests.llm_manager_helpers import (
+from netra_backend.tests.helpers.llm_manager_helpers import (
     LLMProvider,
     count_provider_usage,
     execute_concurrent_requests,
     setup_weighted_load_balancing,
 )
-from netra_backend.tests.llm_mock_clients import MockLLMClient
+from netra_backend.tests.helpers.llm_mock_clients import MockLLMClient
 
 class TestLLMManagerLoadBalancing:
     """Test LLM manager load balancing strategies"""

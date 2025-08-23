@@ -27,9 +27,12 @@ export type {
 
 export {
   DEFAULT_PERFORMANCE_METRICS,
-  PERFORMANCE_THRESHOLDS,
   METRICS_FIELD_MAPPING
 } from '../performance-metrics';
+
+// Import and re-export PERFORMANCE_THRESHOLDS separately to avoid import issues
+import { PERFORMANCE_THRESHOLDS } from '../performance-metrics';
+export { PERFORMANCE_THRESHOLDS };
 
 // ============================================================================
 // AGENT METRICS (from agent-types.ts)

@@ -25,14 +25,18 @@ class MockTool(BaseTool):
     name: str = "mock_tool"
     description: str = "Mock tool for testing"
     
+    class Config:
+        arbitrary_types_allowed = True
+        extra = "allow"
+    
     def __init__(self, name: str = "mock_tool", description: str = "Mock tool", **kwargs):
         super().__init__(name=name, description=description, **kwargs)
-        self.call_count = 0
-        self.last_input = None
+        object.__setattr__(self, 'call_count', 0)
+        object.__setattr__(self, 'last_input', None)
     
     def _run(self, query: str) -> str:
-        self.call_count += 1
-        self.last_input = query
+        object.__setattr__(self, 'call_count', getattr(self, 'call_count', 0) + 1)
+        object.__setattr__(self, 'last_input', query)
         return f"Mock result for: {query}"
     
     async def _arun(self, query: str) -> str:

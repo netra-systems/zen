@@ -11,8 +11,8 @@ from netra_backend.tests.test_utils import setup_test_path
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.tool_registry_management_core import ToolOrchestrator
-from netra_backend.tests.tool_registry_test_mocks import (
+from netra_backend.tests.services.tool_registry_management_core import ToolOrchestrator
+from netra_backend.tests.services.tool_registry_test_mocks import (
     MockAdvancedTool,
     assert_tool_called,
 )

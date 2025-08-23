@@ -15,7 +15,7 @@ import pytest
 from langchain_core.tools import BaseTool
 
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.test_tool_registry_registration_core import MockTool
+from netra_backend.tests.services.test_tool_registry_registration_core import MockTool
 
 class TestToolRegistryDiscovery:
     """Test tool discovery functionality"""

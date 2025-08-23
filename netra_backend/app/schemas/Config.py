@@ -96,21 +96,21 @@ class OAuthConfig(BaseModel):
     ]
 
 class ClickHouseNativeConfig(BaseModel):
-    host: str = "clickhouse_host_url_placeholder"
+    host: str = "localhost"
     port: int = 9440
     user: str = "default"
     password: str = ""
     database: str = "default"
 
 class ClickHouseHTTPConfig(BaseModel):
-    host: str = "clickhouse_host_url_placeholder"
+    host: str = "localhost"
     port: int = 8123  # Standard ClickHouse HTTP port
     user: str = "default"
     password: str = ""
     database: str = "default"
 
 class ClickHouseHTTPSConfig(BaseModel):
-    host: str = "clickhouse_host_url_placeholder"
+    host: str = "localhost"
     port: int = 8443  # Standard ClickHouse HTTPS port
     user: str = "default"
     password: str = ""

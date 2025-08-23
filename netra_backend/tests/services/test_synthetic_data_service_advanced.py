@@ -24,7 +24,7 @@ from netra_backend.app.services.synthetic_data.metrics import (
 )
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
+from netra_backend.tests.services.test_synthetic_data_service_basic import GenerationConfig
 
 @pytest.fixture
 def advanced_service():

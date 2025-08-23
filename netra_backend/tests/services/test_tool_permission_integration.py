@@ -23,7 +23,7 @@ from netra_backend.app.services.tool_permission_service import ToolPermissionSer
 from netra_backend.tests.services.helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
-from netra_backend.tests.tool_permission_helpers import (
+from netra_backend.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     assert_business_requirements_result,
     assert_missing_permissions,

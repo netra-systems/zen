@@ -127,8 +127,8 @@ class ServiceAvailabilityChecker:
                 )
             else:
                 results['llm'] = ServiceAvailabilityResult(
-                    'llm', False, ResourceMode.MOCK,
-                    "API keys not configured, using mock LLM mode"
+                    'llm', False, ResourceMode.DISABLED,
+                    "API keys not configured, LLM services disabled"
                 )
         
         return results
@@ -395,7 +395,8 @@ class ServiceAvailabilityChecker:
         mode_emoji = {
             ResourceMode.LOCAL: get_emoji('computer'),
             ResourceMode.SHARED: get_emoji('cloud'),
-            ResourceMode.MOCK: get_emoji('test_tube')
+            ResourceMode.DOCKER: get_emoji('test_tube'),
+            ResourceMode.DISABLED: get_emoji('x')
         }
         
         safe_print(f"{service_emoji} {service_name.upper()}: {old_mode.value} → {new_mode.value} ({reason})")
@@ -414,7 +415,8 @@ class ServiceAvailabilityChecker:
             mode_emoji = {
                 ResourceMode.LOCAL: get_emoji('computer'),
                 ResourceMode.SHARED: get_emoji('cloud'),
-                ResourceMode.MOCK: get_emoji('test_tube')
+                ResourceMode.DOCKER: get_emoji('test_tube'),
+                ResourceMode.DISABLED: get_emoji('x')
             }.get(result.recommended_mode, get_emoji('gear'))
             
             safe_print(f"  {status_emoji} {service_name.upper():12} : {mode_emoji} {result.recommended_mode.value:8} - {result.reason}")

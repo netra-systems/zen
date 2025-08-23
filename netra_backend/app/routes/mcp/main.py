@@ -167,7 +167,7 @@ async def websocket_endpoint(
     # Manually create MCP service for WebSocket endpoint
     # FastAPI Depends() doesn't work properly with WebSocket endpoints
     from netra_backend.app.routes.mcp.service_factory import create_mcp_service_for_websocket
-    mcp_service = await create_mcp_service_for_websocket()
+    mcp_service = await create_mcp_service_for_websocket(websocket)
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
 

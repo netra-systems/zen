@@ -19,7 +19,7 @@ from langchain_core.tools import BaseTool
 from netra_backend.app.core.exceptions_base import NetraException
 
 from netra_backend.app.services.tool_registry import ToolRegistry
-from netra_backend.tests.test_tool_registry_registration_core import MockTool
+from netra_backend.tests.services.test_tool_registry_registration_core import MockTool
 
 class TestToolRegistryValidation:
     """Test tool validation functionality"""
@@ -79,8 +79,8 @@ class TestToolRegistryValidation:
         
         # Potentially unsafe tool
         class UnsafeTool(BaseTool):
-            name = "unsafe_tool"
-            description = "Tool with file system access"
+            name: str = "unsafe_tool"
+            description: str = "Tool with file system access"
             
             def _run(self, query: str) -> str:
                 import os

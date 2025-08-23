@@ -92,14 +92,10 @@ export type AgentStatus =
   | "shutdown";
 
 // ============================================================================
-// BASE WEBSOCKET PAYLOAD (mirroring backend BaseWebSocketPayload)
+// BASE WEBSOCKET PAYLOAD (imported from shared base to avoid duplication)
 // ============================================================================
 
-export interface BaseWebSocketPayload {
-  timestamp?: string; // ISO datetime string
-  correlation_id?: string;
-  message_id?: string; // For message deduplication
-}
+import { BaseWebSocketPayload } from './shared/base';
 
 // ============================================================================
 // CLIENT TO SERVER PAYLOAD TYPES

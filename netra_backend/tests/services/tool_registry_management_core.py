@@ -75,6 +75,7 @@ class ToolOrchestrator:
     def _start_chain_execution(self, chain_id: str, tools: List) -> None:
         """Start chain execution tracking"""
         self.active_chains[chain_id] = {
+            'chain_id': chain_id,
             'status': 'running',
             'start_time': datetime.now(UTC),
             'tools': tools

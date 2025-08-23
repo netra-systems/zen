@@ -39,19 +39,18 @@ class WebSocketTestClient:
     async def connect(self, headers: Optional[Dict[str, str]] = None) -> bool:
         """Connect to WebSocket server with session token."""
         try:
-    pass
             # For testing, we'll mock the WebSocket connection instead of making real connections
-#             # since these are unit tests for context preservation logic, not integration tests # Possibly broken comprehension
+            # since these are unit tests for context preservation logic, not integration tests
             
             if "mock" in self.uri or not hasattr(self, '_real_connection'):
-#                 # Mock connection for unit testing # Possibly broken comprehension
+                # Mock connection for unit testing
                 self.websocket = AsyncMock()
                 self.is_connected = True
                 logger.info(f"WebSocket mock connected successfully with token: {self.session_token[:8]}...")
                 return True
             
-#             # This would be for real integration testing if needed # Possibly broken comprehension
-import websockets as ws
+            # This would be for real integration testing if needed
+            import websockets as ws
             # Format headers for websockets library
             headers_list = []
             if headers:
@@ -288,6 +287,7 @@ async def test_established_conversation(websocket_test_client, mock_agent_contex
                 "current_step": 3,
                 "total_steps": 5,
                 "pending_steps": ["analysis", "recommendations"]
+            }
         },
         "tool_call_history": [
             {"tool": "usage_analyzer", "timestamp": "2025-01-20T10:00:00Z"},
@@ -395,6 +395,8 @@ async def test_reconnection_preserves_agent_memory_and_context(, established_con
         "payload": {
             "context": original_context,
             "session_token": session_token
+        }
+    }
     
     restored_context = await client.request_agent_context()
     
@@ -437,6 +439,7 @@ async def test_reconnection_same_token_different_ip_location(, established_conve
         "X-Real-IP": "192.168.1.100",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "X-Geolocation": "37.7749,-122.4194"  # San Francisco
+    }
     
     # Establish baseline
     await client.connect(headers=original_headers)
@@ -452,6 +455,7 @@ async def test_reconnection_same_token_different_ip_location(, established_conve
         "X-Real-IP": "10.0.0.50", 
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)",
         "X-Geolocation": "40.7128,-74.0060"  # New York
+    }
     
     # Reconnect from Location B
     start_time = time.time()
@@ -468,6 +472,8 @@ async def test_reconnection_same_token_different_ip_location(, established_conve
             "security_checks_passed": True,
             "context_available": True,
             "location_change_detected": True
+        }
+    }
     
     # Validate session recognition despite IP change
     connection_response = await client.receive_message(timeout=5.0)
@@ -484,6 +490,7 @@ async def test_reconnection_same_token_different_ip_location(, established_conve
     client.websocket._configured_response = {
         "type": "agent_context",
         "payload": {"context": original_context}
+    }
     
     accessible_context = await client.request_agent_context()
     assert accessible_context is not None, "Agent context not accessible from new location"
@@ -492,8 +499,7 @@ async def test_reconnection_same_token_different_ip_location(, established_conve
     logger.info(f"✓ Cross-location reconnection successful in {connection_time:.3f}s")
 
 @pytest.mark.asyncio
-async def test_multiple_reconnections_maintain_consistency(, established_conversation, session_token
-):
+async def test_multiple_reconnections_maintain_consistency(established_conversation, session_token):
     """
     Test Case 4: Multiple reconnections in sequence maintain consistency.
     
@@ -539,6 +545,8 @@ async def test_multiple_reconnections_maintain_consistency(, established_convers
                 "context_preserved": True,
                 "consistency_check": "passed",
                 "memory_usage": initial_memory * (1 + cycle * 0.001)  # Minimal growth
+            }
+        }
         
         # Verify state consistency
         status_response = await client.receive_message(timeout=5.0)
@@ -600,12 +608,15 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
             "context_preserved": True,
             "preservation_rate": 1.0,
             "disconnection_type": "brief"
+        }
+    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["brief"] = {
         "preservation_rate": status["payload"]["preservation_rate"],
         "restoration_time": brief_restoration_time,
         "context_preserved": status["payload"]["context_preserved"]
+    }
     
     await client.disconnect()
     
@@ -613,7 +624,7 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
     logger.info("Testing medium disconnection (2 minutes)")
     medium_start = time.time()
     
-#     # Simulate 2 minutes with time acceleration for testing # Possibly broken comprehension
+    # Simulate 2 minutes with time acceleration for testing
     await asyncio.sleep(2)  # Reduced for testing, simulating 2 minutes
     
     await client.connect()
@@ -627,6 +638,8 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
             "preservation_rate": 0.95,
             "disconnection_type": "medium",
             "warning": "Some non-critical data may be stale"
+        }
+    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["medium"] = {
@@ -634,6 +647,7 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
         "restoration_time": medium_restoration_time,
         "context_preserved": status["payload"]["context_preserved"],
         "warning": status["payload"].get("warning")
+    }
     
     await client.disconnect()
     
@@ -656,6 +670,8 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
             "clean_session_started": True,
             "disconnection_type": "extended",
             "timeout_policy_enforced": True
+        }
+    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["extended"] = {
@@ -663,6 +679,7 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(, establishe
         "clean_session_started": status["payload"]["clean_session_started"],
         "timeout_policy_enforced": status["payload"]["timeout_policy_enforced"],
         "restoration_time": extended_restoration_time
+    }
     
     # Validate brief disconnection results
     brief = test_results["brief"]

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-from netra_backend.tests.test_quality_monitoring_alerts import *
-from netra_backend.tests.test_quality_monitoring_basic import *
-from netra_backend.tests.test_quality_monitoring_integration import *
-from netra_backend.tests.test_quality_monitoring_metrics import *
+from netra_backend.tests.services.test_quality_monitoring_alerts import *
+from netra_backend.tests.services.test_quality_monitoring_basic import *
+from netra_backend.tests.services.test_quality_monitoring_integration import *
+from netra_backend.tests.services.test_quality_monitoring_metrics import *

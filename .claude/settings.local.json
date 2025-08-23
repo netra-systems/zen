@@ -34,5 +34,5 @@
     ],
     "deny": []
   },
-  "disableAllHooks": true
+  "disableAllHooks": false
 }

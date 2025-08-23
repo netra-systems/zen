@@ -16,7 +16,7 @@ import pytest
 from cryptography.fernet import Fernet
 
 from netra_backend.app.services.key_manager import KeyManager
-from netra_backend.tests.security_service_test_mocks import (
+from netra_backend.tests.services.security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
     assert_authentication_failure,

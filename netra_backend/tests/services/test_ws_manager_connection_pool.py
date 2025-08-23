@@ -10,12 +10,12 @@ from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 
-from netra_backend.tests.test_ws_connection_basic import (
+from netra_backend.tests.services.test_ws_connection_basic import (
 
     TestWebSocketManagerConnectionPooling,
 
 )
-from netra_backend.tests.test_ws_connection_mocks import (
+from netra_backend.tests.services.test_ws_connection_mocks import (
 
     MockConnectionPool,
 
@@ -24,7 +24,7 @@ from netra_backend.tests.test_ws_connection_mocks import (
     WebSocketTestHelpers,
 
 )
-from netra_backend.tests.test_ws_connection_performance import (
+from netra_backend.tests.services.test_ws_connection_performance import (
 
     TestWebSocketManagerPerformanceAndScaling,
 

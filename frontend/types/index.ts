@@ -25,5 +25,13 @@ export {
 // Export performance metrics unified types
 export * from './performance-metrics';
 
+// Export domain types and utilities
+export * from './domains/messages';
+export * from './domains/threads';
+
+// Export specific utility functions for backward compatibility
+export { createMessage, Message, MessageRole } from './domains/messages';
+export { getThreadTitle, createThread, Thread } from './domains/threads';
+
 // Only export from other files if they have unique types not in backend_schema_auto_generated
 // Most types are already defined in backend_schema_auto_generated

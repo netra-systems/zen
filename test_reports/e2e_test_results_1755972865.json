@@ -1,0 +1,56 @@
+{
+  "dev_login": {
+    "status": "PASS",
+    "response_code": 200,
+    "token_received": true,
+    "user_data": {
+      "id": "dev-temp-f7ebda5b",
+      "email": "dev@example.com",
+      "name": "Development User",
+      "session_id": "1dfc5857-bc62-4572-a65e-86d5eba959c7"
+    }
+  },
+  "websocket_connection": {
+    "status": "PASS",
+    "connected": true,
+    "welcome_received": true
+  },
+  "message_send_receive": {
+    "status": "PARTIAL",
+    "message_sent": true,
+    "response_received": false,
+    "ai_response": null
+  },
+  "frontend_loading": {
+    "status": "ERROR",
+    "error": "HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=10)"
+  },
+  "backend_health": {
+    "status": "PASS",
+    "response_code": 200,
+    "health_data": {
+      "status": "healthy",
+      "service": "netra-ai-platform",
+      "version": "1.0.0",
+      "timestamp": "2025-08-23T18:14:23.037453+00:00"
+    }
+  },
+  "auth_health": {
+    "status": "PASS",
+    "response_code": 200,
+    "health_data": {
+      "status": "healthy",
+      "service": "auth-service",
+      "version": "1.0.0",
+      "timestamp": "2025-08-23T18:14:25.111271+00:00",
+      "uptime_seconds": 482.863929
+    }
+  },
+  "summary": {
+    "total_tests": 5,
+    "passed": 4,
+    "failed": 1,
+    "errors": 0
+  },
+  "duration_seconds": 27.36911368370056
+}

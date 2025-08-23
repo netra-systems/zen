@@ -18,7 +18,7 @@ from netra_backend.app.schemas.UserPlan import (
 )
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.tests.tool_permission_helpers import (
+from netra_backend.tests.helpers.tool_permission_helpers import (
     assert_business_requirements_result,
     create_business_requirements,
     create_developer_context,

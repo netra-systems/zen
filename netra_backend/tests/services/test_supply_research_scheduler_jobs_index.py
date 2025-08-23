@@ -11,14 +11,14 @@ from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-from netra_backend.tests.test_scheduler_concurrency import (
+from netra_backend.tests.services.test_scheduler_concurrency import (
     TestSupplyResearchSchedulerConcurrency,
 )
-from netra_backend.tests.test_scheduler_jobs_core import TestSupplyResearchSchedulerJobs
-from netra_backend.tests.test_scheduler_performance import (
+from netra_backend.tests.services.test_scheduler_jobs_core import TestSupplyResearchSchedulerJobs
+from netra_backend.tests.services.test_scheduler_performance import (
     TestSupplyResearchSchedulerPerformance,
 )
-from netra_backend.tests.test_scheduler_retry_logic import (
+from netra_backend.tests.services.test_scheduler_retry_logic import (
     TestSupplyResearchSchedulerRetryLogic,
 )
 

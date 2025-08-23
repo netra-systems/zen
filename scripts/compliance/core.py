@@ -11,16 +11,19 @@ from typing import Dict, List, Optional, Union
 
 @dataclass
 class Violation:
-    """Structured violation data"""
+    """Structured violation data with enhanced severity tracking"""
     file_path: str
     violation_type: str
-    severity: str
+    severity: str  # Now uses 4-tier: critical, high, medium, low
     line_number: Optional[int] = None
     function_name: Optional[str] = None
     actual_value: Optional[int] = None
     expected_value: Optional[int] = None
     description: str = ""
     fix_suggestion: str = ""
+    business_impact: Optional[str] = None  # Business impact description
+    remediation_timeline: Optional[str] = None  # Expected fix timeline
+    category: Optional[str] = None  # Violation category for grouping
 
 
 @dataclass
@@ -99,49 +102,128 @@ class ComplianceConfig:
 
 
 class ViolationBuilder:
-    """Builder for creating violation objects"""
+    """Builder for creating violation objects with enhanced severity"""
     
     @staticmethod
     def file_size_violation(rel_path: str, lines: int, max_lines: int) -> Violation:
-        """Build file size violation"""
+        """Build file size violation with tiered severity"""
+        # Determine severity based on how much the limit is exceeded
+        if lines > max_lines * 2:  # More than double the limit
+            severity = "high"
+            violation_type = "file_size_extreme"
+            business_impact = "Severe maintainability issues, high cognitive load"
+            timeline = "Within 24 hours"
+        elif lines > max_lines:
+            severity = "medium"
+            violation_type = "file_size_high"
+            business_impact = "Reduced maintainability, testing complexity"
+            timeline = "Current sprint"
+        else:
+            severity = "low"
+            violation_type = "file_size_warning"
+            business_impact = "Code quality concern"
+            timeline = "Next refactor cycle"
+        
         return Violation(
-            file_path=rel_path, violation_type="file_size", severity="high",
+            file_path=rel_path, violation_type=violation_type, severity=severity,
             actual_value=lines, expected_value=max_lines,
             description=f"File exceeds {max_lines} line limit",
-            fix_suggestion=f"Split into {(lines // max_lines) + 1} modules"
+            fix_suggestion=f"Split into {(lines // max_lines) + 1} modules",
+            business_impact=business_impact,
+            remediation_timeline=timeline,
+            category="complexity"
         )
     
     @staticmethod
     def function_violation(node, rel_path: str, lines: int, max_lines: int,
                           severity: str, prefix: str) -> Violation:
-        """Build function complexity violation"""
-        fix_action = "Consider splitting" if severity == "low" else "Split"
+        """Build function complexity violation with enhanced severity"""
+        # Override severity based on complexity level
+        if lines > max_lines * 2:  # More than double the limit
+            severity = "high"
+            violation_type = "function_complexity_extreme"
+            business_impact = "Severe testing difficulty, high bug risk"
+            timeline = "Within 24 hours"
+            fix_action = "Urgently split"
+        elif lines > max_lines:
+            severity = "medium"
+            violation_type = "function_complexity_high"
+            business_impact = "Testing complexity, maintenance burden"
+            timeline = "Current sprint"
+            fix_action = "Split"
+        else:
+            severity = "low"
+            violation_type = "function_complexity_warning"
+            business_impact = "Code quality concern"
+            timeline = "Next refactor cycle"
+            fix_action = "Consider splitting"
+        
         return Violation(
-            file_path=rel_path, violation_type="function_complexity", severity=severity,
+            file_path=rel_path, violation_type=violation_type, severity=severity,
             line_number=node.lineno, function_name=node.name, actual_value=lines,
             expected_value=max_lines,
             description=f"{prefix} Function '{node.name}' has {lines} lines (max: {max_lines})",
-            fix_suggestion=f"{fix_action} into {(lines // max_lines) + 1} smaller functions"
+            fix_suggestion=f"{fix_action} into {(lines // max_lines) + 1} smaller functions",
+            business_impact=business_impact,
+            remediation_timeline=timeline,
+            category="complexity"
         )
     
     @staticmethod
     def duplicate_violation(type_name: str, files: List[str]) -> Violation:
-        """Build duplicate type violation"""
+        """Build duplicate type violation with context-aware severity"""
         file_list = ", ".join(files[:3]) + ("..." if len(files) > 3 else "")
+        
+        # Check if it's a critical type based on naming
+        critical_patterns = ['Agent', 'Service', 'Config', 'Auth', 'Security']
+        is_critical = any(pattern in type_name for pattern in critical_patterns)
+        
+        if is_critical and len(files) > 2:
+            severity = "high"
+            violation_type = "duplicate_critical_logic"
+            business_impact = "Critical logic fragmentation, high bug risk"
+            timeline = "Within 24 hours"
+        else:
+            severity = "medium"
+            violation_type = "duplicate_types"
+            business_impact = "Type system inconsistency, maintenance burden"
+            timeline = "Current sprint"
+        
         return Violation(
-            file_path=file_list, violation_type="duplicate_types", severity="medium",
+            file_path=file_list, violation_type=violation_type, severity=severity,
             actual_value=len(files), expected_value=1,
             description=f"Type '{type_name}' defined in {len(files)} files",
-            fix_suggestion=f"Consolidate '{type_name}' into single source of truth"
+            fix_suggestion=f"Consolidate '{type_name}' into single source of truth",
+            business_impact=business_impact,
+            remediation_timeline=timeline,
+            category="duplication"
         )
     
     @staticmethod
     def test_stub_violation(rel_path: str, line_number: int, description: str) -> Violation:
-        """Build test stub violation"""
+        """Build test stub violation - always critical in production"""
+        # Test stubs in production are always critical
+        is_production = not any(indicator in rel_path.lower() 
+                               for indicator in ['/test', '/tests', '_test.', 'test_'])
+        
+        if is_production:
+            severity = "critical"
+            violation_type = "production_test_stub"
+            business_impact = "Production code contains test logic - system failure risk"
+            timeline = "Immediate - Stop all work and fix"
+        else:
+            severity = "medium"
+            violation_type = "test_stub"
+            business_impact = "Test quality issue"
+            timeline = "Current sprint"
+        
         return Violation(
-            file_path=rel_path, violation_type="test_stub", severity="high",
+            file_path=rel_path, violation_type=violation_type, severity=severity,
             line_number=line_number, description=f"Test stub detected: {description}",
-            fix_suggestion="Replace with production implementation"
+            fix_suggestion="Replace with production implementation",
+            business_impact=business_impact,
+            remediation_timeline=timeline,
+            category="quality"
         )
 
 

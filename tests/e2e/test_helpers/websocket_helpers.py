@@ -147,7 +147,7 @@ def validate_message_ordering(sent_messages: List[Dict], received_messages: List
             
     return True
 
-async def test_stress_test_connections(server_url: str, num_connections: int, 
+async def stress_test_connections(server_url: str, num_connections: int, 
                                 messages_per_connection: int) -> Dict[str, Any]:
     """Create multiple concurrent connections and send messages"""
     results = {
@@ -161,7 +161,7 @@ async def test_stress_test_connections(server_url: str, num_connections: int,
     
     async def single_connection_test(connection_id: int):
         try:
-            async with websocket_test_context(server_url) as websocket:
+            async with test_websocket_test_context(server_url) as websocket:
                 results["successful_connections"] += 1
                 
                 for i in range(messages_per_connection):

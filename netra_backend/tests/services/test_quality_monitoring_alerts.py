@@ -18,13 +18,13 @@ from netra_backend.app.services.quality_monitoring_service import (
     MetricType,
     QualityMonitoringService,
 )
-from netra_backend.tests.quality_monitoring_fixtures import (
+from netra_backend.tests.helpers.quality_monitoring_fixtures import (
     poor_quality_metrics,
     real_quality_monitoring_service,
     sample_quality_alert,
     sample_quality_metrics,
 )
-from netra_backend.tests.quality_monitoring_helpers import (
+from netra_backend.tests.helpers.quality_monitoring_helpers import (
     assert_event_in_buffer,
     assert_event_properties,
     assert_monitoring_methods_called,

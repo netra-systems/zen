@@ -67,8 +67,10 @@ class AuthStarter:
             if len(host) > 30:
                 host = host[:27] + '...'
             mode_desc = f"using cloud Redis ({host})"
-        elif redis_mode == ResourceMode.MOCK:
-            mode_desc = "using mock Redis"
+        elif redis_mode == ResourceMode.DOCKER:
+            mode_desc = "using Docker Redis"
+        elif redis_mode == ResourceMode.DISABLED:
+            mode_desc = "with Redis disabled"
         else:
             mode_desc = "with Redis disabled"
         

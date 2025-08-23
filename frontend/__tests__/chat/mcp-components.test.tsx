@@ -1,9 +1,8 @@
 // MCP Components Tests - Basic test coverage for MCP UI components
-// Tests functionality, rendering, and integration
+// Tests functionality, rendering, and integration with proper mocking
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-// Using Jest instead of vitest
 import { MCPToolIndicator } from '@/components/chat/MCPToolIndicator';
 import { MCPServerStatus } from '@/components/chat/MCPServerStatus';
 import { MCPResultCard } from '@/components/chat/MCPResultCard';
@@ -12,6 +11,26 @@ import type {
   MCPServerInfo, 
   MCPToolResult 
 } from '@/types/mcp-types';
+import {
+  setupMCPMocks,
+  cleanupMCPMocks,
+  createMockServer,
+  createMockExecution as createMockExecutionFromMock,
+  createMockToolResult
+} from '../mocks/mcp-service-mock';
+
+// ============================================
+// Test Setup and Teardown
+// ============================================
+
+beforeEach(() => {
+  setupMCPMocks();
+});
+
+afterEach(() => {
+  cleanupMCPMocks();
+  jest.clearAllMocks();
+});
 
 // ============================================
 // Test Data Setup (8 lines max)
@@ -28,25 +47,8 @@ const createMockExecution = (overrides?: Partial<MCPToolExecution>): MCPToolExec
   ...overrides
 });
 
-const createMockServer = (overrides?: Partial<MCPServerInfo>): MCPServerInfo => ({
-  id: 'server-1',
-  name: 'test-server',
-  url: 'http://localhost:3000',
-  transport: 'HTTP',
-  status: 'CONNECTED',
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  ...overrides
-});
-
-const createMockResult = (overrides?: Partial<MCPToolResult>): MCPToolResult => ({
-  tool_name: 'test-tool',
-  server_name: 'test-server',
-  content: [{ type: 'text', text: 'Test result' }],
-  is_error: false,
-  execution_time_ms: 1500,
-  ...overrides
-});
+// Using mock factories from the mock service module
+const createMockResult = createMockToolResult;
 
 // ============================================
 // MCPToolIndicator Tests (8 lines max each)
@@ -114,7 +116,7 @@ describe('MCPToolIndicator', () => {
 
 describe('MCPServerStatus', () => {
   it('renders server list correctly', () => {
-    const servers = [createMockServer()];
+    const servers = [createMockServer({ name: 'test-server' })];
     render(<MCPServerStatus servers={servers} connections={[]} />);
     expect(screen.getByText('test-server')).toBeInTheDocument();
     expect(screen.getByText('1/1 Connected')).toBeInTheDocument();
@@ -126,7 +128,7 @@ describe('MCPServerStatus', () => {
   });
 
   it('displays server status correctly', () => {
-    const connectedServer = createMockServer({ status: 'CONNECTED' });
+    const connectedServer = createMockServer({ name: 'connected-server', status: 'CONNECTED' });
     const disconnectedServer = createMockServer({ 
       id: 'server-2',
       name: 'disconnected-server',
@@ -142,7 +144,7 @@ describe('MCPServerStatus', () => {
   });
 
   it('renders in compact mode', () => {
-    const servers = [createMockServer()];
+    const servers = [createMockServer({ name: 'test-server' })];
     render(
       <MCPServerStatus 
         servers={servers} 
@@ -235,7 +237,7 @@ describe('MCPResultCard', () => {
 describe('MCP Components Integration', () => {
   it('works together in message context', () => {
     const executions = [createMockExecution()];
-    const servers = [createMockServer()];
+    const servers = [createMockServer({ name: 'test-server' })];
     
     render(
       <div>
