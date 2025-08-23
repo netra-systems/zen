@@ -25,7 +25,6 @@ def _load_base_env_file(root_path: Path) -> None:
     if env_path.exists():
         from dotenv import load_dotenv
         load_dotenv(env_path)
-        print(f"Loaded .env file from {env_path}")
 
 
 def _load_development_env_file(root_path: Path) -> None:
@@ -34,7 +33,6 @@ def _load_development_env_file(root_path: Path) -> None:
     if env_dev_path.exists():
         from dotenv import load_dotenv
         load_dotenv(env_dev_path, override=True)
-        print(f"Loaded .env.development file from {env_dev_path}")
 
 
 def _load_local_development_env_file(root_path: Path) -> None:
@@ -43,12 +41,12 @@ def _load_local_development_env_file(root_path: Path) -> None:
     if env_local_path.exists():
         from dotenv import load_dotenv
         load_dotenv(env_local_path, override=True)
-        print(f"Loaded .env.development.local file from {env_local_path}")
 
 
 def _get_project_root() -> Path:
     """Get the project root path."""
-    return Path(__file__).parent.parent
+    # main.py is in netra_backend/app/, so project root is two levels up
+    return Path(__file__).parent.parent.parent
 
 
 def _load_all_env_files(root_path: Path) -> None:
@@ -60,23 +58,36 @@ def _load_all_env_files(root_path: Path) -> None:
 
 def _setup_environment_files() -> None:
     """Load environment files ONLY if not already loaded by dev launcher."""
-    # Skip loading if running under dev launcher (it already loaded secrets)
-    from netra_backend.app.core.configuration import unified_config_manager
-    config = unified_config_manager.get_config()
+    # Check if dev launcher already loaded environment variables
+    # by looking for specific environment variables that dev launcher sets
+    dev_launcher_indicators = [
+        'DEV_LAUNCHER_ACTIVE',  # Explicit flag from dev launcher
+        'CROSS_SERVICE_AUTH_TOKEN',  # Token set by dev launcher
+    ]
     
-    # Check for dev launcher active flag through unified config
-    try:
-        dev_launcher_active = getattr(config, 'dev_launcher_active', False)
-        if dev_launcher_active:
+    # If any dev launcher indicator is present, skip loading
+    for indicator in dev_launcher_indicators:
+        if os.environ.get(indicator):
+            print(f"Dev launcher detected via {indicator} - skipping .env loading")
             return
-    except AttributeError:
-        pass
     
-    # Only load for direct uvicorn runs
+    # Check if critical environment variables are already set
+    # This handles cases where env vars are set directly without dev launcher
+    critical_vars = ['LLM_MODE', 'DATABASE_URL', 'GEMINI_API_KEY']
+    vars_already_set = sum(1 for var in critical_vars if os.environ.get(var))
+    
+    # If most critical vars are already set, assume external loading
+    if vars_already_set >= len(critical_vars) // 2:
+        print("Critical environment variables already set - skipping .env loading")
+        return
+    
+    # Only load for direct uvicorn runs when environment is not pre-configured
     try:
         root_path = _get_project_root()
+        print("Loading .env files for direct application run")
         _load_all_env_files(root_path)
     except ImportError: 
+        print("python-dotenv not available - skipping .env loading")
         pass
 
 # Load environment files only if needed

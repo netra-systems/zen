@@ -20,6 +20,7 @@ class CriticalErrorType(Enum):
     PORT_BINDING = 4
     DEPENDENCY_MISSING = 5
     PERMISSION_DENIED = 6
+    STARTUP_FAILURE = 7
 
 
 class CriticalError(Exception):
@@ -41,6 +42,7 @@ class CriticalError(Exception):
             CriticalErrorType.PORT_BINDING: 5,
             CriticalErrorType.DEPENDENCY_MISSING: 6,
             CriticalErrorType.PERMISSION_DENIED: 7,
+            CriticalErrorType.STARTUP_FAILURE: 8,
         }
         return exit_codes.get(self.error_type, 1)
 

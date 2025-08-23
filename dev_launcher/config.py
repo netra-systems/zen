@@ -421,7 +421,7 @@ class LauncherConfig:
             # Map modes to descriptive text and emojis
             mode_info = {
                 ResourceMode.LOCAL: ("Local", "💻"),
-                ResourceMode.SHARED: ("Cloud", "☁️"),
+                ResourceMode.SHARED: ("On", "☁️"),  # Changed from "Cloud" to "On" for better UX
                 ResourceMode.DOCKER: ("Docker", "🧪"),
                 ResourceMode.DISABLED: ("Off", "❌")
             }

@@ -2,11 +2,12 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY frontend/package*.json ./
 RUN npm ci
 
-# Copy application code
+# Copy all frontend source files
+# The .dockerignore file handles exclusions (node_modules, tests, etc.)
 COPY frontend/ .
 COPY shared/ ../shared/
 

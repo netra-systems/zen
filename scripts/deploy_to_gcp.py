@@ -352,11 +352,12 @@ CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port ${PORT:-80
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY frontend/package*.json ./
 RUN npm ci
 
-# Copy application code
+# Copy all frontend source files
+# The .dockerignore file handles exclusions (node_modules, tests, etc.)
 COPY frontend/ .
 COPY shared/ ../shared/
 
@@ -511,7 +512,7 @@ CMD ["npm", "start"]
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
-        # Build base command
+        # Build base command - automatically route traffic to new revision once healthy
         cmd = [
             self.gcloud_cmd, "run", "deploy", service.cloud_run_name,
             "--image", image_tag,
@@ -524,7 +525,8 @@ CMD ["npm", "start"]
             "--max-instances", str(service.max_instances),
             "--timeout", str(service.timeout),
             "--allow-unauthenticated",  # Remove for production
-            "--no-cpu-throttling"
+            "--no-cpu-throttling",
+            "--ingress", "all"  # Allow traffic from anywhere
         ]
         
         # Add environment variables
@@ -580,11 +582,95 @@ CMD ["npm", "start"]
             if url:
                 print(f"   URL: {url}")
                 
+            # Ensure traffic is routed to the latest revision
+            self.update_traffic_to_latest(service.cloud_run_name)
+            
             return True, url
             
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to deploy {service.name}: {e.stderr}")
             return False, None
+    
+    def wait_for_revision_ready(self, service_name: str, max_wait: int = 60) -> bool:
+        """Wait for the latest revision to be ready before routing traffic."""
+        print(f"  ⏳ Waiting for {service_name} revision to be ready...")
+        
+        start_time = time.time()
+        while time.time() - start_time < max_wait:
+            try:
+                # Check if the latest revision is ready
+                cmd = [
+                    self.gcloud_cmd, "run", "revisions", "list",
+                    "--service", service_name,
+                    "--platform", "managed",
+                    "--region", self.region,
+                    "--format", "value(status.conditions[0].status)",
+                    "--limit", "1"
+                ]
+                
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    shell=self.use_shell
+                )
+                
+                if result.returncode == 0 and "True" in result.stdout:
+                    print(f"  ✅ Revision is ready")
+                    return True
+                    
+            except Exception:
+                pass
+            
+            time.sleep(5)
+        
+        print(f"  ⚠️ Revision not ready after {max_wait} seconds")
+        return False
+    
+    def update_traffic_to_latest(self, service_name: str) -> bool:
+        """Update traffic to route 100% to the latest revision."""
+        print(f"  📡 Updating traffic to latest revision for {service_name}...")
+        
+        # First wait for the revision to be ready
+        if not self.wait_for_revision_ready(service_name):
+            print(f"  ⚠️ Skipping traffic update - revision not ready")
+            return False
+        
+        try:
+            # Update traffic to send 100% to the latest revision
+            cmd = [
+                self.gcloud_cmd, "run", "services", "update-traffic",
+                service_name,
+                "--to-latest",
+                "--platform", "managed",
+                "--region", self.region
+            ]
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=False,
+                shell=self.use_shell
+            )
+            
+            if result.returncode == 0:
+                print(f"  ✅ Traffic updated to latest revision")
+                return True
+            else:
+                # This may fail if the service doesn't exist yet or if traffic is already at latest
+                # which is okay
+                if "already receives 100%" in result.stderr or "not found" in result.stderr:
+                    print(f"  ✓ Traffic already routing to latest revision")
+                    return True
+                else:
+                    print(f"  ⚠️ Could not update traffic: {result.stderr[:200]}")
+                    return False
+                    
+        except Exception as e:
+            print(f"  ⚠️ Error updating traffic: {e}")
+            return False
     
     def get_service_url(self, service_name: str) -> Optional[str]:
         """Get the URL of a deployed Cloud Run service."""

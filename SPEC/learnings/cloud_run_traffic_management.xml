@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>Cloud Run Traffic Management</name>
+    <type>learnings</type>
+    <version>1.0</version>
+    <last_updated>2025-08-23</last_updated>
+    <description>Learnings about Cloud Run traffic management and automatic revision switching</description>
+    <critical>true</critical>
+    <business_impact>Critical - New deployments must receive traffic to serve customers</business_impact>
+  </metadata>
+  
+  <cloud_run_traffic_learnings>
+    <learning>
+      <id>cloud-run-automatic-traffic-switching</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>Cloud Run Requires Explicit Traffic Migration to New Revisions</title>
+      <problem>
+        <description>Cloud Run does not automatically route traffic to new revisions after deployment</description>
+        <symptoms>
+          <symptom>New deployments are healthy but not receiving traffic</symptom>
+          <symptom>Old revisions continue serving despite new deployment</symptom>
+          <symptom>Users don't see updated features after deployment</symptom>
+          <symptom>Health checks pass but service still serves old version</symptom>
+        </symptoms>
+        <root_cause>Cloud Run by default maintains traffic on existing revisions for stability</root_cause>
+      </problem>
+      <solution>
+        <description>Explicitly update traffic routing after successful deployment</description>
+        <implementation>
+          <step>Deploy new revision with gcloud run deploy</step>
+          <step>Wait for revision to be ready (health checks pass)</step>
+          <step>Use gcloud run services update-traffic --to-latest to route traffic</step>
+          <benefits>
+            <benefit>Ensures new deployments receive traffic immediately</benefit>
+            <benefit>Maintains zero-downtime deployments</benefit>
+            <benefit>Allows rollback if issues detected</benefit>
+          </benefits>
+        </implementation>
+        <code_example>
+          <![CDATA[
+# Deploy service
+gcloud run deploy SERVICE_NAME \
+  --image IMAGE_URL \
+  --platform managed \
+  --region REGION
+
+# Wait for revision to be ready
+gcloud run revisions list \
+  --service SERVICE_NAME \
+  --platform managed \
+  --region REGION \
+  --limit 1
+
+# Update traffic to latest revision
+gcloud run services update-traffic SERVICE_NAME \
+  --to-latest \
+  --platform managed \
+  --region REGION
+          ]]>
+        </code_example>
+        <verification>
+          <step>Deploy to staging</step>
+          <step>Verify new revision is created</step>
+          <step>Confirm traffic switches to new revision</step>
+          <step>Test that new features are accessible</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always include traffic update step in deployment scripts</guideline>
+        <guideline>Monitor revision status before switching traffic</guideline>
+        <guideline>Implement health checks to validate revision readiness</guideline>
+        <guideline>Log traffic routing changes for audit trail</guideline>
+      </prevention>
+      <related_commands>
+        <command>
+          <name>List current traffic allocation</name>
+          <syntax>gcloud run services describe SERVICE_NAME --format="value(spec.traffic[].percent,spec.traffic[].revisionName)"</syntax>
+        </command>
+        <command>
+          <name>Split traffic between revisions</name>
+          <syntax>gcloud run services update-traffic SERVICE_NAME --to-revisions=REVISION1=50,REVISION2=50</syntax>
+        </command>
+        <command>
+          <name>Rollback to previous revision</name>
+          <syntax>gcloud run services update-traffic SERVICE_NAME --to-revisions=OLD_REVISION=100</syntax>
+        </command>
+      </related_commands>
+    </learning>
+    
+    <learning>
+      <id>cloud-run-revision-readiness-check</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>high</severity>
+      <title>Verify Revision Readiness Before Traffic Switch</title>
+      <problem>
+        <description>Switching traffic to unhealthy revisions causes service disruption</description>
+        <symptoms>
+          <symptom>503 errors after deployment</symptom>
+          <symptom>Service unavailable errors</symptom>
+          <symptom>Failed health checks after traffic switch</symptom>
+        </symptoms>
+        <root_cause>Traffic switched before revision is fully ready</root_cause>
+      </problem>
+      <solution>
+        <description>Implement revision readiness checks before traffic migration</description>
+        <implementation>
+          <step>Query revision status after deployment</step>
+          <step>Wait for status.conditions[0].status = True</step>
+          <step>Optionally perform HTTP health check</step>
+          <step>Only switch traffic after confirmed ready</step>
+        </implementation>
+        <verification>
+          <step>Deploy with readiness check</step>
+          <step>Verify no service disruption</step>
+          <step>Confirm smooth traffic transition</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always wait for revision ready status</guideline>
+        <guideline>Implement timeout for readiness checks</guideline>
+        <guideline>Log revision status during deployment</guideline>
+      </prevention>
+    </learning>
+  </cloud_run_traffic_learnings>
+</specification>

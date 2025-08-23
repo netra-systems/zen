@@ -31,7 +31,7 @@ from unittest.mock import MagicMock, Mock, call, patch, PropertyMock
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration, ServiceResource
-from dev_launcher.critical_error_handler import CriticalError
+from dev_launcher.critical_error_handler import CriticalError, CriticalErrorType
 
 
 def create_test_project_structure(base_dir: Path) -> None:
@@ -1123,19 +1123,24 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher.process_manager = Mock()
         launcher.process_manager.processes = mock_processes
         launcher.process_manager.is_running = Mock(side_effect=lambda x: x in mock_processes)
+        # Emergency cleanup should use kill_process, not terminate_process
+        launcher.process_manager.kill_process = Mock(return_value=True)
         launcher.process_manager.terminate_process = Mock(return_value=True)
         launcher.process_manager.cleanup_all = Mock()
         
         # Mock port operations
         launcher._is_port_in_use = Mock(return_value=True)
-        launcher._force_free_port_with_retry = Mock()
+        launcher._force_free_port_with_retry = Mock(return_value=True)
         
         # Trigger emergency cleanup
         launcher.emergency_cleanup()
         
-        # ASSERTION THAT SHOULD FAIL: Should terminate all running services
+        # ASSERTION: Should use kill_process for emergency force termination
         expected_calls = [call("Frontend"), call("Backend"), call("Auth")]
-        launcher.process_manager.terminate_process.assert_has_calls(expected_calls, any_order=True)
+        launcher.process_manager.kill_process.assert_has_calls(expected_calls, any_order=True)
+        
+        # ASSERTION: terminate_process should NOT be called in emergency mode
+        launcher.process_manager.terminate_process.assert_not_called()
         
         # ASSERTION THAT SHOULD FAIL: Should cleanup all processes
         launcher.process_manager.cleanup_all.assert_called_once()
@@ -1188,7 +1193,7 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher.emergency_cleanup = Mock()
         
         # Simulate critical error during startup
-        critical_error = CriticalError("Critical startup failure", CriticalErrorType.STARTUP_FAILURE)
+        critical_error = CriticalError(CriticalErrorType.STARTUP_FAILURE, "Critical startup failure")
         
         async def run_test():
             with patch('dev_launcher.launcher.critical_handler') as mock_handler:

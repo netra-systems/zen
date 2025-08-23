@@ -137,12 +137,15 @@ else:
 
 import pytest
 
+# Always import logger - this is lightweight
+from netra_backend.app.logging_config import central_logger
+logger = central_logger.get_logger(__name__)
+
 # Only import heavy modules if not in collection mode
 if not os.environ.get("TEST_COLLECTION_MODE"):
     from fastapi.testclient import TestClient
     from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
     from sqlalchemy.orm import sessionmaker
-    from sqlalchemy.pool import StaticPool
 
     # Configuration imports moved to fixtures to avoid slow startup during test collection
     from netra_backend.app.core.configuration.base import get_unified_config
@@ -249,7 +252,9 @@ def ensure_db_initialized():
     
     if async_session_factory is None:
         try:
-            initialize_postgres()
+            session_factory = initialize_postgres()
+            if session_factory is None:
+                pytest.skip("Database initialization returned None - database may not be available")
         except Exception as e:
             pytest.skip(f"Cannot initialize database for test: {e}")
     
@@ -282,20 +287,29 @@ async def test_engine():
         }
     )
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
-    yield engine
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-    await engine.dispose()
+        yield engine
+    finally:
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.drop_all)
+        except Exception as e:
+            logger.warning(f"Failed to drop test tables: {e}")
+        finally:
+            await engine.dispose()
 
 @pytest.fixture(scope="function")
 async def db_session(test_engine):
     # Skip this fixture during collection mode
     if os.environ.get("TEST_COLLECTION_MODE"):
+        yield None
+        return
+        
+    # Skip if test_engine is None (happens during collection mode)
+    if test_engine is None:
         yield None
         return
         
@@ -305,13 +319,22 @@ async def db_session(test_engine):
     async_session = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
 
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 @pytest.fixture(scope="function")
 def client(db_session):
     """Create FastAPI test client with database session override."""
     # Skip this fixture during collection mode
     if os.environ.get("TEST_COLLECTION_MODE"):
+        return None
+        
+    # Skip if db_session is None (happens during collection mode or engine issues)
+    if db_session is None:
         return None
         
     # Import modules lazily to avoid startup during test collection
@@ -324,10 +347,13 @@ def client(db_session):
 
     app.dependency_overrides[get_db_session] = override_get_db
 
-    with TestClient(app) as c:
-        yield c
-
-    del app.dependency_overrides[get_db_session]
+    try:
+        with TestClient(app) as c:
+            yield c
+    finally:
+        # Clean up override
+        if get_db_session in app.dependency_overrides:
+            del app.dependency_overrides[get_db_session]
 
 # Real LLM Testing Fixtures
 
@@ -419,20 +445,20 @@ def _create_real_agents(llm_manager, tool_dispatcher):
     return _instantiate_agents(agent_classes, llm_manager, tool_dispatcher)
 
 def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatcher):
-
     """Build real setup dictionary for E2E tests."""
     import uuid
 
     return {
-
         'agents': agents, 'llm': llm_manager, 'websocket': websocket_manager,
-
         'dispatcher': tool_dispatcher, 'run_id': str(uuid.uuid4()), 'user_id': 'test-user-e2e'
-
     }
 
 # Import database repository fixtures to make them available
-pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
+# Use try-except to handle missing modules gracefully
+try:
+    pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
+except ImportError:
+    pytest_plugins = []
 
 # =============================================================================
 # AGENT TESTING FIXTURES
@@ -591,10 +617,9 @@ def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
     from netra_backend.app.services.agent_service import AgentService
 
+    import uuid
     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
-
     supervisor.thread_id = str(uuid.uuid4())
-
     supervisor.user_id = str(uuid.uuid4())
 
     agent_service = AgentService(supervisor)

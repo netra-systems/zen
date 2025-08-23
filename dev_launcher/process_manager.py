@@ -83,18 +83,46 @@ class ProcessManager:
             self.process_ports[name].add(port)
             logger.debug(f"Registered port {port} for process {name}")
     
-    def terminate_process(self, name: str) -> bool:
-        """Terminate a specific process."""
+    def terminate_process(self, name: str, timeout: int = 5) -> bool:
+        """Terminate a specific process gracefully."""
         with self._lock:
             if not self._process_exists(name):
                 return False
             process = self.processes[name]
-            return self._handle_process_termination(process, name)
+            return self._handle_process_termination(process, name, timeout)
     
-    def _handle_process_termination(self, process: subprocess.Popen, name: str) -> bool:
+    def kill_process(self, name: str) -> bool:
+        """Force kill a specific process immediately (for emergency situations)."""
+        with self._lock:
+            if not self._process_exists(name):
+                return False
+            process = self.processes[name]
+            return self._handle_process_force_kill(process, name)
+    
+    def _handle_process_force_kill(self, process: subprocess.Popen, name: str) -> bool:
+        """Handle immediate process force killing."""
+        if process.poll() is None:  # Process is still running
+            logger.info(f"Force killing {name} (PID: {process.pid})")
+            try:
+                # Skip graceful termination, go straight to force kill
+                self._force_kill_process(process, name)
+                # Wait briefly to verify termination
+                try:
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"Force kill of {name} may not have completed immediately")
+                return self._cleanup_process(name)
+            except Exception as e:
+                logger.error(f"Failed to force kill {name}: {e}")
+                return False
+        else:
+            # Process already terminated
+            return self._cleanup_process(name)
+    
+    def _handle_process_termination(self, process: subprocess.Popen, name: str, timeout: int = 5) -> bool:
         """Handle process termination logic."""
         if self._is_process_running(process, name):
-            if not self._terminate_running_process(process, name):
+            if not self._terminate_running_process(process, name, timeout):
                 return False
         return self._cleanup_process(name)
     
@@ -112,11 +140,11 @@ class ProcessManager:
             return True
         return False
     
-    def _terminate_running_process(self, process: subprocess.Popen, name: str) -> bool:
+    def _terminate_running_process(self, process: subprocess.Popen, name: str, timeout: int = 5) -> bool:
         """Terminate a running process."""
         try:
             self._send_terminate_signal(process, name)
-            self._wait_for_termination(process, name)
+            self._wait_for_termination(process, name, timeout)
             return True
         except Exception as e:
             logger.error(f"Failed to terminate {name}: {e}")
@@ -251,10 +279,10 @@ class ProcessManager:
         except Exception as e:
             logger.error(f"Error terminating {name}: {e}")
     
-    def _wait_for_termination(self, process: subprocess.Popen, name: str):
+    def _wait_for_termination(self, process: subprocess.Popen, name: str, timeout: int = 5):
         """Wait for process termination."""
         try:
-            process.wait(timeout=5)
+            process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             self._handle_termination_timeout(process, name)
     

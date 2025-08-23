@@ -126,9 +126,11 @@ class ServiceAvailabilityChecker:
                     'llm', True, ResourceMode.SHARED, "API keys configured"
                 )
             else:
+                # Keep LLM in shared mode even without API keys - just show warning
+                # This ensures LLM shows as "On" (shared mode) instead of "Off" (disabled)
                 results['llm'] = ServiceAvailabilityResult(
-                    'llm', False, ResourceMode.DISABLED,
-                    "API keys not configured, LLM services disabled"
+                    'llm', True, ResourceMode.SHARED,
+                    "API keys not configured - LLM services will use mock mode for development"
                 )
         
         return results
