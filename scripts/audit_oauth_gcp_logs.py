@@ -17,12 +17,17 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set, Tuple
+from pathlib import Path
 
 # Fix Windows Unicode issues
 if sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+# Import centralized GCP authentication
+sys.path.insert(0, str(Path(__file__).parent))
+from gcp_auth_config import GCPAuthConfig
 
 import click
 from google.cloud import logging as cloud_logging
@@ -43,11 +48,11 @@ class OAuthLogAnalyzer:
         self.project_id = project_id
         self.hours_back = hours_back
         
-        # Try to clear the environment variable if it points to a non-existent file
-        gcp_creds = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
-        if gcp_creds and not os.path.exists(gcp_creds):
-            console.print(f"[yellow]Clearing invalid GOOGLE_APPLICATION_CREDENTIALS: {gcp_creds}[/yellow]")
-            os.environ.pop('GOOGLE_APPLICATION_CREDENTIALS', None)
+        # Ensure proper authentication
+        if not GCPAuthConfig.ensure_authentication():
+            console.print("[red]Failed to set up GCP authentication[/red]")
+            console.print("[yellow]Please ensure service account key is at: config/netra-staging-7a1059b7cf26.json[/yellow]")
+            raise RuntimeError("GCP authentication failed")
         
         self.client = cloud_logging.Client(project=project_id)
         

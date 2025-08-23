@@ -24,17 +24,21 @@ if sys.platform == "win32":
 class GCPAuthConfig:
     """Centralized configuration for GCP service account authentication."""
     
+    # Get project root directory (parent of scripts directory)
+    PROJECT_ROOT = Path(__file__).parent.parent
+    
     # Primary service account key path - MUST be used for all GCP operations
-    PRIMARY_KEY_PATH = Path("C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/gcp-staging-sa-key.json")
+    PRIMARY_KEY_PATH = PROJECT_ROOT / "config" / "netra-staging-7a1059b7cf26.json"
     
     # Alternative key locations in priority order
     KEY_SEARCH_PATHS = [
         PRIMARY_KEY_PATH,
+        PROJECT_ROOT / "config" / "netra-staging-7a1059b7cf26.json",
         Path.home() / ".netra" / "gcp-staging-sa-key.json",
         Path.home() / ".gcp" / "netra-deployer.json",
-        Path("netra-deployer-netra-staging.json"),
-        Path("service-account.json"),
-        Path("gcp-key.json"),
+        PROJECT_ROOT / "netra-deployer-netra-staging.json",
+        PROJECT_ROOT / "service-account.json",
+        PROJECT_ROOT / "gcp-key.json",
     ]
     
     @classmethod

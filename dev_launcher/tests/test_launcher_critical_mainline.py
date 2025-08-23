@@ -251,7 +251,7 @@ class TestPortConflictResolution(unittest.TestCase):
         launcher.port_manager = mock_manager
         
         # Simulate shutdown with stuck ports
-        launcher._verify_ports_freed()
+        launcher._verify_ports_freed_with_force_cleanup()
         
         # ASSERTION THAT SHOULD FAIL: Should force-free stuck ports
         # This will fail if force cleanup isn't properly implemented
@@ -259,7 +259,7 @@ class TestPortConflictResolution(unittest.TestCase):
         
         # ASSERTION THAT SHOULD FAIL: Should attempt force cleanup for stuck ports
         # This exposes inadequate port cleanup handling
-        force_free_calls = [call for call in launcher._force_free_port.call_args_list 
+        force_free_calls = [call for call in launcher._force_free_port_with_retry.call_args_list 
                           if call[0][0] in {8000, 3000}]
         self.assertGreater(len(force_free_calls), 0)
 
@@ -994,7 +994,7 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher.process_manager.processes = {"Frontend": Mock(), "Backend": Mock(), "Auth": Mock()}
         
         # Trigger shutdown
-        launcher._terminate_all_services()
+        launcher._terminate_all_services_ordered()
         
         # ASSERTION THAT SHOULD FAIL: Should terminate in correct order
         expected_order = ["Frontend", "Backend", "Auth"]
@@ -1027,13 +1027,13 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         
         # Mock port verification
         launcher._is_port_in_use = Mock(side_effect=[True, True, False])  # Two ports in use, one free
-        launcher._force_free_port = Mock()
+        launcher._force_free_port_with_retry = Mock()
         
         # Mock other components
         launcher.process_manager.processes = {}
         
         # Trigger port verification
-        launcher._verify_ports_freed()
+        launcher._verify_ports_freed_with_force_cleanup()
         
         # ASSERTION THAT SHOULD FAIL: Should check all critical ports
         expected_port_checks = [
@@ -1044,8 +1044,8 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher._is_port_in_use.assert_has_calls(expected_port_checks, any_order=True)
         
         # ASSERTION THAT SHOULD FAIL: Should force-free ports that are still in use
-        expected_force_free_calls = [call(8081), call(8000)]
-        launcher._force_free_port.assert_has_calls(expected_force_free_calls, any_order=True)
+        expected_force_free_calls = [call(8081, max_retries=3), call(8000, max_retries=3)]
+        launcher._force_free_port_with_retry.assert_has_calls(expected_force_free_calls, any_order=True)
 
     def test_graceful_shutdown_database_monitoring_cleanup(self):
         """Test that database monitoring is properly cleaned up during shutdown."""
@@ -1128,7 +1128,7 @@ class TestEmergencyRecovery(unittest.TestCase):
         
         # Mock port operations
         launcher._is_port_in_use = Mock(return_value=True)
-        launcher._force_free_port = Mock()
+        launcher._force_free_port_with_retry = Mock()
         
         # Trigger emergency cleanup
         launcher.emergency_cleanup()
@@ -1143,7 +1143,7 @@ class TestEmergencyRecovery(unittest.TestCase):
         # ASSERTION THAT SHOULD FAIL: Should force free critical ports
         critical_ports = [8000, 3000, 8081]
         for port in critical_ports:
-            launcher._force_free_port.assert_any_call(port)
+            launcher._force_free_port_with_retry.assert_any_call(port, max_retries=1)
 
     def test_emergency_cleanup_duplicate_prevention(self):
         """Test that emergency cleanup prevents duplicate execution."""
@@ -1226,7 +1226,7 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock platform detection
-        original_platform = launcher._force_free_port.__func__.__globals__['sys'].platform
+        original_platform = launcher._force_free_port_with_retry.__func__.__globals__['sys'].platform
         
         # Test Windows platform
         with patch('sys.platform', 'win32'):
@@ -1237,7 +1237,7 @@ class TestEmergencyRecovery(unittest.TestCase):
                     Mock(returncode=0)  # taskkill success
                 ]
                 
-                launcher._force_free_port(8000)
+                launcher._force_free_port_with_retry(8000)
                 
                 # ASSERTION THAT SHOULD FAIL: Should use Windows-specific commands
                 self.assertEqual(mock_run.call_count, 2)

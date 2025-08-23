@@ -231,7 +231,7 @@ class SpikeLoadGenerator:
         self.stop_flag = threading.Event()
         
     async def create_session_pool(self, pool_size: int = 50):
-#         """Create a pool of HTTP sessions for load testing""" # Possibly broken comprehension
+    #         """Create a pool of HTTP sessions for load testing""" # Possibly broken comprehension
         self.session_pool = []
         for _ in range(pool_size):
             session = aiohttp.ClientSession(
@@ -246,7 +246,7 @@ class SpikeLoadGenerator:
         self.session_pool.clear()
     
     async def generate_baseline_load(self, duration: float = 30.0) -> Dict[str, Any]:
-#         """Generate baseline load to establish performance baseline""" # Possibly broken comprehension
+    #         """Generate baseline load to establish performance baseline""" # Possibly broken comprehension
         logger.info(f"Generating baseline load for {duration}s with {SPIKE_TEST_CONFIG['baseline_users']} users")
         
         self.metrics.take_memory_snapshot("baseline_start")
@@ -384,7 +384,7 @@ class SpikeLoadGenerator:
                     None if success else "CONNECTION_FAILED"
                 
                 if success:
-#                     # Simulate maintaining connection for a short time # Possibly broken comprehension
+    #                     # Simulate maintaining connection for a short time # Possibly broken comprehension
                     await asyncio.sleep(random.uniform(1.0, 5.0))
                 
                 return success
@@ -476,7 +476,7 @@ class SpikeLoadGenerator:
             'scaling_events': len([r for r in scaling_results if r['scaling_triggered']])
     
     async def _simple_health_check(self, session):
-#         """Simple health check request for load testing""" # Possibly broken comprehension
+    #         """Simple health check request for load testing""" # Possibly broken comprehension
         start_time = time.perf_counter()
         try:
             async with session.get(f"{SERVICE_ENDPOINTS['backend']}/health") as response:

@@ -123,13 +123,15 @@ class TestCORSDynamicFrontendPorts:
                     "app.core.middleware_setup._check_wildcard_match",
                     return_value=False,
                 ):
-    from netra_backend.app.core.middleware_setup import (
+                    from netra_backend.app.core.middleware_setup import (
                         _get_localhost_origins,
+                    )
 
                     localhost_origins = _get_localhost_origins()
 
                     # Test dynamic frontend ports against hardcoded list only
-#                     for config in dynamic_frontend_configs: # Possibly broken comprehension
+                    # for config in dynamic_frontend_configs: # Possibly broken comprehension
+                    for config in dynamic_frontend_configs:
                         origin = config.frontend_url
 
                         # Direct check against hardcoded localhost origins
@@ -139,10 +141,10 @@ class TestCORSDynamicFrontendPorts:
                         if not is_in_hardcoded_list:
                             # This assertion WILL FAIL for non-standard ports
                             assert False, (
-                                f"Dynamic frontend port {
-                                    config.frontend_port} NOT in hardcoded list. "
+                                f"Dynamic frontend port {config.frontend_port} NOT in hardcoded list. "
                                 f"Origin: {origin}, Hardcoded localhost origins: {localhost_origins}. "
                                 f"This shows the fundamental limitation: hardcoded ports 3000/3001 only."
+                            )
 
     @pytest.mark.asyncio
     async def test_service_discovery_integration_gap(self, dynamic_frontend_configs):
@@ -150,9 +152,9 @@ class TestCORSDynamicFrontendPorts:
         Test that demonstrates the gap between service discovery and CORS configuration.
 
         THIS TEST WILL FAIL because service discovery knows about dynamic ports
-#         but CORS configuration doesn't automatically use that information. # Possibly broken comprehension
+        but CORS configuration doesn't automatically use that information.
         """
-#         for config in dynamic_frontend_configs: # Possibly broken comprehension
+        for config in dynamic_frontend_configs:
             with mock_service_discovery(config):
     from dev_launcher.service_discovery import ServiceDiscovery
                 from netra_backend.app.core.middleware_setup import get_cors_origins
@@ -182,25 +184,23 @@ class TestCORSDynamicFrontendPorts:
                     if not is_dynamic_url_allowed:
                         # This assertion WILL FAIL showing the integration gap
                         assert False, (
-                            f"Service discovery tracks dynamic frontend port {
-                                config.frontend_port} "
+                            f"Service discovery tracks dynamic frontend port {config.frontend_port} "
                             f"at URL {frontend_url_from_discovery}, but this URL is NOT in CORS origins: {cors_origins}. "
                             f"This demonstrates the gap between service discovery and CORS configuration."
+                        )
 
     @pytest.mark.asyncio
-    async def test_dynamic_frontend_cors_headers_unit_test(, self, dynamic_frontend_configs
-    ):
+    async def test_dynamic_frontend_cors_headers_unit_test(self, dynamic_frontend_configs):
         """
         Unit test: Verify CORS middleware directly allows dynamic frontend ports.
 
         THIS TEST WILL FAIL because the CustomCORSMiddleware relies on get_cors_origins()
         which returns hardcoded localhost ports, not dynamic ones.
         """
-#         for config in dynamic_frontend_configs: # Possibly broken comprehension
+        for config in dynamic_frontend_configs:
             with mock_service_discovery(config):
     from fastapi import Request
-
-from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
+                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
 
                 # Mock FastAPI app and service discovery
                 mock_app = MagicMock()
@@ -208,9 +208,11 @@ from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 mock_service_discovery_instance.read_frontend_info.return_value = {
                     "port": config.frontend_port,
                     "url": config.frontend_url,
+                }
 
                 middleware = CustomCORSMiddleware(
                     app=mock_app, service_discovery=mock_service_discovery_instance
+                )
 
                 # Create mock request with dynamic frontend origin
                 mock_request = MagicMock(spec=Request)
@@ -220,14 +222,15 @@ from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 # Test if origin is allowed
                 is_allowed = middleware._is_origin_allowed_with_discovery(
                     config.frontend_url
+                )
 
                 # This assertion WILL FAIL for non-standard ports
                 assert is_allowed, (
-                    f"Middleware should allow dynamic frontend port {
-                        config.frontend_port} "
+                    f"Middleware should allow dynamic frontend port {config.frontend_port} "
                     f"but rejected origin {config.frontend_url}. "
                     f"The service discovery integration exists but doesn't override the "
                     f"hardcoded localhost origins in get_cors_origins()."
+                )
 
     @pytest.mark.asyncio
     async def test_dynamic_frontend_http_integration(self):
@@ -352,6 +355,7 @@ class TestCORSDynamicBackendPorts:
     from netra_backend.app.core.middleware_setup import (
                         get_cors_origins,
 
+                    origins = get_cors_origins()
                     origins = get_cors_origins()
 
                     # The default origins should include the dynamic backend
@@ -575,11 +579,12 @@ class TestCORSComprehensiveDynamicPortFailures:
     # return_value=False,
     # ):
     # with mock_service_discovery(config):
-    from netra_backend.app.core.middleware_setup import (
+from netra_backend.app.core.middleware_setup import (
                             get_cors_origins,
                             is_origin_allowed,
 
                         failures = []
+                        cors_origins = get_cors_origins()
                         cors_origins = get_cors_origins()
 
 #                         # Test CORS validation for each dynamic origin # Possibly broken comprehension
@@ -631,6 +636,7 @@ class TestCORSComprehensiveDynamicPortFailures:
                     get_cors_origins,
 
                 cors_origins = get_cors_origins()
+                cors_origins = get_cors_origins()
                 origin = config.frontend_url
 
                 # For credentialed requests, we cannot use wildcard "*"
@@ -661,6 +667,7 @@ class TestCORSComprehensiveDynamicPortFailures:
                 get_cors_origins,
 
             static_origins = get_cors_origins()
+            static_origins = get_cors_origins()
             localhost_origins = _get_localhost_origins()
 
             # Generate actual dynamic configuration
@@ -678,7 +685,7 @@ class TestCORSComprehensiveDynamicPortFailures:
             # Check if actual origins are covered by static configuration
             uncovered_origins = []
 #             for origin in actual_origins: # Possibly broken comprehension
-    from netra_backend.app.core.middleware_setup import is_origin_allowed
+from netra_backend.app.core.middleware_setup import is_origin_allowed
 
                 if not is_origin_allowed(origin, static_origins):
                     uncovered_origins.append(origin)
@@ -706,7 +713,7 @@ class TestCORSRegexPatternLimitations:
     # FAIL because they expose limitations in how patterns are applied.
     # """
     # with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-    from netra_backend.app.core.middleware_setup import _check_localhost_pattern
+from netra_backend.app.core.middleware_setup import _check_localhost_pattern
 
             # These should work (and test that pattern is correct)
             valid_cases = [
@@ -763,6 +770,7 @@ class TestCORSRegexPatternLimitations:
             ]
 
 #             for origin in test_origins: # Possibly broken comprehension
+                if _check_localhost_pattern(origin):
                 if _check_localhost_pattern(origin):
                     pattern_allowed.append(origin)
 

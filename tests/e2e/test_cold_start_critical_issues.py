@@ -28,7 +28,7 @@ from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from auth_service.auth_core.database.database_manager import DatabaseManager
 from auth_service.auth_core.core.session_manager import SessionManager
-from netra_backend.app.db.postgres import PostgreSQLDatabase
+from netra_backend.app.db.postgres import Database
 from netra_backend.app.redis_manager import RedisManager
 from database_scripts.create_postgres_tables import create_all_tables
 
@@ -438,8 +438,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         # Set very small connection pool
         os.environ["POSTGRES_MAX_CONNECTIONS"] = "1"
         
-        from netra_backend.app.db.postgres import PostgreSQLDatabase
-        db = PostgreSQLDatabase()
+        from netra_backend.app.db.postgres import Database
+        db = Database()
         
         # Create multiple concurrent connections
         async def get_connection():
@@ -505,8 +505,8 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_agent_state_persistence_database_failure(self):
         """Test 7.2: Agent state cannot be saved due to database issues."""
         # Simulate intermittent database failures
-        from netra_backend.app.db.postgres import PostgreSQLDatabase
-        original_execute = PostgreSQLDatabase.execute
+        from netra_backend.app.db.postgres import Database
+        original_execute = Database.execute
         
         call_count = [0]
         async def failing_execute(self, *args, **kwargs):
@@ -515,7 +515,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
                 raise Exception("Database connection lost")
             return await original_execute(self, *args, **kwargs)
             
-        PostgreSQLDatabase.execute = failing_execute
+        Database.execute = failing_execute
         
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         agent = SupervisorAgent()
@@ -656,7 +656,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_health_check_database_query_timeout(self):
         """Test 9.2: Health checks hang on database queries without timeout."""
         # Simulate slow database
-        with patch('netra_backend.app.db.postgres.PostgreSQLDatabase.execute') as mock_execute:
+        with patch('netra_backend.app.db.postgres.Database.execute') as mock_execute:
             async def slow_query(*args, **kwargs):
                 await asyncio.sleep(30)  # 30 second delay
                 

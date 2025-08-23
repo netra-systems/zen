@@ -23,11 +23,22 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
+# Import centralized GCP authentication
+sys.path.insert(0, str(Path(__file__).parent))
+from gcp_auth_config import GCPAuthConfig
+
 # Fix Unicode encoding issues on Windows
 if sys.platform == "win32":
     import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    try:
+        # Only wrap if not already wrapped
+        if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding != 'utf-8':
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', line_buffering=True)
+        if not isinstance(sys.stderr, io.TextIOWrapper) or sys.stderr.encoding != 'utf-8':
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', line_buffering=True)
+    except:
+        # If wrapping fails, continue with default encoding
+        pass
 
 
 @dataclass
@@ -159,39 +170,17 @@ class GCPDeployer:
     
     def authenticate_with_service_account(self) -> bool:
         """Authenticate using service account key file."""
-        if not self.service_account_path:
-            return True
-            
-        service_account_file = Path(self.service_account_path)
-        if not service_account_file.exists():
-            print(f"❌ Service account file not found: {service_account_file}")
-            return False
-            
-        print(f"🔐 Authenticating with service account: {service_account_file}")
+        # If explicit path provided, use it
+        if self.service_account_path:
+            service_account_file = Path(self.service_account_path)
+            if not service_account_file.exists():
+                print(f"❌ Service account file not found: {service_account_file}")
+                return False
+            return GCPAuthConfig.setup_authentication(service_account_file)
         
-        try:
-            # Activate service account
-            result = subprocess.run(
-                [
-                    self.gcloud_cmd, "auth", "activate-service-account",
-                    "--key-file", str(service_account_file)
-                ],
-                capture_output=True,
-                text=True,
-                check=True,
-                shell=self.use_shell
-            )
-            
-            print("✅ Service account authentication successful")
-            
-            # Also set GOOGLE_APPLICATION_CREDENTIALS for ADC
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(service_account_file)
-            
-            return True
-            
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to authenticate with service account: {e.stderr}")
-            return False
+        # Otherwise use centralized auth config to find and set up authentication
+        print("🔍 Using centralized authentication configuration...")
+        return GCPAuthConfig.ensure_authentication()
     
     def run_pre_deployment_checks(self) -> bool:
         """Run pre-deployment checks to ensure code quality."""
@@ -846,7 +835,7 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
     parser.add_argument("--cleanup", action="store_true", 
                        help="Clean up deployments")
     parser.add_argument("--service-account", 
-                       help="Path to service account JSON key file for authentication")
+                       help="Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)")
     
     args = parser.parse_args()
     

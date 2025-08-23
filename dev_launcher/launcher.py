@@ -261,9 +261,6 @@ class DevLauncher:
         shutdown_time = time.time() - shutdown_start
         self._print("✅", "SHUTDOWN", f"Graceful shutdown complete in {shutdown_time:.1f}s")
     
-    def _terminate_all_services(self):
-        """Terminate all services in proper order (legacy method)."""
-        self._terminate_all_services_ordered()
     
     def _terminate_all_services_ordered(self):
         """Terminate all services with enhanced ordering and timeout handling."""
@@ -311,9 +308,6 @@ class DevLauncher:
         except Exception as e:
             logger.error(f"Process cleanup error: {e}")
     
-    def _verify_ports_freed(self):
-        """Verify that service ports are freed (legacy method)."""
-        self._verify_ports_freed_with_force_cleanup()
     
     def _verify_ports_freed_with_force_cleanup(self):
         """Verify that service ports are freed with enhanced cleanup and retry logic."""
@@ -397,9 +391,6 @@ class DevLauncher:
             except:
                 return True
     
-    def _force_free_port(self, port: int):
-        """Force free a port cross-platform (legacy method)."""
-        return self._force_free_port_with_retry(port, max_retries=1)
     
     def _force_free_port_with_retry(self, port: int, max_retries: int = 3) -> bool:
         """Force free a port cross-platform with retry logic and enhanced error handling."""
@@ -1879,14 +1870,6 @@ class DevLauncher:
                 logger.warning(f"{step_name} failed with error: {e} (non-critical)")
             return False
     
-    async def _perform_docker_service_discovery_async(self) -> bool:
-        """Async wrapper for Docker service discovery."""
-        try:
-            self._perform_docker_service_discovery()
-            return True
-        except Exception as e:
-            logger.warning(f"Docker service discovery failed: {e}")
-            return False
     
     async def _run_migrations_async(self) -> bool:
         """Async wrapper for migration running."""
@@ -1964,6 +1947,15 @@ class DevLauncher:
             logger.error(f"Cache update failed: {e}")
             return False
     
+    async def _perform_docker_service_discovery_async(self) -> bool:
+        """Async wrapper for Docker service discovery."""
+        try:
+            self._perform_docker_service_discovery()
+            return True
+        except Exception as e:
+            logger.warning(f"Docker service discovery failed: {e}")
+            return False
+
     async def _start_health_monitoring_after_readiness_async(self) -> bool:
         """Async wrapper for starting health monitoring after readiness."""
         try:

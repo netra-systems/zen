@@ -517,6 +517,15 @@ class UnifiedTestRunner:
         
         return test_counts
     
+    def _safe_print_unicode(self, text):
+        """Safely print text with Unicode characters, falling back to ASCII on encoding errors."""
+        try:
+            print(text)
+        except UnicodeEncodeError:
+            # Replace Unicode symbols with ASCII equivalents for Windows console compatibility
+            ascii_text = text.replace("✅", "[PASS]").replace("❌", "[FAIL]").replace("⏭️", "[SKIP]")
+            print(ascii_text)
+
     def _generate_report(self, results: Dict, args: argparse.Namespace):
         """Generate test execution report."""
         report_dir = self.project_root / "test_reports"
@@ -559,9 +568,10 @@ class UnifiedTestRunner:
             status = "✅ PASSED" if result["success"] else "❌ FAILED"
             if result.get("skipped"):
                 status = "⏭️ SKIPPED"
-            print(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
+            self._safe_print_unicode(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
         
-        print(f"\nOverall: {'✅ PASSED' if report_data['overall_success'] else '❌ FAILED'}")
+        overall_status = "✅ PASSED" if report_data['overall_success'] else "❌ FAILED"
+        self._safe_print_unicode(f"\nOverall: {overall_status}")
         print(f"Report: {json_report}")
 
 

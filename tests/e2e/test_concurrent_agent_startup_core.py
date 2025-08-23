@@ -73,15 +73,13 @@ class ContaminationReport:
         })
     
     @property
+    def contamination_incidents(self) -> int:
+        """Get total contamination incidents."""
+        return len(self.incidents)
+
 
 class TestSyntaxFix:
     """Generated test class"""
-
-    def contamination_incidents(self) -> int:
-
-        """Get total contamination incidents."""
-
-        return len(self.incidents)
 
 class ConcurrentTestReport:
     pass
@@ -138,6 +136,7 @@ class ConcurrentTestEnvironment:
             decode_responses=True,
 
             socket_timeout=10
+        )
 
         
         # Initialize database pool
@@ -151,6 +150,7 @@ class ConcurrentTestEnvironment:
             max_size=50,
 
             command_timeout=30
+        )
 
         
         # Verify services are available
@@ -239,6 +239,7 @@ class ConcurrentTestEnvironment:
                 f"user_context:{user.user_id}",
 
                 mapping=user.context_data
+            )
 
     
     async def cleanup_user_data(self, users: List[TestUser]):
@@ -258,18 +259,21 @@ class ConcurrentTestEnvironment:
                 "DELETE FROM users WHERE id = ANY($1)",
 
                 user_ids
+            )
 
             await conn.execute(
 
                 "DELETE FROM user_sessions WHERE user_id = ANY($1)", 
 
                 user_ids
+            )
 
             await conn.execute(
 
                 "DELETE FROM agent_states WHERE user_id = ANY($1)",
 
                 user_ids
+            )
 
         
         # Clean Redis
@@ -314,15 +318,11 @@ class CrossContaminationDetector:
 
         user_markers = {}
         
-#         for user in users: # Possibly broken comprehension
-
+        for user in users:
             markers = {
-
                 f"marker_{user.user_id}_{i}_{secrets.token_hex(8)}"
-
                 for i in range(10)  # 10 unique markers per user
-
-            
+            }
             user_markers[user.user_id] = markers
 
             self.sensitivity_markers.update(markers)
@@ -349,8 +349,7 @@ class CrossContaminationDetector:
 
         contamination_report = ContaminationReport()
         
-#         for response in responses: # Possibly broken comprehension
-
+        for response in responses:
             user_id = response.get('user_id')
 
             if not user_id:

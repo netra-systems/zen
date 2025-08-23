@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Resource efficiency enables +$30K annual cost savings
 
 Architecture:
-#     - 450-line file limit enforced through focused resource testing # Possibly broken comprehension
+    #     - 450-line file limit enforced through focused resource testing # Possibly broken comprehension
 # - 25-line function limit for all functions # Possibly broken comprehension
 # - Real resource monitoring for production accuracy # Possibly broken comprehension
 - Agent resource initialization validation patterns
@@ -75,7 +75,7 @@ class AgentResourceMonitor:
             pass
     
     async def _monitor_agent_loop(self, agent_id: str) -> None:
-#         """Main monitoring loop for agent resources""" # Possibly broken comprehension
+    #         """Main monitoring loop for agent resources""" # Possibly broken comprehension
         while self._monitoring:
             metrics = self._collect_agent_metrics(agent_id)
             self.metrics.append(metrics)
@@ -114,7 +114,7 @@ class TokenUsageTracker:
         return self.token_counts.get(agent_id, 0)
     
     def reset_tracking(self, agent_id: str) -> None:
-#         """Reset token tracking for agent""" # Possibly broken comprehension
+    #         """Reset token tracking for agent""" # Possibly broken comprehension
         self.token_counts[agent_id] = 0
 
 class DatabaseConnectionPool:
@@ -159,7 +159,7 @@ class TestAgentResourceInitialization:
     
     # @pytest.fixture
     def resource_limits(self) -> AgentResourceLimits:
-#         """Create resource limits for testing""" # Possibly broken comprehension
+    #         """Create resource limits for testing""" # Possibly broken comprehension
         return AgentResourceLimits()
     
     @pytest.fixture

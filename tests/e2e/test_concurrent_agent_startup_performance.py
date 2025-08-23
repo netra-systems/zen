@@ -155,7 +155,9 @@ class TestSyntaxFix:
             'max_memory_usage_mb': max(self.metrics['memory_usage_mb']) if self.metrics['memory_usage_mb'] else 0,
 
             'avg_cpu_usage_percent': statistics.mean(self.metrics['cpu_usage_percent']) if self.metrics['cpu_usage_percent'] else 0
+        }
 
+@pytest.mark.asyncio
 async def test_performance_under_concurrent_load(self, 
     concurrent_test_environment, 
 
@@ -207,24 +209,21 @@ async def test_performance_under_concurrent_load(self,
         'max_memory_usage_gb': 4.0,
 
         'max_cpu_usage_percent': 80
+    }
 
     
     # Assertions
 
-    assert performance_summary['p95_startup_time'] <= thresholds['max_p95_startup_time'], 
-
+    assert performance_summary['p95_startup_time'] <= thresholds['max_p95_startup_time'], \
         f"P95 startup time exceeded: {performance_summary['p95_startup_time']:.2f}s"
 
-    assert performance_summary['p99_startup_time'] <= thresholds['max_p99_startup_time'], 
-
+    assert performance_summary['p99_startup_time'] <= thresholds['max_p99_startup_time'], \
         f"P99 startup time exceeded: {performance_summary['p99_startup_time']:.2f}s"
 
-    assert performance_summary['max_memory_usage_mb'] / 1024 <= thresholds['max_memory_usage_gb'], 
-
+    assert performance_summary['max_memory_usage_mb'] / 1024 <= thresholds['max_memory_usage_gb'], \
         f"Memory usage exceeded: {performance_summary['max_memory_usage_mb'] / 1024:.2f}GB"
 
-    assert performance_summary['avg_cpu_usage_percent'] <= thresholds['max_cpu_usage_percent'], 
-
+    assert performance_summary['avg_cpu_usage_percent'] <= thresholds['max_cpu_usage_percent'], \
         f"CPU usage exceeded: {performance_summary['avg_cpu_usage_percent']:.1f}%"
     
     logger.info(f"Test Case 3 completed: Performance within SLA thresholds")
