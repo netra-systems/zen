@@ -44,6 +44,39 @@ SHARD_MAPPINGS = {
     "4/4": ["netra_backend/app/routes", "test_api", "test_auth", "frontend"]
 }
 
+# Test levels configuration
+TEST_LEVELS = {
+    "unit": ["tests/unit", "tests/core"],
+    "integration": ["tests/integration", "tests/e2e"],
+    "smoke": ["tests/integration/critical_paths"],
+    "e2e": ["tests/e2e"],
+    "agents": ["tests/agents"],
+}
+
+# Runners configuration for different test types
+RUNNERS = {
+    "backend": {
+        "command": "pytest",
+        "paths": ["netra_backend/tests"],
+        "options": ["-v", "--tb=short"]
+    },
+    "auth": {
+        "command": "pytest",
+        "paths": ["auth_service/tests"],
+        "options": ["-v", "--tb=short"]
+    },
+    "frontend": {
+        "command": "npm",
+        "paths": ["frontend"],
+        "options": ["test"]
+    },
+    "dev_launcher": {
+        "command": "pytest",
+        "paths": ["tests"],
+        "options": ["-v", "--tb=short"]
+    }
+}
+
 def configure_staging_environment(staging_url: str, staging_api_url: str):
     """Configure environment variables for staging testing."""
     os.environ["STAGING_MODE"] = "true"

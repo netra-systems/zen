@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Import core unified components
 from test_framework.runner import UnifiedTestRunner
-from test_framework.test_config import COMPONENT_MAPPINGS, RUNNERS, SHARD_MAPPINGS, TEST_LEVELS
+from test_framework.test_config import COMPONENT_MAPPINGS, SHARD_MAPPINGS, TEST_LEVELS, RUNNERS
 
 # Import discovery and parsing utilities
 from test_framework.test_discovery import TestDiscovery

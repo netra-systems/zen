@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Enhanced Test Runner System provides intelligent test categorization, progress tracking, and auto-splitting capabilities for the Netra Apex AI Optimization Platform. This system transforms test execution from basic level-based runs to sophisticated, category-based orchestration with real-time progress monitoring and adaptive execution strategies.
+The Enhanced Test Runner System provides intelligent test categorization, progress tracking, and auto-splitting capabilities for the Netra Apex AI Optimization Platform. This system uses category-based orchestration with real-time progress monitoring and adaptive execution strategies.
 
 ## Key Features
 
@@ -67,30 +67,23 @@ python unified_test_runner.py --category performance --disable-auto-split
 python unified_test_runner.py --category all --progress-mode rich
 ```
 
-### Legacy Compatibility
-
-All existing `--level` commands continue to work:
-
-```bash
-# These commands still work as before
-python unified_test_runner.py --level unit
-python unified_test_runner.py --level integration --no-coverage
-python unified_test_runner.py --level e2e --real-llm
-```
-
 ## Category Structure
 
 ### Standard Categories
 
 | Category | Description | Default Window | Priority | Fail-Fast |
 |----------|-------------|----------------|----------|-----------|
-| `unit` | Fast, isolated unit tests | 60s | CRITICAL | immediate |
-| `integration` | Service integration tests | 120s | HIGH | category |
-| `agents` | AI agent functionality tests | 180s | HIGH | category |
-| `e2e` | End-to-end workflow tests | 180s | MEDIUM | never |
-| `security` | Security-focused tests | 120s | CRITICAL | immediate |
+| `smoke` | Quick validation tests | 60s | CRITICAL | immediate |
+| `unit` | Fast, isolated unit tests | 60s | HIGH | immediate |
+| `integration` | Service integration tests | 120s | MEDIUM | category |
+| `api` | API endpoint tests | 120s | MEDIUM | category |
+| `database` | Database integration tests | 120s | HIGH | category |
+| `websocket` | WebSocket communication tests | 120s | MEDIUM | never |
+| `agent` | AI agent functionality tests | 180s | MEDIUM | category |
+| `security` | Security-focused tests | 120s | HIGH | immediate |
+| `frontend` | Frontend component tests | 120s | LOW | never |
+| `e2e` | End-to-end workflow tests | 180s | LOW | never |
 | `performance` | Performance and load tests | 300s | LOW | never |
-| `critical_path` | Business-critical functionality | 180s | CRITICAL | immediate |
 
 ### Subcategories
 
@@ -116,14 +109,6 @@ e2e/
 └── user_journeys/   # Complete user workflows
 ```
 
-### Rollup Categories
-
-Rollup categories aggregate tests from multiple sources:
-
-- **security**: Combines unit.security + integration.auth + e2e.auth_flows
-- **performance**: Combines integration.database + e2e.data_pipelines
-- **critical_path**: Combines e2e.user_journeys + integration.inter_service
-
 ## Configuration
 
 ### Test Categories Configuration
@@ -134,7 +119,7 @@ Configuration is defined in `test_framework/config/test_categories.yml`:
 version: "1.0"
 
 global:
-  default_fail_fast_mode: "category"
+  default_fail_fast_mode: "category_failure"
   default_execution_timeout: "30m"
   progress_update_interval: "5s"
   enable_auto_rebalancing: true
@@ -143,7 +128,7 @@ global:
 categories:
   unit:
     description: "Fast, isolated unit tests"
-    priority: "CRITICAL"
+    priority: "HIGH"
     max_execution_time: "30s"
     fail_fast_mode: "immediate"
     auto_split: true
@@ -157,9 +142,9 @@ categories:
     
   integration:
     description: "Service integration tests"
-    priority: "HIGH"
+    priority: "MEDIUM"
     max_execution_time: "5m"
-    fail_fast_mode: "category"
+    fail_fast_mode: "category_failure"
     auto_split: true
     target_window_size: "120s"
     dependencies: ["unit"]
@@ -208,30 +193,29 @@ environments:
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `--window-size SECONDS` | Set auto-split window size | `--window-size 180` |
+| `--window-size MINUTES` | Set auto-split window size | `--window-size 3` |
 | `--fail-fast-mode MODE` | Set fail-fast strategy | `--fail-fast-mode smart_adaptive` |
 | `--disable-auto-split` | Disable automatic test splitting | `--disable-auto-split` |
 | `--resume-from CATEGORY` | Resume from specific category | `--resume-from integration.database` |
-| `--max-parallel WORKERS` | Maximum parallel workers | `--max-parallel 8` |
+| `--workers N` | Number of parallel workers | `--workers 8` |
 
 ### Progress Display Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `--progress-mode MODE` | Progress display mode (rich/simple/none) | `--progress-mode rich` |
-| `--progress-interval SECONDS` | Progress update interval | `--progress-interval 5` |
-| `--show-window-progress` | Show individual window progress | `--show-window-progress` |
+| `--progress-mode MODE` | Progress display mode (simple/rich/json) | `--progress-mode rich` |
 
 ### Fail-Fast Modes
 
 | Mode | Description | Use Case |
 |------|-------------|----------|
-| `immediate` | Stop on first failure | Critical tests, CI pipelines |
-| `category` | Complete category, then stop | Development testing |
-| `critical` | Stop only on critical failures | Production validation |
-| `threshold` | Stop after N failures | Large test suites |
+| `disabled` | Never stop early | Full regression testing |
+| `first_failure` | Stop on first failure | Quick validation |
+| `category_failure` | Complete category, then stop | Development testing |
+| `critical_failure` | Stop only on critical failures | Production validation |
+| `threshold_based` | Stop after N failures | Large test suites |
 | `smart_adaptive` | Adaptive based on patterns | Intelligent failure handling |
-| `never` | Complete all tests | Full regression testing |
+| `dependency_aware` | Skip dependent categories | Complex test hierarchies |
 
 ## Progress Display
 
@@ -337,10 +321,10 @@ unified_test_runner.py       # Main runner with integration
 
 ### 3. Fail-Fast Strategies
 
-- **CI/CD**: Use `immediate` for fast feedback
-- **Development**: Use `category` for complete category results
+- **CI/CD**: Use `first_failure` for fast feedback
+- **Development**: Use `category_failure` for complete category results
 - **Production**: Use `smart_adaptive` for intelligent handling
-- **Full regression**: Use `never` to run everything
+- **Full regression**: Use `disabled` to run everything
 
 ### 4. Resource Management
 
@@ -376,8 +360,8 @@ ls -la .test_progress/
 #### Window Size Issues
 
 ```bash
-# Override window size
-python unified_test_runner.py --category e2e --window-size 300
+# Override window size (in minutes)
+python unified_test_runner.py --category e2e --window-size 5
 
 # Disable auto-splitting
 python unified_test_runner.py --category e2e --disable-auto-split
@@ -389,11 +373,8 @@ python unified_test_runner.py --category e2e --disable-auto-split
 # Verbose output
 python unified_test_runner.py --category unit --verbose
 
-# Debug mode
+# Debug mode (if implemented)
 python unified_test_runner.py --category integration --debug
-
-# Dry run (no execution)
-python unified_test_runner.py --category all --dry-run
 ```
 
 ## Performance Metrics
@@ -415,40 +396,33 @@ python unified_test_runner.py --category all --dry-run
 - **25% reduction** in CI/CD pipeline duration
 - **90% success rate** in resumable test runs
 
-## Migration Guide
-
-### From Legacy Levels
-
-```bash
-# Old way
-python unified_test_runner.py --level unit
-
-# New way (backward compatible)
-python unified_test_runner.py --level unit
-
-# Enhanced way
-python unified_test_runner.py --category unit --progress-mode rich
-```
-
-### Custom Categories
-
-1. Define in `test_categories.yml`
-2. Add patterns for test discovery
-3. Set dependencies and priorities
-4. Configure auto-split parameters
-
-### Integration with CI/CD
+## Integration with CI/CD
 
 ```yaml
 # GitHub Actions example
 - name: Run Unit Tests
-  run: python unified_test_runner.py --category unit --fail-fast-mode immediate
+  run: python unified_test_runner.py --category unit --fail-fast-mode first_failure
 
 - name: Run Integration Tests
-  run: python unified_test_runner.py --category integration --window-size 120
+  run: python unified_test_runner.py --category integration --window-size 2
 
 - name: Run E2E Tests
   run: python unified_test_runner.py --category e2e --progress-mode simple
+```
+
+```yaml
+# GitLab CI example
+test:unit:
+  script:
+    - python unified_test_runner.py --category unit --parallel --workers 4
+
+test:integration:
+  script:
+    - python unified_test_runner.py --categories integration api database
+  
+test:e2e:
+  script:
+    - python unified_test_runner.py --category e2e --env staging
 ```
 
 ## API Reference
@@ -512,7 +486,7 @@ splitter.rebalance_windows(category, historical_data)
 2. Define patterns and dependencies
 3. Set resource requirements
 4. Configure auto-split parameters
-5. Test with `--dry-run`
+5. Test with dry-run (if available)
 
 ### Implementing Custom Strategies
 
@@ -537,10 +511,16 @@ For issues or questions:
 
 ## Changelog
 
-### Version 1.0.0 (2024-01-15)
+### Version 2.0.0 (2024-01-15)
+- Removed all legacy test level support
+- Pure category-based execution
+- Enhanced progress tracking
+- Smart window splitting
+- Advanced fail-fast strategies
+
+### Version 1.0.0 (2024-01-14)
 - Initial release of enhanced test runner
 - Hierarchical categorization system
 - Progress tracking and persistence
 - Auto-splitting with multiple strategies
 - Advanced fail-fast modes
-- Full backward compatibility

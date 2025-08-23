@@ -74,17 +74,24 @@ async def close_database_connections() -> None:
 
 async def cleanup_resources(app: FastAPI) -> None:
     """Shutdown all application services."""
+    logger = central_logger.get_logger(__name__)
     await asyncio.sleep(0.1)
     
     # Shutdown background task manager with timeout
     try:
-        await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
+        if hasattr(app.state, 'background_task_manager') and app.state.background_task_manager is not None:
+            await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
+        else:
+            logger.info("Background task manager not initialized, skipping shutdown")
     except (asyncio.TimeoutError, AttributeError, Exception) as e:
         logger.warning(f"Background task manager shutdown timeout/error: {e}")
     
     # Shutdown agent supervisor with timeout  
     try:
-        await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
+        if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor is not None:
+            await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
+        else:
+            logger.info("Agent supervisor not initialized, skipping shutdown")
     except (asyncio.TimeoutError, AttributeError, Exception) as e:
         logger.warning(f"Agent supervisor shutdown timeout/error: {e}")
     

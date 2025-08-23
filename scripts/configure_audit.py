@@ -7,8 +7,13 @@ Manage feature flags, permission levels, and team settings
 import sys
 import json
 import argparse
+import io
 from pathlib import Path
 from typing import Optional
+
+# Fix Windows console encoding
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 sys.path.insert(0, str(Path(__file__).parent))
 from audit_config import (

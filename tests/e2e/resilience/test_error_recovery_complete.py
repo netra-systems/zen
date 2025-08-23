@@ -51,17 +51,17 @@ logger = central_logger.get_logger(__name__)
 
 @dataclass
 class ErrorRecoveryResult:
-    # """Result of error recovery test execution."""
-    # test_name: str
-    # recovery_successful: bool
-    # recovery_time_seconds: float
-    # service_isolation_maintained: bool
-    # circuit_breaker_activated: bool
-    # data_integrity_preserved: bool
-    # within_sla: bool
+    """Result of error recovery test execution."""
+    test_name: str
+    recovery_successful: bool
+    recovery_time_seconds: float
+    service_isolation_maintained: bool
+    circuit_breaker_activated: bool
+    data_integrity_preserved: bool
+    within_sla: bool
 
 class RealCircuitBreakerTester:
-    # """Tests real circuit breaker behavior with actual service calls."""
+    """Tests real circuit breaker behavior with actual service calls."""
     
     def __init__(self):
         """Initialize circuit breaker tester."""
@@ -76,7 +76,7 @@ class RealCircuitBreakerTester:
             failure_threshold=failure_threshold,
             recovery_timeout=recovery_timeout,
             timeout_seconds=5.0
-        
+        )
         circuit = CircuitBreaker(config)
         self.circuit_breakers[service_name] = circuit
         self.failure_counts[service_name] = 0
@@ -148,9 +148,10 @@ class RealCircuitBreakerTester:
             "recovery_successful": recovery_successful,
             "final_state": final_state,
             "circuit_closed": circuit.state == CircuitState.CLOSED
+        }
 
 class ServiceIsolationValidator:
-    # """Validates service isolation during failures."""
+    """Validates service isolation during failures."""
     
     def __init__(self, orchestrator: E2EServiceOrchestrator):
         """Initialize service isolation validator."""
@@ -168,6 +169,7 @@ class ServiceIsolationValidator:
             "baseline_captured": True,
             "healthy_services": [s for s, h in self.service_health_baseline.items() if h],
             "total_services": len(self.service_health_baseline)
+        }
     
     async def validate_isolation_during_failure(self, failed_service: str) -> Dict[str, Any]:
         """Validate other services remain healthy during specific service failure."""
@@ -196,14 +198,15 @@ class ServiceIsolationValidator:
             result["isolation_correct"] if service == failed_service 
             else result["isolation_maintained"]
             for service, result in isolation_results.items()
-        
+        )
         return {
             "isolation_maintained": isolated_correctly,
             "service_results": isolation_results,
             "failed_service": failed_service
+        }
 
 class DataIntegrityTracker:
-    # """Tracks data integrity throughout failure and recovery."""
+    """Tracks data integrity throughout failure and recovery."""
     
     def __init__(self):
         """Initialize data integrity tracker."""
@@ -223,7 +226,7 @@ class DataIntegrityTracker:
                 {"id": 2, "content": "Pre-failure message 2"},
                 {"id": 3, "content": "Pre-failure message 3"}
             ]
-        
+        }
         try:
             # Send test data through WebSocket
             await ws_client.send_json({
@@ -267,11 +270,12 @@ class DataIntegrityTracker:
             "messages_attempted": len(failure_messages),
             "messages_queued": queued_count,
             "errors_encountered": error_count
-        
+        }
         return {
             "data_preserved": True,  # Messages queued for later delivery
             "messages_queued": len(self.message_queue),
             "error_handling_correct": error_count > 0  # Expect errors during failure
+        }
     
     async def validate_post_recovery_integrity(self, ws_client: RealWebSocketClient) -> Dict[str, Any]:
         """Validate data integrity after recovery."""
@@ -309,6 +313,7 @@ class DataIntegrityTracker:
                 "messages_delivered": delivered_count,
                 "total_messages": len(self.message_queue),
                 "delivery_success_rate": delivered_count / len(self.message_queue) if self.message_queue else 1.0
+            }
         except Exception as e:
             logger.error(f"Post-recovery validation failed: {e}")
             return {"integrity_validated": False, "error": str(e)}
@@ -316,19 +321,19 @@ class DataIntegrityTracker:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestCompleteErrorRecovery:
-    # """Complete error recovery and circuit breaker validation."""
+    """Complete error recovery and circuit breaker validation."""
     
-    # @pytest_asyncio.fixture
-    # async def orchestrator(self):
-    # """Setup service orchestrator for testing."""
-    # orchestrator = E2EServiceOrchestrator()
-    # try:
-    # await orchestrator.start_test_environment("error_recovery_test")
-    # yield orchestrator
-    # finally:
-    # await orchestrator.stop_test_environment("error_recovery_test")
+    @pytest_asyncio.fixture
+    async def orchestrator(self):
+        """Setup service orchestrator for testing."""
+        orchestrator = E2EServiceOrchestrator()
+        try:
+            await orchestrator.start_test_environment("error_recovery_test")
+            yield orchestrator
+        finally:
+            await orchestrator.stop_test_environment("error_recovery_test")
     
-    # @pytest.fixture
+    @pytest.fixture
     def circuit_breaker_tester(self):
         """Initialize circuit breaker tester."""
         return RealCircuitBreakerTester()
@@ -585,22 +590,20 @@ async def run_error_recovery_test() -> Dict[str, Any]:
         "circuit_breaker_logic": "validated",
         "error_recovery_patterns": "implemented",
         "sla_compliance": "30_second_requirement"
+    }
 
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def validate_circuit_breaker_implementation() -> bool:
+def validate_circuit_breaker_implementation() -> bool:
     """Validate that circuit breaker implementation exists and is accessible."""
     try:
         # Test that we can import and instantiate circuit breaker
-from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+        from netra_backend.app.core.circuit_breaker_types import CircuitConfig
         
         config = CircuitConfig(
             name="validation_test",
             failure_threshold=3,
             recovery_timeout=10.0,
             timeout_seconds=5.0
-        
+        )
         circuit = CircuitBreaker(config)
         return circuit.state == CircuitState.CLOSED
     except ImportError as e:

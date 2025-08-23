@@ -23,7 +23,7 @@ from .report_generators import (
     generate_text_report,
 )
 from test_framework.report_manager import print_summary, save_test_report
-from test_framework.test_config import RUNNERS, TEST_LEVELS
+from test_framework.test_config import COMPONENT_MAPPINGS
 from test_framework.test_parser import extract_failing_tests, parse_coverage, parse_test_counts
 
 PROJECT_ROOT = Path(__file__).parent.parent
