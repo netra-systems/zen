@@ -12,6 +12,7 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
+import time
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from fastapi import WebSocket
@@ -77,16 +78,56 @@ class UnifiedMessagingManager:
             if not success:
                 queue.add_failed_message(message)
 
+    def _get_or_create_user_queue(self, user_id: str) -> MessageQueue:
+        """Get or create message queue for user."""
+        if user_id not in self.user_queues:
+            self.user_queues[user_id] = MessageQueue(user_id, max_size=1000)
+        return self.user_queues[user_id]
+
     async def send_to_user(self, user_id: str, 
                           message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                           retry: bool = True,
                           compression: CompressionAlgorithm = CompressionAlgorithm.NONE) -> bool:
-        """Send message to user with zero-loss guarantee and optional compression."""
+        """Send message to user with zero-loss guarantee and transactional patterns."""
         self._ensure_queue_processor_started()
         validated_message = self.message_handler.prepare_and_validate_message(message)
         if not validated_message:
             return False
-        return await self._send_with_large_message_support(user_id, validated_message, retry, compression)
+        
+        # Implement transactional pattern as per websocket_reliability.xml
+        return await self._send_with_transactional_guarantee(user_id, validated_message, retry, compression)
+
+    async def _send_with_transactional_guarantee(self, user_id: str, message: Dict[str, Any], 
+                                               retry: bool, compression: CompressionAlgorithm) -> bool:
+        """Send message with transactional guarantee following websocket_reliability.xml patterns."""
+        # Step 1: Mark message as 'sending' in-place (NEVER remove from queue before confirmation)
+        message_id = f"tx_{user_id}_{int(time.time() * 1000000)}"
+        queue = self._get_or_create_user_queue(user_id)
+        
+        try:
+            # Step 2: Mark as sending and attempt transmission
+            queue.mark_message_sending(message_id, message)
+            
+            # Step 3: Attempt send operation with retry logic
+            success = await self._send_with_large_message_support(user_id, message, retry, compression)
+            
+            if success:
+                # Step 4: Only remove on confirmed success
+                queue.confirm_message_sent(message_id)
+                return True
+            else:
+                # Step 5: Revert to 'pending' on failure (transactional pattern)
+                queue.revert_to_pending(message_id)
+                return False
+                
+        except Exception as e:
+            # Step 5: Revert to 'pending' on exception (transactional pattern)
+            queue.revert_to_pending(message_id)
+            logger.error(f"Transactional send failed for user {user_id}: {e}")
+            if retry:
+                # Add to retry queue for later processing
+                queue.add_failed_message(message)
+            raise
 
     async def _send_with_large_message_support(self, user_id: str, message: Dict[str, Any], 
                                              retry: bool, compression: CompressionAlgorithm) -> bool:

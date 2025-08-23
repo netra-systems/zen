@@ -465,11 +465,13 @@ async def unified_websocket_endpoint(websocket: WebSocket):
                 
                 logger.info(f"Unified WebSocket ready: {connection_id}")
                 
-                # Step 7: Message handling loop with heartbeat
+                # Step 7: Message handling loop with heartbeat and exponential backoff
                 heartbeat_interval = UNIFIED_WEBSOCKET_CONFIG["limits"]["heartbeat_interval"]
                 last_heartbeat = time.time()
                 error_count = 0
                 max_errors = 3
+                backoff_delay = 0.1  # Start with 100ms
+                max_backoff = 5.0    # Max 5 second backoff
                 
                 while True:
                     try:
@@ -483,29 +485,39 @@ async def unified_websocket_endpoint(websocket: WebSocket):
                         success = await manager.handle_message(connection_id, raw_message)
                         if success:
                             error_count = 0  # Reset on success
+                            backoff_delay = 0.1  # Reset backoff on success
                             last_heartbeat = time.time()
                         else:
                             error_count += 1
+                            # Apply exponential backoff on repeated failures
+                            await asyncio.sleep(min(backoff_delay, max_backoff))
+                            backoff_delay = min(backoff_delay * 2, max_backoff)
                         
                         if error_count >= max_errors:
                             logger.error(f"Too many errors for {connection_id}")
                             break
                         
                     except asyncio.TimeoutError:
-                        # Send heartbeat
+                        # Send heartbeat with connection validation
                         current_time = time.time()
                         if current_time - last_heartbeat > heartbeat_interval:
                             try:
-                                heartbeat_message = {
-                                    "type": "heartbeat",
-                                    "payload": {
-                                        "timestamp": current_time,
-                                        "connection_id": connection_id
-                                    },
-                                    "timestamp": current_time
-                                }
-                                await websocket.send_json(heartbeat_message)
-                                last_heartbeat = current_time
+                                # Validate connection is still alive before sending heartbeat
+                                if websocket.application_state == WebSocketState.CONNECTED:
+                                    heartbeat_message = {
+                                        "type": "heartbeat",
+                                        "payload": {
+                                            "timestamp": current_time,
+                                            "connection_id": connection_id,
+                                            "server_status": "healthy"
+                                        },
+                                        "timestamp": current_time
+                                    }
+                                    await websocket.send_json(heartbeat_message)
+                                    last_heartbeat = current_time
+                                else:
+                                    logger.info(f"WebSocket {connection_id} no longer connected, ending heartbeat")
+                                    break
                             except Exception as e:
                                 logger.warning(f"Heartbeat failed for {connection_id}: {e}")
                                 break
@@ -523,7 +535,9 @@ async def unified_websocket_endpoint(websocket: WebSocket):
                             logger.error(f"Too many errors for {connection_id}, closing")
                             break
                         
-                        await asyncio.sleep(0.1)
+                        # Apply exponential backoff for errors
+                        await asyncio.sleep(min(backoff_delay, max_backoff))
+                        backoff_delay = min(backoff_delay * 2, max_backoff)
     
     except HTTPException as e:
         logger.error(f"HTTP exception during unified WebSocket setup: {e.detail}")
