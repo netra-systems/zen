@@ -1066,7 +1066,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Assert interval accuracy (allow ±1 interval tolerance)
 
         assert abs(actual_interval_count - expected_interval_count) <= 1, \
-
             f"Expected ~{expected_interval_count} heartbeats, got {actual_interval_count}"
     
     @pytest.mark.asyncio

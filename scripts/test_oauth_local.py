@@ -17,6 +17,12 @@ import sys
 from datetime import datetime
 from typing import Dict, Optional
 
+# Fix Windows Unicode issues
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 import httpx
 import click
 from rich import print as rprint
@@ -27,7 +33,7 @@ from rich.table import Table
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-console = Console()
+console = Console(force_terminal=True if sys.platform == 'win32' else None)
 
 
 class OAuthLocalTester:

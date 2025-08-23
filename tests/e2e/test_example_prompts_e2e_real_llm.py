@@ -189,7 +189,12 @@ class TestExamplePromptsE2ERealLLM:
             assert execution_time < max_time, f"Workflow too slow: {execution_time:.2f}s for {test_case.prompt_id}"
             
         finally:
-            await session_data["client"].close()
+            if session_data.get("client") and hasattr(session_data["client"], "close"):
+                try:
+                    await session_data["client"].close()
+                except Exception as e:
+                    # Ignore errors during cleanup
+                    pass
     
     @pytest.mark.asyncio
     async def test_high_complexity_prompts_real_llm(self, test_core, use_real_llm, test_data):
@@ -216,7 +221,12 @@ class TestExamplePromptsE2ERealLLM:
                 assert result.get("agents_executed", 0) >= 4, f"Not enough agents executed for complex prompt {i}"
                 
         finally:
-            await session_data["client"].close()
+            if session_data.get("client") and hasattr(session_data["client"], "close"):
+                try:
+                    await session_data["client"].close()
+                except Exception as e:
+                    # Ignore errors during cleanup
+                    pass
     
     @pytest.mark.asyncio
     async def test_multi_agent_coordination_validation(self, test_core, use_real_llm):
@@ -242,7 +252,12 @@ class TestExamplePromptsE2ERealLLM:
             assert context_validation["continuity_score"] >= 0.8, "Context not preserved across agents"
             
         finally:
-            await session_data["client"].close()
+            if session_data.get("client") and hasattr(session_data["client"], "close"):
+                try:
+                    await session_data["client"].close()
+                except Exception as e:
+                    # Ignore errors during cleanup
+                    pass
     
     @pytest.mark.asyncio
     async def test_enterprise_tier_all_prompts(self, test_core, use_real_llm, test_data):
@@ -266,7 +281,12 @@ class TestExamplePromptsE2ERealLLM:
                 assert result.get("business_value_score", 0) >= 7, f"Low business value for {prompt_id}"
                 
         finally:
-            await session_data["client"].close()
+            if session_data.get("client") and hasattr(session_data["client"], "close"):
+                try:
+                    await session_data["client"].close()
+                except Exception as e:
+                    # Ignore errors during cleanup
+                    pass
     
     # Helper methods
     async def _execute_complete_agent_workflow(self, session_data: Dict[str, Any], 
@@ -308,16 +328,21 @@ class TestExamplePromptsE2ERealLLM:
         if use_real_llm:
             # Real LLM execution
             from netra_backend.app.llm.llm_manager import LLMManager
-            llm_manager = LLMManager()
+            from netra_backend.app.core.config import get_config
+            
+            # Get configuration for LLM manager
+            config = get_config()
+            llm_manager = LLMManager(config)
             
             prompt = self._build_agent_prompt(agent_name, workflow_context, workflow_state)
             
             try:
+                # Use ask_llm_full method which returns LLMResponse with metadata
                 llm_response = await asyncio.wait_for(
-                    llm_manager.call_llm(
-                        model="gpt-4-turbo-preview",
-                        messages=[{"role": "user", "content": prompt}],
-                        temperature=0.3
+                    llm_manager.ask_llm_full(
+                        prompt=prompt,
+                        llm_config_name="gpt-4-turbo-preview",
+                        use_cache=False
                     ),
                     timeout=30
                 )
@@ -325,14 +350,16 @@ class TestExamplePromptsE2ERealLLM:
                 return {
                     "agent_name": agent_name,
                     "status": "success",
-                    "output": llm_response.get("content", ""),
-                    "tokens_used": llm_response.get("tokens_used", 0),
+                    "output": llm_response.content,
+                    "tokens_used": llm_response.token_usage.total_tokens if llm_response.token_usage else 0,
                     "output_context": self._extract_output_context(llm_response),
                     "real_llm": True
                 }
                 
             except asyncio.TimeoutError:
                 return {"agent_name": agent_name, "status": "timeout", "real_llm": True}
+            except Exception as e:
+                return {"agent_name": agent_name, "status": "error", "error": str(e), "real_llm": True}
         else:
             # Mock execution
             await asyncio.sleep(0.5)  # Simulate processing
@@ -367,10 +394,15 @@ Your specific role:"""
         
         return f"{base_prompt}\n{role_description}\n\nPrevious Context: {workflow_state.get('context', {})}\n\nProvide your analysis and recommendations:"
     
-    def _extract_output_context(self, llm_response: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_output_context(self, llm_response) -> Dict[str, Any]:
         """Extract structured context from LLM response."""
         # Simplified context extraction - real implementation would parse structured output
-        content = llm_response.get("content", "")
+        # Handle both dict and LLMResponse object formats
+        if hasattr(llm_response, 'content'):
+            content = llm_response.content
+        else:
+            content = llm_response.get("content", "")
+            
         return {
             "summary": content[:200] + "..." if len(content) > 200 else content,
             "key_points": len(content.split(".")) // 3,  # Rough estimate of complexity

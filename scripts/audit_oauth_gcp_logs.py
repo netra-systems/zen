@@ -18,6 +18,12 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Set, Tuple
 
+# Fix Windows Unicode issues
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 import click
 from google.cloud import logging as cloud_logging
 from google.cloud.logging_v2 import DESCENDING
@@ -27,7 +33,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-console = Console()
+console = Console(force_terminal=True if sys.platform == 'win32' else None)
 
 
 class OAuthLogAnalyzer:
@@ -36,6 +42,13 @@ class OAuthLogAnalyzer:
     def __init__(self, project_id: str, hours_back: int = 24):
         self.project_id = project_id
         self.hours_back = hours_back
+        
+        # Try to clear the environment variable if it points to a non-existent file
+        gcp_creds = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+        if gcp_creds and not os.path.exists(gcp_creds):
+            console.print(f"[yellow]Clearing invalid GOOGLE_APPLICATION_CREDENTIALS: {gcp_creds}[/yellow]")
+            os.environ.pop('GOOGLE_APPLICATION_CREDENTIALS', None)
+        
         self.client = cloud_logging.Client(project=project_id)
         
         # OAuth patterns to search for
@@ -117,6 +130,20 @@ class OAuthLogAnalyzer:
     
     def _parse_log_entry(self, entry) -> dict:
         """Parse a log entry into a structured format"""
+        # Handle different payload types
+        text_payload = None
+        json_payload = {}
+        
+        if hasattr(entry, 'payload'):
+            if isinstance(entry.payload, str):
+                text_payload = entry.payload
+            elif isinstance(entry.payload, dict):
+                json_payload = entry.payload
+        elif hasattr(entry, 'text_payload'):
+            text_payload = entry.text_payload
+        elif hasattr(entry, 'json_payload'):
+            json_payload = dict(entry.json_payload) if entry.json_payload else {}
+        
         parsed = {
             'timestamp': entry.timestamp.isoformat() if entry.timestamp else None,
             'severity': entry.severity,
@@ -125,11 +152,11 @@ class OAuthLogAnalyzer:
                 'labels': dict(entry.resource.labels) if entry.resource.labels else {}
             },
             'labels': dict(entry.labels) if entry.labels else {},
-            'text_payload': entry.text_payload,
-            'json_payload': dict(entry.json_payload) if entry.json_payload else {},
+            'text_payload': text_payload,
+            'json_payload': json_payload,
             'http_request': None,
-            'trace': entry.trace,
-            'span_id': entry.span_id
+            'trace': entry.trace if hasattr(entry, 'trace') else None,
+            'span_id': entry.span_id if hasattr(entry, 'span_id') else None
         }
         
         # Parse HTTP request if present
